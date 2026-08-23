@@ -1,10 +1,11 @@
 {
   "name": "@frontline/content-schema",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "private": true,
   "type": "module",
   "exports": "./src/index.ts",
   "scripts": {
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "test": "node --experimental-transform-types --test test/*.test.ts"
   }
 }
