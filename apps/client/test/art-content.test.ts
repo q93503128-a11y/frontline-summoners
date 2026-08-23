@@ -8,12 +8,15 @@ const allCombatantIds = [
   ...ENEMIES.map((enemy) => enemy.definition.id),
 ];
 
-test('every chapter one player and enemy has a registered art family', () => {
+const ATTACK_FX_STYLES = new Set(['SLASH', 'PIERCE', 'BLUNT', 'MAGIC', 'FIRE', 'VOID']);
+
+test('every chapter one player and enemy has a registered art family and attack FX style', () => {
   assert.equal(allCombatantIds.length, 20);
   for (const id of allCombatantIds) {
     const variant = UNIT_ART[id];
     assert.ok(variant, `missing UNIT_ART mapping for ${id}`);
     assert.ok(ART_BY_ID[variant.familyId], `unknown art family ${variant.familyId} for ${id}`);
+    assert.ok(ATTACK_FX_STYLES.has(variant.attackFx), `unknown attack FX ${variant.attackFx} for ${id}`);
   }
 });
 
@@ -36,4 +39,14 @@ test('all sprite strips are local deploy assets with coherent frame metadata', (
 test('chapter one avoids a single repeated visual family for all player units', () => {
   const families = new Set(PLAYER_SLOTS.map((slot) => UNIT_ART[slot.definition.id]?.familyId));
   assert.ok(families.size >= 7, `expected all seven baseline families across player roster, got ${families.size}`);
+});
+
+test('chapter one exposes multiple readable attack languages', () => {
+  const playerStyles = new Set(PLAYER_SLOTS.map((slot) => UNIT_ART[slot.definition.id]?.attackFx));
+  assert.ok(playerStyles.has('SLASH'));
+  assert.ok(playerStyles.has('PIERCE'));
+  assert.ok(playerStyles.has('MAGIC'));
+  assert.ok(playerStyles.has('FIRE'));
+  assert.ok(playerStyles.has('VOID'));
+  assert.ok(playerStyles.size >= 6, `expected six player attack FX styles, got ${playerStyles.size}`);
 });
