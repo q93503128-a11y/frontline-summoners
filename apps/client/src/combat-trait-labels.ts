@@ -11,10 +11,15 @@ export function getCombatTraitLabel(trait: CombatTrait): string {
   return TRAIT_LABELS[trait];
 }
 
+export function formatCompactTraits(definition: BattleUnitDefinition): string {
+  const traits = definition.traits ?? [];
+  return traits.length > 0 ? traits.map(getCombatTraitLabel).join('·') : '무속성';
+}
+
 export function formatCombatTraits(definition: BattleUnitDefinition): string {
   const traits = definition.traits ?? [];
   if (traits.length === 0) return '속성 없음';
-  return `속성 ${traits.map(getCombatTraitLabel).join('·')}`;
+  return `속성 ${formatCompactTraits(definition)}`;
 }
 
 export function formatDamageSpecialty(definition: BattleUnitDefinition): string | null {
@@ -29,9 +34,8 @@ export function formatDamageSpecialty(definition: BattleUnitDefinition): string 
 }
 
 export function formatCompactCombatIdentity(definition: BattleUnitDefinition): string {
-  const traits = definition.traits ?? [];
   const bonuses = definition.damageBonuses ?? [];
-  const traitText = traits.length > 0 ? traits.map(getCombatTraitLabel).join('·') : '무속성';
+  const traitText = formatCompactTraits(definition);
   if (bonuses.length === 0) return traitText;
   const strongest = bonuses.reduce((best, bonus) => bonus.multiplierPermille > best.multiplierPermille ? bonus : best, bonuses[0]!);
   const bonusPercent = Math.round((strongest.multiplierPermille - 1000) / 10);
