@@ -2,10 +2,12 @@ import Phaser from 'phaser';
 import { APP_NAME, INTERNAL_HEIGHT, INTERNAL_WIDTH } from '@frontline/shared';
 import { SIM_TICK_MS, UnitState, type BattleUnit } from '@frontline/sim';
 import {
+  getBaseWeaponCooldownRemaining,
   getCooldownRemaining,
   getCurrentSupplyLevel,
   getNextSupplyLevel,
   stepPlayableBattle,
+  tryFireBaseWeapon,
   trySpawnPlayerUnit,
   tryUpgradeSupply,
   type PlayableBattleState,
@@ -290,6 +292,8 @@ class BattleScene extends Phaser.Scene {
   private supplyBar!: Phaser.GameObjects.Rectangle;
   private supplyLevelText!: Phaser.GameObjects.Text;
   private supplyUpgradeText!: Phaser.GameObjects.Text;
+  private baseWeaponText!: Phaser.GameObjects.Text;
+  private baseWeaponBg!: Phaser.GameObjects.Rectangle;
   private playerBaseBar!: Phaser.GameObjects.Rectangle;
   private enemyBaseBar!: Phaser.GameObjects.Rectangle;
   private playerBaseText!: Phaser.GameObjects.Text;
@@ -418,12 +422,37 @@ class BattleScene extends Phaser.Scene {
       this.buttons.set(slot.slotId, { bg, shade, cooldown, cost });
     });
 
-    const upgradeBg = this.add.rectangle(1145, 615, 220, 134, 0x302a1c).setStrokeStyle(3, 0xc59d4b).setInteractive({ useHandCursor: true });
-    this.supplyUpgradeText = addText(this, 1145, 594, '', 19, '#ffe29a', 'center').setOrigin(0.5);
-    addText(this, 1145, 636, '보급소 강화', 18, '#ffffff', 'center').setOrigin(0.5);
+    const upgradeBg = this.add.rectangle(1145, 580, 220, 60, 0x302a1c).setStrokeStyle(3, 0xc59d4b).setInteractive({ useHandCursor: true });
+    this.supplyUpgradeText = addText(this, 1145, 570, '', 16, '#ffe29a', 'center').setOrigin(0.5);
+    addText(this, 1145, 594, '보급소 강화', 15, '#ffffff', 'center').setOrigin(0.5);
     upgradeBg.on('pointerdown', () => {
       const result = tryUpgradeSupply(this.state);
       if (!result.ok) this.cameras.main.shake(55, 0.0012);
+    });
+
+    this.baseWeaponBg = this.add.rectangle(1145, 651, 220, 60, 0x26394a).setStrokeStyle(3, 0x72b7db).setInteractive({ useHandCursor: true });
+    this.baseWeaponText = addText(this, 1145, 651, '전선포 · 발사 가능', 16, '#bfe8ff', 'center').setOrigin(0.5);
+    this.baseWeaponBg.on('pointerdown', () => {
+      const result = tryFireBaseWeapon(this.state);
+      if (!result.ok) {
+        this.cameras.main.shake(55, 0.0012);
+        return;
+      }
+      this.playBaseWeaponFx();
+    });
+  }
+
+  private playBaseWeaponFx(): void {
+    const muzzle = this.add.circle(130, 452, 24, 0xffe69a, 0.9).setDepth(20);
+    const beam = this.add.rectangle(650, 452, 1010, 16, 0xffe69a, 0.88).setDepth(19);
+    const core = this.add.rectangle(650, 452, 1010, 5, 0xffffff, 0.95).setDepth(20);
+    this.cameras.main.shake(110, 0.0024);
+    this.tweens.add({
+      targets: [muzzle, beam, core],
+      alpha: 0,
+      duration: 230,
+      ease: 'Quad.easeOut',
+      onComplete: () => { muzzle.destroy(); beam.destroy(); core.destroy(); },
     });
   }
 
@@ -507,6 +536,17 @@ class BattleScene extends Phaser.Scene {
     this.supplyUpgradeText.setText(next ? `Lv.${this.state.supplyLevel + 1} · ${next.upgradeCost} 보급` : 'MAX');
     this.timerText.setText(this.formatTime(this.state.battle.tick));
 
+    const weaponCooldown = getBaseWeaponCooldownRemaining(this.state);
+    if (weaponCooldown > 0) {
+      this.baseWeaponText.setText(`전선포 · ${(weaponCooldown / 30).toFixed(1)}초`);
+      this.baseWeaponText.setColor('#9aa9b8');
+      this.baseWeaponBg.setFillStyle(0x25303a, 1);
+    } else {
+      this.baseWeaponText.setText('전선포 · 발사 가능');
+      this.baseWeaponText.setColor('#bfe8ff');
+      this.baseWeaponBg.setFillStyle(0x26394a, 1);
+    }
+
     const pBase = this.state.battle.bases.PLAYER;
     const eBase = this.state.battle.bases.ENEMY;
     this.playerBaseBar.displayWidth = Math.max(1, 152 * Math.max(0, pBase.hp / pBase.maxHp));
@@ -534,17 +574,20 @@ class BattleScene extends Phaser.Scene {
 class ResultScene extends Phaser.Scene {
   private stage!: PrototypeStage;
   private winner: string | null = null;
+  private progressionSaved = false;
 
   constructor() { super('result'); }
 
   init(data: { stageId?: string; winner?: string | null }): void {
     this.stage = getStage(data.stageId ?? STAGES[0]!.id);
     this.winner = data.winner ?? null;
+    this.progressionSaved = false;
   }
 
   create(): void {
     drawBackdrop(this, 'menu');
     const victory = this.winner === 'PLAYER';
+    this.progressionSaved = !victory;
     addText(this, INTERNAL_WIDTH / 2, 86, victory ? '승 리' : '패 배', 62, victory ? COLORS.gold : COLORS.red, 'center').setOrigin(0.5);
     addText(this, INTERNAL_WIDTH / 2, 148, `STAGE ${getStageNumber(this.stage.id)} · ${this.stage.name}`, 25, '#e9edf4', 'center').setOrigin(0.5);
 
@@ -555,8 +598,9 @@ class ResultScene extends Phaser.Scene {
       addText(this, INTERNAL_WIDTH / 2, 342, this.stage.treasure.effect, 18, '#c8d0dc', 'center').setOrigin(0.5);
       const unlockSlot = this.stage.unlockUnitId ? getSlotById(this.stage.unlockUnitId) : undefined;
       const unlockText = addText(this, INTERNAL_WIDTH / 2, 395, unlockSlot ? `첫 클리어 동료 보상 · ${unlockSlot.displayName}` : '이번 스테이지는 동료 해금 없음', 20, unlockSlot ? '#9ccfff' : '#8f9aac', 'center').setOrigin(0.5);
-      const status = addText(this, INTERNAL_WIDTH / 2, 447, '진행 저장 중…', 16, '#8f9aac', 'center').setOrigin(0.5);
+      const status = addText(this, INTERNAL_WIDTH / 2, 447, '진행 저장 중… 잠시만 기다려 주세요', 16, '#8f9aac', 'center').setOrigin(0.5);
       void recordStageClear(this.stage.id, this.stage.treasure.id).then((result) => {
+        this.progressionSaved = true;
         if (!this.scene.isActive()) return;
         status.setText(result.firstClear ? '첫 클리어 저장 완료 · 다음 스테이지 개방' : '재클리어 완료 · 보물 반복 파밍 불필요');
         if (unlockSlot) unlockText.setText(result.firstClear ? `신규 동료 합류 · ${unlockSlot.displayName}` : `보유 동료 · ${unlockSlot.displayName}`);
@@ -567,9 +611,16 @@ class ResultScene extends Phaser.Scene {
       addText(this, INTERNAL_WIDTH / 2, 425, `현재 전장 · ${BATTLEFIELD_THEME_LABELS[this.stage.theme]} / ${this.stage.mapLength}m`, 17, '#8796aa', 'center').setOrigin(0.5);
     }
 
-    addButton(this, 380, 590, 260, 68, '다시 도전', () => this.scene.start('battle', { stageId: this.stage.id }), 0x6d88a7);
-    addButton(this, 640, 590, 220, 68, '스테이지', () => this.scene.start('stage-select'), 0x667185);
-    addButton(this, 900, 590, 220, 68, '메인', () => this.scene.start('main-menu'), 0x667185);
+    const guarded = (action: () => void): void => {
+      if (!this.progressionSaved) {
+        this.cameras.main.shake(60, 0.0012);
+        return;
+      }
+      action();
+    };
+    addButton(this, 380, 590, 260, 68, '다시 도전', () => guarded(() => this.scene.start('battle', { stageId: this.stage.id })), 0x6d88a7);
+    addButton(this, 640, 590, 220, 68, '스테이지', () => guarded(() => this.scene.start('stage-select')), 0x667185);
+    addButton(this, 900, 590, 220, 68, '메인', () => guarded(() => this.scene.start('main-menu')), 0x667185);
   }
 }
 
