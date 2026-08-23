@@ -5,6 +5,8 @@
 | assetId | 원출처 | 제작자 | 라이선스 | 사용 파일 | 수정 여부 | 비고 |
 | --- | --- | --- | --- | --- | --- | --- |
 | `luizmelo-hero-knight` | `https://luizmelo.itch.io/hero-knight` | LuizMelo | CC0 1.0 | Idle, Run, Attack1 | 코드상 tint/scale만 | Hero Knight. 현재 런타임 미러는 `vlee489/AC31009-Client`의 동일 원본 파일을 사용. |
+| `luizmelo-hero-knight-2` | `https://luizmelo.itch.io/hero-knight-2` | LuizMelo | CC0 1.0 | Idle, Run, Attack | 코드상 tint/scale만 | Hero Knight 2. 현재 런타임 미러는 `NQM765/IngeSoft1`의 동일 원본 파일을 사용. |
+| `luizmelo-fantasy-warrior` | `https://luizmelo.itch.io/fantasy-warrior` | LuizMelo | CC0 1.0 | Idle, Run, Attack1 | 코드상 tint/scale만 | Fantasy Warrior. 현재 런타임 미러는 `NQM765/IngeSoft1`의 동일 원본 파일을 사용. |
 | `luizmelo-wizard-pack` | `https://luizmelo.itch.io/wizard-pack` | LuizMelo | CC0 1.0 | Idle, Run, Attack1 | 코드상 tint/scale만 | Wizard Pack. 현재 런타임 미러는 `vlee489/AC31009-Client`의 동일 원본 파일을 사용. |
 | `luizmelo-medieval-warrior-2` | `https://luizmelo.itch.io/medieval-warrior-pack-2` | LuizMelo | CC0 1.0 | Idle, Run, Attack1 | 코드상 tint/scale만 | Medieval Warrior Pack 2. 현재 런타임 미러는 `NQM765/IngeSoft1`의 동일 원본 파일을 사용. |
 | `luizmelo-huntress` | `https://luizmelo.itch.io/huntress` | LuizMelo | CC0 1.0 | Idle, Run, Attack1 | 코드상 tint/scale만 | Huntress. 현재 런타임 미러는 `NQM765/IngeSoft1`의 동일 원본 파일을 사용. |
