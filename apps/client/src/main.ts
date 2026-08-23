@@ -12,7 +12,7 @@ import {
   tryUpgradeSupply,
   type PlayableBattleState,
 } from '@frontline/sim/playable';
-import { ART_BY_ID, ART_FAMILIES, UNIT_ART, type ArtFamily, type SpriteStrip } from './assets';
+import { ART_BY_ID, ART_FAMILIES, UNIT_ART, type ArtFamily, type AttackFxStyle, type SpriteStrip } from './assets';
 import { BATTLEFIELD_THEME_LABELS, drawBattlefield, getBattlefieldBasePalette } from './battlefield';
 import { classifyImpact, getAttackSpriteFrame, getLoopingSpriteFrame } from './combat-visuals';
 import {
@@ -93,10 +93,10 @@ function drawBackdrop(scene: Phaser.Scene, variant: 'menu' | 'map' = 'menu'): vo
   }
 }
 
-function familyForUnit(unitId: string): { family: ArtFamily; tint: number; displayScale: number } {
-  const variant = UNIT_ART[unitId] ?? { familyId: 'warrior', tint: 0xffffff };
+function familyForUnit(unitId: string): { family: ArtFamily; tint: number; displayScale: number; attackFx: AttackFxStyle } {
+  const variant = UNIT_ART[unitId] ?? { familyId: 'warrior', tint: 0xffffff, attackFx: 'SLASH' as const };
   const family = ART_BY_ID[variant.familyId] ?? ART_FAMILIES[0]!;
-  return { family, tint: variant.tint, displayScale: variant.displayScale ?? 1 };
+  return { family, tint: variant.tint, displayScale: variant.displayScale ?? 1, attackFx: variant.attackFx };
 }
 
 class BootScene extends Phaser.Scene {
@@ -275,6 +275,7 @@ interface UnitView {
   readonly hp: Phaser.GameObjects.Rectangle;
   stateKey: string;
   lastHp: number;
+  lastAttackFxKey: string;
 }
 
 interface UnitButtonView {
@@ -492,7 +493,55 @@ class BattleScene extends Phaser.Scene {
       onComplete: () => spawn.destroy(),
     });
 
-    return { sprite, shadow, hpBg, hp, stateKey: '', lastHp: unit.hp };
+    return { sprite, shadow, hpBg, hp, stateKey: '', lastHp: unit.hp, lastAttackFxKey: '' };
+  }
+
+  private playAttackFx(unit: BattleUnit, view: UnitView, style: AttackFxStyle): void {
+    const direction = unit.team === 'PLAYER' ? 1 : -1;
+    const x = view.sprite.x + direction * 38;
+    const y = view.sprite.y - 8;
+
+    if (style === 'SLASH') {
+      const slashA = this.add.rectangle(x, y, 48, 5, 0xfff6d2, 0.9).setAngle(direction > 0 ? -36 : 36).setDepth(14);
+      const slashB = this.add.rectangle(x + direction * 7, y + 7, 30, 3, 0xffffff, 0.72).setAngle(direction > 0 ? 24 : -24).setDepth(14);
+      this.tweens.add({ targets: [slashA, slashB], alpha: 0, scaleX: 1.45, duration: 130, ease: 'Quad.easeOut', onComplete: () => { slashA.destroy(); slashB.destroy(); } });
+      return;
+    }
+
+    if (style === 'PIERCE') {
+      const line = this.add.rectangle(x + direction * 18, y, 72, 4, 0xdff7ff, 0.92).setDepth(14);
+      const tip = this.add.triangle(x + direction * 57, y, -8 * direction, -7, -8 * direction, 7, 9 * direction, 0, 0xffffff, 0.95).setDepth(15);
+      this.tweens.add({ targets: [line, tip], alpha: 0, scaleX: 1.3, duration: 120, ease: 'Quad.easeOut', onComplete: () => { line.destroy(); tip.destroy(); } });
+      return;
+    }
+
+    if (style === 'BLUNT') {
+      const shock = this.add.circle(x, y + 7, 18, 0xffe4a8, 0.26).setStrokeStyle(4, 0xfff0c9, 0.85).setDepth(14);
+      const dust = this.add.ellipse(x, y + 24, 54, 13, 0xdcc9a6, 0.36).setDepth(13);
+      this.tweens.add({ targets: [shock, dust], alpha: 0, scaleX: 1.8, scaleY: 1.45, duration: 165, ease: 'Quad.easeOut', onComplete: () => { shock.destroy(); dust.destroy(); } });
+      return;
+    }
+
+    if (style === 'FIRE') {
+      const core = this.add.circle(x + direction * 17, y - 2, 13, 0xffd071, 0.92).setDepth(15);
+      const flame = this.add.circle(x + direction * 20, y - 2, 25, 0xff704f, 0.36).setDepth(14);
+      const ember = this.add.circle(x + direction * 30, y - 18, 5, 0xfff0a0, 0.9).setDepth(15);
+      this.tweens.add({ targets: [core, flame], alpha: 0, scaleX: 1.75, scaleY: 1.75, duration: 190, ease: 'Quad.easeOut', onComplete: () => { core.destroy(); flame.destroy(); } });
+      this.tweens.add({ targets: ember, alpha: 0, y: ember.y - 24, x: ember.x + direction * 13, duration: 210, onComplete: () => ember.destroy() });
+      return;
+    }
+
+    if (style === 'VOID') {
+      const outer = this.add.circle(x + direction * 18, y - 3, 25, 0x4f3b82, 0.34).setStrokeStyle(4, 0xb99cff, 0.8).setDepth(14);
+      const inner = this.add.circle(x + direction * 18, y - 3, 9, 0xe0d2ff, 0.82).setDepth(15);
+      this.tweens.add({ targets: outer, alpha: 0, scaleX: 1.7, scaleY: 1.7, angle: direction * 45, duration: 220, ease: 'Quad.easeOut', onComplete: () => outer.destroy() });
+      this.tweens.add({ targets: inner, alpha: 0, scaleX: 0.25, scaleY: 0.25, duration: 170, onComplete: () => inner.destroy() });
+      return;
+    }
+
+    const ring = this.add.circle(x + direction * 20, y - 2, 18, 0x88cfff, 0.24).setStrokeStyle(3, 0xd8f0ff, 0.82).setDepth(14);
+    const spark = this.add.circle(x + direction * 22, y - 2, 7, 0xffffff, 0.92).setDepth(15);
+    this.tweens.add({ targets: [ring, spark], alpha: 0, scaleX: 1.8, scaleY: 1.8, duration: 180, ease: 'Quad.easeOut', onComplete: () => { ring.destroy(); spark.destroy(); } });
   }
 
   private playUnitImpactFx(unit: BattleUnit, view: UnitView, damage: number): void {
@@ -500,17 +549,15 @@ class BattleScene extends Phaser.Scene {
     const radius = weight === 'HEAVY' ? 18 : weight === 'MEDIUM' ? 13 : 9;
     const duration = weight === 'HEAVY' ? 170 : weight === 'MEDIUM' ? 140 : 110;
     const flash = this.add.circle(view.sprite.x, view.sprite.y - 7, radius, 0xfff2c6, weight === 'HEAVY' ? 0.88 : 0.72).setDepth(12);
-    const slash = this.add.rectangle(view.sprite.x + (unit.team === 'PLAYER' ? 8 : -8), view.sprite.y - 8, radius * 2.2, weight === 'HEAVY' ? 5 : 3, 0xffffff, 0.9)
-      .setAngle(unit.team === 'PLAYER' ? -28 : 28)
-      .setDepth(13);
+    const ring = this.add.circle(view.sprite.x, view.sprite.y - 6, radius + 3, 0xffffff, 0).setStrokeStyle(weight === 'HEAVY' ? 4 : 2, 0xffffff, 0.72).setDepth(13);
     this.tweens.add({
-      targets: [flash, slash],
+      targets: [flash, ring],
       alpha: 0,
       scaleX: 1.65,
       scaleY: 1.65,
       duration,
       ease: 'Quad.easeOut',
-      onComplete: () => { flash.destroy(); slash.destroy(); },
+      onComplete: () => { flash.destroy(); ring.destroy(); },
     });
     if (weight === 'HEAVY') this.cameras.main.shake(45, 0.00075);
   }
@@ -547,6 +594,19 @@ class BattleScene extends Phaser.Scene {
       view.lastHp = unit.hp;
 
       const art = familyForUnit(unit.definition.id);
+      const hitFrames = unit.definition.attackTiming.hitFrames;
+      const lastHit = hitFrames[hitFrames.length - 1] ?? -1;
+      const impactMoment =
+        (unit.state === UnitState.Foreswing && hitFrames.includes(unit.stateFrame)) ||
+        (unit.state === UnitState.Backswing && unit.stateFrame === 0 && lastHit >= 0);
+      if (impactMoment) {
+        const attackFxKey = `${this.state.battle.tick}:${unit.state}:${unit.stateFrame}`;
+        if (view.lastAttackFxKey !== attackFxKey) {
+          this.playAttackFx(unit, view, art.attackFx);
+          view.lastAttackFxKey = attackFxKey;
+        }
+      }
+
       const strip = this.stripForState(art.family, unit);
       const stateKey = `${strip.key}:${unit.state}`;
       if (view.stateKey !== stateKey) {
