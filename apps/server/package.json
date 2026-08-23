@@ -1,0 +1,13 @@
+{
+  "name": "@frontline/server",
+  "version": "0.0.1",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@frontline/shared": "0.0.1",
+    "@frontline/sim": "0.0.1"
+  }
+}
