@@ -75,11 +75,11 @@ export interface CampaignContentBundle {
 }
 
 export interface CampaignValidationOptions {
-  readonly enemyIds?: ReadonlySet<string>;
-  readonly playerUnitIds?: ReadonlySet<string>;
-  readonly expectedStageCount?: number;
-  readonly requiredThemeCount?: number;
-  readonly starterUnitId?: string;
+  readonly enemyIds?: ReadonlySet<string> | undefined;
+  readonly playerUnitIds?: ReadonlySet<string> | undefined;
+  readonly expectedStageCount?: number | undefined;
+  readonly requiredThemeCount?: number | undefined;
+  readonly starterUnitId?: string | undefined;
 }
 
 function isRecord(value: unknown): value is Record<string, unknown> {
@@ -124,7 +124,6 @@ function parseCombat(value: unknown, context: string): CombatContent {
   const attackMaxRange = requireInteger(value, 'attackMaxRange', context, 0, 10000);
   const standingRange = requireInteger(value, 'standingRange', context, 0, 10000);
   if (attackMinRange > attackMaxRange) throw new Error(`${context}.attackMinRange must be <= attackMaxRange`);
-  if (standingRange > 5000) throw new Error(`${context}.standingRange is unreasonable`);
   return {
     id: requireString(value, 'id', context),
     displayName: requireString(value, 'displayName', context),
@@ -171,10 +170,7 @@ export function parseEnemies(value: unknown): readonly EnemyContent[] {
     const combat = parseCombat(raw, context);
     if (ids.has(combat.id)) throw new Error(`duplicate enemy id: ${combat.id}`);
     ids.add(combat.id);
-    return {
-      ...combat,
-      rewardSupply: requireInteger(raw, 'rewardSupply', context, 0, 1000000),
-    };
+    return { ...combat, rewardSupply: requireInteger(raw, 'rewardSupply', context, 0, 1000000) };
   });
 }
 
@@ -192,11 +188,7 @@ function parseWave(value: unknown, context: string, enemyIds?: ReadonlySet<strin
 
 function parseTreasure(value: unknown, context: string): CampaignTreasureContent {
   if (!isRecord(value)) throw new Error(`${context} must be an object`);
-  return {
-    id: requireString(value, 'id', context),
-    name: requireString(value, 'name', context),
-    effect: requireString(value, 'effect', context),
-  };
+  return { id: requireString(value, 'id', context), name: requireString(value, 'name', context), effect: requireString(value, 'effect', context) };
 }
 
 function parseStage(value: unknown, index: number, options: CampaignValidationOptions): CampaignStageContent {
@@ -251,18 +243,12 @@ export function parseCampaignStages(value: unknown, options: CampaignValidationO
       unlockIds.add(stage.unlockUnitId);
     }
     const waveStarts = stage.waves.map((wave) => wave.atTick);
-    if (waveStarts.some((tick, waveIndex) => waveIndex > 0 && tick < waveStarts[waveIndex - 1]!)) {
-      throw new Error(`${stage.id} waves must be ordered by atTick`);
-    }
+    if (waveStarts.some((tick, waveIndex) => waveIndex > 0 && tick < waveStarts[waveIndex - 1]!)) throw new Error(`${stage.id} waves must be ordered by atTick`);
     const previous = stages[index - 1];
-    if (previous && stage.mapLength === previous.mapLength && stage.theme === previous.theme) {
-      throw new Error(`${stage.id} repeats both theme and mapLength from the immediately previous stage`);
-    }
+    if (previous && stage.mapLength === previous.mapLength && stage.theme === previous.theme) throw new Error(`${stage.id} repeats both theme and mapLength from the immediately previous stage`);
   }
 
-  if (options.requiredThemeCount !== undefined && themes.size < options.requiredThemeCount) {
-    throw new Error(`campaign must use at least ${options.requiredThemeCount} battlefield themes, got ${themes.size}`);
-  }
+  if (options.requiredThemeCount !== undefined && themes.size < options.requiredThemeCount) throw new Error(`campaign must use at least ${options.requiredThemeCount} battlefield themes, got ${themes.size}`);
   return stages;
 }
 
@@ -271,8 +257,8 @@ export function parseCampaignBundle(input: {
   readonly enemies: unknown;
   readonly stages: unknown;
   readonly starterUnitId: string;
-  readonly expectedStageCount?: number;
-  readonly requiredThemeCount?: number;
+  readonly expectedStageCount?: number | undefined;
+  readonly requiredThemeCount?: number | undefined;
 }): CampaignContentBundle {
   const playerUnits = parsePlayerUnits(input.playerUnits);
   const enemies = parseEnemies(input.enemies);
