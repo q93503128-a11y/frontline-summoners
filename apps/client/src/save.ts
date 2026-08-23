@@ -3,10 +3,14 @@ export interface GuestProgress {
   readonly treasureIds: readonly string[];
 }
 
+interface StoredGuestProgress extends GuestProgress {
+  readonly schemaVersion: number;
+}
+
 const DB_NAME = 'frontline-summoners';
 const STORE_NAME = 'guest-progress';
 const KEY = 'progress';
-
+const SCHEMA_VERSION = 2;
 const EMPTY_PROGRESS: GuestProgress = { clearedStageIds: [], treasureIds: [] };
 
 function openDb(): Promise<IDBDatabase> {
@@ -28,10 +32,14 @@ export async function loadGuestProgress(): Promise<GuestProgress> {
       const tx = db.transaction(STORE_NAME, 'readonly');
       const request = tx.objectStore(STORE_NAME).get(KEY);
       request.onsuccess = () => {
-        const value = request.result as Partial<GuestProgress> | undefined;
+        const value = request.result as Partial<StoredGuestProgress> | undefined;
+        if (value?.schemaVersion !== SCHEMA_VERSION) {
+          resolve(EMPTY_PROGRESS);
+          return;
+        }
         resolve({
-          clearedStageIds: Array.isArray(value?.clearedStageIds) ? value.clearedStageIds.filter((id): id is string => typeof id === 'string') : [],
-          treasureIds: Array.isArray(value?.treasureIds) ? value.treasureIds.filter((id): id is string => typeof id === 'string') : [],
+          clearedStageIds: Array.isArray(value.clearedStageIds) ? value.clearedStageIds.filter((id): id is string => typeof id === 'string') : [],
+          treasureIds: Array.isArray(value.treasureIds) ? value.treasureIds.filter((id): id is string => typeof id === 'string') : [],
         });
       };
       request.onerror = () => reject(request.error ?? new Error('indexedDB read failed'));
@@ -51,12 +59,13 @@ export async function recordStageClear(stageId: string, treasureId: string): Pro
   cleared.add(stageId);
   treasures.add(treasureId);
   const progress: GuestProgress = { clearedStageIds: [...cleared], treasureIds: [...treasures] };
+  const stored: StoredGuestProgress = { ...progress, schemaVersion: SCHEMA_VERSION };
 
   try {
     const db = await openDb();
     await new Promise<void>((resolve, reject) => {
       const tx = db.transaction(STORE_NAME, 'readwrite');
-      tx.objectStore(STORE_NAME).put(progress, KEY);
+      tx.objectStore(STORE_NAME).put(stored, KEY);
       tx.oncomplete = () => { db.close(); resolve(); };
       tx.onerror = () => reject(tx.error ?? new Error('indexedDB write failed'));
       tx.onabort = () => reject(tx.error ?? new Error('indexedDB write aborted'));
