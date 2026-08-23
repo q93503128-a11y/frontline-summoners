@@ -50,6 +50,8 @@ function fighter(content: CombatContent): BattleUnitDefinition {
     attackMinRange: content.attackMinRange,
     attackMaxRange: content.attackMaxRange,
     targetMode: content.targetMode,
+    traits: content.traits,
+    damageBonuses: content.damageBonuses,
     naturalKnockbackCount: content.naturalKnockbackCount,
     naturalKnockbackFrames: 12,
     naturalKnockbackDistance: 34,
