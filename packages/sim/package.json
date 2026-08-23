@@ -3,7 +3,10 @@
   "version": "0.0.2",
   "private": true,
   "type": "module",
-  "exports": "./src/index.ts",
+  "exports": {
+    ".": "./src/index.ts",
+    "./playable": "./src/playable.ts"
+  },
   "scripts": {
     "typecheck": "tsc --noEmit",
     "test": "node --experimental-transform-types --test test/*.test.ts"

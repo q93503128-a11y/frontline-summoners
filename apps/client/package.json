@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "@frontline/shared": "0.0.1",
+    "@frontline/sim": "0.0.2",
     "phaser": "4.2.1"
   },
   "devDependencies": {
