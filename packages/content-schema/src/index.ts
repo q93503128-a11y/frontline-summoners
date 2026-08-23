@@ -7,6 +7,14 @@ export type PlayerRole = (typeof PLAYER_ROLES)[number];
 export const TARGET_MODES = ['SINGLE', 'AREA'] as const;
 export type TargetMode = (typeof TARGET_MODES)[number];
 
+export const COMBAT_TRAITS = ['LIGHT', 'ARMORED', 'ARCANE', 'BOSS'] as const;
+export type CombatTrait = (typeof COMBAT_TRAITS)[number];
+
+export interface TraitDamageBonusContent {
+  readonly trait: CombatTrait;
+  readonly multiplierPermille: number;
+}
+
 export const BATTLEFIELD_THEME_IDS = ['meadow', 'canyon', 'burning', 'ruins', 'moon', 'fortress', 'golden'] as const;
 export type BattlefieldThemeId = (typeof BATTLEFIELD_THEME_IDS)[number];
 
@@ -24,6 +32,8 @@ export interface CombatContent {
   readonly backswingFrames: number;
   readonly naturalKnockbackCount: number;
   readonly targetMode: TargetMode;
+  readonly traits: readonly CombatTrait[];
+  readonly damageBonuses: readonly TraitDamageBonusContent[];
 }
 
 export interface PlayerUnitContent extends CombatContent {
@@ -117,6 +127,36 @@ function requireHitFrames(record: Record<string, unknown>, context: string, cycl
   return frames;
 }
 
+function parseTraits(record: Record<string, unknown>, context: string): readonly CombatTrait[] {
+  const raw = record.traits;
+  if (raw === undefined) return [];
+  if (!Array.isArray(raw)) throw new Error(`${context}.traits must be an array`);
+  const traits = raw.map((trait, index) => {
+    if (typeof trait !== 'string' || !(COMBAT_TRAITS as readonly string[]).includes(trait)) {
+      throw new Error(`${context}.traits[${index}] is unknown: ${String(trait)}`);
+    }
+    return trait as CombatTrait;
+  });
+  if (new Set(traits).size !== traits.length) throw new Error(`${context}.traits must be unique`);
+  return traits;
+}
+
+function parseDamageBonuses(record: Record<string, unknown>, context: string): readonly TraitDamageBonusContent[] {
+  const raw = record.damageBonuses;
+  if (raw === undefined) return [];
+  if (!Array.isArray(raw)) throw new Error(`${context}.damageBonuses must be an array`);
+  const bonuses = raw.map((bonus, index) => {
+    const itemContext = `${context}.damageBonuses[${index}]`;
+    if (!isRecord(bonus)) throw new Error(`${itemContext} must be an object`);
+    return {
+      trait: requireEnum(bonus, 'trait', itemContext, COMBAT_TRAITS),
+      multiplierPermille: requireInteger(bonus, 'multiplierPermille', itemContext, 1000, 3000),
+    };
+  });
+  if (new Set(bonuses.map((bonus) => bonus.trait)).size !== bonuses.length) throw new Error(`${context}.damageBonuses traits must be unique`);
+  return bonuses;
+}
+
 function parseCombat(value: unknown, context: string): CombatContent {
   if (!isRecord(value)) throw new Error(`${context} must be an object`);
   const cycleFrames = requireInteger(value, 'cycleFrames', context, 1, 3600);
@@ -138,6 +178,8 @@ function parseCombat(value: unknown, context: string): CombatContent {
     backswingFrames: requireInteger(value, 'backswingFrames', context, 0, 3600),
     naturalKnockbackCount: requireInteger(value, 'naturalKnockbackCount', context, 0, 100),
     targetMode: requireEnum(value, 'targetMode', context, TARGET_MODES),
+    traits: parseTraits(value, context),
+    damageBonuses: parseDamageBonuses(value, context),
   };
 }
 
