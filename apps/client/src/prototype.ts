@@ -13,9 +13,9 @@ import {
   type PlayableBattleState,
   type PlayerRosterSlot,
 } from '@frontline/sim/playable';
-import playerUnitsJson from '../../../content/units/chapter-01.json';
-import enemiesJson from '../../../content/enemies/chapter-01.json';
-import stagesJson from '../../../content/stages/chapter-01.json';
+import playerUnitsJson from '../../../content/units/chapter-01.json' with { type: 'json' };
+import enemiesJson from '../../../content/enemies/chapter-01.json' with { type: 'json' };
+import stagesJson from '../../../content/stages/chapter-01.json' with { type: 'json' };
 
 export type PrototypeRarity = Rarity;
 export type PrototypeRole = PlayerRole;
