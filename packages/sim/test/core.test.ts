@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import { UnitState, computeStateHash, createBattle, spawnUnit, stepBattle, type BattleUnitDefinition } from '../src/index.ts';
+import { CombatTrait, UnitState, computeStateHash, createBattle, getUnitAttackDamageAgainst, spawnUnit, stepBattle, type BattleUnitDefinition } from '../src/index.ts';
 
 const fighter = (overrides: Partial<BattleUnitDefinition> = {}): BattleUnitDefinition => ({
   id: 'fighter', maxHp: 100, attackDamage: 100, moveSpeed: 0, standingRange: 100,
@@ -49,4 +49,44 @@ test('identical sequence produces identical final state hash', () => {
     return computeStateHash(state);
   };
   assert.equal(run(), run());
+});
+
+test('specialist damage applies only to matching target traits', () => {
+  const specialist = fighter({
+    id: 'hunter',
+    damageBonuses: [{ trait: CombatTrait.Light, multiplierPermille: 1250 }],
+  });
+  const light = fighter({ id: 'light', maxHp: 500, attackDamage: 0, traits: [CombatTrait.Light] });
+  const armored = fighter({ id: 'armored', maxHp: 500, attackDamage: 0, traits: [CombatTrait.Armored] });
+  assert.equal(getUnitAttackDamageAgainst(specialist, light), 125);
+  assert.equal(getUnitAttackDamageAgainst(specialist, armored), 100);
+
+  const state = createBattle({ mapLength: 1000, playerBaseHp: 1000, enemyBaseHp: 1000 });
+  spawnUnit(state, specialist, 'PLAYER', 500);
+  const target = spawnUnit(state, light, 'ENEMY', 500);
+  stepBattle(state);
+  assert.equal(target.hp, 375);
+});
+
+test('multiple matching target traits use strongest bonus rather than stacking', () => {
+  const attacker = fighter({
+    id: 'boss-hunter',
+    attackDamage: 100,
+    damageBonuses: [
+      { trait: CombatTrait.Armored, multiplierPermille: 1300 },
+      { trait: CombatTrait.Boss, multiplierPermille: 1500 },
+    ],
+  });
+  const target = fighter({ id: 'iron-boss', traits: [CombatTrait.Armored, CombatTrait.Boss] });
+  assert.equal(getUnitAttackDamageAgainst(attacker, target), 150);
+});
+
+test('specialist bonuses never inflate base damage', () => {
+  const state = createBattle({ mapLength: 1000, playerBaseHp: 1000, enemyBaseHp: 1000 });
+  spawnUnit(state, fighter({
+    id: 'boss-hunter',
+    damageBonuses: [{ trait: CombatTrait.Boss, multiplierPermille: 3000 }],
+  }), 'PLAYER', 950);
+  stepBattle(state);
+  assert.equal(state.bases.ENEMY.hp, 900);
 });
