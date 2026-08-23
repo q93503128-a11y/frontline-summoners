@@ -10,12 +10,16 @@ type SocketAttachment = {
   clientId: string;
 };
 
+const CORS_HEADERS = {
+  'access-control-allow-origin': '*',
+  'access-control-allow-headers': 'content-type',
+  'access-control-allow-methods': 'GET,POST,OPTIONS',
+} as const;
+
 const json = (data: unknown, init: ResponseInit = {}): Response => {
   const headers = new Headers(init.headers);
   headers.set('content-type', 'application/json; charset=utf-8');
-  headers.set('access-control-allow-origin', '*');
-  headers.set('access-control-allow-headers', 'content-type');
-  headers.set('access-control-allow-methods', 'GET,POST,OPTIONS');
+  for (const [key, value] of Object.entries(CORS_HEADERS)) headers.set(key, value);
   return new Response(JSON.stringify(data), { ...init, headers });
 };
 
@@ -25,7 +29,7 @@ export default {
   async fetch(request: Request, env: Env): Promise<Response> {
     const url = new URL(request.url);
 
-    if (request.method === 'OPTIONS') return json(null, { status: 204 });
+    if (request.method === 'OPTIONS') return new Response(null, { status: 204, headers: CORS_HEADERS });
 
     if (request.method === 'GET' && url.pathname === '/health') {
       return json({ ok: true, service: 'frontline-summoners-api', simTickRate: SIM_TICK_RATE });
@@ -62,7 +66,7 @@ export class BattleRoom extends DurableObject<Env> {
     }
 
     const pair = new WebSocketPair();
-    const [client, server] = Object.values(pair);
+    const [client, server] = Object.values(pair) as [WebSocket, WebSocket];
     const clientId = crypto.randomUUID();
     server.serializeAttachment({ clientId } satisfies SocketAttachment);
     this.ctx.acceptWebSocket(server);
@@ -93,11 +97,11 @@ export class BattleRoom extends DurableObject<Env> {
     ws.send(JSON.stringify({ type: 'ERROR', code: 'unsupported_message' }));
   }
 
-  webSocketClose(_ws: WebSocket): void {
+  webSocketClose(): void {
     this.broadcastPresence();
   }
 
-  webSocketError(_ws: WebSocket): void {
+  webSocketError(): void {
     this.broadcastPresence();
   }
 

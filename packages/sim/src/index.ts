@@ -28,14 +28,11 @@ export interface BattleUnitDefinition {
   readonly id: string;
   readonly maxHp: number;
   readonly attackDamage: number;
-  /** Integer simulation units moved per 30 Hz tick. */
   readonly moveSpeed: number;
   readonly standingRange: number;
-  /** Signed range relative to facing direction. Negative values permit rear hits. */
   readonly attackMinRange: number;
   readonly attackMaxRange: number;
   readonly targetMode: AttackTargetMode;
-  /** Number of non-lethal natural knockbacks before death. */
   readonly naturalKnockbackCount: number;
   readonly naturalKnockbackFrames: number;
   readonly naturalKnockbackDistance: number;
@@ -124,25 +121,12 @@ export function createBattle(config: BattleConfig): BattleState {
   return state;
 }
 
-export function spawnUnit(
-  state: BattleState,
-  definition: BattleUnitDefinition,
-  team: BattleTeam,
-  anchorX = team === 'PLAYER' ? state.bases.PLAYER.anchorX : state.bases.ENEMY.anchorX,
-): BattleUnit {
+export function spawnUnit(state: BattleState, definition: BattleUnitDefinition, team: BattleTeam, anchorX = team === 'PLAYER' ? state.bases.PLAYER.anchorX : state.bases.ENEMY.anchorX): BattleUnit {
   assertDefinition(definition);
   const unit: BattleUnit = {
-    simulationId: state.nextSimulationId++,
-    definition,
-    team,
-    hp: definition.maxHp,
-    anchorX: clamp(Math.trunc(anchorX), 0, state.mapLength),
-    state: UnitState.Moving,
-    stateFrame: 0,
-    nextAttackTick: 0,
-    naturalKnockbacksConsumed: 0,
-    knockbackStartX: 0,
-    knockbackTargetX: 0,
+    simulationId: state.nextSimulationId++, definition, team, hp: definition.maxHp,
+    anchorX: clamp(Math.trunc(anchorX), 0, state.mapLength), state: UnitState.Moving, stateFrame: 0,
+    nextAttackTick: 0, naturalKnockbacksConsumed: 0, knockbackStartX: 0, knockbackTargetX: 0,
   };
   state.units.push(unit);
   return unit;
@@ -175,8 +159,7 @@ function advanceTimers(state: BattleState): void {
     if (unit.state === UnitState.NaturalKnockback) {
       const duration = unit.definition.naturalKnockbackFrames;
       const elapsed = Math.min(unit.stateFrame, duration);
-      const delta = unit.knockbackTargetX - unit.knockbackStartX;
-      unit.anchorX = unit.knockbackStartX + Math.trunc((delta * elapsed) / duration);
+      unit.anchorX = unit.knockbackStartX + Math.trunc(((unit.knockbackTargetX - unit.knockbackStartX) * elapsed) / duration);
       if (elapsed >= duration) {
         unit.anchorX = unit.knockbackTargetX;
         unit.state = UnitState.Moving;
@@ -219,20 +202,17 @@ function isInsideAttackRange(source: BattleUnit, targetX: number): boolean {
 function collectHits(state: BattleState): HitEvent[] {
   const hits: HitEvent[] = [];
   for (const source of state.units) {
-    if (source.state !== UnitState.Foreswing) continue;
-    if (!source.definition.attackTiming.hitFrames.includes(source.stateFrame)) continue;
+    if (source.state !== UnitState.Foreswing || !source.definition.attackTiming.hitFrames.includes(source.stateFrame)) continue;
     const unitTargets = state.units
       .filter((target) => target.team !== source.team && isTargetable(target) && isInsideAttackRange(source, target.anchorX))
       .sort((a, b) => signedDistance(source, a.anchorX) - signedDistance(source, b.anchorX) || a.simulationId - b.simulationId);
     const base = state.bases[oppositeTeam(source.team)];
     const baseIsInRange = isInsideAttackRange(source, base.anchorX) && base.hp > 0;
-
     if (source.definition.targetMode === 'AREA') {
       for (const target of unitTargets) hits.push({ targetKind: 'UNIT', targetId: target.simulationId, damage: source.definition.attackDamage });
       if (baseIsInRange) hits.push({ targetKind: 'BASE', targetTeam: base.team, damage: source.definition.attackDamage });
       continue;
     }
-
     const nearestUnit = unitTargets[0];
     const unitDistance = nearestUnit ? signedDistance(source, nearestUnit.anchorX) : Number.POSITIVE_INFINITY;
     const baseDistance = baseIsInRange ? signedDistance(source, base.anchorX) : Number.POSITIVE_INFINITY;
@@ -268,7 +248,6 @@ function applyHits(state: BattleState, hits: readonly HitEvent[]): void {
     if (hit.targetKind === 'UNIT') unitDamage.set(hit.targetId, (unitDamage.get(hit.targetId) ?? 0) + hit.damage);
     else baseDamage[hit.targetTeam] += hit.damage;
   }
-
   for (const unit of state.units) {
     const damage = unitDamage.get(unit.simulationId) ?? 0;
     if (damage <= 0 || !isTargetable(unit)) continue;
@@ -281,16 +260,19 @@ function applyHits(state: BattleState, hits: readonly HitEvent[]): void {
     }
     let crossed = 0;
     for (let index = unit.naturalKnockbacksConsumed + 1; index <= unit.definition.naturalKnockbackCount; index += 1) {
-      const threshold = naturalThreshold(unit.definition, index);
-      if (oldHp > threshold && newHp <= threshold) crossed += 1;
+      if (oldHp > naturalThreshold(unit.definition, index) && newHp <= naturalThreshold(unit.definition, index)) crossed += 1;
     }
     if (crossed > 0) {
       unit.naturalKnockbacksConsumed = Math.min(unit.definition.naturalKnockbackCount, unit.naturalKnockbacksConsumed + crossed);
       enterNaturalKnockback(state, unit);
     }
   }
-
   for (const team of ['PLAYER', 'ENEMY'] as const) state.bases[team].hp = Math.max(0, state.bases[team].hp - baseDamage[team]);
+}
+
+function finishAttackOrWait(state: BattleState, unit: BattleUnit): void {
+  unit.state = state.tick >= unit.nextAttackTick ? UnitState.Moving : UnitState.AttackWait;
+  unit.stateFrame = 0;
 }
 
 function advanceAttackStates(state: BattleState): void {
@@ -298,12 +280,14 @@ function advanceAttackStates(state: BattleState): void {
     if (unit.state === UnitState.Foreswing) {
       const hitFrames = unit.definition.attackTiming.hitFrames;
       if (unit.stateFrame >= hitFrames[hitFrames.length - 1]!) {
-        unit.state = UnitState.Backswing;
-        unit.stateFrame = 0;
+        if (unit.definition.attackTiming.backswingFrames === 0) finishAttackOrWait(state, unit);
+        else {
+          unit.state = UnitState.Backswing;
+          unit.stateFrame = 0;
+        }
       }
     } else if (unit.state === UnitState.Backswing && unit.stateFrame >= unit.definition.attackTiming.backswingFrames) {
-      unit.state = state.tick >= unit.nextAttackTick ? UnitState.Moving : UnitState.AttackWait;
-      unit.stateFrame = 0;
+      finishAttackOrWait(state, unit);
     }
   }
 }

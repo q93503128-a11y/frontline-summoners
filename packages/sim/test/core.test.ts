@@ -30,6 +30,16 @@ test('one damage batch consumes crossed thresholds but enters knockback once', (
   assert.equal(defender.state, UnitState.NaturalKnockback);
 });
 
+test('zero-frame backswing does not add an accidental extra frame', () => {
+  const state = createBattle({ mapLength: 1000, playerBaseHp: 1000, enemyBaseHp: 1000 });
+  const attacker = spawnUnit(state, fighter({ id: 'fast', attackDamage: 1, attackTiming: { cycleFrames: 1, hitFrames: [0], backswingFrames: 0 } }), 'PLAYER', 500);
+  spawnUnit(state, fighter({ id: 'dummy', attackDamage: 0, maxHp: 1000 }), 'ENEMY', 500);
+  stepBattle(state);
+  assert.equal(attacker.state, UnitState.AttackWait);
+  stepBattle(state);
+  assert.notEqual(attacker.state, UnitState.Backswing);
+});
+
 test('identical sequence produces identical final state hash', () => {
   const run = (): string => {
     const state = createBattle({ mapLength: 1000, playerBaseHp: 1000, enemyBaseHp: 1000 });
