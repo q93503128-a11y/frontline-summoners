@@ -1,7 +1,16 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
 import type { BattleUnitDefinition } from '../src/index.ts';
-import { createPlayableBattle, getCooldownRemaining, stepPlayableBattle, trySpawnPlayerUnit, tryUpgradeSupply, type PlayableBattleConfig } from '../src/playable.ts';
+import {
+  createPlayableBattle,
+  getBaseWeaponCooldownRemaining,
+  getCooldownRemaining,
+  stepPlayableBattle,
+  tryFireBaseWeapon,
+  trySpawnPlayerUnit,
+  tryUpgradeSupply,
+  type PlayableBattleConfig,
+} from '../src/playable.ts';
 
 const unit = (id: string, overrides: Partial<BattleUnitDefinition> = {}): BattleUnitDefinition => ({
   id,
@@ -76,11 +85,47 @@ test('scheduled enemy waves spawn at deterministic ticks', () => {
   assert.equal(state.battle.units.filter((candidate) => candidate.team === 'ENEMY').length, 2);
 });
 
+test('base weapon is initially ready and uses the normal damage and natural-KB path', () => {
+  const state = createPlayableBattle({
+    ...config(),
+    baseWeapon: { damage: 60, cooldownFrames: 90 },
+    enemyWaves: [{ enemyId: 'grunt', atTick: 0, count: 1, intervalTicks: 999 }],
+  });
+  assert.equal(getBaseWeaponCooldownRemaining(state), 0);
+  assert.deepEqual(tryFireBaseWeapon(state), { ok: true, readyTick: 90 });
+  assert.deepEqual(tryFireBaseWeapon(state), { ok: false, reason: 'already_pending' });
+  stepPlayableBattle(state);
+  const enemy = state.battle.units.find((candidate) => candidate.team === 'ENEMY');
+  assert.ok(enemy);
+  assert.equal(enemy.hp, 40);
+  assert.equal(enemy.state, 'NATURAL_KNOCKBACK');
+  assert.equal(getBaseWeaponCooldownRemaining(state), 89);
+});
+
+test('base weapon kills grant the same enemy reward and remain deterministic', () => {
+  const run = (): { supply: number; hash: string } => {
+    const state = createPlayableBattle({
+      ...config(),
+      baseWeapon: { damage: 120, cooldownFrames: 120 },
+      enemyWaves: [{ enemyId: 'grunt', atTick: 0, count: 1, intervalTicks: 999 }],
+    });
+    tryFireBaseWeapon(state);
+    stepPlayableBattle(state);
+    assert.equal(state.battle.units[0]?.state, 'DYING');
+    return { supply: state.supply, hash: state.stateHash };
+  };
+  const a = run();
+  const b = run();
+  assert.equal(a.supply, 327);
+  assert.equal(a.hash, b.hash);
+});
+
 test('identical playable command sequence yields identical hash', () => {
   const run = (): string => {
     const state = createPlayableBattle(config());
     trySpawnPlayerUnit(state, 'cheap');
     for (let i = 0; i < 180; i += 1) {
+      if (i === 30) tryFireBaseWeapon(state);
       if (i === 60) trySpawnPlayerUnit(state, 'cheap');
       stepPlayableBattle(state);
     }
