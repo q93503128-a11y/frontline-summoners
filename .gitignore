@@ -9,3 +9,4 @@ worker-configuration.d.ts
 !.env.example
 .DS_Store
 *.log
+apps/client/public/assets/characters/
