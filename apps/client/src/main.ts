@@ -14,6 +14,7 @@ import {
 } from '@frontline/sim/playable';
 import { ART_BY_ID, ART_FAMILIES, UNIT_ART, type ArtFamily, type SpriteStrip } from './assets';
 import { BATTLEFIELD_THEME_LABELS, drawBattlefield, getBattlefieldBasePalette } from './battlefield';
+import { classifyImpact, getAttackSpriteFrame, getLoopingSpriteFrame } from './combat-visuals';
 import {
   PLAYER_SLOTS,
   STAGES,
@@ -269,9 +270,11 @@ class DeckScene extends Phaser.Scene {
 
 interface UnitView {
   readonly sprite: Phaser.GameObjects.Sprite;
+  readonly shadow: Phaser.GameObjects.Ellipse;
   readonly hpBg: Phaser.GameObjects.Rectangle;
   readonly hp: Phaser.GameObjects.Rectangle;
   stateKey: string;
+  lastHp: number;
 }
 
 interface UnitButtonView {
@@ -299,6 +302,8 @@ class BattleScene extends Phaser.Scene {
   private playerBaseText!: Phaser.GameObjects.Text;
   private enemyBaseText!: Phaser.GameObjects.Text;
   private timerText!: Phaser.GameObjects.Text;
+  private lastPlayerBaseHp = 0;
+  private lastEnemyBaseHp = 0;
   private ready = false;
   private resolved = false;
 
@@ -309,6 +314,8 @@ class BattleScene extends Phaser.Scene {
     this.accumulator = 0;
     this.ready = false;
     this.resolved = false;
+    this.lastPlayerBaseHp = 0;
+    this.lastEnemyBaseHp = 0;
     this.views.clear();
     this.buttons.clear();
     this.activeSlots = [];
@@ -325,6 +332,8 @@ class BattleScene extends Phaser.Scene {
       }
       this.activeSlots = getUnlockedPlayerSlots(progress.clearedStageIds);
       this.state = createPrototypeBattle(this.stage.id, this.activeSlots.map((slot) => slot.slotId));
+      this.lastPlayerBaseHp = this.state.battle.bases.PLAYER.hp;
+      this.lastEnemyBaseHp = this.state.battle.bases.ENEMY.hp;
       loading.destroy();
       this.drawHud();
       this.drawBases();
@@ -464,12 +473,63 @@ class BattleScene extends Phaser.Scene {
 
   private createUnitView(unit: BattleUnit): UnitView {
     const art = familyForUnit(unit.definition.id);
-    const sprite = this.add.sprite(this.toScreenX(unit.anchorX), 490, art.family.run.key, 0).setTint(art.tint).setDepth(3);
+    const x = this.toScreenX(unit.anchorX);
+    const shadow = this.add.ellipse(x, 524, 58 * Math.min(1.45, art.displayScale), 12, 0x101216, 0.34).setDepth(2);
+    const sprite = this.add.sprite(x, 490, art.family.run.key, 0).setTint(art.tint).setDepth(3);
     sprite.setFlipX(unit.team === 'ENEMY');
     sprite.setScale((art.family.displayHeight / art.family.run.frameHeight) * art.displayScale);
     const hpBg = this.add.rectangle(sprite.x, 443, 54, 7, 0x161a21).setDepth(5);
     const hp = this.add.rectangle(sprite.x - 26, 443, 52, 5, unit.team === 'PLAYER' ? 0x78dca0 : 0xf1837c).setOrigin(0, 0.5).setDepth(6);
-    return { sprite, hpBg, hp, stateKey: '' };
+
+    const spawn = this.add.ellipse(x, 519, 34, 9, unit.team === 'PLAYER' ? 0x9cd7ff : 0xffa39b, 0.42).setDepth(2);
+    this.tweens.add({
+      targets: spawn,
+      alpha: 0,
+      scaleX: 2.1,
+      scaleY: 1.5,
+      duration: 180,
+      ease: 'Quad.easeOut',
+      onComplete: () => spawn.destroy(),
+    });
+
+    return { sprite, shadow, hpBg, hp, stateKey: '', lastHp: unit.hp };
+  }
+
+  private playUnitImpactFx(unit: BattleUnit, view: UnitView, damage: number): void {
+    const weight = classifyImpact(damage, unit.definition.maxHp);
+    const radius = weight === 'HEAVY' ? 18 : weight === 'MEDIUM' ? 13 : 9;
+    const duration = weight === 'HEAVY' ? 170 : weight === 'MEDIUM' ? 140 : 110;
+    const flash = this.add.circle(view.sprite.x, view.sprite.y - 7, radius, 0xfff2c6, weight === 'HEAVY' ? 0.88 : 0.72).setDepth(12);
+    const slash = this.add.rectangle(view.sprite.x + (unit.team === 'PLAYER' ? 8 : -8), view.sprite.y - 8, radius * 2.2, weight === 'HEAVY' ? 5 : 3, 0xffffff, 0.9)
+      .setAngle(unit.team === 'PLAYER' ? -28 : 28)
+      .setDepth(13);
+    this.tweens.add({
+      targets: [flash, slash],
+      alpha: 0,
+      scaleX: 1.65,
+      scaleY: 1.65,
+      duration,
+      ease: 'Quad.easeOut',
+      onComplete: () => { flash.destroy(); slash.destroy(); },
+    });
+    if (weight === 'HEAVY') this.cameras.main.shake(45, 0.00075);
+  }
+
+  private playBaseImpactFx(team: 'PLAYER' | 'ENEMY', damage: number, maxHp: number): void {
+    const x = team === 'PLAYER' ? 88 : 1192;
+    const weight = classifyImpact(damage, maxHp);
+    const flash = this.add.rectangle(x, 445, 104, 190, team === 'PLAYER' ? 0xaad9ff : 0xffa59d, weight === 'HEAVY' ? 0.38 : 0.25).setDepth(10);
+    const dust = this.add.ellipse(x, 526, weight === 'HEAVY' ? 112 : 78, 20, 0xe8ddc8, 0.32).setDepth(9);
+    this.tweens.add({
+      targets: [flash, dust],
+      alpha: 0,
+      scaleX: weight === 'HEAVY' ? 1.45 : 1.2,
+      scaleY: weight === 'HEAVY' ? 1.25 : 1.1,
+      duration: weight === 'HEAVY' ? 220 : 160,
+      ease: 'Quad.easeOut',
+      onComplete: () => { flash.destroy(); dust.destroy(); },
+    });
+    if (weight !== 'LIGHT') this.cameras.main.shake(weight === 'HEAVY' ? 80 : 45, weight === 'HEAVY' ? 0.00125 : 0.0007);
   }
 
   private syncUnits(): void {
@@ -481,6 +541,11 @@ class BattleScene extends Phaser.Scene {
         view = this.createUnitView(unit);
         this.views.set(unit.simulationId, view);
       }
+
+      const damageTaken = Math.max(0, view.lastHp - unit.hp);
+      if (damageTaken > 0) this.playUnitImpactFx(unit, view, damageTaken);
+      view.lastHp = unit.hp;
+
       const art = familyForUnit(unit.definition.id);
       const strip = this.stripForState(art.family, unit);
       const stateKey = `${strip.key}:${unit.state}`;
@@ -488,13 +553,15 @@ class BattleScene extends Phaser.Scene {
         view.sprite.setTexture(strip.key, 0);
         view.stateKey = stateKey;
       }
-      const frame = this.frameForState(strip, unit);
+      const frame = this.frameForState(art.family, strip, unit);
       if (frame >= 0 && frame < strip.frames) view.sprite.setFrame(frame);
       view.sprite.x = this.toScreenX(unit.anchorX);
       view.sprite.y = unit.state === UnitState.NaturalKnockback ? 486 : 490;
       view.sprite.setAlpha(unit.state === UnitState.Dying ? Math.max(0.15, 1 - unit.stateFrame / Math.max(1, unit.definition.deathFrames)) : 1);
       if (unit.state === UnitState.Dying) view.sprite.setAngle((unit.team === 'PLAYER' ? -1 : 1) * Math.min(70, unit.stateFrame * 5));
       else view.sprite.setAngle(0);
+      view.shadow.x = view.sprite.x;
+      view.shadow.setAlpha(unit.state === UnitState.Dying ? Math.max(0, 0.34 * (1 - unit.stateFrame / Math.max(1, unit.definition.deathFrames))) : unit.state === UnitState.NaturalKnockback ? 0.2 : 0.34);
       view.hpBg.x = view.sprite.x;
       view.hp.x = view.sprite.x - 26;
       view.hpBg.setVisible(unit.state !== UnitState.Dying);
@@ -504,6 +571,7 @@ class BattleScene extends Phaser.Scene {
     for (const [id, view] of this.views) {
       if (present.has(id)) continue;
       view.sprite.destroy();
+      view.shadow.destroy();
       view.hpBg.destroy();
       view.hp.destroy();
       this.views.delete(id);
@@ -516,14 +584,17 @@ class BattleScene extends Phaser.Scene {
     return family.idle;
   }
 
-  private frameForState(strip: SpriteStrip, unit: BattleUnit): number {
+  private frameForState(family: ArtFamily, strip: SpriteStrip, unit: BattleUnit): number {
     if (unit.state === UnitState.Foreswing || unit.state === UnitState.Backswing) {
-      const lastHit = unit.definition.attackTiming.hitFrames[unit.definition.attackTiming.hitFrames.length - 1] ?? 1;
-      const attackSpan = Math.max(1, lastHit + unit.definition.attackTiming.backswingFrames);
-      const elapsed = unit.state === UnitState.Foreswing ? unit.stateFrame : lastHit + unit.stateFrame;
-      return Math.min(strip.frames - 1, Math.floor((elapsed / attackSpan) * strip.frames));
+      return getAttackSpriteFrame({
+        frameCount: strip.frames,
+        contactFrame: family.attackContactFrame,
+        timing: unit.definition.attackTiming,
+        state: unit.state,
+        stateFrame: unit.stateFrame,
+      });
     }
-    return Math.floor((this.state.battle.tick / 4) % strip.frames);
+    return getLoopingSpriteFrame(strip.frames, this.state.battle.tick, unit.simulationId);
   }
 
   private syncHud(): void {
@@ -549,6 +620,10 @@ class BattleScene extends Phaser.Scene {
 
     const pBase = this.state.battle.bases.PLAYER;
     const eBase = this.state.battle.bases.ENEMY;
+    if (pBase.hp < this.lastPlayerBaseHp) this.playBaseImpactFx('PLAYER', this.lastPlayerBaseHp - pBase.hp, pBase.maxHp);
+    if (eBase.hp < this.lastEnemyBaseHp) this.playBaseImpactFx('ENEMY', this.lastEnemyBaseHp - eBase.hp, eBase.maxHp);
+    this.lastPlayerBaseHp = pBase.hp;
+    this.lastEnemyBaseHp = eBase.hp;
     this.playerBaseBar.displayWidth = Math.max(1, 152 * Math.max(0, pBase.hp / pBase.maxHp));
     this.enemyBaseBar.displayWidth = Math.max(1, 152 * Math.max(0, eBase.hp / eBase.maxHp));
     this.playerBaseText.setText(`${pBase.hp.toLocaleString()} / ${pBase.maxHp.toLocaleString()}`);
