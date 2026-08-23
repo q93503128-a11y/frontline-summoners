@@ -12,49 +12,51 @@ export interface ArtFamily {
   readonly run: SpriteStrip;
   readonly attack: SpriteStrip;
   readonly displayHeight: number;
+  /** Zero-based sprite frame that visually represents weapon/spell contact. */
+  readonly attackContactFrame: number;
 }
 
 const LOCAL = '/assets/characters';
 
 export const ART_FAMILIES: readonly ArtFamily[] = [
   {
-    id: 'hero-knight', displayHeight: 190,
+    id: 'hero-knight', displayHeight: 190, attackContactFrame: 4,
     idle: { key: 'hero-knight-idle', url: `${LOCAL}/hero-knight/idle.png`, frameWidth: 180, frameHeight: 180, frames: 11 },
     run: { key: 'hero-knight-run', url: `${LOCAL}/hero-knight/run.png`, frameWidth: 180, frameHeight: 180, frames: 8 },
     attack: { key: 'hero-knight-attack', url: `${LOCAL}/hero-knight/attack.png`, frameWidth: 180, frameHeight: 180, frames: 7 },
   },
   {
-    id: 'hero-knight-2', displayHeight: 184,
+    id: 'hero-knight-2', displayHeight: 184, attackContactFrame: 3,
     idle: { key: 'hero-knight-2-idle', url: `${LOCAL}/hero-knight-2/idle.png`, frameWidth: 140, frameHeight: 140, frames: 11 },
     run: { key: 'hero-knight-2-run', url: `${LOCAL}/hero-knight-2/run.png`, frameWidth: 140, frameHeight: 140, frames: 8 },
     attack: { key: 'hero-knight-2-attack', url: `${LOCAL}/hero-knight-2/attack.png`, frameWidth: 140, frameHeight: 140, frames: 6 },
   },
   {
-    id: 'fantasy-warrior', displayHeight: 188,
+    id: 'fantasy-warrior', displayHeight: 188, attackContactFrame: 4,
     idle: { key: 'fantasy-warrior-idle', url: `${LOCAL}/fantasy-warrior/idle.png`, frameWidth: 162, frameHeight: 162, frames: 10 },
     run: { key: 'fantasy-warrior-run', url: `${LOCAL}/fantasy-warrior/run.png`, frameWidth: 162, frameHeight: 162, frames: 8 },
     attack: { key: 'fantasy-warrior-attack', url: `${LOCAL}/fantasy-warrior/attack.png`, frameWidth: 162, frameHeight: 162, frames: 7 },
   },
   {
-    id: 'wizard', displayHeight: 200,
+    id: 'wizard', displayHeight: 200, attackContactFrame: 3,
     idle: { key: 'wizard-idle', url: `${LOCAL}/wizard/idle.png`, frameWidth: 231, frameHeight: 190, frames: 6 },
     run: { key: 'wizard-run', url: `${LOCAL}/wizard/run.png`, frameWidth: 231, frameHeight: 190, frames: 8 },
     attack: { key: 'wizard-attack', url: `${LOCAL}/wizard/attack.png`, frameWidth: 231, frameHeight: 190, frames: 6 },
   },
   {
-    id: 'warrior', displayHeight: 178,
+    id: 'warrior', displayHeight: 178, attackContactFrame: 2,
     idle: { key: 'warrior-idle', url: `${LOCAL}/warrior/idle.png`, frameWidth: 150, frameHeight: 150, frames: 8 },
     run: { key: 'warrior-run', url: `${LOCAL}/warrior/run.png`, frameWidth: 150, frameHeight: 150, frames: 8 },
     attack: { key: 'warrior-attack', url: `${LOCAL}/warrior/attack.png`, frameWidth: 150, frameHeight: 150, frames: 4 },
   },
   {
-    id: 'huntress', displayHeight: 182,
+    id: 'huntress', displayHeight: 182, attackContactFrame: 3,
     idle: { key: 'huntress-idle', url: `${LOCAL}/huntress/idle.png`, frameWidth: 150, frameHeight: 150, frames: 8 },
     run: { key: 'huntress-run', url: `${LOCAL}/huntress/run.png`, frameWidth: 150, frameHeight: 150, frames: 8 },
     attack: { key: 'huntress-attack', url: `${LOCAL}/huntress/attack.png`, frameWidth: 150, frameHeight: 150, frames: 5 },
   },
   {
-    id: 'evil-wizard', displayHeight: 190,
+    id: 'evil-wizard', displayHeight: 190, attackContactFrame: 5,
     idle: { key: 'evil-wizard-idle', url: `${LOCAL}/evil-wizard/idle.png`, frameWidth: 150, frameHeight: 150, frames: 8 },
     run: { key: 'evil-wizard-run', url: `${LOCAL}/evil-wizard/run.png`, frameWidth: 150, frameHeight: 150, frames: 8 },
     attack: { key: 'evil-wizard-attack', url: `${LOCAL}/evil-wizard/attack.png`, frameWidth: 150, frameHeight: 150, frames: 8 },
