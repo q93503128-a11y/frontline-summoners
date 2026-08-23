@@ -1,46 +1,73 @@
 import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
 import test from 'node:test';
-import { parseCampaignStages } from '../src/index.ts';
+import { parseCampaignBundle, parseCampaignStages } from '../src/index.ts';
 
-const enemyIds = new Set([
-  'enemy-raider', 'enemy-sprinter', 'enemy-spearman', 'enemy-shield', 'enemy-cultist',
-  'enemy-sniper', 'enemy-knight', 'enemy-berserker', 'enemy-boss', 'enemy-boss-iron',
-]);
-const playerUnitIds = new Set([
-  'militia', 'guard', 'hunter', 'duelist', 'lancer', 'battlemage', 'pyromancer', 'royal', 'heretic', 'voidsage',
-]);
-
-async function loadChapter(): Promise<unknown> {
-  const url = new URL('../../../content/stages/chapter-01.json', import.meta.url);
+async function readJson(relativePath: string): Promise<unknown> {
+  const url = new URL(relativePath, import.meta.url);
   return JSON.parse(await readFile(url, 'utf8')) as unknown;
 }
 
-test('chapter one has 20 valid sequential-content stages and at least seven battlefield themes', async () => {
-  const stages = parseCampaignStages(await loadChapter(), {
-    enemyIds,
-    playerUnitIds,
+async function loadBundle() {
+  return parseCampaignBundle({
+    playerUnits: await readJson('../../../content/units/chapter-01.json'),
+    enemies: await readJson('../../../content/enemies/chapter-01.json'),
+    stages: await readJson('../../../content/stages/chapter-01.json'),
     starterUnitId: 'militia',
     expectedStageCount: 20,
     requiredThemeCount: 7,
   });
-  assert.equal(stages.length, 20);
-  assert.equal(stages[0]?.id, 'border-01');
-  assert.equal(stages[19]?.id, 'border-20');
-  assert.equal(stages[0]?.unlockUnitId, 'guard');
-  assert.equal(stages[19]?.unlockUnitId, 'voidsage');
+}
+
+test('chapter one bundle has 10 player units, 10 enemies, 20 stages and seven battlefield themes', async () => {
+  const bundle = await loadBundle();
+  assert.equal(bundle.playerUnits.length, 10);
+  assert.equal(bundle.enemies.length, 10);
+  assert.equal(bundle.stages.length, 20);
+  assert.equal(bundle.playerUnits[0]?.id, 'militia');
+  assert.equal(bundle.stages[0]?.id, 'border-01');
+  assert.equal(bundle.stages[19]?.id, 'border-20');
+  assert.ok(new Set(bundle.stages.map((stage) => stage.theme)).size >= 7);
 });
 
 test('chapter one keeps exactly nine deterministic character unlock milestones', async () => {
-  const stages = parseCampaignStages(await loadChapter(), { enemyIds, playerUnitIds, starterUnitId: 'militia' });
-  const unlocks = stages.flatMap((stage, index) => stage.unlockUnitId ? [`${index + 1}:${stage.unlockUnitId}`] : []);
+  const bundle = await loadBundle();
+  const unlocks = bundle.stages.flatMap((stage, index) => stage.unlockUnitId ? [`${index + 1}:${stage.unlockUnitId}`] : []);
   assert.deepEqual(unlocks, [
     '1:guard', '2:hunter', '4:duelist', '6:lancer', '8:battlemage',
     '10:pyromancer', '13:royal', '16:heretic', '20:voidsage',
   ]);
 });
 
-test('campaign validator rejects duplicate treasures and unknown enemy references', () => {
+test('campaign bundle rejects a non-starter player unit that can never be unlocked', () => {
+  const units = [
+    {
+      id: 'starter', displayName: 'starter', rarity: 'C', role: '물량', description: 'starter',
+      maxHp: 100, attackDamage: 10, moveSpeed: 1, standingRange: 40, attackMinRange: 0, attackMaxRange: 50,
+      cycleFrames: 30, hitFrames: [5], backswingFrames: 5, naturalKnockbackCount: 1, targetMode: 'SINGLE', cost: 10, rechargeFrames: 30,
+    },
+    {
+      id: 'orphan', displayName: 'orphan', rarity: 'C', role: '전열', description: 'orphan',
+      maxHp: 100, attackDamage: 10, moveSpeed: 1, standingRange: 40, attackMinRange: 0, attackMaxRange: 50,
+      cycleFrames: 30, hitFrames: [5], backswingFrames: 5, naturalKnockbackCount: 1, targetMode: 'SINGLE', cost: 10, rechargeFrames: 30,
+    },
+  ];
+  const enemies = [{
+    id: 'enemy', displayName: 'enemy', maxHp: 100, attackDamage: 10, moveSpeed: 1, standingRange: 40,
+    attackMinRange: 0, attackMaxRange: 50, cycleFrames: 30, hitFrames: [5], backswingFrames: 5,
+    naturalKnockbackCount: 1, targetMode: 'SINGLE', rewardSupply: 10,
+  }];
+  const stages = [{
+    id: 's1', chapter: 'x', name: 's1', subtitle: 's1', difficulty: 1,
+    playerBaseHp: 100, enemyBaseHp: 100, startingSupply: 0, mapLength: 800,
+    theme: 'meadow', decorSeed: 1,
+    waves: [{ enemyId: 'enemy', atTick: 0, count: 1, intervalTicks: 1 }],
+    treasure: { id: 't', name: 't', effect: 't' },
+  }];
+  assert.throws(() => parseCampaignBundle({ playerUnits: units, enemies, stages, starterUnitId: 'starter' }), /never unlocked/);
+});
+
+test('campaign validator rejects unknown enemy references', () => {
   const bad = [
     {
       id: 'a', chapter: 'x', name: 'a', subtitle: 'a', difficulty: 1,
@@ -50,5 +77,5 @@ test('campaign validator rejects duplicate treasures and unknown enemy reference
       treasure: { id: 't', name: 't', effect: 't' },
     },
   ];
-  assert.throws(() => parseCampaignStages(bad, { enemyIds }), /unknown enemy/);
+  assert.throws(() => parseCampaignStages(bad, { enemyIds: new Set(['enemy']) }), /unknown enemy/);
 });
