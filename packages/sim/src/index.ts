@@ -270,6 +270,21 @@ function applyHits(state: BattleState, hits: readonly HitEvent[]): void {
   for (const team of ['PLAYER', 'ENEMY'] as const) state.bases[team].hp = Math.max(0, state.bases[team].hp - baseDamage[team]);
 }
 
+/**
+ * Applies one deterministic, simultaneous damage packet to every currently targetable unit on a team.
+ * This intentionally does not damage bases. It reuses the same natural-KB/death rules as normal attacks.
+ * Callers that grant kill rewards should capture the alive set before calling this function.
+ */
+export function applyAreaDamageToTeam(state: BattleState, targetTeam: BattleTeam, damage: number): number {
+  if (!Number.isInteger(damage) || damage < 0) throw new Error('area damage must be a non-negative integer');
+  if (damage === 0 || state.winner !== null) return 0;
+  const targets = state.units.filter((unit) => unit.team === targetTeam && isTargetable(unit));
+  if (targets.length === 0) return 0;
+  applyHits(state, targets.map((unit) => ({ targetKind: 'UNIT' as const, targetId: unit.simulationId, damage })));
+  state.stateHash = computeStateHash(state);
+  return targets.length;
+}
+
 function finishAttackOrWait(state: BattleState, unit: BattleUnit): void {
   unit.state = state.tick >= unit.nextAttackTick ? UnitState.Moving : UnitState.AttackWait;
   unit.stateFrame = 0;
