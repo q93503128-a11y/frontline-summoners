@@ -1,4 +1,4 @@
-import { SIM_TICK_RATE, computeStateHash, createBattle, spawnUnit, stepBattle, UnitState, type BattleState, type BattleUnitDefinition } from './index.ts';
+import { SIM_TICK_RATE, applyAreaDamageToTeam, computeStateHash, createBattle, spawnUnit, stepBattle, UnitState, type BattleState, type BattleUnitDefinition } from './index.ts';
 
 export interface SupplyLevelDefinition {
   readonly incomePerSecond: number;
@@ -16,6 +16,16 @@ export const DEFAULT_SUPPLY_LEVELS: readonly SupplyLevelDefinition[] = [
   { incomePerSecond: 168, maxSupply: 8100, upgradeCost: 1600 },
   { incomePerSecond: 192, maxSupply: 9300, upgradeCost: 2050 },
 ] as const;
+
+export interface BaseWeaponDefinition {
+  readonly damage: number;
+  readonly cooldownFrames: number;
+}
+
+export const DEFAULT_BASE_WEAPON: BaseWeaponDefinition = {
+  damage: 90,
+  cooldownFrames: 900,
+};
 
 export interface PlayerRosterSlot {
   readonly slotId: string;
@@ -55,6 +65,7 @@ export interface PlayableBattleConfig {
   readonly playerUnitCap?: number;
   readonly enemyUnitCap?: number;
   readonly supplyLevels?: readonly SupplyLevelDefinition[];
+  readonly baseWeapon?: BaseWeaponDefinition;
   readonly playerSlots: readonly PlayerRosterSlot[];
   readonly enemies: readonly EnemyArchetype[];
   readonly enemyWaves: readonly EnemyWaveDefinition[];
@@ -66,6 +77,10 @@ export interface PlayableBattleState {
   supplyLevel: number;
   incomeRemainder: number;
   readonly supplyLevels: readonly SupplyLevelDefinition[];
+  readonly baseWeapon: BaseWeaponDefinition;
+  baseWeaponReadyTick: number;
+  baseWeaponPending: boolean;
+  baseWeaponLastFiredTick: number;
   readonly playerSlots: readonly PlayerRosterSlot[];
   readonly enemies: readonly EnemyArchetype[];
   readonly cooldownReadyTick: Record<string, number>;
@@ -78,6 +93,7 @@ export interface PlayableBattleState {
 
 export type SpawnFailureReason = 'battle_over' | 'unknown_slot' | 'insufficient_supply' | 'cooldown' | 'unit_cap';
 export type UpgradeFailureReason = 'battle_over' | 'max_level' | 'insufficient_supply';
+export type BaseWeaponFailureReason = 'battle_over' | 'cooldown' | 'already_pending';
 
 export type SpawnResult =
   | { readonly ok: true; readonly simulationId: number }
@@ -86,6 +102,10 @@ export type SpawnResult =
 export type UpgradeResult =
   | { readonly ok: true; readonly level: number }
   | { readonly ok: false; readonly reason: UpgradeFailureReason };
+
+export type BaseWeaponResult =
+  | { readonly ok: true; readonly readyTick: number }
+  | { readonly ok: false; readonly reason: BaseWeaponFailureReason };
 
 function assertPositiveInteger(value: number, name: string): void {
   if (!Number.isInteger(value) || value <= 0) throw new Error(`${name} must be a positive integer`);
@@ -111,6 +131,9 @@ function validateConfig(config: PlayableBattleConfig): void {
     assertPositiveInteger(wave.count, 'wave count');
     assertPositiveInteger(wave.intervalTicks, 'wave intervalTicks');
   }
+  const weapon = config.baseWeapon ?? DEFAULT_BASE_WEAPON;
+  if (!Number.isInteger(weapon.damage) || weapon.damage < 0) throw new Error('base weapon damage must be a non-negative integer');
+  assertPositiveInteger(weapon.cooldownFrames, 'base weapon cooldownFrames');
 }
 
 export function createPlayableBattle(config: PlayableBattleConfig): PlayableBattleState {
@@ -124,6 +147,10 @@ export function createPlayableBattle(config: PlayableBattleConfig): PlayableBatt
     supplyLevel: 1,
     incomeRemainder: 0,
     supplyLevels,
+    baseWeapon: config.baseWeapon ?? DEFAULT_BASE_WEAPON,
+    baseWeaponReadyTick: 0,
+    baseWeaponPending: false,
+    baseWeaponLastFiredTick: -1,
     playerSlots: config.playerSlots,
     enemies: config.enemies,
     cooldownReadyTick: Object.fromEntries(config.playerSlots.map((slot) => [slot.slotId, 0])),
@@ -153,6 +180,10 @@ export function getCooldownRemaining(state: PlayableBattleState, slotId: string)
   return Math.max(0, (state.cooldownReadyTick[slotId] ?? 0) - state.battle.tick);
 }
 
+export function getBaseWeaponCooldownRemaining(state: PlayableBattleState): number {
+  return Math.max(0, state.baseWeaponReadyTick - state.battle.tick);
+}
+
 export function trySpawnPlayerUnit(state: PlayableBattleState, slotId: string): SpawnResult {
   if (state.battle.winner !== null) return { ok: false, reason: 'battle_over' };
   const slot = state.playerSlots.find((candidate) => candidate.slotId === slotId);
@@ -180,6 +211,17 @@ export function tryUpgradeSupply(state: PlayableBattleState): UpgradeResult {
   return { ok: true, level: state.supplyLevel };
 }
 
+export function tryFireBaseWeapon(state: PlayableBattleState): BaseWeaponResult {
+  if (state.battle.winner !== null) return { ok: false, reason: 'battle_over' };
+  if (state.baseWeaponPending) return { ok: false, reason: 'already_pending' };
+  if (getBaseWeaponCooldownRemaining(state) > 0) return { ok: false, reason: 'cooldown' };
+  state.baseWeaponPending = true;
+  state.baseWeaponLastFiredTick = state.battle.tick;
+  state.baseWeaponReadyTick = state.battle.tick + state.baseWeapon.cooldownFrames;
+  state.stateHash = computePlayableStateHash(state);
+  return { ok: true, readyTick: state.baseWeaponReadyTick };
+}
+
 function accrueSupply(state: PlayableBattleState): void {
   const level = getCurrentSupplyLevel(state);
   state.incomeRemainder += level.incomePerSecond;
@@ -204,6 +246,12 @@ function processEnemyWaves(state: PlayableBattleState): void {
   }
 }
 
+function processPendingBaseWeapon(state: PlayableBattleState): void {
+  if (!state.baseWeaponPending) return;
+  state.baseWeaponPending = false;
+  applyAreaDamageToTeam(state.battle, 'ENEMY', state.baseWeapon.damage);
+}
+
 function grantNewDeathRewards(state: PlayableBattleState, aliveBefore: ReadonlySet<number>): void {
   const maxSupply = getCurrentSupplyLevel(state).maxSupply;
   for (const unit of state.battle.units) {
@@ -219,6 +267,7 @@ export function stepPlayableBattle(state: PlayableBattleState): PlayableBattleSt
   accrueSupply(state);
   processEnemyWaves(state);
   const aliveBefore = new Set(state.battle.units.filter((unit) => unit.state !== UnitState.Dying).map((unit) => unit.simulationId));
+  processPendingBaseWeapon(state);
   stepBattle(state.battle);
   grantNewDeathRewards(state, aliveBefore);
   state.stateHash = computePlayableStateHash(state);
@@ -238,5 +287,6 @@ export function computePlayableStateHash(state: PlayableBattleState): string {
   const cooldowns = Object.entries(state.cooldownReadyTick).sort(([a], [b]) => a.localeCompare(b)).map(([slot, tick]) => `${slot}:${tick}`).join('|');
   const waves = state.enemyWaves.map((wave) => `${wave.enemyId}:${wave.spawned}:${wave.nextTick}`).join('|');
   const rewards = Object.entries(state.rewardBySimulationId).sort(([a], [b]) => Number(a) - Number(b)).map(([id, reward]) => `${id}:${reward}`).join('|');
-  return fnv1a([computeStateHash(state.battle), state.supply, state.supplyLevel, state.incomeRemainder, cooldowns, waves, rewards].join('#'));
+  const weapon = `${state.baseWeapon.damage}:${state.baseWeapon.cooldownFrames}:${state.baseWeaponReadyTick}:${state.baseWeaponPending ? 1 : 0}:${state.baseWeaponLastFiredTick}`;
+  return fnv1a([computeStateHash(state.battle), state.supply, state.supplyLevel, state.incomeRemainder, cooldowns, waves, rewards, weapon].join('#'));
 }
