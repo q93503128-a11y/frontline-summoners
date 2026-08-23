@@ -2,6 +2,7 @@ node_modules/
 dist/
 coverage/
 .wrangler/
+worker-configuration.d.ts
 .dev.vars
 .env
 .env.*

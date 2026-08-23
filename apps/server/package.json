@@ -1,13 +1,21 @@
 {
   "name": "@frontline/server",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "private": true,
   "type": "module",
   "scripts": {
-    "typecheck": "tsc --noEmit"
+    "types": "wrangler types",
+    "typecheck": "npm run types && tsc --noEmit",
+    "dev": "wrangler dev",
+    "deploy": "wrangler deploy",
+    "db:migrate:local": "wrangler d1 migrations apply frontline-summoners-db --local",
+    "db:migrate:remote": "wrangler d1 migrations apply frontline-summoners-db --remote"
   },
   "dependencies": {
     "@frontline/shared": "0.0.1",
-    "@frontline/sim": "0.0.1"
+    "@frontline/sim": "0.0.2"
+  },
+  "devDependencies": {
+    "wrangler": "^4.0.0"
   }
 }

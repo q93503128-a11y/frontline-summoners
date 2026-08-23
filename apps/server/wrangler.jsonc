@@ -1,0 +1,31 @@
+{
+  "$schema": "../../node_modules/wrangler/config-schema.json",
+  "name": "frontline-summoners-api",
+  "main": "src/index.ts",
+  "compatibility_date": "2026-08-23",
+  "observability": {
+    "enabled": true
+  },
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "frontline-summoners-db",
+      "database_id": "95327cb4-06a1-4ded-ac02-faad09ee07ac",
+      "migrations_dir": "migrations"
+    }
+  ],
+  "durable_objects": {
+    "bindings": [
+      {
+        "name": "BATTLE_ROOM",
+        "class_name": "BattleRoom"
+      }
+    ]
+  },
+  "exports": {
+    "BattleRoom": {
+      "type": "durable-object",
+      "storage": "sqlite"
+    }
+  }
+}
