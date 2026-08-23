@@ -4,7 +4,9 @@
   "private": true,
   "type": "module",
   "scripts": {
+    "predev": "node ../../tools/vendor-client-assets.mjs",
     "dev": "vite --host 0.0.0.0",
+    "prebuild": "node ../../tools/vendor-client-assets.mjs",
     "build": "vite build",
     "typecheck": "tsc --noEmit",
     "test": "node --experimental-transform-types --test test/*.test.ts"
