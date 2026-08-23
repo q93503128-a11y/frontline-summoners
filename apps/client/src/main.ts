@@ -38,7 +38,7 @@ function addText(scene: Phaser.Scene, x: number, y: number, text: string, size =
     fontSize: `${size}px`,
     color,
     align,
-    stroke: size >= 30 ? '#11151d' : undefined,
+    stroke: '#11151d',
     strokeThickness: size >= 30 ? 4 : 0,
   });
 }
@@ -183,12 +183,12 @@ class DeckScene extends Phaser.Scene {
       const row = Math.floor(index / 5);
       const x = 148 + col * 248;
       const y = 280 + row * 260;
-      this.add.rectangle(x, y, 220, 224, 0x252c3a, 0.98).setStrokeStyle(3, Phaser.Display.Color.HexStringToColor(rarityColor[slot.rarity]).color, 0.85);
+      this.add.rectangle(x, y, 220, 224, 0x252c3a, 0.98).setStrokeStyle(3, Phaser.Display.Color.HexStringToColor(rarityColor[slot.rarity] ?? '#ffffff').color, 0.85);
       const art = familyForUnit(slot.definition.id);
       const portrait = this.add.sprite(x, y - 58, art.family.idle.key, 0).setTint(art.tint);
       const scale = (152 / art.family.idle.frameHeight) * art.displayScale;
       portrait.setScale(scale);
-      addText(this, x - 94, y - 102, slot.rarity, 17, rarityColor[slot.rarity]);
+      addText(this, x - 94, y - 102, slot.rarity, 17, rarityColor[slot.rarity] ?? '#ffffff');
       addText(this, x, y + 4, slot.displayName, 23, '#ffffff', 'center').setOrigin(0.5);
       addText(this, x, y + 38, `${slot.role} · ${slot.cost} 보급`, 17, '#f2d37c', 'center').setOrigin(0.5);
       addText(this, x, y + 72, slot.description, 14, '#b9c2d0', 'center').setOrigin(0.5).setWordWrapWidth(190);
@@ -299,7 +299,7 @@ class BattleScene extends Phaser.Scene {
       const col = index % 5;
       const x = 102 + col * 205;
       const y = 579 + row * 72;
-      const border = Phaser.Display.Color.HexStringToColor(rarityColor[slot.rarity]).color;
+      const border = Phaser.Display.Color.HexStringToColor(rarityColor[slot.rarity] ?? '#ffffff').color;
       const bg = this.add.rectangle(x, y, 188, 62, 0x28303e).setStrokeStyle(2, border, 0.85).setInteractive({ useHandCursor: true });
       const shade = this.add.rectangle(x, y, 188, 62, 0x05070b, 0).setDepth(6);
       const art = familyForUnit(slot.definition.id);
