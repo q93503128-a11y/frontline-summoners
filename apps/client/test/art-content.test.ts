@@ -24,6 +24,8 @@ test('all sprite strips are local deploy assets with coherent frame metadata', (
       assert.match(strip.url, /^\/assets\/characters\//, `${family.id} must not load a runtime remote URL`);
       assert.ok(strip.frameWidth > 0 && strip.frameHeight > 0 && strip.frames > 0);
     }
+    assert.ok(Number.isInteger(family.attackContactFrame), `${family.id} contact frame must be an integer`);
+    assert.ok(family.attackContactFrame >= 0 && family.attackContactFrame < family.attack.frames, `${family.id} contact frame must be inside its attack strip`);
   }
   const hero = ART_BY_ID['hero-knight'];
   assert.ok(hero);
