@@ -19,7 +19,7 @@ const LOCAL = '/assets/characters';
 export const ART_FAMILIES: readonly ArtFamily[] = [
   {
     id: 'hero-knight', displayHeight: 190,
-    idle: { key: 'hero-knight-idle', url: `${LOCAL}/hero-knight/idle.png`, frameWidth: 231, frameHeight: 180, frames: 11 },
+    idle: { key: 'hero-knight-idle', url: `${LOCAL}/hero-knight/idle.png`, frameWidth: 180, frameHeight: 180, frames: 11 },
     run: { key: 'hero-knight-run', url: `${LOCAL}/hero-knight/run.png`, frameWidth: 180, frameHeight: 180, frames: 8 },
     attack: { key: 'hero-knight-attack', url: `${LOCAL}/hero-knight/attack.png`, frameWidth: 180, frameHeight: 180, frames: 7 },
   },
