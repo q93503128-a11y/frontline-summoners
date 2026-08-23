@@ -11,7 +11,21 @@ import {
   type PlayableBattleState,
 } from '@frontline/sim/playable';
 import { ART_BY_ID, ART_FAMILIES, UNIT_ART, type ArtFamily, type SpriteStrip } from './assets';
-import { PLAYER_SLOTS, STAGES, createPrototypeBattle, getStage, type PrototypeStage } from './prototype';
+import { BATTLEFIELD_THEME_LABELS, drawBattlefield, getBattlefieldBasePalette } from './battlefield';
+import {
+  PLAYER_SLOTS,
+  STAGES,
+  createPrototypeBattle,
+  getSlotById,
+  getStage,
+  getStageNumber,
+  getUnlockStageForSlot,
+  getUnlockedPlayerSlots,
+  getUnlockedSlotIds,
+  isStageUnlocked,
+  type PrototypeRosterSlot,
+  type PrototypeStage,
+} from './prototype';
 import { loadGuestProgress, recordStageClear, type GuestProgress } from './save';
 
 const FONT = '"Malgun Gothic", "Apple SD Gothic Neo", "Noto Sans KR", sans-serif';
@@ -28,6 +42,7 @@ const COLORS = {
   muted: '#b8c0ce',
 };
 
+const EMPTY_PROGRESS: GuestProgress = { clearedStageIds: [], treasureIds: [] };
 const rarityColor: Record<string, string> = {
   C: '#b9c2cf', B: '#8bd6a3', A: '#79baff', S: '#d79aff', SS: '#ffd56f',
 };
@@ -46,7 +61,7 @@ function addText(scene: Phaser.Scene, x: number, y: number, text: string, size =
 function addButton(scene: Phaser.Scene, x: number, y: number, width: number, height: number, label: string, onClick: () => void, accent = 0x59677f): Phaser.GameObjects.Container {
   const bg = scene.add.rectangle(0, 0, width, height, 0x252b38, 0.98).setStrokeStyle(3, accent, 1);
   const shine = scene.add.rectangle(0, -height / 2 + 4, width - 8, 5, accent, 0.45);
-  const text = addText(scene, 0, 0, label, Math.max(20, Math.floor(height * 0.3)), '#ffffff', 'center').setOrigin(0.5);
+  const text = addText(scene, 0, 0, label, Math.max(18, Math.floor(height * 0.3)), '#ffffff', 'center').setOrigin(0.5);
   const container = scene.add.container(x, y, [bg, shine, text]);
   bg.setInteractive({ useHandCursor: true });
   bg.on('pointerover', () => bg.setFillStyle(0x343c4d, 1));
@@ -56,26 +71,23 @@ function addButton(scene: Phaser.Scene, x: number, y: number, width: number, hei
   return container;
 }
 
-function drawBackdrop(scene: Phaser.Scene, variant: 'menu' | 'map' | 'battle' = 'menu'): void {
-  scene.cameras.main.setBackgroundColor(variant === 'battle' ? '#9fc7cf' : '#171c27');
+function drawBackdrop(scene: Phaser.Scene, variant: 'menu' | 'map' = 'menu'): void {
+  scene.cameras.main.setBackgroundColor('#171c27');
   const g = scene.add.graphics();
-  if (variant !== 'battle') {
-    g.fillStyle(0x171c27).fillRect(0, 0, INTERNAL_WIDTH, INTERNAL_HEIGHT);
-    g.fillStyle(0x20283a, 1).fillCircle(1080, 130, 240);
-    g.fillStyle(0x263247, 1).fillTriangle(0, 570, 330, 250, 630, 570);
-    g.fillStyle(0x222d40, 1).fillTriangle(430, 570, 760, 200, 1080, 570);
-    g.fillStyle(0x1f2939, 1).fillTriangle(870, 570, 1110, 300, 1280, 570);
-    g.fillStyle(0x111722).fillRect(0, 570, INTERNAL_WIDTH, 150);
-    return;
+  g.fillStyle(0x171c27).fillRect(0, 0, INTERNAL_WIDTH, INTERNAL_HEIGHT);
+  g.fillStyle(variant === 'map' ? 0x26344a : 0x20283a, 1).fillCircle(1080, 130, 240);
+  g.fillStyle(0x263247, 1).fillTriangle(0, 570, 330, 250, 630, 570);
+  g.fillStyle(0x222d40, 1).fillTriangle(430, 570, 760, 200, 1080, 570);
+  g.fillStyle(0x1f2939, 1).fillTriangle(870, 570, 1110, 300, 1280, 570);
+  g.fillStyle(0x111722).fillRect(0, 570, INTERNAL_WIDTH, 150);
+  if (variant === 'map') {
+    g.lineStyle(5, 0x53627a, 0.5);
+    for (let i = 0; i < 9; i += 1) {
+      const x = 100 + i * 145;
+      g.lineBetween(x, 485 - (i % 3) * 24, x + 80, 450 - ((i + 1) % 3) * 24);
+      g.fillStyle(i % 2 === 0 ? 0x788aa5 : 0x64758f, 0.6).fillCircle(x, 485 - (i % 3) * 24, 7);
+    }
   }
-  g.fillStyle(0xb9dce2).fillRect(0, 0, INTERNAL_WIDTH, 430);
-  g.fillStyle(0xe9d89d, 0.7).fillCircle(1050, 105, 54);
-  g.fillStyle(0x7997a0).fillTriangle(0, 440, 280, 250, 540, 440);
-  g.fillStyle(0x78918a).fillTriangle(300, 440, 650, 230, 980, 440);
-  g.fillStyle(0x6f857d).fillTriangle(760, 440, 1040, 290, 1280, 440);
-  g.fillStyle(0x78985f).fillRect(0, 430, INTERNAL_WIDTH, 88);
-  g.fillStyle(0x556a48).fillRect(0, 510, INTERNAL_WIDTH, 22);
-  g.fillStyle(0x40382f).fillRect(0, 532, INTERNAL_WIDTH, 188);
 }
 
 function familyForUnit(unitId: string): { family: ArtFamily; tint: number; displayScale: number } {
@@ -100,14 +112,13 @@ class BootScene extends Phaser.Scene {
       }
     }
     this.load.on('progress', (value: number) => bar.displayWidth = Math.max(1, 512 * value));
-    this.load.on('loaderror', (file: { key?: string }) => status.setText(`일부 캐릭터 로드 재시도 중… ${file.key ?? ''}`));
+    this.load.on('loaderror', (file: { key?: string }) => status.setText(`일부 캐릭터 로드 실패 · 대체 표시 사용 예정 ${file.key ?? ''}`));
   }
 
   create(): void { this.scene.start('main-menu'); }
 }
 
 class MainMenuScene extends Phaser.Scene {
-  private progress: GuestProgress = { clearedStageIds: [], treasureIds: [] };
   constructor() { super('main-menu'); }
 
   create(): void {
@@ -115,83 +126,141 @@ class MainMenuScene extends Phaser.Scene {
     addText(this, 84, 84, '전선소환전', 70, COLORS.cream);
     addText(this, 88, 165, APP_NAME, 24, '#9fb0c6');
     addText(this, 88, 230, '별난 영웅들을 모아 전선을 밀어붙여라.', 29, '#e8edf6');
-    addText(this, 88, 272, '소환은 단순하게, 덱과 타이밍은 깊게.', 22, COLORS.muted);
+    addText(this, 88, 272, '첫 출정은 징집병 하나. 승리할수록 전선과 동료가 열린다.', 22, COLORS.muted);
 
     this.add.rectangle(1040, 105, 320, 110, 0x222936, 0.96).setStrokeStyle(2, 0x556077);
     addText(this, 900, 72, '게스트 지휘관', 26, '#ffffff');
-    const progressText = addText(this, 900, 110, '진행도 불러오는 중…', 19, COLORS.muted);
+    const progressText = addText(this, 900, 110, '진행도 불러오는 중…', 18, COLORS.muted);
 
     addButton(this, 230, 435, 310, 92, '출 정', () => this.scene.start('stage-select'), 0xc5a04c);
     addButton(this, 575, 435, 310, 92, '편 성', () => this.scene.start('deck'), 0x5f8fb8);
     addButton(this, 920, 435, 310, 92, '도 감  ·  준비 중', () => undefined, 0x56606f).setAlpha(0.72);
-    addText(this, 88, 628, '보물은 첫 클리어 시 100% 획득 · 에너지 제한 없음', 20, '#9cd6ad');
+    addText(this, 88, 628, '보물 첫 클리어 100% · 스테이지 순차 개방 · 에너지 제한 없음', 20, '#9cd6ad');
     addText(this, 1185, 675, 'PRE-ALPHA', 17, '#657086').setOrigin(1, 0.5);
 
     void loadGuestProgress().then((progress) => {
-      this.progress = progress;
-      progressText.setText(`클리어 ${progress.clearedStageIds.length}/${STAGES.length}   ·   보물 ${progress.treasureIds.length}/${STAGES.length}`);
+      if (!this.scene.isActive()) return;
+      const unlocked = getUnlockedPlayerSlots(progress.clearedStageIds).length;
+      progressText.setText(`클리어 ${progress.clearedStageIds.length}/${STAGES.length} · 보물 ${progress.treasureIds.length}/${STAGES.length} · 동료 ${unlocked}/${PLAYER_SLOTS.length}`);
     });
   }
 }
 
 class StageSelectScene extends Phaser.Scene {
-  private progress: GuestProgress = { clearedStageIds: [], treasureIds: [] };
+  private progress: GuestProgress = EMPTY_PROGRESS;
+  private page = 0;
+  private stageLayer?: Phaser.GameObjects.Container;
+  private pageText?: Phaser.GameObjects.Text;
+
   constructor() { super('stage-select'); }
 
   create(): void {
     drawBackdrop(this, 'map');
-    addText(this, 70, 55, '제1장 · 뒤집힌 국경', 44, COLORS.cream);
-    addText(this, 72, 112, '스테이지 선택', 22, COLORS.muted);
-    addButton(this, 1135, 74, 190, 56, '메인으로', () => this.scene.start('main-menu'), 0x586275);
+    addText(this, 54, 38, '제1장 · 뒤집힌 국경', 42, COLORS.cream);
+    addText(this, 56, 91, '20개 전장 · 5개씩 보기', 19, COLORS.muted);
+    addButton(this, 1165, 65, 160, 50, '메인', () => this.scene.start('main-menu'), 0x586275);
+    addButton(this, 72, 655, 115, 52, '◀ 이전', () => { this.page = Math.max(0, this.page - 1); this.renderPage(); }, 0x586275);
+    addButton(this, 1208, 655, 115, 52, '다음 ▶', () => { this.page = Math.min(Math.ceil(STAGES.length / 5) - 1, this.page + 1); this.renderPage(); }, 0x586275);
+    this.pageText = addText(this, INTERNAL_WIDTH / 2, 640, '', 18, '#9ca9bb', 'center').setOrigin(0.5);
 
-    const cards: Array<{ stage: PrototypeStage; clear: Phaser.GameObjects.Text; treasure: Phaser.GameObjects.Text }> = [];
-    STAGES.forEach((stage, index) => {
-      const x = 250 + index * 390;
-      this.add.rectangle(x, 365, 330, 410, 0x242b3a, 0.97).setStrokeStyle(3, index === STAGES.length - 1 ? 0xbf9252 : 0x55657c);
-      addText(this, x, 205, `STAGE ${index + 1}`, 18, '#8291a6', 'center').setOrigin(0.5);
-      addText(this, x, 250, stage.name, 34, '#ffffff', 'center').setOrigin(0.5);
-      addText(this, x, 300, '★'.repeat(stage.difficulty) + '☆'.repeat(3 - stage.difficulty), 23, COLORS.gold, 'center').setOrigin(0.5);
-      addText(this, x, 340, stage.subtitle, 17, '#c4cbd7', 'center').setOrigin(0.5);
-      const clear = addText(this, x, 390, '미클리어', 19, '#98a2b2', 'center').setOrigin(0.5);
-      addText(this, x, 438, '확정 보물', 17, '#8dd9a8', 'center').setOrigin(0.5);
-      const treasure = addText(this, x, 468, stage.treasure.name, 18, '#f2d37c', 'center').setOrigin(0.5);
-      addButton(this, x, 535, 230, 62, '전투 시작', () => this.scene.start('battle', { stageId: stage.id }), index === STAGES.length - 1 ? 0xbf9252 : 0x5e7ea0);
-      cards.push({ stage, clear, treasure });
-    });
-
+    this.renderPage();
     void loadGuestProgress().then((progress) => {
+      if (!this.scene.isActive()) return;
       this.progress = progress;
-      for (const card of cards) {
-        const cleared = progress.clearedStageIds.includes(card.stage.id);
-        card.clear.setText(cleared ? '✓ 클리어' : '미클리어').setColor(cleared ? '#8ee3aa' : '#98a2b2');
-        if (progress.treasureIds.includes(card.stage.treasure.id)) card.treasure.setText(`✓ ${card.stage.treasure.name}`).setColor('#9fe4b5');
+      const firstUncleared = STAGES.findIndex((stage) => !progress.clearedStageIds.includes(stage.id));
+      if (firstUncleared >= 0) this.page = Math.floor(firstUncleared / 5);
+      this.renderPage();
+    });
+  }
+
+  private renderPage(): void {
+    this.stageLayer?.destroy(true);
+    this.stageLayer = this.add.container(0, 0);
+    const start = this.page * 5;
+    const visible = STAGES.slice(start, start + 5);
+    this.pageText?.setText(`${this.page + 1} / ${Math.ceil(STAGES.length / 5)}`);
+
+    visible.forEach((stage, localIndex) => {
+      const index = start + localIndex;
+      const x = 145 + localIndex * 247;
+      const unlocked = isStageUnlocked(stage.id, this.progress.clearedStageIds);
+      const cleared = this.progress.clearedStageIds.includes(stage.id);
+      const treasureOwned = this.progress.treasureIds.includes(stage.treasure.id);
+      const border = unlocked ? (index === STAGES.length - 1 ? 0xbf9252 : 0x596c86) : 0x3c4554;
+      const card = this.add.rectangle(x, 360, 220, 445, unlocked ? 0x242b3a : 0x1d222c, 0.98).setStrokeStyle(3, border, 1);
+      this.stageLayer!.add(card);
+      this.stageLayer!.add(addText(this, x, 160, `STAGE ${index + 1}`, 16, unlocked ? '#8998ad' : '#5f6978', 'center').setOrigin(0.5));
+      this.stageLayer!.add(addText(this, x, 202, stage.name, 25, unlocked ? '#ffffff' : '#747d89', 'center').setOrigin(0.5).setWordWrapWidth(195));
+      const stars = '★'.repeat(stage.difficulty) + '☆'.repeat(Math.max(0, 5 - stage.difficulty));
+      this.stageLayer!.add(addText(this, x, 246, stars, 17, unlocked ? COLORS.gold : '#5e6470', 'center').setOrigin(0.5));
+      this.stageLayer!.add(addText(this, x, 282, BATTLEFIELD_THEME_LABELS[stage.theme], 16, unlocked ? '#9ec5d7' : '#606874', 'center').setOrigin(0.5));
+      this.stageLayer!.add(addText(this, x, 310, `전장 ${stage.mapLength}m`, 14, unlocked ? '#aeb8c8' : '#59616d', 'center').setOrigin(0.5));
+      this.stageLayer!.add(addText(this, x, 346, stage.subtitle, 14, unlocked ? '#c4cbd7' : '#626a76', 'center').setOrigin(0.5).setWordWrapWidth(194));
+      this.stageLayer!.add(addText(this, x, 401, cleared ? '✓ 클리어' : unlocked ? '미클리어' : '잠김', 17, cleared ? '#8ee3aa' : unlocked ? '#a3adbb' : '#6b7480', 'center').setOrigin(0.5));
+      this.stageLayer!.add(addText(this, x, 434, '확정 보물', 14, unlocked ? '#8dd9a8' : '#596a60', 'center').setOrigin(0.5));
+      this.stageLayer!.add(addText(this, x, 458, treasureOwned ? `✓ ${stage.treasure.name}` : stage.treasure.name, 14, treasureOwned ? '#9fe4b5' : unlocked ? '#f2d37c' : '#6d6858', 'center').setOrigin(0.5).setWordWrapWidth(196));
+
+      if (stage.unlockUnitId) {
+        const slot = getSlotById(stage.unlockUnitId);
+        if (slot) this.stageLayer!.add(addText(this, x, 503, `첫 클리어 동료 · ${slot.displayName}`, 14, cleared ? '#8ee3aa' : unlocked ? '#a8cfff' : '#59616d', 'center').setOrigin(0.5));
       }
+
+      const button = addButton(this, x, 548, 174, 52, unlocked ? '전투 시작' : '이전 스테이지 필요', () => {
+        if (unlocked) this.scene.start('battle', { stageId: stage.id });
+        else this.cameras.main.shake(70, 0.0015);
+      }, unlocked ? (index === STAGES.length - 1 ? 0xbf9252 : 0x5e7ea0) : 0x3f4855);
+      if (!unlocked) button.setAlpha(0.62);
+      this.stageLayer!.add(button);
     });
   }
 }
 
 class DeckScene extends Phaser.Scene {
+  private cardsLayer?: Phaser.GameObjects.Container;
+  private header?: Phaser.GameObjects.Text;
+
   constructor() { super('deck'); }
+
   create(): void {
     drawBackdrop(this, 'map');
-    addText(this, 70, 48, '현재 편성 · 10 / 10', 42, COLORS.cream);
-    addText(this, 72, 100, '희귀도는 강함의 서열이 아니다. 역할과 비용을 섞어 전선을 설계한다.', 20, COLORS.muted);
-    addButton(this, 1135, 70, 190, 56, '메인으로', () => this.scene.start('main-menu'), 0x586275);
+    this.header = addText(this, 60, 42, '편성 불러오는 중…', 38, COLORS.cream);
+    addText(this, 62, 92, '처음에는 징집병 1종만 보유한다. 캠페인 첫 클리어 보상으로 동료가 순서대로 합류한다.', 18, COLORS.muted);
+    addButton(this, 1165, 65, 160, 50, '메인', () => this.scene.start('main-menu'), 0x586275);
+    void loadGuestProgress().then((progress) => {
+      if (!this.scene.isActive()) return;
+      this.renderRoster(progress);
+    });
+  }
+
+  private renderRoster(progress: GuestProgress): void {
+    this.cardsLayer?.destroy(true);
+    this.cardsLayer = this.add.container(0, 0);
+    const unlockedIds = new Set(getUnlockedSlotIds(progress.clearedStageIds));
+    this.header?.setText(`현재 보유 · ${unlockedIds.size} / ${PLAYER_SLOTS.length}   ·   자동 편성 ${unlockedIds.size} / 10`);
 
     PLAYER_SLOTS.forEach((slot, index) => {
       const col = index % 5;
       const row = Math.floor(index / 5);
       const x = 148 + col * 248;
       const y = 280 + row * 260;
-      this.add.rectangle(x, y, 220, 224, 0x252c3a, 0.98).setStrokeStyle(3, Phaser.Display.Color.HexStringToColor(rarityColor[slot.rarity] ?? '#ffffff').color, 0.85);
+      const unlocked = unlockedIds.has(slot.slotId);
+      const border = unlocked ? Phaser.Display.Color.HexStringToColor(rarityColor[slot.rarity] ?? '#ffffff').color : 0x4a5260;
+      const card = this.add.rectangle(x, y, 220, 224, unlocked ? 0x252c3a : 0x1d222b, 0.98).setStrokeStyle(3, border, unlocked ? 0.85 : 0.65);
+      this.cardsLayer!.add(card);
       const art = familyForUnit(slot.definition.id);
-      const portrait = this.add.sprite(x, y - 58, art.family.idle.key, 0).setTint(art.tint);
-      const scale = (152 / art.family.idle.frameHeight) * art.displayScale;
-      portrait.setScale(scale);
-      addText(this, x - 94, y - 102, slot.rarity, 17, rarityColor[slot.rarity] ?? '#ffffff');
-      addText(this, x, y + 4, slot.displayName, 23, '#ffffff', 'center').setOrigin(0.5);
-      addText(this, x, y + 38, `${slot.role} · ${slot.cost} 보급`, 17, '#f2d37c', 'center').setOrigin(0.5);
-      addText(this, x, y + 72, slot.description, 14, '#b9c2d0', 'center').setOrigin(0.5).setWordWrapWidth(190);
+      const portrait = this.add.sprite(x, y - 58, art.family.idle.key, 0).setTint(unlocked ? art.tint : 0x30343c).setAlpha(unlocked ? 1 : 0.5);
+      portrait.setScale((152 / art.family.idle.frameHeight) * art.displayScale);
+      this.cardsLayer!.add(portrait);
+      this.cardsLayer!.add(addText(this, x - 94, y - 102, unlocked ? slot.rarity : 'LOCK', 15, unlocked ? (rarityColor[slot.rarity] ?? '#ffffff') : '#656d78'));
+      this.cardsLayer!.add(addText(this, x, y + 4, unlocked ? slot.displayName : '미해금', 22, unlocked ? '#ffffff' : '#78818d', 'center').setOrigin(0.5));
+      if (unlocked) {
+        this.cardsLayer!.add(addText(this, x, y + 38, `${slot.role} · ${slot.cost} 보급`, 16, '#f2d37c', 'center').setOrigin(0.5));
+        this.cardsLayer!.add(addText(this, x, y + 72, slot.description, 13, '#b9c2d0', 'center').setOrigin(0.5).setWordWrapWidth(190));
+      } else {
+        const unlockStage = getUnlockStageForSlot(slot.slotId);
+        const requirement = unlockStage ? `STAGE ${getStageNumber(unlockStage.id)} 첫 클리어\n${unlockStage.name}` : '캠페인 진행으로 해금';
+        this.cardsLayer!.add(addText(this, x, y + 46, requirement, 14, '#727c89', 'center').setOrigin(0.5).setWordWrapWidth(190));
+      }
     });
   }
 }
@@ -213,6 +282,7 @@ interface UnitButtonView {
 class BattleScene extends Phaser.Scene {
   private state!: PlayableBattleState;
   private stage!: PrototypeStage;
+  private activeSlots: readonly PrototypeRosterSlot[] = [];
   private accumulator = 0;
   private views = new Map<number, UnitView>();
   private buttons = new Map<string, UnitButtonView>();
@@ -225,28 +295,43 @@ class BattleScene extends Phaser.Scene {
   private playerBaseText!: Phaser.GameObjects.Text;
   private enemyBaseText!: Phaser.GameObjects.Text;
   private timerText!: Phaser.GameObjects.Text;
+  private ready = false;
   private resolved = false;
 
   constructor() { super('battle'); }
 
   init(data: { stageId?: string }): void {
     this.stage = getStage(data.stageId ?? STAGES[0]!.id);
-    this.state = createPrototypeBattle(this.stage.id);
     this.accumulator = 0;
+    this.ready = false;
     this.resolved = false;
     this.views.clear();
     this.buttons.clear();
+    this.activeSlots = [];
   }
 
   create(): void {
-    drawBackdrop(this, 'battle');
-    this.drawHud();
-    this.drawBases();
-    this.drawUnitButtons();
+    drawBattlefield(this, this.stage);
+    const loading = addText(this, INTERNAL_WIDTH / 2, 330, '편성과 전장 불러오는 중…', 25, '#ffffff', 'center').setOrigin(0.5);
+    void loadGuestProgress().then((progress) => {
+      if (!this.scene.isActive()) return;
+      if (!isStageUnlocked(this.stage.id, progress.clearedStageIds)) {
+        this.scene.start('stage-select');
+        return;
+      }
+      this.activeSlots = getUnlockedPlayerSlots(progress.clearedStageIds);
+      this.state = createPrototypeBattle(this.stage.id, this.activeSlots.map((slot) => slot.slotId));
+      loading.destroy();
+      this.drawHud();
+      this.drawBases();
+      this.drawUnitButtons();
+      this.ready = true;
+      this.syncHud();
+    });
   }
 
   update(_: number, delta: number): void {
-    if (this.resolved) return;
+    if (!this.ready || this.resolved) return;
     this.accumulator += Math.min(delta, 120);
     while (this.accumulator >= SIM_TICK_MS && this.state.battle.winner === null) {
       stepPlayableBattle(this.state);
@@ -262,8 +347,8 @@ class BattleScene extends Phaser.Scene {
 
   private drawHud(): void {
     this.add.rectangle(INTERNAL_WIDTH / 2, 53, INTERNAL_WIDTH, 106, 0x151a24, 0.95);
-    addText(this, 35, 19, this.stage.name, 30, '#ffffff');
-    addText(this, 36, 60, this.stage.chapter, 16, '#aeb8c8');
+    addText(this, 35, 16, this.stage.name, 28, '#ffffff');
+    addText(this, 36, 56, `${this.stage.chapter} · ${BATTLEFIELD_THEME_LABELS[this.stage.theme]} · ${this.stage.mapLength}m`, 15, '#aeb8c8');
     this.timerText = addText(this, 625, 25, '0:00', 23, '#dbe2ee', 'center').setOrigin(0.5, 0);
 
     addText(this, 760, 18, '보급', 17, '#d7ddea');
@@ -274,37 +359,55 @@ class BattleScene extends Phaser.Scene {
   }
 
   private drawBases(): void {
+    const palette = getBattlefieldBasePalette(this.stage);
     const g = this.add.graphics();
-    g.fillStyle(0x627fa0).fillRect(42, 360, 92, 184);
-    g.fillStyle(0x7894b5).fillTriangle(35, 360, 88, 310, 141, 360);
+    g.fillStyle(palette.player).fillRect(42, 360, 92, 184);
+    g.fillStyle(palette.playerRoof).fillTriangle(35, 360, 88, 310, 141, 360);
     g.fillStyle(0x36475e).fillRect(75, 476, 28, 68);
-    g.fillStyle(0x9b625d).fillRect(1146, 360, 92, 184);
-    g.fillStyle(0xb4776c).fillTriangle(1139, 360, 1192, 310, 1245, 360);
+    g.fillStyle(palette.enemy).fillRect(1146, 360, 92, 184);
+    g.fillStyle(palette.enemyRoof).fillTriangle(1139, 360, 1192, 310, 1245, 360);
     g.fillStyle(0x55383a).fillRect(1179, 476, 28, 68);
 
-    addText(this, 42, 288, '아군 거점', 17, '#cfe5ff');
-    addText(this, 1238, 288, '적 거점', 17, '#ffd3cc', 'right').setOrigin(1, 0);
-    this.add.rectangle(88, 330, 156, 16, 0x161b23).setStrokeStyle(2, 0x7990aa);
-    this.add.rectangle(1192, 330, 156, 16, 0x161b23).setStrokeStyle(2, 0xaa716c);
-    this.playerBaseBar = this.add.rectangle(12, 330, 152, 10, 0x74c7ff).setOrigin(0, 0.5);
-    this.enemyBaseBar = this.add.rectangle(1116, 330, 152, 10, 0xff8f82).setOrigin(0, 0.5);
-    this.playerBaseText = addText(this, 88, 342, '', 16, '#e8f5ff', 'center').setOrigin(0.5, 0);
-    this.enemyBaseText = addText(this, 1192, 342, '', 16, '#ffe6e1', 'center').setOrigin(0.5, 0);
+    if (this.stage.theme === 'fortress' || this.stage.theme === 'golden') {
+      g.fillStyle(palette.playerRoof, 0.9).fillRect(50, 340, 18, 30).fillRect(108, 340, 18, 30);
+      g.fillStyle(palette.enemyRoof, 0.9).fillRect(1154, 340, 18, 30).fillRect(1212, 340, 18, 30);
+    }
+
+    addText(this, 42, 286, '아군 거점', 16, '#cfe5ff');
+    addText(this, 1238, 286, '적 거점', 16, '#ffd3cc', 'right').setOrigin(1, 0);
+    this.add.rectangle(88, 328, 156, 16, 0x161b23).setStrokeStyle(2, 0x7990aa);
+    this.add.rectangle(1192, 328, 156, 16, 0x161b23).setStrokeStyle(2, 0xaa716c);
+    this.playerBaseBar = this.add.rectangle(12, 328, 152, 10, 0x74c7ff).setOrigin(0, 0.5);
+    this.enemyBaseBar = this.add.rectangle(1116, 328, 152, 10, 0xff8f82).setOrigin(0, 0.5);
+    this.playerBaseText = addText(this, 88, 340, '', 16, '#e8f5ff', 'center').setOrigin(0.5, 0);
+    this.enemyBaseText = addText(this, 1192, 340, '', 16, '#ffe6e1', 'center').setOrigin(0.5, 0);
   }
 
   private drawUnitButtons(): void {
     this.add.rectangle(INTERNAL_WIDTH / 2, 630, INTERNAL_WIDTH, 180, 0x151a24, 0.98);
+    const activeIds = new Set(this.activeSlots.map((slot) => slot.slotId));
+
     PLAYER_SLOTS.forEach((slot, index) => {
       const row = Math.floor(index / 5);
       const col = index % 5;
       const x = 102 + col * 205;
       const y = 579 + row * 72;
-      const border = Phaser.Display.Color.HexStringToColor(rarityColor[slot.rarity] ?? '#ffffff').color;
-      const bg = this.add.rectangle(x, y, 188, 62, 0x28303e).setStrokeStyle(2, border, 0.85).setInteractive({ useHandCursor: true });
-      const shade = this.add.rectangle(x, y, 188, 62, 0x05070b, 0).setDepth(6);
+      const unlocked = activeIds.has(slot.slotId);
+      const border = unlocked ? Phaser.Display.Color.HexStringToColor(rarityColor[slot.rarity] ?? '#ffffff').color : 0x454e5b;
+      const bg = this.add.rectangle(x, y, 188, 62, unlocked ? 0x28303e : 0x1c222c).setStrokeStyle(2, border, 0.85);
       const art = familyForUnit(slot.definition.id);
-      const portrait = this.add.sprite(x - 69, y, art.family.idle.key, 0).setTint(art.tint).setDepth(4);
+      const portrait = this.add.sprite(x - 69, y, art.family.idle.key, 0).setTint(unlocked ? art.tint : 0x343840).setAlpha(unlocked ? 1 : 0.45).setDepth(4);
       portrait.setScale((50 / art.family.idle.frameHeight) * art.displayScale);
+
+      if (!unlocked) {
+        addText(this, x - 43, y - 22, '미해금', 14, '#7c8490').setDepth(5);
+        const unlockStage = getUnlockStageForSlot(slot.slotId);
+        addText(this, x - 43, y + 2, unlockStage ? `ST.${getStageNumber(unlockStage.id)} 클리어` : '잠김', 12, '#626b77').setDepth(5);
+        return;
+      }
+
+      bg.setInteractive({ useHandCursor: true });
+      const shade = this.add.rectangle(x, y, 188, 62, 0x05070b, 0).setDepth(6);
       addText(this, x - 43, y - 25, `${slot.rarity} · ${slot.displayName}`, 14, '#ffffff').setDepth(5);
       const cost = addText(this, x - 43, y + 2, `${slot.cost} 보급`, 14, '#f2d37c').setDepth(5);
       const cooldown = addText(this, x + 82, y + 2, '', 13, '#d8e1ef', 'right').setOrigin(1, 0).setDepth(7);
@@ -334,8 +437,7 @@ class BattleScene extends Phaser.Scene {
     const art = familyForUnit(unit.definition.id);
     const sprite = this.add.sprite(this.toScreenX(unit.anchorX), 490, art.family.run.key, 0).setTint(art.tint).setDepth(3);
     sprite.setFlipX(unit.team === 'ENEMY');
-    const scale = (art.family.displayHeight / art.family.run.frameHeight) * art.displayScale;
-    sprite.setScale(scale);
+    sprite.setScale((art.family.displayHeight / art.family.run.frameHeight) * art.displayScale);
     const hpBg = this.add.rectangle(sprite.x, 443, 54, 7, 0x161a21).setDepth(5);
     const hp = this.add.rectangle(sprite.x - 26, 443, 52, 5, unit.team === 'PLAYER' ? 0x78dca0 : 0xf1837c).setOrigin(0, 0.5).setDepth(6);
     return { sprite, hpBg, hp, stateKey: '' };
@@ -372,7 +474,10 @@ class BattleScene extends Phaser.Scene {
     }
     for (const [id, view] of this.views) {
       if (present.has(id)) continue;
-      view.sprite.destroy(); view.hpBg.destroy(); view.hp.destroy(); this.views.delete(id);
+      view.sprite.destroy();
+      view.hpBg.destroy();
+      view.hp.destroy();
+      this.views.delete(id);
     }
   }
 
@@ -409,7 +514,7 @@ class BattleScene extends Phaser.Scene {
     this.playerBaseText.setText(`${pBase.hp.toLocaleString()} / ${pBase.maxHp.toLocaleString()}`);
     this.enemyBaseText.setText(`${eBase.hp.toLocaleString()} / ${eBase.maxHp.toLocaleString()}`);
 
-    for (const slot of PLAYER_SLOTS) {
+    for (const slot of this.activeSlots) {
       const view = this.buttons.get(slot.slotId);
       if (!view) continue;
       const cooldown = getCooldownRemaining(this.state, slot.slotId);
@@ -429,6 +534,7 @@ class BattleScene extends Phaser.Scene {
 class ResultScene extends Phaser.Scene {
   private stage!: PrototypeStage;
   private winner: string | null = null;
+
   constructor() { super('result'); }
 
   init(data: { stageId?: string; winner?: string | null }): void {
@@ -439,26 +545,31 @@ class ResultScene extends Phaser.Scene {
   create(): void {
     drawBackdrop(this, 'menu');
     const victory = this.winner === 'PLAYER';
-    addText(this, INTERNAL_WIDTH / 2, 105, victory ? '승 리' : '패 배', 64, victory ? COLORS.gold : COLORS.red, 'center').setOrigin(0.5);
-    addText(this, INTERNAL_WIDTH / 2, 172, this.stage.name, 28, '#e9edf4', 'center').setOrigin(0.5);
+    addText(this, INTERNAL_WIDTH / 2, 86, victory ? '승 리' : '패 배', 62, victory ? COLORS.gold : COLORS.red, 'center').setOrigin(0.5);
+    addText(this, INTERNAL_WIDTH / 2, 148, `STAGE ${getStageNumber(this.stage.id)} · ${this.stage.name}`, 25, '#e9edf4', 'center').setOrigin(0.5);
 
-    this.add.rectangle(INTERNAL_WIDTH / 2, 360, 720, 280, 0x242b38, 0.98).setStrokeStyle(3, victory ? 0xb99449 : 0x805151);
+    this.add.rectangle(INTERNAL_WIDTH / 2, 355, 760, 320, 0x242b38, 0.98).setStrokeStyle(3, victory ? 0xb99449 : 0x805151);
     if (victory) {
-      addText(this, INTERNAL_WIDTH / 2, 270, '확정 보물 획득', 24, '#8ee3aa', 'center').setOrigin(0.5);
-      addText(this, INTERNAL_WIDTH / 2, 325, this.stage.treasure.name, 38, '#ffe18a', 'center').setOrigin(0.5);
-      addText(this, INTERNAL_WIDTH / 2, 382, this.stage.treasure.effect, 20, '#c8d0dc', 'center').setOrigin(0.5);
-      const status = addText(this, INTERNAL_WIDTH / 2, 430, '저장 중…', 17, '#8f9aac', 'center').setOrigin(0.5);
+      addText(this, INTERNAL_WIDTH / 2, 238, '확정 보물 획득', 23, '#8ee3aa', 'center').setOrigin(0.5);
+      addText(this, INTERNAL_WIDTH / 2, 290, this.stage.treasure.name, 35, '#ffe18a', 'center').setOrigin(0.5);
+      addText(this, INTERNAL_WIDTH / 2, 342, this.stage.treasure.effect, 18, '#c8d0dc', 'center').setOrigin(0.5);
+      const unlockSlot = this.stage.unlockUnitId ? getSlotById(this.stage.unlockUnitId) : undefined;
+      const unlockText = addText(this, INTERNAL_WIDTH / 2, 395, unlockSlot ? `첫 클리어 동료 보상 · ${unlockSlot.displayName}` : '이번 스테이지는 동료 해금 없음', 20, unlockSlot ? '#9ccfff' : '#8f9aac', 'center').setOrigin(0.5);
+      const status = addText(this, INTERNAL_WIDTH / 2, 447, '진행 저장 중…', 16, '#8f9aac', 'center').setOrigin(0.5);
       void recordStageClear(this.stage.id, this.stage.treasure.id).then((result) => {
-        status.setText(result.treasureNew ? '첫 획득 완료 · 다시 파밍할 필요 없음' : '이미 획득한 보물 · 드랍 등급 RNG 없음');
+        if (!this.scene.isActive()) return;
+        status.setText(result.firstClear ? '첫 클리어 저장 완료 · 다음 스테이지 개방' : '재클리어 완료 · 보물 반복 파밍 불필요');
+        if (unlockSlot) unlockText.setText(result.firstClear ? `신규 동료 합류 · ${unlockSlot.displayName}` : `보유 동료 · ${unlockSlot.displayName}`);
       });
     } else {
-      addText(this, INTERNAL_WIDTH / 2, 328, '편성과 소환 타이밍을 바꿔 다시 도전해 보자.', 25, '#dce2ec', 'center').setOrigin(0.5);
-      addText(this, INTERNAL_WIDTH / 2, 382, '패배 시 보상 손실이나 에너지 소모는 없다.', 19, '#aeb8c7', 'center').setOrigin(0.5);
+      addText(this, INTERNAL_WIDTH / 2, 310, '편성과 소환 타이밍을 바꿔 다시 도전해 보자.', 24, '#dce2ec', 'center').setOrigin(0.5);
+      addText(this, INTERNAL_WIDTH / 2, 370, '패배 시 보상 손실이나 에너지 소모는 없다.', 18, '#aeb8c7', 'center').setOrigin(0.5);
+      addText(this, INTERNAL_WIDTH / 2, 425, `현재 전장 · ${BATTLEFIELD_THEME_LABELS[this.stage.theme]} / ${this.stage.mapLength}m`, 17, '#8796aa', 'center').setOrigin(0.5);
     }
 
-    addButton(this, 380, 585, 260, 68, '다시 도전', () => this.scene.start('battle', { stageId: this.stage.id }), 0x6d88a7);
-    addButton(this, 640, 585, 220, 68, '스테이지', () => this.scene.start('stage-select'), 0x667185);
-    addButton(this, 900, 585, 220, 68, '메인', () => this.scene.start('main-menu'), 0x667185);
+    addButton(this, 380, 590, 260, 68, '다시 도전', () => this.scene.start('battle', { stageId: this.stage.id }), 0x6d88a7);
+    addButton(this, 640, 590, 220, 68, '스테이지', () => this.scene.start('stage-select'), 0x667185);
+    addButton(this, 900, 590, 220, 68, '메인', () => this.scene.start('main-menu'), 0x667185);
   }
 }
 
