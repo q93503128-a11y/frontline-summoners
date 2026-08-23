@@ -18,6 +18,22 @@ export type BattleTeam = 'PLAYER' | 'ENEMY';
 export type AttackTargetMode = 'SINGLE' | 'AREA';
 export type BattleWinner = BattleTeam | 'DRAW' | null;
 
+export const CombatTrait = {
+  Light: 'LIGHT',
+  Armored: 'ARMORED',
+  Arcane: 'ARCANE',
+  Boss: 'BOSS',
+} as const;
+
+export type CombatTrait = (typeof CombatTrait)[keyof typeof CombatTrait];
+const COMBAT_TRAIT_VALUES = new Set<CombatTrait>(Object.values(CombatTrait));
+
+export interface TraitDamageBonus {
+  readonly trait: CombatTrait;
+  /** 1000 = normal damage, 1250 = 1.25x. Matching bonuses do not stack; the strongest one wins. */
+  readonly multiplierPermille: number;
+}
+
 export interface AttackTiming {
   readonly cycleFrames: number;
   readonly hitFrames: readonly number[];
@@ -38,6 +54,10 @@ export interface BattleUnitDefinition {
   readonly naturalKnockbackDistance: number;
   readonly deathFrames: number;
   readonly attackTiming: AttackTiming;
+  /** Attributes are specialist tags, not a global rock-paper-scissors chart. */
+  readonly traits?: readonly CombatTrait[];
+  /** Optional specialist damage. Only the strongest bonus matching a target trait applies. */
+  readonly damageBonuses?: readonly TraitDamageBonus[];
 }
 
 export interface BattleUnit {
@@ -101,6 +121,33 @@ function assertDefinition(definition: BattleUnitDefinition): void {
   if (!Number.isInteger(definition.naturalKnockbackCount) || definition.naturalKnockbackCount < 0) throw new Error('naturalKnockbackCount must be non-negative');
   if (!Number.isInteger(definition.naturalKnockbackFrames) || definition.naturalKnockbackFrames <= 0) throw new Error('naturalKnockbackFrames must be positive');
   if (!Number.isInteger(definition.deathFrames) || definition.deathFrames <= 0) throw new Error('deathFrames must be positive');
+
+  const traits = definition.traits ?? [];
+  if (new Set(traits).size !== traits.length) throw new Error('traits must be unique');
+  if (traits.some((trait) => !COMBAT_TRAIT_VALUES.has(trait))) throw new Error('unknown combat trait');
+
+  const bonuses = definition.damageBonuses ?? [];
+  if (new Set(bonuses.map((bonus) => bonus.trait)).size !== bonuses.length) throw new Error('damage bonus traits must be unique');
+  for (const bonus of bonuses) {
+    if (!COMBAT_TRAIT_VALUES.has(bonus.trait)) throw new Error('unknown damage bonus trait');
+    if (!Number.isInteger(bonus.multiplierPermille) || bonus.multiplierPermille < 1000 || bonus.multiplierPermille > 3000) {
+      throw new Error('damage bonus multiplierPermille must be an integer from 1000 to 3000');
+    }
+  }
+}
+
+/**
+ * Returns deterministic damage against a unit target. Attributes have no inherent
+ * matchup table: only explicit specialist bonuses on the attacker matter.
+ * If a target has multiple matching traits, only the strongest bonus is used.
+ */
+export function getUnitAttackDamageAgainst(source: BattleUnitDefinition, target: BattleUnitDefinition): number {
+  const targetTraits = new Set(target.traits ?? []);
+  let multiplierPermille = 1000;
+  for (const bonus of source.damageBonuses ?? []) {
+    if (targetTraits.has(bonus.trait)) multiplierPermille = Math.max(multiplierPermille, bonus.multiplierPermille);
+  }
+  return Math.trunc((source.attackDamage * multiplierPermille) / 1000);
 }
 
 export function createBattle(config: BattleConfig): BattleState {
@@ -209,15 +256,21 @@ function collectHits(state: BattleState): HitEvent[] {
     const base = state.bases[oppositeTeam(source.team)];
     const baseIsInRange = isInsideAttackRange(source, base.anchorX) && base.hp > 0;
     if (source.definition.targetMode === 'AREA') {
-      for (const target of unitTargets) hits.push({ targetKind: 'UNIT', targetId: target.simulationId, damage: source.definition.attackDamage });
+      for (const target of unitTargets) {
+        hits.push({ targetKind: 'UNIT', targetId: target.simulationId, damage: getUnitAttackDamageAgainst(source.definition, target.definition) });
+      }
+      // Bases do not have traits, so specialist bonuses never inflate structure damage.
       if (baseIsInRange) hits.push({ targetKind: 'BASE', targetTeam: base.team, damage: source.definition.attackDamage });
       continue;
     }
     const nearestUnit = unitTargets[0];
     const unitDistance = nearestUnit ? signedDistance(source, nearestUnit.anchorX) : Number.POSITIVE_INFINITY;
     const baseDistance = baseIsInRange ? signedDistance(source, base.anchorX) : Number.POSITIVE_INFINITY;
-    if (nearestUnit && unitDistance <= baseDistance) hits.push({ targetKind: 'UNIT', targetId: nearestUnit.simulationId, damage: source.definition.attackDamage });
-    else if (baseIsInRange) hits.push({ targetKind: 'BASE', targetTeam: base.team, damage: source.definition.attackDamage });
+    if (nearestUnit && unitDistance <= baseDistance) {
+      hits.push({ targetKind: 'UNIT', targetId: nearestUnit.simulationId, damage: getUnitAttackDamageAgainst(source.definition, nearestUnit.definition) });
+    } else if (baseIsInRange) {
+      hits.push({ targetKind: 'BASE', targetTeam: base.team, damage: source.definition.attackDamage });
+    }
   }
   return hits;
 }
@@ -342,10 +395,19 @@ function fnv1a(text: string): string {
   return (hash >>> 0).toString(16).padStart(8, '0');
 }
 
+function definitionCombatSignature(definition: BattleUnitDefinition): string {
+  const traits = [...(definition.traits ?? [])].sort().join(',');
+  const bonuses = [...(definition.damageBonuses ?? [])]
+    .sort((a, b) => a.trait.localeCompare(b.trait))
+    .map((bonus) => `${bonus.trait}:${bonus.multiplierPermille}`)
+    .join(',');
+  return `${definition.id}[${traits}][${bonuses}]`;
+}
+
 export function computeStateHash(state: BattleState): string {
   const units = [...state.units]
     .sort((a, b) => a.simulationId - b.simulationId)
-    .map((unit) => [unit.simulationId, unit.definition.id, unit.team, unit.hp, unit.anchorX, unit.state, unit.stateFrame, unit.nextAttackTick, unit.naturalKnockbacksConsumed].join(':'))
+    .map((unit) => [unit.simulationId, definitionCombatSignature(unit.definition), unit.team, unit.hp, unit.anchorX, unit.state, unit.stateFrame, unit.nextAttackTick, unit.naturalKnockbacksConsumed].join(':'))
     .join('|');
   return fnv1a([state.tick, state.nextSimulationId, state.bases.PLAYER.hp, state.bases.ENEMY.hp, state.winner ?? '-', units].join('#'));
 }
