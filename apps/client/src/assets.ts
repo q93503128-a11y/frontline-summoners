@@ -16,6 +16,8 @@ export interface ArtFamily {
   readonly attackContactFrame: number;
 }
 
+export type AttackFxStyle = 'SLASH' | 'PIERCE' | 'BLUNT' | 'MAGIC' | 'FIRE' | 'VOID';
+
 const LOCAL = '/assets/characters';
 
 export const ART_FAMILIES: readonly ArtFamily[] = [
@@ -67,30 +69,31 @@ export interface UnitArtVariant {
   readonly familyId: string;
   readonly tint: number;
   readonly displayScale?: number;
+  readonly attackFx: AttackFxStyle;
 }
 
 export const UNIT_ART: Readonly<Record<string, UnitArtVariant>> = {
-  militia: { familyId: 'warrior', tint: 0xffffff },
-  guard: { familyId: 'hero-knight-2', tint: 0xffffff },
-  hunter: { familyId: 'huntress', tint: 0xffffff },
-  duelist: { familyId: 'fantasy-warrior', tint: 0xffffff },
-  lancer: { familyId: 'huntress', tint: 0xbedcff },
-  battlemage: { familyId: 'wizard', tint: 0xffffff },
-  pyromancer: { familyId: 'wizard', tint: 0xffa782 },
-  royal: { familyId: 'hero-knight', tint: 0xffe08a, displayScale: 1.08 },
-  heretic: { familyId: 'evil-wizard', tint: 0xd9a5ff },
-  voidsage: { familyId: 'evil-wizard', tint: 0x8ebcff, displayScale: 1.12 },
+  militia: { familyId: 'warrior', tint: 0xffffff, attackFx: 'SLASH' },
+  guard: { familyId: 'hero-knight-2', tint: 0xffffff, attackFx: 'BLUNT' },
+  hunter: { familyId: 'huntress', tint: 0xffffff, attackFx: 'PIERCE' },
+  duelist: { familyId: 'fantasy-warrior', tint: 0xffffff, attackFx: 'SLASH' },
+  lancer: { familyId: 'huntress', tint: 0xbedcff, attackFx: 'PIERCE' },
+  battlemage: { familyId: 'wizard', tint: 0xffffff, attackFx: 'MAGIC' },
+  pyromancer: { familyId: 'wizard', tint: 0xffa782, attackFx: 'FIRE' },
+  royal: { familyId: 'hero-knight', tint: 0xffe08a, displayScale: 1.08, attackFx: 'SLASH' },
+  heretic: { familyId: 'evil-wizard', tint: 0xd9a5ff, attackFx: 'VOID' },
+  voidsage: { familyId: 'evil-wizard', tint: 0x8ebcff, displayScale: 1.12, attackFx: 'VOID' },
 
-  'enemy-raider': { familyId: 'warrior', tint: 0xff9a93 },
-  'enemy-sprinter': { familyId: 'fantasy-warrior', tint: 0xffb27d },
-  'enemy-spearman': { familyId: 'huntress', tint: 0xffad96 },
-  'enemy-shield': { familyId: 'hero-knight-2', tint: 0xd38c83 },
-  'enemy-cultist': { familyId: 'evil-wizard', tint: 0xff7373 },
-  'enemy-sniper': { familyId: 'wizard', tint: 0xeeb7ff },
-  'enemy-knight': { familyId: 'hero-knight', tint: 0xd78383 },
-  'enemy-berserker': { familyId: 'fantasy-warrior', tint: 0xff6767, displayScale: 1.08 },
-  'enemy-boss': { familyId: 'evil-wizard', tint: 0xffd36e, displayScale: 1.28 },
-  'enemy-boss-iron': { familyId: 'hero-knight', tint: 0xb5c6d8, displayScale: 1.38 },
+  'enemy-raider': { familyId: 'warrior', tint: 0xff9a93, attackFx: 'SLASH' },
+  'enemy-sprinter': { familyId: 'fantasy-warrior', tint: 0xffb27d, attackFx: 'SLASH' },
+  'enemy-spearman': { familyId: 'huntress', tint: 0xffad96, attackFx: 'PIERCE' },
+  'enemy-shield': { familyId: 'hero-knight-2', tint: 0xd38c83, attackFx: 'BLUNT' },
+  'enemy-cultist': { familyId: 'evil-wizard', tint: 0xff7373, attackFx: 'FIRE' },
+  'enemy-sniper': { familyId: 'wizard', tint: 0xeeb7ff, attackFx: 'MAGIC' },
+  'enemy-knight': { familyId: 'hero-knight', tint: 0xd78383, attackFx: 'SLASH' },
+  'enemy-berserker': { familyId: 'fantasy-warrior', tint: 0xff6767, displayScale: 1.08, attackFx: 'BLUNT' },
+  'enemy-boss': { familyId: 'evil-wizard', tint: 0xffd36e, displayScale: 1.28, attackFx: 'VOID' },
+  'enemy-boss-iron': { familyId: 'hero-knight', tint: 0xb5c6d8, displayScale: 1.38, attackFx: 'BLUNT' },
 };
 
 export const ART_BY_ID: Readonly<Record<string, ArtFamily>> = Object.fromEntries(ART_FAMILIES.map((art) => [art.id, art]));
