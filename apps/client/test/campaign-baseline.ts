@@ -30,8 +30,7 @@ export interface CampaignBaselineTelemetry {
   readonly seenPlayerIds: ReadonlySet<string>;
 }
 
-const MIN_FRONTLINE_UNITS = 3;
-const STRATEGIC_WALLET_RATIO = 0.8;
+const DEPLOYMENTS_PER_ECONOMY_LEVEL = 3;
 
 export function targetSupplyLevelForStage(stageIndex: number, state: ReturnType<typeof createPrototypeBattle>): number {
   const highestUnlockedCost = Math.max(...state.playerSlots.map((slot) => slot.cost));
@@ -64,11 +63,11 @@ export function autoPlayCampaignStage(
   const ownedTreasureIds = getTreasureIdsForClearedStages(clearedStageIds);
   const state = createPrototypeBattle(stage.id, unlockedSlotIds, ownedTreasureIds);
   const maxTicks = options.maxSeconds * 30;
-  const slotPriority = [...state.playerSlots].sort((a, b) => b.cost - a.cost || a.slotId.localeCompare(b.slotId));
   const targetSupplyLevel = targetSupplyLevelForStage(stageIndex, state);
   const seenEnemyIds = new Set<string>();
   const seenPlayerIds = new Set<string>();
 
+  let rosterCursor = 0;
   let firstSpawnTick: number | null = null;
   let spawnCount = 0;
   let upgradeCount = 0;
@@ -84,61 +83,45 @@ export function autoPlayCampaignStage(
     return true;
   };
 
-  const spawnStrongestAffordableNow = (): boolean => {
-    for (const slot of slotPriority) {
-      if (slot.cost > state.supply || getCooldownRemaining(state, slot.slotId) > 0) continue;
-      if (recordSpawn(slot.slotId)) return true;
+  const advancePastCoolingSlots = (): void => {
+    for (let offset = 0; offset < state.playerSlots.length; offset += 1) {
+      const index = (rosterCursor + offset) % state.playerSlots.length;
+      const slot = state.playerSlots[index]!;
+      if (getCooldownRemaining(state, slot.slotId) === 0) {
+        rosterCursor = index;
+        return;
+      }
     }
-    return false;
   };
 
   for (let step = 0; step < maxTicks && state.battle.winner === null; step += 1) {
-    const alivePlayersAtDecision = alivePlayerUnitCount(state);
-    let reservingForUpgrade = false;
+    advancePastCoolingSlots();
+    const targetSlot = state.playerSlots[rosterCursor]!;
+    const currentWallet = getCurrentSupplyLevel(state).maxSupply;
 
-    // Economy investment is allowed only behind a real minimum frontline. The previous helper
-    // started saving after one disposable unit, which made later stages look impossible while
-    // the script itself was voluntarily abandoning the front.
-    if (state.supplyLevel < targetSupplyLevel && alivePlayersAtDecision >= MIN_FRONTLINE_UNITS) {
+    // Do not rush worker/economy levels before fielding troops. Each additional planned economy
+    // level requires another three real deployments first, so the test models the same production
+    // versus investment tradeoff expected from a human player instead of abandoning the frontline.
+    const deploymentUnlockedEconomyLevel = 1 + Math.floor(spawnCount / DEPLOYMENTS_PER_ECONOMY_LEVEL);
+    const plannedEconomyLevel = Math.min(targetSupplyLevel, deploymentUnlockedEconomyLevel);
+    const targetNeedsWalletUpgrade = targetSlot.cost > currentWallet;
+    const shouldInvestEconomy = state.supplyLevel < plannedEconomyLevel || targetNeedsWalletUpgrade;
+
+    if (shouldInvestEconomy) {
       const next = getNextSupplyLevel(state);
-      if (next) {
-        if (state.supply >= next.upgradeCost) {
-          const upgraded = tryUpgradeSupply(state);
-          if (upgraded.ok) upgradeCount += 1;
-        } else {
-          reservingForUpgrade = true;
-        }
+      if (next && state.supply >= next.upgradeCost) {
+        const upgraded = tryUpgradeSupply(state);
+        if (upgraded.ok) upgradeCount += 1;
       }
-    }
-
-    if (!reservingForUpgrade) {
-      const alivePlayers = alivePlayerUnitCount(state);
-
-      if (alivePlayers < MIN_FRONTLINE_UNITS) {
-        // Emergency/frontline construction spends immediately, but on the strongest unit that is
-        // actually affordable now rather than blindly burning every 50 supply on militia.
-        spawnStrongestAffordableNow();
-      } else {
-        const wallet = getCurrentSupplyLevel(state).maxSupply;
-        const strategicCostCeiling = Math.max(
-          state.playerSlots[0]?.cost ?? 0,
-          Math.floor(wallet * STRATEGIC_WALLET_RATIO),
-        );
-        const strategicTarget = slotPriority.find((slot) =>
-          slot.cost <= strategicCostCeiling && getCooldownRemaining(state, slot.slotId) === 0
-        );
-
-        if (strategicTarget) {
-          // Once the line is stable, deliberately save for a meaningful unit. Capping the target at
-          // 80% of wallet capacity avoids pathological "wait for the single most expensive button"
-          // behavior while still making newly unlocked roles appear in the baseline.
-          if (state.supply >= strategicTarget.cost) recordSpawn(strategicTarget.slotId);
-        } else {
-          // All strategic choices can be on cooldown at once. In that case do not idle purely for
-          // cooldown timing; spend on the best currently ready affordable reinforcement.
-          spawnStrongestAffordableNow();
-        }
-      }
+    } else if (state.supply >= targetSlot.cost && getCooldownRemaining(state, targetSlot.slotId) === 0) {
+      if (recordSpawn(targetSlot.slotId)) rosterCursor = (rosterCursor + 1) % state.playerSlots.length;
+    } else if (alivePlayerUnitCount(state) === 0 && targetableEnemyCount(state) > 0) {
+      // A collapsing line is the only exception to the planned roster order. Use any immediately
+      // affordable ready reinforcement rather than intentionally letting the base take free hits.
+      const emergency = [...state.playerSlots]
+        .filter((slot) => slot.cost <= state.supply && getCooldownRemaining(state, slot.slotId) === 0)
+        .sort((a, b) => b.cost - a.cost || a.slotId.localeCompare(b.slotId))[0];
+      if (emergency) recordSpawn(emergency.slotId);
     }
 
     const enemies = targetableEnemyCount(state);
