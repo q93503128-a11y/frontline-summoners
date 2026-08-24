@@ -3,6 +3,14 @@ export interface GuestProgress {
   readonly treasureIds: readonly string[];
 }
 
+export interface StageClearResult {
+  readonly firstClear: boolean;
+  readonly treasureNew: boolean;
+  readonly progress: GuestProgress;
+  /** True only when IndexedDB confirmed the write transaction. */
+  readonly persisted: boolean;
+}
+
 interface StoredGuestProgress extends GuestProgress {
   readonly schemaVersion: number;
 }
@@ -12,6 +20,14 @@ const STORE_NAME = 'guest-progress';
 const KEY = 'progress';
 const SCHEMA_VERSION = 2;
 const EMPTY_PROGRESS: GuestProgress = { clearedStageIds: [], treasureIds: [] };
+let sessionProgress: GuestProgress = EMPTY_PROGRESS;
+
+export function mergeGuestProgress(a: GuestProgress, b: GuestProgress): GuestProgress {
+  return {
+    clearedStageIds: [...new Set([...a.clearedStageIds, ...b.clearedStageIds])],
+    treasureIds: [...new Set([...a.treasureIds, ...b.treasureIds])],
+  };
+}
 
 function openDb(): Promise<IDBDatabase> {
   return new Promise((resolve, reject) => {
@@ -25,32 +41,39 @@ function openDb(): Promise<IDBDatabase> {
   });
 }
 
+function readStoredProgress(db: IDBDatabase): Promise<GuestProgress> {
+  return new Promise((resolve, reject) => {
+    const tx = db.transaction(STORE_NAME, 'readonly');
+    const request = tx.objectStore(STORE_NAME).get(KEY);
+    request.onsuccess = () => {
+      const value = request.result as Partial<StoredGuestProgress> | undefined;
+      if (value?.schemaVersion !== SCHEMA_VERSION) {
+        resolve(EMPTY_PROGRESS);
+        return;
+      }
+      resolve({
+        clearedStageIds: Array.isArray(value.clearedStageIds) ? value.clearedStageIds.filter((id): id is string => typeof id === 'string') : [],
+        treasureIds: Array.isArray(value.treasureIds) ? value.treasureIds.filter((id): id is string => typeof id === 'string') : [],
+      });
+    };
+    request.onerror = () => reject(request.error ?? new Error('indexedDB read failed'));
+    tx.oncomplete = () => db.close();
+  });
+}
+
 export async function loadGuestProgress(): Promise<GuestProgress> {
   try {
     const db = await openDb();
-    return await new Promise((resolve, reject) => {
-      const tx = db.transaction(STORE_NAME, 'readonly');
-      const request = tx.objectStore(STORE_NAME).get(KEY);
-      request.onsuccess = () => {
-        const value = request.result as Partial<StoredGuestProgress> | undefined;
-        if (value?.schemaVersion !== SCHEMA_VERSION) {
-          resolve(EMPTY_PROGRESS);
-          return;
-        }
-        resolve({
-          clearedStageIds: Array.isArray(value.clearedStageIds) ? value.clearedStageIds.filter((id): id is string => typeof id === 'string') : [],
-          treasureIds: Array.isArray(value.treasureIds) ? value.treasureIds.filter((id): id is string => typeof id === 'string') : [],
-        });
-      };
-      request.onerror = () => reject(request.error ?? new Error('indexedDB read failed'));
-      tx.oncomplete = () => db.close();
-    });
+    const stored = await readStoredProgress(db);
+    sessionProgress = mergeGuestProgress(stored, sessionProgress);
   } catch {
-    return EMPTY_PROGRESS;
+    // IndexedDB can be unavailable in restrictive/private browser contexts.
+    // Preserve progress already earned in this tab instead of silently resetting the session.
   }
+  return sessionProgress;
 }
 
-export async function recordStageClear(stageId: string, treasureId: string): Promise<{ firstClear: boolean; treasureNew: boolean; progress: GuestProgress }> {
+export async function recordStageClear(stageId: string, treasureId: string): Promise<StageClearResult> {
   const before = await loadGuestProgress();
   const cleared = new Set(before.clearedStageIds);
   const treasures = new Set(before.treasureIds);
@@ -61,6 +84,10 @@ export async function recordStageClear(stageId: string, treasureId: string): Pro
   const progress: GuestProgress = { clearedStageIds: [...cleared], treasureIds: [...treasures] };
   const stored: StoredGuestProgress = { ...progress, schemaVersion: SCHEMA_VERSION };
 
+  // Apply the result to the in-memory session before persistence. A storage failure must not
+  // immediately relock the next stage in the same tab, but it must be reported to the UI.
+  sessionProgress = progress;
+  let persisted = false;
   try {
     const db = await openDb();
     await new Promise<void>((resolve, reject) => {
@@ -70,9 +97,11 @@ export async function recordStageClear(stageId: string, treasureId: string): Pro
       tx.onerror = () => reject(tx.error ?? new Error('indexedDB write failed'));
       tx.onabort = () => reject(tx.error ?? new Error('indexedDB write aborted'));
     });
+    persisted = true;
   } catch {
-    // 플레이 자체는 저장 장애 때문에 막지 않는다. 로그인 계정 정본 저장은 서버 단계에서 별도 처리한다.
+    // Gameplay remains usable in-memory. The result screen explicitly reports that durable
+    // browser persistence failed instead of falsely claiming the clear was saved.
   }
 
-  return { firstClear, treasureNew, progress };
+  return { firstClear, treasureNew, progress, persisted };
 }
