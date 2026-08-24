@@ -81,6 +81,8 @@
 
 - compact 기준: `min(width,height) <= 540`.
 - 세로 모바일은 가로 전환 안내를 표시하고 전투 simulation을 정지한다.
+- `viewport-fit=cover` 환경에서는 `body`에 `safe-area-inset-*` 패딩을 적용하고 `#game`이 남은 안전 영역을 100% 채운다. 노치/컷아웃이 없는 PC에서는 inset=0이라 기존 레이아웃이 유지된다.
+- 세로 회전 안내도 각 방향 `max(32px, env(safe-area-inset-*)))` 패딩으로 컷아웃을 피한다.
 - 공용 버튼은 `pointerout`과 `pointerupoutside`에서도 scale을 1로 복구한다. 손가락이 버튼 밖으로 미끄러져도 눌린 모양으로 고착되지 않는다.
 
 ### 전투
@@ -226,8 +228,8 @@
   - 공용 버튼 pointer 취소 시 scale 복구.
   - compact 편성 초상화 행간 미침범.
   - 난이도 12단계 UI.
-- `catalog-boss-mobile-ui.test.ts`는 세로 simulation 선차단, 540px compact breakpoint, 도감 PC 상세/모바일 축약, 보스 경고를 검사한다.
-- 이번 UI 감사에서 수정한 파일은 UI와 UI 테스트이며 전투 판정/경제/스폰/content 수치는 변경하지 않았다.
+- `catalog-boss-mobile-ui.test.ts`는 세로 simulation 선차단, 540px compact breakpoint, 도감 PC 상세/모바일 축약, 보스 경고, `safe-area-inset-*` 캔버스 containment를 검사한다.
+- 이번 UI 감사에서 수정한 파일은 UI/HTML과 UI 테스트이며 전투 판정/경제/스폰/content 수치는 변경하지 않았다.
 - 이전 마지막 실제 완전 검증에서는 install/typecheck/build 성공, 당시 테스트 실패는 과거 ST20 baseline 1개였다.
 - 현재 `.github/workflows/ci.yml`은 main push/PR에서 install → typecheck → test → build를 실행하도록 설정되어 있다.
 - 현재 연결의 workflow-run 조회는 PR-triggered 실행만 반환하며 direct-main push 결과는 보이지 않는다.
@@ -237,7 +239,7 @@
 ## 14. 첫 사용자 테스트 전 남은 항목
 
 1. 현재 HEAD의 실제 install → typecheck → test → build 결과를 직접 확인할 실행 경로 확보.
-2. PC/compact 모바일의 코드/정적 레이아웃 분리는 완료됐지만 **실제 렌더된 PC 브라우저와 작은 가로폰에서 텍스트 겹침, 터치감, 카드/아트 잘림을 최종 시각 확인**해야 한다.
+2. PC/compact 모바일의 코드/정적 레이아웃 분리는 완료됐지만 **실제 렌더된 PC 브라우저와 작은 가로폰에서 텍스트 겹침, 터치감, 카드/아트 잘림, 노치 safe-area를 최종 시각 확인**해야 한다.
 3. Cloudflare Pages 실제 프로젝트 URL/최신 배포 상태 확인. 저장소에는 현재 명시적인 `pages.dev` URL/프로젝트 설정을 찾지 못했다.
 4. 첫 수동 테스트 게이트 전체를 확인한 뒤에만 사용자에게 테스트를 요청한다.
 
