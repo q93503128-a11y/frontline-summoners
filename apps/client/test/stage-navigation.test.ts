@@ -2,10 +2,13 @@ import assert from 'node:assert/strict';
 import test from 'node:test';
 import {
   STAGE_COLLECTIONS,
+  STAGE_COLLECTIONS_PER_PAGE,
   getCollectionClearedIds,
   getFirstUnclearedCollectionStageIndex,
   getStageCollection,
   getStageCollectionForStage,
+  getStageCollectionPage,
+  getStageCollectionPageCount,
   isStageCollectionUnlocked,
 } from '../src/stage-navigation.ts';
 import { SPECIAL_STAGES, STAGES } from '../src/prototype.ts';
@@ -17,6 +20,20 @@ test('stage navigation groups progression and special stages instead of flatteni
   assert.equal(getStageCollection('special-border-01').stages, SPECIAL_STAGES);
   assert.equal(getStageCollectionForStage('border-01').id, 'chapter-01');
   assert.equal(getStageCollectionForStage('special-05').id, 'special-border-01');
+});
+
+test('sortie hub collection paging remains bounded when future chapters and events multiply', () => {
+  assert.equal(STAGE_COLLECTIONS_PER_PAGE, 2);
+  const progression = STAGE_COLLECTIONS[0]!;
+  const special = STAGE_COLLECTIONS[1]!;
+  const simulatedFutureCollections = [progression, special, progression, special, progression];
+
+  assert.equal(getStageCollectionPageCount(simulatedFutureCollections), 3);
+  assert.deepEqual(getStageCollectionPage(0, simulatedFutureCollections), [progression, special]);
+  assert.deepEqual(getStageCollectionPage(1, simulatedFutureCollections), [progression, special]);
+  assert.deepEqual(getStageCollectionPage(2, simulatedFutureCollections), [progression]);
+  assert.deepEqual(getStageCollectionPage(99, simulatedFutureCollections), [progression], 'out-of-range pages clamp to the final page');
+  assert.deepEqual(getStageCollectionPage(-5, simulatedFutureCollections), [progression, special], 'negative pages clamp to page zero');
 });
 
 test('special collection unlock uses contiguous campaign progress and cannot be opened by scattered late-stage save fragments', () => {
