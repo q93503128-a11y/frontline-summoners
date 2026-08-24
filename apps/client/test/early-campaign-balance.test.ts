@@ -9,6 +9,7 @@ import {
 import {
   STAGES,
   createPrototypeBattle,
+  getTreasureIdsForClearedStages,
   getUnlockedSlotIds,
 } from '../src/prototype.ts';
 
@@ -29,11 +30,12 @@ function targetableEnemyCount(state: ReturnType<typeof createPrototypeBattle>): 
 function autoPlayStage(stageIndex: number, clearedStageIds: readonly string[]) {
   const stage = STAGES[stageIndex]!;
   const unlockedSlotIds = getUnlockedSlotIds(clearedStageIds);
-  const state = createPrototypeBattle(stage.id, unlockedSlotIds);
+  const ownedTreasureIds = getTreasureIdsForClearedStages(clearedStageIds);
+  const state = createPrototypeBattle(stage.id, unlockedSlotIds, ownedTreasureIds);
   const limit = STAGE_LIMITS[stageIndex]!;
   const maxTicks = limit.maxSeconds * 30;
 
-  // Deterministic baseline player: use only units genuinely unlocked at this point.
+  // Deterministic baseline player: use only units and permanent treasures genuinely earned at this point.
   // Expensive/newer units get first refusal, then cheaper units fill the frontline.
   const slotPriority = [...state.playerSlots].sort((a, b) => b.cost - a.cost || a.slotId.localeCompare(b.slotId));
 
@@ -49,15 +51,16 @@ function autoPlayStage(stageIndex: number, clearedStageIds: readonly string[]) {
     stepPlayableBattle(state);
   }
 
-  return { state, limit, unlockedSlotIds };
+  return { state, limit, unlockedSlotIds, ownedTreasureIds };
 }
 
-test('stages one through five are beatable in the real sequential unlock order', () => {
+test('stages one through five are beatable in the real sequential unlock and treasure order', () => {
   const clearedStageIds: string[] = [];
 
   for (let stageIndex = 0; stageIndex < 5; stageIndex += 1) {
     const stage = STAGES[stageIndex]!;
-    const { state, limit, unlockedSlotIds } = autoPlayStage(stageIndex, clearedStageIds);
+    const { state, limit, unlockedSlotIds, ownedTreasureIds } = autoPlayStage(stageIndex, clearedStageIds);
+    assert.equal(ownedTreasureIds.length, clearedStageIds.length, 'baseline must use exactly the treasures earned from prior clears');
 
     assert.equal(
       state.battle.winner,
