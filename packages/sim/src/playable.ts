@@ -20,13 +20,13 @@ export interface SupplyLevelDefinition {
 
 export const DEFAULT_SUPPLY_LEVELS: readonly SupplyLevelDefinition[] = [
   { incomePerSecond: 12, maxSupply: 1000, upgradeCost: 0 },
-  { incomePerSecond: 16, maxSupply: 1400, upgradeCost: 160 },
-  { incomePerSecond: 22, maxSupply: 1900, upgradeCost: 260 },
-  { incomePerSecond: 29, maxSupply: 2500, upgradeCost: 390 },
-  { incomePerSecond: 38, maxSupply: 3200, upgradeCost: 560 },
-  { incomePerSecond: 49, maxSupply: 4000, upgradeCost: 760 },
-  { incomePerSecond: 62, maxSupply: 5000, upgradeCost: 1000 },
-  { incomePerSecond: 78, maxSupply: 6200, upgradeCost: 1300 },
+  { incomePerSecond: 20, maxSupply: 1400, upgradeCost: 160 },
+  { incomePerSecond: 30, maxSupply: 1900, upgradeCost: 260 },
+  { incomePerSecond: 42, maxSupply: 2500, upgradeCost: 390 },
+  { incomePerSecond: 56, maxSupply: 3200, upgradeCost: 560 },
+  { incomePerSecond: 72, maxSupply: 4000, upgradeCost: 760 },
+  { incomePerSecond: 90, maxSupply: 5000, upgradeCost: 1000 },
+  { incomePerSecond: 110, maxSupply: 6200, upgradeCost: 1300 },
 ] as const;
 
 export interface BaseWeaponDefinition {
