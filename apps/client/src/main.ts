@@ -59,13 +59,14 @@ const BATTLE_UNIT_HOTKEY_CODES: readonly string[] = [
 ];
 
 function addText(scene: Phaser.Scene, x: number, y: number, text: string, size = 28, color = '#ffffff', align: 'left' | 'center' | 'right' = 'left'): Phaser.GameObjects.Text {
+  const renderedSize = isCompactMobileViewport() ? Math.max(size, 16) : size;
   return scene.add.text(x, y, text, {
     fontFamily: FONT,
-    fontSize: `${size}px`,
+    fontSize: `${renderedSize}px`,
     color,
     align,
     stroke: '#11151d',
-    strokeThickness: size >= 30 ? 4 : 0,
+    strokeThickness: renderedSize >= 30 ? 4 : 0,
   });
 }
 
