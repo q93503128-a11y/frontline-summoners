@@ -14,6 +14,8 @@ import {
 } from '@frontline/sim/playable';
 import { ART_BY_ID, ART_FAMILIES, UNIT_ART, type ArtFamily, type AttackFxStyle, type SpriteStrip } from './assets';
 import { BATTLEFIELD_THEME_LABELS, drawBattlefield, getBattlefieldBasePalette } from './battlefield';
+import { showBossArrival } from './boss-warning';
+import { CatalogScene } from './catalog-scene';
 import { classifyImpact, getAttackSpriteFrame, getLoopingSpriteFrame } from './combat-visuals';
 import { formatCombatTraits, formatCompactTraits, formatDamageSpecialty } from './combat-trait-labels';
 import { getProjectileArcOffsetY, getProjectileTravelPlan, usesTravelProjectile } from './projectile-visuals';
@@ -139,7 +141,7 @@ class MainMenuScene extends Phaser.Scene {
 
     addButton(this, 230, 435, 310, 92, '출 정', () => this.scene.start('stage-select'), 0xc5a04c);
     addButton(this, 575, 435, 310, 92, '편 성', () => this.scene.start('deck'), 0x5f8fb8);
-    addButton(this, 920, 435, 310, 92, '도 감  ·  준비 중', () => undefined, 0x56606f).setAlpha(0.72);
+    addButton(this, 920, 435, 310, 92, '도 감', () => this.scene.start('catalog'), 0x8c7650);
     addText(this, 88, 628, '보물 첫 클리어 100% · 스테이지 순차 개방 · 에너지 제한 없음', 20, '#9cd6ad');
     addText(this, 1185, 675, 'PRE-ALPHA', 17, '#657086').setOrigin(1, 0.5);
 
@@ -310,6 +312,7 @@ class BattleScene extends Phaser.Scene {
   private views = new Map<number, UnitView>();
   private buttons = new Map<string, UnitButtonView>();
   private projectiles: ProjectileView[] = [];
+  private seenBossSimulationIds = new Set<number>();
   private supplyText!: Phaser.GameObjects.Text;
   private supplyBar!: Phaser.GameObjects.Rectangle;
   private supplyLevelText!: Phaser.GameObjects.Text;
@@ -338,6 +341,7 @@ class BattleScene extends Phaser.Scene {
     this.views.clear();
     this.buttons.clear();
     this.projectiles = [];
+    this.seenBossSimulationIds.clear();
     this.activeSlots = [];
   }
 
@@ -371,12 +375,24 @@ class BattleScene extends Phaser.Scene {
       stepPlayableBattle(this.state);
       this.accumulator -= SIM_TICK_MS;
     }
+    this.syncBossWarnings();
     this.syncProjectileViews();
     this.syncUnits();
     this.syncHud();
     if (this.state.battle.winner !== null) {
       this.resolved = true;
       this.time.delayedCall(700, () => this.scene.start('result', { stageId: this.stage.id, winner: this.state.battle.winner }));
+    }
+  }
+
+  private syncBossWarnings(): void {
+    for (const unit of this.state.battle.units) {
+      if (unit.team !== 'ENEMY' || unit.state === UnitState.Dying) continue;
+      if (!(unit.definition.traits ?? []).includes('BOSS')) continue;
+      if (this.seenBossSimulationIds.has(unit.simulationId)) continue;
+      this.seenBossSimulationIds.add(unit.simulationId);
+      const enemy = this.state.enemies.find((candidate) => candidate.definition.id === unit.definition.id);
+      showBossArrival(this, enemy?.displayName ?? '우두머리');
     }
   }
 
@@ -891,7 +907,7 @@ new Phaser.Game({
   backgroundColor: '#111722',
   pixelArt: true,
   roundPixels: true,
-  scene: [BootScene, MainMenuScene, StageSelectScene, DeckScene, BattleScene, ResultScene],
+  scene: [BootScene, MainMenuScene, StageSelectScene, DeckScene, CatalogScene, BattleScene, ResultScene],
   scale: {
     mode: Phaser.Scale.FIT,
     autoCenter: Phaser.Scale.CENTER_BOTH,
