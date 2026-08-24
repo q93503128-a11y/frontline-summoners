@@ -99,19 +99,28 @@ test('locked-stage and save-pending clicks are quiet; camera shake is reserved f
   assert.match(source, /private playBaseImpactFx[\s\S]*?cameras\.main\.shake/);
 });
 
-test('special challenge screen is a separate optional axis with its own battle and result wiring', async () => {
+test('sortie flow uses a scalable collection hub and one shared stage-list scene for progression and special content', async () => {
   const source = await readMain();
-  assert.match(source, /class SpecialStageSelectScene extends Phaser\.Scene/);
-  assert.match(source, /super\('special-select'\)/);
-  assert.match(source, /SPECIAL_STAGES\.forEach\(\(stage, index\) =>/);
-  assert.match(source, /isSpecialStageUnlocked\(stage\.id, this\.progress\.clearedStageIds\)/);
+  assert.match(source, /'출 정', \(\) => this\.scene\.start\('stage-hub'\)/);
+  assert.match(source, /class StageHubScene extends Phaser\.Scene/);
+  assert.match(source, /super\('stage-hub'\)/);
+  assert.match(source, /STAGE_COLLECTIONS\.forEach\(\(collection, index\) =>/);
+  assert.match(source, /isStageCollectionUnlocked\(collection, this\.progress\.clearedStageIds\)/);
+  assert.match(source, /this\.scene\.start\('stage-select', \{ collectionId: collection\.id \}\)/);
+
+  assert.match(source, /class StageSelectScene extends Phaser\.Scene/);
+  assert.match(source, /getStageCollection\(data\.collectionId \?\? STAGE_COLLECTIONS\[0\]!\.id\)/);
+  assert.match(source, /const special = this\.collection\.stageType === 'SPECIAL'/);
+  assert.match(source, /this\.collection\.stages\.slice\(start, start \+ 5\)/);
+  assert.match(source, /isBattleStageUnlocked\(stage\.id, this\.progress\.clearedStageIds\)/);
   assert.match(source, /this\.progress\.specialClearedStageIds\.includes\(stage\.id\)/);
-  assert.match(source, /this\.scene\.start\('special-select'\)/);
-  assert.match(source, /isBattleStageUnlocked\(this\.stage\.id, progress\.clearedStageIds\)/);
   assert.match(source, /recordSpecialStageClear\(this\.stage\.id\)/);
   assert.match(source, /recordStageClear\(this\.stage\.id, this\.stage\.treasure\.id\)/);
-  assert.match(source, /special \? '특수전' : '스테이지'/);
-  assert.match(source, /scene: \[BootScene, MainMenuScene, StageSelectScene, SpecialStageSelectScene, DeckScene, CatalogScene, BattleScene, ResultScene\]/);
+  assert.match(source, /getStageCollectionForStage\(this\.stage\.id\)/);
+  assert.match(source, /this\.scene\.start\('stage-select', \{ collectionId: collection\.id \}\)/);
+  assert.match(source, /scene: \[BootScene, MainMenuScene, StageHubScene, StageSelectScene, DeckScene, CatalogScene, BattleScene, ResultScene\]/);
+  assert.doesNotMatch(source, /SpecialStageSelectScene/);
+  assert.doesNotMatch(source, /special-select/);
   assert.doesNotMatch(source, /협동 권장/);
 });
 
@@ -171,23 +180,23 @@ test('compact two-row summon and right-side control hitboxes stay inside the bot
   assert.ok(unitHeight * scaleAt390High >= 44, 'compact battle targets must stay finger-sized on a 390px-high landscape phone');
 });
 
-test('compact navigation buttons stay finger-sized across progression, special, deck, battle pause, and result screens', async () => {
+test('compact navigation buttons stay finger-sized across sortie hub, shared stage list, deck, battle pause, and result screens', async () => {
   const source = await readMain();
+  const hubStart = source.indexOf('class StageHubScene');
   const stageStart = source.indexOf('class StageSelectScene');
-  const specialStart = source.indexOf('class SpecialStageSelectScene');
   const deckStart = source.indexOf('class DeckScene');
   const battleStart = source.indexOf('class BattleScene');
   const resultStart = source.indexOf('class ResultScene');
-  assert.ok(stageStart >= 0 && specialStart > stageStart && deckStart > specialStart && battleStart > deckStart && resultStart > battleStart);
+  assert.ok(hubStart >= 0 && stageStart > hubStart && deckStart > stageStart && battleStart > deckStart && resultStart > battleStart);
 
-  const stageBlock = source.slice(stageStart, specialStart);
-  const specialBlock = source.slice(specialStart, deckStart);
+  const hubBlock = source.slice(hubStart, stageStart);
+  const stageBlock = source.slice(stageStart, deckStart);
   const deckBlock = source.slice(deckStart, battleStart);
   const battleBlock = source.slice(battleStart, resultStart);
+  assert.match(hubBlock, /compact \? 84 : 50/);
+  assert.match(hubBlock, /compact \? 84 : 60/);
   assert.match(stageBlock, /compact \? 84 : 50/);
   assert.match(stageBlock, /compact \? 84 : 52/);
-  assert.match(specialBlock, /compact \? 84 : 50/);
-  assert.match(specialBlock, /compact \? 84 : 52/);
   assert.match(deckBlock, /compact \? 84 : 50/);
   assert.match(battleBlock, /compact \? 84 : 42, '일시정지'/);
   assert.match(battleBlock, /isCompactMobileViewport\(\) \? 84 : 58, '계 속'/);
@@ -196,27 +205,26 @@ test('compact navigation buttons stay finger-sized across progression, special, 
   assert.ok(84 * scaleAt390High >= 44);
 });
 
-test('stage and deck cards keep desktop detail while compact mobile renders a reduced high-priority information set', async () => {
+test('shared stage cards keep desktop detail while compact mobile switches between progression reward and special challenge priority', async () => {
   const source = await readMain();
   const stageStart = source.indexOf('class StageSelectScene');
-  const specialStart = source.indexOf('class SpecialStageSelectScene');
   const deckStart = source.indexOf('class DeckScene');
   const battleStart = source.indexOf('class BattleScene');
-  assert.ok(stageStart >= 0 && specialStart > stageStart && deckStart > specialStart && battleStart > deckStart);
-  const stageBlock = source.slice(stageStart, specialStart);
-  const specialBlock = source.slice(specialStart, deckStart);
+  assert.ok(stageStart >= 0 && deckStart > stageStart && battleStart > deckStart);
+  const stageBlock = source.slice(stageStart, deckStart);
   const deckBlock = source.slice(deckStart, battleStart);
 
+  assert.match(stageBlock, /const special = this\.collection\.stageType === 'SPECIAL'/);
   assert.match(stageBlock, /const compact = isCompactMobileViewport\(\);/);
   assert.match(stageBlock, /if \(compact\) \{/);
   assert.match(stageBlock, /compact \? 28 : 25/);
   assert.match(stageBlock, /compact \? 535 : 548/);
-  assert.match(stageBlock, /BATTLEFIELD_THEME_LABELS\[stage\.theme\]/, 'desktop progression detail must keep battlefield theme');
-  assert.match(stageBlock, /`전장 \$\{stage\.mapLength\}m`/, 'desktop progression detail must keep map length');
-  assert.match(stageBlock, /stage\.subtitle/, 'desktop progression detail must keep subtitle');
-  assert.match(specialBlock, /BATTLEFIELD_THEME_LABELS\[stage\.theme\]/, 'desktop special detail must keep battlefield theme');
-  assert.match(specialBlock, /stage\.subtitle/, 'desktop special detail must keep challenge description');
-  assert.match(specialBlock, /동시 출격 \$\{effectiveCap\}기/);
+  assert.match(stageBlock, /BATTLEFIELD_THEME_LABELS\[stage\.theme\]/, 'desktop shared stage detail must keep battlefield theme');
+  assert.match(stageBlock, /`전장 \$\{stage\.mapLength\}m`/, 'desktop shared stage detail must keep map length');
+  assert.match(stageBlock, /stage\.subtitle/, 'desktop shared stage detail must keep subtitle');
+  assert.match(stageBlock, /동시 출격 \$\{effectiveCap\}기/, 'special branch must expose its effective unit cap');
+  assert.match(stageBlock, /'확정 보물'/, 'progression branch must keep guaranteed treasure information');
+  assert.match(stageBlock, /`첫 클리어 훈장 · \$\{stage\.treasure\.name\}`/, 'special branch must keep medal information');
 
   assert.match(deckBlock, /const compact = isCompactMobileViewport\(\);/);
   assert.match(deckBlock, /compact \? 27 : 22/);
@@ -235,12 +243,12 @@ test('stage and deck cards keep desktop detail while compact mobile renders a re
 test('main and result scenes use separate compact layouts while desktop keeps the full wording', async () => {
   const source = await readMain();
   const mainStart = source.indexOf('class MainMenuScene');
-  const stageStart = source.indexOf('class StageSelectScene');
+  const hubStart = source.indexOf('class StageHubScene');
   const resultStart = source.indexOf('class ResultScene');
   const gameStart = source.indexOf('new Phaser.Game');
-  assert.ok(mainStart >= 0 && stageStart > mainStart && resultStart > stageStart && gameStart > resultStart);
+  assert.ok(mainStart >= 0 && hubStart > mainStart && resultStart > hubStart && gameStart > resultStart);
 
-  const mainBlock = source.slice(mainStart, stageStart);
+  const mainBlock = source.slice(mainStart, hubStart);
   const resultBlock = source.slice(resultStart, gameStart);
   assert.match(mainBlock, /const compact = isCompactMobileViewport\(\);/);
   assert.match(mainBlock, /const menuButtonHeight = compact \? 108 : 92;/);
@@ -249,6 +257,7 @@ test('main and result scenes use separate compact layouts while desktop keeps th
   assert.match(mainBlock, /`진도 \$\{progress\.clearedStageIds\.length\}\/\$\{STAGES\.length\} · 특수 \$\{progress\.specialClearedStageIds\.length\}\/\$\{SPECIAL_STAGES\.length\} · 보물 \$\{progress\.treasureIds\.length\}\/\$\{STAGES\.length\} · 동료 \$\{unlocked\}\/\$\{PLAYER_SLOTS\.length\}`/);
 
   assert.match(resultBlock, /const compact = isCompactMobileViewport\(\);/);
+  assert.match(resultBlock, /getStageCollectionForStage\(this\.stage\.id\)/);
   assert.match(resultBlock, /compact \? 820 : 760/);
   assert.match(resultBlock, /setWordWrapWidth\(compact \? 720 : 680\)/);
   assert.match(resultBlock, /const resultButtonHeight = compact \? 84 : 68;/);
@@ -257,6 +266,7 @@ test('main and result scenes use separate compact layouts while desktop keeps th
   assert.match(resultBlock, /'브라우저 영구 저장 실패 · 현재 탭에서는 진행 유지'/, 'desktop progression result must retain full save-failure wording');
   assert.match(resultBlock, /'특수전 훈장 획득'/);
   assert.match(resultBlock, /'특수전 첫 클리어 저장 완료'/);
+  assert.match(resultBlock, /this\.scene\.start\('stage-select', \{ collectionId: collection\.id \}\)/);
 });
 
 test('shared buttons recover from touch or pointer cancellation instead of staying visually pressed', async () => {
