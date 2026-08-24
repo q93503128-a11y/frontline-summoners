@@ -2,7 +2,7 @@
 
 이 문서는 `docs/CANONICAL.md`를 대체하지 않는다. 매 작업 전 정본을 먼저 읽고, 전체 방향은 `docs/GAME_DESIGN_FULL.md`, 스테이지·특수·협동 세부는 `docs/STAGE_SYSTEM_DESIGN.md`, 개발 방식은 `docs/DEVELOPMENT_RULES.md`와 대조한다.
 
-## 2026-08-24 — campaign vertical slice 0.0.25
+## 2026-08-24 — campaign vertical slice 0.0.26
 
 ## 1. 문서 정본
 
@@ -79,8 +79,11 @@
 
 ### 공통 모바일 기준
 
-- compact 기준: `min(width,height) <= 540`.
-- 세로 모바일은 가로 전환 안내를 표시하고 전투 simulation을 정지한다.
+- viewport 판정 권위 경로는 `apps/client/src/viewport.ts` 하나다. `main.ts`와 `catalog-scene.ts`에 중복 판정 함수를 두지 않는다.
+- compact 모바일은 **coarse primary pointer + 짧은 변 540px 이하**를 함께 만족할 때만 사용한다.
+- 따라서 `1280×500`처럼 낮게 줄인 마우스 PC 창은 compact 모바일로 오인하지 않고 PC UI/단축키 표기를 유지한다.
+- 세로 모바일 차단도 **coarse primary pointer + width 900px 이하 + portrait**일 때만 활성화한다. 작은 세로 PC 창은 회전 안내로 막지 않는다.
+- `index.html`의 orientation CSS 역시 `(pointer: coarse)`를 포함해 JS 판정과 같은 의미를 유지한다.
 - `viewport-fit=cover` 환경에서는 `body`에 `safe-area-inset-*` 패딩을 적용하고 `#game`이 남은 안전 영역을 100% 채운다. 노치/컷아웃이 없는 PC에서는 inset=0이라 기존 레이아웃이 유지된다.
 - 세로 회전 안내도 각 방향 `max(32px, env(safe-area-inset-*)))` 패딩으로 컷아웃을 피한다.
 - 공용 버튼은 `pointerout`과 `pointerupoutside`에서도 scale을 1로 복구한다. 손가락이 버튼 밖으로 미끄러져도 눌린 모양으로 고착되지 않는다.
@@ -225,10 +228,12 @@
 - 콘텐츠 스키마 테스트: 1~12 난이도, `PROGRESSION/SPECIAL`, stage unit caps, 편성 제한, `specialRules`, 잘못된 난이도/한도 거부.
 - 현재 제1장 기본 정규화: `PROGRESSION / 50 / 50 / 제한 없음`.
 - final campaign 테스트는 ST20 15초 오프닝, 50초 황금가면, 80초 철문장군 타이밍을 고정한다.
+- `viewport-classification.test.ts`는 터치폰/작은 PC/태블릿을 순수 입력값으로 분리해 compact·portrait 판정을 검증한다.
 - `battle-ui-wiring.test.ts`는 다음을 정적 회귀 검사한다.
   - 1~0/Q/E/P/ESC 및 activeSlots 기반 입력.
   - 마우스/키보드 공통 실패 경로.
   - camera shake 정확히 3개 전투 충격 경로.
+  - shared `viewport.ts` 사용 및 로컬 중복 viewport 판정 금지.
   - compact 전투 HUD와 하단 hitbox geometry.
   - 390px 높이 가로폰에서 84 logical px 핵심 터치 영역이 최소 44 CSS px를 확보하는지 계산.
   - 스테이지/편성 PC 상세정보 유지 + 모바일 축약.
@@ -236,8 +241,8 @@
   - 공용 버튼 pointer 취소 시 scale 복구.
   - compact 편성 초상화 행간 미침범.
   - smooth sprite 렌더 설정과 난이도 12단계 UI.
-- `catalog-boss-mobile-ui.test.ts`는 세로 simulation 선차단, 540px compact breakpoint, 도감 PC 상세/모바일 축약, compact 84px 네비게이션, 버튼 pointer 취소, 보스 경고, `safe-area-inset-*` 캔버스 containment를 검사한다.
-- 이번 UI 감사에서 수정한 파일은 UI/HTML과 UI 테스트이며 전투 판정/경제/스폰/content 수치는 변경하지 않았다.
+- `catalog-boss-mobile-ui.test.ts`는 shared coarse-pointer viewport 판정, 세로 simulation 선차단, 모바일 전용 CSS orientation guard, 도감 PC 상세/모바일 축약, compact 84px 네비게이션, 버튼 pointer 취소, 보스 경고, `safe-area-inset-*` 캔버스 containment를 검사한다.
+- 이번 UI 감사에서 수정한 파일은 UI/HTML/viewport 분류와 UI 테스트이며 전투 판정/경제/스폰/content 수치는 변경하지 않았다.
 - 이전 마지막 실제 완전 검증에서는 install/typecheck/build 성공, 당시 테스트 실패는 과거 ST20 baseline 1개였다.
 - 현재 `.github/workflows/ci.yml`은 main push/PR에서 install → typecheck → test → build를 실행하도록 설정되어 있다.
 - 현재 연결의 workflow-run 조회는 PR-triggered 실행만 반환하며 direct-main push 결과는 보이지 않는다.
@@ -247,7 +252,7 @@
 ## 14. 첫 사용자 테스트 전 남은 항목
 
 1. 현재 HEAD의 실제 install → typecheck → test → build 결과를 직접 확인할 실행 경로 확보.
-2. PC/compact 모바일의 코드/정적 레이아웃과 44px급 터치 기준은 완료됐지만 **실제 렌더된 PC 브라우저와 작은 가로폰에서 텍스트 겹침, 터치감, 카드/아트 잘림, 노치 safe-area를 최종 시각 확인**해야 한다.
+2. PC/compact 모바일의 코드/정적 레이아웃·장치 분류·44px급 터치 기준은 완료됐지만 **실제 렌더된 PC 브라우저와 작은 가로폰에서 텍스트 겹침, 터치감, 카드/아트 잘림, 노치 safe-area를 최종 시각 확인**해야 한다.
 3. Cloudflare Pages 실제 프로젝트 URL/최신 배포 상태 확인. 저장소에는 현재 명시적인 `pages.dev` URL/프로젝트 설정을 찾지 못했다.
 4. 첫 수동 테스트 게이트 전체를 확인한 뒤에만 사용자에게 테스트를 요청한다.
 
