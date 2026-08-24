@@ -33,6 +33,7 @@ interface StageCollectionContent {
 }
 
 export const STAGE_COLLECTIONS_PER_PAGE = 2;
+export const STAGES_PER_COLLECTION_PAGE = 5;
 
 const ALL_STAGE_BY_ID = new Map(ALL_STAGES.map((stage) => [stage.id, stage] as const));
 const PROGRESSION_STAGE_INDEX = new Map(STAGES.map((stage, index) => [stage.id, index] as const));
@@ -118,6 +119,23 @@ export function getStageCollectionPage(
   const safePage = Math.max(0, Math.min(pageCount - 1, Math.trunc(page)));
   const start = safePage * STAGE_COLLECTIONS_PER_PAGE;
   return collections.slice(start, start + STAGE_COLLECTIONS_PER_PAGE);
+}
+
+export function getCollectionStagePageCount(collection: StageCollection): number {
+  return Math.max(1, Math.ceil(collection.stages.length / STAGES_PER_COLLECTION_PAGE));
+}
+
+export function getCollectionStagePage(collection: StageCollection, page: number): readonly PrototypeStage[] {
+  const pageCount = getCollectionStagePageCount(collection);
+  const safePage = Math.max(0, Math.min(pageCount - 1, Math.trunc(page)));
+  const start = safePage * STAGES_PER_COLLECTION_PAGE;
+  return collection.stages.slice(start, start + STAGES_PER_COLLECTION_PAGE);
+}
+
+export function getCollectionStagePageIndexForStage(collection: StageCollection, stageId: string): number {
+  const index = collection.stages.findIndex((stage) => stage.id === stageId);
+  if (index < 0) throw new Error(`Stage ${stageId} is not part of collection ${collection.id}`);
+  return Math.floor(index / STAGES_PER_COLLECTION_PAGE);
 }
 
 export function isStageCollectionUnlocked(collection: StageCollection, clearedStageIds: readonly string[]): boolean {
