@@ -192,12 +192,13 @@ class StageSelectScene extends Phaser.Scene {
 
   create(): void {
     drawBackdrop(this, 'map');
+    const compact = isCompactMobileViewport();
     addText(this, 54, 38, '제1장 · 뒤집힌 국경', 42, COLORS.cream);
-    addText(this, 56, 91, '20개 전장 · 5개씩 보기', isCompactMobileViewport() ? 22 : 19, COLORS.muted);
-    addButton(this, 1165, 65, 160, 50, '메인', () => this.scene.start('main-menu'), 0x586275);
-    addButton(this, 72, 655, 115, 52, '◀ 이전', () => { this.page = Math.max(0, this.page - 1); this.renderPage(); }, 0x586275);
-    addButton(this, 1208, 655, 115, 52, '다음 ▶', () => { this.page = Math.min(Math.ceil(STAGES.length / 5) - 1, this.page + 1); this.renderPage(); }, 0x586275);
-    this.pageText = addText(this, INTERNAL_WIDTH / 2, 640, '', isCompactMobileViewport() ? 22 : 18, '#9ca9bb', 'center').setOrigin(0.5);
+    addText(this, 56, 91, '20개 전장 · 5개씩 보기', compact ? 22 : 19, COLORS.muted);
+    addButton(this, 1165, compact ? 70 : 65, 160, compact ? 84 : 50, '메인', () => this.scene.start('main-menu'), 0x586275);
+    addButton(this, 72, compact ? 655 : 655, 115, compact ? 84 : 52, '◀ 이전', () => { this.page = Math.max(0, this.page - 1); this.renderPage(); }, 0x586275);
+    addButton(this, 1208, compact ? 655 : 655, 115, compact ? 84 : 52, '다음 ▶', () => { this.page = Math.min(Math.ceil(STAGES.length / 5) - 1, this.page + 1); this.renderPage(); }, 0x586275);
+    this.pageText = addText(this, INTERNAL_WIDTH / 2, 640, '', compact ? 22 : 18, '#9ca9bb', 'center').setOrigin(0.5);
 
     this.renderPage();
     void loadGuestProgress().then((progress) => {
@@ -248,7 +249,7 @@ class StageSelectScene extends Phaser.Scene {
         if (slot) this.stageLayer!.add(addText(this, x, compact ? 445 : 503, compact ? `동료 · ${slot.displayName}` : `첫 클리어 동료 · ${slot.displayName}`, compact ? 19 : 14, cleared ? '#8ee3aa' : unlocked ? '#a8cfff' : '#59616d', 'center').setOrigin(0.5));
       }
 
-      const button = addButton(this, x, compact ? 535 : 548, 174, compact ? 68 : 52, unlocked ? '전투 시작' : compact ? '잠김' : '이전 스테이지 필요', () => {
+      const button = addButton(this, x, compact ? 535 : 548, 174, compact ? 84 : 52, unlocked ? '전투 시작' : compact ? '잠김' : '이전 스테이지 필요', () => {
         if (unlocked) this.scene.start('battle', { stageId: stage.id });
       }, unlocked ? (index === STAGES.length - 1 ? 0xbf9252 : 0x5e7ea0) : 0x3f4855);
       if (!unlocked) button.setAlpha(0.62);
@@ -265,9 +266,10 @@ class DeckScene extends Phaser.Scene {
 
   create(): void {
     drawBackdrop(this, 'map');
+    const compact = isCompactMobileViewport();
     this.header = addText(this, 60, 42, '편성 불러오는 중…', 38, COLORS.cream);
-    addText(this, 62, 92, isCompactMobileViewport() ? '보유 동료 · 현재는 자동 편성' : '처음에는 징집병 1종만 보유한다. 캠페인 첫 클리어 보상으로 동료가 순서대로 합류한다.', isCompactMobileViewport() ? 22 : 18, COLORS.muted);
-    addButton(this, 1165, 65, 160, 50, '메인', () => this.scene.start('main-menu'), 0x586275);
+    addText(this, 62, 92, compact ? '보유 동료 · 현재는 자동 편성' : '처음에는 징집병 1종만 보유한다. 캠페인 첫 클리어 보상으로 동료가 순서대로 합류한다.', compact ? 22 : 18, COLORS.muted);
+    addButton(this, 1165, compact ? 70 : 65, 160, compact ? 84 : 50, '메인', () => this.scene.start('main-menu'), 0x586275);
     void loadGuestProgress().then((progress) => {
       if (!this.scene.isActive()) return;
       this.renderRoster(progress);
@@ -487,7 +489,7 @@ class BattleScene extends Phaser.Scene {
     const title = addText(this, INTERNAL_WIDTH / 2, 266, '일 시 정 지', 40, COLORS.cream, 'center').setOrigin(0.5);
     const detail = addText(this, INTERNAL_WIDTH / 2, 316, '솔로 전투 정지 · 보급·쿨다운·적 스폰도 멈춤', battleUiFontSize(17, 24), '#b8c5d6', 'center').setOrigin(0.5);
     const shortcut = addText(this, INTERNAL_WIDTH / 2, 352, 'P 또는 ESC로도 계속할 수 있습니다.', battleUiFontSize(15, 22), '#8f9bae', 'center').setOrigin(0.5);
-    const resume = addButton(this, INTERNAL_WIDTH / 2, 414, 220, 58, '계 속', () => this.setManualPaused(false), 0x6b94b7);
+    const resume = addButton(this, INTERNAL_WIDTH / 2, 414, 220, isCompactMobileViewport() ? 84 : 58, '계 속', () => this.setManualPaused(false), 0x6b94b7);
     this.pauseOverlay = this.add.container(0, 0, [blocker, panel, title, detail, shortcut, resume]).setDepth(100);
   }
 
@@ -503,11 +505,12 @@ class BattleScene extends Phaser.Scene {
   }
 
   private drawHud(): void {
+    const compact = isCompactMobileViewport();
     this.add.rectangle(INTERNAL_WIDTH / 2, 53, INTERNAL_WIDTH, 106, 0x151a24, 0.95);
     addText(this, 35, 16, this.stage.name, battleUiFontSize(28, 34), '#ffffff');
     addText(this, 36, 56, `${this.stage.chapter} · ${BATTLEFIELD_THEME_LABELS[this.stage.theme]} · ${this.stage.mapLength}m`, battleUiFontSize(17, 23), '#aeb8c8');
     this.timerText = addText(this, 585, 25, '0:00', battleUiFontSize(23, 30), '#dbe2ee', 'center').setOrigin(0.5, 0);
-    addButton(this, 690, 55, 108, 42, '일시정지', () => this.toggleManualPause(), 0x65758d);
+    addButton(this, 690, 55, 108, compact ? 80 : 42, '일시정지', () => this.toggleManualPause(), 0x65758d);
 
     addText(this, 760, 18, '보급', battleUiFontSize(18, 23), '#d7ddea');
     this.add.rectangle(930, 56, 300, 22, 0x0d1118).setStrokeStyle(2, 0x67738b);
@@ -1035,8 +1038,9 @@ new Phaser.Game({
   width: INTERNAL_WIDTH,
   height: INTERNAL_HEIGHT,
   backgroundColor: '#111722',
-  pixelArt: true,
-  roundPixels: true,
+  antialias: true,
+  pixelArt: false,
+  roundPixels: false,
   scene: [BootScene, MainMenuScene, StageSelectScene, DeckScene, CatalogScene, BattleScene, ResultScene],
   scale: {
     mode: Phaser.Scale.FIT,
