@@ -135,9 +135,29 @@ function parseBanner(value: unknown): RecruitmentBanner {
 
 export const FIRST_RECRUITMENT_BANNER: RecruitmentBanner = parseBanner(bannerJson);
 
+function checkedRoll(rng: RecruitmentRandomSource, maxExclusive: number): number {
+  const roll = rng.nextInt(maxExclusive);
+  if (!Number.isInteger(roll) || roll < 0 || roll >= maxExclusive) {
+    throw new Error(`random source returned invalid roll ${roll} for maxExclusive=${maxExclusive}`);
+  }
+  return roll;
+}
+
+export const CRYPTO_RECRUITMENT_RANDOM_SOURCE: RecruitmentRandomSource = {
+  nextInt(maxExclusive: number): number {
+    if (!Number.isInteger(maxExclusive) || maxExclusive <= 0) throw new Error('maxExclusive must be a positive integer');
+    if (!globalThis.crypto?.getRandomValues) throw new Error('secure random source is unavailable');
+    const limit = Math.floor(0x1_0000_0000 / maxExclusive) * maxExclusive;
+    const buffer = new Uint32Array(1);
+    do {
+      globalThis.crypto.getRandomValues(buffer);
+    } while (buffer[0]! >= limit);
+    return buffer[0]! % maxExclusive;
+  },
+};
+
 function randomRarity(banner: RecruitmentBanner, rng: RecruitmentRandomSource): Rarity {
-  const roll = rng.nextInt(1000);
-  if (!Number.isInteger(roll) || roll < 0 || roll >= 1000) throw new Error(`random source returned invalid permille roll: ${roll}`);
+  const roll = checkedRoll(rng, 1000);
   let cursor = 0;
   for (const rarity of RARITIES) {
     cursor += banner.ratesPermille[rarity];
@@ -146,16 +166,27 @@ function randomRarity(banner: RecruitmentBanner, rng: RecruitmentRandomSource): 
   throw new Error('recruitment rate table did not resolve a rarity');
 }
 
+function weightedRarityAtLeast(banner: RecruitmentBanner, minimum: Rarity, rng: RecruitmentRandomSource): Rarity {
+  const eligible = RARITIES.filter((rarity) => RARITY_RANK[rarity] >= RARITY_RANK[minimum]);
+  const totalWeight = eligible.reduce((sum, rarity) => sum + banner.ratesPermille[rarity], 0);
+  if (totalWeight <= 0) throw new Error(`banner has no positive rarity weight at or above ${minimum}`);
+  const roll = checkedRoll(rng, totalWeight);
+  let cursor = 0;
+  for (const rarity of eligible) {
+    cursor += banner.ratesPermille[rarity];
+    if (roll < cursor) return rarity;
+  }
+  throw new Error(`guaranteed rarity table did not resolve at or above ${minimum}`);
+}
+
 function chooseFrom(ids: readonly string[], rng: RecruitmentRandomSource): string {
-  const index = rng.nextInt(ids.length);
-  if (!Number.isInteger(index) || index < 0 || index >= ids.length) throw new Error(`random source returned invalid pool index: ${index}`);
+  const index = checkedRoll(rng, ids.length);
   return ids[index]!;
 }
 
-function minimumRarityPool(banner: RecruitmentBanner, minimum: Rarity): readonly string[] {
-  return RARITIES
-    .filter((rarity) => RARITY_RANK[rarity] >= RARITY_RANK[minimum])
-    .flatMap((rarity) => banner.poolByRarity[rarity]);
+function chooseAtLeast(banner: RecruitmentBanner, minimum: Rarity, rng: RecruitmentRandomSource): string {
+  const rarity = weightedRarityAtLeast(banner, minimum, rng);
+  return chooseFrom(banner.poolByRarity[rarity], rng);
 }
 
 function rarityForCharacter(characterId: string): Rarity {
@@ -189,10 +220,10 @@ export function recruit(
       characterId = chooseFrom(banner.pickupSsIds, rng);
       guaranteedBy = 'SIXTY_PULL_PICKUP_SS';
     } else if (pullNumber % 30 === 0) {
-      characterId = chooseFrom(minimumRarityPool(banner, banner.thirtyPullMinimumRarity), rng);
+      characterId = chooseAtLeast(banner, banner.thirtyPullMinimumRarity, rng);
       guaranteedBy = 'THIRTY_PULL_S_PLUS';
     } else if (pullNumber % 10 === 0) {
-      characterId = chooseFrom(minimumRarityPool(banner, banner.tenPullMinimumRarity), rng);
+      characterId = chooseAtLeast(banner, banner.tenPullMinimumRarity, rng);
       guaranteedBy = 'TEN_PULL_A_PLUS';
     } else {
       const rarity = randomRarity(banner, rng);
