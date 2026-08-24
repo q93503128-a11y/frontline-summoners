@@ -16,6 +16,7 @@ import {
 import playerUnitsJson from '../../../content/units/chapter-01.json' with { type: 'json' };
 import enemiesJson from '../../../content/enemies/chapter-01.json' with { type: 'json' };
 import stagesJson from '../../../content/stages/chapter-01.json' with { type: 'json' };
+import { applyTreasureBattleEffects } from './treasure-effects.ts';
 
 export type PrototypeRarity = Rarity;
 export type PrototypeRole = PlayerRole;
@@ -122,23 +123,38 @@ export function isStageUnlocked(stageId: string, clearedStageIds: readonly strin
   return clearedStageIds.includes(STAGES[index - 1]!.id);
 }
 
+export function getTreasureIdsForClearedStages(clearedStageIds: readonly string[]): readonly string[] {
+  const cleared = new Set(clearedStageIds);
+  return STAGES.filter((stage) => cleared.has(stage.id)).map((stage) => stage.treasure.id);
+}
+
 export function createPrototypeBattle(
   stageId = STAGES[0]!.id,
   unlockedSlotIds: readonly string[] = [STARTER_SLOT_ID],
+  ownedTreasureIds: readonly string[] = [],
 ): PlayableBattleState {
   const stage = getStage(stageId);
   const unlocked = new Set(unlockedSlotIds);
   const playerSlots = PLAYER_SLOTS.filter((slot) => unlocked.has(slot.slotId));
   const safeSlots = playerSlots.length > 0 ? playerSlots : [PLAYER_SLOTS[0]!];
-  return createPlayableBattle({
-    mapLength: stage.mapLength,
-    playerBaseHp: stage.playerBaseHp,
-    enemyBaseHp: stage.enemyBaseHp,
+  const progression = applyTreasureBattleEffects({
+    ownedTreasureIds,
     startingSupply: stage.startingSupply,
+    playerBaseHp: stage.playerBaseHp,
+    playerUnitCap: 50,
     playerSlots: safeSlots,
     enemies: ENEMIES,
+  });
+  return createPlayableBattle({
+    mapLength: stage.mapLength,
+    playerBaseHp: progression.playerBaseHp,
+    enemyBaseHp: stage.enemyBaseHp,
+    startingSupply: progression.startingSupply,
+    playerSlots: progression.playerSlots,
+    enemies: progression.enemies,
     enemyWaves: stage.waves,
-    playerUnitCap: 50,
+    playerUnitCap: progression.playerUnitCap,
     enemyUnitCap: 50,
+    supplyLevels: progression.supplyLevels,
   });
 }
