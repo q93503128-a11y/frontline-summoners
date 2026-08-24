@@ -32,6 +32,7 @@ export interface CampaignBaselineTelemetry {
 
 const DEPLOYMENTS_PER_ECONOMY_LEVEL = 3;
 const EMERGENCY_FRONTLINE_COUNT = 1;
+const OPENING_ECONOMY_STAGE_INDEX = 7;
 
 export function targetSupplyLevelForStage(stageIndex: number, state: ReturnType<typeof createPrototypeBattle>): number {
   const highestUnlockedCost = Math.max(...state.playerSlots.map((slot) => slot.cost));
@@ -102,6 +103,18 @@ export function autoPlayCampaignStage(
     }
   };
 
+  // Once the campaign has introduced supply upgrades as a real strategic choice, a competent
+  // baseline may invest immediately if it can still retain enough supply for the cheapest defender.
+  // This replaces the old fixed "deploy three units first" opening and does not grant extra resources.
+  if (stageIndex >= OPENING_ECONOMY_STAGE_INDEX && state.supplyLevel < targetSupplyLevel) {
+    const next = getNextSupplyLevel(state);
+    const cheapestCost = Math.min(...state.playerSlots.map((slot) => slot.cost));
+    if (next && state.supply >= next.upgradeCost + cheapestCost) {
+      const upgraded = tryUpgradeSupply(state);
+      if (upgraded.ok) upgradeCount += 1;
+    }
+  }
+
   for (let step = 0; step < maxTicks && state.battle.winner === null; step += 1) {
     advancePastCoolingSlots();
     const targetSlot = state.playerSlots[rosterCursor]!;
@@ -115,8 +128,8 @@ export function autoPlayCampaignStage(
     const emergencySpawned = emergencyPressure && spawnStrongestAffordableNow();
 
     if (!emergencySpawned) {
-      // Do not rush worker/economy levels before fielding troops. Each additional planned economy
-      // level requires another three real deployments first, so production and investment compete.
+      // After the opening choice, additional economy tiers still require real field presence first.
+      // This keeps production and investment competing instead of turning the baseline into worker rush AI.
       const deploymentUnlockedEconomyLevel = 1 + Math.floor(spawnCount / DEPLOYMENTS_PER_ECONOMY_LEVEL);
       const plannedEconomyLevel = Math.min(targetSupplyLevel, deploymentUnlockedEconomyLevel);
       const targetNeedsWalletUpgrade = targetSlot.cost > currentWallet;
