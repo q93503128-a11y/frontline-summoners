@@ -4,6 +4,7 @@ import {
   ALL_STAGES,
   STAGES,
   getContiguousClearedStageIds,
+  isStageUnlocked,
   type PrototypeStage,
 } from './prototype.ts';
 
@@ -141,6 +142,17 @@ export function getCollectionStagePageIndexForStage(collection: StageCollection,
 export function isStageCollectionUnlocked(collection: StageCollection, clearedStageIds: readonly string[]): boolean {
   if (!collection.unlockAfterStageId) return true;
   return getContiguousClearedStageIds(clearedStageIds).includes(collection.unlockAfterStageId);
+}
+
+/**
+ * Navigation-level battle gate. Progression keeps its sequential rule; SPECIAL uses its Collection gate.
+ * Main/Battle scenes should converge on this path before collections with different unlock anchors are added.
+ */
+export function isSortieStageUnlocked(stageId: string, clearedStageIds: readonly string[]): boolean {
+  const stage = ALL_STAGE_BY_ID.get(stageId);
+  if (!stage) return false;
+  if (stage.stageType === 'PROGRESSION') return isStageUnlocked(stage.id, clearedStageIds);
+  return isStageCollectionUnlocked(getStageCollectionForStage(stage.id), clearedStageIds);
 }
 
 export function getCollectionClearedIds(
