@@ -1,5 +1,6 @@
 import {
   parseCampaignBundle,
+  parseCampaignStages,
   type BattlefieldThemeId as ContentBattlefieldThemeId,
   type CampaignStageContent,
   type CombatContent,
@@ -16,6 +17,7 @@ import {
 import playerUnitsJson from '../../../content/units/chapter-01.json' with { type: 'json' };
 import enemiesJson from '../../../content/enemies/chapter-01.json' with { type: 'json' };
 import stagesJson from '../../../content/stages/chapter-01.json' with { type: 'json' };
+import specialStagesJson from '../../../content/stages/special-01.json' with { type: 'json' };
 import { applyTreasureBattleEffects } from './treasure-effects.ts';
 
 export type PrototypeRarity = Rarity;
@@ -40,6 +42,18 @@ const CAMPAIGN = parseCampaignBundle({
   expectedStageCount: 20,
   requiredThemeCount: 7,
 });
+
+const SPECIAL_STAGE_CONTENT = parseCampaignStages(specialStagesJson, {
+  playerUnitIds: new Set(CAMPAIGN.playerUnits.map((unit) => unit.id)),
+  enemyIds: new Set(CAMPAIGN.enemies.map((enemy) => enemy.id)),
+  starterUnitId: STARTER_SLOT_ID,
+  expectedStageCount: 5,
+});
+
+for (const stage of SPECIAL_STAGE_CONTENT) {
+  if (stage.stageType !== 'SPECIAL') throw new Error(`special stage must use SPECIAL stageType: ${stage.id}`);
+  if (stage.unlockUnitId) throw new Error(`special stage must not unlock chapter-one core roster units: ${stage.id}`);
+}
 
 function fighter(content: CombatContent): BattleUnitDefinition {
   return {
@@ -83,17 +97,31 @@ export const ENEMIES: readonly EnemyArchetype[] = CAMPAIGN.enemies.map((enemy) =
   rewardSupply: enemy.rewardSupply,
 }));
 
+/** Sequential chapter-one progression only. Keep this array stable for campaign progression/save math. */
 export const STAGES: readonly PrototypeStage[] = CAMPAIGN.stages;
+/** First optional challenge pack. It intentionally does not participate in the 20-stage progression prefix. */
+export const SPECIAL_STAGES: readonly PrototypeStage[] = SPECIAL_STAGE_CONTENT;
+export const ALL_STAGES: readonly PrototypeStage[] = [...STAGES, ...SPECIAL_STAGES];
+
+if (new Set(ALL_STAGES.map((stage) => stage.id)).size !== ALL_STAGES.length) {
+  throw new Error('progression and special stage ids must be globally unique');
+}
 
 export function getStage(stageId: string): PrototypeStage {
-  const stage = STAGES.find((candidate) => candidate.id === stageId);
-  if (!stage) throw new Error(`Unknown campaign stage: ${stageId}`);
+  const stage = ALL_STAGES.find((candidate) => candidate.id === stageId);
+  if (!stage) throw new Error(`Unknown stage: ${stageId}`);
   return stage;
 }
 
 export function getStageNumber(stageId: string): number {
   const index = STAGES.findIndex((stage) => stage.id === stageId);
-  if (index < 0) throw new Error(`Unknown campaign stage: ${stageId}`);
+  if (index < 0) throw new Error(`Unknown progression stage: ${stageId}`);
+  return index + 1;
+}
+
+export function getSpecialStageNumber(stageId: string): number {
+  const index = SPECIAL_STAGES.findIndex((stage) => stage.id === stageId);
+  if (index < 0) throw new Error(`Unknown special stage: ${stageId}`);
   return index + 1;
 }
 
@@ -135,6 +163,23 @@ export function isStageUnlocked(stageId: string, clearedStageIds: readonly strin
   if (index < 0) return false;
   if (index === 0) return true;
   return getContiguousClearedStageIds(clearedStageIds).length >= index;
+}
+
+/**
+ * The first special pack opens when chapter one is fully cleared.
+ * It remains independent from progression order: clearing or skipping a special challenge never gates chapter progression.
+ */
+export function isSpecialStageUnlocked(stageId: string, clearedStageIds: readonly string[]): boolean {
+  if (!SPECIAL_STAGES.some((stage) => stage.id === stageId)) return false;
+  return getContiguousClearedStageIds(clearedStageIds).length === STAGES.length;
+}
+
+export function isBattleStageUnlocked(stageId: string, clearedStageIds: readonly string[]): boolean {
+  const stage = ALL_STAGES.find((candidate) => candidate.id === stageId);
+  if (!stage) return false;
+  return stage.stageType === 'SPECIAL'
+    ? isSpecialStageUnlocked(stageId, clearedStageIds)
+    : isStageUnlocked(stageId, clearedStageIds);
 }
 
 export function getTreasureIdsForClearedStages(clearedStageIds: readonly string[]): readonly string[] {
