@@ -2,6 +2,7 @@ import {
   ALL_PLAYER_SLOTS,
   SPECIAL_STAGES,
   STAGES,
+  STARTER_SLOT_ID,
   getContiguousClearedStageIds,
   getStage,
   getTreasureIdsForClearedStages,
@@ -24,6 +25,8 @@ import {
   normalizeCharacterLevel,
 } from './character-growth.ts';
 
+export const MAX_DECK_SLOTS = 10;
+
 export interface CharacterMetaProgress {
   readonly level: number;
   readonly unlockedFormIds: readonly string[];
@@ -42,6 +45,8 @@ export interface GuestProgress {
   readonly recruitmentProgressByBanner?: Readonly<Record<string, RecruitmentProgress>>;
   /** Level/form state for currently owned characters. */
   readonly characterProgressById?: Readonly<Record<string, CharacterMetaProgress>>;
+  /** Undefined means legacy/automatic formation. Once set, this is the explicit 1~10 slot solo deck. */
+  readonly deckSlotIds?: readonly string[];
 }
 
 export interface StageClearResult {
@@ -79,6 +84,12 @@ export interface GuestCharacterProgressResult {
   readonly guestProgress: GuestProgress;
 }
 
+export interface GuestDeckResult {
+  readonly deckSlotIds: readonly string[];
+  readonly persisted: boolean;
+  readonly guestProgress: GuestProgress;
+}
+
 interface StoredGuestProgressV2 {
   readonly schemaVersion: 2;
   readonly clearedStageIds: readonly string[];
@@ -111,10 +122,21 @@ interface StoredGuestProgressV5 {
   readonly characterProgressById: Readonly<Record<string, CharacterMetaProgress>>;
 }
 
+interface StoredGuestProgressV6 {
+  readonly schemaVersion: 6;
+  readonly clearedStageIds: readonly string[];
+  readonly specialClearedStageIds: readonly string[];
+  readonly treasureIds: readonly string[];
+  readonly ownedRecruitmentCharacterIds: readonly string[];
+  readonly recruitmentProgressByBanner: Readonly<Record<string, RecruitmentProgress>>;
+  readonly characterProgressById: Readonly<Record<string, CharacterMetaProgress>>;
+  readonly deckSlotIds?: readonly string[];
+}
+
 const DB_NAME = 'frontline-summoners';
 const STORE_NAME = 'guest-progress';
 const KEY = 'progress';
-const SCHEMA_VERSION = 5;
+const SCHEMA_VERSION = 6;
 const EMPTY_PROGRESS: GuestProgress = {
   clearedStageIds: [],
   specialClearedStageIds: [],
@@ -173,8 +195,6 @@ function mergeRecruitmentMaps(
     if (left.totalPulls !== right.totalPulls) {
       merged[bannerId] = left.totalPulls > right.totalPulls ? left : right;
     } else {
-      // Equal pull count with fewer credits means the player may already have spent a selection credit.
-      // Prefer the lower balance so durable/session reconciliation never resurrects a consumed choice.
       merged[bannerId] = {
         totalPulls: left.totalPulls,
         selectionCredits: Math.min(left.selectionCredits, right.selectionCredits),
@@ -215,8 +235,6 @@ function mergeCharacterProgressMaps(
       continue;
     }
     const unlockedFormIds = [...new Set([...left.unlockedFormIds, ...right.unlockedFormIds])];
-    // loadGuestProgress calls mergeGuestProgress(stored, session), so the current session wins a
-    // same-level form-selection tie. Higher level progress still wins if the other source is stale.
     const preferredSelection = right.level >= left.level
       ? right.selectedFormId ?? left.selectedFormId
       : left.selectedFormId ?? right.selectedFormId;
@@ -270,6 +288,28 @@ function normalizeCharacterProgressMap(
   return result;
 }
 
+function normalizeExplicitDeckSlotIds(value: unknown, ownedCharacterIds: ReadonlySet<string>): readonly string[] | undefined {
+  if (value === undefined) return undefined;
+  const ids = stringArray(value).filter((id) => ownedCharacterIds.has(id) && ALL_CHARACTER_IDS.has(id));
+  const unique = [...new Set(ids)].slice(0, MAX_DECK_SLOTS);
+  return unique.length > 0 ? unique : undefined;
+}
+
+export function getOwnedCharacterIds(progress: GuestProgress): readonly string[] {
+  const normalized = normalizeGuestProgress(progress);
+  const owned = ownedCharacterIdsForProgress(
+    normalized.clearedStageIds,
+    normalized.ownedRecruitmentCharacterIds ?? [],
+  );
+  return ALL_PLAYER_SLOTS.filter((slot) => owned.has(slot.slotId)).map((slot) => slot.slotId);
+}
+
+export function getEffectiveDeckSlotIds(progress: GuestProgress): readonly string[] {
+  const normalized = normalizeGuestProgress(progress);
+  if (normalized.deckSlotIds && normalized.deckSlotIds.length > 0) return normalized.deckSlotIds;
+  return getOwnedCharacterIds(normalized).slice(0, MAX_DECK_SLOTS);
+}
+
 export function mergeGuestProgress(a: GuestProgress, b: GuestProgress): GuestProgress {
   return {
     clearedStageIds: [...new Set([...a.clearedStageIds, ...b.clearedStageIds])],
@@ -287,6 +327,11 @@ export function mergeGuestProgress(a: GuestProgress, b: GuestProgress): GuestPro
       a.characterProgressById ?? {},
       b.characterProgressById ?? {},
     ),
+    ...(b.deckSlotIds !== undefined
+      ? { deckSlotIds: b.deckSlotIds }
+      : a.deckSlotIds !== undefined
+        ? { deckSlotIds: a.deckSlotIds }
+        : {}),
   };
 }
 
@@ -299,6 +344,7 @@ export function normalizeGuestProgress(progress: GuestProgress): GuestProgress {
     (progress.ownedRecruitmentCharacterIds ?? []).filter((characterId) => RECRUITMENT_CHARACTER_IDS.has(characterId)),
   )];
   const ownedCharacterIds = ownedCharacterIdsForProgress(clearedStageIds, ownedRecruitmentCharacterIds);
+  const deckSlotIds = normalizeExplicitDeckSlotIds(progress.deckSlotIds, ownedCharacterIds);
   return {
     clearedStageIds,
     specialClearedStageIds,
@@ -306,6 +352,7 @@ export function normalizeGuestProgress(progress: GuestProgress): GuestProgress {
     ownedRecruitmentCharacterIds,
     recruitmentProgressByBanner: normalizeRecruitmentMap(progress.recruitmentProgressByBanner ?? {}),
     characterProgressById: normalizeCharacterProgressMap(progress.characterProgressById ?? {}, ownedCharacterIds),
+    ...(deckSlotIds === undefined ? {} : { deckSlotIds }),
   };
 }
 
@@ -326,8 +373,8 @@ function readStoredProgress(db: IDBDatabase): Promise<GuestProgress> {
     const tx = db.transaction(STORE_NAME, 'readonly');
     const request = tx.objectStore(STORE_NAME).get(KEY);
     request.onsuccess = () => {
-      const value = request.result as Partial<StoredGuestProgressV2 | StoredGuestProgressV3 | StoredGuestProgressV4 | StoredGuestProgressV5> | undefined;
-      if (value?.schemaVersion !== 2 && value?.schemaVersion !== 3 && value?.schemaVersion !== 4 && value?.schemaVersion !== SCHEMA_VERSION) {
+      const value = request.result as Partial<StoredGuestProgressV2 | StoredGuestProgressV3 | StoredGuestProgressV4 | StoredGuestProgressV5 | StoredGuestProgressV6> | undefined;
+      if (value?.schemaVersion !== 2 && value?.schemaVersion !== 3 && value?.schemaVersion !== 4 && value?.schemaVersion !== 5 && value?.schemaVersion !== SCHEMA_VERSION) {
         resolve(EMPTY_PROGRESS);
         return;
       }
@@ -335,19 +382,23 @@ function readStoredProgress(db: IDBDatabase): Promise<GuestProgress> {
       const hasSpecial = version >= 3;
       const hasRecruitment = version >= 4;
       const hasCharacterProgress = version >= 5;
+      const hasDeck = version >= 6;
       resolve({
         clearedStageIds: stringArray(value.clearedStageIds),
-        specialClearedStageIds: hasSpecial ? stringArray((value as Partial<StoredGuestProgressV3 | StoredGuestProgressV4 | StoredGuestProgressV5>).specialClearedStageIds) : [],
+        specialClearedStageIds: hasSpecial ? stringArray((value as Partial<StoredGuestProgressV3 | StoredGuestProgressV4 | StoredGuestProgressV5 | StoredGuestProgressV6>).specialClearedStageIds) : [],
         treasureIds: stringArray(value.treasureIds),
         ownedRecruitmentCharacterIds: hasRecruitment
-          ? stringArray((value as Partial<StoredGuestProgressV4 | StoredGuestProgressV5>).ownedRecruitmentCharacterIds)
+          ? stringArray((value as Partial<StoredGuestProgressV4 | StoredGuestProgressV5 | StoredGuestProgressV6>).ownedRecruitmentCharacterIds)
           : [],
         recruitmentProgressByBanner: hasRecruitment
-          ? normalizeRecruitmentMap((value as Partial<StoredGuestProgressV4 | StoredGuestProgressV5>).recruitmentProgressByBanner)
+          ? normalizeRecruitmentMap((value as Partial<StoredGuestProgressV4 | StoredGuestProgressV5 | StoredGuestProgressV6>).recruitmentProgressByBanner)
           : {},
         characterProgressById: hasCharacterProgress
-          ? (value as Partial<StoredGuestProgressV5>).characterProgressById ?? {}
+          ? (value as Partial<StoredGuestProgressV5 | StoredGuestProgressV6>).characterProgressById ?? {}
           : {},
+        ...(hasDeck && (value as Partial<StoredGuestProgressV6>).deckSlotIds !== undefined
+          ? { deckSlotIds: stringArray((value as Partial<StoredGuestProgressV6>).deckSlotIds) }
+          : {}),
       });
     };
     request.onerror = () => reject(request.error ?? new Error('indexedDB read failed'));
@@ -357,7 +408,7 @@ function readStoredProgress(db: IDBDatabase): Promise<GuestProgress> {
 
 async function persistProgress(progress: GuestProgress): Promise<boolean> {
   const normalized = normalizeGuestProgress(progress);
-  const stored: StoredGuestProgressV5 = {
+  const stored: StoredGuestProgressV6 = {
     schemaVersion: SCHEMA_VERSION,
     clearedStageIds: normalized.clearedStageIds,
     specialClearedStageIds: normalized.specialClearedStageIds,
@@ -365,6 +416,7 @@ async function persistProgress(progress: GuestProgress): Promise<boolean> {
     ownedRecruitmentCharacterIds: normalized.ownedRecruitmentCharacterIds ?? [],
     recruitmentProgressByBanner: normalized.recruitmentProgressByBanner ?? {},
     characterProgressById: normalized.characterProgressById ?? {},
+    ...(normalized.deckSlotIds === undefined ? {} : { deckSlotIds: normalized.deckSlotIds }),
   };
   try {
     const db = await openDb();
@@ -388,8 +440,6 @@ export async function loadGuestProgress(): Promise<GuestProgress> {
     const currentSession = normalizeGuestProgress(sessionProgress);
     sessionProgress = normalizeGuestProgress(mergeGuestProgress(stored, currentSession));
   } catch {
-    // IndexedDB can be unavailable in restrictive/private browser contexts.
-    // Preserve progress already earned in this tab instead of silently resetting the session.
     sessionProgress = normalizeGuestProgress(sessionProgress);
   }
   return sessionProgress;
@@ -531,6 +581,12 @@ export async function recordGuestEvolutionUnlock(
   const current = requireOwnedCharacter(before, characterId);
   const form = getEvolutionForm(formId);
   if (form.characterId !== characterId) throw new Error(`Evolution form ${formId} does not belong to ${characterId}`);
+  if (form.formOrder > 1) {
+    const previousForm = getEvolutionForms(characterId).find((candidate) => candidate.formOrder === form.formOrder - 1);
+    if (!previousForm || !current.unlockedFormIds.includes(previousForm.formId)) {
+      throw new Error(`Previous evolution form must be unlocked first: ${formId}`);
+    }
+  }
   const progress = normalizeGuestProgress({
     ...before,
     characterProgressById: {
@@ -566,3 +622,32 @@ export async function selectGuestEvolutionForm(
   const persisted = await persistProgress(progress);
   return { characterId, characterProgress: progress.characterProgressById![characterId]!, persisted, guestProgress: progress };
 }
+
+export async function recordGuestDeck(slotIds: readonly string[]): Promise<GuestDeckResult> {
+  if (slotIds.length < 1 || slotIds.length > MAX_DECK_SLOTS) {
+    throw new Error(`Deck must contain 1..${MAX_DECK_SLOTS} characters`);
+  }
+  if (new Set(slotIds).size !== slotIds.length) throw new Error('Deck must not contain duplicate characters');
+
+  const before = normalizeGuestProgress(await loadGuestProgress());
+  const owned = new Set(getOwnedCharacterIds(before));
+  for (const slotId of slotIds) {
+    if (!owned.has(slotId)) throw new Error(`Deck character is not owned: ${slotId}`);
+  }
+
+  const progress = normalizeGuestProgress({ ...before, deckSlotIds: [...slotIds] });
+  sessionProgress = progress;
+  const persisted = await persistProgress(progress);
+  return { deckSlotIds: progress.deckSlotIds!, persisted, guestProgress: progress };
+}
+
+export async function resetGuestDeckToAutomatic(): Promise<GuestDeckResult> {
+  const before = normalizeGuestProgress(await loadGuestProgress());
+  const { deckSlotIds: _deckSlotIds, ...withoutDeck } = before;
+  const progress = normalizeGuestProgress(withoutDeck);
+  sessionProgress = progress;
+  const persisted = await persistProgress(progress);
+  return { deckSlotIds: getEffectiveDeckSlotIds(progress), persisted, guestProgress: progress };
+}
+
+export { STARTER_SLOT_ID };
