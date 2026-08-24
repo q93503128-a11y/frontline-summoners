@@ -160,10 +160,16 @@ test('stage and deck cards keep desktop detail while compact mobile renders a re
 
   assert.match(deckBlock, /const compact = isCompactMobileViewport\(\);/);
   assert.match(deckBlock, /compact \? 27 : 22/);
+  assert.match(deckBlock, /compact \? 132 : 152/, 'compact portrait height must leave row separation while desktop keeps full portrait size');
   assert.match(deckBlock, /if \(!compact\) this\.cardsLayer!\.add\(addText\(this, x, y \+ \(specialty \? 103 : 84\), slot\.description/);
   assert.match(deckBlock, /slot\.description/, 'desktop deck card must retain the character description');
   assert.match(deckBlock, /compact \? '보유 동료 · 현재는 자동 편성' : '처음에는 징집병 1종만 보유한다\./);
   assert.match(deckBlock, /compact \? y \+ 62 : y \+ 46/, 'compact locked-card requirement spacing must stay at the audited position');
+
+  const maxCompactPortraitHeight = 132 * 1.12;
+  const secondRowPortraitTop = 540 - 63 - maxCompactPortraitHeight / 2;
+  const firstRowCardBottom = 280 + 244 / 2;
+  assert.ok(secondRowPortraitTop > firstRowCardBottom, `compact portrait rows must not overlap: ${secondRowPortraitTop} <= ${firstRowCardBottom}`);
 });
 
 test('main and result scenes use separate compact layouts while desktop keeps the full wording', async () => {
