@@ -548,13 +548,13 @@ class BattleScene extends Phaser.Scene {
     this.add.rectangle(INTERNAL_WIDTH / 2, 630, INTERNAL_WIDTH, 180, 0x151a24, 0.98);
     const activeIds = new Set(this.activeSlots.map((slot) => slot.slotId));
     const compact = isCompactMobileViewport();
-    const buttonHeight = compact ? 80 : 62;
+    const buttonHeight = compact ? 84 : 62;
 
     PLAYER_SLOTS.forEach((slot, index) => {
       const row = Math.floor(index / 5);
       const col = index % 5;
       const x = 102 + col * 205;
-      const y = compact ? 582 + row * 80 : 579 + row * 72;
+      const y = compact ? 582 + row * 84 : 579 + row * 72;
       const unlocked = activeIds.has(slot.slotId);
       const hotkeyLabel = getUnitHotkeyLabel(index);
       const border = unlocked ? Phaser.Display.Color.HexStringToColor(rarityColor[slot.rarity] ?? '#ffffff').color : 0x454e5b;
@@ -581,9 +581,9 @@ class BattleScene extends Phaser.Scene {
       this.buttons.set(slot.slotId, { bg, shade, cooldown, cost });
     });
 
-    const controlHeight = compact ? 76 : 60;
+    const controlHeight = compact ? 84 : 60;
     const upgradeY = compact ? 582 : 580;
-    const weaponY = compact ? 662 : 651;
+    const weaponY = compact ? 666 : 651;
     const upgradeBg = this.add.rectangle(1145, upgradeY, 220, controlHeight, 0x302a1c).setStrokeStyle(3, 0xc59d4b).setInteractive({ useHandCursor: true });
     this.supplyUpgradeText = addText(this, 1145, compact ? 568 : 570, '', battleUiFontSize(17, 22), '#ffe29a', 'center').setOrigin(0.5);
     addText(this, 1145, compact ? 598 : 594, compact ? '보급소 강화' : 'Q · 보급소 강화', battleUiFontSize(16, 21), '#ffffff', 'center').setOrigin(0.5);
