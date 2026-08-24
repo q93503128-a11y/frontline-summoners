@@ -1,0 +1,74 @@
+name: Final campaign failure telemetry
+on:
+  push:
+    branches: [main]
+    paths:
+      - .github/workflows/final-campaign-probe.yml
+permissions:
+  contents: write
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Capture exact final-campaign failure
+        shell: bash
+        run: |
+          set +e
+          npm install --ignore-scripts > /tmp/install.log 2>&1
+          INSTALL=$?
+          node --experimental-transform-types --test apps/client/test/final-campaign-balance.test.ts > /tmp/final-test.log 2>&1
+          FINAL_TEST=$?
+          node --experimental-transform-types --input-type=module > /tmp/final-telemetry.log 2>&1 <<'NODE'
+          const { STAGES } = await import('./apps/client/src/prototype.ts');
+          const { autoPlayCampaignStage } = await import('./apps/client/test/campaign-baseline.ts');
+          const limits = [330, 345, 360, 390, 450];
+          const cleared = STAGES.slice(0, 15).map((stage) => stage.id);
+          for (let i = 15; i < 20; i += 1) {
+            const r = autoPlayCampaignStage(i, cleared, { maxSeconds: limits[i - 15], cannonBaseRatio: 0.75 });
+            const b = r.state.battle;
+            console.log(JSON.stringify({
+              stage: i + 1,
+              id: STAGES[i].id,
+              winner: b.winner,
+              seconds: +(b.tick / 30).toFixed(1),
+              playerBaseRatio: +(b.bases.PLAYER.hp / b.bases.PLAYER.maxHp).toFixed(4),
+              enemyBaseRatio: +(b.bases.ENEMY.hp / b.bases.ENEMY.maxHp).toFixed(4),
+              supply: r.state.supply,
+              supplyLevel: r.state.supplyLevel,
+              targetSupplyLevel: r.targetSupplyLevel,
+              spawns: r.telemetry.spawnCount,
+              upgrades: r.telemetry.upgradeCount,
+              cannons: r.telemetry.cannonCount,
+              emptyPressureSeconds: +(r.telemetry.longestEnemyPressureWithoutPlayerTicks / 30).toFixed(1),
+              players: [...r.telemetry.seenPlayerIds],
+              enemies: [...r.seenEnemyIds],
+              boss: r.seenEnemyIds.has('enemy-boss'),
+              ironBoss: r.seenEnemyIds.has('enemy-boss-iron'),
+            }));
+            if (b.winner === 'PLAYER') cleared.push(STAGES[i].id);
+            else break;
+          }
+          NODE
+          TELEMETRY=$?
+          set -e
+
+          {
+            printf 'source_sha=%s\ninstall=%s\nfinal_test=%s\ntelemetry=%s\n\n' "$GITHUB_SHA" "$INSTALL" "$FINAL_TEST" "$TELEMETRY"
+            printf '== final test ==\n'
+            cat /tmp/final-test.log
+            printf '\n== telemetry ==\n'
+            cat /tmp/final-telemetry.log
+          } > docs/FINAL_CAMPAIGN_PROBE_RESULT.txt
+
+          git config user.name frontline-ci
+          git config user.email frontline-ci@users.noreply.github.com
+          git rm .github/workflows/final-campaign-probe.yml
+          git add docs/FINAL_CAMPAIGN_PROBE_RESULT.txt
+          git commit -m 'chore: record final campaign failure telemetry'
+          git push origin HEAD:main
