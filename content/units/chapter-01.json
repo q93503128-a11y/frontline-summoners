@@ -2,7 +2,7 @@
   {
     "id": "militia", "displayName": "징집병", "rarity": "C", "role": "물량",
     "description": "처음부터 함께하는 기본 병력. 싸고 빠르게 전선을 채운다.",
-    "maxHp": 145, "attackDamage": 15, "moveSpeed": 6,
+    "maxHp": 145, "attackDamage": 15, "moveSpeed": 3,
     "standingRange": 42, "attackMinRange": 0, "attackMaxRange": 50,
     "cycleFrames": 25, "hitFrames": [5], "backswingFrames": 5,
     "naturalKnockbackCount": 2, "targetMode": "SINGLE",
@@ -12,7 +12,7 @@
   {
     "id": "guard", "displayName": "방벽기사", "rarity": "C", "role": "전열",
     "description": "공격보다 오래 버티는 데 특화된 기사.",
-    "maxHp": 560, "attackDamage": 30, "moveSpeed": 3,
+    "maxHp": 560, "attackDamage": 30, "moveSpeed": 2,
     "standingRange": 48, "attackMinRange": 0, "attackMaxRange": 58,
     "cycleFrames": 48, "hitFrames": [10], "backswingFrames": 8,
     "naturalKnockbackCount": 1, "targetMode": "SINGLE",
@@ -22,7 +22,7 @@
   {
     "id": "hunter", "displayName": "수렵창병", "rarity": "C", "role": "원거리",
     "description": "긴 창으로 전열 뒤에서 안정적으로 찌른다. 경량 적 추격에 강하다.",
-    "maxHp": 230, "attackDamage": 38, "moveSpeed": 4,
+    "maxHp": 230, "attackDamage": 38, "moveSpeed": 2,
     "standingRange": 105, "attackMinRange": 45, "attackMaxRange": 128,
     "cycleFrames": 45, "hitFrames": [11], "backswingFrames": 7,
     "naturalKnockbackCount": 3, "targetMode": "SINGLE",
@@ -32,7 +32,7 @@
   {
     "id": "duelist", "displayName": "결투검사", "rarity": "B", "role": "전열",
     "description": "짧은 선딜로 틈을 놓치지 않으며 중갑 적의 빈틈을 파고든다.",
-    "maxHp": 390, "attackDamage": 70, "moveSpeed": 5,
+    "maxHp": 390, "attackDamage": 70, "moveSpeed": 3,
     "standingRange": 54, "attackMinRange": 0, "attackMaxRange": 64,
     "cycleFrames": 38, "hitFrames": [8], "backswingFrames": 6,
     "naturalKnockbackCount": 3, "targetMode": "SINGLE",
@@ -42,7 +42,7 @@
   {
     "id": "lancer", "displayName": "청창대", "rarity": "B", "role": "원거리",
     "description": "중거리에서 전열을 교체하며 버티고 중갑 적을 꾸준히 압박한다.",
-    "maxHp": 360, "attackDamage": 72, "moveSpeed": 4,
+    "maxHp": 360, "attackDamage": 72, "moveSpeed": 2,
     "standingRange": 128, "attackMinRange": 62, "attackMaxRange": 148,
     "cycleFrames": 52, "hitFrames": [14], "backswingFrames": 9,
     "naturalKnockbackCount": 4, "targetMode": "SINGLE",
@@ -52,7 +52,7 @@
   {
     "id": "battlemage", "displayName": "전투마도사", "rarity": "B", "role": "광역",
     "description": "안정적인 중거리 범위 마법으로 경량 무리를 정리한다.",
-    "maxHp": 280, "attackDamage": 90, "moveSpeed": 3,
+    "maxHp": 280, "attackDamage": 90, "moveSpeed": 2,
     "standingRange": 178, "attackMinRange": 55, "attackMaxRange": 205,
     "cycleFrames": 68, "hitFrames": [19], "backswingFrames": 11,
     "naturalKnockbackCount": 3, "targetMode": "AREA",
@@ -62,7 +62,7 @@
   {
     "id": "pyromancer", "displayName": "화염술사", "rarity": "A", "role": "광역",
     "description": "긴 선딜 대신 넓은 화염 폭발을 일으키며 중갑 전열을 녹인다.",
-    "maxHp": 300, "attackDamage": 145, "moveSpeed": 2,
+    "maxHp": 300, "attackDamage": 145, "moveSpeed": 1,
     "standingRange": 210, "attackMinRange": 70, "attackMaxRange": 245,
     "cycleFrames": 82, "hitFrames": [27], "backswingFrames": 13,
     "naturalKnockbackCount": 2, "targetMode": "AREA",
@@ -72,7 +72,7 @@
   {
     "id": "royal", "displayName": "왕실기사", "rarity": "A", "role": "전열",
     "description": "높은 체력과 안정적인 광역 검격으로 경량 적의 공세를 받아친다.",
-    "maxHp": 1200, "attackDamage": 180, "moveSpeed": 3,
+    "maxHp": 1200, "attackDamage": 180, "moveSpeed": 2,
     "standingRange": 72, "attackMinRange": 0, "attackMaxRange": 90,
     "cycleFrames": 72, "hitFrames": [20], "backswingFrames": 12,
     "naturalKnockbackCount": 2, "targetMode": "AREA",
@@ -82,7 +82,7 @@
   {
     "id": "heretic", "displayName": "이단주술사", "rarity": "S", "role": "변칙",
     "description": "넓은 사각지대를 가진 장거리 광역 공격수. 비전 적에게 특히 강하다.",
-    "maxHp": 470, "attackDamage": 240, "moveSpeed": 2,
+    "maxHp": 470, "attackDamage": 240, "moveSpeed": 1,
     "standingRange": 250, "attackMinRange": 115, "attackMaxRange": 290,
     "cycleFrames": 102, "hitFrames": [34], "backswingFrames": 16,
     "naturalKnockbackCount": 3, "targetMode": "AREA",
@@ -92,7 +92,7 @@
   {
     "id": "voidsage", "displayName": "공허현자", "rarity": "SS", "role": "결정타",
     "description": "매우 비싸지만 보스에게 큰 압박을 주는 대형 광역 공허 마법을 쓴다.",
-    "maxHp": 980, "attackDamage": 520, "moveSpeed": 2,
+    "maxHp": 980, "attackDamage": 520, "moveSpeed": 1,
     "standingRange": 275, "attackMinRange": 80, "attackMaxRange": 330,
     "cycleFrames": 138, "hitFrames": [48], "backswingFrames": 22,
     "naturalKnockbackCount": 2, "targetMode": "AREA",
