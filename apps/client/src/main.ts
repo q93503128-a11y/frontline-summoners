@@ -143,7 +143,7 @@ class BootScene extends Phaser.Scene {
         if (!this.textures.exists(strip.key)) this.load.spritesheet(strip.key, strip.url, { frameWidth: strip.frameWidth, frameHeight: strip.frameHeight });
       }
     }
-    this.load.on('progress', (value) => bar.displayWidth = Math.max(1, 512 * value));
+    this.load.on('progress', (value: number) => bar.displayWidth = Math.max(1, 512 * value));
     this.load.on('loaderror', (file: { key?: string }) => status.setText(`일부 캐릭터 로드 실패 · 대체 표시 사용 예정 ${file.key ?? ''}`));
   }
 
@@ -305,7 +305,7 @@ class DeckScene extends Phaser.Scene {
       } else {
         const unlockStage = getUnlockStageForSlot(slot.slotId);
         const requirement = unlockStage ? `STAGE ${getStageNumber(unlockStage.id)} 첫 클리어\n${unlockStage.name}` : '캠페인 진행으로 해금';
-        this.cardsLayer!.add(addText(this, x, compact ? y + 56 : y + 46, requirement, compact ? 19 : 14, '#727c89', 'center').setOrigin(0.5).setWordWrapWidth(190));
+        this.cardsLayer!.add(addText(this, x, compact ? y + 62 : y + 46, requirement, compact ? 19 : 14, '#727c89', 'center').setOrigin(0.5).setWordWrapWidth(190));
       }
     });
   }
