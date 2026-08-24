@@ -103,6 +103,10 @@ function familyForUnit(unitId: string): { family: ArtFamily; tint: number; displ
   return { family, tint: variant.tint, displayScale: variant.displayScale ?? 1, attackFx: variant.attackFx };
 }
 
+function isPortraitMobileViewport(): boolean {
+  return window.innerWidth <= 900 && window.innerHeight > window.innerWidth;
+}
+
 class BootScene extends Phaser.Scene {
   constructor() { super('boot'); }
 
@@ -368,7 +372,7 @@ class BattleScene extends Phaser.Scene {
   }
 
   update(_: number, delta: number): void {
-    if (!this.ready || this.resolved) return;
+    if (!this.ready || this.resolved || isPortraitMobileViewport()) return;
     this.accumulator += Math.min(delta, 120);
     while (this.accumulator >= SIM_TICK_MS && this.state.battle.winner === null) {
       this.syncProjectileLaunches();
