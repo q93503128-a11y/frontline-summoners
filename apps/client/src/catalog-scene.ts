@@ -4,7 +4,9 @@ import { ART_BY_ID, ART_FAMILIES, UNIT_ART, type UnitArtVariant } from './assets
 import { formatCombatTraits, formatDamageSpecialty } from './combat-trait-labels';
 import {
   PLAYER_SLOTS,
+  SPECIAL_STAGES,
   STAGES,
+  getSpecialStageNumber,
   getStageNumber,
   getUnlockStageForSlot,
   getUnlockedSlotIds,
@@ -16,6 +18,9 @@ const FONT = '"Malgun Gothic", "Apple SD Gothic Neo", "Noto Sans KR", sans-serif
 const EMPTY_PROGRESS: GuestProgress = { clearedStageIds: [], specialClearedStageIds: [], treasureIds: [] };
 const ALLY_PAGE_SIZE = 5;
 const TREASURE_PAGE_SIZE = 5;
+const MEDAL_PAGE_SIZE = 5;
+
+type CatalogMode = 'ALLIES' | 'TREASURES' | 'MEDALS';
 
 const rarityColor: Record<string, string> = {
   C: '#b9c2cf',
@@ -93,12 +98,13 @@ function getArt(slotId: string) {
 
 export class CatalogScene extends Phaser.Scene {
   private progress: GuestProgress = EMPTY_PROGRESS;
-  private mode: 'ALLIES' | 'TREASURES' = 'ALLIES';
+  private mode: CatalogMode = 'ALLIES';
   private page = 0;
   private contentLayer?: Phaser.GameObjects.Container;
   private pageText?: Phaser.GameObjects.Text;
   private allyTab?: Phaser.GameObjects.Container;
   private treasureTab?: Phaser.GameObjects.Container;
+  private medalTab?: Phaser.GameObjects.Container;
 
   constructor() {
     super('catalog');
@@ -110,11 +116,12 @@ export class CatalogScene extends Phaser.Scene {
     const navigationHeight = compact ? 84 : 50;
     const tabHeight = compact ? 84 : 54;
     addText(this, 54, 34, '도 감', 44, '#fff4cf');
-    if (!compact) addText(this, 56, 88, '제1장 동료와 확정 보물을 한곳에서 확인한다.', 18, '#b8c0ce');
+    if (!compact) addText(this, 56, 88, '동료, 제1장 확정 보물, 특수전 훈장을 한곳에서 확인한다.', 18, '#b8c0ce');
     addButton(this, 1165, compact ? 70 : 62, 160, navigationHeight, '메인', () => this.scene.start('main-menu'), 0x586275);
 
-    this.allyTab = addButton(this, 245, 135, 280, tabHeight, '동료 10종', () => this.setMode('ALLIES'), 0x6d91b5);
-    this.treasureTab = addButton(this, 545, 135, 280, tabHeight, '보물 20종', () => this.setMode('TREASURES'), 0xb69755);
+    this.allyTab = addButton(this, 210, 135, 230, tabHeight, '동료 10종', () => this.setMode('ALLIES'), 0x6d91b5);
+    this.treasureTab = addButton(this, 465, 135, 230, tabHeight, '보물 20종', () => this.setMode('TREASURES'), 0xb69755);
+    this.medalTab = addButton(this, 720, 135, 230, tabHeight, '훈장 5종', () => this.setMode('MEDALS'), 0x9569a5);
     addButton(this, 92, compact ? 660 : 664, 140, navigationHeight, '◀ 이전', () => this.changePage(-1), 0x586275);
     addButton(this, 1188, compact ? 660 : 664, 140, navigationHeight, '다음 ▶', () => this.changePage(1), 0x586275);
     this.pageText = addText(this, INTERNAL_WIDTH / 2, 652, '', compact ? 22 : 18, '#aab4c3', 'center').setOrigin(0.5);
@@ -127,7 +134,7 @@ export class CatalogScene extends Phaser.Scene {
     });
   }
 
-  private setMode(mode: 'ALLIES' | 'TREASURES'): void {
+  private setMode(mode: CatalogMode): void {
     if (this.mode === mode) return;
     this.mode = mode;
     this.page = 0;
@@ -135,9 +142,9 @@ export class CatalogScene extends Phaser.Scene {
   }
 
   private getPageCount(): number {
-    return this.mode === 'ALLIES'
-      ? Math.ceil(PLAYER_SLOTS.length / ALLY_PAGE_SIZE)
-      : Math.ceil(STAGES.length / TREASURE_PAGE_SIZE);
+    if (this.mode === 'ALLIES') return Math.ceil(PLAYER_SLOTS.length / ALLY_PAGE_SIZE);
+    if (this.mode === 'TREASURES') return Math.ceil(STAGES.length / TREASURE_PAGE_SIZE);
+    return Math.ceil(SPECIAL_STAGES.length / MEDAL_PAGE_SIZE);
   }
 
   private changePage(delta: number): void {
@@ -149,12 +156,15 @@ export class CatalogScene extends Phaser.Scene {
     this.contentLayer?.destroy(true);
     this.contentLayer = this.add.container(0, 0);
     this.page = Phaser.Math.Clamp(this.page, 0, Math.max(0, this.getPageCount() - 1));
-    this.pageText?.setText(`${this.mode === 'ALLIES' ? '동료' : '보물'} · ${this.page + 1} / ${this.getPageCount()}`);
+    const modeLabel = this.mode === 'ALLIES' ? '동료' : this.mode === 'TREASURES' ? '보물' : '훈장';
+    this.pageText?.setText(`${modeLabel} · ${this.page + 1} / ${this.getPageCount()}`);
     this.allyTab?.setAlpha(this.mode === 'ALLIES' ? 1 : 0.62);
     this.treasureTab?.setAlpha(this.mode === 'TREASURES' ? 1 : 0.62);
+    this.medalTab?.setAlpha(this.mode === 'MEDALS' ? 1 : 0.62);
 
     if (this.mode === 'ALLIES') this.renderAllies();
-    else this.renderTreasures();
+    else if (this.mode === 'TREASURES') this.renderTreasures();
+    else this.renderMedals();
   }
 
   private renderAllies(): void {
@@ -235,6 +245,38 @@ export class CatalogScene extends Phaser.Scene {
       this.contentLayer!.add(addText(this, x, compact ? 520 : 505, isOwned ? '획득 완료' : '미획득', compact ? 20 : 14, isOwned ? '#8ee3aa' : '#7b8591', 'center').setOrigin(0.5));
       if (!compact) {
         this.contentLayer!.add(addText(this, x, 548, `${stage.name}\n첫 클리어 100% 확정`, 12, isOwned ? '#aab6c5' : '#687381', 'center').setOrigin(0.5).setWordWrapWidth(188));
+      }
+    });
+  }
+
+  private renderMedals(): void {
+    const compact = isCompactMobileViewport();
+    const start = this.page * MEDAL_PAGE_SIZE;
+    const cleared = new Set(this.progress.specialClearedStageIds);
+    const visible = SPECIAL_STAGES.slice(start, start + MEDAL_PAGE_SIZE);
+
+    visible.forEach((stage, localIndex) => {
+      const x = 145 + localIndex * 247;
+      const specialNumber = getSpecialStageNumber(stage.id);
+      const isCleared = cleared.has(stage.id);
+      const card = this.add.rectangle(x, 398, 220, 430, isCleared ? 0x30283a : 0x1d222b, 0.98)
+        .setStrokeStyle(3, isCleared ? 0xa879ba : 0x46505e, isCleared ? 0.95 : 0.65);
+      this.contentLayer!.add(card);
+
+      const outer = this.add.circle(x, compact ? 290 : 280, compact ? 58 : 64, isCleared ? 0x8f60a4 : 0x39414d, isCleared ? 0.92 : 0.7)
+        .setStrokeStyle(5, isCleared ? 0xe4b7f2 : 0x5c6572, 0.9);
+      const inner = this.add.circle(x, compact ? 290 : 280, compact ? 27 : 30, isCleared ? 0x493554 : 0x242a34, 0.95);
+      this.contentLayer!.add(outer);
+      this.contentLayer!.add(inner);
+      this.contentLayer!.add(addText(this, x, compact ? 290 : 280, isCleared ? '★' : '?', compact ? 34 : 32, isCleared ? '#f3d5ff' : '#747e8b', 'center').setOrigin(0.5));
+
+      this.contentLayer!.add(addText(this, x, 205, `SPECIAL ${specialNumber}`, compact ? 20 : 15, isCleared ? '#d6b5e3' : '#6f7987', 'center').setOrigin(0.5));
+      this.contentLayer!.add(addText(this, x, compact ? 374 : 360, stage.treasure.name, compact ? 23 : 19, isCleared ? '#f1ceff' : '#8b939e', 'center').setOrigin(0.5).setWordWrapWidth(190));
+      this.contentLayer!.add(addText(this, x, compact ? 435 : 418, stage.name, compact ? 20 : 15, isCleared ? '#d8ddea' : '#737c89', 'center').setOrigin(0.5).setWordWrapWidth(188));
+      this.contentLayer!.add(addText(this, x, compact ? 482 : 462, `난이도 ${stage.difficulty} / 12`, compact ? 19 : 14, isCleared ? '#efb6ff' : '#707886', 'center').setOrigin(0.5));
+      this.contentLayer!.add(addText(this, x, compact ? 528 : 510, isCleared ? '도전 완료' : '미획득', compact ? 20 : 14, isCleared ? '#8ee3aa' : '#7b8591', 'center').setOrigin(0.5));
+      if (!compact) {
+        this.contentLayer!.add(addText(this, x, 548, '전투 능력치 보너스 없음', 12, isCleared ? '#aa9bb5' : '#687381', 'center').setOrigin(0.5));
       }
     });
   }
