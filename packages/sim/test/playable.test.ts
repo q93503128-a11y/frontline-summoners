@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import type { BattleUnitDefinition } from '../src/index.ts';
+import { spawnUnit, type BattleUnitDefinition } from '../src/index.ts';
 import {
   createPlayableBattle,
   getBaseWeaponCooldownRemaining,
@@ -85,10 +85,10 @@ test('scheduled enemy waves spawn at deterministic ticks', () => {
   assert.equal(state.battle.units.filter((candidate) => candidate.team === 'ENEMY').length, 2);
 });
 
-test('base weapon is initially ready and uses the normal damage and natural-KB path', () => {
+test('base weapon is initially ready and natural KB takes priority over cannon push', () => {
   const state = createPlayableBattle({
     ...config(),
-    baseWeapon: { damage: 60, cooldownFrames: 90 },
+    baseWeapon: { damage: 60, cooldownFrames: 90, pushDistance: 60, pushFrames: 10 },
     enemyWaves: [{ enemyId: 'grunt', atTick: 0, count: 1, intervalTicks: 999 }],
   });
   assert.equal(getBaseWeaponCooldownRemaining(state), 0);
@@ -99,14 +99,35 @@ test('base weapon is initially ready and uses the normal damage and natural-KB p
   assert.ok(enemy);
   assert.equal(enemy.hp, 40);
   assert.equal(enemy.state, 'NATURAL_KNOCKBACK');
+  assert.equal(enemy.forcedDisplacementFrames, 0);
   assert.equal(getBaseWeaponCooldownRemaining(state), 89);
+});
+
+test('base weapon pushes surviving enemies through the forced-displacement state', () => {
+  const state = createPlayableBattle({
+    ...config(),
+    baseWeapon: { damage: 20, cooldownFrames: 90, pushDistance: 60, pushFrames: 3 },
+    enemyWaves: [],
+  });
+  const enemy = spawnUnit(state.battle, unit('tank', { maxHp: 1000, attackDamage: 0, moveSpeed: 0, naturalKnockbackCount: 0 }), 'ENEMY', 600);
+  tryFireBaseWeapon(state);
+
+  stepPlayableBattle(state);
+  assert.equal(enemy.hp, 980);
+  assert.equal(enemy.state, 'FORCED_DISPLACEMENT');
+  assert.equal(enemy.anchorX, 620);
+  stepPlayableBattle(state);
+  assert.equal(enemy.anchorX, 640);
+  stepPlayableBattle(state);
+  assert.equal(enemy.anchorX, 660);
+  assert.equal(enemy.state, 'MOVING');
 });
 
 test('base weapon kills grant the same enemy reward and remain deterministic', () => {
   const run = (): { supply: number; hash: string } => {
     const state = createPlayableBattle({
       ...config(),
-      baseWeapon: { damage: 120, cooldownFrames: 120 },
+      baseWeapon: { damage: 120, cooldownFrames: 120, pushDistance: 60, pushFrames: 10 },
       enemyWaves: [{ enemyId: 'grunt', atTick: 0, count: 1, intervalTicks: 999 }],
     });
     tryFireBaseWeapon(state);
