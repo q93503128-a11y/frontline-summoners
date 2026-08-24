@@ -30,6 +30,9 @@ export interface CampaignBaselineTelemetry {
   readonly seenPlayerIds: ReadonlySet<string>;
 }
 
+const MIN_FRONTLINE_UNITS = 3;
+const STRATEGIC_WALLET_RATIO = 0.8;
+
 export function targetSupplyLevelForStage(stageIndex: number, state: ReturnType<typeof createPrototypeBattle>): number {
   const highestUnlockedCost = Math.max(...state.playerSlots.map((slot) => slot.cost));
   const walletIndex = state.supplyLevels.findIndex((level) => level.maxSupply >= highestUnlockedCost);
@@ -62,7 +65,6 @@ export function autoPlayCampaignStage(
   const state = createPrototypeBattle(stage.id, unlockedSlotIds, ownedTreasureIds);
   const maxTicks = options.maxSeconds * 30;
   const slotPriority = [...state.playerSlots].sort((a, b) => b.cost - a.cost || a.slotId.localeCompare(b.slotId));
-  const cheapPriority = [...state.playerSlots].sort((a, b) => a.cost - b.cost || a.slotId.localeCompare(b.slotId));
   const targetSupplyLevel = targetSupplyLevelForStage(stageIndex, state);
   const seenEnemyIds = new Set<string>();
   const seenPlayerIds = new Set<string>();
@@ -74,13 +76,30 @@ export function autoPlayCampaignStage(
   let currentEnemyPressureWithoutPlayerTicks = 0;
   let longestEnemyPressureWithoutPlayerTicks = 0;
 
-  for (let step = 0; step < maxTicks && state.battle.winner === null; step += 1) {
-    let reservingForUpgrade = false;
-    const alivePlayersAtDecision = alivePlayerUnitCount(state);
+  const recordSpawn = (slotId: string): boolean => {
+    const result = trySpawnPlayerUnit(state, slotId);
+    if (!result.ok) return false;
+    spawnCount += 1;
+    firstSpawnTick ??= state.battle.tick;
+    return true;
+  };
 
-    // Never open a battle by staring at an empty field just to rush the wallet.
-    // Once a minimal frontline exists, saving for the planned economy tier becomes a real strategic choice.
-    if (state.supplyLevel < targetSupplyLevel && alivePlayersAtDecision > 0) {
+  const spawnStrongestAffordableNow = (): boolean => {
+    for (const slot of slotPriority) {
+      if (slot.cost > state.supply || getCooldownRemaining(state, slot.slotId) > 0) continue;
+      if (recordSpawn(slot.slotId)) return true;
+    }
+    return false;
+  };
+
+  for (let step = 0; step < maxTicks && state.battle.winner === null; step += 1) {
+    const alivePlayersAtDecision = alivePlayerUnitCount(state);
+    let reservingForUpgrade = false;
+
+    // Economy investment is allowed only behind a real minimum frontline. The previous helper
+    // started saving after one disposable unit, which made later stages look impossible while
+    // the script itself was voluntarily abandoning the front.
+    if (state.supplyLevel < targetSupplyLevel && alivePlayersAtDecision >= MIN_FRONTLINE_UNITS) {
       const next = getNextSupplyLevel(state);
       if (next) {
         if (state.supply >= next.upgradeCost) {
@@ -93,53 +112,33 @@ export function autoPlayCampaignStage(
     }
 
     if (!reservingForUpgrade) {
-      let spawnedThisTick = false;
       const alivePlayers = alivePlayerUnitCount(state);
 
-      // Keep at least a tiny screen presence before saving for premium units. This prevents the old
-      // baseline bug where every 50 supply was immediately burned on militia, but also avoids a new
-      // opposite bug where the script waits on an empty field for one expensive unit.
-      if (alivePlayers < 2) {
-        for (const slot of cheapPriority) {
-          const result = trySpawnPlayerUnit(state, slot.slotId);
-          if (!result.ok) continue;
-          spawnedThisTick = true;
-          spawnCount += 1;
-          firstSpawnTick ??= state.battle.tick;
-          break;
-        }
+      if (alivePlayers < MIN_FRONTLINE_UNITS) {
+        // Emergency/frontline construction spends immediately, but on the strongest unit that is
+        // actually affordable now rather than blindly burning every 50 supply on militia.
+        spawnStrongestAffordableNow();
       } else {
-        // With a frontline established, reserve for the strongest currently ready unit instead of
-        // leaking the wallet into the cheapest slot every tick. If that unit is still on cooldown,
-        // fall through to the next ready option so the baseline does not idle for cooldown alone.
         const wallet = getCurrentSupplyLevel(state).maxSupply;
+        const strategicCostCeiling = Math.max(
+          state.playerSlots[0]?.cost ?? 0,
+          Math.floor(wallet * STRATEGIC_WALLET_RATIO),
+        );
         const strategicTarget = slotPriority.find((slot) =>
-          slot.cost <= wallet && getCooldownRemaining(state, slot.slotId) === 0
+          slot.cost <= strategicCostCeiling && getCooldownRemaining(state, slot.slotId) === 0
         );
 
         if (strategicTarget) {
-          if (state.supply >= strategicTarget.cost) {
-            const result = trySpawnPlayerUnit(state, strategicTarget.slotId);
-            if (result.ok) {
-              spawnedThisTick = true;
-              spawnCount += 1;
-              firstSpawnTick ??= state.battle.tick;
-            }
-          }
-          // If supply is short, intentionally reserve instead of falling through to cheap spam.
+          // Once the line is stable, deliberately save for a meaningful unit. Capping the target at
+          // 80% of wallet capacity avoids pathological "wait for the single most expensive button"
+          // behavior while still making newly unlocked roles appear in the baseline.
+          if (state.supply >= strategicTarget.cost) recordSpawn(strategicTarget.slotId);
         } else {
-          for (const slot of slotPriority) {
-            const result = trySpawnPlayerUnit(state, slot.slotId);
-            if (!result.ok) continue;
-            spawnedThisTick = true;
-            spawnCount += 1;
-            firstSpawnTick ??= state.battle.tick;
-            break;
-          }
+          // All strategic choices can be on cooldown at once. In that case do not idle purely for
+          // cooldown timing; spend on the best currently ready affordable reinforcement.
+          spawnStrongestAffordableNow();
         }
       }
-
-      void spawnedThisTick;
     }
 
     const enemies = targetableEnemyCount(state);
