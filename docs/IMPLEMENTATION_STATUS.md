@@ -2,7 +2,7 @@
 
 이 문서는 `docs/CANONICAL.md`를 대체하지 않는다. 매 작업 전 정본을 먼저 읽고, 전체 방향은 `docs/GAME_DESIGN_FULL.md`, 스테이지·특수·협동 세부는 `docs/STAGE_SYSTEM_DESIGN.md`와 대조한다.
 
-## 2026-08-24 — campaign vertical slice 0.0.19
+## 2026-08-24 — campaign vertical slice 0.0.20
 
 ### 문서 정본
 
@@ -60,6 +60,18 @@
 - 모달 배경 입력 차단.
 - 모바일 세로 가독성 가드 중에도 simulation 정지.
 - 멀티의 개별 사용자 pause는 구현 대상이 아님.
+
+### PC 전투 단축키 / 입력 피드백
+
+- PC 숫자열 `1 2 3 4 5 6 7 8 9 0`은 화면의 1~10번째 캐릭터 슬롯과 고정 대응한다.
+- `Q` = 보급소 강화.
+- `E` = 전선포.
+- `P` / `ESC` = 기존 솔로 일시정지 유지.
+- 숫자키 반복 입력을 별도로 막지 않아 키 반복/연타 플레이가 가능하다. 쿨다운이 끝나기 전 입력은 그냥 실패하고 다음 반복 입력이 자연스럽게 이어진다.
+- 마우스/터치와 키보드는 `trySpawnSlot / tryUpgradeSupplyInput / tryFireBaseWeaponInput` 공통 경로를 사용한다.
+- **소환 쿨다운, 보급 부족, 동시 출격 한도, 미해금/알 수 없는 슬롯, 보급소 강화비 부족/MAX, 전선포 쿨다운/대기 중 같은 정상적인 실패 입력에서는 카메라를 흔들지 않는다.** 광클을 방해하는 실패 피드백을 제거했다.
+- 실제 전선포 발사 성공, 강한 유닛 피격/거점 피격 등 전투 타격감용 카메라 흔들림은 유지한다.
+- 화면 슬롯에 `1~0`, 보급소 버튼에 `Q`, 전선포 버튼에 `E`를 직접 표시한다.
 
 ### 제1장 경제 / 전투 템포
 
@@ -148,6 +160,7 @@ GitHub Actions 상태가 제공되지 않는 상황에서 `packages/sim/src/inde
 - IndexedDB 게스트 진행 + 같은 탭 session fallback.
 - 메인, 20스테이지 선택, 편성, 결과, 도감 구현.
 - 보스 경고, 적 속성 라벨 디클러터, 모바일 세로 가드 구현.
+- **1~12 난이도 스키마 복원 뒤에도 남아 있던 구식 5성 UI를 제거하고 스테이지 카드에 `난이도 N / 12`로 표시한다.** 난이도 6 이상에서 별이 카드 폭을 계속 늘리는 회귀를 차단했다.
 - 특수 스테이지 전용 메뉴는 아직 없음.
 
 ### 검증 상태
@@ -157,17 +170,19 @@ GitHub Actions 상태가 제공되지 않는 상황에서 `packages/sim/src/inde
 - 기존 client의 고정 `50` 배치 경로를 stage-derived 값으로 교체함.
 - final campaign 테스트에 ST20의 15초 경제 오프닝, 50초 황금가면, 80초 철문장군 페이싱을 명시적으로 고정.
 - 구식 `STABLE_FRONTLINE_COUNT`, `selectReadyBossCounter`, ST20 철문장군 1800F 경로는 저장소 검색에서 제거됨.
+- `battle-ui-wiring.test.ts`에 숫자열 1~0, Q/E/P/ESC 배선, 공통 마우스/키보드 입력 경로, 정상적인 실패 입력에서 camera shake 미사용, `난이도 N / 12` UI를 정적 회귀 검사로 추가함.
 - 이전 마지막 실제 완전 검증에서는 install/typecheck/build가 성공했고 테스트 실패는 ST20 campaign baseline 하나였음.
-- 그 이후 stage schema/후반 baseline 변경에 대해 GitHub Actions status가 계속 비어 있어 **현재 HEAD의 실제 CI green은 아직 주장하지 않는다.**
+- 그 이후 stage schema/후반 baseline/현재 입력·UI 변경에 대해 GitHub Actions status가 계속 비어 있어 **현재 HEAD의 실제 CI green은 아직 주장하지 않는다.**
 - 정적 코드 대조상 optional combat metadata는 `?? []`, optional restriction 필드는 값이 있을 때만 객체에 넣어 strict/exactOptionalPropertyTypes 조건을 고려함.
 
 ## 첫 사용자 테스트 전 남은 주요 항목
 
 1. 현재 HEAD를 실제 install → typecheck → test → build 가능한 환경에서 한 번 더 검증. 소스 충실 독립 재현에서는 ST1~20이 전부 통과했지만 CI 자체 확인은 별도다.
 2. 7개 맵에서 캐릭터 발 위치/그림자/거점 상대 크기/PC·가로 모바일 가독성 수동 감사.
-3. Cloudflare Pages 실제 배포 상태와 최신 빌드 반영 여부 확인.
-4. 첫 수동 테스트 게이트의 UI/전투 화면 항목을 전체 체크한 뒤에만 사용자 테스트를 요청.
-5. 특수 스테이지의 실제 콘텐츠 파일/선택 UI는 첫 vertical slice 안정화 뒤 다음 큰 단계에서 구현.
+3. **가로 모바일는 현재 1280×720 내부 화면을 FIT 축소하므로 390~430px 높이의 실제 폰에서 14~17px 내부 글씨가 지나치게 작아질 가능성이 있다. 기존 모바일 테스트는 세로 가드/정지 배선만 검사하므로 가로 전투 UI는 별도 보정 또는 실화면 검증이 필요하다.**
+4. Cloudflare Pages 실제 배포 상태와 최신 빌드 반영 여부 확인.
+5. 첫 수동 테스트 게이트의 UI/전투 화면 항목을 전체 체크한 뒤에만 사용자 테스트를 요청.
+6. 특수 스테이지의 실제 콘텐츠 파일/선택 UI는 첫 vertical slice 안정화 뒤 다음 큰 단계에서 구현.
 
 ## 첫 vertical slice 이후 큰 단계
 
