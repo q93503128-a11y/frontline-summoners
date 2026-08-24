@@ -34,6 +34,12 @@ test('clearing a stage opens only its immediate successor', () => {
   assert.deepEqual(getUnlockedSlotIds(cleared), ['militia', 'guard']);
 });
 
+test('progression rejects unknown stage ids and cannot be skipped by a non-contiguous clear set', () => {
+  assert.equal(isStageUnlocked('missing-stage', STAGES.map((stage) => stage.id)), false);
+  assert.equal(isStageUnlocked(STAGES[3]!.id, [STAGES[2]!.id]), false, 'clearing only the immediate predecessor out of order must not unlock a later stage');
+  assert.equal(isStageUnlocked(STAGES[3]!.id, [STAGES[0]!.id, STAGES[1]!.id, STAGES[2]!.id]), true);
+});
+
 test('full chapter progression unlocks all ten player units', () => {
   const cleared = STAGES.map((stage) => stage.id);
   assert.deepEqual(getUnlockedSlotIds(cleared), PLAYER_SLOTS.map((slot) => slot.slotId));
