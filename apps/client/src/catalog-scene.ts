@@ -1,6 +1,6 @@
 import Phaser from 'phaser';
 import { INTERNAL_HEIGHT, INTERNAL_WIDTH } from '@frontline/shared';
-import { ART_BY_ID, ART_FAMILIES, UNIT_ART } from './assets';
+import { ART_BY_ID, ART_FAMILIES, UNIT_ART, type UnitArtVariant } from './assets';
 import { formatCombatTraits, formatDamageSpecialty } from './combat-trait-labels';
 import {
   PLAYER_SLOTS,
@@ -38,7 +38,6 @@ function addText(
     fontSize: `${size}px`,
     color,
     align,
-    wordWrap: { width: 220, useAdvancedWrap: true },
   });
 }
 
@@ -77,7 +76,11 @@ function drawBackdrop(scene: Phaser.Scene): void {
 }
 
 function getArt(slotId: string) {
-  const variant = UNIT_ART[slotId] ?? { familyId: 'warrior', tint: 0xffffff };
+  const variant: UnitArtVariant = UNIT_ART[slotId] ?? {
+    familyId: 'warrior',
+    tint: 0xffffff,
+    attackFx: 'SLASH',
+  };
   const family = ART_BY_ID[variant.familyId] ?? ART_FAMILIES[0]!;
   return { family, tint: variant.tint, displayScale: variant.displayScale ?? 1 };
 }
