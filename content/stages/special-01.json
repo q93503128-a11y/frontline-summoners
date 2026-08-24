@@ -102,8 +102,8 @@
     "waves": [
       { "enemyId": "enemy-knight", "atTick": 300, "count": 2, "intervalTicks": 300 },
       { "enemyId": "enemy-berserker", "atTick": 900, "count": 3, "intervalTicks": 260 },
-      { "enemyId": "enemy-sniper", "atTick": 1600, "count": 2, "intervalTicks": 260 },
-      { "enemyId": "enemy-boss-iron", "atTick": 2400, "count": 1, "intervalTicks": 1 }
+      { "enemyId": "enemy-boss-iron", "atTick": 1500, "count": 1, "intervalTicks": 1 },
+      { "enemyId": "enemy-sniper", "atTick": 1600, "count": 2, "intervalTicks": 260 }
     ],
     "treasure": {
       "id": "special-three-vow-seal",
@@ -131,10 +131,10 @@
     "waves": [
       { "enemyId": "enemy-cultist", "atTick": 240, "count": 3, "intervalTicks": 210 },
       { "enemyId": "enemy-shield", "atTick": 600, "count": 3, "intervalTicks": 240 },
-      { "enemyId": "enemy-boss-golden", "atTick": 1350, "count": 1, "intervalTicks": 1 },
+      { "enemyId": "enemy-boss-golden", "atTick": 1050, "count": 1, "intervalTicks": 1 },
       { "enemyId": "enemy-berserker", "atTick": 1800, "count": 2, "intervalTicks": 240 },
-      { "enemyId": "enemy-sniper", "atTick": 2200, "count": 2, "intervalTicks": 260 },
-      { "enemyId": "enemy-boss-iron", "atTick": 2850, "count": 1, "intervalTicks": 1 }
+      { "enemyId": "enemy-boss-iron", "atTick": 2100, "count": 1, "intervalTicks": 1 },
+      { "enemyId": "enemy-sniper", "atTick": 2200, "count": 2, "intervalTicks": 260 }
     ],
     "treasure": {
       "id": "special-double-boss-seal",
