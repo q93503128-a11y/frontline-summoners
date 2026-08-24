@@ -7,6 +7,7 @@ import {
 } from './prototype.ts';
 
 export interface GuestProgress {
+  /** Current schema stores sequential PROGRESSION clears only. SPECIAL clears get a separate field when that axis is implemented. */
   readonly clearedStageIds: readonly string[];
   readonly treasureIds: readonly string[];
 }
@@ -28,7 +29,6 @@ const STORE_NAME = 'guest-progress';
 const KEY = 'progress';
 const SCHEMA_VERSION = 2;
 const EMPTY_PROGRESS: GuestProgress = { clearedStageIds: [], treasureIds: [] };
-const PROGRESSION_STAGE_IDS = new Set(STAGES.map((stage) => stage.id));
 const STAGE_TREASURE_IDS = new Set(STAGES.map((stage) => stage.treasure.id));
 let sessionProgress: GuestProgress = EMPTY_PROGRESS;
 
@@ -40,12 +40,11 @@ export function mergeGuestProgress(a: GuestProgress, b: GuestProgress): GuestPro
 }
 
 export function normalizeGuestProgress(progress: GuestProgress): GuestProgress {
-  const contiguousProgressionIds = getContiguousClearedStageIds(progress.clearedStageIds);
-  const nonProgressionStageIds = progress.clearedStageIds.filter((stageId) => !PROGRESSION_STAGE_IDS.has(stageId));
-  const guaranteedTreasureIds = getTreasureIdsForClearedStages(contiguousProgressionIds);
+  const clearedStageIds = getContiguousClearedStageIds(progress.clearedStageIds);
+  const guaranteedTreasureIds = getTreasureIdsForClearedStages(clearedStageIds);
   const nonStageTreasureIds = progress.treasureIds.filter((treasureId) => !STAGE_TREASURE_IDS.has(treasureId));
   return {
-    clearedStageIds: [...new Set([...contiguousProgressionIds, ...nonProgressionStageIds])],
+    clearedStageIds,
     treasureIds: [...new Set([...guaranteedTreasureIds, ...nonStageTreasureIds])],
   };
 }
