@@ -2,14 +2,14 @@ import assert from 'node:assert/strict';
 import test from 'node:test';
 import { selectVisibleTraitLabelIds } from '../src/trait-label-visibility.ts';
 
-test('dense ordinary enemies collapse to spaced representative labels', () => {
+test('dense ordinary enemies collapse to labels that respect the configured minimum gap', () => {
   const visible = selectVisibleTraitLabelIds([
     { simulationId: 1, screenX: 100, isBoss: false },
     { simulationId: 2, screenX: 125, isBoss: false },
     { simulationId: 3, screenX: 180, isBoss: false },
     { simulationId: 4, screenX: 260, isBoss: false },
   ], 76);
-  assert.deepEqual([...visible], [1, 4]);
+  assert.deepEqual([...visible], [1, 3, 4]);
 });
 
 test('boss labels remain visible even when they are inside the ordinary spacing gap', () => {
