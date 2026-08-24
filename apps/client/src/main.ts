@@ -266,10 +266,10 @@ class DeckScene extends Phaser.Scene {
       this.cardsLayer!.add(addText(this, x, y + 4, unlocked ? slot.displayName : '미해금', 22, unlocked ? '#ffffff' : '#78818d', 'center').setOrigin(0.5));
       if (unlocked) {
         this.cardsLayer!.add(addText(this, x, y + 34, `${slot.role} · ${slot.cost} 보급`, 15, '#f2d37c', 'center').setOrigin(0.5));
-        this.cardsLayer!.add(addText(this, x, y + 57, formatCombatTraits(slot.definition), 13, '#9fcfff', 'center').setOrigin(0.5));
+        this.cardsLayer!.add(addText(this, x, y + 57, formatCombatTraits(slot.definition), 14, '#9fcfff', 'center').setOrigin(0.5));
         const specialty = formatDamageSpecialty(slot.definition);
-        if (specialty) this.cardsLayer!.add(addText(this, x, y + 78, specialty, 12, '#ffd493', 'center').setOrigin(0.5));
-        this.cardsLayer!.add(addText(this, x, y + (specialty ? 103 : 84), slot.description, 11, '#b9c2d0', 'center').setOrigin(0.5).setWordWrapWidth(190));
+        if (specialty) this.cardsLayer!.add(addText(this, x, y + 78, specialty, 14, '#ffd493', 'center').setOrigin(0.5));
+        this.cardsLayer!.add(addText(this, x, y + (specialty ? 103 : 84), slot.description, 13, '#b9c2d0', 'center').setOrigin(0.5).setWordWrapWidth(190));
       } else {
         const unlockStage = getUnlockStageForSlot(slot.slotId);
         const requirement = unlockStage ? `STAGE ${getStageNumber(unlockStage.id)} 첫 클리어\n${unlockStage.name}` : '캠페인 진행으로 해금';
@@ -403,14 +403,14 @@ class BattleScene extends Phaser.Scene {
   private drawHud(): void {
     this.add.rectangle(INTERNAL_WIDTH / 2, 53, INTERNAL_WIDTH, 106, 0x151a24, 0.95);
     addText(this, 35, 16, this.stage.name, 28, '#ffffff');
-    addText(this, 36, 56, `${this.stage.chapter} · ${BATTLEFIELD_THEME_LABELS[this.stage.theme]} · ${this.stage.mapLength}m`, 15, '#aeb8c8');
+    addText(this, 36, 56, `${this.stage.chapter} · ${BATTLEFIELD_THEME_LABELS[this.stage.theme]} · ${this.stage.mapLength}m`, 17, '#aeb8c8');
     this.timerText = addText(this, 625, 25, '0:00', 23, '#dbe2ee', 'center').setOrigin(0.5, 0);
 
-    addText(this, 760, 18, '보급', 17, '#d7ddea');
+    addText(this, 760, 18, '보급', 18, '#d7ddea');
     this.add.rectangle(930, 56, 300, 22, 0x0d1118).setStrokeStyle(2, 0x67738b);
     this.supplyBar = this.add.rectangle(782, 56, 1, 14, 0xe9c965).setOrigin(0, 0.5);
     this.supplyText = addText(this, 1084, 20, '', 21, '#f4d577', 'right').setOrigin(1, 0);
-    this.supplyLevelText = addText(this, 760, 68, '', 17, '#b9c4d4');
+    this.supplyLevelText = addText(this, 760, 68, '', 18, '#b9c4d4');
   }
 
   private drawBases(): void {
@@ -428,14 +428,14 @@ class BattleScene extends Phaser.Scene {
       g.fillStyle(palette.enemyRoof, 0.9).fillRect(1154, 340, 18, 30).fillRect(1212, 340, 18, 30);
     }
 
-    addText(this, 42, 286, '아군 거점', 16, '#cfe5ff');
-    addText(this, 1238, 286, '적 거점', 16, '#ffd3cc', 'right').setOrigin(1, 0);
+    addText(this, 42, 286, '아군 거점', 18, '#cfe5ff');
+    addText(this, 1238, 286, '적 거점', 18, '#ffd3cc', 'right').setOrigin(1, 0);
     this.add.rectangle(88, 328, 156, 16, 0x161b23).setStrokeStyle(2, 0x7990aa);
     this.add.rectangle(1192, 328, 156, 16, 0x161b23).setStrokeStyle(2, 0xaa716c);
     this.playerBaseBar = this.add.rectangle(12, 328, 152, 10, 0x74c7ff).setOrigin(0, 0.5);
     this.enemyBaseBar = this.add.rectangle(1116, 328, 152, 10, 0xff8f82).setOrigin(0, 0.5);
-    this.playerBaseText = addText(this, 88, 340, '', 16, '#e8f5ff', 'center').setOrigin(0.5, 0);
-    this.enemyBaseText = addText(this, 1192, 340, '', 16, '#ffe6e1', 'center').setOrigin(0.5, 0);
+    this.playerBaseText = addText(this, 88, 340, '', 18, '#e8f5ff', 'center').setOrigin(0.5, 0);
+    this.enemyBaseText = addText(this, 1192, 340, '', 18, '#ffe6e1', 'center').setOrigin(0.5, 0);
   }
 
   private drawUnitButtons(): void {
@@ -455,17 +455,17 @@ class BattleScene extends Phaser.Scene {
       portrait.setScale((50 / art.family.idle.frameHeight) * art.displayScale);
 
       if (!unlocked) {
-        addText(this, x - 43, y - 22, '미해금', 14, '#7c8490').setDepth(5);
+        addText(this, x - 43, y - 22, '미해금', 15, '#7c8490').setDepth(5);
         const unlockStage = getUnlockStageForSlot(slot.slotId);
-        addText(this, x - 43, y + 2, unlockStage ? `ST.${getStageNumber(unlockStage.id)} 클리어` : '잠김', 12, '#626b77').setDepth(5);
+        addText(this, x - 43, y + 2, unlockStage ? `ST.${getStageNumber(unlockStage.id)} 클리어` : '잠김', 14, '#626b77').setDepth(5);
         return;
       }
 
       bg.setInteractive({ useHandCursor: true });
       const shade = this.add.rectangle(x, y, 188, 62, 0x05070b, 0).setDepth(6);
-      addText(this, x - 43, y - 25, `${slot.rarity} · ${slot.displayName}`, 14, '#ffffff').setDepth(5);
-      const cost = addText(this, x - 43, y + 2, `${slot.cost} 보급`, 14, '#f2d37c').setDepth(5);
-      const cooldown = addText(this, x + 82, y + 2, '', 13, '#d8e1ef', 'right').setOrigin(1, 0).setDepth(7);
+      addText(this, x - 43, y - 25, `${slot.rarity} · ${slot.displayName}`, 15, '#ffffff').setDepth(5);
+      const cost = addText(this, x - 43, y + 2, `${slot.cost} 보급`, 15, '#f2d37c').setDepth(5);
+      const cooldown = addText(this, x + 82, y + 2, '', 15, '#d8e1ef', 'right').setOrigin(1, 0).setDepth(7);
       bg.on('pointerdown', () => {
         const result = trySpawnPlayerUnit(this.state, slot.slotId);
         if (!result.ok) this.cameras.main.shake(55, 0.0012);
@@ -474,15 +474,15 @@ class BattleScene extends Phaser.Scene {
     });
 
     const upgradeBg = this.add.rectangle(1145, 580, 220, 60, 0x302a1c).setStrokeStyle(3, 0xc59d4b).setInteractive({ useHandCursor: true });
-    this.supplyUpgradeText = addText(this, 1145, 570, '', 16, '#ffe29a', 'center').setOrigin(0.5);
-    addText(this, 1145, 594, '보급소 강화', 15, '#ffffff', 'center').setOrigin(0.5);
+    this.supplyUpgradeText = addText(this, 1145, 570, '', 17, '#ffe29a', 'center').setOrigin(0.5);
+    addText(this, 1145, 594, '보급소 강화', 16, '#ffffff', 'center').setOrigin(0.5);
     upgradeBg.on('pointerdown', () => {
       const result = tryUpgradeSupply(this.state);
       if (!result.ok) this.cameras.main.shake(55, 0.0012);
     });
 
     this.baseWeaponBg = this.add.rectangle(1145, 651, 220, 60, 0x26394a).setStrokeStyle(3, 0x72b7db).setInteractive({ useHandCursor: true });
-    this.baseWeaponText = addText(this, 1145, 651, '전선포 · 발사 가능', 16, '#bfe8ff', 'center').setOrigin(0.5);
+    this.baseWeaponText = addText(this, 1145, 651, '전선포 · 발사 가능', 17, '#bfe8ff', 'center').setOrigin(0.5);
     this.baseWeaponBg.on('pointerdown', () => {
       const result = tryFireBaseWeapon(this.state);
       if (!result.ok) {
@@ -522,7 +522,7 @@ class BattleScene extends Phaser.Scene {
     sprite.setScale((art.family.displayHeight / art.family.run.frameHeight) * art.displayScale);
     const hpBg = this.add.rectangle(sprite.x, 443, 54, 7, 0x161a21).setDepth(5);
     const hp = this.add.rectangle(sprite.x - 26, 443, 52, 5, unit.team === 'PLAYER' ? 0x78dca0 : 0xf1837c).setOrigin(0, 0.5).setDepth(6);
-    const trait = addText(this, sprite.x, 425, unit.team === 'ENEMY' ? formatCompactTraits(unit.definition) : '', 11, '#ffd0c8', 'center').setOrigin(0.5).setDepth(7);
+    const trait = addText(this, sprite.x, 425, unit.team === 'ENEMY' ? formatCompactTraits(unit.definition) : '', 14, '#ffd0c8', 'center').setOrigin(0.5).setDepth(7);
 
     const spawn = this.add.ellipse(x, 519, 34, 9, unit.team === 'PLAYER' ? 0x9cd7ff : 0xffa39b, 0.42).setDepth(2);
     this.tweens.add({
