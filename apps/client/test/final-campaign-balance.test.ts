@@ -9,6 +9,7 @@ import {
 import {
   STAGES,
   createPrototypeBattle,
+  getTreasureIdsForClearedStages,
   getUnlockedSlotIds,
 } from '../src/prototype.ts';
 
@@ -31,7 +32,8 @@ function targetableEnemyCount(state: ReturnType<typeof createPrototypeBattle>): 
 function autoPlayStage(stageIndex: number, clearedStageIds: readonly string[]) {
   const stage = STAGES[stageIndex]!;
   const unlockedSlotIds = getUnlockedSlotIds(clearedStageIds);
-  const state = createPrototypeBattle(stage.id, unlockedSlotIds);
+  const ownedTreasureIds = getTreasureIdsForClearedStages(clearedStageIds);
+  const state = createPrototypeBattle(stage.id, unlockedSlotIds, ownedTreasureIds);
   const limit = FINAL_LIMITS[stageIndex - 15]!;
   const maxTicks = limit.maxSeconds * 30;
   const slotPriority = [...state.playerSlots].sort((a, b) => b.cost - a.cost || a.slotId.localeCompare(b.slotId));
@@ -52,10 +54,10 @@ function autoPlayStage(stageIndex: number, clearedStageIds: readonly string[]) {
     }
   }
 
-  return { state, limit, unlockedSlotIds, seenEnemyIds };
+  return { state, limit, unlockedSlotIds, ownedTreasureIds, seenEnemyIds };
 }
 
-test('stages sixteen through twenty stay beatable in exact unlock order and final bosses actually appear', () => {
+test('stages sixteen through twenty stay beatable in exact unlock/treasure order and final bosses actually appear', () => {
   const clearedStageIds = STAGES.slice(0, 15).map((stage) => stage.id);
   assert.deepEqual(
     getUnlockedSlotIds(clearedStageIds),
@@ -64,7 +66,8 @@ test('stages sixteen through twenty stay beatable in exact unlock order and fina
 
   for (let stageIndex = 15; stageIndex < 20; stageIndex += 1) {
     const stage = STAGES[stageIndex]!;
-    const { state, limit, unlockedSlotIds, seenEnemyIds } = autoPlayStage(stageIndex, clearedStageIds);
+    const { state, limit, unlockedSlotIds, ownedTreasureIds, seenEnemyIds } = autoPlayStage(stageIndex, clearedStageIds);
+    assert.equal(ownedTreasureIds.length, clearedStageIds.length, 'final baseline must not receive a treasure before its stage is cleared');
 
     assert.equal(
       unlockedSlotIds.length,
