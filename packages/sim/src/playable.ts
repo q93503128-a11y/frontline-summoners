@@ -5,6 +5,7 @@ import {
   applyForcedDisplacementToTeam,
   computeStateHash,
   createBattle,
+  getBattleUnitDefinitionSignature,
   spawnUnit,
   stepBattle,
   type BattleState,
@@ -305,9 +306,43 @@ function fnv1a(text: string): string {
 }
 
 export function computePlayableStateHash(state: PlayableBattleState): string {
-  const cooldowns = Object.entries(state.cooldownReadyTick).sort(([a], [b]) => a.localeCompare(b)).map(([slot, tick]) => `${slot}:${tick}`).join('|');
-  const waves = state.enemyWaves.map((wave) => `${wave.enemyId}:${wave.spawned}:${wave.nextTick}`).join('|');
-  const rewards = Object.entries(state.rewardBySimulationId).sort(([a], [b]) => Number(a) - Number(b)).map(([id, reward]) => `${id}:${reward}`).join('|');
+  const supplyDefinitions = state.supplyLevels
+    .map((level) => `${level.incomePerSecond}:${level.maxSupply}:${level.upgradeCost}`)
+    .join('|');
+  const slotDefinitions = [...state.playerSlots]
+    .sort((a, b) => a.slotId.localeCompare(b.slotId))
+    .map((slot) => `${slot.slotId}:${slot.cost}:${slot.rechargeFrames}:${getBattleUnitDefinitionSignature(slot.definition)}`)
+    .join('|');
+  const enemyDefinitions = [...state.enemies]
+    .sort((a, b) => a.enemyId.localeCompare(b.enemyId))
+    .map((enemy) => `${enemy.enemyId}:${enemy.rewardSupply}:${getBattleUnitDefinitionSignature(enemy.definition)}`)
+    .join('|');
+  const cooldowns = Object.entries(state.cooldownReadyTick)
+    .sort(([a], [b]) => a.localeCompare(b))
+    .map(([slot, tick]) => `${slot}:${tick}`)
+    .join('|');
+  const waves = state.enemyWaves
+    .map((wave) => `${wave.enemyId}:${wave.count}:${wave.intervalTicks}:${wave.spawned}:${wave.nextTick}`)
+    .join('|');
+  const rewards = Object.entries(state.rewardBySimulationId)
+    .sort(([a], [b]) => Number(a) - Number(b))
+    .map(([id, reward]) => `${id}:${reward}`)
+    .join('|');
   const weapon = `${state.baseWeapon.damage}:${state.baseWeapon.cooldownFrames}:${state.baseWeapon.pushDistance}:${state.baseWeapon.pushFrames}:${state.baseWeaponReadyTick}:${state.baseWeaponPending ? 1 : 0}:${state.baseWeaponLastFiredTick}`;
-  return fnv1a([computeStateHash(state.battle), state.supply, state.supplyLevel, state.incomeRemainder, cooldowns, waves, rewards, weapon].join('#'));
+  const caps = `${state.playerUnitCap}:${state.enemyUnitCap}`;
+  return fnv1a([
+    computeStateHash(state.battle),
+    state.battle.mapLength,
+    state.supply,
+    state.supplyLevel,
+    state.incomeRemainder,
+    supplyDefinitions,
+    slotDefinitions,
+    enemyDefinitions,
+    cooldowns,
+    waves,
+    rewards,
+    weapon,
+    caps,
+  ].join('#'));
 }
