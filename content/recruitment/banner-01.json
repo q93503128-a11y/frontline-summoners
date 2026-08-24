@@ -1,0 +1,24 @@
+{
+  "id": "border-wonders-01",
+  "name": "뒤집힌 국경의 별난 자들",
+  "description": "제1장 이후 모집에서 만나는 첫 별난 동료들.",
+  "ratesPermille": {
+    "C": 300,
+    "B": 280,
+    "A": 240,
+    "S": 130,
+    "SS": 50
+  },
+  "tenPullMinimumRarity": "A",
+  "thirtyPullMinimumRarity": "S",
+  "pickupSsGuaranteeEvery": 60,
+  "selectionCreditEvery": 100,
+  "pickupSsIds": ["moon-eater"],
+  "poolByRarity": {
+    "C": ["turnip-rider", "tin-mole", "sling-goblin", "pot-mimic"],
+    "B": ["coffin-porter", "lantern-witch", "goat-ballista", "bell-hermit"],
+    "A": ["clockwork-duck", "cloud-herder", "candle-golem"],
+    "S": ["banquet-ogre", "mirror-exorcist"],
+    "SS": ["moon-eater", "castle-crab"]
+  }
+}
