@@ -374,6 +374,12 @@ ST19/ST20 전용 보스 랜드마크.
 - 스테이지별 unit cap의 실제 simulation 연결
 - ST16~20 전술형 합법 campaign baseline
 - ST20 15초 경제 오프닝 + 50초/80초 두 보스 페이싱 회귀 테스트
+- PC 전투 단축키: `1~0` 현재 편성 슬롯, `Q` 보급소, `E` 전선포, `P/ESC` 일시정지
+- 소환/보급소/전선포 및 잠긴 스테이지/저장 대기 같은 정상 실패 입력은 조용히 무시하며 camera shake 없음
+- camera shake는 전선포 성공 / 강한 유닛 피격 / 거점 피격 세 전투 충격 경로에만 허용
+- compact 모바일 기준 `min(width,height) <= 540`, 전투 핵심 텍스트와 터치 hitbox 확대
+- compact 모바일 전투에서는 1~0/Q/E 표시를 숨기고 터치 정보 우선, PC에서는 단축키 표시 유지
+- compact 하단 10칸/보급소/전선포 geometry를 회귀 테스트로 고정
 
 ==================================================
 10. 아직 미구현 / 부분 구현
@@ -435,10 +441,13 @@ ST19/ST20 전용 보스 랜드마크.
 - build 성공
 - 당시 테스트 실패는 ST20 campaign baseline 1개
 
-그 이후 stage schema 및 현재 후반 baseline/ST20 페이싱이 추가됐다.
-GitHub Actions status가 계속 비어 있어 현재 HEAD의 install → typecheck → test → build 실제 green은 아직 미확인이다.
+그 이후 stage schema, 후반 baseline/ST20 페이싱, 입력/UI 변경이 추가됐다.
 
-검증 가능한 실행 환경이 생기면 반드시 다시 돌린다.
+`.github/workflows/ci.yml`은 `main` push와 pull_request에서 install → typecheck → test → build를 실행하도록 설정돼 있다.
+현재 사용할 수 있는 commit workflow 조회는 PR-triggered run만 반환하므로 `main` 직접 push 방식의 실행 여부를 그 결과만으로 판단하지 않는다. 최신 commit combined status에도 status context가 0개라, 이 연결 경로에서는 현재 HEAD의 실제 CI green/red를 확인할 수 없다.
+
+따라서 확인되지 않은 CI 성공을 주장하지 않는다.
+검증 가능한 실행 환경이 생기면 반드시 install → typecheck → test → build를 다시 돌린다.
 Actions 사용량/실행 불가 상황이면 일회성 workflow를 계속 추가해 쓰레기로 남기지 않는다.
 
 ==================================================
@@ -484,13 +493,12 @@ Actions 사용량/실행 불가 상황이면 일회성 workflow를 계속 추가
 - PC/가로 모바일 가독성
 - ST1~20 합법 순차 baseline
 
-campaign baseline은 소스 충실 재현 기준 통과했지만, **실제 CI 재확인과 시각/모바일/배포 감사가 남아 있으므로 아직 사용자 테스트를 요청하지 않는다.**
+campaign baseline은 소스 충실 재현 기준 통과했고 전투 compact 조작부는 코드/좌표 회귀 검사까지 완료했다. 하지만 **최신 실제 CI, 5열 스테이지/편성/도감의 작은 가로폰 정보 밀도, 실제 배포 확인이 남아 있으므로 아직 사용자 테스트를 요청하지 않는다.**
 
 다음 실제 작업 우선순위:
-1. 현재 HEAD의 typecheck/test/build 실행 가능 여부 재확인
-2. 7개 맵·거점·캐릭터 발 위치/그림자·UI 가독성 수동 감사
-3. PC/가로 모바일 배치 감사
-4. Cloudflare Pages 최신 배포 확인
-5. 첫 테스트 게이트 전체 충족 시에만 사용자에게 테스트 요청
+1. 작은 가로 모바일의 스테이지 선택/편성/도감 5열 카드 정보 밀도 축약 및 가독성 감사
+2. 현재 HEAD의 typecheck/test/build 실행 가능 여부 재확인
+3. Cloudflare Pages 최신 배포 확인
+4. 첫 테스트 게이트 전체 충족 시에만 사용자에게 테스트 요청
 
 이 프롬프트에서 멈추지 말고 최신 GitHub `main`을 다시 읽은 뒤 실제 다음 개발 작업을 이어서 진행한다.
