@@ -54,6 +54,9 @@ const EMPTY_PROGRESS: GuestProgress = { clearedStageIds: [], treasureIds: [] };
 const rarityColor: Record<string, string> = {
   C: '#b9c2cf', B: '#8bd6a3', A: '#79baff', S: '#d79aff', SS: '#ffd56f',
 };
+const BATTLE_UNIT_HOTKEY_CODES: readonly string[] = [
+  'Digit1', 'Digit2', 'Digit3', 'Digit4', 'Digit5', 'Digit6', 'Digit7', 'Digit8', 'Digit9', 'Digit0',
+];
 
 function addText(scene: Phaser.Scene, x: number, y: number, text: string, size = 28, color = '#ffffff', align: 'left' | 'center' | 'right' = 'left'): Phaser.GameObjects.Text {
   return scene.add.text(x, y, text, {
@@ -106,6 +109,10 @@ function familyForUnit(unitId: string): { family: ArtFamily; tint: number; displ
 
 function isPortraitMobileViewport(): boolean {
   return window.innerWidth <= 900 && window.innerHeight > window.innerWidth;
+}
+
+function getUnitHotkeyLabel(index: number): string {
+  return index === 9 ? '0' : String(index + 1);
 }
 
 class BootScene extends Phaser.Scene {
@@ -203,8 +210,7 @@ class StageSelectScene extends Phaser.Scene {
       this.stageLayer!.add(card);
       this.stageLayer!.add(addText(this, x, 160, `STAGE ${index + 1}`, 16, unlocked ? '#8998ad' : '#5f6978', 'center').setOrigin(0.5));
       this.stageLayer!.add(addText(this, x, 202, stage.name, 25, unlocked ? '#ffffff' : '#747d89', 'center').setOrigin(0.5).setWordWrapWidth(195));
-      const stars = '★'.repeat(stage.difficulty) + '☆'.repeat(Math.max(0, 5 - stage.difficulty));
-      this.stageLayer!.add(addText(this, x, 246, stars, 17, unlocked ? COLORS.gold : '#5e6470', 'center').setOrigin(0.5));
+      this.stageLayer!.add(addText(this, x, 246, `난이도 ${stage.difficulty} / 12`, 16, unlocked ? COLORS.gold : '#5e6470', 'center').setOrigin(0.5));
       this.stageLayer!.add(addText(this, x, 282, BATTLEFIELD_THEME_LABELS[stage.theme], 16, unlocked ? '#9ec5d7' : '#606874', 'center').setOrigin(0.5));
       this.stageLayer!.add(addText(this, x, 310, `전장 ${stage.mapLength}m`, 14, unlocked ? '#aeb8c8' : '#59616d', 'center').setOrigin(0.5));
       this.stageLayer!.add(addText(this, x, 346, stage.subtitle, 14, unlocked ? '#c4cbd7' : '#626a76', 'center').setOrigin(0.5).setWordWrapWidth(194));
@@ -357,8 +363,7 @@ class BattleScene extends Phaser.Scene {
   create(): void {
     drawBattlefield(this, this.stage);
     const loading = addText(this, INTERNAL_WIDTH / 2, 330, '편성과 전장 불러오는 중…', 25, '#ffffff', 'center').setOrigin(0.5);
-    this.input.keyboard?.on('keydown-P', () => this.toggleManualPause());
-    this.input.keyboard?.on('keydown-ESC', () => this.toggleManualPause());
+    this.input.keyboard?.on('keydown', (event: KeyboardEvent) => this.handleBattleHotkey(event));
     void loadGuestProgress().then((progress) => {
       if (!this.scene.isActive()) return;
       if (!isStageUnlocked(this.stage.id, progress.clearedStageIds)) {
@@ -394,6 +399,46 @@ class BattleScene extends Phaser.Scene {
       this.resolved = true;
       this.time.delayedCall(700, () => this.scene.start('result', { stageId: this.stage.id, winner: this.state.battle.winner }));
     }
+  }
+
+  private canAcceptBattleAction(): boolean {
+    return this.ready && !this.resolved && !this.manuallyPaused && !isPortraitMobileViewport();
+  }
+
+  private handleBattleHotkey(event: KeyboardEvent): void {
+    if (event.code === 'KeyP' || event.code === 'Escape') {
+      this.toggleManualPause();
+      return;
+    }
+    if (!this.canAcceptBattleAction()) return;
+
+    const slotIndex = BATTLE_UNIT_HOTKEY_CODES.indexOf(event.code);
+    if (slotIndex >= 0) {
+      const slot = PLAYER_SLOTS[slotIndex];
+      if (slot) this.trySpawnSlot(slot.slotId);
+      return;
+    }
+    if (event.code === 'KeyQ') {
+      this.tryUpgradeSupplyInput();
+      return;
+    }
+    if (event.code === 'KeyE') this.tryFireBaseWeaponInput();
+  }
+
+  private trySpawnSlot(slotId: string): void {
+    if (!this.canAcceptBattleAction()) return;
+    trySpawnPlayerUnit(this.state, slotId);
+  }
+
+  private tryUpgradeSupplyInput(): void {
+    if (!this.canAcceptBattleAction()) return;
+    tryUpgradeSupply(this.state);
+  }
+
+  private tryFireBaseWeaponInput(): void {
+    if (!this.canAcceptBattleAction()) return;
+    const result = tryFireBaseWeapon(this.state);
+    if (result.ok) this.playBaseWeaponFx();
   }
 
   private toggleManualPause(): void {
@@ -481,11 +526,13 @@ class BattleScene extends Phaser.Scene {
       const x = 102 + col * 205;
       const y = 579 + row * 72;
       const unlocked = activeIds.has(slot.slotId);
+      const hotkeyLabel = getUnitHotkeyLabel(index);
       const border = unlocked ? Phaser.Display.Color.HexStringToColor(rarityColor[slot.rarity] ?? '#ffffff').color : 0x454e5b;
       const bg = this.add.rectangle(x, y, 188, 62, unlocked ? 0x28303e : 0x1c222c).setStrokeStyle(2, border, 0.85);
       const art = familyForUnit(slot.definition.id);
       const portrait = this.add.sprite(x - 69, y, art.family.idle.key, 0).setTint(unlocked ? art.tint : 0x343840).setAlpha(unlocked ? 1 : 0.45).setDepth(4);
       portrait.setScale((50 / art.family.idle.frameHeight) * art.displayScale);
+      addText(this, x + 82, y - 25, hotkeyLabel, 14, unlocked ? '#9fb3ca' : '#555f6d', 'right').setOrigin(1, 0).setDepth(7);
 
       if (!unlocked) {
         addText(this, x - 43, y - 22, '미해금', 15, '#7c8490').setDepth(5);
@@ -499,34 +546,18 @@ class BattleScene extends Phaser.Scene {
       addText(this, x - 43, y - 25, `${slot.rarity} · ${slot.displayName}`, 15, '#ffffff').setDepth(5);
       const cost = addText(this, x - 43, y + 2, `${slot.cost} 보급`, 15, '#f2d37c').setDepth(5);
       const cooldown = addText(this, x + 82, y + 2, '', 15, '#d8e1ef', 'right').setOrigin(1, 0).setDepth(7);
-      bg.on('pointerdown', () => {
-        if (this.manuallyPaused) return;
-        const result = trySpawnPlayerUnit(this.state, slot.slotId);
-        if (!result.ok) this.cameras.main.shake(55, 0.0012);
-      });
+      bg.on('pointerdown', () => this.trySpawnSlot(slot.slotId));
       this.buttons.set(slot.slotId, { bg, shade, cooldown, cost });
     });
 
     const upgradeBg = this.add.rectangle(1145, 580, 220, 60, 0x302a1c).setStrokeStyle(3, 0xc59d4b).setInteractive({ useHandCursor: true });
     this.supplyUpgradeText = addText(this, 1145, 570, '', 17, '#ffe29a', 'center').setOrigin(0.5);
-    addText(this, 1145, 594, '보급소 강화', 16, '#ffffff', 'center').setOrigin(0.5);
-    upgradeBg.on('pointerdown', () => {
-      if (this.manuallyPaused) return;
-      const result = tryUpgradeSupply(this.state);
-      if (!result.ok) this.cameras.main.shake(55, 0.0012);
-    });
+    addText(this, 1145, 594, 'Q · 보급소 강화', 16, '#ffffff', 'center').setOrigin(0.5);
+    upgradeBg.on('pointerdown', () => this.tryUpgradeSupplyInput());
 
     this.baseWeaponBg = this.add.rectangle(1145, 651, 220, 60, 0x26394a).setStrokeStyle(3, 0x72b7db).setInteractive({ useHandCursor: true });
-    this.baseWeaponText = addText(this, 1145, 651, '전선포 · 발사 가능', 17, '#bfe8ff', 'center').setOrigin(0.5);
-    this.baseWeaponBg.on('pointerdown', () => {
-      if (this.manuallyPaused) return;
-      const result = tryFireBaseWeapon(this.state);
-      if (!result.ok) {
-        this.cameras.main.shake(55, 0.0012);
-        return;
-      }
-      this.playBaseWeaponFx();
-    });
+    this.baseWeaponText = addText(this, 1145, 651, 'E · 전선포 · 발사 가능', 17, '#bfe8ff', 'center').setOrigin(0.5);
+    this.baseWeaponBg.on('pointerdown', () => this.tryFireBaseWeaponInput());
   }
 
   private playBaseWeaponFx(): void {
@@ -869,11 +900,11 @@ class BattleScene extends Phaser.Scene {
 
     const weaponCooldown = getBaseWeaponCooldownRemaining(this.state);
     if (weaponCooldown > 0) {
-      this.baseWeaponText.setText(`전선포 · ${(weaponCooldown / 30).toFixed(1)}초`);
+      this.baseWeaponText.setText(`E · 전선포 · ${(weaponCooldown / 30).toFixed(1)}초`);
       this.baseWeaponText.setColor('#9aa9b8');
       this.baseWeaponBg.setFillStyle(0x25303a, 1);
     } else {
-      this.baseWeaponText.setText('전선포 · 발사 가능');
+      this.baseWeaponText.setText('E · 전선포 · 발사 가능');
       this.baseWeaponText.setColor('#bfe8ff');
       this.baseWeaponBg.setFillStyle(0x26394a, 1);
     }
