@@ -57,12 +57,16 @@ function addButton(
   accent = 0x657086,
 ): Phaser.GameObjects.Container {
   const bg = scene.add.rectangle(0, 0, width, height, 0x252b38, 0.98).setStrokeStyle(3, accent, 1);
-  const text = addText(scene, 0, 0, label, 18, '#ffffff', 'center').setOrigin(0.5);
+  const text = addText(scene, 0, 0, label, isCompactMobileViewport() ? 26 : 18, '#ffffff', 'center').setOrigin(0.5);
   const container = scene.add.container(x, y, [bg, text]);
   bg.setInteractive({ useHandCursor: true });
   bg.on('pointerover', () => bg.setFillStyle(0x343c4d, 1));
-  bg.on('pointerout', () => bg.setFillStyle(0x252b38, 0.98));
+  bg.on('pointerout', () => {
+    bg.setFillStyle(0x252b38, 0.98);
+    container.setScale(1);
+  });
   bg.on('pointerdown', () => container.setScale(0.98));
+  bg.on('pointerupoutside', () => container.setScale(1));
   bg.on('pointerup', () => {
     container.setScale(1);
     onClick();
@@ -105,15 +109,18 @@ export class CatalogScene extends Phaser.Scene {
 
   create(): void {
     drawBackdrop(this);
+    const compact = isCompactMobileViewport();
+    const navigationHeight = compact ? 84 : 50;
+    const tabHeight = compact ? 84 : 54;
     addText(this, 54, 34, '도 감', 44, '#fff4cf');
-    addText(this, 56, 88, '제1장 동료와 확정 보물을 한곳에서 확인한다.', isCompactMobileViewport() ? 22 : 18, '#b8c0ce');
-    addButton(this, 1165, 62, 160, 50, '메인', () => this.scene.start('main-menu'), 0x586275);
+    addText(this, 56, 88, '제1장 동료와 확정 보물을 한곳에서 확인한다.', compact ? 22 : 18, '#b8c0ce');
+    addButton(this, 1165, compact ? 70 : 62, 160, navigationHeight, '메인', () => this.scene.start('main-menu'), 0x586275);
 
-    this.allyTab = addButton(this, 245, 135, 280, 54, '동료 10종', () => this.setMode('ALLIES'), 0x6d91b5);
-    this.treasureTab = addButton(this, 545, 135, 280, 54, '보물 20종', () => this.setMode('TREASURES'), 0xb69755);
-    addButton(this, 92, 664, 140, 50, '◀ 이전', () => this.changePage(-1), 0x586275);
-    addButton(this, 1188, 664, 140, 50, '다음 ▶', () => this.changePage(1), 0x586275);
-    this.pageText = addText(this, INTERNAL_WIDTH / 2, 652, '', isCompactMobileViewport() ? 22 : 18, '#aab4c3', 'center').setOrigin(0.5);
+    this.allyTab = addButton(this, 245, 135, 280, tabHeight, '동료 10종', () => this.setMode('ALLIES'), 0x6d91b5);
+    this.treasureTab = addButton(this, 545, 135, 280, tabHeight, '보물 20종', () => this.setMode('TREASURES'), 0xb69755);
+    addButton(this, 92, compact ? 660 : 664, 140, navigationHeight, '◀ 이전', () => this.changePage(-1), 0x586275);
+    addButton(this, 1188, compact ? 660 : 664, 140, navigationHeight, '다음 ▶', () => this.changePage(1), 0x586275);
+    this.pageText = addText(this, INTERNAL_WIDTH / 2, 652, '', compact ? 22 : 18, '#aab4c3', 'center').setOrigin(0.5);
 
     this.render();
     void loadGuestProgress().then((progress) => {
