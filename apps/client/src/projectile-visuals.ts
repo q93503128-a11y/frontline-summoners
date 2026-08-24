@@ -70,6 +70,7 @@ export function getProjectileArcOffsetY(style: AttackFxStyle, progress: number):
   const profile = getProjectileVisualProfile(style);
   if (!profile) return 0;
   const t = Math.max(0, Math.min(1, progress));
+  if (profile.arcHeightPx === 0 || t === 0 || t === 1) return 0;
   return -4 * profile.arcHeightPx * t * (1 - t);
 }
 
