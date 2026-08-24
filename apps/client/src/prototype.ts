@@ -119,8 +119,10 @@ export function getUnlockedPlayerSlots(clearedStageIds: readonly string[]): read
 
 export function isStageUnlocked(stageId: string, clearedStageIds: readonly string[]): boolean {
   const index = STAGES.findIndex((stage) => stage.id === stageId);
-  if (index <= 0) return true;
-  return clearedStageIds.includes(STAGES[index - 1]!.id);
+  if (index < 0) return false;
+  if (index === 0) return true;
+  const cleared = new Set(clearedStageIds);
+  return STAGES.slice(0, index).every((stage) => cleared.has(stage.id));
 }
 
 export function getTreasureIdsForClearedStages(clearedStageIds: readonly string[]): readonly string[] {
