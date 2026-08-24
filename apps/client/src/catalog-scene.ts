@@ -10,6 +10,7 @@ import {
   getUnlockedSlotIds,
 } from './prototype';
 import { loadGuestProgress, type GuestProgress } from './save';
+import { isCompactMobileViewport } from './viewport';
 
 const FONT = '"Malgun Gothic", "Apple SD Gothic Neo", "Noto Sans KR", sans-serif';
 const EMPTY_PROGRESS: GuestProgress = { clearedStageIds: [], treasureIds: [] };
@@ -23,10 +24,6 @@ const rarityColor: Record<string, string> = {
   S: '#d79aff',
   SS: '#ffd56f',
 };
-
-function isCompactMobileViewport(): boolean {
-  return Math.min(window.innerWidth, window.innerHeight) <= 540;
-}
 
 function addText(
   scene: Phaser.Scene,
