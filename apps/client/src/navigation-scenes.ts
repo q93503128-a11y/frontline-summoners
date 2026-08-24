@@ -63,9 +63,10 @@ export class MainMenuScene extends Phaser.Scene {
     const progressText = addText(this, compact ? 850 : 900, compact ? 122 : 110, '진행도 불러오는 중…', compact ? 22 : 18, COLORS.muted);
 
     const menuButtonHeight = compact ? 108 : 92;
-    addButton(this, 230, compact ? 425 : 435, 310, menuButtonHeight, '출 정', () => this.scene.start('stage-hub'), 0xc5a04c);
-    addButton(this, 575, compact ? 425 : 435, 310, menuButtonHeight, '편 성', () => this.scene.start('deck'), 0x5f8fb8);
-    addButton(this, 920, compact ? 425 : 435, 310, menuButtonHeight, '도 감', () => this.scene.start('catalog'), 0x8c7650);
+    addButton(this, 170, compact ? 425 : 435, 250, menuButtonHeight, '출 정', () => this.scene.start('stage-hub'), 0xc5a04c);
+    addButton(this, 480, compact ? 425 : 435, 250, menuButtonHeight, '편 성', () => this.scene.start('deck'), 0x5f8fb8);
+    addButton(this, 790, compact ? 425 : 435, 250, menuButtonHeight, '모 집', () => this.scene.start('recruitment'), 0x8b6fb5);
+    addButton(this, 1100, compact ? 425 : 435, 250, menuButtonHeight, '도 감', () => this.scene.start('catalog'), 0x8c7650);
     addText(this, compact ? 74 : 88, compact ? 610 : 628, compact ? '보물 첫 클리어 100% · 에너지 제한 없음' : '출정에서 전선 묶음을 고른 뒤 스테이지로 진입 · 에너지 제한 없음', compact ? 24 : 20, '#9cd6ad');
     if (!compact) addText(this, 1185, 675, 'PRE-ALPHA', 17, '#657086').setOrigin(1, 0.5);
 
