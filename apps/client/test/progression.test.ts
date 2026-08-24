@@ -40,8 +40,8 @@ test('clearing a stage opens only its immediate successor', () => {
 
 test('progression rejects unknown stage ids and cannot be skipped by a non-contiguous clear set', () => {
   assert.equal(isStageUnlocked('missing-stage', STAGES.map((stage) => stage.id)), false);
-  assert.throws(() => getStage('missing-stage'), /Unknown campaign stage: missing-stage/);
-  assert.throws(() => getStageNumber('missing-stage'), /Unknown campaign stage: missing-stage/);
+  assert.throws(() => getStage('missing-stage'), /Unknown stage: missing-stage/);
+  assert.throws(() => getStageNumber('missing-stage'), /Unknown progression stage: missing-stage/);
 
   const outOfOrder = [STAGES[2]!.id, STAGES[15]!.id];
   assert.deepEqual(getContiguousClearedStageIds(outOfOrder), []);
