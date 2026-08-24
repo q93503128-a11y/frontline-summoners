@@ -1,0 +1,45 @@
+name: Balance candidate probe
+on:
+  push:
+    branches: [main]
+    paths: [.github/workflows/balance-candidate-probe.yml]
+permissions:
+  contents: write
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with: {fetch-depth: 0}
+      - uses: actions/setup-node@v4
+        with: {node-version: 22}
+      - name: Probe later-stage starting supply without committing candidate
+        shell: bash
+        run: |
+          set -e
+          npm ci --ignore-scripts >/tmp/install.log 2>&1
+          cp content/stages/chapter-01.json /tmp/stages-original.json
+          node --input-type=module <<'NODE'
+          import {readFileSync,writeFileSync} from 'node:fs';
+          const path='content/stages/chapter-01.json';
+          const stages=JSON.parse(readFileSync(path,'utf8'));
+          for(let i=7;i<stages.length;i++) stages[i].startingSupply += 40;
+          writeFileSync(path,JSON.stringify(stages,null,2)+'\n');
+          NODE
+          node --experimental-transform-types --input-type=module >/tmp/candidate.log 2>&1 <<'NODE'
+          const {STAGES}=await import('./apps/client/src/prototype.ts');
+          const {autoPlayCampaignStage}=await import('./apps/client/test/campaign-baseline.ts');
+          const o=i=>({maxSeconds:i<5?[90,105,120,135,150][i]:i<10?[180,195,210,225,240][i-5]:i<15?[255,270,285,300,315][i-10]:[330,345,360,390,450][i-15],cannonBaseRatio:i<5?.75:i<10?.70:i<15?.72:.75,...(i<5?{cannonEnemyCount:2}:{})});
+          for(let n=0;n<20;n++){const r=autoPlayCampaignStage(n,STAGES.slice(0,n).map(s=>s.id),o(n)),s=r.state;console.log(JSON.stringify({stage:n+1,start:STAGES[n].startingSupply,winner:s.battle.winner,sec:+(s.battle.tick/30).toFixed(1),p:+(s.battle.bases.PLAYER.hp/s.battle.bases.PLAYER.maxHp).toFixed(3),e:+(s.battle.bases.ENEMY.hp/s.battle.bases.ENEMY.maxHp).toFixed(3),lvl:s.supplyLevel,sp:r.telemetry.spawnCount,up:r.telemetry.upgradeCount,empty:+(r.telemetry.longestEnemyPressureWithoutPlayerTicks/30).toFixed(1),players:[...r.telemetry.seenPlayerIds]}));}
+          NODE
+          mv /tmp/stages-original.json content/stages/chapter-01.json
+          {
+            printf 'source_sha=%s\nstrategy=ST8-ST20 startingSupply +40 only\n\n' "$GITHUB_SHA"
+            cat /tmp/candidate.log
+          } > docs/BALANCE_CANDIDATE_RESULT.txt
+          git config user.name frontline-ci
+          git config user.email frontline-ci@users.noreply.github.com
+          git rm .github/workflows/balance-candidate-probe.yml
+          git add docs/BALANCE_CANDIDATE_RESULT.txt
+          git commit -m 'chore: record starting-supply balance candidate'
+          git push origin HEAD:main
