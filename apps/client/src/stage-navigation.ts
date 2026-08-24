@@ -1,12 +1,12 @@
 import type { StageType } from '@frontline/content-schema';
+import stageCollectionsJson from '../../../content/stage-collections.json' with { type: 'json' };
 import {
-  SPECIAL_STAGES,
-  STAGES,
+  ALL_STAGES,
   getContiguousClearedStageIds,
   type PrototypeStage,
 } from './prototype.ts';
 
-export type StageCollectionId = 'chapter-01' | 'special-border-01';
+export type StageCollectionId = string;
 
 export interface StageCollection {
   readonly id: StageCollectionId;
@@ -18,28 +18,63 @@ export interface StageCollection {
   readonly requiredProgressionClears: number;
 }
 
+interface StageCollectionContent {
+  readonly id: string;
+  readonly stageType: StageType;
+  readonly title: string;
+  readonly shortTitle: string;
+  readonly description: string;
+  readonly stageIds: readonly string[];
+  readonly requiredProgressionClears: number;
+}
+
 export const STAGE_COLLECTIONS_PER_PAGE = 2;
 
-export const STAGE_COLLECTIONS: readonly StageCollection[] = [
-  {
-    id: 'chapter-01',
-    stageType: 'PROGRESSION',
-    title: '제1장 · 뒤집힌 국경',
-    shortTitle: '제1장',
-    description: '첫 전선을 밀며 동료와 보물을 확보한다.',
-    stages: STAGES,
-    requiredProgressionClears: 0,
-  },
-  {
-    id: 'special-border-01',
-    stageType: 'SPECIAL',
-    title: '특수전 · 뒤집힌 국경',
-    shortTitle: '특수전',
-    description: '출격 제한·러시·장거리·보스 연전 도전.',
-    stages: SPECIAL_STAGES,
-    requiredProgressionClears: STAGES.length,
-  },
-];
+const ALL_STAGE_BY_ID = new Map(ALL_STAGES.map((stage) => [stage.id, stage] as const));
+
+function parseStageCollection(raw: StageCollectionContent, index: number): StageCollection {
+  const context = `stageCollections[${index}]`;
+  if (!raw.id.trim()) throw new Error(`${context}.id must be non-empty`);
+  if (raw.stageType !== 'PROGRESSION' && raw.stageType !== 'SPECIAL') throw new Error(`${context}.stageType is unknown`);
+  if (!raw.title.trim() || !raw.shortTitle.trim() || !raw.description.trim()) throw new Error(`${context} text fields must be non-empty`);
+  if (!Array.isArray(raw.stageIds) || raw.stageIds.length === 0) throw new Error(`${context}.stageIds must be non-empty`);
+  if (new Set(raw.stageIds).size !== raw.stageIds.length) throw new Error(`${context}.stageIds must be unique`);
+  if (!Number.isInteger(raw.requiredProgressionClears) || raw.requiredProgressionClears < 0) {
+    throw new Error(`${context}.requiredProgressionClears must be a non-negative integer`);
+  }
+
+  const stages = raw.stageIds.map((stageId) => {
+    const stage = ALL_STAGE_BY_ID.get(stageId);
+    if (!stage) throw new Error(`${context} references unknown stage: ${stageId}`);
+    if (stage.stageType !== raw.stageType) throw new Error(`${context} mixes ${raw.stageType} with ${stage.id}:${stage.stageType}`);
+    return stage;
+  });
+  return {
+    id: raw.id,
+    stageType: raw.stageType,
+    title: raw.title,
+    shortTitle: raw.shortTitle,
+    description: raw.description,
+    stages,
+    requiredProgressionClears: raw.requiredProgressionClears,
+  };
+}
+
+function buildStageCollections(): readonly StageCollection[] {
+  const collections = (stageCollectionsJson as readonly StageCollectionContent[]).map(parseStageCollection);
+  const ids = collections.map((collection) => collection.id);
+  if (new Set(ids).size !== ids.length) throw new Error('stage collection ids must be unique');
+
+  const assignedStageIds = collections.flatMap((collection) => collection.stages.map((stage) => stage.id));
+  if (new Set(assignedStageIds).size !== assignedStageIds.length) throw new Error('a stage cannot belong to more than one collection');
+  if (assignedStageIds.length !== ALL_STAGES.length) throw new Error('every playable stage must belong to exactly one collection');
+  for (const stage of ALL_STAGES) {
+    if (!assignedStageIds.includes(stage.id)) throw new Error(`stage is missing from collection data: ${stage.id}`);
+  }
+  return collections;
+}
+
+export const STAGE_COLLECTIONS: readonly StageCollection[] = buildStageCollections();
 
 export function getStageCollection(collectionId: string): StageCollection {
   const collection = STAGE_COLLECTIONS.find((candidate) => candidate.id === collectionId);
