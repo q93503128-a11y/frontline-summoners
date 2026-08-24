@@ -185,7 +185,7 @@ test('compact navigation buttons stay finger-sized across extracted sortie, deck
   assert.match(navigation, /compact \? 84 : 50/);
   assert.match(navigation, /compact \? 84 : 60/);
   assert.match(navigation, /compact \? 84 : 52/);
-  assert.match(deck, /compact \? 76 : 48/);
+  assert.match(deck, /compact \? 84 : 48/);
   assert.match(battle, /compact \? 84 : 42, '일시정지'/);
   assert.match(battle, /isCompactMobileViewport\(\) \? 84 : 58/);
   assert.match(result, /const resultButtonHeight = compact \? 84 : 68;/);
