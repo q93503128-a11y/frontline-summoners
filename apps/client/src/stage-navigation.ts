@@ -2,6 +2,7 @@ import type { StageType } from '@frontline/content-schema';
 import stageCollectionsJson from '../../../content/stage-collections.json' with { type: 'json' };
 import {
   ALL_STAGES,
+  STAGES,
   getContiguousClearedStageIds,
   type PrototypeStage,
 } from './prototype.ts';
@@ -15,6 +16,9 @@ export interface StageCollection {
   readonly shortTitle: string;
   readonly description: string;
   readonly stages: readonly PrototypeStage[];
+  /** Progression stage whose clear unlocks this collection. Undefined means available from the start. */
+  readonly unlockAfterStageId?: string;
+  /** Derived ordinal used only for progress/countdown UI. The stage ID above is the authority. */
   readonly requiredProgressionClears: number;
 }
 
@@ -25,12 +29,13 @@ interface StageCollectionContent {
   readonly shortTitle: string;
   readonly description: string;
   readonly stageIds: readonly string[];
-  readonly requiredProgressionClears: number;
+  readonly unlockAfterStageId?: string;
 }
 
 export const STAGE_COLLECTIONS_PER_PAGE = 2;
 
 const ALL_STAGE_BY_ID = new Map(ALL_STAGES.map((stage) => [stage.id, stage] as const));
+const PROGRESSION_STAGE_INDEX = new Map(STAGES.map((stage, index) => [stage.id, index] as const));
 
 function parseStageCollection(raw: StageCollectionContent, index: number): StageCollection {
   const context = `stageCollections[${index}]`;
@@ -39,9 +44,6 @@ function parseStageCollection(raw: StageCollectionContent, index: number): Stage
   if (!raw.title.trim() || !raw.shortTitle.trim() || !raw.description.trim()) throw new Error(`${context} text fields must be non-empty`);
   if (!Array.isArray(raw.stageIds) || raw.stageIds.length === 0) throw new Error(`${context}.stageIds must be non-empty`);
   if (new Set(raw.stageIds).size !== raw.stageIds.length) throw new Error(`${context}.stageIds must be unique`);
-  if (!Number.isInteger(raw.requiredProgressionClears) || raw.requiredProgressionClears < 0) {
-    throw new Error(`${context}.requiredProgressionClears must be a non-negative integer`);
-  }
 
   const stages = raw.stageIds.map((stageId) => {
     const stage = ALL_STAGE_BY_ID.get(stageId);
@@ -49,6 +51,21 @@ function parseStageCollection(raw: StageCollectionContent, index: number): Stage
     if (stage.stageType !== raw.stageType) throw new Error(`${context} mixes ${raw.stageType} with ${stage.id}:${stage.stageType}`);
     return stage;
   });
+
+  let unlockAfterStageId: string | undefined;
+  let requiredProgressionClears = 0;
+  if (raw.unlockAfterStageId !== undefined) {
+    if (typeof raw.unlockAfterStageId !== 'string' || raw.unlockAfterStageId.trim().length === 0) {
+      throw new Error(`${context}.unlockAfterStageId must be a non-empty progression stage id`);
+    }
+    const progressionIndex = PROGRESSION_STAGE_INDEX.get(raw.unlockAfterStageId);
+    if (progressionIndex === undefined) {
+      throw new Error(`${context}.unlockAfterStageId references unknown progression stage: ${raw.unlockAfterStageId}`);
+    }
+    unlockAfterStageId = raw.unlockAfterStageId;
+    requiredProgressionClears = progressionIndex + 1;
+  }
+
   return {
     id: raw.id,
     stageType: raw.stageType,
@@ -56,7 +73,8 @@ function parseStageCollection(raw: StageCollectionContent, index: number): Stage
     shortTitle: raw.shortTitle,
     description: raw.description,
     stages,
-    requiredProgressionClears: raw.requiredProgressionClears,
+    ...(unlockAfterStageId === undefined ? {} : { unlockAfterStageId }),
+    requiredProgressionClears,
   };
 }
 
@@ -103,7 +121,8 @@ export function getStageCollectionPage(
 }
 
 export function isStageCollectionUnlocked(collection: StageCollection, clearedStageIds: readonly string[]): boolean {
-  return getContiguousClearedStageIds(clearedStageIds).length >= collection.requiredProgressionClears;
+  if (!collection.unlockAfterStageId) return true;
+  return getContiguousClearedStageIds(clearedStageIds).includes(collection.unlockAfterStageId);
 }
 
 export function getCollectionClearedIds(
