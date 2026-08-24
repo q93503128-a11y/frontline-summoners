@@ -41,3 +41,38 @@ test('player specialties are visible in deck and enemy traits are visible in bat
   assert.match(source, /formatCompactTraits\(unit\.definition\)/);
   assert.match(source, /unit\.team === 'ENEMY' && unit\.state !== UnitState\.Dying/);
 });
+
+test('PC battle hotkeys map 1 through 0 to units, Q to supply upgrade, and E to the base weapon', async () => {
+  const source = await readMain();
+  assert.match(source, /'Digit1', 'Digit2', 'Digit3', 'Digit4', 'Digit5', 'Digit6', 'Digit7', 'Digit8', 'Digit9', 'Digit0'/);
+  assert.match(source, /BATTLE_UNIT_HOTKEY_CODES\.indexOf\(event\.code\)/);
+  assert.match(source, /event\.code === 'KeyQ'/);
+  assert.match(source, /event\.code === 'KeyE'/);
+  assert.match(source, /event\.code === 'KeyP' \|\| event\.code === 'Escape'/);
+  assert.match(source, /Q · 보급소 강화/);
+  assert.match(source, /E · 전선포 · 발사 가능/);
+  assert.match(source, /getUnitHotkeyLabel\(index\)/);
+});
+
+test('mouse and keyboard battle actions share quiet failure paths without camera shake', async () => {
+  const source = await readMain();
+  assert.match(source, /bg\.on\('pointerdown', \(\) => this\.trySpawnSlot\(slot\.slotId\)\)/);
+  assert.match(source, /upgradeBg\.on\('pointerdown', \(\) => this\.tryUpgradeSupplyInput\(\)\)/);
+  assert.match(source, /this\.baseWeaponBg\.on\('pointerdown', \(\) => this\.tryFireBaseWeaponInput\(\)\)/);
+
+  const actionStart = source.indexOf('private trySpawnSlot');
+  const actionEnd = source.indexOf('private toggleManualPause');
+  assert.ok(actionStart >= 0 && actionEnd > actionStart);
+  const actionBlock = source.slice(actionStart, actionEnd);
+  assert.match(actionBlock, /trySpawnPlayerUnit\(this\.state, slotId\);/);
+  assert.match(actionBlock, /tryUpgradeSupply\(this\.state\);/);
+  assert.match(actionBlock, /const result = tryFireBaseWeapon\(this\.state\);/);
+  assert.match(actionBlock, /if \(result\.ok\) this\.playBaseWeaponFx\(\);/);
+  assert.doesNotMatch(actionBlock, /cameras\.main\.shake/);
+});
+
+test('stage cards render the restored twelve-step difficulty scale without legacy five-star overflow', async () => {
+  const source = await readMain();
+  assert.match(source, /`난이도 \$\{stage\.difficulty\} \/ 12`/);
+  assert.doesNotMatch(source, /const stars = '★'\.repeat/);
+});
