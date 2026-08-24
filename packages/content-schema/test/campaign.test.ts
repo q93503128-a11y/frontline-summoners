@@ -1,7 +1,15 @@
 import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
 import test from 'node:test';
-import { parseCampaignBundle, parseCampaignStages, parseEnemies, parsePlayerUnits } from '../src/index.ts';
+import {
+  DEFAULT_ENEMY_UNIT_CAP,
+  DEFAULT_PLAYER_UNIT_CAP,
+  MAX_STAGE_DIFFICULTY,
+  parseCampaignBundle,
+  parseCampaignStages,
+  parseEnemies,
+  parsePlayerUnits,
+} from '../src/index.ts';
 
 async function readJson(relativePath: string): Promise<unknown> {
   const url = new URL(relativePath, import.meta.url);
@@ -28,6 +36,15 @@ test('chapter one bundle has 10 player units, 10 enemies, 20 stages and seven ba
   assert.equal(bundle.stages[0]?.id, 'border-01');
   assert.equal(bundle.stages[19]?.id, 'border-20');
   assert.ok(new Set(bundle.stages.map((stage) => stage.theme)).size >= 7);
+});
+
+test('chapter one defaults to progression stages and live simultaneous unit caps', async () => {
+  const bundle = await loadBundle();
+  assert.ok(bundle.stages.every((stage) => stage.stageType === 'PROGRESSION'));
+  assert.ok(bundle.stages.every((stage) => stage.playerUnitCap === DEFAULT_PLAYER_UNIT_CAP));
+  assert.ok(bundle.stages.every((stage) => stage.enemyUnitCap === DEFAULT_ENEMY_UNIT_CAP));
+  assert.ok(bundle.stages.every((stage) => stage.formationRestrictions.allowedRarities.length === 0));
+  assert.ok(bundle.stages.every((stage) => stage.specialRules.length === 0));
 });
 
 test('chapter one keeps exactly nine deterministic character unlock milestones', async () => {
@@ -106,4 +123,46 @@ test('campaign validator rejects unknown enemy references', () => {
     },
   ];
   assert.throws(() => parseCampaignStages(bad, { enemyIds: new Set(['enemy']) }), /unknown enemy/);
+});
+
+test('stage schema supports twelve difficulty levels, per-stage unit caps and restored restriction DSL', () => {
+  const stage = {
+    id: 'special-a', chapter: 'special', name: 'special', subtitle: 'special', stageType: 'SPECIAL', difficulty: MAX_STAGE_DIFFICULTY,
+    playerBaseHp: 100, enemyBaseHp: 100, startingSupply: 0, mapLength: 800,
+    theme: 'meadow', decorSeed: 1, playerUnitCap: 5, enemyUnitCap: 20,
+    formationRestrictions: {
+      allowedRarities: ['C', 'B'],
+      maxRarity: 'A',
+      allowedRoles: ['전열'],
+      maxUnitCost: 1000,
+      requiredUnitTags: ['MAGIC'],
+      forbiddenUnitTags: ['HUMAN'],
+      maxDistinctUnits: 5,
+      sameFactionOnly: true,
+    },
+    specialRules: ['base-weapon-disabled'],
+    waves: [{ enemyId: 'enemy', atTick: 0, count: 1, intervalTicks: 1 }],
+    treasure: { id: 't-special', name: 't', effect: 't' },
+  };
+  const [parsed] = parseCampaignStages([stage], { enemyIds: new Set(['enemy']) });
+  assert.equal(parsed?.stageType, 'SPECIAL');
+  assert.equal(parsed?.difficulty, 12);
+  assert.equal(parsed?.playerUnitCap, 5);
+  assert.equal(parsed?.enemyUnitCap, 20);
+  assert.deepEqual(parsed?.formationRestrictions.allowedRarities, ['C', 'B']);
+  assert.deepEqual(parsed?.formationRestrictions.requiredUnitTags, ['MAGIC']);
+  assert.equal(parsed?.formationRestrictions.sameFactionOnly, true);
+  assert.deepEqual(parsed?.specialRules, ['base-weapon-disabled']);
+});
+
+test('stage schema rejects difficulty above 12 and invalid unit caps', () => {
+  const base = {
+    id: 'a', chapter: 'x', name: 'a', subtitle: 'a', difficulty: 1,
+    playerBaseHp: 100, enemyBaseHp: 100, startingSupply: 0, mapLength: 800,
+    theme: 'meadow', decorSeed: 1,
+    waves: [{ enemyId: 'enemy', atTick: 0, count: 1, intervalTicks: 1 }],
+    treasure: { id: 't', name: 't', effect: 't' },
+  };
+  assert.throws(() => parseCampaignStages([{ ...base, difficulty: 13 }]), /1\.\.12/);
+  assert.throws(() => parseCampaignStages([{ ...base, playerUnitCap: 0 }]), /1\.\.500/);
 });
