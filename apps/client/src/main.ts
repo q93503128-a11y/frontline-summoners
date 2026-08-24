@@ -15,6 +15,8 @@ import {
 import { ART_BY_ID, ART_FAMILIES, UNIT_ART, type ArtFamily, type AttackFxStyle, type SpriteStrip } from './assets';
 import { BATTLEFIELD_THEME_LABELS, drawBattlefield, getBattlefieldBasePalette } from './battlefield';
 import { classifyImpact, getAttackSpriteFrame, getLoopingSpriteFrame } from './combat-visuals';
+import { formatCombatTraits, formatCompactTraits, formatDamageSpecialty } from './combat-trait-labels';
+import { getProjectileArcOffsetY, getProjectileTravelPlan, usesTravelProjectile } from './projectile-visuals';
 import {
   PLAYER_SLOTS,
   STAGES,
@@ -248,7 +250,7 @@ class DeckScene extends Phaser.Scene {
       const y = 280 + row * 260;
       const unlocked = unlockedIds.has(slot.slotId);
       const border = unlocked ? Phaser.Display.Color.HexStringToColor(rarityColor[slot.rarity] ?? '#ffffff').color : 0x4a5260;
-      const card = this.add.rectangle(x, y, 220, 224, unlocked ? 0x252c3a : 0x1d222b, 0.98).setStrokeStyle(3, border, unlocked ? 0.85 : 0.65);
+      const card = this.add.rectangle(x, y, 220, 244, unlocked ? 0x252c3a : 0x1d222b, 0.98).setStrokeStyle(3, border, unlocked ? 0.85 : 0.65);
       this.cardsLayer!.add(card);
       const art = familyForUnit(slot.definition.id);
       const portrait = this.add.sprite(x, y - 58, art.family.idle.key, 0).setTint(unlocked ? art.tint : 0x30343c).setAlpha(unlocked ? 1 : 0.5);
@@ -257,8 +259,11 @@ class DeckScene extends Phaser.Scene {
       this.cardsLayer!.add(addText(this, x - 94, y - 102, unlocked ? slot.rarity : 'LOCK', 15, unlocked ? (rarityColor[slot.rarity] ?? '#ffffff') : '#656d78'));
       this.cardsLayer!.add(addText(this, x, y + 4, unlocked ? slot.displayName : '미해금', 22, unlocked ? '#ffffff' : '#78818d', 'center').setOrigin(0.5));
       if (unlocked) {
-        this.cardsLayer!.add(addText(this, x, y + 38, `${slot.role} · ${slot.cost} 보급`, 16, '#f2d37c', 'center').setOrigin(0.5));
-        this.cardsLayer!.add(addText(this, x, y + 72, slot.description, 13, '#b9c2d0', 'center').setOrigin(0.5).setWordWrapWidth(190));
+        this.cardsLayer!.add(addText(this, x, y + 34, `${slot.role} · ${slot.cost} 보급`, 15, '#f2d37c', 'center').setOrigin(0.5));
+        this.cardsLayer!.add(addText(this, x, y + 57, formatCombatTraits(slot.definition), 13, '#9fcfff', 'center').setOrigin(0.5));
+        const specialty = formatDamageSpecialty(slot.definition);
+        if (specialty) this.cardsLayer!.add(addText(this, x, y + 78, specialty, 12, '#ffd493', 'center').setOrigin(0.5));
+        this.cardsLayer!.add(addText(this, x, y + (specialty ? 103 : 84), slot.description, 11, '#b9c2d0', 'center').setOrigin(0.5).setWordWrapWidth(190));
       } else {
         const unlockStage = getUnlockStageForSlot(slot.slotId);
         const requirement = unlockStage ? `STAGE ${getStageNumber(unlockStage.id)} 첫 클리어\n${unlockStage.name}` : '캠페인 진행으로 해금';
@@ -273,9 +278,21 @@ interface UnitView {
   readonly shadow: Phaser.GameObjects.Ellipse;
   readonly hpBg: Phaser.GameObjects.Rectangle;
   readonly hp: Phaser.GameObjects.Rectangle;
+  readonly trait: Phaser.GameObjects.Text;
   stateKey: string;
   lastHp: number;
   lastAttackFxKey: string;
+}
+
+interface ProjectileView {
+  readonly body: Phaser.GameObjects.Container;
+  readonly style: AttackFxStyle;
+  readonly startX: number;
+  readonly startY: number;
+  readonly endX: number;
+  readonly endY: number;
+  readonly startTick: number;
+  readonly endTick: number;
 }
 
 interface UnitButtonView {
@@ -292,6 +309,7 @@ class BattleScene extends Phaser.Scene {
   private accumulator = 0;
   private views = new Map<number, UnitView>();
   private buttons = new Map<string, UnitButtonView>();
+  private projectiles: ProjectileView[] = [];
   private supplyText!: Phaser.GameObjects.Text;
   private supplyBar!: Phaser.GameObjects.Rectangle;
   private supplyLevelText!: Phaser.GameObjects.Text;
@@ -319,6 +337,7 @@ class BattleScene extends Phaser.Scene {
     this.lastEnemyBaseHp = 0;
     this.views.clear();
     this.buttons.clear();
+    this.projectiles = [];
     this.activeSlots = [];
   }
 
@@ -348,9 +367,11 @@ class BattleScene extends Phaser.Scene {
     if (!this.ready || this.resolved) return;
     this.accumulator += Math.min(delta, 120);
     while (this.accumulator >= SIM_TICK_MS && this.state.battle.winner === null) {
+      this.syncProjectileLaunches();
       stepPlayableBattle(this.state);
       this.accumulator -= SIM_TICK_MS;
     }
+    this.syncProjectileViews();
     this.syncUnits();
     this.syncHud();
     if (this.state.battle.winner !== null) {
@@ -481,6 +502,7 @@ class BattleScene extends Phaser.Scene {
     sprite.setScale((art.family.displayHeight / art.family.run.frameHeight) * art.displayScale);
     const hpBg = this.add.rectangle(sprite.x, 443, 54, 7, 0x161a21).setDepth(5);
     const hp = this.add.rectangle(sprite.x - 26, 443, 52, 5, unit.team === 'PLAYER' ? 0x78dca0 : 0xf1837c).setOrigin(0, 0.5).setDepth(6);
+    const trait = addText(this, sprite.x, 425, unit.team === 'ENEMY' ? formatCompactTraits(unit.definition) : '', 11, '#ffd0c8', 'center').setOrigin(0.5).setDepth(7);
 
     const spawn = this.add.ellipse(x, 519, 34, 9, unit.team === 'PLAYER' ? 0x9cd7ff : 0xffa39b, 0.42).setDepth(2);
     this.tweens.add({
@@ -493,7 +515,104 @@ class BattleScene extends Phaser.Scene {
       onComplete: () => spawn.destroy(),
     });
 
-    return { sprite, shadow, hpBg, hp, stateKey: '', lastHp: unit.hp, lastAttackFxKey: '' };
+    return { sprite, shadow, hpBg, hp, trait, stateKey: '', lastHp: unit.hp, lastAttackFxKey: '' };
+  }
+
+  private getProjectileTargetScreenX(unit: BattleUnit): number {
+    const direction = unit.team === 'PLAYER' ? 1 : -1;
+    let bestDistance = Number.POSITIVE_INFINITY;
+    let bestAnchor: number | null = null;
+    for (const target of this.state.battle.units) {
+      if (target.team === unit.team || target.state === UnitState.Dying || target.state === UnitState.NaturalKnockback) continue;
+      const distance = direction * (target.anchorX - unit.anchorX);
+      if (distance < unit.definition.attackMinRange || distance > unit.definition.attackMaxRange) continue;
+      if (distance < bestDistance) {
+        bestDistance = distance;
+        bestAnchor = target.anchorX;
+      }
+    }
+    const enemyBase = this.state.battle.bases[unit.team === 'PLAYER' ? 'ENEMY' : 'PLAYER'];
+    const baseDistance = direction * (enemyBase.anchorX - unit.anchorX);
+    if (enemyBase.hp > 0 && baseDistance >= unit.definition.attackMinRange && baseDistance <= unit.definition.attackMaxRange && baseDistance < bestDistance) {
+      bestAnchor = enemyBase.anchorX;
+    }
+    if (bestAnchor === null) {
+      const fallbackDistance = Math.max(unit.definition.attackMinRange, Math.min(unit.definition.standingRange, unit.definition.attackMaxRange));
+      bestAnchor = Math.max(0, Math.min(this.state.battle.mapLength, unit.anchorX + direction * fallbackDistance));
+    }
+    return this.toScreenX(bestAnchor);
+  }
+
+  private createProjectileBody(style: AttackFxStyle, direction: 1 | -1, x: number, y: number): Phaser.GameObjects.Container {
+    const body = this.add.container(x, y).setDepth(16);
+    if (style === 'PIERCE') {
+      body.add(this.add.rectangle(0, 0, 34, 4, 0xe8f9ff, 0.96));
+      body.add(this.add.triangle(direction * 20, 0, -7 * direction, -6, -7 * direction, 6, 8 * direction, 0, 0xffffff, 0.98));
+    } else if (style === 'FIRE') {
+      body.add(this.add.circle(0, 0, 15, 0xff704f, 0.48));
+      body.add(this.add.circle(direction * 2, 0, 8, 0xffdf78, 0.96));
+    } else if (style === 'VOID') {
+      body.add(this.add.circle(0, 0, 16, 0x4f3b82, 0.4).setStrokeStyle(3, 0xb99cff, 0.92));
+      body.add(this.add.circle(0, 0, 6, 0xe4d8ff, 0.9));
+    } else {
+      body.add(this.add.circle(0, 0, 13, 0x70bfff, 0.35).setStrokeStyle(3, 0xccecff, 0.9));
+      body.add(this.add.circle(0, 0, 5, 0xffffff, 0.96));
+    }
+    return body;
+  }
+
+  private syncProjectileLaunches(): void {
+    for (const unit of this.state.battle.units) {
+      if (unit.state !== UnitState.Foreswing) continue;
+      const art = familyForUnit(unit.definition.id);
+      if (!usesTravelProjectile(art.attackFx)) continue;
+      let view = this.views.get(unit.simulationId);
+      if (!view) {
+        view = this.createUnitView(unit);
+        this.views.set(unit.simulationId, view);
+      }
+      const firstHitFrame = unit.definition.attackTiming.hitFrames[0];
+      if (firstHitFrame === undefined) continue;
+      const direction: 1 | -1 = unit.team === 'PLAYER' ? 1 : -1;
+      const startX = this.toScreenX(unit.anchorX) + direction * 28;
+      const startY = 482;
+      const endX = this.getProjectileTargetScreenX(unit);
+      const endY = 482;
+      const plan = getProjectileTravelPlan(art.attackFx, firstHitFrame, Math.abs(endX - startX));
+      if (!plan || unit.stateFrame !== plan.launchFrame) continue;
+      const launchKey = `projectile:${unit.nextAttackTick}:${plan.launchFrame}`;
+      if (view.lastAttackFxKey === launchKey) continue;
+      this.playAttackFx(unit, view, art.attackFx);
+      const body = this.createProjectileBody(art.attackFx, direction, startX, startY);
+      this.projectiles.push({
+        body,
+        style: art.attackFx,
+        startX,
+        startY,
+        endX,
+        endY,
+        startTick: this.state.battle.tick,
+        endTick: this.state.battle.tick + plan.travelTicks,
+      });
+      view.lastAttackFxKey = launchKey;
+    }
+  }
+
+  private syncProjectileViews(): void {
+    const active: ProjectileView[] = [];
+    for (const projectile of this.projectiles) {
+      const span = Math.max(1, projectile.endTick - projectile.startTick);
+      const progress = Math.max(0, Math.min(1, (this.state.battle.tick - projectile.startTick) / span));
+      projectile.body.x = projectile.startX + (projectile.endX - projectile.startX) * progress;
+      projectile.body.y = projectile.startY + (projectile.endY - projectile.startY) * progress + getProjectileArcOffsetY(projectile.style, progress);
+      projectile.body.setAlpha(progress > 0.88 ? Math.max(0.35, (1 - progress) / 0.12) : 1);
+      if (progress >= 1) {
+        projectile.body.destroy();
+      } else {
+        active.push(projectile);
+      }
+    }
+    this.projectiles = active;
   }
 
   private playAttackFx(unit: BattleUnit, view: UnitView, style: AttackFxStyle): void {
@@ -599,7 +718,7 @@ class BattleScene extends Phaser.Scene {
       const impactMoment =
         (unit.state === UnitState.Foreswing && hitFrames.includes(unit.stateFrame)) ||
         (unit.state === UnitState.Backswing && unit.stateFrame === 0 && lastHit >= 0);
-      if (impactMoment) {
+      if (impactMoment && !usesTravelProjectile(art.attackFx)) {
         const attackFxKey = `${this.state.battle.tick}:${unit.state}:${unit.stateFrame}`;
         if (view.lastAttackFxKey !== attackFxKey) {
           this.playAttackFx(unit, view, art.attackFx);
@@ -624,6 +743,8 @@ class BattleScene extends Phaser.Scene {
       view.shadow.setAlpha(unit.state === UnitState.Dying ? Math.max(0, 0.34 * (1 - unit.stateFrame / Math.max(1, unit.definition.deathFrames))) : unit.state === UnitState.NaturalKnockback ? 0.2 : 0.34);
       view.hpBg.x = view.sprite.x;
       view.hp.x = view.sprite.x - 26;
+      view.trait.x = view.sprite.x;
+      view.trait.setVisible(unit.team === 'ENEMY' && unit.state !== UnitState.Dying);
       view.hpBg.setVisible(unit.state !== UnitState.Dying);
       view.hp.setVisible(unit.state !== UnitState.Dying);
       view.hp.displayWidth = Math.max(1, 52 * Math.max(0, unit.hp / unit.definition.maxHp));
@@ -634,6 +755,7 @@ class BattleScene extends Phaser.Scene {
       view.shadow.destroy();
       view.hpBg.destroy();
       view.hp.destroy();
+      view.trait.destroy();
       this.views.delete(id);
     }
   }
