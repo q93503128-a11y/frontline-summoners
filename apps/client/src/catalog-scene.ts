@@ -25,7 +25,7 @@ const rarityColor: Record<string, string> = {
 };
 
 function isCompactMobileViewport(): boolean {
-  return Math.min(window.innerWidth, window.innerHeight) <= 500;
+  return Math.min(window.innerWidth, window.innerHeight) <= 540;
 }
 
 function addText(
