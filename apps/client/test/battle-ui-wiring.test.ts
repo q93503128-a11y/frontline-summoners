@@ -6,6 +6,10 @@ async function readMain(): Promise<string> {
   return readFile(new URL('../src/main.ts', import.meta.url), 'utf8');
 }
 
+async function readViewport(): Promise<string> {
+  return readFile(new URL('../src/viewport.ts', import.meta.url), 'utf8');
+}
+
 test('battle loop launches ranged visuals before deterministic damage step and then advances projectile views', async () => {
   const source = await readMain();
   const launchIndex = source.indexOf('this.syncProjectileLaunches();');
@@ -95,10 +99,14 @@ test('locked-stage and save-pending clicks are quiet; camera shake is reserved f
   assert.match(source, /private playBaseImpactFx[\s\S]*?cameras\.main\.shake/);
 });
 
-test('compact mobile battle HUD prioritizes readable touch controls without changing desktop shortcuts', async () => {
+test('compact mobile battle HUD uses the shared coarse-pointer classifier and keeps desktop shortcuts intact', async () => {
   const source = await readMain();
-  assert.match(source, /function isCompactMobileViewport\(\): boolean/);
-  assert.match(source, /Math\.min\(window\.innerWidth, window\.innerHeight\) <= 540/);
+  const viewport = await readViewport();
+  assert.match(source, /import \{ isCompactMobileViewport, isPortraitMobileViewport \} from '\.\/viewport';/);
+  assert.doesNotMatch(source, /function isCompactMobileViewport\(/);
+  assert.doesNotMatch(source, /function isPortraitMobileViewport\(/);
+  assert.match(viewport, /COMPACT_MOBILE_SHORT_SIDE = 540/);
+  assert.match(viewport, /coarsePointer && Math\.min\(width, height\) <= COMPACT_MOBILE_SHORT_SIDE/);
   assert.match(source, /function battleUiFontSize\(regular: number, compact: number\): number/);
   assert.match(source, /const compact = isCompactMobileViewport\(\);/);
   assert.match(source, /const buttonHeight = compact \? 84 : 62;/);
