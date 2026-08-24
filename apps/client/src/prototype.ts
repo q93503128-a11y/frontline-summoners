@@ -93,7 +93,8 @@ export function getStage(stageId: string): PrototypeStage {
 
 export function getStageNumber(stageId: string): number {
   const index = STAGES.findIndex((stage) => stage.id === stageId);
-  return index >= 0 ? index + 1 : 1;
+  if (index < 0) throw new Error(`Unknown campaign stage: ${stageId}`);
+  return index + 1;
 }
 
 export function getSlotById(slotId: string): PrototypeRosterSlot | undefined {
