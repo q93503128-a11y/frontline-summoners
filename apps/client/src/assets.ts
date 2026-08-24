@@ -84,6 +84,23 @@ export const UNIT_ART: Readonly<Record<string, UnitArtVariant>> = {
   heretic: { familyId: 'evil-wizard', tint: 0xd9a5ff, attackFx: 'VOID' },
   voidsage: { familyId: 'evil-wizard', tint: 0x8ebcff, displayScale: 1.12, attackFx: 'VOID' },
 
+  // First recruitment pool. These are explicit prototype mappings, not final character art.
+  'turnip-rider': { familyId: 'fantasy-warrior', tint: 0xb8e687, displayScale: 0.94, attackFx: 'SLASH' },
+  'tin-mole': { familyId: 'hero-knight-2', tint: 0xaeb8c2, displayScale: 0.92, attackFx: 'BLUNT' },
+  'sling-goblin': { familyId: 'huntress', tint: 0x9fdb83, displayScale: 0.9, attackFx: 'PIERCE' },
+  'pot-mimic': { familyId: 'hero-knight-2', tint: 0xc09b72, displayScale: 0.88, attackFx: 'BLUNT' },
+  'coffin-porter': { familyId: 'hero-knight', tint: 0x8e7f8c, displayScale: 1.12, attackFx: 'BLUNT' },
+  'lantern-witch': { familyId: 'wizard', tint: 0xffba72, attackFx: 'FIRE' },
+  'goat-ballista': { familyId: 'huntress', tint: 0xd6c69b, displayScale: 1.06, attackFx: 'PIERCE' },
+  'bell-hermit': { familyId: 'fantasy-warrior', tint: 0xd8be78, attackFx: 'BLUNT' },
+  'clockwork-duck': { familyId: 'hero-knight-2', tint: 0xf3cf68, displayScale: 1.04, attackFx: 'SLASH' },
+  'cloud-herder': { familyId: 'wizard', tint: 0xc9e7ff, attackFx: 'MAGIC' },
+  'candle-golem': { familyId: 'evil-wizard', tint: 0xffe3a3, displayScale: 1.1, attackFx: 'FIRE' },
+  'banquet-ogre': { familyId: 'fantasy-warrior', tint: 0xe29d83, displayScale: 1.24, attackFx: 'BLUNT' },
+  'mirror-exorcist': { familyId: 'evil-wizard', tint: 0xd8e4f2, displayScale: 1.08, attackFx: 'VOID' },
+  'moon-eater': { familyId: 'evil-wizard', tint: 0x8aa8ff, displayScale: 1.26, attackFx: 'VOID' },
+  'castle-crab': { familyId: 'hero-knight', tint: 0xa8bfd0, displayScale: 1.34, attackFx: 'BLUNT' },
+
   'enemy-raider': { familyId: 'warrior', tint: 0xff9a93, attackFx: 'SLASH' },
   'enemy-sprinter': { familyId: 'fantasy-warrior', tint: 0xffb27d, attackFx: 'SLASH' },
   'enemy-spearman': { familyId: 'huntress', tint: 0xffad96, attackFx: 'PIERCE' },
