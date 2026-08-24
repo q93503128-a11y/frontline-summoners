@@ -9,6 +9,7 @@ import {
 import {
   STAGES,
   createPrototypeBattle,
+  getTreasureIdsForClearedStages,
   getUnlockedSlotIds,
 } from '../src/prototype.ts';
 
@@ -31,7 +32,8 @@ function targetableEnemyCount(state: ReturnType<typeof createPrototypeBattle>): 
 function autoPlayStage(stageIndex: number, clearedStageIds: readonly string[]) {
   const stage = STAGES[stageIndex]!;
   const unlockedSlotIds = getUnlockedSlotIds(clearedStageIds);
-  const state = createPrototypeBattle(stage.id, unlockedSlotIds);
+  const ownedTreasureIds = getTreasureIdsForClearedStages(clearedStageIds);
+  const state = createPrototypeBattle(stage.id, unlockedSlotIds, ownedTreasureIds);
   const limit = LATE_LIMITS[stageIndex - 10]!;
   const maxTicks = limit.maxSeconds * 30;
   const slotPriority = [...state.playerSlots].sort((a, b) => b.cost - a.cost || a.slotId.localeCompare(b.slotId));
@@ -48,10 +50,10 @@ function autoPlayStage(stageIndex: number, clearedStageIds: readonly string[]) {
     stepPlayableBattle(state);
   }
 
-  return { state, limit, unlockedSlotIds };
+  return { state, limit, unlockedSlotIds, ownedTreasureIds };
 }
 
-test('stages eleven through fifteen remain beatable without using future unlocks', () => {
+test('stages eleven through fifteen remain beatable without future unlocks or future treasures', () => {
   const clearedStageIds = STAGES.slice(0, 10).map((stage) => stage.id);
   assert.deepEqual(
     getUnlockedSlotIds(clearedStageIds),
@@ -60,7 +62,8 @@ test('stages eleven through fifteen remain beatable without using future unlocks
 
   for (let stageIndex = 10; stageIndex < 15; stageIndex += 1) {
     const stage = STAGES[stageIndex]!;
-    const { state, limit, unlockedSlotIds } = autoPlayStage(stageIndex, clearedStageIds);
+    const { state, limit, unlockedSlotIds, ownedTreasureIds } = autoPlayStage(stageIndex, clearedStageIds);
+    assert.equal(ownedTreasureIds.length, clearedStageIds.length, 'late baseline must apply only already-earned treasures');
     assert.equal(
       unlockedSlotIds.length,
       EXPECTED_ROSTER_SIZE_BEFORE_STAGE[stageIndex - 10],
