@@ -1,0 +1,75 @@
+name: Campaign verification probe
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - .github/workflows/campaign-verify-probe.yml
+
+permissions:
+  contents: write
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Run canonical verification and record result
+        shell: bash
+        run: |
+          set +e
+
+          npm install --ignore-scripts > /tmp/frontline-install.log 2>&1
+          install_status=$?
+
+          if [ "$install_status" -eq 0 ]; then
+            npm run typecheck > /tmp/frontline-typecheck.log 2>&1
+            typecheck_status=$?
+            npm test > /tmp/frontline-test.log 2>&1
+            test_status=$?
+            npm run build > /tmp/frontline-build.log 2>&1
+            build_status=$?
+          else
+            typecheck_status=99
+            test_status=99
+            build_status=99
+            : > /tmp/frontline-typecheck.log
+            : > /tmp/frontline-test.log
+            : > /tmp/frontline-build.log
+          fi
+
+          {
+            printf 'source_sha=%s\n' "$GITHUB_SHA"
+            printf 'verified_at=%s\n' "$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+            printf 'install=%s\n' "$install_status"
+            printf 'typecheck=%s\n' "$typecheck_status"
+            printf 'test=%s\n' "$test_status"
+            printf 'build=%s\n' "$build_status"
+            printf '\n== npm install tail ==\n'
+            tail -n 40 /tmp/frontline-install.log
+            printf '\n== typecheck tail ==\n'
+            tail -n 80 /tmp/frontline-typecheck.log
+            printf '\n== test tail ==\n'
+            tail -n 160 /tmp/frontline-test.log
+            printf '\n== build tail ==\n'
+            tail -n 80 /tmp/frontline-build.log
+          } > docs/CI_PROBE_RESULT.txt
+
+          git config user.name "frontline-ci"
+          git config user.email "frontline-ci@users.noreply.github.com"
+          git rm .github/workflows/campaign-verify-probe.yml
+          git add docs/CI_PROBE_RESULT.txt
+          if [ "$install_status" -eq 0 ] && [ -f package-lock.json ]; then
+            git add package-lock.json
+          fi
+          git commit -m "chore: record campaign verification probe"
+          git push origin HEAD:main
+
+          if [ "$install_status" -ne 0 ] || [ "$typecheck_status" -ne 0 ] || [ "$test_status" -ne 0 ] || [ "$build_status" -ne 0 ]; then
+            exit 1
+          fi
