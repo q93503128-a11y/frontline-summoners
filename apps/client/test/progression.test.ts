@@ -6,7 +6,9 @@ import {
   STARTER_SLOT_ID,
   STAGES,
   createPrototypeBattle,
+  getContiguousClearedStageIds,
   getStage,
+  getTreasureIdsForClearedStages,
   getUnlockedSlotIds,
   isStageUnlocked,
 } from '../src/prototype.ts';
@@ -38,8 +40,16 @@ test('clearing a stage opens only its immediate successor', () => {
 test('progression rejects unknown stage ids and cannot be skipped by a non-contiguous clear set', () => {
   assert.equal(isStageUnlocked('missing-stage', STAGES.map((stage) => stage.id)), false);
   assert.throws(() => getStage('missing-stage'), /Unknown campaign stage: missing-stage/);
-  assert.equal(isStageUnlocked(STAGES[3]!.id, [STAGES[2]!.id]), false, 'clearing only the immediate predecessor out of order must not unlock a later stage');
-  assert.equal(isStageUnlocked(STAGES[3]!.id, [STAGES[0]!.id, STAGES[1]!.id, STAGES[2]!.id]), true);
+
+  const outOfOrder = [STAGES[2]!.id, STAGES[15]!.id];
+  assert.deepEqual(getContiguousClearedStageIds(outOfOrder), []);
+  assert.equal(isStageUnlocked(STAGES[3]!.id, outOfOrder), false, 'out-of-order clear records must not open later campaign stages');
+  assert.deepEqual(getUnlockedSlotIds(outOfOrder), ['militia'], 'out-of-order clear records must not grant later roster rewards');
+  assert.deepEqual(getTreasureIdsForClearedStages(outOfOrder), [], 'out-of-order clear records must not grant derived treasure effects');
+
+  const contiguous = [STAGES[0]!.id, STAGES[1]!.id, STAGES[2]!.id];
+  assert.deepEqual(getContiguousClearedStageIds(contiguous), contiguous);
+  assert.equal(isStageUnlocked(STAGES[3]!.id, contiguous), true);
 });
 
 test('full chapter progression unlocks all ten player units', () => {
