@@ -42,9 +42,54 @@ function xAt(seed: number, index: number, min = 150, max = 1130): number {
   return min + seeded(seed, index) * (max - min);
 }
 
+function isGoldenBossStage(stage: PrototypeStage): boolean {
+  return stage.id === 'border-19' || stage.id === 'border-20';
+}
+
 export function getBattlefieldBasePalette(stage: PrototypeStage): { player: number; playerRoof: number; enemy: number; enemyRoof: number } {
   const theme = THEMES[stage.theme];
+  if (stage.id === 'border-20') {
+    return { player: theme.playerBase, playerRoof: theme.playerRoof, enemy: 0x514a49, enemyRoof: 0xd0a654 };
+  }
+  if (stage.id === 'border-19') {
+    return { player: theme.playerBase, playerRoof: theme.playerRoof, enemy: 0x70444b, enemyRoof: 0xc99648 };
+  }
   return { player: theme.playerBase, playerRoof: theme.playerRoof, enemy: theme.enemyBase, enemyRoof: theme.enemyRoof };
+}
+
+function drawGoldenBossLandmarks(g: Phaser.GameObjects.Graphics, stage: PrototypeStage, theme: ThemeStyle): void {
+  if (!isGoldenBossStage(stage)) return;
+
+  // A giant ritual mask makes the penultimate/final arenas readable before a boss unit even enters.
+  const maskX = stage.id === 'border-20' ? 930 : 960;
+  const maskY = 230;
+  g.fillStyle(0x2d2527, 0.34).fillCircle(maskX, maskY + 8, 108);
+  g.fillStyle(0xc99a45, 0.72).fillEllipse(maskX, maskY, 142, 176);
+  g.fillStyle(0x5c4237, 0.9).fillTriangle(maskX - 50, maskY - 42, maskX - 12, maskY - 18, maskX - 54, maskY + 2);
+  g.fillStyle(0x5c4237, 0.9).fillTriangle(maskX + 50, maskY - 42, maskX + 12, maskY - 18, maskX + 54, maskY + 2);
+  g.fillStyle(0x302a2c, 0.92).fillEllipse(maskX - 31, maskY - 18, 30, 16).fillEllipse(maskX + 31, maskY - 18, 30, 16);
+  g.fillStyle(0x49342f, 0.86).fillTriangle(maskX, maskY - 2, maskX - 15, maskY + 40, maskX + 15, maskY + 40);
+  g.lineStyle(5, 0xf0c86c, 0.72).strokeEllipse(maskX, maskY, 142, 176);
+
+  // Ritual standards become denser than normal golden-stage flags.
+  for (let i = 0; i < 5; i += 1) {
+    const x = 610 + i * 128;
+    g.fillStyle(0x3b3030, 0.92).fillRect(x, 292, 8, 146);
+    g.fillStyle(i % 2 === 0 ? 0x8b3e3d : 0x604151, 0.9).fillTriangle(x + 8, 302, x + 62, 324, x + 8, 350);
+    g.fillStyle(theme.accent, 0.9).fillCircle(x + 25, 326, 6);
+  }
+
+  if (stage.id === 'border-20') {
+    // Final stage combines the golden cult gate with the iron general's fortress silhouette.
+    g.fillStyle(0x34383a, 0.92).fillRect(0, 326, 500, 118);
+    for (let x = 28; x < 500; x += 94) {
+      g.fillStyle(0x454b4e, 0.96).fillRect(x, 276, 62, 168);
+      g.fillStyle(0x454b4e, 0.96).fillRect(x - 8, 262, 22, 28).fillRect(x + 48, 262, 22, 28);
+    }
+    g.fillStyle(0x202529, 0.9).fillRect(178, 330, 144, 114);
+    for (let bar = 0; bar < 6; bar += 1) g.fillStyle(0x7f704f, 0.72).fillRect(188 + bar * 24, 330, 7, 114);
+    g.fillStyle(0xd1aa55, 0.72).fillRect(170, 320, 160, 10);
+  }
 }
 
 export function drawBattlefield(scene: Phaser.Scene, stage: PrototypeStage): void {
@@ -55,6 +100,10 @@ export function drawBattlefield(scene: Phaser.Scene, stage: PrototypeStage): voi
 
   g.fillStyle(theme.sky).fillRect(0, 0, INTERNAL_WIDTH, 440);
   g.fillStyle(theme.skyBand, 0.72).fillRect(0, 270, INTERNAL_WIDTH, 170);
+
+  if (isGoldenBossStage(stage)) {
+    g.fillStyle(stage.id === 'border-20' ? 0x4b2e35 : 0x6a3c3e, stage.id === 'border-20' ? 0.24 : 0.16).fillRect(0, 0, INTERNAL_WIDTH, 440);
+  }
 
   if (stage.theme === 'moon') {
     g.fillStyle(theme.sun, 0.95).fillCircle(1030, 102, 52);
@@ -117,6 +166,7 @@ export function drawBattlefield(scene: Phaser.Scene, stage: PrototypeStage): voi
       g.fillStyle(0x54483e).fillRect(x, 285, 9, 155);
       g.fillStyle(theme.accent, 0.88).fillTriangle(x + 9, 300, x + 62, 318, x + 9, 338);
     }
+    drawGoldenBossLandmarks(g, stage, theme);
   } else {
     g.fillStyle(theme.far).fillTriangle(0, 445, 280, 250, 550, 445);
     g.fillStyle(theme.mid).fillTriangle(420, 445, 760, 230, 1080, 445);
@@ -127,6 +177,14 @@ export function drawBattlefield(scene: Phaser.Scene, stage: PrototypeStage): voi
   g.fillStyle(theme.verge).fillRect(0, 512, INTERNAL_WIDTH, 22);
   g.fillStyle(theme.soil).fillRect(0, 534, INTERNAL_WIDTH, INTERNAL_HEIGHT - 534);
   g.fillStyle(0x1e2226, 0.16).fillRect(0, 548, INTERNAL_WIDTH, 6);
+
+  if (isGoldenBossStage(stage)) {
+    g.lineStyle(stage.id === 'border-20' ? 5 : 4, stage.id === 'border-20' ? 0xd7b05b : 0xb86d58, 0.48);
+    const centerX = stage.id === 'border-20' ? 660 : 720;
+    g.strokeCircle(centerX, 505, stage.id === 'border-20' ? 84 : 64);
+    g.lineBetween(centerX - 92, 505, centerX + 92, 505);
+    g.lineBetween(centerX, 474, centerX, 531);
+  }
 
   for (let i = 0; i < 14; i += 1) {
     const x = xAt(seed + 30, i, 155, 1125);
