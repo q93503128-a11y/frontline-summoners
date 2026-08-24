@@ -196,8 +196,8 @@ class StageSelectScene extends Phaser.Scene {
     addText(this, 54, 38, '제1장 · 뒤집힌 국경', 42, COLORS.cream);
     addText(this, 56, 91, '20개 전장 · 5개씩 보기', compact ? 22 : 19, COLORS.muted);
     addButton(this, 1165, compact ? 70 : 65, 160, compact ? 84 : 50, '메인', () => this.scene.start('main-menu'), 0x586275);
-    addButton(this, 72, compact ? 655 : 655, 115, compact ? 84 : 52, '◀ 이전', () => { this.page = Math.max(0, this.page - 1); this.renderPage(); }, 0x586275);
-    addButton(this, 1208, compact ? 655 : 655, 115, compact ? 84 : 52, '다음 ▶', () => { this.page = Math.min(Math.ceil(STAGES.length / 5) - 1, this.page + 1); this.renderPage(); }, 0x586275);
+    addButton(this, 72, 655, 115, compact ? 84 : 52, '◀ 이전', () => { this.page = Math.max(0, this.page - 1); this.renderPage(); }, 0x586275);
+    addButton(this, 1208, 655, 115, compact ? 84 : 52, '다음 ▶', () => { this.page = Math.min(Math.ceil(STAGES.length / 5) - 1, this.page + 1); this.renderPage(); }, 0x586275);
     this.pageText = addText(this, INTERNAL_WIDTH / 2, 640, '', compact ? 22 : 18, '#9ca9bb', 'center').setOrigin(0.5);
 
     this.renderPage();
@@ -510,7 +510,7 @@ class BattleScene extends Phaser.Scene {
     addText(this, 35, 16, this.stage.name, battleUiFontSize(28, 34), '#ffffff');
     addText(this, 36, 56, `${this.stage.chapter} · ${BATTLEFIELD_THEME_LABELS[this.stage.theme]} · ${this.stage.mapLength}m`, battleUiFontSize(17, 23), '#aeb8c8');
     this.timerText = addText(this, 585, 25, '0:00', battleUiFontSize(23, 30), '#dbe2ee', 'center').setOrigin(0.5, 0);
-    addButton(this, 690, 55, 108, compact ? 80 : 42, '일시정지', () => this.toggleManualPause(), 0x65758d);
+    addButton(this, 690, 55, 108, compact ? 84 : 42, '일시정지', () => this.toggleManualPause(), 0x65758d);
 
     addText(this, 760, 18, '보급', battleUiFontSize(18, 23), '#d7ddea');
     this.add.rectangle(930, 56, 300, 22, 0x0d1118).setStrokeStyle(2, 0x67738b);
