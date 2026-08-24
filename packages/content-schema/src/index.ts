@@ -10,6 +10,13 @@ export type TargetMode = (typeof TARGET_MODES)[number];
 export const COMBAT_TRAITS = ['LIGHT', 'ARMORED', 'ARCANE', 'BOSS'] as const;
 export type CombatTrait = (typeof COMBAT_TRAITS)[number];
 
+export const STAGE_TYPES = ['PROGRESSION', 'SPECIAL'] as const;
+export type StageType = (typeof STAGE_TYPES)[number];
+export const MIN_STAGE_DIFFICULTY = 1;
+export const MAX_STAGE_DIFFICULTY = 12;
+export const DEFAULT_PLAYER_UNIT_CAP = 50;
+export const DEFAULT_ENEMY_UNIT_CAP = 50;
+
 export interface TraitDamageBonusContent {
   readonly trait: CombatTrait;
   readonly multiplierPermille: number;
@@ -61,11 +68,28 @@ export interface CampaignTreasureContent {
   readonly effect: string;
 }
 
+export interface FormationRestrictionContent {
+  /** Empty means no rarity allow-list restriction. */
+  readonly allowedRarities: readonly Rarity[];
+  readonly maxRarity?: Rarity;
+  /** Empty means no role allow-list restriction. */
+  readonly allowedRoles: readonly PlayerRole[];
+  readonly maxUnitCost?: number;
+  /** Long-term unit taxonomy tags such as MELEE, HUMAN or MAGIC. */
+  readonly requiredUnitTags: readonly string[];
+  readonly forbiddenUnitTags: readonly string[];
+  readonly maxDistinctUnits?: number;
+  readonly sameFactionOnly: boolean;
+}
+
 export interface CampaignStageContent {
   readonly id: string;
   readonly chapter: string;
   readonly name: string;
   readonly subtitle: string;
+  /** PROGRESSION is the default for the current chapter-one JSON. */
+  readonly stageType: StageType;
+  /** Shared fine-grained difficulty scale for progression and special stages. */
   readonly difficulty: number;
   readonly playerBaseHp: number;
   readonly enemyBaseHp: number;
@@ -75,6 +99,12 @@ export interface CampaignStageContent {
   readonly decorSeed: number;
   readonly waves: readonly CampaignWaveContent[];
   readonly treasure: CampaignTreasureContent;
+  /** Base simultaneous living-unit caps before account/treasure modifiers. */
+  readonly playerUnitCap: number;
+  readonly enemyUnitCap: number;
+  readonly formationRestrictions: FormationRestrictionContent;
+  /** Registered deterministic rule IDs. Empty means no special rule. */
+  readonly specialRules: readonly string[];
   readonly unlockUnitId?: string;
 }
 
@@ -112,6 +142,47 @@ function requireEnum<T extends readonly string[]>(record: Record<string, unknown
   const value = requireString(record, key, context);
   if (!(values as readonly string[]).includes(value)) throw new Error(`${context}.${key} is unknown: ${value}`);
   return value as T[number];
+}
+
+function optionalInteger(record: Record<string, unknown>, key: string, context: string, min: number, max = Number.MAX_SAFE_INTEGER): number | undefined {
+  if (record[key] === undefined) return undefined;
+  return requireInteger(record, key, context, min, max);
+}
+
+function optionalEnum<T extends readonly string[]>(record: Record<string, unknown>, key: string, context: string, values: T): T[number] | undefined {
+  if (record[key] === undefined) return undefined;
+  return requireEnum(record, key, context, values);
+}
+
+function parseStringArray(record: Record<string, unknown>, key: string, context: string): readonly string[] {
+  const raw = record[key];
+  if (raw === undefined) return [];
+  if (!Array.isArray(raw)) throw new Error(`${context}.${key} must be an array`);
+  const values = raw.map((item, index) => {
+    if (typeof item !== 'string' || item.trim().length === 0) throw new Error(`${context}.${key}[${index}] must be a non-empty string`);
+    return item;
+  });
+  if (new Set(values).size !== values.length) throw new Error(`${context}.${key} must be unique`);
+  return values;
+}
+
+function parseEnumArray<T extends readonly string[]>(record: Record<string, unknown>, key: string, context: string, values: T): readonly T[number][] {
+  const raw = record[key];
+  if (raw === undefined) return [];
+  if (!Array.isArray(raw)) throw new Error(`${context}.${key} must be an array`);
+  const parsed = raw.map((item, index) => {
+    if (typeof item !== 'string' || !(values as readonly string[]).includes(item)) throw new Error(`${context}.${key}[${index}] is unknown: ${String(item)}`);
+    return item as T[number];
+  });
+  if (new Set(parsed).size !== parsed.length) throw new Error(`${context}.${key} must be unique`);
+  return parsed;
+}
+
+function optionalBoolean(record: Record<string, unknown>, key: string, context: string, fallback: boolean): boolean {
+  const raw = record[key];
+  if (raw === undefined) return fallback;
+  if (typeof raw !== 'boolean') throw new Error(`${context}.${key} must be a boolean`);
+  return raw;
 }
 
 function requireHitFrames(record: Record<string, unknown>, context: string, cycleFrames: number): readonly number[] {
@@ -233,6 +304,32 @@ function parseTreasure(value: unknown, context: string): CampaignTreasureContent
   return { id: requireString(value, 'id', context), name: requireString(value, 'name', context), effect: requireString(value, 'effect', context) };
 }
 
+function parseFormationRestrictions(value: unknown, context: string): FormationRestrictionContent {
+  if (value === undefined) {
+    return {
+      allowedRarities: [],
+      allowedRoles: [],
+      requiredUnitTags: [],
+      forbiddenUnitTags: [],
+      sameFactionOnly: false,
+    };
+  }
+  if (!isRecord(value)) throw new Error(`${context} must be an object`);
+  const maxRarity = optionalEnum(value, 'maxRarity', context, RARITIES);
+  const maxUnitCost = optionalInteger(value, 'maxUnitCost', context, 0, 1000000);
+  const maxDistinctUnits = optionalInteger(value, 'maxDistinctUnits', context, 1, 10);
+  return {
+    allowedRarities: parseEnumArray(value, 'allowedRarities', context, RARITIES),
+    ...(maxRarity === undefined ? {} : { maxRarity }),
+    allowedRoles: parseEnumArray(value, 'allowedRoles', context, PLAYER_ROLES),
+    ...(maxUnitCost === undefined ? {} : { maxUnitCost }),
+    requiredUnitTags: parseStringArray(value, 'requiredUnitTags', context),
+    forbiddenUnitTags: parseStringArray(value, 'forbiddenUnitTags', context),
+    ...(maxDistinctUnits === undefined ? {} : { maxDistinctUnits }),
+    sameFactionOnly: optionalBoolean(value, 'sameFactionOnly', context, false),
+  };
+}
+
 function parseStage(value: unknown, index: number, options: CampaignValidationOptions): CampaignStageContent {
   const context = `stages[${index}]`;
   if (!isRecord(value)) throw new Error(`${context} must be an object`);
@@ -249,7 +346,8 @@ function parseStage(value: unknown, index: number, options: CampaignValidationOp
     chapter: requireString(value, 'chapter', context),
     name: requireString(value, 'name', context),
     subtitle: requireString(value, 'subtitle', context),
-    difficulty: requireInteger(value, 'difficulty', context, 1, 5),
+    stageType: value.stageType === undefined ? 'PROGRESSION' : requireEnum(value, 'stageType', context, STAGE_TYPES),
+    difficulty: requireInteger(value, 'difficulty', context, MIN_STAGE_DIFFICULTY, MAX_STAGE_DIFFICULTY),
     playerBaseHp: requireInteger(value, 'playerBaseHp', context, 1),
     enemyBaseHp: requireInteger(value, 'enemyBaseHp', context, 1),
     startingSupply: requireInteger(value, 'startingSupply', context, 0, 100000),
@@ -258,6 +356,10 @@ function parseStage(value: unknown, index: number, options: CampaignValidationOp
     decorSeed: requireInteger(value, 'decorSeed', context, 0),
     waves: wavesValue.map((wave, waveIndex) => parseWave(wave, `${context}.waves[${waveIndex}]`, options.enemyIds)),
     treasure: parseTreasure(value.treasure, `${context}.treasure`),
+    playerUnitCap: value.playerUnitCap === undefined ? DEFAULT_PLAYER_UNIT_CAP : requireInteger(value, 'playerUnitCap', context, 1, 500),
+    enemyUnitCap: value.enemyUnitCap === undefined ? DEFAULT_ENEMY_UNIT_CAP : requireInteger(value, 'enemyUnitCap', context, 1, 500),
+    formationRestrictions: parseFormationRestrictions(value.formationRestrictions, `${context}.formationRestrictions`),
+    specialRules: parseStringArray(value, 'specialRules', context),
   };
   return unlockUnitId === undefined ? base : { ...base, unlockUnitId };
 }
