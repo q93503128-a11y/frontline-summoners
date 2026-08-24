@@ -32,7 +32,9 @@ export interface CampaignBaselineTelemetry {
 
 const DEPLOYMENTS_PER_ECONOMY_LEVEL = 3;
 const EMERGENCY_FRONTLINE_COUNT = 1;
+const STABLE_FRONTLINE_COUNT = 4;
 const OPENING_ECONOMY_STAGE_INDEX = 7;
+const BOSS_COUNTER_STAGE_INDEX = 15;
 
 export function targetSupplyLevelForStage(stageIndex: number, state: ReturnType<typeof createPrototypeBattle>): number {
   const highestUnlockedCost = Math.max(...state.playerSlots.map((slot) => slot.cost));
@@ -53,6 +55,34 @@ function targetableEnemyCount(state: ReturnType<typeof createPrototypeBattle>): 
 
 function alivePlayerUnitCount(state: ReturnType<typeof createPrototypeBattle>): number {
   return state.battle.units.filter((unit) => unit.team === 'PLAYER' && unit.state !== 'DYING').length;
+}
+
+function selectReadyBossCounter(state: ReturnType<typeof createPrototypeBattle>) {
+  const bossTraits = new Set(
+    state.battle.units
+      .filter((unit) => unit.team === 'ENEMY' && unit.state !== 'DYING' && unit.definition.traits.includes('BOSS'))
+      .flatMap((unit) => unit.definition.traits),
+  );
+  if (bossTraits.size === 0) return undefined;
+
+  return [...state.playerSlots]
+    .filter((slot) => getCooldownRemaining(state, slot.slotId) === 0)
+    .map((slot) => {
+      const matchingMultiplier = slot.definition.damageBonuses
+        .filter((bonus) => bossTraits.has(bonus.trait))
+        .reduce((best, bonus) => Math.max(best, bonus.multiplierPermille), 0);
+      if (matchingMultiplier === 0) return null;
+      const cycleFrames = slot.definition.attackTiming.cycleFrames;
+      const specialistScore = (slot.definition.attackDamage * matchingMultiplier) / cycleFrames;
+      return { slot, specialistScore, matchingMultiplier };
+    })
+    .filter((candidate): candidate is NonNullable<typeof candidate> => candidate !== null)
+    .sort((a, b) =>
+      b.specialistScore - a.specialistScore ||
+      b.matchingMultiplier - a.matchingMultiplier ||
+      b.slot.cost - a.slot.cost ||
+      a.slot.slotId.localeCompare(b.slot.slotId)
+    )[0]?.slot;
 }
 
 export function autoPlayCampaignStage(
@@ -123,7 +153,7 @@ export function autoPlayCampaignStage(
     const alivePlayersAtDecision = alivePlayerUnitCount(state);
 
     // Actual pressure overrides planned saving. A human player would not keep hoarding for the next
-    // roster slot or worker level while the final defender is disappearing in front of an active wave.
+    // roster slot, worker level or specialist while the final defender is disappearing under a wave.
     const emergencyPressure = enemiesAtDecision > 0 && alivePlayersAtDecision <= EMERGENCY_FRONTLINE_COUNT;
     const emergencySpawned = emergencyPressure && spawnStrongestAffordableNow();
 
@@ -141,8 +171,21 @@ export function autoPlayCampaignStage(
           const upgraded = tryUpgradeSupply(state);
           if (upgraded.ok) upgradeCount += 1;
         }
-      } else if (state.supply >= targetSlot.cost && getCooldownRemaining(state, targetSlot.slotId) === 0) {
-        if (recordSpawn(targetSlot.slotId)) rosterCursor = (rosterCursor + 1) % state.playerSlots.length;
+      } else {
+        // Boss stages should test the roster the player actually owns, not a bot that spends every coin
+        // on cheap rotation units. Once a stable front exists, reserve for a ready specialist whose
+        // explicit damage bonus matches a living boss trait. Emergency defense above always wins over saving.
+        const bossCounter = stageIndex >= BOSS_COUNTER_STAGE_INDEX && alivePlayersAtDecision >= STABLE_FRONTLINE_COUNT
+          ? selectReadyBossCounter(state)
+          : undefined;
+        const counterFitsWallet = bossCounter !== undefined && bossCounter.cost <= currentWallet;
+
+        if (bossCounter && counterFitsWallet) {
+          if (state.supply >= bossCounter.cost) recordSpawn(bossCounter.slotId);
+          // Otherwise intentionally save this tick instead of draining supply on the cheap roster cycle.
+        } else if (state.supply >= targetSlot.cost && getCooldownRemaining(state, targetSlot.slotId) === 0) {
+          if (recordSpawn(targetSlot.slotId)) rosterCursor = (rosterCursor + 1) % state.playerSlots.length;
+        }
       }
     }
 
