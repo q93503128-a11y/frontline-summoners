@@ -11,17 +11,23 @@ test('main menu opens the real catalog scene and the scene is registered', async
   assert.match(source, /scene:\s*\[[^\]]*CatalogScene[^\]]*\]/s);
 });
 
-test('catalog is progress-aware and pages allies and guaranteed treasures instead of overfilling one screen', async () => {
+test('catalog pages allies, gameplay treasures, and separate special medals instead of mixing reward axes', async () => {
   const source = await readSource('../src/catalog-scene.ts');
   assert.match(source, /const ALLY_PAGE_SIZE = 5/);
   assert.match(source, /const TREASURE_PAGE_SIZE = 5/);
+  assert.match(source, /const MEDAL_PAGE_SIZE = 5/);
+  assert.match(source, /type CatalogMode = 'ALLIES' \| 'TREASURES' \| 'MEDALS'/);
+  assert.match(source, /'동료 10종'/);
+  assert.match(source, /'보물 20종'/);
+  assert.match(source, /'훈장 5종'/);
   assert.match(source, /loadGuestProgress\(\)/);
   assert.match(source, /getUnlockedSlotIds\(this\.progress\.clearedStageIds\)/);
   assert.match(source, /new Set\(this\.progress\.treasureIds\)/);
+  assert.match(source, /new Set\(this\.progress\.specialClearedStageIds\)/);
   assert.match(source, /formatCombatTraits\(slot\.definition\)/);
   assert.match(source, /formatDamageSpecialty\(slot\.definition\)/);
   assert.match(source, /첫 클리어 100% 확정/);
-  assert.match(source, /능력치는 합류 후 공개/);
+  assert.match(source, /전투 능력치 보너스 없음/);
 });
 
 test('core and catalog scenes share one coarse-pointer compact-mobile classifier instead of treating short desktop windows as phones', async () => {
@@ -55,8 +61,9 @@ test('catalog keeps desktop descriptions while compact cards prioritize readable
   assert.match(source, /else \{[\s\S]*?slot\.description/);
   assert.match(source, /재생산 \$\{\(slot\.rechargeFrames \/ 30\)\.toFixed\(1\)\}초/, 'desktop ally detail must retain recharge information');
   assert.match(source, /if \(!compact\) \{[\s\S]*?첫 클리어 100% 확정/, 'desktop treasure card must retain acquisition detail');
-  assert.match(source, /compact \? 24 : 20/);
-  assert.match(source, /compact \? 20 : 14/);
+  assert.match(source, /private renderMedals\(\): void/);
+  assert.match(source, /`SPECIAL \$\{specialNumber\}`/);
+  assert.match(source, /`난이도 \$\{stage\.difficulty\} \/ 12`/);
 });
 
 test('compact catalog navigation stays finger-sized, drops decorative header copy, and cancelled drags restore button scale', async () => {
@@ -64,7 +71,7 @@ test('compact catalog navigation stays finger-sized, drops decorative header cop
   assert.match(source, /const navigationHeight = compact \? 84 : 50;/);
   assert.match(source, /const tabHeight = compact \? 84 : 54;/);
   assert.match(source, /isCompactMobileViewport\(\) \? 26 : 18/);
-  assert.match(source, /if \(!compact\) addText\(this, 56, 88, '제1장 동료와 확정 보물을 한곳에서 확인한다\.'/);
+  assert.match(source, /if \(!compact\) addText\(this, 56, 88, '동료, 제1장 확정 보물, 특수전 훈장을 한곳에서 확인한다\.'/);
   assert.match(source, /bg\.on\('pointerout', \(\) => \{[\s\S]*?container\.setScale\(1\);/);
   assert.match(source, /bg\.on\('pointerupoutside', \(\) => container\.setScale\(1\)\);/);
 
