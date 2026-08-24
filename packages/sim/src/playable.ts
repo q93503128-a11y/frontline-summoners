@@ -128,38 +128,67 @@ function assertPositiveInteger(value: number, name: string): void {
   if (!Number.isInteger(value) || value <= 0) throw new Error(`${name} must be a positive integer`);
 }
 
+function assertNonNegativeInteger(value: number, name: string): void {
+  if (!Number.isInteger(value) || value < 0) throw new Error(`${name} must be a non-negative integer`);
+}
+
+function validateSupplyLevels(levels: readonly SupplyLevelDefinition[]): void {
+  if (levels.length === 0) throw new Error('supplyLevels must not be empty');
+  levels.forEach((level, index) => {
+    assertNonNegativeInteger(level.incomePerSecond, `supplyLevels[${index}].incomePerSecond`);
+    assertPositiveInteger(level.maxSupply, `supplyLevels[${index}].maxSupply`);
+    assertNonNegativeInteger(level.upgradeCost, `supplyLevels[${index}].upgradeCost`);
+    if (index === 0 && level.upgradeCost !== 0) throw new Error('supplyLevels[0].upgradeCost must be 0');
+    if (index > 0) {
+      const previous = levels[index - 1]!;
+      if (level.maxSupply < previous.maxSupply) throw new Error('supplyLevels maxSupply must not decrease');
+      if (level.incomePerSecond < previous.incomePerSecond) throw new Error('supplyLevels incomePerSecond must not decrease');
+    }
+  });
+}
+
 function validateConfig(config: PlayableBattleConfig): void {
   assertPositiveInteger(config.mapLength, 'mapLength');
   assertPositiveInteger(config.playerBaseHp, 'playerBaseHp');
   assertPositiveInteger(config.enemyBaseHp, 'enemyBaseHp');
+  if (config.startingSupply !== undefined) assertNonNegativeInteger(config.startingSupply, 'startingSupply');
+  if (config.playerUnitCap !== undefined) assertPositiveInteger(config.playerUnitCap, 'playerUnitCap');
+  if (config.enemyUnitCap !== undefined) assertPositiveInteger(config.enemyUnitCap, 'enemyUnitCap');
+  validateSupplyLevels(config.supplyLevels ?? DEFAULT_SUPPLY_LEVELS);
+
   if (config.playerSlots.length === 0) throw new Error('playerSlots must not be empty');
   const slotIds = new Set<string>();
   for (const slot of config.playerSlots) {
     if (slotIds.has(slot.slotId)) throw new Error(`duplicate slotId: ${slot.slotId}`);
     slotIds.add(slot.slotId);
-    if (!Number.isInteger(slot.cost) || slot.cost < 0) throw new Error('slot cost must be a non-negative integer');
+    assertNonNegativeInteger(slot.cost, 'slot cost');
     assertPositiveInteger(slot.rechargeFrames, 'rechargeFrames');
   }
-  const enemyIds = new Set(config.enemies.map((enemy) => enemy.enemyId));
-  if (enemyIds.size !== config.enemies.length) throw new Error('enemyId values must be unique');
+
+  const enemyIds = new Set<string>();
+  for (const enemy of config.enemies) {
+    if (enemyIds.has(enemy.enemyId)) throw new Error(`duplicate enemyId: ${enemy.enemyId}`);
+    enemyIds.add(enemy.enemyId);
+    assertNonNegativeInteger(enemy.rewardSupply, `enemy rewardSupply (${enemy.enemyId})`);
+  }
   for (const wave of config.enemyWaves) {
     if (!enemyIds.has(wave.enemyId)) throw new Error(`unknown enemyId in wave: ${wave.enemyId}`);
-    if (!Number.isInteger(wave.atTick) || wave.atTick < 0) throw new Error('wave atTick must be a non-negative integer');
+    assertNonNegativeInteger(wave.atTick, 'wave atTick');
     assertPositiveInteger(wave.count, 'wave count');
     assertPositiveInteger(wave.intervalTicks, 'wave intervalTicks');
   }
+
   const weapon = config.baseWeapon ?? DEFAULT_BASE_WEAPON;
-  if (!Number.isInteger(weapon.damage) || weapon.damage < 0) throw new Error('base weapon damage must be a non-negative integer');
+  assertNonNegativeInteger(weapon.damage, 'base weapon damage');
   assertPositiveInteger(weapon.cooldownFrames, 'base weapon cooldownFrames');
-  if (!Number.isInteger(weapon.pushDistance) || weapon.pushDistance < 0) throw new Error('base weapon pushDistance must be a non-negative integer');
+  assertNonNegativeInteger(weapon.pushDistance, 'base weapon pushDistance');
   assertPositiveInteger(weapon.pushFrames, 'base weapon pushFrames');
 }
 
 export function createPlayableBattle(config: PlayableBattleConfig): PlayableBattleState {
   validateConfig(config);
   const supplyLevels = config.supplyLevels ?? DEFAULT_SUPPLY_LEVELS;
-  if (supplyLevels.length === 0) throw new Error('supplyLevels must not be empty');
-  const startingSupply = Math.max(0, Math.trunc(config.startingSupply ?? 300));
+  const startingSupply = config.startingSupply ?? 300;
   const state: PlayableBattleState = {
     battle: createBattle({ mapLength: config.mapLength, playerBaseHp: config.playerBaseHp, enemyBaseHp: config.enemyBaseHp }),
     supply: Math.min(startingSupply, supplyLevels[0]!.maxSupply),
