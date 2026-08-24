@@ -40,6 +40,19 @@ test('compact mobile breakpoint covers short landscape phones in core and catalo
   assert.match(catalog, /fontSize: `\$\{renderedSize\}px`/);
 });
 
+test('catalog keeps desktop descriptions while compact cards prioritize readable identity and stats', async () => {
+  const source = await readSource('../src/catalog-scene.ts');
+  assert.match(source, /const compact = isCompactMobileViewport\(\);/);
+  assert.match(source, /compact \? 27 : 22/);
+  assert.match(source, /compact \? 21 : 14/);
+  assert.match(source, /if \(compact\) \{[\s\S]*?HP \$\{slot\.definition\.maxHp\} · 공격 \$\{slot\.definition\.attackDamage\}/);
+  assert.match(source, /else \{[\s\S]*?slot\.description/);
+  assert.match(source, /재생산 \$\{\(slot\.rechargeFrames \/ 30\)\.toFixed\(1\)\}초/, 'desktop ally detail must retain recharge information');
+  assert.match(source, /if \(!compact\) \{[\s\S]*?첫 클리어 100% 확정/, 'desktop treasure card must retain acquisition detail');
+  assert.match(source, /compact \? 24 : 20/);
+  assert.match(source, /compact \? 20 : 14/);
+});
+
 test('boss arrival warning is keyed by actual BOSS-tagged simulation units and only fires once per instance', async () => {
   const main = await readSource('../src/main.ts');
   const warning = await readSource('../src/boss-warning.ts');
