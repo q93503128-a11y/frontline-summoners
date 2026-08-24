@@ -46,9 +46,9 @@ const config = (): PlayableBattleConfig => ({
   ],
 });
 
-test('default economy starts with a deliberately small wallet and slow income', () => {
+test('default economy starts with a deliberately small wallet and meaningful upgrade income', () => {
   assert.deepEqual(DEFAULT_SUPPLY_LEVELS[0], { incomePerSecond: 12, maxSupply: 1000, upgradeCost: 0 });
-  assert.deepEqual(DEFAULT_SUPPLY_LEVELS[1], { incomePerSecond: 16, maxSupply: 1400, upgradeCost: 160 });
+  assert.deepEqual(DEFAULT_SUPPLY_LEVELS[1], { incomePerSecond: 20, maxSupply: 1400, upgradeCost: 160 });
   assert.equal(DEFAULT_SUPPLY_LEVELS.length, 8);
 });
 
@@ -77,7 +77,7 @@ test('supply upgrades spend supply and switch income/max tier', () => {
   assert.deepEqual(result, { ok: true, level: 2 });
   assert.equal(state.supply, 840);
   for (let i = 0; i < 30; i += 1) stepPlayableBattle(state);
-  assert.equal(state.supply, 856);
+  assert.equal(state.supply, 860);
 });
 
 test('scheduled enemy waves spawn at deterministic ticks', () => {
