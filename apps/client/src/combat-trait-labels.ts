@@ -4,7 +4,7 @@ const TRAIT_LABELS: Readonly<Record<CombatTrait, string>> = {
   LIGHT: '경량',
   ARMORED: '중갑',
   ARCANE: '비전',
-  BOSS: '우두머리',
+  BOSS: '보스',
 };
 
 export function getCombatTraitLabel(trait: CombatTrait): string {
