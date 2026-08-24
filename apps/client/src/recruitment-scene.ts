@@ -34,8 +34,8 @@ export class RecruitmentScene extends Phaser.Scene {
   private progress: GuestProgress = EMPTY_PROGRESS;
   private statusText?: Phaser.GameObjects.Text;
   private progressText?: Phaser.GameObjects.Text;
-  private resultsLayer?: Phaser.GameObjects.Container;
-  private selectionLayer?: Phaser.GameObjects.Container;
+  private resultsLayer: Phaser.GameObjects.Container | undefined;
+  private selectionLayer: Phaser.GameObjects.Container | undefined;
   private busy = false;
 
   constructor() { super('recruitment'); }
