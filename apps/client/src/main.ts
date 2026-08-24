@@ -234,7 +234,6 @@ class StageSelectScene extends Phaser.Scene {
 
       const button = addButton(this, x, 548, 174, 52, unlocked ? '전투 시작' : '이전 스테이지 필요', () => {
         if (unlocked) this.scene.start('battle', { stageId: stage.id });
-        else this.cameras.main.shake(70, 0.0015);
       }, unlocked ? (index === STAGES.length - 1 ? 0xbf9252 : 0x5e7ea0) : 0x3f4855);
       if (!unlocked) button.setAlpha(0.62);
       this.stageLayer!.add(button);
@@ -995,10 +994,7 @@ class ResultScene extends Phaser.Scene {
     }
 
     const guarded = (action: () => void): void => {
-      if (!this.progressionSaved) {
-        this.cameras.main.shake(60, 0.0012);
-        return;
-      }
+      if (!this.progressionSaved) return;
       action();
     };
     addButton(this, 380, 590, 260, 68, '다시 도전', () => guarded(() => this.scene.start('battle', { stageId: this.stage.id })), 0x6d88a7);
