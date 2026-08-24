@@ -333,6 +333,8 @@ class BattleScene extends Phaser.Scene {
   private lastEnemyBaseHp = 0;
   private ready = false;
   private resolved = false;
+  private manuallyPaused = false;
+  private pauseOverlay?: Phaser.GameObjects.Container;
 
   constructor() { super('battle'); }
 
@@ -341,6 +343,8 @@ class BattleScene extends Phaser.Scene {
     this.accumulator = 0;
     this.ready = false;
     this.resolved = false;
+    this.manuallyPaused = false;
+    this.pauseOverlay = undefined;
     this.lastPlayerBaseHp = 0;
     this.lastEnemyBaseHp = 0;
     this.views.clear();
@@ -353,6 +357,8 @@ class BattleScene extends Phaser.Scene {
   create(): void {
     drawBattlefield(this, this.stage);
     const loading = addText(this, INTERNAL_WIDTH / 2, 330, '편성과 전장 불러오는 중…', 25, '#ffffff', 'center').setOrigin(0.5);
+    this.input.keyboard?.on('keydown-P', () => this.toggleManualPause());
+    this.input.keyboard?.on('keydown-ESC', () => this.toggleManualPause());
     void loadGuestProgress().then((progress) => {
       if (!this.scene.isActive()) return;
       if (!isStageUnlocked(this.stage.id, progress.clearedStageIds)) {
@@ -373,7 +379,7 @@ class BattleScene extends Phaser.Scene {
   }
 
   update(_: number, delta: number): void {
-    if (!this.ready || this.resolved || isPortraitMobileViewport()) return;
+    if (!this.ready || this.resolved || this.manuallyPaused || isPortraitMobileViewport()) return;
     this.accumulator += Math.min(delta, 120);
     while (this.accumulator >= SIM_TICK_MS && this.state.battle.winner === null) {
       this.syncProjectileLaunches();
@@ -388,6 +394,31 @@ class BattleScene extends Phaser.Scene {
       this.resolved = true;
       this.time.delayedCall(700, () => this.scene.start('result', { stageId: this.stage.id, winner: this.state.battle.winner }));
     }
+  }
+
+  private toggleManualPause(): void {
+    if (!this.ready || this.resolved) return;
+    this.setManualPaused(!this.manuallyPaused);
+  }
+
+  private setManualPaused(paused: boolean): void {
+    if (this.manuallyPaused === paused) return;
+    this.manuallyPaused = paused;
+    if (!paused) {
+      this.pauseOverlay?.destroy(true);
+      this.pauseOverlay = undefined;
+      this.tweens.resumeAll();
+      return;
+    }
+
+    this.tweens.pauseAll();
+    const blocker = this.add.rectangle(INTERNAL_WIDTH / 2, INTERNAL_HEIGHT / 2, INTERNAL_WIDTH, INTERNAL_HEIGHT, 0x0b0f16, 0.78);
+    const panel = this.add.rectangle(INTERNAL_WIDTH / 2, 330, 480, 250, 0x202735, 0.98).setStrokeStyle(3, 0x71809a);
+    const title = addText(this, INTERNAL_WIDTH / 2, 266, '일 시 정 지', 40, COLORS.cream, 'center').setOrigin(0.5);
+    const detail = addText(this, INTERNAL_WIDTH / 2, 316, '솔로 전투 정지 · 보급·쿨다운·적 스폰도 멈춤', 17, '#b8c5d6', 'center').setOrigin(0.5);
+    const shortcut = addText(this, INTERNAL_WIDTH / 2, 352, 'P 또는 ESC로도 계속할 수 있습니다.', 15, '#8f9bae', 'center').setOrigin(0.5);
+    const resume = addButton(this, INTERNAL_WIDTH / 2, 414, 220, 58, '계 속', () => this.setManualPaused(false), 0x6b94b7);
+    this.pauseOverlay = this.add.container(0, 0, [blocker, panel, title, detail, shortcut, resume]).setDepth(100);
   }
 
   private syncBossWarnings(): void {
@@ -405,7 +436,8 @@ class BattleScene extends Phaser.Scene {
     this.add.rectangle(INTERNAL_WIDTH / 2, 53, INTERNAL_WIDTH, 106, 0x151a24, 0.95);
     addText(this, 35, 16, this.stage.name, 28, '#ffffff');
     addText(this, 36, 56, `${this.stage.chapter} · ${BATTLEFIELD_THEME_LABELS[this.stage.theme]} · ${this.stage.mapLength}m`, 17, '#aeb8c8');
-    this.timerText = addText(this, 625, 25, '0:00', 23, '#dbe2ee', 'center').setOrigin(0.5, 0);
+    this.timerText = addText(this, 585, 25, '0:00', 23, '#dbe2ee', 'center').setOrigin(0.5, 0);
+    addButton(this, 690, 55, 108, 42, '일시정지', () => this.toggleManualPause(), 0x65758d);
 
     addText(this, 760, 18, '보급', 18, '#d7ddea');
     this.add.rectangle(930, 56, 300, 22, 0x0d1118).setStrokeStyle(2, 0x67738b);
@@ -468,6 +500,7 @@ class BattleScene extends Phaser.Scene {
       const cost = addText(this, x - 43, y + 2, `${slot.cost} 보급`, 15, '#f2d37c').setDepth(5);
       const cooldown = addText(this, x + 82, y + 2, '', 15, '#d8e1ef', 'right').setOrigin(1, 0).setDepth(7);
       bg.on('pointerdown', () => {
+        if (this.manuallyPaused) return;
         const result = trySpawnPlayerUnit(this.state, slot.slotId);
         if (!result.ok) this.cameras.main.shake(55, 0.0012);
       });
@@ -478,6 +511,7 @@ class BattleScene extends Phaser.Scene {
     this.supplyUpgradeText = addText(this, 1145, 570, '', 17, '#ffe29a', 'center').setOrigin(0.5);
     addText(this, 1145, 594, '보급소 강화', 16, '#ffffff', 'center').setOrigin(0.5);
     upgradeBg.on('pointerdown', () => {
+      if (this.manuallyPaused) return;
       const result = tryUpgradeSupply(this.state);
       if (!result.ok) this.cameras.main.shake(55, 0.0012);
     });
@@ -485,6 +519,7 @@ class BattleScene extends Phaser.Scene {
     this.baseWeaponBg = this.add.rectangle(1145, 651, 220, 60, 0x26394a).setStrokeStyle(3, 0x72b7db).setInteractive({ useHandCursor: true });
     this.baseWeaponText = addText(this, 1145, 651, '전선포 · 발사 가능', 17, '#bfe8ff', 'center').setOrigin(0.5);
     this.baseWeaponBg.on('pointerdown', () => {
+      if (this.manuallyPaused) return;
       const result = tryFireBaseWeapon(this.state);
       if (!result.ok) {
         this.cameras.main.shake(55, 0.0012);
