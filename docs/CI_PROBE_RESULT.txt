@@ -1,76 +1,82 @@
-source_sha=1c5be0fc4becf6226cd816f708f8bc290f3913e5
+source_sha=4e2092521cf995f35c3495c79895e959af45149b
 install=0
 typecheck=0
 client_test=1
 test=1
 build=0
-campaign_report=1
+campaign_report=0
 
 == client failures ==
-not ok 1 - test/art-content.test.ts
-not ok 6 - test/early-campaign-balance.test.ts
-not ok 7 - test/final-campaign-balance.test.ts
-not ok 8 - test/late-campaign-balance.test.ts
-not ok 9 - test/mid-campaign-balance.test.ts
-not ok 10 - test/progression.test.ts
-not ok 13 - test/solo-pause-economy.test.ts
-not ok 14 - test/starter-balance.test.ts
-not ok 16 - test/treasure-effects.test.ts
-# tests 33
-# pass 24
-# fail 9
+not ok 20 - stages one through five are beatable in the real sequential unlock and treasure order
+    STAGE 3 (border-03) failed with legitimately unlocked slots: militia, guard, hunter
+  name: 'AssertionError'
+not ok 21 - stages sixteen through twenty stay beatable in exact unlock/treasure order and final bosses actually appear
+    STAGE 16 (border-16) failed with legitimately unlocked slots: militia, guard, hunter, duelist, lancer, battlemage, pyromancer, royal
+  name: 'AssertionError'
+not ok 22 - stages eleven through fifteen remain beatable without future unlocks or future treasures
+    STAGE 12 (border-12) failed with legitimately unlocked slots: militia, guard, hunter, duelist, lancer, battlemage, pyromancer
+  name: 'AssertionError'
+not ok 23 - stages six through ten remain beatable in the real sequential unlock and treasure order
+    STAGE 8 (border-08) failed with legitimately unlocked slots: militia, guard, hunter, duelist, lancer
+  name: 'AssertionError'
+not ok 36 - chapter one opens with a scarce wallet and low base hp instead of a late-game economy
+  name: 'AssertionError'
+# tests 49
+# pass 44
+# fail 5
 npm error Lifecycle script `test` failed with error:
 
 == root failures ==
-not ok 1 - test/art-content.test.ts
-not ok 6 - test/early-campaign-balance.test.ts
-not ok 7 - test/final-campaign-balance.test.ts
-not ok 8 - test/late-campaign-balance.test.ts
-not ok 9 - test/mid-campaign-balance.test.ts
-not ok 10 - test/progression.test.ts
-not ok 13 - test/solo-pause-economy.test.ts
-not ok 14 - test/starter-balance.test.ts
-not ok 16 - test/treasure-effects.test.ts
-# tests 33
-# pass 24
-# fail 9
+not ok 20 - stages one through five are beatable in the real sequential unlock and treasure order
+    STAGE 3 (border-03) failed with legitimately unlocked slots: militia, guard, hunter
+  name: 'AssertionError'
+not ok 21 - stages sixteen through twenty stay beatable in exact unlock/treasure order and final bosses actually appear
+    STAGE 16 (border-16) failed with legitimately unlocked slots: militia, guard, hunter, duelist, lancer, battlemage, pyromancer, royal
+  name: 'AssertionError'
+not ok 22 - stages eleven through fifteen remain beatable without future unlocks or future treasures
+    STAGE 12 (border-12) failed with legitimately unlocked slots: militia, guard, hunter, duelist, lancer, battlemage, pyromancer
+  name: 'AssertionError'
+not ok 23 - stages six through ten remain beatable in the real sequential unlock and treasure order
+    STAGE 8 (border-08) failed with legitimately unlocked slots: militia, guard, hunter, duelist, lancer
+  name: 'AssertionError'
+not ok 36 - chapter one opens with a scarce wallet and low base hp instead of a late-game economy
+  name: 'AssertionError'
+# tests 49
+# pass 44
+# fail 5
 npm error Lifecycle script `test` failed with error:
-not ok 1 - chapter one bundle has 10 player units, 10 enemies, 20 stages and seven battlefield themes
-not ok 2 - chapter one keeps exactly nine deterministic character unlock milestones
-not ok 3 - chapter one trait data is explicit and boss tags can coexist with another trait
 # tests 6
-# pass 3
-# fail 3
-npm error Lifecycle script `test` failed with error:
+# pass 6
+# fail 0
 # tests 24
 # pass 24
 # fail 0
 
 == campaign ==
-/home/runner/work/frontline-summoners/frontline-summoners/packages/content-schema/src/index.ts:288
-    if (waveStarts.some((tick, waveIndex) => waveIndex > 0 && tick < waveStarts[waveIndex - 1]!)) throw new Error(`${stage.id} waves must be ordered by atTick`);
-                                                                                                        ^
+{"stage":1,"winner":"PLAYER","sec":35.4,"p":1,"e":0,"lvl":1,"sp":13,"up":0,"empty":0,"players":["militia"],"enemies":["enemy-raider"]}
+{"stage":2,"winner":"PLAYER","sec":62.1,"p":1,"e":0,"lvl":1,"sp":12,"up":0,"empty":0,"players":["militia","guard"],"enemies":["enemy-sprinter","enemy-raider"]}
+{"stage":3,"winner":null,"sec":120,"p":1,"e":0.098,"lvl":1,"sp":21,"up":0,"empty":0,"players":["militia","guard","hunter"],"enemies":["enemy-raider","enemy-spearman","enemy-sprinter"]}
+{"stage":4,"winner":"ENEMY","sec":113.1,"p":0,"e":0.954,"lvl":1,"sp":26,"up":0,"empty":2.6,"players":["militia","guard"],"enemies":["enemy-shield","enemy-raider","enemy-spearman"]}
+{"stage":5,"winner":null,"sec":150,"p":0.328,"e":0.98,"lvl":1,"sp":31,"up":0,"empty":3.3,"players":["militia","guard","hunter","duelist"],"enemies":["enemy-raider","enemy-cultist","enemy-shield"]}
+{"stage":6,"winner":"PLAYER","sec":129.6,"p":1,"e":0,"lvl":1,"sp":19,"up":0,"empty":0,"players":["militia","guard","hunter","duelist"],"enemies":["enemy-sprinter","enemy-shield","enemy-raider"]}
+{"stage":7,"winner":"PLAYER","sec":111.4,"p":1,"e":0,"lvl":1,"sp":16,"up":0,"empty":0,"players":["militia","guard","hunter","duelist","lancer"],"enemies":["enemy-raider","enemy-sniper","enemy-sprinter"]}
+{"stage":8,"winner":"ENEMY","sec":89.9,"p":0,"e":1,"lvl":1,"sp":20,"up":0,"empty":3.3,"players":["militia","guard"],"enemies":["enemy-shield","enemy-spearman","enemy-cultist"]}
+{"stage":9,"winner":"ENEMY","sec":73.5,"p":0,"e":0.973,"lvl":1,"sp":19,"up":0,"empty":3.5,"players":["militia","guard","hunter"],"enemies":["enemy-cultist","enemy-raider","enemy-shield"]}
+{"stage":10,"winner":"ENEMY","sec":121.1,"p":0,"e":1,"lvl":2,"sp":37,"up":1,"empty":1.8,"players":["militia","guard"],"enemies":["enemy-raider","enemy-knight","enemy-spearman","enemy-sniper"]}
+{"stage":11,"winner":"PLAYER","sec":180.1,"p":1,"e":0,"lvl":2,"sp":44,"up":1,"empty":1.3,"players":["militia","guard","hunter","duelist","lancer","battlemage"],"enemies":["enemy-shield","enemy-sniper","enemy-sprinter"]}
+{"stage":12,"winner":"ENEMY","sec":78.9,"p":0,"e":1,"lvl":2,"sp":23,"up":1,"empty":1.8,"players":["militia","guard","hunter"],"enemies":["enemy-sprinter","enemy-berserker","enemy-spearman"]}
+{"stage":13,"winner":"ENEMY","sec":132.5,"p":0,"e":0.976,"lvl":2,"sp":43,"up":1,"empty":2,"players":["militia","guard","hunter"],"enemies":["enemy-knight","enemy-cultist","enemy-sprinter"]}
+{"stage":14,"winner":"ENEMY","sec":100.5,"p":0,"e":1,"lvl":2,"sp":25,"up":1,"empty":2.1,"players":["militia","guard","hunter"],"enemies":["enemy-shield","enemy-sniper","enemy-berserker"]}
+{"stage":15,"winner":"ENEMY","sec":55.9,"p":0,"e":0.996,"lvl":1,"sp":15,"up":0,"empty":3.5,"players":["militia","guard"],"enemies":["enemy-berserker","enemy-shield","enemy-cultist"]}
+{"stage":16,"winner":"ENEMY","sec":123.8,"p":0,"e":1,"lvl":2,"sp":39,"up":1,"empty":1.9,"players":["militia","guard","hunter","duelist"],"enemies":["enemy-shield","enemy-sniper","enemy-knight","enemy-cultist"]}
+{"stage":17,"winner":"ENEMY","sec":55.4,"p":0,"e":1,"lvl":2,"sp":22,"up":1,"empty":2.3,"players":["militia","guard"],"enemies":["enemy-berserker","enemy-sprinter","enemy-knight"]}
+{"stage":18,"winner":"ENEMY","sec":101.3,"p":0,"e":1,"lvl":2,"sp":26,"up":1,"empty":2.5,"players":["militia","guard","hunter","duelist"],"enemies":["enemy-raider","enemy-shield","enemy-sniper","enemy-berserker"]}
+{"stage":19,"winner":"ENEMY","sec":88.4,"p":0,"e":1,"lvl":1,"sp":20,"up":0,"empty":6.2,"players":["militia","guard","hunter"],"enemies":["enemy-cultist","enemy-knight","enemy-sniper","enemy-boss"]}
+{"stage":20,"winner":"ENEMY","sec":89.9,"p":0,"e":1,"lvl":1,"sp":21,"up":0,"empty":3.1,"players":["militia","guard","hunter"],"enemies":["enemy-shield","enemy-berserker","enemy-boss","enemy-sniper","enemy-boss-iron"]}
+(node:2898) ExperimentalWarning: Transform Types is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
 
-Error: border-20 waves must be ordered by atTick
-    at parseCampaignStages (/home/runner/work/frontline-summoners/frontline-summoners/packages/content-schema/src/index.ts:288:105)
-    at parseCampaignBundle (/home/runner/work/frontline-summoners/frontline-summoners/packages/content-schema/src/index.ts:310:18)
-    at <anonymous> (/home/runner/work/frontline-summoners/frontline-summoners/apps/client/src/prototype.ts:35:18)
-    at ModuleJob.run (node:internal/modules/esm/module_job:343:25)
-    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)
-    at async onImport.tracePromise.__proto__ (node:internal/modules/esm/loader:681:26)
-    at async file:///home/runner/work/frontline-summoners/frontline-summoners/[eval1]:1:16
-
-Node.js v22.23.2
-
-== build tail ==
-
-> frontline-summoners@0.0.1 build
-> npm run build --workspaces --if-present
-
-
-> @frontline/client@0.0.3 prebuild
-> node ../../tools/vendor-client-assets.mjs
-
+== build ==
 [asset] hero-knight/idle.png 1980x180 6299 bytes
 [asset] hero-knight/run.png 1440x180 7994 bytes
 [asset] hero-knight/attack.png 1260x180 7299 bytes
@@ -103,9 +109,9 @@ transforming...
 rendering chunks...
 computing gzip size...
 dist/index.html                    1.79 kB │ gzip:   0.99 kB
-dist/assets/index-vcwItwr1.js  1,478.18 kB │ gzip: 387.82 kB
+dist/assets/index-klXTAR81.js  1,478.18 kB │ gzip: 387.82 kB
 
-[32m✓ built in 615ms[39m
+[32m✓ built in 638ms[39m
 [33m[plugin builtin:vite-reporter] 
 (!) Some chunks are larger than 500 kB after minification. Consider:
 - Using dynamic import() to code-split the application
