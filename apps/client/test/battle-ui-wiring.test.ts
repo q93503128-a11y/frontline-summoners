@@ -73,7 +73,7 @@ test('mouse and keyboard battle actions share quiet failure paths without camera
   assert.doesNotMatch(actionBlock, /cameras\.main\.shake/);
 });
 
-test('locked-stage and save-pending clicks are quiet; camera shake is reserved for combat impact FX', async () => {
+test('locked-stage and save-pending clicks are quiet; camera shake is reserved for exactly three combat impact paths', async () => {
   const source = await readMain();
   const stageStart = source.indexOf('class StageSelectScene');
   const deckStart = source.indexOf('class DeckScene');
@@ -88,6 +88,8 @@ test('locked-stage and save-pending clicks are quiet; camera shake is reserved f
   assert.match(resultBlock, /if \(!this\.progressionSaved\) return;/);
   assert.doesNotMatch(resultBlock, /cameras\.main\.shake/);
 
+  const shakeCalls = source.match(/cameras\.main\.shake\(/g) ?? [];
+  assert.equal(shakeCalls.length, 3, 'camera shake must stay limited to base weapon success, heavy unit impact, and base impact');
   assert.match(source, /private playBaseWeaponFx\(\): void[\s\S]*?cameras\.main\.shake/);
   assert.match(source, /private playUnitImpactFx[\s\S]*?cameras\.main\.shake/);
   assert.match(source, /private playBaseImpactFx[\s\S]*?cameras\.main\.shake/);
