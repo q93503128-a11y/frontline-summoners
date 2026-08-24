@@ -1,4 +1,5 @@
 import assert from 'node:assert/strict';
+import { readFile } from 'node:fs/promises';
 import test from 'node:test';
 import {
   STAGE_COLLECTIONS,
@@ -20,6 +21,19 @@ test('stage navigation groups progression and special stages instead of flatteni
   assert.equal(getStageCollection('special-border-01').stages, SPECIAL_STAGES);
   assert.equal(getStageCollectionForStage('border-01').id, 'chapter-01');
   assert.equal(getStageCollectionForStage('special-05').id, 'special-border-01');
+});
+
+test('collection unlocks are anchored to a progression stage id instead of a brittle hard-coded clear count', async () => {
+  const chapter = getStageCollection('chapter-01');
+  const special = getStageCollection('special-border-01');
+  assert.equal(chapter.unlockAfterStageId, undefined);
+  assert.equal(chapter.requiredProgressionClears, 0);
+  assert.equal(special.unlockAfterStageId, 'border-20');
+  assert.equal(special.requiredProgressionClears, 20, 'the UI countdown is derived from the border-20 ordinal');
+
+  const raw = await readFile(new URL('../../../content/stage-collections.json', import.meta.url), 'utf8');
+  assert.match(raw, /"unlockAfterStageId"\s*:\s*"border-20"/);
+  assert.doesNotMatch(raw, /"requiredProgressionClears"/, 'collection content must not persist a duplicated numeric gate');
 });
 
 test('current hub cannot silently receive an off-screen third collection before its paging controls are wired', () => {
