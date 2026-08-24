@@ -32,9 +32,12 @@ export interface CampaignBaselineTelemetry {
 
 const DEPLOYMENTS_PER_ECONOMY_LEVEL = 3;
 const EMERGENCY_FRONTLINE_COUNT = 1;
-const STABLE_FRONTLINE_COUNT = 4;
 const OPENING_ECONOMY_STAGE_INDEX = 7;
-const BOSS_COUNTER_STAGE_INDEX = 15;
+const FINAL_CAMPAIGN_TACTICAL_STAGE_INDEX = 15;
+const TACTICAL_PREP_COUNT = 3;
+const TACTICAL_LEVEL_THREE_DEPLOYMENTS = 5;
+const TACTICAL_MAX_SAVE_SECONDS = 12;
+const TACTICAL_WAIT_PENALTY_SECONDS = 4;
 
 export function targetSupplyLevelForStage(stageIndex: number, state: ReturnType<typeof createPrototypeBattle>): number {
   const highestUnlockedCost = Math.max(...state.playerSlots.map((slot) => slot.cost));
@@ -57,32 +60,57 @@ function alivePlayerUnitCount(state: ReturnType<typeof createPrototypeBattle>): 
   return state.battle.units.filter((unit) => unit.team === 'PLAYER' && unit.state !== 'DYING').length;
 }
 
-function selectReadyBossCounter(state: ReturnType<typeof createPrototypeBattle>) {
-  const bossTraits = new Set(
+function selectAffordableAnchor(state: ReturnType<typeof createPrototypeBattle>) {
+  return [...state.playerSlots]
+    .filter((slot) => slot.cost <= state.supply && getCooldownRemaining(state, slot.slotId) === 0)
+    .sort((a, b) => {
+      const aEfficiency = a.definition.maxHp / Math.max(1, a.cost);
+      const bEfficiency = b.definition.maxHp / Math.max(1, b.cost);
+      return bEfficiency - aEfficiency || b.definition.maxHp - a.definition.maxHp || a.cost - b.cost || a.slotId.localeCompare(b.slotId);
+    })[0];
+}
+
+function selectCheapestAffordableReady(state: ReturnType<typeof createPrototypeBattle>) {
+  return [...state.playerSlots]
+    .filter((slot) => slot.cost <= state.supply && getCooldownRemaining(state, slot.slotId) === 0)
+    .sort((a, b) => a.cost - b.cost || a.slotId.localeCompare(b.slotId))[0];
+}
+
+function selectTacticalCombatSlot(state: ReturnType<typeof createPrototypeBattle>, enemyCount: number) {
+  const enemyTraits = new Set(
     state.battle.units
-      .filter((unit) => unit.team === 'ENEMY' && unit.state !== 'DYING' && (unit.definition.traits ?? []).includes('BOSS'))
+      .filter((unit) => unit.team === 'ENEMY' && unit.state !== 'DYING')
       .flatMap((unit) => unit.definition.traits ?? []),
   );
-  if (bossTraits.size === 0) return undefined;
+  const supplyLevel = getCurrentSupplyLevel(state);
 
   return [...state.playerSlots]
-    .filter((slot) => getCooldownRemaining(state, slot.slotId) === 0)
+    .filter((slot) => slot.cost <= supplyLevel.maxSupply && getCooldownRemaining(state, slot.slotId) === 0)
     .map((slot) => {
-      const matchingMultiplier = (slot.definition.damageBonuses ?? [])
-        .filter((bonus) => bossTraits.has(bonus.trait))
-        .reduce((best, bonus) => Math.max(best, bonus.multiplierPermille), 0);
-      if (matchingMultiplier === 0) return null;
+      const missingSupply = Math.max(0, slot.cost - state.supply);
+      const waitSeconds = missingSupply === 0
+        ? 0
+        : supplyLevel.incomePerSecond > 0
+          ? missingSupply / supplyLevel.incomePerSecond
+          : Number.POSITIVE_INFINITY;
+      if (waitSeconds > TACTICAL_MAX_SAVE_SECONDS) return null;
+
+      const multiplierPermille = (slot.definition.damageBonuses ?? [])
+        .filter((bonus) => enemyTraits.has(bonus.trait))
+        .reduce((best, bonus) => Math.max(best, bonus.multiplierPermille), 1000);
       const cycleFrames = slot.definition.attackTiming.cycleFrames;
-      const specialistScore = (slot.definition.attackDamage * matchingMultiplier) / cycleFrames;
-      return { slot, specialistScore, matchingMultiplier };
+      const dpsPerFrame = (slot.definition.attackDamage * multiplierPermille) / 1000 / cycleFrames;
+      const areaFactor = slot.definition.targetMode === 'AREA'
+        ? Math.min(2.6, 1 + 0.25 * Math.max(0, enemyCount - 1))
+        : 1;
+      const rangeFactor = 1 + Math.min(slot.definition.standingRange, 250) / 800;
+      const durabilityValue = slot.definition.maxHp / 1200;
+      const rawScore = dpsPerFrame * areaFactor * rangeFactor + durabilityValue;
+      const score = rawScore / (1 + waitSeconds / TACTICAL_WAIT_PENALTY_SECONDS);
+      return { slot, score, waitSeconds };
     })
     .filter((candidate): candidate is NonNullable<typeof candidate> => candidate !== null)
-    .sort((a, b) =>
-      b.specialistScore - a.specialistScore ||
-      b.matchingMultiplier - a.matchingMultiplier ||
-      b.slot.cost - a.slot.cost ||
-      a.slot.slotId.localeCompare(b.slot.slotId)
-    )[0]?.slot;
+    .sort((a, b) => b.score - a.score || a.waitSeconds - b.waitSeconds || a.slot.cost - b.slot.cost || a.slot.slotId.localeCompare(b.slot.slotId))[0]?.slot;
 }
 
 export function autoPlayCampaignStage(
@@ -98,6 +126,7 @@ export function autoPlayCampaignStage(
   const targetSupplyLevel = targetSupplyLevelForStage(stageIndex, state);
   const seenEnemyIds = new Set<string>();
   const seenPlayerIds = new Set<string>();
+  const tacticalFinalStage = stageIndex >= FINAL_CAMPAIGN_TACTICAL_STAGE_INDEX;
 
   let rosterCursor = 0;
   let firstSpawnTick: number | null = null;
@@ -135,7 +164,6 @@ export function autoPlayCampaignStage(
 
   // Once the campaign has introduced supply upgrades as a real strategic choice, a competent
   // baseline may invest immediately if it can still retain enough supply for the cheapest defender.
-  // This replaces the old fixed "deploy three units first" opening and does not grant extra resources.
   if (stageIndex >= OPENING_ECONOMY_STAGE_INDEX && state.supplyLevel < targetSupplyLevel) {
     const next = getNextSupplyLevel(state);
     const cheapestCost = Math.min(...state.playerSlots.map((slot) => slot.cost));
@@ -152,37 +180,73 @@ export function autoPlayCampaignStage(
     const enemiesAtDecision = targetableEnemyCount(state);
     const alivePlayersAtDecision = alivePlayerUnitCount(state);
 
-    // Actual pressure overrides planned saving. A human player would not keep hoarding for the next
-    // roster slot, worker level or specialist while the final defender is disappearing under a wave.
-    const emergencyPressure = enemiesAtDecision > 0 && alivePlayersAtDecision <= EMERGENCY_FRONTLINE_COUNT;
-    const emergencySpawned = emergencyPressure && spawnStrongestAffordableNow();
+    if (tacticalFinalStage) {
+      let acted = false;
 
-    if (!emergencySpawned) {
-      // After the opening choice, additional economy tiers still require real field presence first.
-      // This keeps production and investment competing instead of turning the baseline into worker rush AI.
-      const deploymentUnlockedEconomyLevel = 1 + Math.floor(spawnCount / DEPLOYMENTS_PER_ECONOMY_LEVEL);
-      const plannedEconomyLevel = Math.min(targetSupplyLevel, deploymentUnlockedEconomyLevel);
-      const targetNeedsWalletUpgrade = targetSlot.cost > currentWallet;
-      const shouldInvestEconomy = state.supplyLevel < plannedEconomyLevel || targetNeedsWalletUpgrade;
+      // When the field is completely empty under pressure, rebuild one efficient anchor immediately.
+      // Do not let a planned worker level or high-cost damage dealer turn a recoverable position into a loss.
+      if (enemiesAtDecision > 0 && alivePlayersAtDecision === 0) {
+        const anchor = selectAffordableAnchor(state);
+        acted = anchor ? recordSpawn(anchor.slotId) : false;
+      }
 
-      if (shouldInvestEconomy) {
-        const next = getNextSupplyLevel(state);
-        if (next && state.supply >= next.upgradeCost) {
-          const upgraded = tryUpgradeSupply(state);
-          if (upgraded.ok) upgradeCount += 1;
+      if (!acted) {
+        // The late-campaign baseline needs five real deployments before Lv3 investment. This is slightly
+        // faster than the generic 3-per-level rule because the opening Lv2 investment already happened.
+        const deploymentUnlockedEconomyLevel = spawnCount >= TACTICAL_LEVEL_THREE_DEPLOYMENTS
+          ? 3
+          : 1 + Math.floor(spawnCount / DEPLOYMENTS_PER_ECONOMY_LEVEL);
+        const plannedEconomyLevel = Math.min(targetSupplyLevel, deploymentUnlockedEconomyLevel);
+        if (state.supplyLevel < plannedEconomyLevel) {
+          const next = getNextSupplyLevel(state);
+          if (next && state.supply >= next.upgradeCost) {
+            const upgraded = tryUpgradeSupply(state);
+            if (upgraded.ok) {
+              upgradeCount += 1;
+              acted = true;
+            }
+          }
         }
-      } else {
-        // Boss stages should test the roster the player actually owns, not a bot that spends every coin
-        // on cheap rotation units. Once a stable front exists, reserve for a ready specialist whose
-        // explicit damage bonus matches a living boss trait. Emergency defense above always wins over saving.
-        const bossCounter = stageIndex >= BOSS_COUNTER_STAGE_INDEX && alivePlayersAtDecision >= STABLE_FRONTLINE_COUNT
-          ? selectReadyBossCounter(state)
-          : undefined;
-        const counterFitsWallet = bossCounter !== undefined && bossCounter.cost <= currentWallet;
+      }
 
-        if (bossCounter && counterFitsWallet) {
-          if (state.supply >= bossCounter.cost) recordSpawn(bossCounter.slotId);
-          // Otherwise intentionally save this tick instead of draining supply on the cheap roster cycle.
+      if (!acted) {
+        if (enemiesAtDecision === 0) {
+          // Establish a small screen before first contact, then bank rather than filling the field with cheap units.
+          if (spawnCount < TACTICAL_PREP_COUNT) {
+            const prep = selectCheapestAffordableReady(state);
+            if (prep) recordSpawn(prep.slotId);
+          }
+        } else {
+          // Under pressure, choose from the roster the player actually owns using current enemy traits,
+          // area value, range, durability and the real time required to save the missing supply.
+          const tacticalSlot = selectTacticalCombatSlot(state, enemiesAtDecision);
+          if (tacticalSlot) {
+            if (state.supply >= tacticalSlot.cost) recordSpawn(tacticalSlot.slotId);
+            // Otherwise intentionally save for at most TACTICAL_MAX_SAVE_SECONDS. If the line fully breaks,
+            // the anchor rule above takes over immediately on the next decision tick.
+          } else {
+            spawnStrongestAffordableNow();
+          }
+        }
+      }
+    } else {
+      // Early and mid campaign keep the deliberately simple roster-cycle baseline. This prevents a final-stage
+      // tuning change from silently rewriting the already-established first fifteen stages.
+      const emergencyPressure = enemiesAtDecision > 0 && alivePlayersAtDecision <= EMERGENCY_FRONTLINE_COUNT;
+      const emergencySpawned = emergencyPressure && spawnStrongestAffordableNow();
+
+      if (!emergencySpawned) {
+        const deploymentUnlockedEconomyLevel = 1 + Math.floor(spawnCount / DEPLOYMENTS_PER_ECONOMY_LEVEL);
+        const plannedEconomyLevel = Math.min(targetSupplyLevel, deploymentUnlockedEconomyLevel);
+        const targetNeedsWalletUpgrade = targetSlot.cost > currentWallet;
+        const shouldInvestEconomy = state.supplyLevel < plannedEconomyLevel || targetNeedsWalletUpgrade;
+
+        if (shouldInvestEconomy) {
+          const next = getNextSupplyLevel(state);
+          if (next && state.supply >= next.upgradeCost) {
+            const upgraded = tryUpgradeSupply(state);
+            if (upgraded.ok) upgradeCount += 1;
+          }
         } else if (state.supply >= targetSlot.cost && getCooldownRemaining(state, targetSlot.slotId) === 0) {
           if (recordSpawn(targetSlot.slotId)) rosterCursor = (rosterCursor + 1) % state.playerSlots.length;
         }
