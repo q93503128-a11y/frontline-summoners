@@ -154,3 +154,30 @@ test('identical playable command sequence yields identical hash', () => {
   };
   assert.equal(run(), run());
 });
+
+test('playable hash includes future economy, slot, enemy, wave and cap configuration', () => {
+  const baseline = createPlayableBattle(config());
+  const richerIncome = createPlayableBattle({
+    ...config(),
+    supplyLevels: [{ incomePerSecond: 66, maxSupply: 3000, upgradeCost: 0 }],
+  });
+  const pricierSlot = createPlayableBattle({
+    ...config(),
+    playerSlots: [{ slotId: 'cheap', displayName: 'cheap', definition: unit('cheap'), cost: 51, rechargeFrames: 45 }],
+  });
+  const richerEnemy = createPlayableBattle({
+    ...config(),
+    enemies: [{ enemyId: 'grunt', displayName: 'grunt', definition: unit('grunt'), rewardSupply: 26 }],
+  });
+  const widerWave = createPlayableBattle({
+    ...config(),
+    enemyWaves: [{ enemyId: 'grunt', atTick: 10, count: 3, intervalTicks: 20 }],
+  });
+  const smallerCap = createPlayableBattle({ ...config(), playerUnitCap: 49 });
+
+  assert.notEqual(baseline.stateHash, richerIncome.stateHash);
+  assert.notEqual(baseline.stateHash, pricierSlot.stateHash);
+  assert.notEqual(baseline.stateHash, richerEnemy.stateHash);
+  assert.notEqual(baseline.stateHash, widerWave.stateHash);
+  assert.notEqual(baseline.stateHash, smallerCap.stateHash);
+});
