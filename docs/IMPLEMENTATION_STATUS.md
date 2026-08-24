@@ -2,7 +2,7 @@
 
 이 문서는 `docs/CANONICAL.md`를 대체하지 않는다. 매 작업 전 정본을 먼저 읽고, 전체 방향은 `docs/GAME_DESIGN_FULL.md`, 스테이지·특수·협동 세부는 `docs/STAGE_SYSTEM_DESIGN.md`와 대조한다.
 
-## 2026-08-24 — campaign vertical slice 0.0.21
+## 2026-08-24 — campaign vertical slice 0.0.22
 
 ### 문서 정본
 
@@ -72,8 +72,10 @@
 - 숫자키 반복 입력을 별도로 막지 않아 키 반복/연타 플레이가 가능하다. 쿨다운이 끝나기 전 입력은 그냥 실패하고 다음 반복 입력이 자연스럽게 이어진다.
 - 마우스/터치와 키보드는 `trySpawnSlot / tryUpgradeSupplyInput / tryFireBaseWeaponInput` 공통 경로를 사용한다.
 - **소환 쿨다운, 보급 부족, 동시 출격 한도, 미해금/알 수 없는 슬롯, 보급소 강화비 부족/MAX, 전선포 쿨다운/대기 중 같은 정상적인 실패 입력에서는 카메라를 흔들지 않는다.** 광클을 방해하는 실패 피드백을 제거했다.
-- 실제 전선포 발사 성공, 강한 유닛 피격/거점 피격 등 전투 타격감용 카메라 흔들림은 유지한다.
-- 화면 슬롯에 `1~0`, 보급소 버튼에 `Q`, 전선포 버튼에 `E`를 직접 표시한다.
+- 잠긴 스테이지 클릭과 승리 진행 저장 대기 중 버튼 클릭도 조용히 무시한다.
+- 현재 `main.ts`의 camera shake는 **전선포 발사 성공 / 강한 유닛 피격 / 거점 피격** 세 전투 충격 경로에만 존재하도록 회귀 테스트로 고정했다.
+- PC 화면에서는 슬롯에 `1~0`, 보급소 버튼에 `Q`, 전선포 버튼에 `E`를 표시한다.
+- compact 모바일에서는 터치 플레이에 불필요한 1~0/Q/E 표기를 숨기고 캐릭터명·비용·쿨다운·보급소·전선포 정보를 더 크게 표시한다.
 
 ### 제1장 경제 / 전투 템포
 
@@ -163,9 +165,10 @@
 - 메인, 20스테이지 선택, 편성, 결과, 도감 구현.
 - 보스 경고, 적 속성 라벨 디클러터, 모바일 세로 가드 구현.
 - **1~12 난이도 스키마 복원 뒤에도 남아 있던 구식 5성 UI를 제거하고 스테이지 카드에 `난이도 N / 12`로 표시한다.**
-- 작은 모바일 화면(`min(width,height) <= 500`)에서는 메인/스테이지/편성/결과의 공용 텍스트를 최소 16 logical px로 보정한다. PC 크기는 그대로 유지한다.
-- 전투 화면에서는 작은 모바일에서 보급, 거점 HP, 비용, 쿨다운, 단축키, 대포 등 핵심 텍스트를 별도 확대하고 소환 버튼 62→70, 보급소/대포 버튼 60→68 logical px로 높인다.
-- 도감은 별도 scene이므로 자체 compact 경로에서 기존 12~15px 정보 텍스트도 최소 16 logical px로 보정한다.
+- compact 모바일 기준은 `min(width,height) <= 540`으로 통일했다. 메인/스테이지/편성/결과와 도감의 작은 보조 텍스트는 최소 16 logical px를 보장한다.
+- 전투 화면은 별도 compact 레이아웃을 사용한다. 핵심 보급/거점/타이머 텍스트를 22~34 logical px 범위로 확대하고, 소환 버튼 높이는 62→80, 보급소/전선포 버튼은 60→76 logical px로 확대한다.
+- compact 전투에서는 1~0/Q/E 표기를 숨기고 터치에 필요한 캐릭터명·비용·쿨다운·보급소·전선포 상태를 우선한다. PC에서는 단축키 표기를 그대로 유지한다.
+- compact 하단 HUD는 y=540~720 안에 배치되며 소환 2줄은 y=542~702, 우측 컨트롤은 y=544~700에 들어온다. 다섯 번째 소환칸과 우측 컨트롤 사이에도 19 logical px 간격을 회귀 테스트로 보장한다.
 - 세로 모바일에서는 기존 회전 안내 + simulation 정지를 그대로 유지한다.
 - 전장 코드 감사 기준 유닛 그림자 기준선(y=524)은 지면 verge(512~534)와 맞고, 최대 보스 스프라이트도 상단 HUD를 침범하지 않는다. ST19/20 랜드마크는 배경 레이어이며 거점은 이후 그려져 전경에서 가려지지 않는다.
 - 특수 스테이지 전용 메뉴는 아직 없음.
@@ -177,19 +180,19 @@
 - 기존 client의 고정 `50` 배치 경로를 stage-derived 값으로 교체함.
 - final campaign 테스트에 ST20의 15초 경제 오프닝, 50초 황금가면, 80초 철문장군 페이싱을 명시적으로 고정.
 - 구식 `STABLE_FRONTLINE_COUNT`, `selectReadyBossCounter`, ST20 철문장군 1800F 경로는 저장소 검색에서 제거됨.
-- `battle-ui-wiring.test.ts`: 1~0/Q/E/P/ESC, `activeSlots` 기반 단축키, 공통 마우스/키보드 입력 경로, 실패 입력 camera shake 금지, compact 전투 HUD, 12단계 난이도 UI 회귀 검사를 포함.
-- `catalog-boss-mobile-ui.test.ts`: 세로 화면 simulation 선차단뿐 아니라 main/catalog compact 모바일 16px 최소 글자 경로도 회귀 검사함.
+- `battle-ui-wiring.test.ts`: 1~0/Q/E/P/ESC, `activeSlots` 기반 단축키, 공통 마우스/키보드 입력, 정확히 3개의 전투용 camera shake만 허용, compact 전투 HUD 및 하단 hitbox geometry, 12단계 난이도 UI 회귀 검사를 포함.
+- `catalog-boss-mobile-ui.test.ts`: 세로 화면 simulation 선차단, main/catalog compact 540px breakpoint와 최소 텍스트 경로를 회귀 검사함.
+- compact UI 변경 diff를 직전 상태와 대조했고 전투 판정/경제/스폰/진행 로직 변경 없이 UI 분기와 테스트만 바뀐 것을 확인함.
 - 이전 마지막 실제 완전 검증에서는 install/typecheck/build가 성공했고 당시 테스트 실패는 ST20 campaign baseline 하나였음.
 - `.github/workflows/ci.yml`은 **main push와 pull_request 모두에서** install → typecheck → test → build를 실행하도록 정상 설정되어 있다.
 - 현재 사용 가능한 `fetch_commit_workflow_runs` 조회기는 설명상 **PR-triggered workflow run만 반환**한다. 우리는 `main` 직접 push 방식이므로 빈 결과가 나오는 것은 자연스럽고, 이를 CI 미실행/실패 증거로 해석하지 않는다.
-- legacy commit status 조회도 비어 있으나 이것만으로 GitHub Actions check 결과를 판단하지 않는다.
-- 따라서 현재 HEAD의 실제 CI green/red는 이 연결 경로에서는 확인하지 못했으며, 확인되지 않은 성공을 주장하지 않는다.
+- 최신 커밋의 combined status 조회에는 status context가 0개다. 따라서 이 연결 경로에서 현재 HEAD의 실제 CI green/red는 확인할 수 없으며, 확인되지 않은 성공을 주장하지 않는다.
 - 정적 코드 대조상 optional combat metadata는 `?? []`, optional restriction 필드는 값이 있을 때만 객체에 넣어 strict/exactOptionalPropertyTypes 조건을 고려함.
 
 ## 첫 사용자 테스트 전 남은 주요 항목
 
 1. 현재 HEAD의 실제 install → typecheck → test → build 결과를 직접 확인할 수 있는 실행 경로 확보. 독립 결정론 재현에서는 ST1~20이 전부 통과함.
-2. compact 모바일 보정은 코드/회귀 테스트에 들어갔지만 **실제 렌더된 브라우저 화면**에서 7개 맵, 캐릭터 발 위치/그림자, 버튼 터치성, 텍스트 겹침을 최종 확인해야 함.
+2. 전투 compact 조작부는 코드/회귀 테스트/좌표 감사까지 완료. 다만 **스테이지 선택·편성·도감 카드처럼 5열 정보 밀도가 높은 화면은 실제 작은 가로폰 렌더 기준으로 추가 정보 축약/가독성 감사가 남아 있다.**
 3. Cloudflare Pages 실제 프로젝트 URL/배포 상태와 최신 빌드 반영 여부 확인. 저장소 검색에서는 아직 명시적인 `pages.dev` URL/프로젝트 설정을 찾지 못함.
 4. 첫 수동 테스트 게이트의 UI/전투 화면 항목을 전체 체크한 뒤에만 사용자 테스트를 요청.
 5. 특수 스테이지의 실제 콘텐츠 파일/선택 UI는 첫 vertical slice 안정화 뒤 다음 큰 단계에서 구현.
