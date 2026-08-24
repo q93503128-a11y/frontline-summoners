@@ -1,0 +1,147 @@
+[
+  {
+    "id": "special-01",
+    "chapter": "특수전 · 뒤집힌 국경",
+    "name": "세 자리 전선",
+    "subtitle": "동시에 세 명만 세울 수 있는 작은 정예전",
+    "stageType": "SPECIAL",
+    "difficulty": 6,
+    "playerBaseHp": 2500,
+    "enemyBaseHp": 3200,
+    "startingSupply": 420,
+    "mapLength": 900,
+    "theme": "meadow",
+    "decorSeed": 211,
+    "playerUnitCap": 3,
+    "enemyUnitCap": 18,
+    "waves": [
+      { "enemyId": "enemy-shield", "atTick": 240, "count": 2, "intervalTicks": 210 },
+      { "enemyId": "enemy-sprinter", "atTick": 600, "count": 8, "intervalTicks": 90 },
+      { "enemyId": "enemy-knight", "atTick": 1200, "count": 1, "intervalTicks": 320 }
+    ],
+    "treasure": {
+      "id": "special-three-seal",
+      "name": "세 자리 전선 훈장",
+      "effect": "특수전 첫 클리어 기록"
+    },
+    "formationRestrictions": {},
+    "specialRules": []
+  },
+  {
+    "id": "special-02",
+    "chapter": "특수전 · 뒤집힌 국경",
+    "name": "광란의 짧은 길",
+    "subtitle": "짧은 전장에 돌격병이 끊임없이 밀려든다",
+    "stageType": "SPECIAL",
+    "difficulty": 7,
+    "playerBaseHp": 2800,
+    "enemyBaseHp": 3800,
+    "startingSupply": 500,
+    "mapLength": 650,
+    "theme": "burning",
+    "decorSeed": 223,
+    "playerUnitCap": 10,
+    "enemyUnitCap": 25,
+    "waves": [
+      { "enemyId": "enemy-sprinter", "atTick": 90, "count": 18, "intervalTicks": 45 },
+      { "enemyId": "enemy-raider", "atTick": 500, "count": 12, "intervalTicks": 60 },
+      { "enemyId": "enemy-berserker", "atTick": 1100, "count": 2, "intervalTicks": 240 }
+    ],
+    "treasure": {
+      "id": "special-rush-seal",
+      "name": "광란의 짧은 길 훈장",
+      "effect": "특수전 첫 클리어 기록"
+    },
+    "formationRestrictions": {},
+    "specialRules": []
+  },
+  {
+    "id": "special-03",
+    "chapter": "특수전 · 뒤집힌 국경",
+    "name": "유리봉 저격선",
+    "subtitle": "긴 전장을 방패와 저격수가 층층이 잠근다",
+    "stageType": "SPECIAL",
+    "difficulty": 8,
+    "playerBaseHp": 3000,
+    "enemyBaseHp": 4600,
+    "startingSupply": 600,
+    "mapLength": 1500,
+    "theme": "ruins",
+    "decorSeed": 239,
+    "playerUnitCap": 8,
+    "enemyUnitCap": 20,
+    "waves": [
+      { "enemyId": "enemy-shield", "atTick": 180, "count": 3, "intervalTicks": 180 },
+      { "enemyId": "enemy-sniper", "atTick": 480, "count": 6, "intervalTicks": 210 },
+      { "enemyId": "enemy-knight", "atTick": 1200, "count": 2, "intervalTicks": 320 },
+      { "enemyId": "enemy-cultist", "atTick": 1800, "count": 3, "intervalTicks": 250 }
+    ],
+    "treasure": {
+      "id": "special-glassline-seal",
+      "name": "유리봉 저격선 훈장",
+      "effect": "특수전 첫 클리어 기록"
+    },
+    "formationRestrictions": {},
+    "specialRules": []
+  },
+  {
+    "id": "special-04",
+    "chapter": "특수전 · 뒤집힌 국경",
+    "name": "삼인 결사대",
+    "subtitle": "세 자리만으로 중장갑 전열과 철문장군을 돌파한다",
+    "stageType": "SPECIAL",
+    "difficulty": 9,
+    "playerBaseHp": 3200,
+    "enemyBaseHp": 5200,
+    "startingSupply": 750,
+    "mapLength": 1000,
+    "theme": "fortress",
+    "decorSeed": 251,
+    "playerUnitCap": 3,
+    "enemyUnitCap": 15,
+    "waves": [
+      { "enemyId": "enemy-knight", "atTick": 300, "count": 2, "intervalTicks": 300 },
+      { "enemyId": "enemy-berserker", "atTick": 900, "count": 3, "intervalTicks": 260 },
+      { "enemyId": "enemy-sniper", "atTick": 1600, "count": 2, "intervalTicks": 260 },
+      { "enemyId": "enemy-boss-iron", "atTick": 2400, "count": 1, "intervalTicks": 1 }
+    ],
+    "treasure": {
+      "id": "special-three-vow-seal",
+      "name": "삼인 결사대 훈장",
+      "effect": "특수전 첫 클리어 기록"
+    },
+    "formationRestrictions": {},
+    "specialRules": []
+  },
+  {
+    "id": "special-05",
+    "chapter": "특수전 · 뒤집힌 국경",
+    "name": "가면과 철문",
+    "subtitle": "황금가면과 철문장군을 한 전장에서 연달아 상대한다",
+    "stageType": "SPECIAL",
+    "difficulty": 10,
+    "playerBaseHp": 3600,
+    "enemyBaseHp": 6800,
+    "startingSupply": 900,
+    "mapLength": 1280,
+    "theme": "golden",
+    "decorSeed": 269,
+    "playerUnitCap": 8,
+    "enemyUnitCap": 20,
+    "waves": [
+      { "enemyId": "enemy-cultist", "atTick": 240, "count": 3, "intervalTicks": 210 },
+      { "enemyId": "enemy-shield", "atTick": 600, "count": 3, "intervalTicks": 240 },
+      { "enemyId": "enemy-boss-golden", "atTick": 1350, "count": 1, "intervalTicks": 1 },
+      { "enemyId": "enemy-berserker", "atTick": 1800, "count": 2, "intervalTicks": 240 },
+      { "enemyId": "enemy-sniper", "atTick": 2200, "count": 2, "intervalTicks": 260 },
+      { "enemyId": "enemy-boss-iron", "atTick": 2850, "count": 1, "intervalTicks": 1 }
+    ],
+    "treasure": {
+      "id": "special-double-boss-seal",
+      "name": "가면과 철문 훈장",
+      "effect": "특수전 첫 클리어 기록"
+    },
+    "formationRestrictions": {},
+    "specialRules": []
+  }
+]
