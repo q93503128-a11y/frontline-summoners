@@ -22,10 +22,11 @@ export interface CampaignBaselineOptions {
 
 export function targetSupplyLevelForStage(stageIndex: number, state: ReturnType<typeof createPrototypeBattle>): number {
   const highestUnlockedCost = Math.max(...state.playerSlots.map((slot) => slot.cost));
-  const walletRequired = Math.max(
-    1,
-    state.supplyLevels.findIndex((level) => level.maxSupply >= highestUnlockedCost) + 1,
-  );
+  const walletIndex = state.supplyLevels.findIndex((level) => level.maxSupply >= highestUnlockedCost);
+  if (walletIndex < 0) {
+    throw new Error(`unlocked roster cost ${highestUnlockedCost} exceeds every supply wallet tier`);
+  }
+  const walletRequired = walletIndex + 1;
   const economyPacing = stageIndex >= 16 ? 3 : stageIndex >= 7 ? 2 : 1;
   return Math.min(state.supplyLevels.length, Math.max(walletRequired, economyPacing));
 }
