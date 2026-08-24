@@ -2,7 +2,7 @@
 
 이 문서는 `docs/CANONICAL.md`를 대체하지 않는다. 매 작업 전 정본을 먼저 읽고, 전체 방향은 `docs/GAME_DESIGN_FULL.md`, 스테이지·특수·협동 세부는 `docs/STAGE_SYSTEM_DESIGN.md`와 대조한다.
 
-## 2026-08-24 — campaign vertical slice 0.0.20
+## 2026-08-24 — campaign vertical slice 0.0.21
 
 ### 문서 정본
 
@@ -14,6 +14,7 @@
 - `docs/INDEX.md`: 문서 권위와 읽는 순서.
 - `docs/NEW_CHAT_PROMPT.md`: 새 채팅 인수인계용. 새 채팅에서는 이 파일만 믿지 말고 GitHub `main`을 다시 읽어야 한다.
 - 구체 콘텐츠 수치는 `content/` JSON이 우선한다.
+- 루트 `README.md`의 필수 문서 순서도 위 권위 체계와 다시 동기화했다.
 
 ### 전투 코어
 
@@ -63,7 +64,8 @@
 
 ### PC 전투 단축키 / 입력 피드백
 
-- PC 숫자열 `1 2 3 4 5 6 7 8 9 0`은 화면의 1~10번째 캐릭터 슬롯과 고정 대응한다.
+- PC 숫자열 `1 2 3 4 5 6 7 8 9 0`은 현재 전투 편성의 1~10번째 슬롯과 대응한다.
+- 단축키는 전역 캐릭터 목록이 아니라 `activeSlots` 순서를 참조하여 향후 수동 편성 도입 시에도 같은 입력 계약을 유지할 수 있게 함.
 - `Q` = 보급소 강화.
 - `E` = 전선포.
 - `P` / `ESC` = 기존 솔로 일시정지 유지.
@@ -114,7 +116,7 @@
 
 ### 소스 충실 독립 결정론 재현 결과
 
-GitHub Actions 상태가 제공되지 않는 상황에서 `packages/sim/src/index.ts`, `packages/sim/src/playable.ts`, `apps/client/src/treasure-effects.ts`와 현재 JSON을 그대로 옮긴 독립 결정론 재현으로 전투 수치를 교차검증했다.
+실제 CI 결과를 직접 확인할 수 없는 상황에서 `packages/sim/src/index.ts`, `packages/sim/src/playable.ts`, `apps/client/src/treasure-effects.ts`와 현재 JSON을 그대로 옮긴 독립 결정론 재현으로 전투 수치를 교차검증했다.
 
 - 이 재현은 변경 전 ST16~20의 과거 기록 `243.1 / 140.0 / 145.0 / 164.4 / ST20 109.7초 패배`를 스폰 수까지 동일하게 재현해 현재 소스 동작과의 일치를 먼저 확인함.
 - 이후 새 후반 baseline + 새 ST20 웨이브를 적용한 결과:
@@ -126,7 +128,7 @@ GitHub Actions 상태가 제공되지 않는 상황에서 `packages/sim/src/inde
 - ST20은 공허현자 없이 합법적으로 당시 해금된 로스터만 사용했으며, 실제 사용군에는 징집병/방벽기사/결투검사/화염술사 등이 포함됨.
 - ST1~15는 기존 각 테스트의 시간/거점 제한으로 다시 계산했고 15개 모두 승리. 예: ST8 약 182.1초/210초 제한, ST10 약 161.0초/225초, ST15 약 160.9초/315초.
 - 따라서 **소스 충실 결정론 재현 기준으로는 ST1~20 합법 baseline이 현재 전부 통과**한다.
-- 단, 이것은 `npm test`/GitHub Actions 자체의 green을 대신한다고 주장하지 않는다. 실제 TypeScript install/typecheck/test/build는 별도 확인이 필요하다.
+- 단, 이것은 실제 `npm test`/GitHub Actions green을 대신한다고 주장하지 않는다.
 
 ### 캐릭터 / 진행
 
@@ -160,7 +162,12 @@ GitHub Actions 상태가 제공되지 않는 상황에서 `packages/sim/src/inde
 - IndexedDB 게스트 진행 + 같은 탭 session fallback.
 - 메인, 20스테이지 선택, 편성, 결과, 도감 구현.
 - 보스 경고, 적 속성 라벨 디클러터, 모바일 세로 가드 구현.
-- **1~12 난이도 스키마 복원 뒤에도 남아 있던 구식 5성 UI를 제거하고 스테이지 카드에 `난이도 N / 12`로 표시한다.** 난이도 6 이상에서 별이 카드 폭을 계속 늘리는 회귀를 차단했다.
+- **1~12 난이도 스키마 복원 뒤에도 남아 있던 구식 5성 UI를 제거하고 스테이지 카드에 `난이도 N / 12`로 표시한다.**
+- 작은 모바일 화면(`min(width,height) <= 500`)에서는 메인/스테이지/편성/결과의 공용 텍스트를 최소 16 logical px로 보정한다. PC 크기는 그대로 유지한다.
+- 전투 화면에서는 작은 모바일에서 보급, 거점 HP, 비용, 쿨다운, 단축키, 대포 등 핵심 텍스트를 별도 확대하고 소환 버튼 62→70, 보급소/대포 버튼 60→68 logical px로 높인다.
+- 도감은 별도 scene이므로 자체 compact 경로에서 기존 12~15px 정보 텍스트도 최소 16 logical px로 보정한다.
+- 세로 모바일에서는 기존 회전 안내 + simulation 정지를 그대로 유지한다.
+- 전장 코드 감사 기준 유닛 그림자 기준선(y=524)은 지면 verge(512~534)와 맞고, 최대 보스 스프라이트도 상단 HUD를 침범하지 않는다. ST19/20 랜드마크는 배경 레이어이며 거점은 이후 그려져 전경에서 가려지지 않는다.
 - 특수 스테이지 전용 메뉴는 아직 없음.
 
 ### 검증 상태
@@ -170,19 +177,22 @@ GitHub Actions 상태가 제공되지 않는 상황에서 `packages/sim/src/inde
 - 기존 client의 고정 `50` 배치 경로를 stage-derived 값으로 교체함.
 - final campaign 테스트에 ST20의 15초 경제 오프닝, 50초 황금가면, 80초 철문장군 페이싱을 명시적으로 고정.
 - 구식 `STABLE_FRONTLINE_COUNT`, `selectReadyBossCounter`, ST20 철문장군 1800F 경로는 저장소 검색에서 제거됨.
-- `battle-ui-wiring.test.ts`에 숫자열 1~0, Q/E/P/ESC 배선, 공통 마우스/키보드 입력 경로, 정상적인 실패 입력에서 camera shake 미사용, `난이도 N / 12` UI를 정적 회귀 검사로 추가함.
-- 이전 마지막 실제 완전 검증에서는 install/typecheck/build가 성공했고 테스트 실패는 ST20 campaign baseline 하나였음.
-- 그 이후 stage schema/후반 baseline/현재 입력·UI 변경에 대해 GitHub Actions status가 계속 비어 있어 **현재 HEAD의 실제 CI green은 아직 주장하지 않는다.**
+- `battle-ui-wiring.test.ts`: 1~0/Q/E/P/ESC, `activeSlots` 기반 단축키, 공통 마우스/키보드 입력 경로, 실패 입력 camera shake 금지, compact 전투 HUD, 12단계 난이도 UI 회귀 검사를 포함.
+- `catalog-boss-mobile-ui.test.ts`: 세로 화면 simulation 선차단뿐 아니라 main/catalog compact 모바일 16px 최소 글자 경로도 회귀 검사함.
+- 이전 마지막 실제 완전 검증에서는 install/typecheck/build가 성공했고 당시 테스트 실패는 ST20 campaign baseline 하나였음.
+- `.github/workflows/ci.yml`은 **main push와 pull_request 모두에서** install → typecheck → test → build를 실행하도록 정상 설정되어 있다.
+- 현재 사용 가능한 `fetch_commit_workflow_runs` 조회기는 설명상 **PR-triggered workflow run만 반환**한다. 우리는 `main` 직접 push 방식이므로 빈 결과가 나오는 것은 자연스럽고, 이를 CI 미실행/실패 증거로 해석하지 않는다.
+- legacy commit status 조회도 비어 있으나 이것만으로 GitHub Actions check 결과를 판단하지 않는다.
+- 따라서 현재 HEAD의 실제 CI green/red는 이 연결 경로에서는 확인하지 못했으며, 확인되지 않은 성공을 주장하지 않는다.
 - 정적 코드 대조상 optional combat metadata는 `?? []`, optional restriction 필드는 값이 있을 때만 객체에 넣어 strict/exactOptionalPropertyTypes 조건을 고려함.
 
 ## 첫 사용자 테스트 전 남은 주요 항목
 
-1. 현재 HEAD를 실제 install → typecheck → test → build 가능한 환경에서 한 번 더 검증. 소스 충실 독립 재현에서는 ST1~20이 전부 통과했지만 CI 자체 확인은 별도다.
-2. 7개 맵에서 캐릭터 발 위치/그림자/거점 상대 크기/PC·가로 모바일 가독성 수동 감사.
-3. **가로 모바일는 현재 1280×720 내부 화면을 FIT 축소하므로 390~430px 높이의 실제 폰에서 14~17px 내부 글씨가 지나치게 작아질 가능성이 있다. 기존 모바일 테스트는 세로 가드/정지 배선만 검사하므로 가로 전투 UI는 별도 보정 또는 실화면 검증이 필요하다.**
-4. Cloudflare Pages 실제 배포 상태와 최신 빌드 반영 여부 확인.
-5. 첫 수동 테스트 게이트의 UI/전투 화면 항목을 전체 체크한 뒤에만 사용자 테스트를 요청.
-6. 특수 스테이지의 실제 콘텐츠 파일/선택 UI는 첫 vertical slice 안정화 뒤 다음 큰 단계에서 구현.
+1. 현재 HEAD의 실제 install → typecheck → test → build 결과를 직접 확인할 수 있는 실행 경로 확보. 독립 결정론 재현에서는 ST1~20이 전부 통과함.
+2. compact 모바일 보정은 코드/회귀 테스트에 들어갔지만 **실제 렌더된 브라우저 화면**에서 7개 맵, 캐릭터 발 위치/그림자, 버튼 터치성, 텍스트 겹침을 최종 확인해야 함.
+3. Cloudflare Pages 실제 프로젝트 URL/배포 상태와 최신 빌드 반영 여부 확인. 저장소 검색에서는 아직 명시적인 `pages.dev` URL/프로젝트 설정을 찾지 못함.
+4. 첫 수동 테스트 게이트의 UI/전투 화면 항목을 전체 체크한 뒤에만 사용자 테스트를 요청.
+5. 특수 스테이지의 실제 콘텐츠 파일/선택 UI는 첫 vertical slice 안정화 뒤 다음 큰 단계에서 구현.
 
 ## 첫 vertical slice 이후 큰 단계
 
