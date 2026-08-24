@@ -141,6 +141,30 @@ test('compact two-row summon and right-side control hitboxes stay inside the bot
   assert.ok(lastUnitRight < controlLeft, `expected horizontal gap, got last unit right ${lastUnitRight} and control left ${controlLeft}`);
 });
 
+test('stage and deck cards keep desktop detail while compact mobile renders a reduced high-priority information set', async () => {
+  const source = await readMain();
+  const stageStart = source.indexOf('class StageSelectScene');
+  const deckStart = source.indexOf('class DeckScene');
+  const battleStart = source.indexOf('class BattleScene');
+  assert.ok(stageStart >= 0 && deckStart > stageStart && battleStart > deckStart);
+  const stageBlock = source.slice(stageStart, deckStart);
+  const deckBlock = source.slice(deckStart, battleStart);
+
+  assert.match(stageBlock, /const compact = isCompactMobileViewport\(\);/);
+  assert.match(stageBlock, /if \(compact\) \{/);
+  assert.match(stageBlock, /compact \? 28 : 25/);
+  assert.match(stageBlock, /compact \? 535 : 548/);
+  assert.match(stageBlock, /BATTLEFIELD_THEME_LABELS\[stage\.theme\]/, 'desktop stage detail must keep battlefield theme');
+  assert.match(stageBlock, /`전장 \$\{stage\.mapLength\}m`/, 'desktop stage detail must keep map length');
+  assert.match(stageBlock, /stage\.subtitle/, 'desktop stage detail must keep subtitle');
+
+  assert.match(deckBlock, /const compact = isCompactMobileViewport\(\);/);
+  assert.match(deckBlock, /compact \? 27 : 22/);
+  assert.match(deckBlock, /if \(!compact\) this\.cardsLayer!\.add\(addText\(this, x, y \+ \(specialty \? 103 : 84\), slot\.description/);
+  assert.match(deckBlock, /slot\.description/, 'desktop deck card must retain the character description');
+  assert.match(deckBlock, /compact \? '보유 동료 · 현재는 자동 편성' : '처음에는 징집병 1종만 보유한다\./);
+});
+
 test('stage cards render the restored twelve-step difficulty scale without legacy five-star overflow', async () => {
   const source = await readMain();
   assert.match(source, /`난이도 \$\{stage\.difficulty\} \/ 12`/);
