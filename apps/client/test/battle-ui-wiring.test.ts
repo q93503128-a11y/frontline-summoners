@@ -101,9 +101,10 @@ test('compact mobile battle HUD prioritizes readable touch controls without chan
   assert.match(source, /Math\.min\(window\.innerWidth, window\.innerHeight\) <= 540/);
   assert.match(source, /function battleUiFontSize\(regular: number, compact: number\): number/);
   assert.match(source, /const compact = isCompactMobileViewport\(\);/);
-  assert.match(source, /const buttonHeight = compact \? 80 : 62;/);
-  assert.match(source, /const y = compact \? 582 \+ row \* 80 : 579 \+ row \* 72;/);
-  assert.match(source, /const controlHeight = compact \? 76 : 60;/);
+  assert.match(source, /const buttonHeight = compact \? 84 : 62;/);
+  assert.match(source, /const y = compact \? 582 \+ row \* 84 : 579 \+ row \* 72;/);
+  assert.match(source, /const controlHeight = compact \? 84 : 60;/);
+  assert.match(source, /const weaponY = compact \? 666 : 651;/);
   assert.match(source, /const unitButtonName = compact \? slot\.displayName : `\$\{slot\.rarity\} · \$\{slot\.displayName\}`/);
   assert.match(source, /battleUiFontSize\(15, 22\)/);
   assert.match(source, /battleUiFontSize\(21, 28\)/);
@@ -115,17 +116,17 @@ test('compact mobile battle HUD prioritizes readable touch controls without chan
 test('compact two-row summon and right-side control hitboxes stay inside the bottom HUD without overlap', async () => {
   const source = await readMain();
   assert.match(source, /const x = 102 \+ col \* 205;/);
-  assert.match(source, /const y = compact \? 582 \+ row \* 80 : 579 \+ row \* 72;/);
+  assert.match(source, /const y = compact \? 582 \+ row \* 84 : 579 \+ row \* 72;/);
   assert.match(source, /this\.add\.rectangle\(x, y, 188, buttonHeight/);
   assert.match(source, /this\.add\.rectangle\(1145, upgradeY, 220, controlHeight/);
   assert.match(source, /this\.add\.rectangle\(1145, weaponY, 220, controlHeight/);
 
   const hudTop = 540;
   const hudBottom = 720;
-  const unitHeight = 80;
-  const unitRows = [582, 662];
-  const controlHeight = 76;
-  const controlRows = [582, 662];
+  const unitHeight = 84;
+  const unitRows = [582, 666];
+  const controlHeight = 84;
+  const controlRows = [582, 666];
   for (const center of unitRows) {
     assert.ok(center - unitHeight / 2 >= hudTop);
     assert.ok(center + unitHeight / 2 <= hudBottom);
@@ -134,11 +135,16 @@ test('compact two-row summon and right-side control hitboxes stay inside the bot
     assert.ok(center - controlHeight / 2 >= hudTop);
     assert.ok(center + controlHeight / 2 <= hudBottom);
   }
+  assert.equal(unitRows[1]! - unitRows[0]!, unitHeight, 'compact summon rows must meet without overlapping');
+  assert.equal(controlRows[1]! - controlRows[0]!, controlHeight, 'compact right-side controls must meet without overlapping');
 
   const lastUnitCenter = 102 + 4 * 205;
   const lastUnitRight = lastUnitCenter + 188 / 2;
   const controlLeft = 1145 - 220 / 2;
   assert.ok(lastUnitRight < controlLeft, `expected horizontal gap, got last unit right ${lastUnitRight} and control left ${controlLeft}`);
+
+  const scaleAt390High = 390 / 720;
+  assert.ok(unitHeight * scaleAt390High >= 44, 'compact battle targets must stay finger-sized on a 390px-high landscape phone');
 });
 
 test('compact navigation buttons stay finger-sized across stage, deck, battle pause, and result screens', async () => {
