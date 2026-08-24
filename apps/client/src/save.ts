@@ -1,3 +1,11 @@
+import {
+  STAGES,
+  getContiguousClearedStageIds,
+  getStage,
+  getTreasureIdsForClearedStages,
+  isStageUnlocked,
+} from './prototype.ts';
+
 export interface GuestProgress {
   readonly clearedStageIds: readonly string[];
   readonly treasureIds: readonly string[];
@@ -20,12 +28,23 @@ const STORE_NAME = 'guest-progress';
 const KEY = 'progress';
 const SCHEMA_VERSION = 2;
 const EMPTY_PROGRESS: GuestProgress = { clearedStageIds: [], treasureIds: [] };
+const STAGE_TREASURE_IDS = new Set(STAGES.map((stage) => stage.treasure.id));
 let sessionProgress: GuestProgress = EMPTY_PROGRESS;
 
 export function mergeGuestProgress(a: GuestProgress, b: GuestProgress): GuestProgress {
   return {
     clearedStageIds: [...new Set([...a.clearedStageIds, ...b.clearedStageIds])],
     treasureIds: [...new Set([...a.treasureIds, ...b.treasureIds])],
+  };
+}
+
+export function normalizeGuestProgress(progress: GuestProgress): GuestProgress {
+  const clearedStageIds = getContiguousClearedStageIds(progress.clearedStageIds);
+  const guaranteedTreasureIds = getTreasureIdsForClearedStages(clearedStageIds);
+  const nonStageTreasureIds = progress.treasureIds.filter((treasureId) => !STAGE_TREASURE_IDS.has(treasureId));
+  return {
+    clearedStageIds,
+    treasureIds: [...new Set([...guaranteedTreasureIds, ...nonStageTreasureIds])],
   };
 }
 
@@ -65,23 +84,32 @@ export async function loadGuestProgress(): Promise<GuestProgress> {
   try {
     const db = await openDb();
     const stored = await readStoredProgress(db);
-    sessionProgress = mergeGuestProgress(stored, sessionProgress);
+    sessionProgress = normalizeGuestProgress(mergeGuestProgress(stored, sessionProgress));
   } catch {
     // IndexedDB can be unavailable in restrictive/private browser contexts.
     // Preserve progress already earned in this tab instead of silently resetting the session.
+    sessionProgress = normalizeGuestProgress(sessionProgress);
   }
   return sessionProgress;
 }
 
-export async function recordStageClear(stageId: string, treasureId: string): Promise<StageClearResult> {
+export async function recordStageClear(stageId: string, claimedTreasureId: string): Promise<StageClearResult> {
   const before = await loadGuestProgress();
+  const stage = getStage(stageId);
+  if (!isStageUnlocked(stage.id, before.clearedStageIds)) {
+    throw new Error(`Campaign stage is not unlocked: ${stage.id}`);
+  }
+  if (claimedTreasureId !== stage.treasure.id) {
+    throw new Error(`Treasure does not match campaign stage ${stage.id}: ${claimedTreasureId}`);
+  }
+
   const cleared = new Set(before.clearedStageIds);
   const treasures = new Set(before.treasureIds);
-  const firstClear = !cleared.has(stageId);
-  const treasureNew = !treasures.has(treasureId);
-  cleared.add(stageId);
-  treasures.add(treasureId);
-  const progress: GuestProgress = { clearedStageIds: [...cleared], treasureIds: [...treasures] };
+  const firstClear = !cleared.has(stage.id);
+  const treasureNew = !treasures.has(stage.treasure.id);
+  cleared.add(stage.id);
+  treasures.add(stage.treasure.id);
+  const progress = normalizeGuestProgress({ clearedStageIds: [...cleared], treasureIds: [...treasures] });
   const stored: StoredGuestProgress = { ...progress, schemaVersion: SCHEMA_VERSION };
 
   // Apply the result to the in-memory session before persistence. A storage failure must not
