@@ -53,6 +53,18 @@ test('catalog keeps desktop descriptions while compact cards prioritize readable
   assert.match(source, /compact \? 20 : 14/);
 });
 
+test('compact catalog navigation stays finger-sized and cancelled drags restore button scale', async () => {
+  const source = await readSource('../src/catalog-scene.ts');
+  assert.match(source, /const navigationHeight = compact \? 84 : 50;/);
+  assert.match(source, /const tabHeight = compact \? 84 : 54;/);
+  assert.match(source, /isCompactMobileViewport\(\) \? 26 : 18/);
+  assert.match(source, /bg\.on\('pointerout', \(\) => \{[\s\S]*?container\.setScale\(1\);/);
+  assert.match(source, /bg\.on\('pointerupoutside', \(\) => container\.setScale\(1\)\);/);
+
+  const scaleAt390High = 390 / 720;
+  assert.ok(84 * scaleAt390High >= 44, '84 logical px must remain at least 44 CSS px on a 390px-high landscape phone');
+});
+
 test('boss arrival warning is keyed by actual BOSS-tagged simulation units and only fires once per instance', async () => {
   const main = await readSource('../src/main.ts');
   const warning = await readSource('../src/boss-warning.ts');
