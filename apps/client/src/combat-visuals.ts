@@ -31,7 +31,9 @@ export function getAttackSpriteFrame(input: AttackFrameMappingInput): number {
 
   if (elapsed <= firstHit) {
     if (firstHit <= 0) return contactFrame;
-    return clamp(Math.round((elapsed / firstHit) * contactFrame), 0, contactFrame);
+    // Do not expose the contact pose one simulation tick early. Floor keeps every
+    // pre-hit frame strictly before contact while still landing exactly on contactFrame at hitFrame.
+    return clamp(Math.floor((elapsed / firstHit) * contactFrame), 0, contactFrame);
   }
 
   const attackEnd = Math.max(firstHit + 1, lastHit + timing.backswingFrames);
