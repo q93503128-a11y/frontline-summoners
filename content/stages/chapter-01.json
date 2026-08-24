@@ -116,7 +116,7 @@
   {
     "id": "border-20", "chapter": "제1장 · 뒤집힌 국경", "name": "철문과 황금가면", "subtitle": "제1장 최종전 · 두 지휘관이 합류한다", "difficulty": 5,
     "playerBaseHp": 4000, "enemyBaseHp": 7200, "startingSupply": 260, "mapLength": 1280, "theme": "golden", "decorSeed": 211,
-    "waves": [{ "enemyId": "enemy-shield", "atTick": 220, "count": 4, "intervalTicks": 250 }, { "enemyId": "enemy-berserker", "atTick": 560, "count": 4, "intervalTicks": 230 }, { "enemyId": "enemy-sniper", "atTick": 980, "count": 3, "intervalTicks": 260 }, { "enemyId": "enemy-boss", "atTick": 900, "count": 1, "intervalTicks": 9999 }, { "enemyId": "enemy-boss-iron", "atTick": 1250, "count": 1, "intervalTicks": 9999 }],
+    "waves": [{ "enemyId": "enemy-shield", "atTick": 220, "count": 4, "intervalTicks": 250 }, { "enemyId": "enemy-berserker", "atTick": 560, "count": 4, "intervalTicks": 230 }, { "enemyId": "enemy-boss", "atTick": 900, "count": 1, "intervalTicks": 9999 }, { "enemyId": "enemy-sniper", "atTick": 980, "count": 3, "intervalTicks": 260 }, { "enemyId": "enemy-boss-iron", "atTick": 1250, "count": 1, "intervalTicks": 9999 }],
     "treasure": { "id": "border-crown", "name": "뒤집힌 국경의 왕관", "effect": "제1장 영구 보너스 묶음 해금" }, "unlockUnitId": "voidsage"
   }
 ]
