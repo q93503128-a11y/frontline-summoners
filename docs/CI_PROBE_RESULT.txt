@@ -1,42 +1,113 @@
-source_sha=552d798e11280da0822178bd56a1ce17cbc65e30
+source_sha=1c5be0fc4becf6226cd816f708f8bc290f3913e5
 install=0
+typecheck=0
 client_test=1
-campaign_report=0
+test=1
+build=0
+campaign_report=1
 
-== failures ==
-not ok 20 - stages one through five are beatable in the real sequential unlock and treasure order
-    STAGE 3 (border-03) failed with legitimately unlocked slots: militia, guard, hunter
-not ok 21 - stages sixteen through twenty stay beatable in exact unlock/treasure order and final bosses actually appear
-    STAGE 16 (border-16) failed with legitimately unlocked slots: militia, guard, hunter, duelist, lancer, battlemage, pyromancer, royal
-not ok 22 - stages eleven through fifteen remain beatable without future unlocks or future treasures
-    STAGE 11 (border-11) failed with legitimately unlocked slots: militia, guard, hunter, duelist, lancer, battlemage, pyromancer
-not ok 23 - stages six through ten remain beatable in the real sequential unlock and treasure order
-    STAGE 8 (border-08) failed with legitimately unlocked slots: militia, guard, hunter, duelist, lancer
-# tests 49
-# pass 45
-# fail 4
+== client failures ==
+not ok 1 - test/art-content.test.ts
+not ok 6 - test/early-campaign-balance.test.ts
+not ok 7 - test/final-campaign-balance.test.ts
+not ok 8 - test/late-campaign-balance.test.ts
+not ok 9 - test/mid-campaign-balance.test.ts
+not ok 10 - test/progression.test.ts
+not ok 13 - test/solo-pause-economy.test.ts
+not ok 14 - test/starter-balance.test.ts
+not ok 16 - test/treasure-effects.test.ts
+# tests 33
+# pass 24
+# fail 9
 npm error Lifecycle script `test` failed with error:
 
+== root failures ==
+not ok 1 - test/art-content.test.ts
+not ok 6 - test/early-campaign-balance.test.ts
+not ok 7 - test/final-campaign-balance.test.ts
+not ok 8 - test/late-campaign-balance.test.ts
+not ok 9 - test/mid-campaign-balance.test.ts
+not ok 10 - test/progression.test.ts
+not ok 13 - test/solo-pause-economy.test.ts
+not ok 14 - test/starter-balance.test.ts
+not ok 16 - test/treasure-effects.test.ts
+# tests 33
+# pass 24
+# fail 9
+npm error Lifecycle script `test` failed with error:
+not ok 1 - chapter one bundle has 10 player units, 10 enemies, 20 stages and seven battlefield themes
+not ok 2 - chapter one keeps exactly nine deterministic character unlock milestones
+not ok 3 - chapter one trait data is explicit and boss tags can coexist with another trait
+# tests 6
+# pass 3
+# fail 3
+npm error Lifecycle script `test` failed with error:
+# tests 24
+# pass 24
+# fail 0
+
 == campaign ==
-{"stage":1,"winner":"PLAYER","sec":35.2,"p":1,"e":0,"lvl":1,"sp":12,"up":0,"empty":0,"players":["militia"]}
-{"stage":2,"winner":"PLAYER","sec":59.1,"p":1,"e":0,"lvl":1,"sp":11,"up":0,"empty":0,"players":["militia","guard"]}
-{"stage":3,"winner":"ENEMY","sec":81.2,"p":0,"e":1,"lvl":1,"sp":19,"up":0,"empty":3.7,"players":["militia","guard"]}
-{"stage":4,"winner":"ENEMY","sec":99,"p":0,"e":0.988,"lvl":1,"sp":22,"up":0,"empty":2.6,"players":["militia","guard"]}
-{"stage":5,"winner":"ENEMY","sec":129.6,"p":0,"e":1,"lvl":1,"sp":28,"up":0,"empty":3.5,"players":["militia","guard"]}
-{"stage":6,"winner":"PLAYER","sec":102.5,"p":1,"e":0,"lvl":1,"sp":17,"up":0,"empty":0,"players":["militia","guard","hunter","duelist"]}
-{"stage":7,"winner":"PLAYER","sec":104.2,"p":1,"e":0,"lvl":1,"sp":16,"up":0,"empty":0,"players":["militia","guard","hunter","duelist","lancer"]}
-{"stage":8,"winner":"ENEMY","sec":82,"p":0,"e":1,"lvl":1,"sp":20,"up":0,"empty":2.4,"players":["militia","guard"]}
-{"stage":9,"winner":"ENEMY","sec":59.6,"p":0,"e":0.98,"lvl":1,"sp":17,"up":0,"empty":3.5,"players":["militia","guard"]}
-{"stage":10,"winner":"ENEMY","sec":80.5,"p":0,"e":1,"lvl":2,"sp":22,"up":1,"empty":2.4,"players":["militia","guard"]}
-{"stage":11,"winner":"ENEMY","sec":91.7,"p":0,"e":1,"lvl":2,"sp":23,"up":1,"empty":2.9,"players":["militia","guard"]}
-{"stage":12,"winner":"ENEMY","sec":56.3,"p":0,"e":1,"lvl":2,"sp":16,"up":1,"empty":2.8,"players":["militia","guard","hunter"]}
-{"stage":13,"winner":"ENEMY","sec":58.4,"p":0,"e":0.99,"lvl":1,"sp":16,"up":0,"empty":2.7,"players":["militia","guard"]}
-{"stage":14,"winner":"ENEMY","sec":82.1,"p":0,"e":1,"lvl":2,"sp":18,"up":1,"empty":3.1,"players":["militia","guard"]}
-{"stage":15,"winner":"ENEMY","sec":46.1,"p":0,"e":1,"lvl":1,"sp":13,"up":0,"empty":8,"players":["militia","guard"]}
-{"stage":16,"winner":"ENEMY","sec":88.7,"p":0,"e":1,"lvl":1,"sp":19,"up":0,"empty":3.5,"players":["militia","guard"]}
-{"stage":17,"winner":"ENEMY","sec":44.6,"p":0,"e":1,"lvl":1,"sp":14,"up":0,"empty":4,"players":["militia","guard"]}
-{"stage":18,"winner":"ENEMY","sec":81.2,"p":0,"e":1,"lvl":2,"sp":19,"up":1,"empty":3,"players":["militia","guard","hunter"]}
-{"stage":19,"winner":"ENEMY","sec":84.5,"p":0,"e":1,"lvl":1,"sp":21,"up":0,"empty":3.2,"players":["militia","guard"]}
-{"stage":20,"winner":"ENEMY","sec":68.9,"p":0,"e":1,"lvl":1,"sp":16,"up":0,"empty":3.4,"players":["militia","guard","hunter"]}
-(node:2283) ExperimentalWarning: Transform Types is an experimental feature and might change at any time
-(Use `node --trace-warnings ...` to show where the warning was created)
+/home/runner/work/frontline-summoners/frontline-summoners/packages/content-schema/src/index.ts:288
+    if (waveStarts.some((tick, waveIndex) => waveIndex > 0 && tick < waveStarts[waveIndex - 1]!)) throw new Error(`${stage.id} waves must be ordered by atTick`);
+                                                                                                        ^
+
+Error: border-20 waves must be ordered by atTick
+    at parseCampaignStages (/home/runner/work/frontline-summoners/frontline-summoners/packages/content-schema/src/index.ts:288:105)
+    at parseCampaignBundle (/home/runner/work/frontline-summoners/frontline-summoners/packages/content-schema/src/index.ts:310:18)
+    at <anonymous> (/home/runner/work/frontline-summoners/frontline-summoners/apps/client/src/prototype.ts:35:18)
+    at ModuleJob.run (node:internal/modules/esm/module_job:343:25)
+    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+    at async onImport.tracePromise.__proto__ (node:internal/modules/esm/loader:681:26)
+    at async file:///home/runner/work/frontline-summoners/frontline-summoners/[eval1]:1:16
+
+Node.js v22.23.2
+
+== build tail ==
+
+> frontline-summoners@0.0.1 build
+> npm run build --workspaces --if-present
+
+
+> @frontline/client@0.0.3 prebuild
+> node ../../tools/vendor-client-assets.mjs
+
+[asset] hero-knight/idle.png 1980x180 6299 bytes
+[asset] hero-knight/run.png 1440x180 7994 bytes
+[asset] hero-knight/attack.png 1260x180 7299 bytes
+[asset] hero-knight-2/idle.png 1540x140 4370 bytes
+[asset] hero-knight-2/run.png 1120x140 5085 bytes
+[asset] hero-knight-2/attack.png 840x140 4074 bytes
+[asset] fantasy-warrior/idle.png 1620x162 6651 bytes
+[asset] fantasy-warrior/run.png 1296x162 6010 bytes
+[asset] fantasy-warrior/attack.png 1134x162 8497 bytes
+[asset] wizard/idle.png 1386x190 7036 bytes
+[asset] wizard/run.png 1848x190 11180 bytes
+[asset] wizard/attack.png 1848x190 15367 bytes
+[asset] warrior/idle.png 1200x150 3046 bytes
+[asset] warrior/run.png 1200x150 4313 bytes
+[asset] warrior/attack.png 600x150 2881 bytes
+[asset] huntress/idle.png 1200x150 3884 bytes
+[asset] huntress/run.png 1200x150 4292 bytes
+[asset] huntress/attack.png 750x150 3989 bytes
+[asset] evil-wizard/idle.png 1200x150 5046 bytes
+[asset] evil-wizard/run.png 1200x150 5464 bytes
+[asset] evil-wizard/attack.png 1200x150 6122 bytes
+[asset] vendored 21 verified sprite sheets (128899 bytes)
+
+> @frontline/client@0.0.3 build
+> vite build
+
+[36mvite v8.2.2 [32mbuilding client environment for production...[36m[39m
+transforming...
+✓ 25 modules transformed.
+rendering chunks...
+computing gzip size...
+dist/index.html                    1.79 kB │ gzip:   0.99 kB
+dist/assets/index-vcwItwr1.js  1,478.18 kB │ gzip: 387.82 kB
+
+[32m✓ built in 615ms[39m
+[33m[plugin builtin:vite-reporter] 
+(!) Some chunks are larger than 500 kB after minification. Consider:
+- Using dynamic import() to code-split the application
+- Use build.rolldownOptions.output.codeSplitting to improve chunking: https://rolldown.rs/reference/OutputOptions.codeSplitting
+- Adjust chunk size limit for this warning via build.chunkSizeWarningLimit.[39m
