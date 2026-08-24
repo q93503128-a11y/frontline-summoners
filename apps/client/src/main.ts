@@ -334,7 +334,7 @@ class BattleScene extends Phaser.Scene {
   private ready = false;
   private resolved = false;
   private manuallyPaused = false;
-  private pauseOverlay?: Phaser.GameObjects.Container;
+  private pauseOverlay: Phaser.GameObjects.Container | undefined;
 
   constructor() { super('battle'); }
 
@@ -412,7 +412,7 @@ class BattleScene extends Phaser.Scene {
     }
 
     this.tweens.pauseAll();
-    const blocker = this.add.rectangle(INTERNAL_WIDTH / 2, INTERNAL_HEIGHT / 2, INTERNAL_WIDTH, INTERNAL_HEIGHT, 0x0b0f16, 0.78);
+    const blocker = this.add.rectangle(INTERNAL_WIDTH / 2, INTERNAL_HEIGHT / 2, INTERNAL_WIDTH, INTERNAL_HEIGHT, 0x0b0f16, 0.78).setInteractive();
     const panel = this.add.rectangle(INTERNAL_WIDTH / 2, 330, 480, 250, 0x202735, 0.98).setStrokeStyle(3, 0x71809a);
     const title = addText(this, INTERNAL_WIDTH / 2, 266, '일 시 정 지', 40, COLORS.cream, 'center').setOrigin(0.5);
     const detail = addText(this, INTERNAL_WIDTH / 2, 316, '솔로 전투 정지 · 보급·쿨다운·적 스폰도 멈춤', 17, '#b8c5d6', 'center').setOrigin(0.5);
