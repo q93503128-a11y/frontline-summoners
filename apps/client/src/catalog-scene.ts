@@ -106,14 +106,14 @@ export class CatalogScene extends Phaser.Scene {
   create(): void {
     drawBackdrop(this);
     addText(this, 54, 34, '도 감', 44, '#fff4cf');
-    addText(this, 56, 88, '제1장 동료와 확정 보물을 한곳에서 확인한다.', 18, '#b8c0ce');
+    addText(this, 56, 88, '제1장 동료와 확정 보물을 한곳에서 확인한다.', isCompactMobileViewport() ? 22 : 18, '#b8c0ce');
     addButton(this, 1165, 62, 160, 50, '메인', () => this.scene.start('main-menu'), 0x586275);
 
     this.allyTab = addButton(this, 245, 135, 280, 54, '동료 10종', () => this.setMode('ALLIES'), 0x6d91b5);
     this.treasureTab = addButton(this, 545, 135, 280, 54, '보물 20종', () => this.setMode('TREASURES'), 0xb69755);
     addButton(this, 92, 664, 140, 50, '◀ 이전', () => this.changePage(-1), 0x586275);
     addButton(this, 1188, 664, 140, 50, '다음 ▶', () => this.changePage(1), 0x586275);
-    this.pageText = addText(this, INTERNAL_WIDTH / 2, 652, '', 18, '#aab4c3', 'center').setOrigin(0.5);
+    this.pageText = addText(this, INTERNAL_WIDTH / 2, 652, '', isCompactMobileViewport() ? 22 : 18, '#aab4c3', 'center').setOrigin(0.5);
 
     this.render();
     void loadGuestProgress().then((progress) => {
@@ -154,6 +154,7 @@ export class CatalogScene extends Phaser.Scene {
   }
 
   private renderAllies(): void {
+    const compact = isCompactMobileViewport();
     const start = this.page * ALLY_PAGE_SIZE;
     const unlockedIds = new Set(getUnlockedSlotIds(this.progress.clearedStageIds));
     const visible = PLAYER_SLOTS.slice(start, start + ALLY_PAGE_SIZE);
@@ -169,37 +170,42 @@ export class CatalogScene extends Phaser.Scene {
       this.contentLayer!.add(card);
 
       const art = getArt(slot.definition.id);
-      const portrait = this.add.sprite(x, 270, art.family.idle.key, 0)
+      const portrait = this.add.sprite(x, compact ? 285 : 270, art.family.idle.key, 0)
         .setTint(unlocked ? art.tint : 0x30343c)
         .setAlpha(unlocked ? 1 : 0.5);
-      portrait.setScale((145 / art.family.idle.frameHeight) * art.displayScale);
+      portrait.setScale(((compact ? 132 : 145) / art.family.idle.frameHeight) * art.displayScale);
       this.contentLayer!.add(portrait);
 
-      this.contentLayer!.add(addText(this, x - 96, 200, unlocked ? slot.rarity : 'LOCK', 15, unlocked ? rarityColor[slot.rarity] ?? '#ffffff' : '#69727e'));
-      this.contentLayer!.add(addText(this, x, 342, slot.displayName, 22, unlocked ? '#ffffff' : '#7b8591', 'center').setOrigin(0.5));
+      this.contentLayer!.add(addText(this, x - 96, 200, unlocked ? slot.rarity : 'LOCK', compact ? 20 : 15, unlocked ? rarityColor[slot.rarity] ?? '#ffffff' : '#69727e'));
+      this.contentLayer!.add(addText(this, x, compact ? 360 : 342, slot.displayName, compact ? 27 : 22, unlocked ? '#ffffff' : '#7b8591', 'center').setOrigin(0.5));
 
       if (unlocked) {
-        this.contentLayer!.add(addText(this, x, 376, `${slot.role} · ${slot.cost} 보급`, 14, '#f2d37c', 'center').setOrigin(0.5));
-        this.contentLayer!.add(addText(this, x, 402, formatCombatTraits(slot.definition), 13, '#9fcfff', 'center').setOrigin(0.5));
+        this.contentLayer!.add(addText(this, x, compact ? 400 : 376, `${slot.role} · ${slot.cost} 보급`, compact ? 21 : 14, '#f2d37c', 'center').setOrigin(0.5));
+        this.contentLayer!.add(addText(this, x, compact ? 438 : 402, formatCombatTraits(slot.definition), compact ? 19 : 13, '#9fcfff', 'center').setOrigin(0.5));
         const specialty = formatDamageSpecialty(slot.definition);
         if (specialty) {
-          this.contentLayer!.add(addText(this, x, 430, specialty, 13, '#ffd493', 'center').setOrigin(0.5));
+          this.contentLayer!.add(addText(this, x, compact ? 474 : 430, specialty, compact ? 19 : 13, '#ffd493', 'center').setOrigin(0.5));
         }
-        this.contentLayer!.add(addText(this, x, specialty ? 466 : 440, slot.description, 13, '#bec7d5', 'center').setOrigin(0.5).setWordWrapWidth(188));
-        this.contentLayer!.add(addText(this, x, 555, `HP ${slot.definition.maxHp}  ·  공격 ${slot.definition.attackDamage}\n사거리 ${slot.definition.attackMaxRange}  ·  재생산 ${(slot.rechargeFrames / 30).toFixed(1)}초`, 12, '#91a0b3', 'center').setOrigin(0.5).setWordWrapWidth(190));
+        if (compact) {
+          this.contentLayer!.add(addText(this, x, 532, `HP ${slot.definition.maxHp} · 공격 ${slot.definition.attackDamage}\n사거리 ${slot.definition.attackMaxRange}`, 18, '#aeb8c8', 'center').setOrigin(0.5).setWordWrapWidth(190));
+        } else {
+          this.contentLayer!.add(addText(this, x, specialty ? 466 : 440, slot.description, 13, '#bec7d5', 'center').setOrigin(0.5).setWordWrapWidth(188));
+          this.contentLayer!.add(addText(this, x, 555, `HP ${slot.definition.maxHp}  ·  공격 ${slot.definition.attackDamage}\n사거리 ${slot.definition.attackMaxRange}  ·  재생산 ${(slot.rechargeFrames / 30).toFixed(1)}초`, 12, '#91a0b3', 'center').setOrigin(0.5).setWordWrapWidth(190));
+        }
       } else {
         const unlockStage = getUnlockStageForSlot(slot.slotId);
         const requirement = unlockStage
           ? `STAGE ${getStageNumber(unlockStage.id)} 첫 클리어\n${unlockStage.name}`
           : '캠페인 진행으로 합류';
-        this.contentLayer!.add(addText(this, x, 410, '아직 합류하지 않은 동료', 14, '#727c89', 'center').setOrigin(0.5));
-        this.contentLayer!.add(addText(this, x, 470, requirement, 14, '#8290a1', 'center').setOrigin(0.5).setWordWrapWidth(190));
-        this.contentLayer!.add(addText(this, x, 552, '능력치는 합류 후 공개', 12, '#616b78', 'center').setOrigin(0.5));
+        this.contentLayer!.add(addText(this, x, compact ? 420 : 410, compact ? '미합류' : '아직 합류하지 않은 동료', compact ? 22 : 14, '#727c89', 'center').setOrigin(0.5));
+        this.contentLayer!.add(addText(this, x, compact ? 482 : 470, requirement, compact ? 19 : 14, '#8290a1', 'center').setOrigin(0.5).setWordWrapWidth(190));
+        if (!compact) this.contentLayer!.add(addText(this, x, 552, '능력치는 합류 후 공개', 12, '#616b78', 'center').setOrigin(0.5));
       }
     });
   }
 
   private renderTreasures(): void {
+    const compact = isCompactMobileViewport();
     const start = this.page * TREASURE_PAGE_SIZE;
     const owned = new Set(this.progress.treasureIds);
     const visible = STAGES.slice(start, start + TREASURE_PAGE_SIZE);
@@ -212,18 +218,20 @@ export class CatalogScene extends Phaser.Scene {
         .setStrokeStyle(3, isOwned ? 0xb79958 : 0x46505e, isOwned ? 0.95 : 0.65);
       this.contentLayer!.add(card);
 
-      const seal = this.add.circle(x, 280, 64, isOwned ? 0xd4aa58 : 0x39414d, isOwned ? 0.92 : 0.7)
+      const seal = this.add.circle(x, compact ? 290 : 280, compact ? 58 : 64, isOwned ? 0xd4aa58 : 0x39414d, isOwned ? 0.92 : 0.7)
         .setStrokeStyle(5, isOwned ? 0xffe0a0 : 0x5c6572, 0.9);
-      const core = this.add.circle(x, 280, 28, isOwned ? 0x6c5130 : 0x242a34, 0.95);
+      const core = this.add.circle(x, compact ? 290 : 280, compact ? 25 : 28, isOwned ? 0x6c5130 : 0x242a34, 0.95);
       this.contentLayer!.add(seal);
       this.contentLayer!.add(core);
-      this.contentLayer!.add(addText(this, x, 280, isOwned ? '✓' : '?', 34, isOwned ? '#fff1bd' : '#747e8b', 'center').setOrigin(0.5));
+      this.contentLayer!.add(addText(this, x, compact ? 290 : 280, isOwned ? '✓' : '?', compact ? 36 : 34, isOwned ? '#fff1bd' : '#747e8b', 'center').setOrigin(0.5));
 
-      this.contentLayer!.add(addText(this, x, 205, `STAGE ${stageNumber}`, 15, isOwned ? '#d7bd82' : '#6f7987', 'center').setOrigin(0.5));
-      this.contentLayer!.add(addText(this, x, 365, stage.treasure.name, 20, isOwned ? '#ffe19a' : '#8b939e', 'center').setOrigin(0.5).setWordWrapWidth(190));
-      this.contentLayer!.add(addText(this, x, 425, stage.treasure.effect, 15, isOwned ? '#dce6d7' : '#6f7885', 'center').setOrigin(0.5).setWordWrapWidth(188));
-      this.contentLayer!.add(addText(this, x, 505, isOwned ? '획득 완료 · 영구 적용 중' : '미획득', 14, isOwned ? '#8ee3aa' : '#7b8591', 'center').setOrigin(0.5));
-      this.contentLayer!.add(addText(this, x, 548, `${stage.name}\n첫 클리어 100% 확정`, 12, isOwned ? '#aab6c5' : '#687381', 'center').setOrigin(0.5).setWordWrapWidth(188));
+      this.contentLayer!.add(addText(this, x, 205, `STAGE ${stageNumber}`, compact ? 20 : 15, isOwned ? '#d7bd82' : '#6f7987', 'center').setOrigin(0.5));
+      this.contentLayer!.add(addText(this, x, compact ? 382 : 365, stage.treasure.name, compact ? 24 : 20, isOwned ? '#ffe19a' : '#8b939e', 'center').setOrigin(0.5).setWordWrapWidth(190));
+      this.contentLayer!.add(addText(this, x, compact ? 445 : 425, stage.treasure.effect, compact ? 19 : 15, isOwned ? '#dce6d7' : '#6f7885', 'center').setOrigin(0.5).setWordWrapWidth(188));
+      this.contentLayer!.add(addText(this, x, compact ? 520 : 505, isOwned ? '획득 완료' : '미획득', compact ? 20 : 14, isOwned ? '#8ee3aa' : '#7b8591', 'center').setOrigin(0.5));
+      if (!compact) {
+        this.contentLayer!.add(addText(this, x, 548, `${stage.name}\n첫 클리어 100% 확정`, 12, isOwned ? '#aab6c5' : '#687381', 'center').setOrigin(0.5).setWordWrapWidth(188));
+      }
     });
   }
 }
