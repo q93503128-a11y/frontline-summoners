@@ -105,8 +105,18 @@ export function getUnlockStageForSlot(slotId: string): PrototypeStage | undefine
   return STAGES.find((stage) => stage.unlockUnitId === slotId);
 }
 
-export function getUnlockedSlotIds(clearedStageIds: readonly string[]): readonly string[] {
+export function getContiguousClearedStageIds(clearedStageIds: readonly string[]): readonly string[] {
   const cleared = new Set(clearedStageIds);
+  const contiguous: string[] = [];
+  for (const stage of STAGES) {
+    if (!cleared.has(stage.id)) break;
+    contiguous.push(stage.id);
+  }
+  return contiguous;
+}
+
+export function getUnlockedSlotIds(clearedStageIds: readonly string[]): readonly string[] {
+  const cleared = new Set(getContiguousClearedStageIds(clearedStageIds));
   const unlocked = new Set<string>([STARTER_SLOT_ID]);
   for (const stage of STAGES) {
     if (cleared.has(stage.id) && stage.unlockUnitId) unlocked.add(stage.unlockUnitId);
@@ -123,12 +133,11 @@ export function isStageUnlocked(stageId: string, clearedStageIds: readonly strin
   const index = STAGES.findIndex((stage) => stage.id === stageId);
   if (index < 0) return false;
   if (index === 0) return true;
-  const cleared = new Set(clearedStageIds);
-  return STAGES.slice(0, index).every((stage) => cleared.has(stage.id));
+  return getContiguousClearedStageIds(clearedStageIds).length >= index;
 }
 
 export function getTreasureIdsForClearedStages(clearedStageIds: readonly string[]): readonly string[] {
-  const cleared = new Set(clearedStageIds);
+  const cleared = new Set(getContiguousClearedStageIds(clearedStageIds));
   return STAGES.filter((stage) => cleared.has(stage.id)).map((stage) => stage.treasure.id);
 }
 
