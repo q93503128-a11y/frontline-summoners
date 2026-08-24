@@ -20,7 +20,7 @@ const files = [
   ['fantasy-warrior/attack.png', `${NQM}/Fantasy%20Warrior/Sprites/Attack1.png`, 1134, 162],
   ['wizard/idle.png', `${VLEE}/WizardPack/Idle.png`, 1386, 190],
   ['wizard/run.png', `${VLEE}/WizardPack/Run.png`, 1848, 190],
-  ['wizard/attack.png', `${VLEE}/WizardPack/Attack1.png`, 1386, 190],
+  ['wizard/attack.png', `${VLEE}/WizardPack/Attack1.png`, 1848, 190],
   ['warrior/idle.png', `${NQM}/Medieval%20Warrior%20Pack%202/Sprites/Idle.png`, 1200, 150],
   ['warrior/run.png', `${NQM}/Medieval%20Warrior%20Pack%202/Sprites/Run.png`, 1200, 150],
   ['warrior/attack.png', `${NQM}/Medieval%20Warrior%20Pack%202/Sprites/Attack1.png`, 600, 150],
