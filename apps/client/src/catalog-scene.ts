@@ -13,7 +13,7 @@ import { loadGuestProgress, type GuestProgress } from './save';
 import { isCompactMobileViewport } from './viewport';
 
 const FONT = '"Malgun Gothic", "Apple SD Gothic Neo", "Noto Sans KR", sans-serif';
-const EMPTY_PROGRESS: GuestProgress = { clearedStageIds: [], treasureIds: [] };
+const EMPTY_PROGRESS: GuestProgress = { clearedStageIds: [], specialClearedStageIds: [], treasureIds: [] };
 const ALLY_PAGE_SIZE = 5;
 const TREASURE_PAGE_SIZE = 5;
 
