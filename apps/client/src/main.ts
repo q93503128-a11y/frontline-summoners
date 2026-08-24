@@ -292,7 +292,7 @@ class DeckScene extends Phaser.Scene {
       this.cardsLayer!.add(card);
       const art = familyForUnit(slot.definition.id);
       const portrait = this.add.sprite(x, compact ? y - 63 : y - 58, art.family.idle.key, 0).setTint(unlocked ? art.tint : 0x30343c).setAlpha(unlocked ? 1 : 0.5);
-      portrait.setScale(((compact ? 135 : 152) / art.family.idle.frameHeight) * art.displayScale);
+      portrait.setScale(((compact ? 132 : 152) / art.family.idle.frameHeight) * art.displayScale);
       this.cardsLayer!.add(portrait);
       this.cardsLayer!.add(addText(this, x - 94, y - 102, unlocked ? slot.rarity : 'LOCK', compact ? 20 : 15, unlocked ? (rarityColor[slot.rarity] ?? '#ffffff') : '#656d78'));
       this.cardsLayer!.add(addText(this, x, compact ? y + 8 : y + 4, unlocked ? slot.displayName : '미해금', compact ? 27 : 22, unlocked ? '#ffffff' : '#78818d', 'center').setOrigin(0.5));
