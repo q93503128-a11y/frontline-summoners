@@ -1,0 +1,96 @@
+name: Stage 20 pacing matrix
+on:
+  push:
+    branches: [main]
+    paths:
+      - .github/workflows/st20-balance-matrix.yml
+permissions:
+  contents: write
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Compare stage-20 candidates
+        shell: bash
+        run: |
+          set -euo pipefail
+          npm install --ignore-scripts >/tmp/install.log 2>&1
+          cp content/stages/chapter-01.json /tmp/stages-original.json
+          : > /tmp/matrix.log
+
+          run_variant() {
+            NAME="$1" START="$2" SHIELD_AT="$3" BERSERK_COUNT="$4" BERSERK_AT="$5" BOSS_AT="$6" SNIPER_AT="$7" IRON_AT="$8"
+            NAME="$NAME" START="$START" SHIELD_AT="$SHIELD_AT" BERSERK_COUNT="$BERSERK_COUNT" BERSERK_AT="$BERSERK_AT" BOSS_AT="$BOSS_AT" SNIPER_AT="$SNIPER_AT" IRON_AT="$IRON_AT" python3 - <<'PY'
+          import json, os
+          from pathlib import Path
+          stages=json.loads(Path('/tmp/stages-original.json').read_text())
+          s=stages[19]
+          s['startingSupply']=int(os.environ['START'])
+          waves=s['waves']
+          waves[0]['atTick']=int(os.environ['SHIELD_AT'])
+          waves[1]['count']=int(os.environ['BERSERK_COUNT'])
+          waves[1]['atTick']=int(os.environ['BERSERK_AT'])
+          waves[2]['atTick']=int(os.environ['BOSS_AT'])
+          waves[3]['atTick']=int(os.environ['SNIPER_AT'])
+          waves[4]['atTick']=int(os.environ['IRON_AT'])
+          Path('content/stages/chapter-01.json').write_text(json.dumps(stages, ensure_ascii=False, separators=(',',':'))+'\n')
+          PY
+            NAME="$NAME" node --experimental-transform-types --input-type=module >> /tmp/matrix.log 2>&1 <<'NODE'
+          const { STAGES } = await import(`./apps/client/src/prototype.ts?${Date.now()}-${Math.random()}`);
+          const { autoPlayCampaignStage } = await import(`./apps/client/test/campaign-baseline.ts?${Date.now()}-${Math.random()}`);
+          const cleared = STAGES.slice(0, 19).map((stage) => stage.id);
+          const r = autoPlayCampaignStage(19, cleared, { maxSeconds: 450, cannonBaseRatio: 0.75 });
+          const b = r.state.battle;
+          console.log(JSON.stringify({
+            name: process.env.NAME,
+            start: STAGES[19].startingSupply,
+            waves: STAGES[19].waves.map((w) => [w.enemyId,w.atTick,w.count]),
+            winner: b.winner,
+            seconds: +(b.tick / 30).toFixed(1),
+            playerBaseRatio: +(b.bases.PLAYER.hp / b.bases.PLAYER.maxHp).toFixed(4),
+            enemyBaseRatio: +(b.bases.ENEMY.hp / b.bases.ENEMY.maxHp).toFixed(4),
+            supply: r.state.supply,
+            supplyLevel: r.state.supplyLevel,
+            targetSupplyLevel: r.targetSupplyLevel,
+            spawns: r.telemetry.spawnCount,
+            upgrades: r.telemetry.upgradeCount,
+            cannons: r.telemetry.cannonCount,
+            emptyPressureSeconds: +(r.telemetry.longestEnemyPressureWithoutPlayerTicks / 30).toFixed(1),
+            players: [...r.telemetry.seenPlayerIds],
+            boss: r.seenEnemyIds.has('enemy-boss'),
+            ironBoss: r.seenEnemyIds.has('enemy-boss-iron'),
+          }));
+          NODE
+          }
+
+          # current reference
+          run_variant current 300 300 2 760 1300 1450 1800
+          # delay only
+          run_variant delay_only 300 450 2 900 1800 2100 3000
+          # delay + one less berserker
+          run_variant delay_light 300 450 1 900 1800 2100 3000
+          # more breathing room, same starting economy
+          run_variant delay_wide 300 540 1 1050 2100 2400 3300
+          # modest start-supply bump + delayed bosses
+          run_variant start360 360 450 1 900 1800 2100 3000
+          # stronger final-stage economy ramp, still far below wallet cap
+          run_variant start420 420 450 1 900 1800 2100 3000
+
+          cp /tmp/stages-original.json content/stages/chapter-01.json
+          {
+            printf 'source_sha=%s\n\n' "$GITHUB_SHA"
+            cat /tmp/matrix.log
+          } > docs/ST20_BALANCE_MATRIX_RESULT.txt
+
+          git config user.name frontline-ci
+          git config user.email frontline-ci@users.noreply.github.com
+          git rm .github/workflows/st20-balance-matrix.yml
+          git add docs/ST20_BALANCE_MATRIX_RESULT.txt
+          git commit -m 'chore: record stage-20 pacing matrix'
+          git push origin HEAD:main
