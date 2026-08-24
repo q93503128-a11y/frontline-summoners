@@ -1,72 +1,72 @@
 [
   {
     "id": "enemy-raider", "displayName": "붉은 약탈병",
-    "maxHp": 140, "attackDamage": 18, "moveSpeed": 5,
+    "maxHp": 140, "attackDamage": 18, "moveSpeed": 2,
     "standingRange": 42, "attackMinRange": 0, "attackMaxRange": 52,
     "cycleFrames": 34, "hitFrames": [8], "backswingFrames": 6,
-    "naturalKnockbackCount": 2, "targetMode": "SINGLE", "traits": ["LIGHT"], "damageBonuses": [], "rewardSupply": 35
+    "naturalKnockbackCount": 2, "targetMode": "SINGLE", "traits": ["LIGHT"], "damageBonuses": [], "rewardSupply": 20
   },
   {
     "id": "enemy-sprinter", "displayName": "맨발 돌격병",
-    "maxHp": 105, "attackDamage": 24, "moveSpeed": 9,
+    "maxHp": 105, "attackDamage": 24, "moveSpeed": 4,
     "standingRange": 36, "attackMinRange": 0, "attackMaxRange": 44,
     "cycleFrames": 29, "hitFrames": [5], "backswingFrames": 4,
-    "naturalKnockbackCount": 3, "targetMode": "SINGLE", "traits": ["LIGHT"], "damageBonuses": [], "rewardSupply": 32
+    "naturalKnockbackCount": 3, "targetMode": "SINGLE", "traits": ["LIGHT"], "damageBonuses": [], "rewardSupply": 18
   },
   {
     "id": "enemy-spearman", "displayName": "황야 창잡이",
-    "maxHp": 360, "attackDamage": 50, "moveSpeed": 4,
+    "maxHp": 360, "attackDamage": 50, "moveSpeed": 2,
     "standingRange": 112, "attackMinRange": 48, "attackMaxRange": 136,
     "cycleFrames": 52, "hitFrames": [13], "backswingFrames": 8,
-    "naturalKnockbackCount": 3, "targetMode": "SINGLE", "traits": ["LIGHT"], "damageBonuses": [], "rewardSupply": 90
+    "naturalKnockbackCount": 3, "targetMode": "SINGLE", "traits": ["LIGHT"], "damageBonuses": [], "rewardSupply": 55
   },
   {
     "id": "enemy-shield", "displayName": "녹슨 방패병",
-    "maxHp": 980, "attackDamage": 34, "moveSpeed": 2,
+    "maxHp": 980, "attackDamage": 34, "moveSpeed": 1,
     "standingRange": 45, "attackMinRange": 0, "attackMaxRange": 56,
     "cycleFrames": 64, "hitFrames": [15], "backswingFrames": 11,
-    "naturalKnockbackCount": 1, "targetMode": "SINGLE", "traits": ["ARMORED"], "damageBonuses": [], "rewardSupply": 185
+    "naturalKnockbackCount": 1, "targetMode": "SINGLE", "traits": ["ARMORED"], "damageBonuses": [], "rewardSupply": 110
   },
   {
     "id": "enemy-cultist", "displayName": "불씨 광신도",
-    "maxHp": 520, "attackDamage": 90, "moveSpeed": 2,
+    "maxHp": 520, "attackDamage": 90, "moveSpeed": 1,
     "standingRange": 185, "attackMinRange": 55, "attackMaxRange": 215,
     "cycleFrames": 70, "hitFrames": [21], "backswingFrames": 12,
-    "naturalKnockbackCount": 3, "targetMode": "AREA", "traits": ["ARCANE"], "damageBonuses": [], "rewardSupply": 165
+    "naturalKnockbackCount": 3, "targetMode": "AREA", "traits": ["ARCANE"], "damageBonuses": [], "rewardSupply": 95
   },
   {
     "id": "enemy-sniper", "displayName": "유리봉 저격술사",
-    "maxHp": 280, "attackDamage": 150, "moveSpeed": 2,
+    "maxHp": 280, "attackDamage": 150, "moveSpeed": 1,
     "standingRange": 260, "attackMinRange": 145, "attackMaxRange": 305,
     "cycleFrames": 92, "hitFrames": [33], "backswingFrames": 13,
-    "naturalKnockbackCount": 4, "targetMode": "SINGLE", "traits": ["ARCANE"], "damageBonuses": [], "rewardSupply": 210
+    "naturalKnockbackCount": 4, "targetMode": "SINGLE", "traits": ["ARCANE"], "damageBonuses": [], "rewardSupply": 125
   },
   {
     "id": "enemy-knight", "displayName": "몰락 기사",
-    "maxHp": 1050, "attackDamage": 135, "moveSpeed": 3,
+    "maxHp": 1050, "attackDamage": 135, "moveSpeed": 2,
     "standingRange": 62, "attackMinRange": 0, "attackMaxRange": 76,
     "cycleFrames": 72, "hitFrames": [21], "backswingFrames": 12,
-    "naturalKnockbackCount": 2, "targetMode": "AREA", "traits": ["ARMORED"], "damageBonuses": [], "rewardSupply": 290
+    "naturalKnockbackCount": 2, "targetMode": "AREA", "traits": ["ARMORED"], "damageBonuses": [], "rewardSupply": 180
   },
   {
     "id": "enemy-berserker", "displayName": "철퇴 광전사",
-    "maxHp": 720, "attackDamage": 230, "moveSpeed": 5,
+    "maxHp": 720, "attackDamage": 230, "moveSpeed": 3,
     "standingRange": 50, "attackMinRange": 0, "attackMaxRange": 65,
     "cycleFrames": 78, "hitFrames": [30], "backswingFrames": 12,
-    "naturalKnockbackCount": 2, "targetMode": "AREA", "traits": ["LIGHT"], "damageBonuses": [], "rewardSupply": 260
+    "naturalKnockbackCount": 2, "targetMode": "AREA", "traits": ["LIGHT"], "damageBonuses": [], "rewardSupply": 165
   },
   {
     "id": "enemy-boss", "displayName": "황금가면 대주술사",
-    "maxHp": 3900, "attackDamage": 275, "moveSpeed": 2,
+    "maxHp": 3900, "attackDamage": 275, "moveSpeed": 1,
     "standingRange": 230, "attackMinRange": 70, "attackMaxRange": 285,
     "cycleFrames": 104, "hitFrames": [36], "backswingFrames": 18,
-    "naturalKnockbackCount": 4, "targetMode": "AREA", "traits": ["ARCANE", "BOSS"], "damageBonuses": [], "rewardSupply": 900
+    "naturalKnockbackCount": 4, "targetMode": "AREA", "traits": ["ARCANE", "BOSS"], "damageBonuses": [], "rewardSupply": 600
   },
   {
     "id": "enemy-boss-iron", "displayName": "철문장군",
-    "maxHp": 6500, "attackDamage": 330, "moveSpeed": 2,
+    "maxHp": 6500, "attackDamage": 330, "moveSpeed": 1,
     "standingRange": 78, "attackMinRange": 0, "attackMaxRange": 105,
     "cycleFrames": 96, "hitFrames": [35], "backswingFrames": 16,
-    "naturalKnockbackCount": 3, "targetMode": "AREA", "traits": ["ARMORED", "BOSS"], "damageBonuses": [], "rewardSupply": 1200
+    "naturalKnockbackCount": 3, "targetMode": "AREA", "traits": ["ARMORED", "BOSS"], "damageBonuses": [], "rewardSupply": 800
   }
 ]
