@@ -163,6 +163,44 @@ test('stage and deck cards keep desktop detail while compact mobile renders a re
   assert.match(deckBlock, /if \(!compact\) this\.cardsLayer!\.add\(addText\(this, x, y \+ \(specialty \? 103 : 84\), slot\.description/);
   assert.match(deckBlock, /slot\.description/, 'desktop deck card must retain the character description');
   assert.match(deckBlock, /compact \? '보유 동료 · 현재는 자동 편성' : '처음에는 징집병 1종만 보유한다\./);
+  assert.match(deckBlock, /compact \? y \+ 62 : y \+ 46/, 'compact locked-card requirement spacing must stay at the audited position');
+});
+
+test('main and result scenes use separate compact layouts while desktop keeps the full wording', async () => {
+  const source = await readMain();
+  const mainStart = source.indexOf('class MainMenuScene');
+  const stageStart = source.indexOf('class StageSelectScene');
+  const resultStart = source.indexOf('class ResultScene');
+  const gameStart = source.indexOf('new Phaser.Game');
+  assert.ok(mainStart >= 0 && stageStart > mainStart && resultStart > stageStart && gameStart > resultStart);
+
+  const mainBlock = source.slice(mainStart, stageStart);
+  const resultBlock = source.slice(resultStart, gameStart);
+  assert.match(mainBlock, /const compact = isCompactMobileViewport\(\);/);
+  assert.match(mainBlock, /const menuButtonHeight = compact \? 108 : 92;/);
+  assert.match(mainBlock, /compact \? '승리할수록 전선과 동료가 열린다\.' : '첫 출정은 징집병 하나\. 승리할수록 전선과 동료가 열린다\.'/);
+  assert.match(mainBlock, /if \(!compact\) addText\(this, 1185, 675, 'PRE-ALPHA'/);
+  assert.match(mainBlock, /`클리어 \$\{progress\.clearedStageIds\.length\}\/\$\{STAGES\.length\} · 보물 \$\{progress\.treasureIds\.length\}\/\$\{STAGES\.length\} · 동료 \$\{unlocked\}\/\$\{PLAYER_SLOTS\.length\}`/);
+
+  assert.match(resultBlock, /const compact = isCompactMobileViewport\(\);/);
+  assert.match(resultBlock, /compact \? 820 : 760/);
+  assert.match(resultBlock, /setWordWrapWidth\(compact \? 720 : 680\)/);
+  assert.match(resultBlock, /const resultButtonHeight = compact \? 84 : 68;/);
+  assert.match(resultBlock, /compact \? '진행 저장 중…' : '진행 저장 중… 잠시만 기다려 주세요'/);
+  assert.match(resultBlock, /'첫 클리어 저장 완료 · 다음 스테이지 개방'/, 'desktop result must retain full first-clear wording');
+  assert.match(resultBlock, /'브라우저 영구 저장 실패 · 현재 탭에서는 진행 유지'/, 'desktop result must retain full save-failure wording');
+});
+
+test('shared buttons recover from touch or pointer cancellation instead of staying visually pressed', async () => {
+  const source = await readMain();
+  const buttonStart = source.indexOf('function addButton');
+  const backdropStart = source.indexOf('function drawBackdrop');
+  assert.ok(buttonStart >= 0 && backdropStart > buttonStart);
+  const buttonBlock = source.slice(buttonStart, backdropStart);
+  assert.match(buttonBlock, /bg\.on\('pointerout', \(\) => \{/);
+  assert.match(buttonBlock, /container\.setScale\(1\);/);
+  assert.match(buttonBlock, /bg\.on\('pointerupoutside', \(\) => container\.setScale\(1\)\);/);
+  assert.match(buttonBlock, /bg\.on\('pointerdown', \(\) => container\.setScale\(0\.98\)\);/);
 });
 
 test('stage cards render the restored twelve-step difficulty scale without legacy five-star overflow', async () => {
