@@ -12,7 +12,7 @@
     "mapLength": 900,
     "theme": "meadow",
     "decorSeed": 211,
-    "playerUnitCap": 3,
+    "playerUnitCap": 2,
     "enemyUnitCap": 18,
     "waves": [
       { "enemyId": "enemy-shield", "atTick": 240, "count": 2, "intervalTicks": 210 },
@@ -97,7 +97,7 @@
     "mapLength": 1000,
     "theme": "fortress",
     "decorSeed": 251,
-    "playerUnitCap": 3,
+    "playerUnitCap": 2,
     "enemyUnitCap": 15,
     "waves": [
       { "enemyId": "enemy-knight", "atTick": 300, "count": 2, "intervalTicks": 300 },
