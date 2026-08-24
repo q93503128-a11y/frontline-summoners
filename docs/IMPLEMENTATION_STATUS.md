@@ -1,175 +1,253 @@
 # 구현 상태
 
-이 문서는 `docs/CANONICAL.md`를 대체하지 않는다. 작업 전 `CANONICAL → GAME_DESIGN_FULL → STAGE_SYSTEM_DESIGN → IMPLEMENTATION_STATUS → DEVELOPMENT_RULES → content → 코드/테스트` 순서로 대조한다.
+이 문서는 `docs/CANONICAL.md`를 대체하지 않는다. 작업 전 다음 권위 순서를 대조한다.
 
-## 2026-08-24 — campaign vertical slice 0.0.30
+`CANONICAL → GAME_DESIGN_FULL → 관련 정밀 문서(STAGE_SYSTEM_DESIGN / GROWTH_RECRUITMENT_DESIGN) → IMPLEMENTATION_STATUS → DEVELOPMENT_RULES → content → 코드/테스트`
+
+## 2026-08-24 — campaign + meta vertical slice 0.0.31
 
 ## 1. 현재 제품 뼈대
 
-- Web PC/모바일 횡스크롤 소환 전략 게임.
-- `packages/sim` 30Hz 결정론적 전투 코어를 브라우저 전투가 사용한다.
-- 핵심 루프: 보급 → 생산 → 전선 → 사거리 → 공격 프레임 → KB → 재생산 → 적 스폰.
+- Web PC/모바일 횡스크롤 소환 전략.
+- `packages/sim` 30Hz 결정론적 전투 코어.
+- 전투 핵심: 보급 → 생산 → 전선 → 사거리 → 공격 프레임 → KB → 재생산 → 적 스폰.
 - 현재 과금/에너지/FOMO 없음.
-- 신규 계정은 징집병 1종 + ST1만 개방.
-- 제1장 PROGRESSION 20개 + 첫 SPECIAL 5개 = 현재 데이터 기준 총 25전투.
+- 신규 계정: 징집병 1종 + ST1만 개방.
+- 전투 콘텐츠: PROGRESSION20 + SPECIAL5 = 25전투.
+- 캐릭터 전투 정의: 무료 캠페인10 + 첫 모집 전용15 = 현재 25종.
 
 ## 2. 전투 / 입력
 
-- 이동, 탐지, foreswing/hitFrame/backswing, 동시 피해, 자연 KB, ForcedDisplacement, DYING, 거점 승패, stateHash 구현.
-- 보급소 Lv1~8, 생산비, 재생산 쿨다운, 처치 보급, `atTick` 적 웨이브, 전선포 구현.
-- 기본 동시 출격 한도: 아군50 / 적50.
-- `stage.playerUnitCap → 보물 보정 → simulation`, `stage.enemyUnitCap → simulation` 단일 경로.
-- PC `1~0` = 현재 activeSlots 1~10, `Q` = 보급소 강화, `E` = 전선포, `P/ESC` = 솔로 일시정지.
-- 키 반복 허용. 쿨 종료 순간까지 연타/홀드 가능.
-- 소환 쿨/보급 부족/unit cap/보급소 실패/MAX/전선포 쿨/잠긴 stage/결과 저장 대기 같은 정상 실패 입력은 화면을 흔들지 않는다.
-- camera shake는 전선포 성공 / 강한 유닛 피격 / 거점 피격 세 실제 전투 충격 경로만 허용.
+- 이동, 탐지, foreswing/hitFrame/backswing, 동시 피해, 자연KB, ForcedDisplacement, DYING, 거점 승패, stateHash 구현.
+- 보급소 Lv1~8, 생산비, 재생산, 처치 보급, `atTick` 웨이브, 전선포 구현.
+- 기본 동시 출격 한도 아군50 / 적50. stage별 cap 지원.
+- PC: `1~0` 소환, `Q` 보급소 강화, `E` 전선포, `P/ESC` 솔로 일시정지.
+- 정상 실패 입력(쿨/돈 부족/cap/MAX 등)은 화면 흔들림 없음.
+- camera shake는 전선포 성공 / 강한 유닛 피격 / 거점 피격 세 실제 충격 경로만.
 
-## 3. PC / 모바일 분리
+## 3. PC / 모바일
 
-- 공용 게임 데이터/전투 로직 위에 PC 상세 UI와 compact 모바일 UI를 별도 정보 밀도로 렌더한다.
-- viewport 판정 권위: `apps/client/src/viewport.ts`.
-- compact 모바일 = coarse primary pointer + 짧은 변 540px 이하.
+- viewport 권위 `apps/client/src/viewport.ts`.
+- compact = coarse primary pointer + 짧은 변≤540.
 - 작은 마우스 PC 창은 PC UI 유지.
-- 세로 모바일 가드 = coarse pointer + width≤900 + portrait.
-- safe-area inset 적용.
-- compact 핵심 터치 높이는 84 logical px. 390px 높이 FIT 기준 약45.5 CSS px.
-- 모바일에서 1~0/Q/E 시각 표시는 숨기고 PC에서는 유지.
+- 세로 모바일 가드는 coarse pointer + width≤900 + portrait.
+- safe-area 적용.
+- compact 핵심 터치 높이 84 logical px.
+- 모바일은 1~0/Q/E 표시를 숨기고 PC는 유지.
 - `antialias:true / pixelArt:false / roundPixels:false`.
 
-## 4. 제1장 진도
+## 4. 제1장 / SPECIAL
 
-- PROGRESSION 20개, 난이도 1~9, ST20=9.
-- 합류 순서: 시작 징집병 → ST1 방벽기사 → ST2 수렵창병 → ST4 결투검사 → ST6 청창대 → ST8 전투마도사 → ST10 화염술사 → ST13 왕실기사 → ST16 이단주술사 → ST20 공허현자.
-- 제1장 보물 20개는 첫 클리어 100% 확정. 반복 RNG 파밍 없음.
-- 7개 전장 계열, ST19/ST20 보스 랜드마크.
-- ST20 현재: 방패15초, 광전사33.3초, 황금가면50초, 저격60초, 철문장군80초.
-- 소스 충실 독립 재현 기준 ST1~20 합법 baseline 통과 및 ST19/20 보스 실제 등장 확인 기록이 있다. 이것은 최신 HEAD의 실제 `npm test` green 주장과는 별개다.
+### PROGRESSION
 
-## 5. 경제 정본
+- 제1장20, 난이도1~9.
+- 무료 캠페인 로스터10:
+  - 시작 징집병
+  - ST1 방벽기사
+  - ST2 수렵창병
+  - ST4 결투검사
+  - ST6 청창대
+  - ST8 전투마도사
+  - ST10 화염술사
+  - ST13 왕실기사
+  - ST16 이단주술사
+  - ST20 공허현자
+- 첫 클리어 보물20은 100% 확정.
+- ST20 현재 보스 페이싱: 황금가면50초 / 철문장군80초.
 
-- Lv1 12/s · max1000.
-- Lv2 20/s · max1400 · 강화160.
-- Lv3 30/s · max1900 · 강화260.
-- Lv4 42/s · max2500 · 강화390.
-- Lv5 56/s · max3200 · 강화560.
-- Lv6 72/s · max4000 · 강화760.
-- Lv7 90/s · max5000 · 강화1000.
-- Lv8 110/s · max6200 · 강화1300.
-- ST1 시작 보급50, ST8 160, ST19 280, ST20 300.
+### SPECIAL
 
-## 6. 첫 SPECIAL 5개
+- `special-01` 세 자리 전선 · 난이도6 · 실효3기.
+- `special-02` 광란의 짧은 길 · 난이도7 · 650m 러시.
+- `special-03` 유리봉 저격선 · 난이도8 · 1500m 저격전.
+- `special-04` 삼인 결사대 · 난이도9 · 실효3기 + 철문장군50초.
+- `special-05` 가면과 철문 · 난이도10 · 황금가면35초 → 철문장군70초.
+- 제1장 완료 후 5개 동시 개방, SPECIAL끼리 순차 잠금 없음.
+- SPECIAL 기록은 메인 진도와 별도 저장.
+- SPECIAL 훈장5는 전투 스탯 효과 없는 컬렉션.
+- `special-baseline.ts/test.ts`가 5개 실제 승리/cap/필수 보스 관측을 요구하지만 최신 환경에서 실행 결과는 아직 확보 전.
 
-`content/stages/special-01.json`:
-
-1. `special-01` 세 자리 전선 · 난이도6 · 실효 아군3기 제한.
-2. `special-02` 광란의 짧은 길 · 난이도7 · 650m 러시.
-3. `special-03` 유리봉 저격선 · 난이도8 · 1500m 장거리 방패/저격전.
-4. `special-04` 삼인 결사대 · 난이도9 · 실효3기 + 철문장군.
-5. `special-05` 가면과 철문 · 난이도10 · 황금가면 → 철문장군 연속 보스.
-
-- 제1장 완료 후 5개 동시 개방. SPECIAL끼리 순차 잠금 없음.
-- SPECIAL clear는 `specialClearedStageIds`에 별도 저장하고 메인 20진도에 섞지 않는다.
-- 훈장은 능력치 보너스 없는 도전 완료 기록이며 도감 별도 탭.
-- cap3 두 스테이지의 JSON base cap=2 + 제1장 확정 `PLAYER_UNIT_CAP +1` 보물 = 실제3.
-- 보스 타이밍: 삼인 결사대 철문장군50초, 가면과 철문 황금가면35초 / 철문장군70초.
-- 보스 HP/공격력은 이 타이밍 조정에서 너프하지 않았다.
-
-### 0.0.30 deterministic SPECIAL gate
-
-- `apps/client/test/special-baseline.ts` 추가.
-- ST20 완료 계정의 10종 로스터 + 제1장20 보물을 실제 `createPrototypeBattle()`에 넣는다.
-- 실제 보급 수입/강화비/생산비/재생산 쿨/동시 출격 cap/전선포를 지불하며 `stepPlayableBattle()`을 30Hz로 실행하는 SPECIAL 전용 competent baseline이다.
-- 저출격 cap에서 싼 유닛으로 먼저 슬롯을 채우지 않고 전열 하나 → 지갑 Lv4 → 실제 적 속성/수/보스에 맞는 후반 유닛을 선택한다.
-- `special-baseline.test.ts`는 5개 모두 PLAYER 승리, 적 거점 파괴, 실제 cap 준수, 삼인 결사대 철문장군 관측, 가면과 철문의 황금가면+철문장군 모두 관측을 요구한다.
-- **중요: 최신 환경에서 이 새 테스트의 실행 결과는 아직 확보하지 못했다. 따라서 SPECIAL 5개가 통과했다고 주장하지 않는다. 실패 시 콘텐츠 수치/전략 원인을 분리해서 최소 조정한다.**
-
-## 7. 저장 / 진도
-
-- save schema v3.
-- `clearedStageIds` = PROGRESSION 전용.
-- `specialClearedStageIds` = SPECIAL 전용.
-- ST1부터 끊기지 않은 contiguous prefix가 메인 진도 권위.
-- 뒤 stage 저장 조각이 다음 진도/동료/보물을 건너뛰어 열지 못한다.
-- durable/session 각각 정규화 후 병합.
-- `getStage()` strict, progression/special 번호 함수도 각 축에서 strict.
-- `recordStageClear()`는 PROGRESSION + 정본 stage↔treasure만 처리.
-- `recordSpecialStageClear()`는 SPECIAL만 처리.
-- 영구 저장 실패는 현재 탭 진행만 유지하고 UI에서 성공으로 거짓 표시하지 않는다.
-
-## 8. 대규모 스테이지용 출정 구조
+## 5. 대규모 출정 구조
 
 정본 흐름:
 
 `메인 → 출정 허브 → Collection → 공용 StageSelect → 전투 → 원래 Collection`
 
-- 메인 `출정`은 `stage-hub`로 이동한다.
-- 기존 `SpecialStageSelectScene / special-select` 중복 경로 제거.
-- PROGRESSION/SPECIAL 모두 하나의 `StageSelectScene` 사용.
-- 결과 화면은 stage ID에서 원래 Collection을 찾아 그 목록으로 복귀한다.
-- Collection 데이터는 `content/stage-collections.json`.
-- 현재 `chapter-01`, `special-border-01` 두 Collection.
-- 모든 playable stage는 정확히 한 Collection에 속해야 하며 중복/누락/타입 혼합/미등록 stage 참조를 거부한다.
+- PROGRESSION/SPECIAL이 공용 StageSelect 사용.
+- 옛 `special-select` 중복 Scene 제거.
+- Collection 데이터: `content/stage-collections.json`.
+- 모든 playable stage는 정확히 하나의 Collection에 속해야 함.
+- Collection 해금은 숫자 clear count가 아니라 의미 있는 `unlockAfterStageId` 사용.
+- 첫 SPECIAL 묶음은 `border-20` 클리어가 해금 앵커.
+- `STAGE_COLLECTIONS_PER_PAGE=2`, Collection page helper 구현.
+- `STAGES_PER_COLLECTION_PAGE=5`, 내부 stage page helper 및 stage→page 역산 helper 구현.
+- **현재 StageHubScene은 아직 3+ Collection 실제 좌우 paging UI에 helper를 연결하지 않음.** 현재 Collection2개라 표시 문제는 없으며 세 번째 추가 전 연결 필요.
+- `isSortieStageUnlocked()`를 추가해 SPECIAL 입장 해금을 자기 Collection 조건에서 계산할 수 있게 했지만 `main.ts` 실제 입장 경로는 아직 옛 helper 사용. 다음 안전한 `main.ts` 수정에서 통일 필요.
 
-### 0.0.30 Collection 해금 정리
+## 6. 모집 / 희귀도 — 0.0.31 신규
 
-- Collection 데이터에 `requiredProgressionClears:20` 같은 취약한 숫자 해금 조건을 저장하지 않는다.
-- SPECIAL 묶음은 `unlockAfterStageId: "border-20"`을 정본으로 사용한다.
-- UI용 `requiredProgressionClears=20`은 해당 progression stage의 순번에서 런타임 파생한다.
-- scattered save fragment `['border-20']`만으로는 열리지 않고 contiguous progression에 실제 `border-20`이 포함돼야 열린다.
+정밀 정본: `docs/GROWTH_RECRUITMENT_DESIGN.md`.
 
-### 페이지 계산 권위
+### 희귀도
 
-- `STAGE_COLLECTIONS_PER_PAGE = 2`.
-- `getStageCollectionPageCount()` / `getStageCollectionPage()` 구현 및 미래 5 Collection을 2/2/1로 나누는 테스트 존재.
-- `STAGES_PER_COLLECTION_PAGE = 5`.
-- `getCollectionStagePageCount()` / `getCollectionStagePage()` / `getCollectionStagePageIndexForStage()` 추가.
-- 제1장20 = 4페이지, SPECIAL5 = 1페이지. `border-20`의 내부 page index는3.
-- **현재 StageHubScene 자체는 아직 Collection paging helper를 실제 이전/다음 UI에 연결하지 않았다. 현재 Collection이 2개라 정상 표시되지만 세 번째 Collection 추가 전에 반드시 연결해야 한다.**
-- 그 전까지 `STAGE_COLLECTIONS.length <= 2` 임시 회귀 gate가 세 번째 Collection을 조용히 추가하지 못하게 막는다.
-- StageSelectScene도 현재 5개 page 값을 직접 사용하고 있어 다음 안전한 `main.ts` 수정에서 새 helper를 소비하도록 통일해야 한다.
+- C / B / A / S / SS.
+- X는 필요 시 희귀도가 아니라 변칙 태그.
+- 희귀도는 절대 성능 순위가 아니며 낮은 희귀도도 비용/재생산/사거리/전문화로 사용 가치를 유지해야 함.
 
-## 9. 스테이지 DSL 미구현 부분
+### 첫 모집 풀
 
-- 난이도 정본 1~12, `협동 권장` 태그 없음.
-- schema에 `stageType`, `playerUnitCap`, `enemyUnitCap`, `formationRestrictions`, `specialRules` 존재.
-- 편성 제한 evaluator/UI enforcement는 아직 미구현.
-- `specialRules` runtime registry 미구현.
-- 실제 wave runtime은 현재 `atTick`.
-- 거점HP/특정 적 사망/누적 처치·사망/페이즈/AND·OR 복합 trigger evaluator는 미구현.
-- 미구현 규칙을 카드 설명만으로 작동하는 것처럼 가장하지 않는다.
+- 기본 무료10종은 모집 풀에서 제외.
+- `content/units/recruitment-01.json`에 **모집 전용15종** 추가.
+- 구성: C4 / B4 / A3 / S2 / SS2.
+- `prototype.ts`:
+  - `PLAYER_SLOTS` = 무료 캠페인10 유지.
+  - `RECRUITMENT_PLAYER_SLOTS` = 모집15.
+  - `ALL_PLAYER_SLOTS` = 총25.
+- `createPrototypeBattle()`는 소유/편성 ID를 넘기면 모집 캐릭터도 실제 전투 슬롯으로 사용 가능.
+- 캠페인 `getUnlockedSlotIds()`는 모집 캐릭터를 자동 해금하지 않음.
 
-## 10. 협동 정본
+### 첫 배너
 
-- 2인: 각5칸, 팀 전체10.
-- 개인 보급/보급소/생산 쿨다운, 공유 거점HP/승패/거점 병기.
-- 협동은 싱글보다 실질적으로 수월할 수 있으나 `협동 권장` 태그/경고 금지.
-- 필요 시 적 최대HP / 적 공격력 / 적 거점HP만 단순 수치 보정.
-- 이동속도/공격주기/사거리/KB/스폰/적 수/웨이브/패턴/AI는 협동 때문에 바꾸지 않는다.
-- solo/coop stage 복제 금지.
+`content/recruitment/banner-01.json`:
 
-## 11. 검증 상태 / 현재 한계
+- C 30%
+- B 28%
+- A 24%
+- S 13%
+- SS 5%
+- 10연 A+ 보장
+- 30연 S+ 보장
+- 60연 픽업 SS 보장
+- 100연 배너 캐릭터 직접 선택권 +1
+- 현재 픽업 SS: `moon-eater`.
 
-- `.github/workflows/ci.yml`은 main push/PR에서 install → typecheck → test → build를 실행하도록 설정돼 있다.
-- 그러나 현재 연결에서는 direct-main run 결과를 조회하지 못하고 combined status에도 context가 없다.
-- 로컬 컨테이너는 GitHub DNS가 해석되지 않아 최신 main clone 후 npm 실행을 할 수 없다.
-- 0.0.30에서 정확한 StageHub 부분 패치 + verify용 일회성 push workflow를 시도했으나 실행되지 않았고 즉시 삭제했다. 최종 `.github/workflows/`에는 다시 `ci.yml`만 남겨야 한다.
-- 확인되지 않은 CI 성공을 주장하지 않는다.
+`apps/client/src/recruitment.ts`:
 
-## 12. 첫 사용자 테스트 전 남은 게이트
+- 확률/풀/보장을 JSON에서 파싱하고 합계100% 검증.
+- 일반 roll은 rarity 확률 → 해당 rarity pool 순서.
+- A+/S+ 보장은 최소 희귀도를 올리되 그 이상 희귀도 간 원래 비율을 유지.
+- 60회 milestone은 하위 10/30 보장보다 우선해 픽업 SS 지급.
+- 100회 milestone은 랜덤 결과를 바꾸지 않고 별도 선택권 적립.
+- 실제 플레이용 난수는 `crypto.getRandomValues()` 기반 rejection sampling.
+- 테스트는 결정론적 RNG 주입 가능.
+- 신규/중복 판정 구현.
+- **중복 조각 지급량/교환비는 아직 정본 수치 미확정이라 임의 숫자를 넣지 않음.**
 
-1. 최신 HEAD 실제 install → typecheck → test → build 확인.
-2. 새 `special-baseline.test.ts` 실행으로 SPECIAL1~5 clearability와 필수 보스 실제 등장 확인.
-3. StageHub에 실제 2 Collection/page 이전·다음 UI 연결 후 임시 `<=2` gate 제거.
-4. StageSelect가 공용 5-stage page helper를 소비하고 결과 복귀 시 해당 stage page 맥락을 복원하도록 연결.
-5. PC/compact 모바일 실제 렌더에서 출정 허브/스테이지/도감/결과 텍스트 겹침, 아트 잘림, 터치, safe-area 확인.
-6. Cloudflare Pages 실제 프로젝트 URL/최신 배포 확인.
-7. 위 게이트를 확인한 뒤에만 사용자 테스트 요청.
+### 모집 저장
 
-## 13. 개발 원칙
+- guest save schema **v4**.
+- v2/v3 → v4 마이그레이션.
+- `ownedRecruitmentCharacterIds` 저장.
+- `recruitmentProgressByBanner`에 배너별 totalPulls / selectionCredits 저장.
+- durable/session 병합에서 pull count를 합산하지 않고 더 진행된 쪽 사용.
+- 같은 pull count일 때 소비한 100연 선택권이 부활하지 않도록 더 낮은 selectionCredits를 보존.
+- `performGuestRecruitment()` / `redeemGuestBannerSelection()`이 session 즉시 반영 후 IndexedDB 지속 여부를 별도 보고.
+- **모집 UI는 아직 미구현.**
 
-- GitHub `main` 정본, 사용자 요청대로 direct main 작업.
-- 새 코드를 구식 hotfix/override 뒤에 덧씌우지 않는다.
-- 대체된 코드·테스트·임시 워크플로는 제거한다.
-- 같은 책임은 하나의 권위 경로만 유지한다.
-- 냥코에서 참고하는 것은 대규모 스테이지의 계층/정보 우선순위/복귀 맥락이며 UI 아트·문구·과금·에너지 구조는 복제하지 않는다.
-- 문서·content JSON·코드·테스트가 서로 다른 규칙을 가진 채 남지 않게 한다.
+## 7. 캐릭터 레벨 / 업그레이드 — 0.0.31 신규
+
+`content/growth/level-curve-01.json` + `apps/client/src/character-growth.ts`.
+
+- Lv1~50.
+- 현재 곡선은 명시적으로 `PROTOTYPE_BALANCE` 상태.
+- Lv1 배율1000‰.
+- Lv1~30: 레벨당 HP/공격 +15‰.
+- Lv31~50: 레벨당 HP/공격 +8‰.
+- Lv30 = 1435‰, Lv50 = 1595‰.
+- 레벨로 변하는 것은 현재 HP/기본공격력만.
+- 사거리/공격범위/비용/재생산/이동/KB 등 정체성 값은 레벨로 변경하지 않음.
+- `applyCharacterLevel()` / `buildCharacterCombatSlot()` 실제 전투 슬롯 파생 구현.
+- **강화 골드 비용/보상경제/성장 UI/레벨 저장은 아직 미구현.** 정확 비용은 전체 메타 경제와 함께 확정해야 함.
+
+## 8. 3-form 진화 — 0.0.31 신규
+
+정본 철학:
+
+- 기본/2형태/3형태.
+- 이전 형태 재선택 가능.
+- form 간 소유권/레벨 공유.
+- 무조건 상위호환보다 sidegrade/전문화 허용.
+- 색놀이 진화 금지.
+
+현재 `content/evolution/recruitment-01.json`에서 C/B/A/S/SS 대표 5명에 실제 3-form 데이터 추가:
+
+- C 순무기수
+- B 등불마녀
+- A 태엽오리기사
+- S 거울퇴마사
+- SS 달먹는룡
+
+`character-growth.ts`에서 form이 실제로 다음 전투값을 바꿀 수 있음:
+
+- HP/공격
+- 비용/재생산
+- 이동속도
+- standingRange / 공격 min/max
+- SINGLE/AREA
+- 전문 damage bonus
+
+예시:
+
+- 순무기수: 값싼 물량형 ↔ 고비용 AREA 돌격형.
+- 태엽오리기사: 느린 방벽형 ↔ 빠른 고화력 돌격형.
+- 거울퇴마사: 초장거리 ARCANE 특효 ↔ 사거리 감소 BOSS 견제형.
+- 달먹는룡: 극장거리 보스저격 ↔ 근접한 고화력 보스압박.
+
+테스트는 form1 복귀, 3형태 순서, sidegrade 차이, 레벨+form 결정론적 합성을 검사.
+
+**아직 미구현:**
+
+- form2/3 실제 해금 조건.
+- 진화 재료/비용.
+- form 해금/선택 저장.
+- 성장 UI.
+- form별 정식 전용 아트/애니/VFX.
+- 나머지20 캐릭터의 3-form 데이터.
+
+## 9. 아트
+
+- 현재 프로토타입 아트 패밀리7개.
+- 무료10/적10 기존 매핑 유지.
+- 모집15종도 모두 명시적 `UNIT_ART` 매핑을 가지며 6개 이상 패밀리에 분산.
+- 이것은 **정식 모집 캐릭터 아트가 아니라 프로토타입 식별용 임시 매핑**이다.
+- 정식 수집/진화 캐릭터는 장기적으로 고유 실루엣·종족·장비·모션·VFX가 필요.
+
+## 10. 저장 / 보상
+
+- main progression과 SPECIAL 저장축 분리.
+- 제1장 보물은 첫 클리어100%.
+- 모집 소유권/천장은 v4 저장.
+- 영구 저장 실패 시 same-tab session은 유지하되 persisted=false를 UI에 전달.
+- 아직 레벨/form/조각/재화/수동 덱 저장은 미구현.
+
+## 11. 협동 정본
+
+- 2인 각5칸, 팀 전체10.
+- 개인 보급/보급소/생산 쿨다운.
+- 공유 거점HP/승패/거점 병기.
+- `협동 권장` 태그 금지.
+- 필요 시 적 최대HP/공격력/거점HP만 보정.
+- 이동속도/주기/사거리/KB/스폰/적 수/웨이브/패턴/AI는 협동 때문에 변경하지 않음.
+
+## 12. 현재 검증 한계
+
+- `.github/workflows/ci.yml`은 main push/PR에 install → typecheck → test → build 설정.
+- 현재 연결에서는 direct-main Actions run 결과를 조회하지 못하고 combined status도 비어 있음.
+- 로컬 컨테이너는 GitHub DNS가 해석되지 않아 최신 main clone/npm 실행 불가.
+- 따라서 0.0.31 신규 모집/성장 테스트와 SPECIAL baseline의 **실제 실행 green을 아직 주장하지 않는다.**
+- 일회성 workflow 우회는 실행되지 않아 즉시 제거했으며 `.github/workflows/`에는 `ci.yml`만 유지.
+
+## 13. 다음 우선순위
+
+1. 0.0.31 신규 recruitment/growth/save 테스트 실제 실행 경로 확보 후 typecheck/test/build 확인.
+2. 모집 화면: 메인 `모집` → 배너 → 1회/10회 → 결과 → 소유권/천장 표시.
+3. 성장 화면: 보유 캐릭터 → Lv/현재 form → 강화/진화 비교.
+4. 레벨/진화 저장 + 메타 재화/강화 비용/진화 재료 정본화.
+5. 보유 무료+모집 캐릭터를 사용하는 수동 10칸 덱.
+6. 실제 BattleScene이 저장된 레벨/form/덱을 사용하도록 연결.
+7. StageHub 실제 2 Collection/page UI와 StageSelect 공용 paging helper 연결.
+8. SPECIAL5 deterministic clearability 실행 검증.
+9. 정식 모집/진화 아트 파이프라인.
+10. PC/가로 모바일 실렌더 및 Cloudflare Pages 배포 확인.
+
+첫 사용자 테스트 게이트는 최신 실행 검증과 실제 렌더 감사를 통과하기 전까지 열지 않는다.
