@@ -3,6 +3,7 @@ import { INTERNAL_HEIGHT, INTERNAL_WIDTH } from '@frontline/shared';
 import { BattleScene } from './battle-scene';
 import { CatalogScene } from './catalog-scene';
 import { DeckScene } from './deck-scene';
+import { RecruitmentScene } from './recruitment-scene';
 import { BootScene, MainMenuScene, StageHubScene, StageSelectScene } from './navigation-scenes';
 import { ResultScene } from './result-scene';
 
@@ -15,7 +16,7 @@ new Phaser.Game({
   antialias: true,
   pixelArt: false,
   roundPixels: false,
-  scene: [BootScene, MainMenuScene, StageHubScene, StageSelectScene, DeckScene, CatalogScene, BattleScene, ResultScene],
+  scene: [BootScene, MainMenuScene, StageHubScene, StageSelectScene, DeckScene, CatalogScene, RecruitmentScene, BattleScene, ResultScene],
   scale: {
     mode: Phaser.Scale.FIT,
     autoCenter: Phaser.Scale.CENTER_BOTH,
