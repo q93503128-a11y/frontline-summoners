@@ -23,13 +23,14 @@ test('solo pause freezes the simulation and all direct battle actions', async ()
   assert.ok(guardedActions.length >= 3, 'spawn, supply upgrade and base weapon input must all be blocked while paused');
 });
 
-test('chapter one opens with a scarce wallet and low base hp instead of a late-game economy', () => {
+test('chapter one opens scarce while supply upgrades have meaningful investment value', () => {
   const first = STAGES[0]!;
   assert.equal(first.startingSupply, 50);
   assert.equal(first.playerBaseHp, 900);
   assert.equal(first.enemyBaseHp, 800);
   assert.deepEqual(DEFAULT_SUPPLY_LEVELS[0], { incomePerSecond: 12, maxSupply: 1000, upgradeCost: 0 });
-  assert.deepEqual(DEFAULT_SUPPLY_LEVELS[1], { incomePerSecond: 16, maxSupply: 1400, upgradeCost: 160 });
+  assert.deepEqual(DEFAULT_SUPPLY_LEVELS[1], { incomePerSecond: 20, maxSupply: 1400, upgradeCost: 160 });
+  assert.ok(DEFAULT_SUPPLY_LEVELS[1]!.incomePerSecond > DEFAULT_SUPPLY_LEVELS[0]!.incomePerSecond * 1.5);
 
   const firstFive = STAGES.slice(0, 5);
   assert.deepEqual(firstFive.map((stage) => stage.startingSupply), [50, 60, 70, 80, 90]);
