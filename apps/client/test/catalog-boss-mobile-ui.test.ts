@@ -24,18 +24,18 @@ test('catalog is progress-aware and pages allies and guaranteed treasures instea
   assert.match(source, /능력치는 합류 후 공개/);
 });
 
-test('compact mobile mode keeps core and catalog text at a readable logical minimum while desktop sizes stay unchanged', async () => {
+test('compact mobile breakpoint covers short landscape phones in core and catalog scenes', async () => {
   const main = await readSource('../src/main.ts');
   const catalog = await readSource('../src/catalog-scene.ts');
 
   assert.match(main, /function isCompactMobileViewport\(\): boolean/);
-  assert.match(main, /Math\.min\(window\.innerWidth, window\.innerHeight\) <= 500/);
+  assert.match(main, /Math\.min\(window\.innerWidth, window\.innerHeight\) <= 540/);
   assert.match(main, /const renderedSize = isCompactMobileViewport\(\) \? Math\.max\(size, 16\) : size;/);
   assert.match(main, /fontSize: `\$\{renderedSize\}px`/);
   assert.match(main, /strokeThickness: renderedSize >= 30 \? 4 : 0/);
 
   assert.match(catalog, /function isCompactMobileViewport\(\): boolean/);
-  assert.match(catalog, /Math\.min\(window\.innerWidth, window\.innerHeight\) <= 500/);
+  assert.match(catalog, /Math\.min\(window\.innerWidth, window\.innerHeight\) <= 540/);
   assert.match(catalog, /const renderedSize = isCompactMobileViewport\(\) \? Math\.max\(size, 16\) : size;/);
   assert.match(catalog, /fontSize: `\$\{renderedSize\}px`/);
 });
