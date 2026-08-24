@@ -35,6 +35,7 @@ import {
 } from './prototype';
 import { loadGuestProgress, recordStageClear, type GuestProgress } from './save';
 import { selectVisibleTraitLabelIds } from './trait-label-visibility';
+import { isCompactMobileViewport, isPortraitMobileViewport } from './viewport';
 
 const FONT = '"Malgun Gothic", "Apple SD Gothic Neo", "Noto Sans KR", sans-serif';
 const COLORS = {
@@ -110,14 +111,6 @@ function familyForUnit(unitId: string): { family: ArtFamily; tint: number; displ
   const variant = UNIT_ART[unitId] ?? { familyId: 'warrior', tint: 0xffffff, attackFx: 'SLASH' as const };
   const family = ART_BY_ID[variant.familyId] ?? ART_FAMILIES[0]!;
   return { family, tint: variant.tint, displayScale: variant.displayScale ?? 1, attackFx: variant.attackFx };
-}
-
-function isPortraitMobileViewport(): boolean {
-  return window.innerWidth <= 900 && window.innerHeight > window.innerWidth;
-}
-
-function isCompactMobileViewport(): boolean {
-  return Math.min(window.innerWidth, window.innerHeight) <= 540;
 }
 
 function battleUiFontSize(regular: number, compact: number): number {
