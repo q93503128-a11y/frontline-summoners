@@ -13,13 +13,13 @@ test('session and durable guest progress merge without duplicates while preservi
   assert.deepEqual(merged.treasureIds, ['wind-badge', 'pot-token']);
 });
 
-test('campaign progress normalization keeps only contiguous clears, repairs guaranteed treasures, and preserves non-stage rewards', () => {
+test('campaign progress normalization repairs progression without deleting future special clears or non-stage rewards', () => {
   const normalized = normalizeGuestProgress({
-    clearedStageIds: ['border-01', 'border-03', 'border-16'],
+    clearedStageIds: ['border-01', 'border-03', 'border-16', 'future-special-stage'],
     treasureIds: ['pot-token', 'wall-shadow', 'future-special-relic'],
   });
 
-  assert.deepEqual(normalized.clearedStageIds, ['border-01']);
+  assert.deepEqual(normalized.clearedStageIds, ['border-01', 'future-special-stage']);
   assert.deepEqual(normalized.treasureIds, ['wind-badge', 'future-special-relic']);
 });
 
@@ -32,6 +32,8 @@ test('recordStageClear validates the canonical stage reward and normalizes stora
   assert.match(source, /if \(!isStageUnlocked\(stage\.id, before\.clearedStageIds\)\)/);
   assert.match(source, /if \(claimedTreasureId !== stage\.treasure\.id\)/);
   assert.match(source, /treasures\.add\(stage\.treasure\.id\)/);
+  assert.match(source, /nonProgressionStageIds/);
+  assert.match(source, /nonStageTreasureIds/);
 });
 
 test('recordStageClear contract distinguishes durable IndexedDB persistence from in-tab session progress', async () => {
