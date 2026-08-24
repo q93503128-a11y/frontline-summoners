@@ -22,6 +22,13 @@ test('stage navigation groups progression and special stages instead of flatteni
   assert.equal(getStageCollectionForStage('special-05').id, 'special-border-01');
 });
 
+test('current hub cannot silently receive an off-screen third collection before its paging controls are wired', () => {
+  assert.ok(
+    STAGE_COLLECTIONS.length <= STAGE_COLLECTIONS_PER_PAGE,
+    'StageHubScene must consume getStageCollectionPage() and expose previous/next controls before adding collection 3+',
+  );
+});
+
 test('sortie hub collection paging remains bounded when future chapters and events multiply', () => {
   assert.equal(STAGE_COLLECTIONS_PER_PAGE, 2);
   const progression = STAGE_COLLECTIONS[0]!;
