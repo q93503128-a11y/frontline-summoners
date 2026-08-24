@@ -43,7 +43,7 @@ export const ART_FAMILIES: readonly ArtFamily[] = [
     id: 'wizard', displayHeight: 200, attackContactFrame: 3,
     idle: { key: 'wizard-idle', url: `${LOCAL}/wizard/idle.png`, frameWidth: 231, frameHeight: 190, frames: 6 },
     run: { key: 'wizard-run', url: `${LOCAL}/wizard/run.png`, frameWidth: 231, frameHeight: 190, frames: 8 },
-    attack: { key: 'wizard-attack', url: `${LOCAL}/wizard/attack.png`, frameWidth: 231, frameHeight: 190, frames: 6 },
+    attack: { key: 'wizard-attack', url: `${LOCAL}/wizard/attack.png`, frameWidth: 231, frameHeight: 190, frames: 8 },
   },
   {
     id: 'warrior', displayHeight: 178, attackContactFrame: 2,
