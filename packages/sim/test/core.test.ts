@@ -1,6 +1,16 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import { CombatTrait, UnitState, computeStateHash, createBattle, getUnitAttackDamageAgainst, spawnUnit, stepBattle, type BattleUnitDefinition } from '../src/index.ts';
+import {
+  CombatTrait,
+  UnitState,
+  applyForcedDisplacementToTeam,
+  computeStateHash,
+  createBattle,
+  getUnitAttackDamageAgainst,
+  spawnUnit,
+  stepBattle,
+  type BattleUnitDefinition,
+} from '../src/index.ts';
 
 const fighter = (overrides: Partial<BattleUnitDefinition> = {}): BattleUnitDefinition => ({
   id: 'fighter', maxHp: 100, attackDamage: 100, moveSpeed: 0, standingRange: 100,
@@ -89,4 +99,54 @@ test('specialist bonuses never inflate base damage', () => {
   }), 'PLAYER', 950);
   stepBattle(state);
   assert.equal(state.bases.ENEMY.hp, 900);
+});
+
+test('forced displacement moves units backward over exact frames and cancels their current action', () => {
+  const state = createBattle({ mapLength: 1000, playerBaseHp: 1000, enemyBaseHp: 1000 });
+  const enemy = spawnUnit(state, fighter({ id: 'pushed', attackDamage: 0 }), 'ENEMY', 600);
+  enemy.state = UnitState.Foreswing;
+  enemy.stateFrame = 3;
+  enemy.nextAttackTick = 30;
+
+  assert.equal(applyForcedDisplacementToTeam(state, 'ENEMY', 90, 3), 1);
+  assert.equal(enemy.state, UnitState.ForcedDisplacement);
+  assert.equal(enemy.anchorX, 600);
+  assert.equal(enemy.knockbackTargetX, 690);
+
+  stepBattle(state);
+  assert.equal(enemy.anchorX, 630);
+  assert.equal(enemy.state, UnitState.ForcedDisplacement);
+  stepBattle(state);
+  assert.equal(enemy.anchorX, 660);
+  stepBattle(state);
+  assert.equal(enemy.anchorX, 690);
+  assert.equal(enemy.state, UnitState.Moving);
+});
+
+test('forced displacement keeps hurtbox active but natural knockback takes priority after threshold damage', () => {
+  const state = createBattle({ mapLength: 1000, playerBaseHp: 1000, enemyBaseHp: 1000 });
+  const attacker = spawnUnit(state, fighter({ id: 'attacker', attackDamage: 60, attackTiming: { cycleFrames: 30, hitFrames: [1], backswingFrames: 6 } }), 'PLAYER', 500);
+  const enemy = spawnUnit(state, fighter({ id: 'target', maxHp: 100, attackDamage: 0, naturalKnockbackCount: 1 }), 'ENEMY', 550);
+  applyForcedDisplacementToTeam(state, 'ENEMY', 60, 6);
+  assert.equal(enemy.state, UnitState.ForcedDisplacement);
+
+  attacker.state = UnitState.Foreswing;
+  attacker.stateFrame = 0;
+  stepBattle(state);
+  assert.equal(enemy.hp, 40);
+  assert.equal(enemy.state, UnitState.NaturalKnockback);
+  assert.equal(enemy.forcedDisplacementFrames, 0);
+});
+
+test('state hash includes future-relevant displacement runtime state', () => {
+  const a = createBattle({ mapLength: 1000, playerBaseHp: 1000, enemyBaseHp: 1000 });
+  const b = createBattle({ mapLength: 1000, playerBaseHp: 1000, enemyBaseHp: 1000 });
+  const ua = spawnUnit(a, fighter({ id: 'same' }), 'ENEMY', 500);
+  const ub = spawnUnit(b, fighter({ id: 'same' }), 'ENEMY', 500);
+  applyForcedDisplacementToTeam(a, 'ENEMY', 30, 5);
+  applyForcedDisplacementToTeam(b, 'ENEMY', 60, 5);
+  // Same current anchor/state/frame but different future target must not hash equal.
+  assert.equal(ua.anchorX, ub.anchorX);
+  assert.equal(ua.state, ub.state);
+  assert.notEqual(a.stateHash, b.stateHash);
 });
