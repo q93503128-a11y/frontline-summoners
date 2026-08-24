@@ -111,6 +111,14 @@ function isPortraitMobileViewport(): boolean {
   return window.innerWidth <= 900 && window.innerHeight > window.innerWidth;
 }
 
+function isCompactMobileViewport(): boolean {
+  return Math.min(window.innerWidth, window.innerHeight) <= 500;
+}
+
+function battleUiFontSize(regular: number, compact: number): number {
+  return isCompactMobileViewport() ? compact : regular;
+}
+
 function getUnitHotkeyLabel(index: number): string {
   return index === 9 ? '0' : String(index + 1);
 }
@@ -414,7 +422,7 @@ class BattleScene extends Phaser.Scene {
 
     const slotIndex = BATTLE_UNIT_HOTKEY_CODES.indexOf(event.code);
     if (slotIndex >= 0) {
-      const slot = PLAYER_SLOTS[slotIndex];
+      const slot = this.activeSlots[slotIndex];
       if (slot) this.trySpawnSlot(slot.slotId);
       return;
     }
@@ -460,8 +468,8 @@ class BattleScene extends Phaser.Scene {
     const blocker = this.add.rectangle(INTERNAL_WIDTH / 2, INTERNAL_HEIGHT / 2, INTERNAL_WIDTH, INTERNAL_HEIGHT, 0x0b0f16, 0.78).setInteractive();
     const panel = this.add.rectangle(INTERNAL_WIDTH / 2, 330, 480, 250, 0x202735, 0.98).setStrokeStyle(3, 0x71809a);
     const title = addText(this, INTERNAL_WIDTH / 2, 266, '일 시 정 지', 40, COLORS.cream, 'center').setOrigin(0.5);
-    const detail = addText(this, INTERNAL_WIDTH / 2, 316, '솔로 전투 정지 · 보급·쿨다운·적 스폰도 멈춤', 17, '#b8c5d6', 'center').setOrigin(0.5);
-    const shortcut = addText(this, INTERNAL_WIDTH / 2, 352, 'P 또는 ESC로도 계속할 수 있습니다.', 15, '#8f9bae', 'center').setOrigin(0.5);
+    const detail = addText(this, INTERNAL_WIDTH / 2, 316, '솔로 전투 정지 · 보급·쿨다운·적 스폰도 멈춤', battleUiFontSize(17, 20), '#b8c5d6', 'center').setOrigin(0.5);
+    const shortcut = addText(this, INTERNAL_WIDTH / 2, 352, 'P 또는 ESC로도 계속할 수 있습니다.', battleUiFontSize(15, 18), '#8f9bae', 'center').setOrigin(0.5);
     const resume = addButton(this, INTERNAL_WIDTH / 2, 414, 220, 58, '계 속', () => this.setManualPaused(false), 0x6b94b7);
     this.pauseOverlay = this.add.container(0, 0, [blocker, panel, title, detail, shortcut, resume]).setDepth(100);
   }
@@ -479,16 +487,16 @@ class BattleScene extends Phaser.Scene {
 
   private drawHud(): void {
     this.add.rectangle(INTERNAL_WIDTH / 2, 53, INTERNAL_WIDTH, 106, 0x151a24, 0.95);
-    addText(this, 35, 16, this.stage.name, 28, '#ffffff');
-    addText(this, 36, 56, `${this.stage.chapter} · ${BATTLEFIELD_THEME_LABELS[this.stage.theme]} · ${this.stage.mapLength}m`, 17, '#aeb8c8');
-    this.timerText = addText(this, 585, 25, '0:00', 23, '#dbe2ee', 'center').setOrigin(0.5, 0);
+    addText(this, 35, 16, this.stage.name, battleUiFontSize(28, 31), '#ffffff');
+    addText(this, 36, 56, `${this.stage.chapter} · ${BATTLEFIELD_THEME_LABELS[this.stage.theme]} · ${this.stage.mapLength}m`, battleUiFontSize(17, 20), '#aeb8c8');
+    this.timerText = addText(this, 585, 25, '0:00', battleUiFontSize(23, 26), '#dbe2ee', 'center').setOrigin(0.5, 0);
     addButton(this, 690, 55, 108, 42, '일시정지', () => this.toggleManualPause(), 0x65758d);
 
-    addText(this, 760, 18, '보급', 18, '#d7ddea');
+    addText(this, 760, 18, '보급', battleUiFontSize(18, 21), '#d7ddea');
     this.add.rectangle(930, 56, 300, 22, 0x0d1118).setStrokeStyle(2, 0x67738b);
     this.supplyBar = this.add.rectangle(782, 56, 1, 14, 0xe9c965).setOrigin(0, 0.5);
-    this.supplyText = addText(this, 1084, 20, '', 21, '#f4d577', 'right').setOrigin(1, 0);
-    this.supplyLevelText = addText(this, 760, 68, '', 18, '#b9c4d4');
+    this.supplyText = addText(this, 1084, 20, '', battleUiFontSize(21, 24), '#f4d577', 'right').setOrigin(1, 0);
+    this.supplyLevelText = addText(this, 760, 68, '', battleUiFontSize(18, 21), '#b9c4d4');
   }
 
   private drawBases(): void {
@@ -506,19 +514,20 @@ class BattleScene extends Phaser.Scene {
       g.fillStyle(palette.enemyRoof, 0.9).fillRect(1154, 340, 18, 30).fillRect(1212, 340, 18, 30);
     }
 
-    addText(this, 42, 286, '아군 거점', 18, '#cfe5ff');
-    addText(this, 1238, 286, '적 거점', 18, '#ffd3cc', 'right').setOrigin(1, 0);
+    addText(this, 42, 286, '아군 거점', battleUiFontSize(18, 21), '#cfe5ff');
+    addText(this, 1238, 286, '적 거점', battleUiFontSize(18, 21), '#ffd3cc', 'right').setOrigin(1, 0);
     this.add.rectangle(88, 328, 156, 16, 0x161b23).setStrokeStyle(2, 0x7990aa);
     this.add.rectangle(1192, 328, 156, 16, 0x161b23).setStrokeStyle(2, 0xaa716c);
     this.playerBaseBar = this.add.rectangle(12, 328, 152, 10, 0x74c7ff).setOrigin(0, 0.5);
     this.enemyBaseBar = this.add.rectangle(1116, 328, 152, 10, 0xff8f82).setOrigin(0, 0.5);
-    this.playerBaseText = addText(this, 88, 340, '', 18, '#e8f5ff', 'center').setOrigin(0.5, 0);
-    this.enemyBaseText = addText(this, 1192, 340, '', 18, '#ffe6e1', 'center').setOrigin(0.5, 0);
+    this.playerBaseText = addText(this, 88, 340, '', battleUiFontSize(18, 21), '#e8f5ff', 'center').setOrigin(0.5, 0);
+    this.enemyBaseText = addText(this, 1192, 340, '', battleUiFontSize(18, 21), '#ffe6e1', 'center').setOrigin(0.5, 0);
   }
 
   private drawUnitButtons(): void {
     this.add.rectangle(INTERNAL_WIDTH / 2, 630, INTERNAL_WIDTH, 180, 0x151a24, 0.98);
     const activeIds = new Set(this.activeSlots.map((slot) => slot.slotId));
+    const buttonHeight = isCompactMobileViewport() ? 70 : 62;
 
     PLAYER_SLOTS.forEach((slot, index) => {
       const row = Math.floor(index / 5);
@@ -528,35 +537,36 @@ class BattleScene extends Phaser.Scene {
       const unlocked = activeIds.has(slot.slotId);
       const hotkeyLabel = getUnitHotkeyLabel(index);
       const border = unlocked ? Phaser.Display.Color.HexStringToColor(rarityColor[slot.rarity] ?? '#ffffff').color : 0x454e5b;
-      const bg = this.add.rectangle(x, y, 188, 62, unlocked ? 0x28303e : 0x1c222c).setStrokeStyle(2, border, 0.85);
+      const bg = this.add.rectangle(x, y, 188, buttonHeight, unlocked ? 0x28303e : 0x1c222c).setStrokeStyle(2, border, 0.85);
       const art = familyForUnit(slot.definition.id);
       const portrait = this.add.sprite(x - 69, y, art.family.idle.key, 0).setTint(unlocked ? art.tint : 0x343840).setAlpha(unlocked ? 1 : 0.45).setDepth(4);
-      portrait.setScale((50 / art.family.idle.frameHeight) * art.displayScale);
-      addText(this, x + 82, y - 25, hotkeyLabel, 14, unlocked ? '#9fb3ca' : '#555f6d', 'right').setOrigin(1, 0).setDepth(7);
+      portrait.setScale(((isCompactMobileViewport() ? 56 : 50) / art.family.idle.frameHeight) * art.displayScale);
+      addText(this, x + 82, y - 25, hotkeyLabel, battleUiFontSize(14, 18), unlocked ? '#9fb3ca' : '#555f6d', 'right').setOrigin(1, 0).setDepth(7);
 
       if (!unlocked) {
-        addText(this, x - 43, y - 22, '미해금', 15, '#7c8490').setDepth(5);
+        addText(this, x - 43, y - 22, '미해금', battleUiFontSize(15, 18), '#7c8490').setDepth(5);
         const unlockStage = getUnlockStageForSlot(slot.slotId);
-        addText(this, x - 43, y + 2, unlockStage ? `ST.${getStageNumber(unlockStage.id)} 클리어` : '잠김', 14, '#626b77').setDepth(5);
+        addText(this, x - 43, y + 2, unlockStage ? `ST.${getStageNumber(unlockStage.id)} 클리어` : '잠김', battleUiFontSize(14, 17), '#626b77').setDepth(5);
         return;
       }
 
       bg.setInteractive({ useHandCursor: true });
-      const shade = this.add.rectangle(x, y, 188, 62, 0x05070b, 0).setDepth(6);
-      addText(this, x - 43, y - 25, `${slot.rarity} · ${slot.displayName}`, 15, '#ffffff').setDepth(5);
-      const cost = addText(this, x - 43, y + 2, `${slot.cost} 보급`, 15, '#f2d37c').setDepth(5);
-      const cooldown = addText(this, x + 82, y + 2, '', 15, '#d8e1ef', 'right').setOrigin(1, 0).setDepth(7);
+      const shade = this.add.rectangle(x, y, 188, buttonHeight, 0x05070b, 0).setDepth(6);
+      addText(this, x - 43, y - 25, `${slot.rarity} · ${slot.displayName}`, battleUiFontSize(15, 18), '#ffffff').setDepth(5);
+      const cost = addText(this, x - 43, y + 2, `${slot.cost} 보급`, battleUiFontSize(15, 18), '#f2d37c').setDepth(5);
+      const cooldown = addText(this, x + 82, y + 2, '', battleUiFontSize(15, 18), '#d8e1ef', 'right').setOrigin(1, 0).setDepth(7);
       bg.on('pointerdown', () => this.trySpawnSlot(slot.slotId));
       this.buttons.set(slot.slotId, { bg, shade, cooldown, cost });
     });
 
-    const upgradeBg = this.add.rectangle(1145, 580, 220, 60, 0x302a1c).setStrokeStyle(3, 0xc59d4b).setInteractive({ useHandCursor: true });
-    this.supplyUpgradeText = addText(this, 1145, 570, '', 17, '#ffe29a', 'center').setOrigin(0.5);
-    addText(this, 1145, 594, 'Q · 보급소 강화', 16, '#ffffff', 'center').setOrigin(0.5);
+    const controlHeight = isCompactMobileViewport() ? 68 : 60;
+    const upgradeBg = this.add.rectangle(1145, 580, 220, controlHeight, 0x302a1c).setStrokeStyle(3, 0xc59d4b).setInteractive({ useHandCursor: true });
+    this.supplyUpgradeText = addText(this, 1145, 570, '', battleUiFontSize(17, 20), '#ffe29a', 'center').setOrigin(0.5);
+    addText(this, 1145, 594, 'Q · 보급소 강화', battleUiFontSize(16, 19), '#ffffff', 'center').setOrigin(0.5);
     upgradeBg.on('pointerdown', () => this.tryUpgradeSupplyInput());
 
-    this.baseWeaponBg = this.add.rectangle(1145, 651, 220, 60, 0x26394a).setStrokeStyle(3, 0x72b7db).setInteractive({ useHandCursor: true });
-    this.baseWeaponText = addText(this, 1145, 651, 'E · 전선포 · 발사 가능', 17, '#bfe8ff', 'center').setOrigin(0.5);
+    this.baseWeaponBg = this.add.rectangle(1145, 651, 220, controlHeight, 0x26394a).setStrokeStyle(3, 0x72b7db).setInteractive({ useHandCursor: true });
+    this.baseWeaponText = addText(this, 1145, 651, 'E · 전선포 · 발사 가능', battleUiFontSize(17, 19), '#bfe8ff', 'center').setOrigin(0.5);
     this.baseWeaponBg.on('pointerdown', () => this.tryFireBaseWeaponInput());
   }
 
@@ -589,7 +599,7 @@ class BattleScene extends Phaser.Scene {
     sprite.setScale((art.family.displayHeight / art.family.run.frameHeight) * art.displayScale);
     const hpBg = this.add.rectangle(sprite.x, 443, 54, 7, 0x161a21).setDepth(5);
     const hp = this.add.rectangle(sprite.x - 26, 443, 52, 5, unit.team === 'PLAYER' ? 0x78dca0 : 0xf1837c).setOrigin(0, 0.5).setDepth(6);
-    const trait = addText(this, sprite.x, 425, unit.team === 'ENEMY' ? formatCompactTraits(unit.definition) : '', 14, '#ffd0c8', 'center').setOrigin(0.5).setDepth(7);
+    const trait = addText(this, sprite.x, 425, unit.team === 'ENEMY' ? formatCompactTraits(unit.definition) : '', battleUiFontSize(14, 16), '#ffd0c8', 'center').setOrigin(0.5).setDepth(7);
 
     const spawn = this.add.ellipse(x, 519, 34, 9, unit.team === 'PLAYER' ? 0x9cd7ff : 0xffa39b, 0.42).setDepth(2);
     this.tweens.add({
