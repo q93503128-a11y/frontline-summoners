@@ -85,3 +85,16 @@ test('portrait mobile view blocks tiny layout and freezes battle before the 30Hz
   assert.match(html, /가로 화면으로 돌려 주세요/);
   assert.doesNotMatch(html, /canvas\s*\{[^}]*image-rendering:\s*pixelated/s);
 });
+
+test('mobile viewport-fit keeps Phaser inside device safe areas without changing the desktop zero-inset layout', async () => {
+  const html = await readSource('../index.html');
+  assert.match(html, /viewport-fit=cover/);
+  assert.match(html, /body\s*\{[\s\S]*?box-sizing:\s*border-box/);
+  assert.match(html, /padding-top:\s*env\(safe-area-inset-top, 0px\)/);
+  assert.match(html, /padding-right:\s*env\(safe-area-inset-right, 0px\)/);
+  assert.match(html, /padding-bottom:\s*env\(safe-area-inset-bottom, 0px\)/);
+  assert.match(html, /padding-left:\s*env\(safe-area-inset-left, 0px\)/);
+  assert.match(html, /#game\s*\{\s*width:\s*100%;\s*height:\s*100%;\s*\}/);
+  assert.match(html, /max\(32px, env\(safe-area-inset-left, 0px\)\)/);
+  assert.match(html, /max\(32px, env\(safe-area-inset-right, 0px\)\)/);
+});
