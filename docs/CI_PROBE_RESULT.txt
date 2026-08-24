@@ -1,374 +1,53 @@
-source_sha=78638c0d45fa59b0223fe2dbd33489dca3954f1d
-verified_at=2026-08-24T04:21:34Z
+source_sha=56037fb870e4551b43c534044256706492ab356b
+verified_at=2026-08-24T04:24:59Z
 install=0
 typecheck=0
 client_test=1
 test=1
 build=0
+campaign_report=0
 
-== client test failures ==
-# Subtest: every chapter one player and enemy has a registered art family and attack FX style
-# Subtest: all sprite strips are local deploy assets with coherent frame metadata
-# Subtest: chapter one avoids a single repeated visual family for all player units
-# Subtest: chapter one exposes multiple readable attack languages
-# Subtest: battle loop launches ranged visuals before deterministic damage step and then advances projectile views
-# Subtest: travel projectiles replace caster-local hit FX and interpolate render position between 30Hz ticks
-# Subtest: saved guaranteed treasures are passed into the actual browser battle config
-# Subtest: player specialties are visible in deck and enemy traits are visible in battle
-# Subtest: main menu opens the real catalog scene and the scene is registered
-# Subtest: catalog is progress-aware and pages allies and guaranteed treasures instead of overfilling one screen
-# Subtest: boss arrival warning is keyed by actual BOSS-tagged simulation units and only fires once per instance
-# Subtest: portrait mobile view blocks tiny layout and freezes battle before the 30Hz accumulator advances
-not ok 12 - portrait mobile view blocks tiny layout and freezes battle before the 30Hz accumulator advances
-  code: 'ERR_ASSERTION'
-  name: 'AssertionError'
-  expected: true
-# Subtest: all combat trait ids have Korean player-facing labels
-not ok 13 - all combat trait ids have Korean player-facing labels
-  code: 'ERR_ASSERTION'
-  name: 'AssertionError'
-  expected: '우두머리'
-# Subtest: specialty text is derived from the battle definition multiplier
-not ok 14 - specialty text is derived from the battle definition multiplier
-    + actual - expected
-  code: 'ERR_ASSERTION'
-  name: 'AssertionError'
-  expected: '우두머리 특효 +50%'
-# Subtest: units without a specialty do not invent one
-# Subtest: first simulation hit maps exactly to configured sprite contact frame
-not ok 16 - first simulation hit maps exactly to configured sprite contact frame
-  code: 'ERR_ASSERTION'
-  name: 'AssertionError'
-  expected: true
-# Subtest: backswing advances from contact pose toward final sprite frame
-# Subtest: looping movement animation offsets unit phases instead of marching in lockstep
-# Subtest: impact weight is proportional to target max hp
-# Subtest: stages one through five are beatable in the real sequential unlock and treasure order
+== client failures ==
 not ok 20 - stages one through five are beatable in the real sequential unlock and treasure order
     STAGE 3 (border-03) failed with legitimately unlocked slots: militia, guard, hunter
-  code: 'ERR_ASSERTION'
   name: 'AssertionError'
-  expected: 'PLAYER'
-# Subtest: stages sixteen through twenty stay beatable in exact unlock/treasure order and final bosses actually appear
 not ok 21 - stages sixteen through twenty stay beatable in exact unlock/treasure order and final bosses actually appear
     STAGE 16 (border-16) failed with legitimately unlocked slots: militia, guard, hunter, duelist, lancer, battlemage, pyromancer, royal
-  code: 'ERR_ASSERTION'
   name: 'AssertionError'
-  expected: 'PLAYER'
-# Subtest: stages eleven through fifteen remain beatable without future unlocks or future treasures
 not ok 22 - stages eleven through fifteen remain beatable without future unlocks or future treasures
     STAGE 11 (border-11) failed with legitimately unlocked slots: militia, guard, hunter, duelist, lancer, battlemage, pyromancer
-  code: 'ERR_ASSERTION'
   name: 'AssertionError'
-  expected: 'PLAYER'
-# Subtest: stages six through ten remain beatable in the real sequential unlock and treasure order
 not ok 23 - stages six through ten remain beatable in the real sequential unlock and treasure order
     STAGE 8 (border-08) failed with legitimately unlocked slots: militia, guard, hunter, duelist, lancer
-  code: 'ERR_ASSERTION'
   name: 'AssertionError'
-  expected: 'PLAYER'
-# Subtest: fresh progress owns only the starter and can enter only stage one
-# Subtest: clearing a stage opens only its immediate successor
-# Subtest: full chapter progression unlocks all ten player units
-# Subtest: runtime stage definitions stay identical to canonical chapter json
-# Subtest: chapter one has visible battlefield variety in both theme and length
-# Subtest: melee effects remain immediate while ranged effects get deterministic travel plans
-# Subtest: farther projectile targets launch no later than nearer targets and still arrive on hit frame
-# Subtest: projectile arc starts and ends on target height
-not ok 31 - projectile arc starts and ends on target height
-    + actual - expected
-  code: 'ERR_ASSERTION'
-  name: 'AssertionError'
-  expected: 0
-# Subtest: session and durable guest progress merge without duplicates while preserving first-seen order
-# Subtest: recordStageClear contract distinguishes durable IndexedDB persistence from in-tab session progress
-# Subtest: result screen never labels a failed durable write as saved
-# Subtest: solo pause freezes the simulation and all direct battle actions
-# Subtest: chapter one opens with a scarce wallet and low base hp instead of a late-game economy
-# Subtest: the first roster and enemy line advance at a deliberate pace
-# Subtest: the ten current units are the chapter-one core roster, not an all-game character cap
-# Subtest: stage one starts with exactly one militia worth of supply and remains a readable fresh-account win
-# Subtest: dense ordinary enemies collapse to spaced representative labels
-not ok 40 - dense ordinary enemies collapse to spaced representative labels
-    + actual - expected
-  code: 'ERR_ASSERTION'
-  name: 'AssertionError'
-  expected:
-# Subtest: boss labels remain visible even when they are inside the ordinary spacing gap
-# Subtest: label selection is independent of input iteration order
-# Subtest: every chapter-one stage treasure has exactly one typed effect definition
-# Subtest: cleared stage ids resolve to the exact owned treasure ids without inventing rewards
-# Subtest: treasure modifiers affect the actual playable battle configuration
-# Subtest: base HP, deployment cap, kill reward and upgrade-cost treasures change deterministic config
-# Subtest: unit-targeted treasures apply only to matching roster roles, traits and ids
-# Subtest: small discrete stats use exact flat modifiers instead of misleading tiny percentages
-# Subtest: integer percentage progression is deterministic for larger integer stats
 # tests 49
-# pass 39
-# fail 10
+# pass 45
+# fail 4
 npm error Lifecycle script `test` failed with error:
 
-== client test tail ==
-# Subtest: stages six through ten remain beatable in the real sequential unlock and treasure order
-not ok 23 - stages six through ten remain beatable in the real sequential unlock and treasure order
-  ---
-  duration_ms: 1199.998931
-  type: 'test'
-  location: '/home/runner/work/frontline-summoners/frontline-summoners/apps/client/test/mid-campaign-balance.test.ts:14:1'
-  failureType: 'testCodeFailure'
-  error: |-
-    STAGE 8 (border-08) failed with legitimately unlocked slots: militia, guard, hunter, duelist, lancer
-    
-    'ENEMY' !== 'PLAYER'
-    
-  code: 'ERR_ASSERTION'
-  name: 'AssertionError'
-  expected: 'PLAYER'
-  actual: 'ENEMY'
-  operator: 'strictEqual'
-  stack: |-
-    TestContext.<anonymous> (/home/runner/work/frontline-summoners/frontline-summoners/apps/client/test/mid-campaign-balance.test.ts:28:12)
-    Test.runInAsyncScope (node:async_hooks:214:14)
-    Test.run (node:internal/test_runner/test:1047:25)
-    Test.start (node:internal/test_runner/test:944:17)
-    startSubtestAfterBootstrap (node:internal/test_runner/harness:296:17)
-  ...
-# (node:2589) ExperimentalWarning: Transform Types is an experimental feature and might change at any time
-# (Use `node --trace-warnings ...` to show where the warning was created)
-# Subtest: fresh progress owns only the starter and can enter only stage one
-ok 24 - fresh progress owns only the starter and can enter only stage one
-  ---
-  duration_ms: 14.281544
-  type: 'test'
-  ...
-# Subtest: clearing a stage opens only its immediate successor
-ok 25 - clearing a stage opens only its immediate successor
-  ---
-  duration_ms: 0.271094
-  type: 'test'
-  ...
-# Subtest: full chapter progression unlocks all ten player units
-ok 26 - full chapter progression unlocks all ten player units
-  ---
-  duration_ms: 0.272979
-  type: 'test'
-  ...
-# Subtest: runtime stage definitions stay identical to canonical chapter json
-ok 27 - runtime stage definitions stay identical to canonical chapter json
-  ---
-  duration_ms: 10.951157
-  type: 'test'
-  ...
-# Subtest: chapter one has visible battlefield variety in both theme and length
-ok 28 - chapter one has visible battlefield variety in both theme and length
-  ---
-  duration_ms: 0.401929
-  type: 'test'
-  ...
-# (node:2596) ExperimentalWarning: Transform Types is an experimental feature and might change at any time
-# (Use `node --trace-warnings ...` to show where the warning was created)
-# Subtest: melee effects remain immediate while ranged effects get deterministic travel plans
-ok 29 - melee effects remain immediate while ranged effects get deterministic travel plans
-  ---
-  duration_ms: 4.504016
-  type: 'test'
-  ...
-# Subtest: farther projectile targets launch no later than nearer targets and still arrive on hit frame
-ok 30 - farther projectile targets launch no later than nearer targets and still arrive on hit frame
-  ---
-  duration_ms: 0.250162
-  type: 'test'
-  ...
-# Subtest: projectile arc starts and ends on target height
-not ok 31 - projectile arc starts and ends on target height
-  ---
-  duration_ms: 4.660818
-  type: 'test'
-  location: '/home/runner/work/frontline-summoners/frontline-summoners/apps/client/test/projectile-visuals.test.ts:52:1'
-  failureType: 'testCodeFailure'
-  error: |-
-    Expected values to be strictly equal:
-    + actual - expected
-    
-    + -0
-    - 0
-    
-  code: 'ERR_ASSERTION'
-  name: 'AssertionError'
-  expected: 0
-  actual: -0
-  operator: 'strictEqual'
-  stack: |-
-    TestContext.<anonymous> (/home/runner/work/frontline-summoners/frontline-summoners/apps/client/test/projectile-visuals.test.ts:53:10)
-    Test.runInAsyncScope (node:async_hooks:214:14)
-    Test.run (node:internal/test_runner/test:1047:25)
-    Test.processPendingSubtests (node:internal/test_runner/test:744:18)
-    Test.postRun (node:internal/test_runner/test:1173:19)
-    Test.run (node:internal/test_runner/test:1101:12)
-    async Test.processPendingSubtests (node:internal/test_runner/test:744:7)
-  ...
-# (node:2603) ExperimentalWarning: Transform Types is an experimental feature and might change at any time
-# (Use `node --trace-warnings ...` to show where the warning was created)
-# Subtest: session and durable guest progress merge without duplicates while preserving first-seen order
-ok 32 - session and durable guest progress merge without duplicates while preserving first-seen order
-  ---
-  duration_ms: 1.773772
-  type: 'test'
-  ...
-# Subtest: recordStageClear contract distinguishes durable IndexedDB persistence from in-tab session progress
-ok 33 - recordStageClear contract distinguishes durable IndexedDB persistence from in-tab session progress
-  ---
-  duration_ms: 8.642492
-  type: 'test'
-  ...
-# Subtest: result screen never labels a failed durable write as saved
-ok 34 - result screen never labels a failed durable write as saved
-  ---
-  duration_ms: 1.847244
-  type: 'test'
-  ...
-# (node:2615) ExperimentalWarning: Transform Types is an experimental feature and might change at any time
-# (Use `node --trace-warnings ...` to show where the warning was created)
-# Subtest: solo pause freezes the simulation and all direct battle actions
-ok 35 - solo pause freezes the simulation and all direct battle actions
-  ---
-  duration_ms: 10.343268
-  type: 'test'
-  ...
-# Subtest: chapter one opens with a scarce wallet and low base hp instead of a late-game economy
-ok 36 - chapter one opens with a scarce wallet and low base hp instead of a late-game economy
-  ---
-  duration_ms: 1.344234
-  type: 'test'
-  ...
-# Subtest: the first roster and enemy line advance at a deliberate pace
-ok 37 - the first roster and enemy line advance at a deliberate pace
-  ---
-  duration_ms: 0.26055
-  type: 'test'
-  ...
-# Subtest: the ten current units are the chapter-one core roster, not an all-game character cap
-ok 38 - the ten current units are the chapter-one core roster, not an all-game character cap
-  ---
-  duration_ms: 0.149932
-  type: 'test'
-  ...
-# (node:2626) ExperimentalWarning: Transform Types is an experimental feature and might change at any time
-# (Use `node --trace-warnings ...` to show where the warning was created)
-# Subtest: stage one starts with exactly one militia worth of supply and remains a readable fresh-account win
-ok 39 - stage one starts with exactly one militia worth of supply and remains a readable fresh-account win
-  ---
-  duration_ms: 190.678463
-  type: 'test'
-  ...
-# (node:2637) ExperimentalWarning: Transform Types is an experimental feature and might change at any time
-# (Use `node --trace-warnings ...` to show where the warning was created)
-# Subtest: dense ordinary enemies collapse to spaced representative labels
-not ok 40 - dense ordinary enemies collapse to spaced representative labels
-  ---
-  duration_ms: 3.26443
-  type: 'test'
-  location: '/home/runner/work/frontline-summoners/frontline-summoners/apps/client/test/trait-label-visibility.test.ts:5:1'
-  failureType: 'testCodeFailure'
-  error: |-
-    Expected values to be strictly deep-equal:
-    + actual - expected
-    
-      [
-        1,
-    +   3,
-        4
-      ]
-    
-  code: 'ERR_ASSERTION'
-  name: 'AssertionError'
-  expected:
-    0: 1
-    1: 4
-  actual:
-    0: 1
-    1: 3
-    2: 4
-  operator: 'deepStrictEqual'
-  stack: |-
-    TestContext.<anonymous> (/home/runner/work/frontline-summoners/frontline-summoners/apps/client/test/trait-label-visibility.test.ts:12:10)
-    Test.runInAsyncScope (node:async_hooks:214:14)
-    Test.run (node:internal/test_runner/test:1047:25)
-    Test.start (node:internal/test_runner/test:944:17)
-    startSubtestAfterBootstrap (node:internal/test_runner/harness:296:17)
-  ...
-# Subtest: boss labels remain visible even when they are inside the ordinary spacing gap
-ok 41 - boss labels remain visible even when they are inside the ordinary spacing gap
-  ---
-  duration_ms: 0.344101
-  type: 'test'
-  ...
-# Subtest: label selection is independent of input iteration order
-ok 42 - label selection is independent of input iteration order
-  ---
-  duration_ms: 0.49735
-  type: 'test'
-  ...
-# (node:2644) ExperimentalWarning: Transform Types is an experimental feature and might change at any time
-# (Use `node --trace-warnings ...` to show where the warning was created)
-# Subtest: every chapter-one stage treasure has exactly one typed effect definition
-ok 43 - every chapter-one stage treasure has exactly one typed effect definition
-  ---
-  duration_ms: 1.904119
-  type: 'test'
-  ...
-# Subtest: cleared stage ids resolve to the exact owned treasure ids without inventing rewards
-ok 44 - cleared stage ids resolve to the exact owned treasure ids without inventing rewards
-  ---
-  duration_ms: 1.320449
-  type: 'test'
-  ...
-# Subtest: treasure modifiers affect the actual playable battle configuration
-ok 45 - treasure modifiers affect the actual playable battle configuration
-  ---
-  duration_ms: 13.445978
-  type: 'test'
-  ...
-# Subtest: base HP, deployment cap, kill reward and upgrade-cost treasures change deterministic config
-ok 46 - base HP, deployment cap, kill reward and upgrade-cost treasures change deterministic config
-  ---
-  duration_ms: 0.594835
-  type: 'test'
-  ...
-# Subtest: unit-targeted treasures apply only to matching roster roles, traits and ids
-ok 47 - unit-targeted treasures apply only to matching roster roles, traits and ids
-  ---
-  duration_ms: 0.747273
-  type: 'test'
-  ...
-# Subtest: small discrete stats use exact flat modifiers instead of misleading tiny percentages
-ok 48 - small discrete stats use exact flat modifiers instead of misleading tiny percentages
-  ---
-  duration_ms: 0.359229
-  type: 'test'
-  ...
-# Subtest: integer percentage progression is deterministic for larger integer stats
-ok 49 - integer percentage progression is deterministic for larger integer stats
-  ---
-  duration_ms: 0.238523
-  type: 'test'
-  ...
-1..49
-# tests 49
-# suites 0
-# pass 39
-# fail 10
-# cancelled 0
-# skipped 0
-# todo 0
-# duration_ms 2996.498967
-npm error Lifecycle script `test` failed with error:
-npm error code 1
-npm error path /home/runner/work/frontline-summoners/frontline-summoners/apps/client
-npm error workspace @frontline/client@0.0.3
-npm error location /home/runner/work/frontline-summoners/frontline-summoners/apps/client
-npm error command failed
-npm error command sh -c node --experimental-transform-types --test test/*.test.ts
+== campaign report ==
+{"stage":1,"id":"border-01","winner":"PLAYER","seconds":35.2,"playerBaseRatio":1,"enemyBaseRatio":0,"supply":32,"supplyLevel":1,"targetSupplyLevel":1,"firstSpawnSeconds":0,"spawns":12,"upgrades":0,"cannons":1,"longestEnemyPressureNoPlayerSeconds":0,"seenPlayerIds":["militia"],"seenEnemyIds":["enemy-raider"]}
+{"stage":2,"id":"border-02","winner":"PLAYER","seconds":64.8,"playerBaseRatio":1,"enemyBaseRatio":0,"supply":51,"supplyLevel":1,"targetSupplyLevel":1,"firstSpawnSeconds":0,"spawns":11,"upgrades":0,"cannons":2,"longestEnemyPressureNoPlayerSeconds":0,"seenPlayerIds":["militia","guard"],"seenEnemyIds":["enemy-sprinter","enemy-raider"]}
+{"stage":3,"id":"border-03","winner":null,"seconds":120,"playerBaseRatio":1,"enemyBaseRatio":0.385,"supply":57,"supplyLevel":1,"targetSupplyLevel":1,"firstSpawnSeconds":0,"spawns":26,"upgrades":0,"cannons":4,"longestEnemyPressureNoPlayerSeconds":1.4,"seenPlayerIds":["militia","hunter"],"seenEnemyIds":["enemy-raider","enemy-spearman","enemy-sprinter"]}
+{"stage":4,"id":"border-04","winner":"ENEMY","seconds":78.3,"playerBaseRatio":0,"enemyBaseRatio":0.988,"supply":32,"supplyLevel":1,"targetSupplyLevel":1,"firstSpawnSeconds":0,"spawns":20,"upgrades":0,"cannons":3,"longestEnemyPressureNoPlayerSeconds":1.8,"seenPlayerIds":["militia","hunter"],"seenEnemyIds":["enemy-shield","enemy-raider","enemy-spearman"]}
+{"stage":5,"id":"border-05","winner":"ENEMY","seconds":112.7,"playerBaseRatio":0,"enemyBaseRatio":1,"supply":15,"supplyLevel":1,"targetSupplyLevel":1,"firstSpawnSeconds":0,"spawns":28,"upgrades":0,"cannons":4,"longestEnemyPressureNoPlayerSeconds":2.5,"seenPlayerIds":["militia","duelist"],"seenEnemyIds":["enemy-raider","enemy-cultist","enemy-shield"]}
+{"stage":6,"id":"border-06","winner":"PLAYER","seconds":158.6,"playerBaseRatio":1,"enemyBaseRatio":0,"supply":142,"supplyLevel":1,"targetSupplyLevel":1,"firstSpawnSeconds":0,"spawns":37,"upgrades":0,"cannons":4,"longestEnemyPressureNoPlayerSeconds":0,"seenPlayerIds":["militia","guard","duelist"],"seenEnemyIds":["enemy-sprinter","enemy-shield","enemy-raider"]}
+{"stage":7,"id":"border-07","winner":"PLAYER","seconds":108.8,"playerBaseRatio":1,"enemyBaseRatio":0,"supply":228,"supplyLevel":1,"targetSupplyLevel":1,"firstSpawnSeconds":0,"spawns":17,"upgrades":0,"cannons":3,"longestEnemyPressureNoPlayerSeconds":0,"seenPlayerIds":["militia","lancer"],"seenEnemyIds":["enemy-raider","enemy-sniper","enemy-sprinter"]}
+{"stage":8,"id":"border-08","winner":"ENEMY","seconds":86.6,"playerBaseRatio":0,"enemyBaseRatio":1,"supply":25,"supplyLevel":2,"targetSupplyLevel":2,"firstSpawnSeconds":0,"spawns":27,"upgrades":1,"cannons":3,"longestEnemyPressureNoPlayerSeconds":2.7,"seenPlayerIds":["militia"],"seenEnemyIds":["enemy-shield","enemy-spearman","enemy-cultist"]}
+{"stage":9,"id":"border-09","winner":"ENEMY","seconds":58.5,"playerBaseRatio":0,"enemyBaseRatio":0.98,"supply":35,"supplyLevel":2,"targetSupplyLevel":2,"firstSpawnSeconds":0,"spawns":19,"upgrades":1,"cannons":2,"longestEnemyPressureNoPlayerSeconds":2.4,"seenPlayerIds":["militia"],"seenEnemyIds":["enemy-cultist","enemy-raider","enemy-shield"]}
+{"stage":10,"id":"border-10","winner":"ENEMY","seconds":77.5,"playerBaseRatio":0,"enemyBaseRatio":1,"supply":12,"supplyLevel":2,"targetSupplyLevel":2,"firstSpawnSeconds":0,"spawns":24,"upgrades":1,"cannons":3,"longestEnemyPressureNoPlayerSeconds":2.1,"seenPlayerIds":["militia","guard"],"seenEnemyIds":["enemy-raider","enemy-knight","enemy-spearman","enemy-sniper"]}
+{"stage":11,"id":"border-11","winner":"ENEMY","seconds":134.6,"playerBaseRatio":0,"enemyBaseRatio":1,"supply":47,"supplyLevel":2,"targetSupplyLevel":2,"firstSpawnSeconds":0,"spawns":45,"upgrades":1,"cannons":4,"longestEnemyPressureNoPlayerSeconds":2.8,"seenPlayerIds":["militia","guard"],"seenEnemyIds":["enemy-shield","enemy-sniper","enemy-sprinter"]}
+{"stage":12,"id":"border-12","winner":"ENEMY","seconds":56.4,"playerBaseRatio":0,"enemyBaseRatio":1,"supply":26,"supplyLevel":2,"targetSupplyLevel":2,"firstSpawnSeconds":0,"spawns":19,"upgrades":1,"cannons":2,"longestEnemyPressureNoPlayerSeconds":2.9,"seenPlayerIds":["militia","guard"],"seenEnemyIds":["enemy-sprinter","enemy-berserker","enemy-spearman"]}
+{"stage":13,"id":"border-13","winner":"ENEMY","seconds":71.3,"playerBaseRatio":0,"enemyBaseRatio":0.99,"supply":45,"supplyLevel":2,"targetSupplyLevel":2,"firstSpawnSeconds":0,"spawns":23,"upgrades":1,"cannons":2,"longestEnemyPressureNoPlayerSeconds":2.1,"seenPlayerIds":["militia","guard"],"seenEnemyIds":["enemy-knight","enemy-cultist","enemy-sprinter"]}
+{"stage":14,"id":"border-14","winner":"ENEMY","seconds":81,"playerBaseRatio":0,"enemyBaseRatio":1,"supply":17,"supplyLevel":2,"targetSupplyLevel":2,"firstSpawnSeconds":0,"spawns":22,"upgrades":1,"cannons":3,"longestEnemyPressureNoPlayerSeconds":3.1,"seenPlayerIds":["militia","guard"],"seenEnemyIds":["enemy-shield","enemy-sniper","enemy-berserker"]}
+{"stage":15,"id":"border-15","winner":"ENEMY","seconds":45.1,"playerBaseRatio":0,"enemyBaseRatio":1,"supply":8,"supplyLevel":2,"targetSupplyLevel":2,"firstSpawnSeconds":0,"spawns":15,"upgrades":1,"cannons":2,"longestEnemyPressureNoPlayerSeconds":2.9,"seenPlayerIds":["militia"],"seenEnemyIds":["enemy-berserker","enemy-shield","enemy-cultist"]}
+{"stage":16,"id":"border-16","winner":"ENEMY","seconds":90.5,"playerBaseRatio":0,"enemyBaseRatio":1,"supply":48,"supplyLevel":2,"targetSupplyLevel":2,"firstSpawnSeconds":0,"spawns":27,"upgrades":1,"cannons":3,"longestEnemyPressureNoPlayerSeconds":2.7,"seenPlayerIds":["militia","guard"],"seenEnemyIds":["enemy-shield","enemy-sniper","enemy-knight","enemy-cultist"]}
+{"stage":17,"id":"border-17","winner":"ENEMY","seconds":41.8,"playerBaseRatio":0,"enemyBaseRatio":1,"supply":16,"supplyLevel":2,"targetSupplyLevel":3,"firstSpawnSeconds":0,"spawns":13,"upgrades":1,"cannons":1,"longestEnemyPressureNoPlayerSeconds":2.2,"seenPlayerIds":["militia","guard"],"seenEnemyIds":["enemy-berserker","enemy-sprinter","enemy-knight"]}
+{"stage":18,"id":"border-18","winner":"ENEMY","seconds":82,"playerBaseRatio":0,"enemyBaseRatio":1,"supply":35,"supplyLevel":3,"targetSupplyLevel":3,"firstSpawnSeconds":0,"spawns":27,"upgrades":2,"cannons":3,"longestEnemyPressureNoPlayerSeconds":2.2,"seenPlayerIds":["militia","guard"],"seenEnemyIds":["enemy-raider","enemy-shield","enemy-sniper","enemy-berserker"]}
+{"stage":19,"id":"border-19","winner":"ENEMY","seconds":91.4,"playerBaseRatio":0,"enemyBaseRatio":1,"supply":2,"supplyLevel":3,"targetSupplyLevel":3,"firstSpawnSeconds":0,"spawns":33,"upgrades":2,"cannons":3,"longestEnemyPressureNoPlayerSeconds":2.1,"seenPlayerIds":["militia","guard"],"seenEnemyIds":["enemy-cultist","enemy-knight","enemy-sniper","enemy-boss"]}
+{"stage":20,"id":"border-20","winner":"ENEMY","seconds":74.2,"playerBaseRatio":0,"enemyBaseRatio":1,"supply":23,"supplyLevel":3,"targetSupplyLevel":3,"firstSpawnSeconds":0,"spawns":28,"upgrades":2,"cannons":2,"longestEnemyPressureNoPlayerSeconds":2.2,"seenPlayerIds":["militia"],"seenEnemyIds":["enemy-shield","enemy-berserker","enemy-sniper","enemy-boss","enemy-boss-iron"]}
+(node:2799) ExperimentalWarning: Transform Types is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
 
 == build tail ==
 
@@ -411,9 +90,9 @@ transforming...
 rendering chunks...
 computing gzip size...
 dist/index.html                    1.79 kB │ gzip:   0.99 kB
-dist/assets/index-VSvmxqwN.js  1,478.14 kB │ gzip: 387.85 kB
+dist/assets/index-lUxrLANq.js  1,478.17 kB │ gzip: 387.87 kB
 
-[32m✓ built in 839ms[39m
+[32m✓ built in 669ms[39m
 [33m[plugin builtin:vite-reporter] 
 (!) Some chunks are larger than 500 kB after minification. Consider:
 - Using dynamic import() to code-split the application
