@@ -141,6 +141,29 @@ test('compact two-row summon and right-side control hitboxes stay inside the bot
   assert.ok(lastUnitRight < controlLeft, `expected horizontal gap, got last unit right ${lastUnitRight} and control left ${controlLeft}`);
 });
 
+test('compact navigation buttons stay finger-sized across stage, deck, battle pause, and result screens', async () => {
+  const source = await readMain();
+  const stageStart = source.indexOf('class StageSelectScene');
+  const deckStart = source.indexOf('class DeckScene');
+  const battleStart = source.indexOf('class BattleScene');
+  const resultStart = source.indexOf('class ResultScene');
+  assert.ok(stageStart >= 0 && deckStart > stageStart && battleStart > deckStart && resultStart > battleStart);
+
+  const stageBlock = source.slice(stageStart, deckStart);
+  const deckBlock = source.slice(deckStart, battleStart);
+  const battleBlock = source.slice(battleStart, resultStart);
+  assert.match(stageBlock, /compact \? 84 : 50/);
+  assert.match(stageBlock, /compact \? 84 : 52/);
+  assert.match(stageBlock, /compact \? 84 : 52, unlocked/);
+  assert.match(deckBlock, /compact \? 84 : 50/);
+  assert.match(battleBlock, /compact \? 80 : 42, '일시정지'/);
+  assert.match(battleBlock, /isCompactMobileViewport\(\) \? 84 : 58, '계 속'/);
+
+  const scaleAt390High = 390 / 720;
+  assert.ok(84 * scaleAt390High >= 44);
+  assert.ok(80 * scaleAt390High >= 43);
+});
+
 test('stage and deck cards keep desktop detail while compact mobile renders a reduced high-priority information set', async () => {
   const source = await readMain();
   const stageStart = source.indexOf('class StageSelectScene');
@@ -207,6 +230,15 @@ test('shared buttons recover from touch or pointer cancellation instead of stayi
   assert.match(buttonBlock, /container\.setScale\(1\);/);
   assert.match(buttonBlock, /bg\.on\('pointerupoutside', \(\) => container\.setScale\(1\)\);/);
   assert.match(buttonBlock, /bg\.on\('pointerdown', \(\) => container\.setScale\(0\.98\)\);/);
+});
+
+test('Phaser uses smooth filtering for the current non-pixel-art character sheets', async () => {
+  const source = await readMain();
+  assert.match(source, /antialias:\s*true/);
+  assert.match(source, /pixelArt:\s*false/);
+  assert.match(source, /roundPixels:\s*false/);
+  assert.doesNotMatch(source, /pixelArt:\s*true/);
+  assert.doesNotMatch(source, /roundPixels:\s*true/);
 });
 
 test('stage cards render the restored twelve-step difficulty scale without legacy five-star overflow', async () => {
