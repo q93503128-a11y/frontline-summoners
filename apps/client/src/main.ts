@@ -185,11 +185,11 @@ class StageSelectScene extends Phaser.Scene {
   create(): void {
     drawBackdrop(this, 'map');
     addText(this, 54, 38, '제1장 · 뒤집힌 국경', 42, COLORS.cream);
-    addText(this, 56, 91, '20개 전장 · 5개씩 보기', 19, COLORS.muted);
+    addText(this, 56, 91, '20개 전장 · 5개씩 보기', isCompactMobileViewport() ? 22 : 19, COLORS.muted);
     addButton(this, 1165, 65, 160, 50, '메인', () => this.scene.start('main-menu'), 0x586275);
     addButton(this, 72, 655, 115, 52, '◀ 이전', () => { this.page = Math.max(0, this.page - 1); this.renderPage(); }, 0x586275);
     addButton(this, 1208, 655, 115, 52, '다음 ▶', () => { this.page = Math.min(Math.ceil(STAGES.length / 5) - 1, this.page + 1); this.renderPage(); }, 0x586275);
-    this.pageText = addText(this, INTERNAL_WIDTH / 2, 640, '', 18, '#9ca9bb', 'center').setOrigin(0.5);
+    this.pageText = addText(this, INTERNAL_WIDTH / 2, 640, '', isCompactMobileViewport() ? 22 : 18, '#9ca9bb', 'center').setOrigin(0.5);
 
     this.renderPage();
     void loadGuestProgress().then((progress) => {
@@ -204,6 +204,7 @@ class StageSelectScene extends Phaser.Scene {
   private renderPage(): void {
     this.stageLayer?.destroy(true);
     this.stageLayer = this.add.container(0, 0);
+    const compact = isCompactMobileViewport();
     const start = this.page * 5;
     const visible = STAGES.slice(start, start + 5);
     this.pageText?.setText(`${this.page + 1} / ${Math.ceil(STAGES.length / 5)}`);
@@ -217,22 +218,29 @@ class StageSelectScene extends Phaser.Scene {
       const border = unlocked ? (index === STAGES.length - 1 ? 0xbf9252 : 0x596c86) : 0x3c4554;
       const card = this.add.rectangle(x, 360, 220, 445, unlocked ? 0x242b3a : 0x1d222c, 0.98).setStrokeStyle(3, border, 1);
       this.stageLayer!.add(card);
-      this.stageLayer!.add(addText(this, x, 160, `STAGE ${index + 1}`, 16, unlocked ? '#8998ad' : '#5f6978', 'center').setOrigin(0.5));
-      this.stageLayer!.add(addText(this, x, 202, stage.name, 25, unlocked ? '#ffffff' : '#747d89', 'center').setOrigin(0.5).setWordWrapWidth(195));
-      this.stageLayer!.add(addText(this, x, 246, `난이도 ${stage.difficulty} / 12`, 16, unlocked ? COLORS.gold : '#5e6470', 'center').setOrigin(0.5));
-      this.stageLayer!.add(addText(this, x, 282, BATTLEFIELD_THEME_LABELS[stage.theme], 16, unlocked ? '#9ec5d7' : '#606874', 'center').setOrigin(0.5));
-      this.stageLayer!.add(addText(this, x, 310, `전장 ${stage.mapLength}m`, 14, unlocked ? '#aeb8c8' : '#59616d', 'center').setOrigin(0.5));
-      this.stageLayer!.add(addText(this, x, 346, stage.subtitle, 14, unlocked ? '#c4cbd7' : '#626a76', 'center').setOrigin(0.5).setWordWrapWidth(194));
-      this.stageLayer!.add(addText(this, x, 401, cleared ? '✓ 클리어' : unlocked ? '미클리어' : '잠김', 17, cleared ? '#8ee3aa' : unlocked ? '#a3adbb' : '#6b7480', 'center').setOrigin(0.5));
-      this.stageLayer!.add(addText(this, x, 434, '확정 보물', 14, unlocked ? '#8dd9a8' : '#596a60', 'center').setOrigin(0.5));
-      this.stageLayer!.add(addText(this, x, 458, treasureOwned ? `✓ ${stage.treasure.name}` : stage.treasure.name, 14, treasureOwned ? '#9fe4b5' : unlocked ? '#f2d37c' : '#6d6858', 'center').setOrigin(0.5).setWordWrapWidth(196));
+      this.stageLayer!.add(addText(this, x, 160, `STAGE ${index + 1}`, compact ? 20 : 16, unlocked ? '#8998ad' : '#5f6978', 'center').setOrigin(0.5));
+      this.stageLayer!.add(addText(this, x, compact ? 205 : 202, stage.name, compact ? 28 : 25, unlocked ? '#ffffff' : '#747d89', 'center').setOrigin(0.5).setWordWrapWidth(195));
+      this.stageLayer!.add(addText(this, x, compact ? 252 : 246, `난이도 ${stage.difficulty} / 12`, compact ? 21 : 16, unlocked ? COLORS.gold : '#5e6470', 'center').setOrigin(0.5));
+
+      if (compact) {
+        this.stageLayer!.add(addText(this, x, 302, cleared ? '✓ 클리어' : unlocked ? '미클리어' : '잠김', 22, cleared ? '#8ee3aa' : unlocked ? '#a3adbb' : '#6b7480', 'center').setOrigin(0.5));
+        this.stageLayer!.add(addText(this, x, 350, '확정 보물', 19, unlocked ? '#8dd9a8' : '#596a60', 'center').setOrigin(0.5));
+        this.stageLayer!.add(addText(this, x, 386, treasureOwned ? `✓ ${stage.treasure.name}` : stage.treasure.name, 20, treasureOwned ? '#9fe4b5' : unlocked ? '#f2d37c' : '#6d6858', 'center').setOrigin(0.5).setWordWrapWidth(196));
+      } else {
+        this.stageLayer!.add(addText(this, x, 282, BATTLEFIELD_THEME_LABELS[stage.theme], 16, unlocked ? '#9ec5d7' : '#606874', 'center').setOrigin(0.5));
+        this.stageLayer!.add(addText(this, x, 310, `전장 ${stage.mapLength}m`, 14, unlocked ? '#aeb8c8' : '#59616d', 'center').setOrigin(0.5));
+        this.stageLayer!.add(addText(this, x, 346, stage.subtitle, 14, unlocked ? '#c4cbd7' : '#626a76', 'center').setOrigin(0.5).setWordWrapWidth(194));
+        this.stageLayer!.add(addText(this, x, 401, cleared ? '✓ 클리어' : unlocked ? '미클리어' : '잠김', 17, cleared ? '#8ee3aa' : unlocked ? '#a3adbb' : '#6b7480', 'center').setOrigin(0.5));
+        this.stageLayer!.add(addText(this, x, 434, '확정 보물', 14, unlocked ? '#8dd9a8' : '#596a60', 'center').setOrigin(0.5));
+        this.stageLayer!.add(addText(this, x, 458, treasureOwned ? `✓ ${stage.treasure.name}` : stage.treasure.name, 14, treasureOwned ? '#9fe4b5' : unlocked ? '#f2d37c' : '#6d6858', 'center').setOrigin(0.5).setWordWrapWidth(196));
+      }
 
       if (stage.unlockUnitId) {
         const slot = getSlotById(stage.unlockUnitId);
-        if (slot) this.stageLayer!.add(addText(this, x, 503, `첫 클리어 동료 · ${slot.displayName}`, 14, cleared ? '#8ee3aa' : unlocked ? '#a8cfff' : '#59616d', 'center').setOrigin(0.5));
+        if (slot) this.stageLayer!.add(addText(this, x, compact ? 445 : 503, compact ? `동료 · ${slot.displayName}` : `첫 클리어 동료 · ${slot.displayName}`, compact ? 19 : 14, cleared ? '#8ee3aa' : unlocked ? '#a8cfff' : '#59616d', 'center').setOrigin(0.5));
       }
 
-      const button = addButton(this, x, 548, 174, 52, unlocked ? '전투 시작' : '이전 스테이지 필요', () => {
+      const button = addButton(this, x, compact ? 535 : 548, 174, compact ? 68 : 52, unlocked ? '전투 시작' : compact ? '잠김' : '이전 스테이지 필요', () => {
         if (unlocked) this.scene.start('battle', { stageId: stage.id });
       }, unlocked ? (index === STAGES.length - 1 ? 0xbf9252 : 0x5e7ea0) : 0x3f4855);
       if (!unlocked) button.setAlpha(0.62);
@@ -250,7 +258,7 @@ class DeckScene extends Phaser.Scene {
   create(): void {
     drawBackdrop(this, 'map');
     this.header = addText(this, 60, 42, '편성 불러오는 중…', 38, COLORS.cream);
-    addText(this, 62, 92, '처음에는 징집병 1종만 보유한다. 캠페인 첫 클리어 보상으로 동료가 순서대로 합류한다.', 18, COLORS.muted);
+    addText(this, 62, 92, isCompactMobileViewport() ? '보유 동료 · 현재는 자동 편성' : '처음에는 징집병 1종만 보유한다. 캠페인 첫 클리어 보상으로 동료가 순서대로 합류한다.', isCompactMobileViewport() ? 22 : 18, COLORS.muted);
     addButton(this, 1165, 65, 160, 50, '메인', () => this.scene.start('main-menu'), 0x586275);
     void loadGuestProgress().then((progress) => {
       if (!this.scene.isActive()) return;
@@ -261,6 +269,7 @@ class DeckScene extends Phaser.Scene {
   private renderRoster(progress: GuestProgress): void {
     this.cardsLayer?.destroy(true);
     this.cardsLayer = this.add.container(0, 0);
+    const compact = isCompactMobileViewport();
     const unlockedIds = new Set(getUnlockedSlotIds(progress.clearedStageIds));
     this.header?.setText(`현재 보유 · ${unlockedIds.size} / ${PLAYER_SLOTS.length}   ·   자동 편성 ${unlockedIds.size} / 10`);
 
@@ -274,21 +283,21 @@ class DeckScene extends Phaser.Scene {
       const card = this.add.rectangle(x, y, 220, 244, unlocked ? 0x252c3a : 0x1d222b, 0.98).setStrokeStyle(3, border, unlocked ? 0.85 : 0.65);
       this.cardsLayer!.add(card);
       const art = familyForUnit(slot.definition.id);
-      const portrait = this.add.sprite(x, y - 58, art.family.idle.key, 0).setTint(unlocked ? art.tint : 0x30343c).setAlpha(unlocked ? 1 : 0.5);
-      portrait.setScale((152 / art.family.idle.frameHeight) * art.displayScale);
+      const portrait = this.add.sprite(x, compact ? y - 63 : y - 58, art.family.idle.key, 0).setTint(unlocked ? art.tint : 0x30343c).setAlpha(unlocked ? 1 : 0.5);
+      portrait.setScale(((compact ? 135 : 152) / art.family.idle.frameHeight) * art.displayScale);
       this.cardsLayer!.add(portrait);
-      this.cardsLayer!.add(addText(this, x - 94, y - 102, unlocked ? slot.rarity : 'LOCK', 15, unlocked ? (rarityColor[slot.rarity] ?? '#ffffff') : '#656d78'));
-      this.cardsLayer!.add(addText(this, x, y + 4, unlocked ? slot.displayName : '미해금', 22, unlocked ? '#ffffff' : '#78818d', 'center').setOrigin(0.5));
+      this.cardsLayer!.add(addText(this, x - 94, y - 102, unlocked ? slot.rarity : 'LOCK', compact ? 20 : 15, unlocked ? (rarityColor[slot.rarity] ?? '#ffffff') : '#656d78'));
+      this.cardsLayer!.add(addText(this, x, compact ? y + 8 : y + 4, unlocked ? slot.displayName : '미해금', compact ? 27 : 22, unlocked ? '#ffffff' : '#78818d', 'center').setOrigin(0.5));
       if (unlocked) {
-        this.cardsLayer!.add(addText(this, x, y + 34, `${slot.role} · ${slot.cost} 보급`, 15, '#f2d37c', 'center').setOrigin(0.5));
-        this.cardsLayer!.add(addText(this, x, y + 57, formatCombatTraits(slot.definition), 14, '#9fcfff', 'center').setOrigin(0.5));
+        this.cardsLayer!.add(addText(this, x, compact ? y + 44 : y + 34, `${slot.role} · ${slot.cost} 보급`, compact ? 20 : 15, '#f2d37c', 'center').setOrigin(0.5));
+        this.cardsLayer!.add(addText(this, x, compact ? y + 76 : y + 57, formatCombatTraits(slot.definition), compact ? 18 : 14, '#9fcfff', 'center').setOrigin(0.5));
         const specialty = formatDamageSpecialty(slot.definition);
-        if (specialty) this.cardsLayer!.add(addText(this, x, y + 78, specialty, 14, '#ffd493', 'center').setOrigin(0.5));
-        this.cardsLayer!.add(addText(this, x, y + (specialty ? 103 : 84), slot.description, 13, '#b9c2d0', 'center').setOrigin(0.5).setWordWrapWidth(190));
+        if (specialty) this.cardsLayer!.add(addText(this, x, compact ? y + 104 : y + 78, specialty, compact ? 18 : 14, '#ffd493', 'center').setOrigin(0.5));
+        if (!compact) this.cardsLayer!.add(addText(this, x, y + (specialty ? 103 : 84), slot.description, 13, '#b9c2d0', 'center').setOrigin(0.5).setWordWrapWidth(190));
       } else {
         const unlockStage = getUnlockStageForSlot(slot.slotId);
         const requirement = unlockStage ? `STAGE ${getStageNumber(unlockStage.id)} 첫 클리어\n${unlockStage.name}` : '캠페인 진행으로 해금';
-        this.cardsLayer!.add(addText(this, x, y + 46, requirement, 14, '#727c89', 'center').setOrigin(0.5).setWordWrapWidth(190));
+        this.cardsLayer!.add(addText(this, x, compact ? y + 62 : y + 46, requirement, compact ? 19 : 14, '#727c89', 'center').setOrigin(0.5).setWordWrapWidth(190));
       }
     });
   }
