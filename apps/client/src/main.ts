@@ -21,19 +21,23 @@ import { formatCombatTraits, formatCompactTraits, formatDamageSpecialty } from '
 import { getProjectileArcOffsetY, getProjectileTravelPlan, usesTravelProjectile } from './projectile-visuals';
 import {
   PLAYER_SLOTS,
+  SPECIAL_STAGES,
   STAGES,
   createPrototypeBattle,
   getSlotById,
+  getSpecialStageNumber,
   getStage,
   getStageNumber,
   getUnlockStageForSlot,
   getUnlockedPlayerSlots,
   getUnlockedSlotIds,
+  isBattleStageUnlocked,
+  isSpecialStageUnlocked,
   isStageUnlocked,
   type PrototypeRosterSlot,
   type PrototypeStage,
 } from './prototype';
-import { loadGuestProgress, recordStageClear, type GuestProgress } from './save';
+import { loadGuestProgress, recordSpecialStageClear, recordStageClear, type GuestProgress } from './save';
 import { selectVisibleTraitLabelIds } from './trait-label-visibility';
 import { isCompactMobileViewport, isPortraitMobileViewport } from './viewport';
 
@@ -51,7 +55,7 @@ const COLORS = {
   muted: '#b8c0ce',
 };
 
-const EMPTY_PROGRESS: GuestProgress = { clearedStageIds: [], treasureIds: [] };
+const EMPTY_PROGRESS: GuestProgress = { clearedStageIds: [], specialClearedStageIds: [], treasureIds: [] };
 const rarityColor: Record<string, string> = {
   C: '#b9c2cf', B: '#8bd6a3', A: '#79baff', S: '#d79aff', SS: '#ffd56f',
 };
@@ -162,15 +166,15 @@ class MainMenuScene extends Phaser.Scene {
     addButton(this, 230, compact ? 425 : 435, 310, menuButtonHeight, '출 정', () => this.scene.start('stage-select'), 0xc5a04c);
     addButton(this, 575, compact ? 425 : 435, 310, menuButtonHeight, '편 성', () => this.scene.start('deck'), 0x5f8fb8);
     addButton(this, 920, compact ? 425 : 435, 310, menuButtonHeight, '도 감', () => this.scene.start('catalog'), 0x8c7650);
-    addText(this, compact ? 74 : 88, compact ? 610 : 628, compact ? '보물 첫 클리어 100% · 에너지 제한 없음' : '보물 첫 클리어 100% · 스테이지 순차 개방 · 에너지 제한 없음', compact ? 24 : 20, '#9cd6ad');
+    addText(this, compact ? 74 : 88, compact ? 610 : 628, compact ? '보물 첫 클리어 100% · 에너지 제한 없음' : '보물 첫 클리어 100% · 제1장 완료 후 특수전 개방 · 에너지 제한 없음', compact ? 24 : 20, '#9cd6ad');
     if (!compact) addText(this, 1185, 675, 'PRE-ALPHA', 17, '#657086').setOrigin(1, 0.5);
 
     void loadGuestProgress().then((progress) => {
       if (!this.scene.isActive()) return;
       const unlocked = getUnlockedPlayerSlots(progress.clearedStageIds).length;
       progressText.setText(compact
-        ? `클리어 ${progress.clearedStageIds.length}/${STAGES.length} · 보물 ${progress.treasureIds.length} · 동료 ${unlocked}`
-        : `클리어 ${progress.clearedStageIds.length}/${STAGES.length} · 보물 ${progress.treasureIds.length}/${STAGES.length} · 동료 ${unlocked}/${PLAYER_SLOTS.length}`);
+        ? `진도 ${progress.clearedStageIds.length}/${STAGES.length} · 특수 ${progress.specialClearedStageIds.length}/${SPECIAL_STAGES.length} · 동료 ${unlocked}`
+        : `진도 ${progress.clearedStageIds.length}/${STAGES.length} · 특수 ${progress.specialClearedStageIds.length}/${SPECIAL_STAGES.length} · 보물 ${progress.treasureIds.length}/${STAGES.length} · 동료 ${unlocked}/${PLAYER_SLOTS.length}`);
     });
   }
 }
@@ -187,7 +191,8 @@ class StageSelectScene extends Phaser.Scene {
     drawBackdrop(this, 'map');
     const compact = isCompactMobileViewport();
     addText(this, 54, 38, '제1장 · 뒤집힌 국경', 42, COLORS.cream);
-    addText(this, 56, 91, '20개 전장 · 5개씩 보기', compact ? 22 : 19, COLORS.muted);
+    addText(this, 56, 91, compact ? '20개 진도 전장' : '20개 진도 전장 · 첫 장 완료 후 특수전 개방', compact ? 22 : 19, COLORS.muted);
+    addButton(this, 995, compact ? 70 : 65, 150, compact ? 84 : 50, '특수전', () => this.scene.start('special-select'), 0x80659b);
     addButton(this, 1165, compact ? 70 : 65, 160, compact ? 84 : 50, '메인', () => this.scene.start('main-menu'), 0x586275);
     addButton(this, 72, 655, 115, compact ? 84 : 52, '◀ 이전', () => { this.page = Math.max(0, this.page - 1); this.renderPage(); }, 0x586275);
     addButton(this, 1208, 655, 115, compact ? 84 : 52, '다음 ▶', () => { this.page = Math.min(Math.ceil(STAGES.length / 5) - 1, this.page + 1); this.renderPage(); }, 0x586275);
@@ -248,6 +253,78 @@ class StageSelectScene extends Phaser.Scene {
       if (!unlocked) button.setAlpha(0.62);
       this.stageLayer!.add(button);
     });
+  }
+}
+
+class SpecialStageSelectScene extends Phaser.Scene {
+  private progress: GuestProgress = EMPTY_PROGRESS;
+  private stageLayer?: Phaser.GameObjects.Container;
+
+  constructor() { super('special-select'); }
+
+  create(): void {
+    drawBackdrop(this, 'map');
+    const compact = isCompactMobileViewport();
+    addText(this, 54, 38, '특수전 · 뒤집힌 국경', 42, COLORS.cream);
+    addText(this, 56, 91, compact ? '제1장 완료 후 열리는 5개 도전' : '메인 진도와 별도인 선택형 도전 · 제1장 완료 후 5개 동시 개방', compact ? 22 : 19, COLORS.muted);
+    addButton(this, 995, compact ? 70 : 65, 150, compact ? 84 : 50, '진도', () => this.scene.start('stage-select'), 0x5e7ea0);
+    addButton(this, 1165, compact ? 70 : 65, 160, compact ? 84 : 50, '메인', () => this.scene.start('main-menu'), 0x586275);
+
+    this.renderStages();
+    void loadGuestProgress().then((progress) => {
+      if (!this.scene.isActive()) return;
+      this.progress = progress;
+      this.renderStages();
+    });
+  }
+
+  private renderStages(): void {
+    this.stageLayer?.destroy(true);
+    this.stageLayer = this.add.container(0, 0);
+    const compact = isCompactMobileViewport();
+    const fullChapter = this.progress.clearedStageIds.length === STAGES.length;
+
+    SPECIAL_STAGES.forEach((stage, index) => {
+      const x = 145 + index * 247;
+      const unlocked = isSpecialStageUnlocked(stage.id, this.progress.clearedStageIds);
+      const cleared = this.progress.specialClearedStageIds.includes(stage.id);
+      const border = unlocked ? (index === SPECIAL_STAGES.length - 1 ? 0xc28bcb : 0x80659b) : 0x3c4554;
+      const card = this.add.rectangle(x, 360, 220, 445, unlocked ? 0x2b2535 : 0x1d222c, 0.98).setStrokeStyle(3, border, 1);
+      this.stageLayer!.add(card);
+      this.stageLayer!.add(addText(this, x, 160, `SPECIAL ${index + 1}`, compact ? 20 : 16, unlocked ? '#bba4d0' : '#5f6978', 'center').setOrigin(0.5));
+      this.stageLayer!.add(addText(this, x, compact ? 205 : 202, stage.name, compact ? 28 : 25, unlocked ? '#ffffff' : '#747d89', 'center').setOrigin(0.5).setWordWrapWidth(195));
+      this.stageLayer!.add(addText(this, x, compact ? 252 : 246, `난이도 ${stage.difficulty} / 12`, compact ? 21 : 16, unlocked ? '#efb6ff' : '#5e6470', 'center').setOrigin(0.5));
+
+      if (compact) {
+        this.stageLayer!.add(addText(this, x, 302, cleared ? '✓ 클리어' : unlocked ? '도전 가능' : '잠김', 22, cleared ? '#8ee3aa' : unlocked ? '#d4b7e7' : '#6b7480', 'center').setOrigin(0.5));
+        const effectiveCap = unlocked
+          ? createPrototypeBattle(stage.id, getUnlockedSlotIds(this.progress.clearedStageIds), this.progress.treasureIds).playerUnitCap
+          : stage.playerUnitCap;
+        this.stageLayer!.add(addText(this, x, 350, unlocked ? `동시 출격 ${effectiveCap}기` : '제1장 완료 필요', 20, unlocked ? '#ffd493' : '#6d6858', 'center').setOrigin(0.5));
+        this.stageLayer!.add(addText(this, x, 402, cleared ? `✓ ${stage.treasure.name}` : stage.treasure.name, 19, cleared ? '#9fe4b5' : unlocked ? '#e2ca8d' : '#6d6858', 'center').setOrigin(0.5).setWordWrapWidth(196));
+      } else {
+        this.stageLayer!.add(addText(this, x, 282, BATTLEFIELD_THEME_LABELS[stage.theme], 16, unlocked ? '#bba8ca' : '#606874', 'center').setOrigin(0.5));
+        this.stageLayer!.add(addText(this, x, 310, `전장 ${stage.mapLength}m`, 14, unlocked ? '#aeb8c8' : '#59616d', 'center').setOrigin(0.5));
+        this.stageLayer!.add(addText(this, x, 346, stage.subtitle, 14, unlocked ? '#d0c6da' : '#626a76', 'center').setOrigin(0.5).setWordWrapWidth(194));
+        this.stageLayer!.add(addText(this, x, 401, cleared ? '✓ 클리어' : unlocked ? '도전 가능' : '잠김', 17, cleared ? '#8ee3aa' : unlocked ? '#cdb1df' : '#6b7480', 'center').setOrigin(0.5));
+        const effectiveCap = unlocked
+          ? createPrototypeBattle(stage.id, getUnlockedSlotIds(this.progress.clearedStageIds), this.progress.treasureIds).playerUnitCap
+          : stage.playerUnitCap;
+        this.stageLayer!.add(addText(this, x, 432, unlocked ? `동시 출격 ${effectiveCap}기 · 적 최대 ${stage.enemyUnitCap}기` : '제1장 20스테이지 완료 후 개방', 14, unlocked ? '#ffd493' : '#666d78', 'center').setOrigin(0.5).setWordWrapWidth(196));
+        this.stageLayer!.add(addText(this, x, 474, cleared ? `✓ ${stage.treasure.name}` : `첫 클리어 훈장 · ${stage.treasure.name}`, 13, cleared ? '#9fe4b5' : unlocked ? '#e2ca8d' : '#6d6858', 'center').setOrigin(0.5).setWordWrapWidth(196));
+      }
+
+      const button = addButton(this, x, compact ? 535 : 548, 174, compact ? 84 : 52, unlocked ? '도전 시작' : compact ? '잠김' : '제1장 완료 필요', () => {
+        if (unlocked) this.scene.start('battle', { stageId: stage.id });
+      }, unlocked ? (index === SPECIAL_STAGES.length - 1 ? 0xa869b2 : 0x80659b) : 0x3f4855);
+      if (!unlocked) button.setAlpha(0.62);
+      this.stageLayer!.add(button);
+    });
+
+    if (!fullChapter) {
+      const remaining = STAGES.length - this.progress.clearedStageIds.length;
+      this.stageLayer.add(addText(this, INTERNAL_WIDTH / 2, 625, `특수전 개방까지 진도 ${remaining}개 남음`, compact ? 20 : 16, '#8f9aac', 'center').setOrigin(0.5));
+    }
   }
 }
 
@@ -386,8 +463,8 @@ class BattleScene extends Phaser.Scene {
     this.input.keyboard?.on('keydown', (event: KeyboardEvent) => this.handleBattleHotkey(event));
     void loadGuestProgress().then((progress) => {
       if (!this.scene.isActive()) return;
-      if (!isStageUnlocked(this.stage.id, progress.clearedStageIds)) {
-        this.scene.start('stage-select');
+      if (!isBattleStageUnlocked(this.stage.id, progress.clearedStageIds)) {
+        this.scene.start(this.stage.stageType === 'SPECIAL' ? 'special-select' : 'stage-select');
         return;
       }
       this.activeSlots = getUnlockedPlayerSlots(progress.clearedStageIds);
@@ -968,26 +1045,45 @@ class BattleScene extends Phaser.Scene {
 class ResultScene extends Phaser.Scene {
   private stage!: PrototypeStage;
   private winner: string | null = null;
-  private progressionSaved = false;
+  private resultRecorded = false;
 
   constructor() { super('result'); }
 
   init(data: { stageId?: string; winner?: string | null }): void {
     this.stage = getStage(data.stageId ?? STAGES[0]!.id);
     this.winner = data.winner ?? null;
-    this.progressionSaved = false;
+    this.resultRecorded = false;
   }
 
   create(): void {
     drawBackdrop(this, 'menu');
     const victory = this.winner === 'PLAYER';
     const compact = isCompactMobileViewport();
-    this.progressionSaved = !victory;
+    const special = this.stage.stageType === 'SPECIAL';
+    const stageLabel = special ? `SPECIAL ${getSpecialStageNumber(this.stage.id)}` : `STAGE ${getStageNumber(this.stage.id)}`;
+    this.resultRecorded = !victory;
     addText(this, INTERNAL_WIDTH / 2, compact ? 70 : 86, victory ? '승 리' : '패 배', compact ? 56 : 62, victory ? COLORS.gold : COLORS.red, 'center').setOrigin(0.5);
-    addText(this, INTERNAL_WIDTH / 2, compact ? 132 : 148, `STAGE ${getStageNumber(this.stage.id)} · ${this.stage.name}`, compact ? 28 : 25, '#e9edf4', 'center').setOrigin(0.5);
+    addText(this, INTERNAL_WIDTH / 2, compact ? 132 : 148, `${stageLabel} · ${this.stage.name}`, compact ? 28 : 25, '#e9edf4', 'center').setOrigin(0.5);
 
     this.add.rectangle(INTERNAL_WIDTH / 2, compact ? 345 : 355, compact ? 820 : 760, compact ? 360 : 320, 0x242b38, 0.98).setStrokeStyle(3, victory ? 0xb99449 : 0x805151);
-    if (victory) {
+    if (victory && special) {
+      addText(this, INTERNAL_WIDTH / 2, compact ? 210 : 238, '특수전 훈장 획득', compact ? 28 : 23, '#d8b4ef', 'center').setOrigin(0.5);
+      addText(this, INTERNAL_WIDTH / 2, compact ? 264 : 290, this.stage.treasure.name, compact ? 38 : 35, '#f1ceff', 'center').setOrigin(0.5);
+      addText(this, INTERNAL_WIDTH / 2, compact ? 322 : 342, this.stage.subtitle, compact ? 24 : 18, '#c8d0dc', 'center').setOrigin(0.5).setWordWrapWidth(compact ? 720 : 680);
+      addText(this, INTERNAL_WIDTH / 2, compact ? 390 : 395, '메인 진도와 별도 기록 · 반복 파밍 필요 없음', compact ? 24 : 20, '#b9a5c8', 'center').setOrigin(0.5);
+      const status = addText(this, INTERNAL_WIDTH / 2, compact ? 446 : 447, compact ? '특수전 기록 저장 중…' : '특수전 클리어 기록 저장 중…', compact ? 21 : 16, '#8f9aac', 'center').setOrigin(0.5);
+      void recordSpecialStageClear(this.stage.id).then((result) => {
+        this.resultRecorded = true;
+        if (!this.scene.isActive()) return;
+        if (result.persisted) {
+          status.setText(result.firstClear ? '특수전 첫 클리어 저장 완료' : '특수전 재클리어 기록 완료');
+          status.setColor('#8ee3aa');
+        } else {
+          status.setText(compact ? '영구 저장 실패 · 현재 탭 기록 유지' : '브라우저 영구 저장 실패 · 현재 탭에서는 특수전 기록 유지');
+          status.setColor('#ffb37c');
+        }
+      });
+    } else if (victory) {
       addText(this, INTERNAL_WIDTH / 2, compact ? 210 : 238, '확정 보물 획득', compact ? 28 : 23, '#8ee3aa', 'center').setOrigin(0.5);
       addText(this, INTERNAL_WIDTH / 2, compact ? 264 : 290, this.stage.treasure.name, compact ? 38 : 35, '#ffe18a', 'center').setOrigin(0.5);
       addText(this, INTERNAL_WIDTH / 2, compact ? 322 : 342, this.stage.treasure.effect, compact ? 24 : 18, '#c8d0dc', 'center').setOrigin(0.5).setWordWrapWidth(compact ? 720 : 680);
@@ -995,7 +1091,7 @@ class ResultScene extends Phaser.Scene {
       const unlockText = addText(this, INTERNAL_WIDTH / 2, compact ? 390 : 395, unlockSlot ? (compact ? `동료 · ${unlockSlot.displayName}` : `첫 클리어 동료 보상 · ${unlockSlot.displayName}`) : compact ? '동료 해금 없음' : '이번 스테이지는 동료 해금 없음', compact ? 24 : 20, unlockSlot ? '#9ccfff' : '#8f9aac', 'center').setOrigin(0.5);
       const status = addText(this, INTERNAL_WIDTH / 2, compact ? 446 : 447, compact ? '진행 저장 중…' : '진행 저장 중… 잠시만 기다려 주세요', compact ? 21 : 16, '#8f9aac', 'center').setOrigin(0.5);
       void recordStageClear(this.stage.id, this.stage.treasure.id).then((result) => {
-        this.progressionSaved = true;
+        this.resultRecorded = true;
         if (!this.scene.isActive()) return;
         if (result.persisted) {
           status.setText(compact
@@ -1015,12 +1111,12 @@ class ResultScene extends Phaser.Scene {
     }
 
     const guarded = (action: () => void): void => {
-      if (!this.progressionSaved) return;
+      if (!this.resultRecorded) return;
       action();
     };
     const resultButtonHeight = compact ? 84 : 68;
     addButton(this, 380, compact ? 600 : 590, 260, resultButtonHeight, '다시 도전', () => guarded(() => this.scene.start('battle', { stageId: this.stage.id })), 0x6d88a7);
-    addButton(this, 640, compact ? 600 : 590, 220, resultButtonHeight, '스테이지', () => guarded(() => this.scene.start('stage-select')), 0x667185);
+    addButton(this, 640, compact ? 600 : 590, 220, resultButtonHeight, special ? '특수전' : '스테이지', () => guarded(() => this.scene.start(special ? 'special-select' : 'stage-select')), special ? 0x80659b : 0x667185);
     addButton(this, 900, compact ? 600 : 590, 220, resultButtonHeight, '메인', () => guarded(() => this.scene.start('main-menu')), 0x667185);
   }
 }
@@ -1034,7 +1130,7 @@ new Phaser.Game({
   antialias: true,
   pixelArt: false,
   roundPixels: false,
-  scene: [BootScene, MainMenuScene, StageSelectScene, DeckScene, CatalogScene, BattleScene, ResultScene],
+  scene: [BootScene, MainMenuScene, StageSelectScene, SpecialStageSelectScene, DeckScene, CatalogScene, BattleScene, ResultScene],
   scale: {
     mode: Phaser.Scale.FIT,
     autoCenter: Phaser.Scale.CENTER_BOTH,
