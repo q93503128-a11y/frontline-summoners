@@ -8,6 +8,14 @@ import {
   redeemBannerSelection,
   type RecruitmentRandomSource,
 } from '../src/recruitment.ts';
+import {
+  ALL_PLAYER_SLOTS,
+  PLAYER_SLOTS,
+  RECRUITMENT_PLAYER_SLOTS,
+  STAGES,
+  createPrototypeBattle,
+  getUnlockedSlotIds,
+} from '../src/prototype.ts';
 
 class ZeroRandom implements RecruitmentRandomSource {
   nextInt(maxExclusive: number): number {
@@ -22,6 +30,18 @@ test('first recruitment pool is separate from the ten free chapter-one character
   assert.equal(RECRUITMENT_UNITS.length, 15);
   const counts = Object.fromEntries(['C', 'B', 'A', 'S', 'SS'].map((rarity) => [rarity, RECRUITMENT_UNITS.filter((unit) => unit.rarity === rarity).length]));
   assert.deepEqual(counts, { C: 4, B: 4, A: 3, S: 2, SS: 2 });
+});
+
+test('the free campaign roster stays ten while recruitment adds fifteen battle-ready definitions without auto-unlocking them', () => {
+  assert.equal(PLAYER_SLOTS.length, 10);
+  assert.equal(RECRUITMENT_PLAYER_SLOTS.length, 15);
+  assert.equal(ALL_PLAYER_SLOTS.length, 25);
+  const fullChapter = STAGES.map((stage) => stage.id);
+  assert.equal(getUnlockedSlotIds(fullChapter).length, 10);
+  assert.equal(getUnlockedSlotIds(fullChapter).includes('moon-eater'), false);
+
+  const battle = createPrototypeBattle('border-01', ['militia', 'moon-eater'], []);
+  assert.deepEqual(battle.playerSlots.map((slot) => slot.slotId), ['militia', 'moon-eater']);
 });
 
 test('restored recruitment rates are 30/28/24/13/5 and sum to 100 percent', () => {
