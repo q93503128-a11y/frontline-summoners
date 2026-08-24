@@ -113,7 +113,7 @@ export class CatalogScene extends Phaser.Scene {
     const navigationHeight = compact ? 84 : 50;
     const tabHeight = compact ? 84 : 54;
     addText(this, 54, 34, '도 감', 44, '#fff4cf');
-    addText(this, 56, 88, '제1장 동료와 확정 보물을 한곳에서 확인한다.', compact ? 22 : 18, '#b8c0ce');
+    if (!compact) addText(this, 56, 88, '제1장 동료와 확정 보물을 한곳에서 확인한다.', 18, '#b8c0ce');
     addButton(this, 1165, compact ? 70 : 62, 160, navigationHeight, '메인', () => this.scene.start('main-menu'), 0x586275);
 
     this.allyTab = addButton(this, 245, 135, 280, tabHeight, '동료 10종', () => this.setMode('ALLIES'), 0x6d91b5);
