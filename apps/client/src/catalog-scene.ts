@@ -24,6 +24,10 @@ const rarityColor: Record<string, string> = {
   SS: '#ffd56f',
 };
 
+function isCompactMobileViewport(): boolean {
+  return Math.min(window.innerWidth, window.innerHeight) <= 500;
+}
+
 function addText(
   scene: Phaser.Scene,
   x: number,
@@ -33,9 +37,10 @@ function addText(
   color = '#ffffff',
   align: 'left' | 'center' | 'right' = 'left',
 ): Phaser.GameObjects.Text {
+  const renderedSize = isCompactMobileViewport() ? Math.max(size, 16) : size;
   return scene.add.text(x, y, text, {
     fontFamily: FONT,
-    fontSize: `${size}px`,
+    fontSize: `${renderedSize}px`,
     color,
     align,
   });
