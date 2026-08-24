@@ -10,8 +10,7 @@
       "border-06", "border-07", "border-08", "border-09", "border-10",
       "border-11", "border-12", "border-13", "border-14", "border-15",
       "border-16", "border-17", "border-18", "border-19", "border-20"
-    ],
-    "requiredProgressionClears": 0
+    ]
   },
   {
     "id": "special-border-01",
@@ -20,6 +19,6 @@
     "shortTitle": "특수전",
     "description": "출격 제한·러시·장거리·보스 연전 도전.",
     "stageIds": ["special-01", "special-02", "special-03", "special-04", "special-05"],
-    "requiredProgressionClears": 20
+    "unlockAfterStageId": "border-20"
   }
 ]
