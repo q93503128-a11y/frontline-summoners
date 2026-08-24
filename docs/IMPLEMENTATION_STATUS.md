@@ -2,7 +2,7 @@
 
 이 문서는 `docs/CANONICAL.md`를 대체하지 않는다. 매 작업 전 정본을 먼저 읽고, 전체 방향은 `docs/GAME_DESIGN_FULL.md`, 스테이지·특수·협동 세부는 `docs/STAGE_SYSTEM_DESIGN.md`, 개발 방식은 `docs/DEVELOPMENT_RULES.md`와 대조한다.
 
-## 2026-08-24 — campaign vertical slice 0.0.26
+## 2026-08-24 — campaign vertical slice 0.0.27
 
 ## 1. 문서 정본
 
@@ -10,7 +10,7 @@
 - `docs/GAME_DESIGN_FULL.md`: 통합 전체 기획서.
 - `docs/STAGE_SYSTEM_DESIGN.md`: 스테이지 DSL, 진도/특수 분리, 출격 제한, 편성 제한, 특수 규칙, 협동 세부 정본 보조 문서.
 - `docs/IMPLEMENTATION_STATUS.md`: 현재 구현/미구현만 기록하는 상태 문서.
-- `docs/DEVELOPMENT_RULES.md`: 레거시 덧씌우기 금지, 중복 구현 제거, 권위 경로 단일화 원칙.
+- `docs/DEVELOPMENT_RULES.md`: 레거시 덧씌우기 금지, 중복 구현 제거, 권위 경로 단일화 원칙. 작업 전 읽기에 `STAGE_SYSTEM_DESIGN.md`가 포함되어 있다.
 - `docs/INDEX.md`: 문서 권위/읽는 순서.
 - `docs/NEW_CHAT_PROMPT.md`: 새 채팅 인수인계용. 새 채팅에서는 반드시 GitHub `main`을 다시 확인한다.
 - 구체 콘텐츠 수치는 `content/` JSON이 우선한다.
@@ -215,11 +215,19 @@
 - 원거리 투사체는 foreswing 후반 발사 → hitFrame 도달, 판정은 30Hz hitFrame 정본.
 - 장기 캐릭터 풀은 현재 무료 인간형 에셋 반복에 묶이지 않고 실루엣 차별화를 우선한다.
 
-## 12. 보물 / 저장
+## 12. 진도 / 보물 / 저장
 
 - 제1장 20스테이지 보물은 첫 클리어 100% 확정.
 - 보물 등급/드랍 RNG 없음.
 - `content/treasures/chapter-01.json` typed modifier가 실제 전투의 시작 보급, 거점HP, 유닛 스탯, 재생산, 처치보급, 보급소 강화비, 배치한도 등에 적용된다.
+- 현재 `clearedStageIds`는 **PROGRESSION 진도 전용 저장 필드**다. SPECIAL 실제 구현 시 같은 배열에 섞지 않고 별도 저장 축을 추가한다.
+- `getContiguousClearedStageIds()`가 ST1부터 끊기지 않은 연속 clear prefix를 진도 권위로 사용한다.
+- 미등록 stage ID는 `isStageUnlocked=false`; `getStage()`와 `getStageNumber()`는 미등록 ID를 ST1로 위장하지 않고 오류를 낸다.
+- 뒤 스테이지만 비정상적으로 저장된 기록은 다음 스테이지, 동료, 제1장 보물을 건너뛰어 해금하지 못한다.
+- 저장 로드시 durable/session 각각을 먼저 정규화한 뒤 병합하고 다시 정규화하여 서로 깨진 조각이 합쳐져 진도를 만드는 것을 막는다.
+- 제1장 stage treasure ID는 해당 연속 clear prefix에서 다시 파생해 누락된 확정 보물을 복구하고 조기 stage treasure를 제거한다.
+- 향후 비스테이지 보상 ID는 `treasureIds`에서 보존한다.
+- `recordStageClear()`는 현재 열린 정본 스테이지만 기록하고 호출자가 넘긴 보물 ID가 그 스테이지의 정본 보물과 일치하는지 검증한다.
 - IndexedDB 게스트 진행 + 같은 탭 session fallback.
 - 저장 실패를 성공으로 거짓 표시하지 않고, 영구 저장 실패 시 현재 탭 진행 유지 상태를 표시한다.
 
@@ -229,6 +237,8 @@
 - 현재 제1장 기본 정규화: `PROGRESSION / 50 / 50 / 제한 없음`.
 - final campaign 테스트는 ST20 15초 오프닝, 50초 황금가면, 80초 철문장군 타이밍을 고정한다.
 - `viewport-classification.test.ts`는 터치폰/작은 PC/태블릿을 순수 입력값으로 분리해 compact·portrait 판정을 검증한다.
+- `progression.test.ts`는 신규 계정 militia/ST1, 연속 진도, 미등록 stage 거부, 비연속 clear의 stage/동료/파생 보물 차단을 검사한다.
+- `save-progress.test.ts`는 durable/session 정규화 순서, 정본 stage↔treasure 검증, 확정 보물 복구, 비스테이지 보상 보존, persistence 실패 구분을 검사한다.
 - `battle-ui-wiring.test.ts`는 다음을 정적 회귀 검사한다.
   - 1~0/Q/E/P/ESC 및 activeSlots 기반 입력.
   - 마우스/키보드 공통 실패 경로.
@@ -242,11 +252,12 @@
   - compact 편성 초상화 행간 미침범.
   - smooth sprite 렌더 설정과 난이도 12단계 UI.
 - `catalog-boss-mobile-ui.test.ts`는 shared coarse-pointer viewport 판정, 세로 simulation 선차단, 모바일 전용 CSS orientation guard, 도감 PC 상세/모바일 축약, compact 84px 네비게이션, 버튼 pointer 취소, 보스 경고, `safe-area-inset-*` 캔버스 containment를 검사한다.
-- 이번 UI 감사에서 수정한 파일은 UI/HTML/viewport 분류와 UI 테스트이며 전투 판정/경제/스폰/content 수치는 변경하지 않았다.
+- `DEVELOPMENT_RULES.md` 자체도 모든 의미 있는 수정 전 `STAGE_SYSTEM_DESIGN.md` 확인을 요구하도록 갱신했다.
+- 로컬 컨테이너의 GitHub DNS는 여전히 해석되지 않아 최신 main을 clone해 실제 npm 실행하는 경로는 확보하지 못했다.
+- 공개 GitHub Actions 페이지도 현재 도구 경로로 최신 저장소 run을 확인하지 못했다.
 - 이전 마지막 실제 완전 검증에서는 install/typecheck/build 성공, 당시 테스트 실패는 과거 ST20 baseline 1개였다.
 - 현재 `.github/workflows/ci.yml`은 main push/PR에서 install → typecheck → test → build를 실행하도록 설정되어 있다.
-- 현재 연결의 workflow-run 조회는 PR-triggered 실행만 반환하며 direct-main push 결과는 보이지 않는다.
-- 최신 commit combined-status도 status context가 없어 현재 HEAD의 실제 CI green/red는 이 연결로 확인하지 못했다.
+- 최신 commit combined-status에는 status context가 없어 현재 HEAD의 실제 CI green/red는 이 연결로 확인하지 못했다.
 - **확인되지 않은 CI 성공을 주장하지 않는다.**
 
 ## 14. 첫 사용자 테스트 전 남은 항목
@@ -264,12 +275,14 @@
 - 모집 및 다양한 획득 경로.
 - 10칸 수동 편성.
 - 특수 스테이지 런타임, 편성 제한 evaluator, 복합 trigger DSL.
+- SPECIAL 저장/진행 축은 현재 `clearedStageIds`와 분리해서 추가.
 - 제2장 이상 진도 캠페인.
 - 2인 협동 → 1v1 → 2v2.
 
 ## 16. 개발 원칙 재확인
 
 - GitHub `main` 정본.
+- 작업 전 `CANONICAL → GAME_DESIGN_FULL → STAGE_SYSTEM_DESIGN → IMPLEMENTATION_STATUS → 관련 content → 코드/테스트` 순서로 확인.
 - 새 코드를 옛 hotfix/override 위에 덧씌우지 않는다.
 - 대체된 상수/함수/워크플로/진단 결과는 필요한 결론을 정본으로 옮긴 뒤 제거한다.
 - 같은 책임은 하나의 권위 경로만 남긴다.
