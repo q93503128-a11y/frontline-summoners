@@ -4,7 +4,11 @@ import test from 'node:test';
 import {
   STAGE_COLLECTIONS,
   STAGE_COLLECTIONS_PER_PAGE,
+  STAGES_PER_COLLECTION_PAGE,
   getCollectionClearedIds,
+  getCollectionStagePage,
+  getCollectionStagePageCount,
+  getCollectionStagePageIndexForStage,
   getFirstUnclearedCollectionStageIndex,
   getStageCollection,
   getStageCollectionForStage,
@@ -55,6 +59,21 @@ test('sortie hub collection paging remains bounded when future chapters and even
   assert.deepEqual(getStageCollectionPage(2, simulatedFutureCollections), [progression]);
   assert.deepEqual(getStageCollectionPage(99, simulatedFutureCollections), [progression], 'out-of-range pages clamp to the final page');
   assert.deepEqual(getStageCollectionPage(-5, simulatedFutureCollections), [progression, special], 'negative pages clamp to page zero');
+});
+
+test('stage pages inside a collection use one five-stage paging rule and can recover the page for a played stage', () => {
+  const progression = getStageCollection('chapter-01');
+  const special = getStageCollection('special-border-01');
+  assert.equal(STAGES_PER_COLLECTION_PAGE, 5);
+  assert.equal(getCollectionStagePageCount(progression), 4);
+  assert.equal(getCollectionStagePageCount(special), 1);
+  assert.deepEqual(getCollectionStagePage(progression, 0).map((stage) => stage.id), STAGES.slice(0, 5).map((stage) => stage.id));
+  assert.deepEqual(getCollectionStagePage(progression, 3).map((stage) => stage.id), STAGES.slice(15, 20).map((stage) => stage.id));
+  assert.deepEqual(getCollectionStagePage(progression, 99).map((stage) => stage.id), STAGES.slice(15, 20).map((stage) => stage.id));
+  assert.equal(getCollectionStagePageIndexForStage(progression, 'border-01'), 0);
+  assert.equal(getCollectionStagePageIndexForStage(progression, 'border-20'), 3);
+  assert.equal(getCollectionStagePageIndexForStage(special, 'special-05'), 0);
+  assert.throws(() => getCollectionStagePageIndexForStage(progression, 'special-01'), /not part of collection/);
 });
 
 test('special collection unlock uses contiguous campaign progress and cannot be opened by scattered late-stage save fragments', () => {
