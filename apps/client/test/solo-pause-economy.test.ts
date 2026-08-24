@@ -1,0 +1,56 @@
+import assert from 'node:assert/strict';
+import { readFile } from 'node:fs/promises';
+import test from 'node:test';
+import { DEFAULT_SUPPLY_LEVELS } from '@frontline/sim/playable';
+import { PLAYER_SLOTS, STAGES } from '../src/prototype.ts';
+import enemiesJson from '../../../content/enemies/chapter-01.json' with { type: 'json' };
+
+const readSource = (relative: string): Promise<string> => readFile(new URL(relative, import.meta.url), 'utf8');
+
+test('solo pause freezes the simulation and all direct battle actions', async () => {
+  const source = await readSource('../src/main.ts');
+
+  assert.match(source, /private manuallyPaused = false/);
+  assert.match(source, /keydown-P/);
+  assert.match(source, /keydown-ESC/);
+  assert.match(source, /this\.manuallyPaused \|\| isPortraitMobileViewport\(\)/);
+  assert.match(source, /this\.tweens\.pauseAll\(\)/);
+  assert.match(source, /this\.tweens\.resumeAll\(\)/);
+  assert.match(source, /솔로 전투 정지 · 보급·쿨다운·적 스폰도 멈춤/);
+  assert.match(source, /'일시정지', \(\) => this\.toggleManualPause\(\)/);
+
+  const guardedActions = source.match(/if \(this\.manuallyPaused\) return;/g) ?? [];
+  assert.ok(guardedActions.length >= 3, 'spawn, supply upgrade and base weapon input must all be blocked while paused');
+});
+
+test('chapter one opens with a scarce wallet and low base hp instead of a late-game economy', () => {
+  const first = STAGES[0]!;
+  assert.equal(first.startingSupply, 50);
+  assert.equal(first.playerBaseHp, 900);
+  assert.equal(first.enemyBaseHp, 800);
+  assert.deepEqual(DEFAULT_SUPPLY_LEVELS[0], { incomePerSecond: 12, maxSupply: 1000, upgradeCost: 0 });
+  assert.deepEqual(DEFAULT_SUPPLY_LEVELS[1], { incomePerSecond: 16, maxSupply: 1400, upgradeCost: 160 });
+
+  const firstFive = STAGES.slice(0, 5);
+  assert.deepEqual(firstFive.map((stage) => stage.startingSupply), [50, 60, 70, 80, 90]);
+  assert.ok(firstFive.every((stage) => stage.playerBaseHp <= 1200));
+  assert.ok(firstFive.every((stage) => stage.enemyBaseHp <= 1500));
+});
+
+test('the first roster and enemy line advance at a deliberate pace', () => {
+  const starter = PLAYER_SLOTS.find((slot) => slot.slotId === 'militia');
+  assert.ok(starter);
+  assert.equal(starter.definition.moveSpeed, 3);
+  assert.equal(starter.cost, 50);
+
+  const enemies = enemiesJson as Array<{ id: string; moveSpeed: number }>;
+  assert.equal(enemies.find((enemy) => enemy.id === 'enemy-raider')?.moveSpeed, 2);
+  assert.equal(enemies.find((enemy) => enemy.id === 'enemy-sprinter')?.moveSpeed, 4);
+  assert.ok(enemies.every((enemy) => enemy.moveSpeed <= 4));
+  assert.ok(PLAYER_SLOTS.every((slot) => slot.definition.moveSpeed <= 3));
+});
+
+test('the ten current units are the chapter-one core roster, not an all-game character cap', () => {
+  assert.equal(PLAYER_SLOTS.length, 10);
+  assert.equal(STAGES.length, 20);
+});
