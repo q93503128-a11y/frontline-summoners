@@ -2,6 +2,7 @@ import assert from 'node:assert/strict';
 import test from 'node:test';
 import { spawnUnit, type BattleUnitDefinition } from '../src/index.ts';
 import {
+  DEFAULT_SUPPLY_LEVELS,
   createPlayableBattle,
   getBaseWeaponCooldownRemaining,
   getCooldownRemaining,
@@ -45,10 +46,16 @@ const config = (): PlayableBattleConfig => ({
   ],
 });
 
-test('level 1 economy produces exactly 65 supply over 30 ticks', () => {
+test('default economy starts with a deliberately small wallet and slow income', () => {
+  assert.deepEqual(DEFAULT_SUPPLY_LEVELS[0], { incomePerSecond: 12, maxSupply: 1000, upgradeCost: 0 });
+  assert.deepEqual(DEFAULT_SUPPLY_LEVELS[1], { incomePerSecond: 16, maxSupply: 1400, upgradeCost: 160 });
+  assert.equal(DEFAULT_SUPPLY_LEVELS.length, 8);
+});
+
+test('level 1 economy produces exactly 12 supply over 30 ticks', () => {
   const state = createPlayableBattle(config());
   for (let i = 0; i < 30; i += 1) stepPlayableBattle(state);
-  assert.equal(state.supply, 365);
+  assert.equal(state.supply, 312);
   assert.equal(state.incomeRemainder, 0);
 });
 
@@ -68,9 +75,9 @@ test('supply upgrades spend supply and switch income/max tier', () => {
   const state = createPlayableBattle({ ...config(), startingSupply: 1000 });
   const result = tryUpgradeSupply(state);
   assert.deepEqual(result, { ok: true, level: 2 });
-  assert.equal(state.supply, 650);
+  assert.equal(state.supply, 840);
   for (let i = 0; i < 30; i += 1) stepPlayableBattle(state);
-  assert.equal(state.supply, 728);
+  assert.equal(state.supply, 856);
 });
 
 test('scheduled enemy waves spawn at deterministic ticks', () => {
@@ -137,7 +144,7 @@ test('base weapon kills grant the same enemy reward and remain deterministic', (
   };
   const a = run();
   const b = run();
-  assert.equal(a.supply, 327);
+  assert.equal(a.supply, 325);
   assert.equal(a.hash, b.hash);
 });
 
@@ -159,7 +166,7 @@ test('playable hash includes future economy, slot, enemy, wave and cap configura
   const baseline = createPlayableBattle(config());
   const richerIncome = createPlayableBattle({
     ...config(),
-    supplyLevels: [{ incomePerSecond: 66, maxSupply: 3000, upgradeCost: 0 }],
+    supplyLevels: [{ incomePerSecond: 13, maxSupply: 1000, upgradeCost: 0 }],
   });
   const pricierSlot = createPlayableBattle({
     ...config(),
