@@ -62,6 +62,7 @@
 핵심 루프:
 `보급 → 생산 → 전선 → 사거리 → 공격 프레임 → KB → 재생산 → 적 스폰`
 
+- Web PC/모바일 모두 지원.
 - 30Hz 결정론적 공용 전투 코어.
 - 싱글만으로 완전한 게임이어야 함.
 - 이후 같은 코어로 2인 협동 / 1v1 / 2v2.
@@ -344,7 +345,25 @@ ST19/ST20 전용 보스 랜드마크.
 - 모바일 세로 가드 중 simulation 정지
 
 ==================================================
-9. 현재 구현된 핵심
+9. PC / 모바일 구현 규칙
+==================================================
+
+PC와 모바일은 공용 게임 데이터/전투 로직을 쓰되 UI 정보 밀도와 터치 영역은 분리한다.
+
+- viewport 판정 권위는 `apps/client/src/viewport.ts` 하나.
+- compact 모바일 = **coarse primary pointer + 짧은 변 540px 이하**.
+- 화면이 낮거나 좁은 것만으로 PC를 모바일로 취급하지 않는다. 예: 마우스 기반 `1280×500` 창은 PC UI 유지.
+- 모바일 세로 차단 = **coarse primary pointer + width≤900 + portrait**.
+- HTML orientation 안내 CSS도 `(pointer: coarse)`를 요구해 JS와 의미를 맞춘다.
+- PC에서는 1~0/Q/E 단축키 표기와 상세 카드 설명을 유지.
+- 모바일에서는 1~0/Q/E 시각 표기를 숨기고 터치 정보/핵심 정보 우선.
+- compact 핵심 터치 버튼은 84 logical px를 기본으로 사용. 390px 높이 FIT 기준 약45.5 CSS px.
+- 모바일 `viewport-fit=cover` + safe-area inset containment 적용.
+- 현재 일반 스프라이트 시트 기준 `antialias:true / pixelArt:false / roundPixels:false`.
+- `main.ts`나 `catalog-scene.ts`에 viewport 판정 함수를 다시 복제하지 않는다.
+
+==================================================
+10. 현재 구현된 핵심
 ==================================================
 
 - Phaser 브라우저 클라이언트
@@ -378,17 +397,17 @@ ST19/ST20 전용 보스 랜드마크.
 - 소환/보급소/전선포 및 잠긴 스테이지/저장 대기 같은 정상 실패 입력은 조용히 무시하며 camera shake 없음
 - camera shake는 전선포 성공 / 강한 유닛 피격 / 거점 피격 세 전투 충격 경로에만 허용
 - PC 상세 UI와 compact 모바일 UI를 같은 데이터/게임 로직 위에서 별도 정보 밀도로 렌더
-- compact 기준 `min(width,height) <= 540`; 모바일에서는 1~0/Q/E 표기를 숨기고 PC에서는 유지
 - 스테이지/편성/도감/메인/결과의 compact 정보 축약 및 PC 상세정보 보존 회귀 테스트
-- compact 핵심 터치 버튼은 대부분 84 logical px. 390px 높이 가로폰 FIT 기준 약 45.5 CSS px
-- 전투 소환 10칸, 보급소, 전선포, 일시정지/재개도 compact 84px 기준으로 통일
+- compact 핵심 터치 버튼 84 logical px 기준
+- 전투 소환 10칸, 보급소, 전선포, 일시정지/재개도 compact 84px 기준
 - compact 하단 두 줄 중심 y=582/666, 높이84로 겹침 없이 y=540~708 안에 배치
 - 모바일 `viewport-fit=cover` + safe-area inset containment 적용
 - 도감 compact의 84px 탭과 겹치던 상단 설명은 모바일에서 숨기고 PC에서 유지
+- 공용 coarse-pointer viewport classifier + 순수 분류 회귀 테스트
 - 현재 일반 스프라이트에 맞게 `antialias:true / pixelArt:false / roundPixels:false`
 
 ==================================================
-10. 아직 미구현 / 부분 구현
+11. 아직 미구현 / 부분 구현
 ==================================================
 
 - SPECIAL 실제 콘텐츠 파일/선택 UI
@@ -407,7 +426,7 @@ ST19/ST20 전용 보스 랜드마크.
 스키마에 존재한다고 런타임까지 구현됐다고 거짓 보고하지 않는다.
 
 ==================================================
-11. 현재 campaign baseline 상태
+12. 현재 campaign baseline 상태
 ==================================================
 
 과거 ST20 실패 원인은 보스 HP 자체보다 저보급 경제에 비해 너무 빠른 초반 압박과 단순 baseline의 값싼 유닛 과소비가 겹친 것이었다.
@@ -438,7 +457,7 @@ ST19/ST20 전용 보스 랜드마크.
 단, 실제 `npm test`/GitHub Actions green을 대신한다고 주장하지 않는다.
 
 ==================================================
-12. 검증 상태 / Actions 주의
+13. 검증 상태 / Actions 주의
 ==================================================
 
 이전 마지막 실제 완전 검증에서는:
@@ -449,6 +468,11 @@ ST19/ST20 전용 보스 랜드마크.
 
 그 이후 stage schema, 후반 baseline/ST20 페이싱, 입력/UI 변경이 추가됐다.
 
+현재 UI 정적/순수 테스트에는 다음이 포함된다.
+- `viewport-classification.test.ts`: 터치폰 / 작은 PC 창 / 대형 터치 태블릿 구분.
+- `battle-ui-wiring.test.ts`: shared viewport authority, PC 단축키 보존, compact 84px 터치 geometry, 실패 입력 무흔들림, smooth sprite 설정.
+- `catalog-boss-mobile-ui.test.ts`: shared viewport authority, 모바일-only 세로 가드 CSS, 도감 PC/모바일 분리, safe-area, 보스 경고.
+
 `.github/workflows/ci.yml`은 `main` push와 pull_request에서 install → typecheck → test → build를 실행하도록 설정돼 있다.
 현재 사용할 수 있는 commit workflow 조회는 PR-triggered run만 반환하므로 `main` 직접 push 방식의 실행 여부를 그 결과만으로 판단하지 않는다. 최신 commit combined status에도 status context가 0개라, 이 연결 경로에서는 현재 HEAD의 실제 CI green/red를 확인할 수 없다.
 
@@ -457,7 +481,7 @@ ST19/ST20 전용 보스 랜드마크.
 Actions 사용량/실행 불가 상황이면 일회성 workflow를 계속 추가해 쓰레기로 남기지 않는다.
 
 ==================================================
-13. 개발 방식
+14. 개발 방식
 ==================================================
 
 - GitHub `main` 정본.
@@ -474,7 +498,7 @@ Actions 사용량/실행 불가 상황이면 일회성 workflow를 계속 추가
 - 불필요한 선택 질문 없이 합리적인 개발 판단은 직접 내린다.
 
 ==================================================
-14. 첫 사용자 테스트 게이트
+15. 첫 사용자 테스트 게이트
 ==================================================
 
 아래가 충족되기 전에는 사용자에게 테스트하라고 하지 않는다.
@@ -497,9 +521,10 @@ Actions 사용량/실행 불가 상황이면 일회성 workflow를 계속 추가
 - ST19/ST20 보스 실제 등장
 - 원거리 hitFrame 시각 동기화
 - PC/가로 모바일 가독성
+- 작은 PC 창이 모바일 UI로 오인되지 않음
 - ST1~20 합법 순차 baseline
 
-campaign baseline은 소스 충실 재현 기준 통과했다. PC/compact 모바일의 정보 구조, 5열 스테이지/편성/도감 축약, 하단 전투 geometry, safe-area, 44px급 터치 목표는 코드/정적 회귀 검사까지 완료했다. 하지만 **최신 실제 CI, 실제 렌더된 PC/작은 가로폰의 최종 시각 확인, 실제 배포 확인이 남아 있으므로 아직 사용자 테스트를 요청하지 않는다.**
+campaign baseline은 소스 충실 재현 기준 통과했다. PC/compact 모바일의 정보 구조, 5열 스테이지/편성/도감 축약, 하단 전투 geometry, safe-area, 44px급 터치 목표, coarse-pointer 장치 분리는 코드/정적 회귀 검사까지 완료했다. 하지만 **최신 실제 CI, 실제 렌더된 PC/작은 가로폰의 최종 시각 확인, 실제 배포 확인이 남아 있으므로 아직 사용자 테스트를 요청하지 않는다.**
 
 다음 실제 작업 우선순위:
 1. 현재 HEAD의 typecheck/test/build를 실제 실행해 결과 확인할 수 있는 경로 재확인
