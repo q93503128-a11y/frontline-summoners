@@ -131,15 +131,15 @@ export class DeckScene extends Phaser.Scene {
       compact ? 20 : 17,
       '#b8c0ce',
     );
-    button(this, 1180, compact ? 58 : 55, 150, compact ? 76 : 48, '메인', () => this.scene.start('main-menu'), 0x586275);
+    button(this, 1180, compact ? 58 : 55, 150, compact ? 84 : 48, '메인', () => this.scene.start('main-menu'), 0x586275);
 
     this.pageText = text(this, 640, 632, '', compact ? 20 : 17, '#9ca9bb', 'center').setOrigin(0.5);
     this.statusText = text(this, 640, compact ? 594 : 600, '저장 데이터를 불러오는 중…', compact ? 19 : 15, '#9ca9bb', 'center').setOrigin(0.5);
 
-    button(this, 86, 660, 120, compact ? 76 : 48, '◀ 이전', () => this.changePage(-1), 0x586275);
-    button(this, 235, 660, 140, compact ? 76 : 48, '다음 ▶', () => this.changePage(1), 0x586275);
-    button(this, 910, 660, 170, compact ? 76 : 48, '자동 편성', () => { void this.resetAutomatic(); }, 0x6d6b55);
-    button(this, 1120, 660, 190, compact ? 76 : 48, '편성 저장', () => { void this.saveDeck(); }, 0x5f8fb8);
+    button(this, 86, 660, 120, compact ? 84 : 48, '◀ 이전', () => this.changePage(-1), 0x586275);
+    button(this, 235, 660, 140, compact ? 84 : 48, '다음 ▶', () => this.changePage(1), 0x586275);
+    button(this, 910, 660, 170, compact ? 84 : 48, '자동 편성', () => { void this.resetAutomatic(); }, 0x6d6b55);
+    button(this, 1120, 660, 190, compact ? 84 : 48, '편성 저장', () => { void this.saveDeck(); }, 0x5f8fb8);
 
     void loadGuestProgress().then((progress) => {
       if (!this.scene.isActive()) return;
