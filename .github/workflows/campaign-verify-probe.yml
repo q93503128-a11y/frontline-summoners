@@ -1,0 +1,87 @@
+name: Campaign verification probe
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - .github/workflows/campaign-verify-probe.yml
+
+permissions:
+  contents: write
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Verify current main and report chapter pacing
+        shell: bash
+        run: |
+          set +e
+          npm ci --ignore-scripts > /tmp/install.log 2>&1
+          install_status=$?
+          if [ "$install_status" -eq 0 ]; then
+            npm run typecheck > /tmp/typecheck.log 2>&1
+            typecheck_status=$?
+            npm test -w @frontline/client > /tmp/client-test.log 2>&1
+            client_test_status=$?
+            npm test > /tmp/test.log 2>&1
+            test_status=$?
+            npm run build > /tmp/build.log 2>&1
+            build_status=$?
+            node --experimental-transform-types --input-type=module > /tmp/campaign-report.log 2>&1 <<'NODE'
+          const { STAGES } = await import('./apps/client/src/prototype.ts');
+          const { autoPlayCampaignStage } = await import('./apps/client/test/campaign-baseline.ts');
+          const optionsFor = (index) => ({
+            maxSeconds: index < 5 ? [90,105,120,135,150][index] : index < 10 ? [180,195,210,225,240][index-5] : index < 15 ? [255,270,285,300,315][index-10] : [330,345,360,390,450][index-15],
+            cannonBaseRatio: index < 5 ? 0.75 : index < 10 ? 0.70 : index < 15 ? 0.72 : 0.75,
+            ...(index < 5 ? { cannonEnemyCount: 2 } : {}),
+          });
+          for (let index = 0; index < STAGES.length; index += 1) {
+            const cleared = STAGES.slice(0, index).map((stage) => stage.id);
+            const result = autoPlayCampaignStage(index, cleared, optionsFor(index));
+            const state = result.state;
+            console.log(JSON.stringify({
+              stage: index + 1,
+              id: STAGES[index].id,
+              winner: state.battle.winner,
+              seconds: Number((state.battle.tick / 30).toFixed(1)),
+              playerBaseRatio: Number((state.battle.bases.PLAYER.hp / state.battle.bases.PLAYER.maxHp).toFixed(3)),
+              enemyBaseRatio: Number((state.battle.bases.ENEMY.hp / state.battle.bases.ENEMY.maxHp).toFixed(3)),
+              supplyLevel: state.supplyLevel,
+              targetSupplyLevel: result.targetSupplyLevel,
+              spawns: result.telemetry.spawnCount,
+              upgrades: result.telemetry.upgradeCount,
+              cannons: result.telemetry.cannonCount,
+              longestEnemyPressureNoPlayerSeconds: Number((result.telemetry.longestEnemyPressureWithoutPlayerTicks / 30).toFixed(1)),
+              seenPlayerIds: [...result.telemetry.seenPlayerIds],
+              seenEnemyIds: [...result.seenEnemyIds],
+            }));
+          }
+          NODE
+            report_status=$?
+          else
+            typecheck_status=99; client_test_status=99; test_status=99; build_status=99; report_status=99
+            : > /tmp/typecheck.log; : > /tmp/client-test.log; : > /tmp/test.log; : > /tmp/build.log; : > /tmp/campaign-report.log
+          fi
+          {
+            printf 'source_sha=%s\nverified_at=%s\ninstall=%s\ntypecheck=%s\nclient_test=%s\ntest=%s\nbuild=%s\ncampaign_report=%s\n' "$GITHUB_SHA" "$(date -u +%Y-%m-%dT%H:%M:%SZ)" "$install_status" "$typecheck_status" "$client_test_status" "$test_status" "$build_status" "$report_status"
+            printf '\n== client failures ==\n'
+            grep -E '^(not ok|# tests|# pass|# fail)|AssertionError|failed with|exceeded' /tmp/client-test.log | tail -n 160
+            printf '\n== campaign report ==\n'
+            cat /tmp/campaign-report.log
+            printf '\n== build tail ==\n'
+            tail -n 60 /tmp/build.log
+          } > docs/CI_PROBE_RESULT.txt
+          git config user.name "frontline-ci"
+          git config user.email "frontline-ci@users.noreply.github.com"
+          git rm .github/workflows/campaign-verify-probe.yml
+          git add docs/CI_PROBE_RESULT.txt
+          git commit -m "chore: record campaign verification probe"
+          git push origin HEAD:main
+          if [ "$install_status" -ne 0 ] || [ "$typecheck_status" -ne 0 ] || [ "$client_test_status" -ne 0 ] || [ "$test_status" -ne 0 ] || [ "$build_status" -ne 0 ] || [ "$report_status" -ne 0 ]; then exit 1; fi
