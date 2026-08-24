@@ -1,0 +1,20 @@
+source_sha=df37413c34b9d24af787ff775cf8bafd77169508
+
+{"name":"current","start":300,"waves":[["enemy-shield",300,2],["enemy-berserker",760,2],["enemy-boss",1300,1],["enemy-sniper",1450,1],["enemy-boss-iron",1800,1]],"winner":"ENEMY","seconds":109.7,"playerBaseRatio":0,"enemyBaseRatio":1,"supply":32,"supplyLevel":2,"targetSupplyLevel":3,"spawns":29,"upgrades":1,"cannons":3,"emptyPressureSeconds":2.3,"players":["militia","guard","hunter","duelist"],"boss":true,"ironBoss":true}
+(node:2360) ExperimentalWarning: Transform Types is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+{"name":"delay_only","start":300,"waves":[["enemy-shield",450,2],["enemy-berserker",900,2],["enemy-boss",1800,1],["enemy-sniper",2100,1],["enemy-boss-iron",3000,1]],"winner":"ENEMY","seconds":142.1,"playerBaseRatio":0,"enemyBaseRatio":0.9867,"supply":25,"supplyLevel":2,"targetSupplyLevel":3,"spawns":42,"upgrades":1,"cannons":4,"emptyPressureSeconds":2.5,"players":["militia","guard","hunter","duelist","lancer"],"boss":true,"ironBoss":true}
+(node:2368) ExperimentalWarning: Transform Types is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+{"name":"delay_light","start":300,"waves":[["enemy-shield",450,2],["enemy-berserker",900,1],["enemy-boss",1800,1],["enemy-sniper",2100,1],["enemy-boss-iron",3000,1]],"winner":"ENEMY","seconds":374.4,"playerBaseRatio":0,"enemyBaseRatio":0.9867,"supply":2,"supplyLevel":3,"targetSupplyLevel":3,"spawns":177,"upgrades":2,"cannons":6,"emptyPressureSeconds":1.6,"players":["militia","guard","hunter","duelist","lancer"],"boss":true,"ironBoss":true}
+(node:2376) ExperimentalWarning: Transform Types is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+{"name":"delay_wide","start":300,"waves":[["enemy-shield",540,2],["enemy-berserker",1050,1],["enemy-boss",2100,1],["enemy-sniper",2400,1],["enemy-boss-iron",3300,1]],"winner":null,"seconds":450,"playerBaseRatio":0.7357,"enemyBaseRatio":0.9689,"supply":39,"supplyLevel":3,"targetSupplyLevel":3,"spawns":196,"upgrades":2,"cannons":6,"emptyPressureSeconds":1.7,"players":["militia","guard","hunter","duelist","lancer","battlemage"],"boss":true,"ironBoss":true}
+(node:2385) ExperimentalWarning: Transform Types is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+{"name":"start360","start":360,"waves":[["enemy-shield",450,2],["enemy-berserker",900,1],["enemy-boss",1800,1],["enemy-sniper",2100,1],["enemy-boss-iron",3000,1]],"winner":null,"seconds":450,"playerBaseRatio":0.6696,"enemyBaseRatio":0.9822,"supply":31,"supplyLevel":3,"targetSupplyLevel":3,"spawns":205,"upgrades":2,"cannons":8,"emptyPressureSeconds":1.7,"players":["militia","guard","hunter","duelist","lancer"],"boss":true,"ironBoss":true}
+(node:2393) ExperimentalWarning: Transform Types is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+{"name":"start420","start":420,"waves":[["enemy-shield",450,2],["enemy-berserker",900,1],["enemy-boss",1800,1],["enemy-sniper",2100,1],["enemy-boss-iron",3000,1]],"winner":null,"seconds":450,"playerBaseRatio":0.7093,"enemyBaseRatio":0.9822,"supply":29,"supplyLevel":3,"targetSupplyLevel":3,"spawns":200,"upgrades":2,"cannons":8,"emptyPressureSeconds":1.7,"players":["militia","guard","hunter","duelist","lancer","battlemage"],"boss":true,"ironBoss":true}
+(node:2401) ExperimentalWarning: Transform Types is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
