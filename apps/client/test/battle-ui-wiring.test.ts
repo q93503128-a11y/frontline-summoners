@@ -156,12 +156,11 @@ test('compact navigation buttons stay finger-sized across stage, deck, battle pa
   assert.match(stageBlock, /compact \? 84 : 52/);
   assert.match(stageBlock, /compact \? 84 : 52, unlocked/);
   assert.match(deckBlock, /compact \? 84 : 50/);
-  assert.match(battleBlock, /compact \? 80 : 42, '일시정지'/);
+  assert.match(battleBlock, /compact \? 84 : 42, '일시정지'/);
   assert.match(battleBlock, /isCompactMobileViewport\(\) \? 84 : 58, '계 속'/);
 
   const scaleAt390High = 390 / 720;
   assert.ok(84 * scaleAt390High >= 44);
-  assert.ok(80 * scaleAt390High >= 43);
 });
 
 test('stage and deck cards keep desktop detail while compact mobile renders a reduced high-priority information set', async () => {
