@@ -60,15 +60,15 @@ function alivePlayerUnitCount(state: ReturnType<typeof createPrototypeBattle>): 
 function selectReadyBossCounter(state: ReturnType<typeof createPrototypeBattle>) {
   const bossTraits = new Set(
     state.battle.units
-      .filter((unit) => unit.team === 'ENEMY' && unit.state !== 'DYING' && unit.definition.traits.includes('BOSS'))
-      .flatMap((unit) => unit.definition.traits),
+      .filter((unit) => unit.team === 'ENEMY' && unit.state !== 'DYING' && (unit.definition.traits ?? []).includes('BOSS'))
+      .flatMap((unit) => unit.definition.traits ?? []),
   );
   if (bossTraits.size === 0) return undefined;
 
   return [...state.playerSlots]
     .filter((slot) => getCooldownRemaining(state, slot.slotId) === 0)
     .map((slot) => {
-      const matchingMultiplier = slot.definition.damageBonuses
+      const matchingMultiplier = (slot.definition.damageBonuses ?? [])
         .filter((bonus) => bossTraits.has(bonus.trait))
         .reduce((best, bonus) => Math.max(best, bonus.multiplierPermille), 0);
       if (matchingMultiplier === 0) return null;
