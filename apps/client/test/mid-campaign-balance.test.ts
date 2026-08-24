@@ -9,6 +9,7 @@ import {
 import {
   STAGES,
   createPrototypeBattle,
+  getTreasureIdsForClearedStages,
   getUnlockedSlotIds,
 } from '../src/prototype.ts';
 
@@ -29,14 +30,14 @@ function targetableEnemyCount(state: ReturnType<typeof createPrototypeBattle>): 
 function autoPlayStage(stageIndex: number, clearedStageIds: readonly string[]) {
   const stage = STAGES[stageIndex]!;
   const unlockedSlotIds = getUnlockedSlotIds(clearedStageIds);
-  const state = createPrototypeBattle(stage.id, unlockedSlotIds);
+  const ownedTreasureIds = getTreasureIdsForClearedStages(clearedStageIds);
+  const state = createPrototypeBattle(stage.id, unlockedSlotIds, ownedTreasureIds);
   const limit = MID_LIMITS[stageIndex - 5]!;
   const maxTicks = limit.maxSeconds * 30;
   const slotPriority = [...state.playerSlots].sort((a, b) => b.cost - a.cost || a.slotId.localeCompare(b.slotId));
 
   for (let step = 0; step < maxTicks && state.battle.winner === null; step += 1) {
-    // A deliberately simple deterministic baseline: it does not know enemy traits,
-    // future waves, or unlocks. It simply attempts every legitimately-owned unit.
+    // Simple deterministic baseline: it knows only legitimately-owned units and already-earned treasures.
     for (const slot of slotPriority) trySpawnPlayerUnit(state, slot.slotId);
 
     const enemies = targetableEnemyCount(state);
@@ -48,16 +49,17 @@ function autoPlayStage(stageIndex: number, clearedStageIds: readonly string[]) {
     stepPlayableBattle(state);
   }
 
-  return { state, limit, unlockedSlotIds };
+  return { state, limit, unlockedSlotIds, ownedTreasureIds };
 }
 
-test('stages six through ten remain beatable in the real sequential unlock order', () => {
+test('stages six through ten remain beatable in the real sequential unlock and treasure order', () => {
   const clearedStageIds = STAGES.slice(0, 5).map((stage) => stage.id);
   assert.deepEqual(getUnlockedSlotIds(clearedStageIds), ['militia', 'guard', 'hunter', 'duelist']);
 
   for (let stageIndex = 5; stageIndex < 10; stageIndex += 1) {
     const stage = STAGES[stageIndex]!;
-    const { state, limit, unlockedSlotIds } = autoPlayStage(stageIndex, clearedStageIds);
+    const { state, limit, unlockedSlotIds, ownedTreasureIds } = autoPlayStage(stageIndex, clearedStageIds);
+    assert.equal(ownedTreasureIds.length, clearedStageIds.length, 'mid baseline must not use future treasure rewards');
 
     assert.equal(
       state.battle.winner,
