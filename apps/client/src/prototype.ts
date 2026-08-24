@@ -141,7 +141,7 @@ export function createPrototypeBattle(
     ownedTreasureIds,
     startingSupply: stage.startingSupply,
     playerBaseHp: stage.playerBaseHp,
-    playerUnitCap: 50,
+    playerUnitCap: stage.playerUnitCap,
     playerSlots: safeSlots,
     enemies: ENEMIES,
   });
@@ -154,7 +154,7 @@ export function createPrototypeBattle(
     enemies: progression.enemies,
     enemyWaves: stage.waves,
     playerUnitCap: progression.playerUnitCap,
-    enemyUnitCap: 50,
+    enemyUnitCap: stage.enemyUnitCap,
     supplyLevels: progression.supplyLevels,
   });
 }
