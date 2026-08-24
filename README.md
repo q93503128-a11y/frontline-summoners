@@ -9,7 +9,11 @@
 - 30Hz 결정론적 전투 코어를 브라우저와 권위 서버가 공유
 - 전투 조작: 유닛 생산, 보급소 투자, 거점 병기
 - 솔로 완전 일시정지 지원
+- PC 전투 단축키: `1~0` 소환, `Q` 보급소 강화, `E` 전선포, `P/ESC` 일시정지
+- 쿨다운/보급 부족 같은 정상적인 실패 입력은 화면을 흔들지 않고 조용히 무시
 - 10칸 덱(협동/2v2는 플레이어당 5칸)
+- 진도 스테이지와 특수 스테이지를 별도 콘텐츠 축으로 운영
+- 난이도 1~12, 스테이지별 동시 출격/편성 제한 확장
 - 기본 핵심 로스터 약 10종, 이후 모집·스테이지/보스·외전·이벤트로 캐릭터 풀 확장
 - 캐릭터는 종족/체형/장비/모션이 다른 강한 실루엣 식별성을 우선
 - 캐릭터 레벨/강화/진화는 핵심 메타 시스템
@@ -22,9 +26,11 @@
 
 1. [`docs/CANONICAL.md`](docs/CANONICAL.md) — 최신 핵심 결정 정본
 2. [`docs/GAME_DESIGN_FULL.md`](docs/GAME_DESIGN_FULL.md) — 통합 전체 상세 기획서
-3. [`docs/IMPLEMENTATION_STATUS.md`](docs/IMPLEMENTATION_STATUS.md) — 현재 구현/미구현 상태
-4. [`docs/INDEX.md`](docs/INDEX.md) — 문서 권위와 유지 규칙
-5. [`docs/NEW_CHAT_PROMPT.md`](docs/NEW_CHAT_PROMPT.md) — 새 채팅 인수인계 프롬프트
+3. [`docs/STAGE_SYSTEM_DESIGN.md`](docs/STAGE_SYSTEM_DESIGN.md) — 진도/특수·난이도·출격/편성 제한·협동 정밀 기획
+4. [`docs/IMPLEMENTATION_STATUS.md`](docs/IMPLEMENTATION_STATUS.md) — 현재 구현/미구현 상태
+5. [`docs/DEVELOPMENT_RULES.md`](docs/DEVELOPMENT_RULES.md) — 레거시/중복 구현 정리와 작업 규칙
+6. [`docs/INDEX.md`](docs/INDEX.md) — 문서 권위와 유지 규칙
+7. [`docs/NEW_CHAT_PROMPT.md`](docs/NEW_CHAT_PROMPT.md) — 새 채팅 인수인계 프롬프트
 
 구체 콘텐츠 수치는 `content/` JSON을 우선한다.
 
