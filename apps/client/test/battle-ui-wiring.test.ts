@@ -16,11 +16,22 @@ test('battle loop launches ranged visuals before deterministic damage step and t
   assert.ok(renderIndex > stepIndex);
 });
 
-test('travel projectiles replace caster-local hit FX instead of duplicating it on contact', async () => {
+test('travel projectiles replace caster-local hit FX and interpolate render position between 30Hz ticks', async () => {
   const source = await readMain();
   assert.match(source, /impactMoment && !usesTravelProjectile\(art\.attackFx\)/);
   assert.match(source, /getProjectileTravelPlan\(art\.attackFx, firstHitFrame, Math\.abs\(endX - startX\)\)/);
+  assert.match(source, /const fractionalTick = Math\.max\(0, Math\.min\(1, this\.accumulator \/ SIM_TICK_MS\)\);/);
+  assert.match(source, /const renderTick = this\.state\.battle\.tick \+ fractionalTick;/);
+  assert.match(source, /\(renderTick - projectile\.startTick\) \/ span/);
   assert.match(source, /getProjectileArcOffsetY\(projectile\.style, progress\)/);
+});
+
+test('saved guaranteed treasures are passed into the actual browser battle config', async () => {
+  const source = await readMain();
+  assert.match(
+    source,
+    /createPrototypeBattle\(this\.stage\.id, this\.activeSlots\.map\(\(slot\) => slot\.slotId\), progress\.treasureIds\)/,
+  );
 });
 
 test('player specialties are visible in deck and enemy traits are visible in battle', async () => {
