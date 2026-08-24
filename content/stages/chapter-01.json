@@ -9,7 +9,7 @@
     "id": "border-02", "chapter": "제1장 · 뒤집힌 국경", "name": "맨발 언덕", "subtitle": "빠른 적을 방벽으로 받아내라", "difficulty": 1,
     "playerBaseHp": 4200, "enemyBaseHp": 3900, "startingSupply": 460, "mapLength": 900, "theme": "meadow", "decorSeed": 23,
     "waves": [{ "enemyId": "enemy-sprinter", "atTick": 150, "count": 9, "intervalTicks": 105 }, { "enemyId": "enemy-raider", "atTick": 620, "count": 5, "intervalTicks": 125 }],
-    "treasure": { "id": "barefoot-ribbon", "name": "맨발부대 붉은 끈", "effect": "저비용 유닛 이동속도 +2%" }, "unlockUnitId": "hunter"
+    "treasure": { "id": "barefoot-ribbon", "name": "맨발부대 붉은 끈", "effect": "저비용 유닛 이동속도 +1" }, "unlockUnitId": "hunter"
   },
   {
     "id": "border-03", "chapter": "제1장 · 뒤집힌 국경", "name": "냄비 협곡", "subtitle": "길어진 전장에서 창병을 익힌다", "difficulty": 1,
@@ -33,7 +33,7 @@
     "id": "border-06", "chapter": "제1장 · 뒤집힌 국경", "name": "부서진 마차길", "subtitle": "짧은 길에서 속도전이 벌어진다", "difficulty": 2,
     "playerBaseHp": 4600, "enemyBaseHp": 5200, "startingSupply": 400, "mapLength": 780, "theme": "burning", "decorSeed": 67,
     "waves": [{ "enemyId": "enemy-sprinter", "atTick": 100, "count": 12, "intervalTicks": 76 }, { "enemyId": "enemy-shield", "atTick": 490, "count": 3, "intervalTicks": 235 }, { "enemyId": "enemy-raider", "atTick": 680, "count": 10, "intervalTicks": 82 }],
-    "treasure": { "id": "wagon-wheel", "name": "반쪽 마차바퀴", "effect": "재생산 시간 -1%" }, "unlockUnitId": "lancer"
+    "treasure": { "id": "wagon-wheel", "name": "반쪽 마차바퀴", "effect": "재생산 시간 -1F" }, "unlockUnitId": "lancer"
   },
   {
     "id": "border-07", "chapter": "제1장 · 뒤집힌 국경", "name": "유리봉 언덕", "subtitle": "긴 사거리의 사각을 파고들어라", "difficulty": 2,
@@ -69,7 +69,7 @@
     "id": "border-12", "chapter": "제1장 · 뒤집힌 국경", "name": "돌개바람 비탈", "subtitle": "전선이 빠르게 밀리고 되밀리는 긴 비탈", "difficulty": 3,
     "playerBaseHp": 5200, "enemyBaseHp": 6500, "startingSupply": 420, "mapLength": 1200, "theme": "canyon", "decorSeed": 127,
     "waves": [{ "enemyId": "enemy-sprinter", "atTick": 90, "count": 15, "intervalTicks": 68 }, { "enemyId": "enemy-berserker", "atTick": 610, "count": 3, "intervalTicks": 245 }, { "enemyId": "enemy-spearman", "atTick": 880, "count": 8, "intervalTicks": 128 }],
-    "treasure": { "id": "dust-charm", "name": "먼지바람 부적", "effect": "KB 회복 +2%" }
+    "treasure": { "id": "dust-charm", "name": "먼지바람 부적", "effect": "자연 KB 시간 -1F" }
   },
   {
     "id": "border-13", "chapter": "제1장 · 뒤집힌 국경", "name": "달빛 검문소", "subtitle": "밤 전장에서 고체력 전열이 압박한다", "difficulty": 4,
@@ -87,7 +87,7 @@
     "id": "border-15", "chapter": "제1장 · 뒤집힌 국경", "name": "철문 전초기지", "subtitle": "요새 앞의 짧은 살육전", "difficulty": 4,
     "playerBaseHp": 5500, "enemyBaseHp": 7500, "startingSupply": 470, "mapLength": 840, "theme": "fortress", "decorSeed": 157,
     "waves": [{ "enemyId": "enemy-berserker", "atTick": 170, "count": 5, "intervalTicks": 205 }, { "enemyId": "enemy-shield", "atTick": 320, "count": 5, "intervalTicks": 215 }, { "enemyId": "enemy-cultist", "atTick": 870, "count": 5, "intervalTicks": 170 }],
-    "treasure": { "id": "iron-bolt", "name": "철문 대형 볼트", "effect": "거점 방어 +2%" }
+    "treasure": { "id": "iron-bolt", "name": "철문 대형 볼트", "effect": "거점 최대 HP +2%" }
   },
   {
     "id": "border-16", "chapter": "제1장 · 뒤집힌 국경", "name": "성벽 그림자", "subtitle": "요새 장거리 화력을 버티며 전진한다", "difficulty": 4,
