@@ -14,6 +14,7 @@ import {
   getStageCollectionForStage,
   getStageCollectionPage,
   getStageCollectionPageCount,
+  isSortieStageUnlocked,
   isStageCollectionUnlocked,
 } from '../src/stage-navigation.ts';
 import { SPECIAL_STAGES, STAGES } from '../src/prototype.ts';
@@ -74,6 +75,20 @@ test('stage pages inside a collection use one five-stage paging rule and can rec
   assert.equal(getCollectionStagePageIndexForStage(progression, 'border-20'), 3);
   assert.equal(getCollectionStagePageIndexForStage(special, 'special-05'), 0);
   assert.throws(() => getCollectionStagePageIndexForStage(progression, 'special-01'), /not part of collection/);
+});
+
+test('collection-aware sortie gate keeps progression sequential and SPECIAL tied to its collection unlock anchor', () => {
+  const fullChapter = STAGES.map((stage) => stage.id);
+  const nineteen = STAGES.slice(0, 19).map((stage) => stage.id);
+
+  assert.equal(isSortieStageUnlocked('border-01', []), true);
+  assert.equal(isSortieStageUnlocked('border-02', []), false);
+  assert.equal(isSortieStageUnlocked('border-02', ['border-01']), true);
+  assert.equal(isSortieStageUnlocked('special-01', nineteen), false);
+  assert.equal(isSortieStageUnlocked('special-01', ['border-20']), false, 'scattered late clear cannot unlock the collection');
+  assert.equal(isSortieStageUnlocked('special-01', fullChapter), true);
+  assert.equal(isSortieStageUnlocked('special-05', fullChapter), true, 'the first SPECIAL collection opens all five challenges together');
+  assert.equal(isSortieStageUnlocked('missing-stage', fullChapter), false);
 });
 
 test('special collection unlock uses contiguous campaign progress and cannot be opened by scattered late-stage save fragments', () => {
