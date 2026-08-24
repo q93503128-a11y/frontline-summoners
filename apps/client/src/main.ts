@@ -77,8 +77,12 @@ function addButton(scene: Phaser.Scene, x: number, y: number, width: number, hei
   const container = scene.add.container(x, y, [bg, shine, text]);
   bg.setInteractive({ useHandCursor: true });
   bg.on('pointerover', () => bg.setFillStyle(0x343c4d, 1));
-  bg.on('pointerout', () => bg.setFillStyle(0x252b38, 0.98));
+  bg.on('pointerout', () => {
+    bg.setFillStyle(0x252b38, 0.98);
+    container.setScale(1);
+  });
   bg.on('pointerdown', () => container.setScale(0.98));
+  bg.on('pointerupoutside', () => container.setScale(1));
   bg.on('pointerup', () => { container.setScale(1); onClick(); });
   return container;
 }
@@ -139,7 +143,7 @@ class BootScene extends Phaser.Scene {
         if (!this.textures.exists(strip.key)) this.load.spritesheet(strip.key, strip.url, { frameWidth: strip.frameWidth, frameHeight: strip.frameHeight });
       }
     }
-    this.load.on('progress', (value: number) => bar.displayWidth = Math.max(1, 512 * value));
+    this.load.on('progress', (value) => bar.displayWidth = Math.max(1, 512 * value));
     this.load.on('loaderror', (file: { key?: string }) => status.setText(`일부 캐릭터 로드 실패 · 대체 표시 사용 예정 ${file.key ?? ''}`));
   }
 
@@ -151,25 +155,29 @@ class MainMenuScene extends Phaser.Scene {
 
   create(): void {
     drawBackdrop(this, 'menu');
-    addText(this, 84, 84, '전선소환전', 70, COLORS.cream);
-    addText(this, 88, 165, APP_NAME, 24, '#9fb0c6');
-    addText(this, 88, 230, '별난 영웅들을 모아 전선을 밀어붙여라.', 29, '#e8edf6');
-    addText(this, 88, 272, '첫 출정은 징집병 하나. 승리할수록 전선과 동료가 열린다.', 22, COLORS.muted);
+    const compact = isCompactMobileViewport();
+    addText(this, compact ? 70 : 84, compact ? 60 : 84, '전선소환전', compact ? 60 : 70, COLORS.cream);
+    addText(this, compact ? 74 : 88, compact ? 132 : 165, APP_NAME, compact ? 22 : 24, '#9fb0c6');
+    addText(this, compact ? 74 : 88, compact ? 188 : 230, compact ? '별난 영웅을 모아 전선을 밀어붙여라.' : '별난 영웅들을 모아 전선을 밀어붙여라.', compact ? 30 : 29, '#e8edf6');
+    addText(this, compact ? 74 : 88, compact ? 238 : 272, compact ? '승리할수록 전선과 동료가 열린다.' : '첫 출정은 징집병 하나. 승리할수록 전선과 동료가 열린다.', compact ? 24 : 22, COLORS.muted);
 
-    this.add.rectangle(1040, 105, 320, 110, 0x222936, 0.96).setStrokeStyle(2, 0x556077);
-    addText(this, 900, 72, '게스트 지휘관', 26, '#ffffff');
-    const progressText = addText(this, 900, 110, '진행도 불러오는 중…', 18, COLORS.muted);
+    this.add.rectangle(compact ? 1020 : 1040, compact ? 120 : 105, compact ? 390 : 320, compact ? 145 : 110, 0x222936, 0.96).setStrokeStyle(2, 0x556077);
+    addText(this, compact ? 850 : 900, compact ? 78 : 72, '게스트 지휘관', compact ? 28 : 26, '#ffffff');
+    const progressText = addText(this, compact ? 850 : 900, compact ? 122 : 110, '진행도 불러오는 중…', compact ? 22 : 18, COLORS.muted);
 
-    addButton(this, 230, 435, 310, 92, '출 정', () => this.scene.start('stage-select'), 0xc5a04c);
-    addButton(this, 575, 435, 310, 92, '편 성', () => this.scene.start('deck'), 0x5f8fb8);
-    addButton(this, 920, 435, 310, 92, '도 감', () => this.scene.start('catalog'), 0x8c7650);
-    addText(this, 88, 628, '보물 첫 클리어 100% · 스테이지 순차 개방 · 에너지 제한 없음', 20, '#9cd6ad');
-    addText(this, 1185, 675, 'PRE-ALPHA', 17, '#657086').setOrigin(1, 0.5);
+    const menuButtonHeight = compact ? 108 : 92;
+    addButton(this, 230, compact ? 425 : 435, 310, menuButtonHeight, '출 정', () => this.scene.start('stage-select'), 0xc5a04c);
+    addButton(this, 575, compact ? 425 : 435, 310, menuButtonHeight, '편 성', () => this.scene.start('deck'), 0x5f8fb8);
+    addButton(this, 920, compact ? 425 : 435, 310, menuButtonHeight, '도 감', () => this.scene.start('catalog'), 0x8c7650);
+    addText(this, compact ? 74 : 88, compact ? 610 : 628, compact ? '보물 첫 클리어 100% · 에너지 제한 없음' : '보물 첫 클리어 100% · 스테이지 순차 개방 · 에너지 제한 없음', compact ? 24 : 20, '#9cd6ad');
+    if (!compact) addText(this, 1185, 675, 'PRE-ALPHA', 17, '#657086').setOrigin(1, 0.5);
 
     void loadGuestProgress().then((progress) => {
       if (!this.scene.isActive()) return;
       const unlocked = getUnlockedPlayerSlots(progress.clearedStageIds).length;
-      progressText.setText(`클리어 ${progress.clearedStageIds.length}/${STAGES.length} · 보물 ${progress.treasureIds.length}/${STAGES.length} · 동료 ${unlocked}/${PLAYER_SLOTS.length}`);
+      progressText.setText(compact
+        ? `클리어 ${progress.clearedStageIds.length}/${STAGES.length} · 보물 ${progress.treasureIds.length} · 동료 ${unlocked}`
+        : `클리어 ${progress.clearedStageIds.length}/${STAGES.length} · 보물 ${progress.treasureIds.length}/${STAGES.length} · 동료 ${unlocked}/${PLAYER_SLOTS.length}`);
     });
   }
 }
@@ -297,7 +305,7 @@ class DeckScene extends Phaser.Scene {
       } else {
         const unlockStage = getUnlockStageForSlot(slot.slotId);
         const requirement = unlockStage ? `STAGE ${getStageNumber(unlockStage.id)} 첫 클리어\n${unlockStage.name}` : '캠페인 진행으로 해금';
-        this.cardsLayer!.add(addText(this, x, compact ? y + 62 : y + 46, requirement, compact ? 19 : 14, '#727c89', 'center').setOrigin(0.5).setWordWrapWidth(190));
+        this.cardsLayer!.add(addText(this, x, compact ? y + 56 : y + 46, requirement, compact ? 19 : 14, '#727c89', 'center').setOrigin(0.5).setWordWrapWidth(190));
       }
     });
   }
@@ -977,43 +985,47 @@ class ResultScene extends Phaser.Scene {
   create(): void {
     drawBackdrop(this, 'menu');
     const victory = this.winner === 'PLAYER';
+    const compact = isCompactMobileViewport();
     this.progressionSaved = !victory;
-    addText(this, INTERNAL_WIDTH / 2, 86, victory ? '승 리' : '패 배', 62, victory ? COLORS.gold : COLORS.red, 'center').setOrigin(0.5);
-    addText(this, INTERNAL_WIDTH / 2, 148, `STAGE ${getStageNumber(this.stage.id)} · ${this.stage.name}`, 25, '#e9edf4', 'center').setOrigin(0.5);
+    addText(this, INTERNAL_WIDTH / 2, compact ? 70 : 86, victory ? '승 리' : '패 배', compact ? 56 : 62, victory ? COLORS.gold : COLORS.red, 'center').setOrigin(0.5);
+    addText(this, INTERNAL_WIDTH / 2, compact ? 132 : 148, `STAGE ${getStageNumber(this.stage.id)} · ${this.stage.name}`, compact ? 28 : 25, '#e9edf4', 'center').setOrigin(0.5);
 
-    this.add.rectangle(INTERNAL_WIDTH / 2, 355, 760, 320, 0x242b38, 0.98).setStrokeStyle(3, victory ? 0xb99449 : 0x805151);
+    this.add.rectangle(INTERNAL_WIDTH / 2, compact ? 345 : 355, compact ? 820 : 760, compact ? 360 : 320, 0x242b38, 0.98).setStrokeStyle(3, victory ? 0xb99449 : 0x805151);
     if (victory) {
-      addText(this, INTERNAL_WIDTH / 2, 238, '확정 보물 획득', 23, '#8ee3aa', 'center').setOrigin(0.5);
-      addText(this, INTERNAL_WIDTH / 2, 290, this.stage.treasure.name, 35, '#ffe18a', 'center').setOrigin(0.5);
-      addText(this, INTERNAL_WIDTH / 2, 342, this.stage.treasure.effect, 18, '#c8d0dc', 'center').setOrigin(0.5);
+      addText(this, INTERNAL_WIDTH / 2, compact ? 210 : 238, '확정 보물 획득', compact ? 28 : 23, '#8ee3aa', 'center').setOrigin(0.5);
+      addText(this, INTERNAL_WIDTH / 2, compact ? 264 : 290, this.stage.treasure.name, compact ? 38 : 35, '#ffe18a', 'center').setOrigin(0.5);
+      addText(this, INTERNAL_WIDTH / 2, compact ? 322 : 342, this.stage.treasure.effect, compact ? 24 : 18, '#c8d0dc', 'center').setOrigin(0.5).setWordWrapWidth(compact ? 720 : 680);
       const unlockSlot = this.stage.unlockUnitId ? getSlotById(this.stage.unlockUnitId) : undefined;
-      const unlockText = addText(this, INTERNAL_WIDTH / 2, 395, unlockSlot ? `첫 클리어 동료 보상 · ${unlockSlot.displayName}` : '이번 스테이지는 동료 해금 없음', 20, unlockSlot ? '#9ccfff' : '#8f9aac', 'center').setOrigin(0.5);
-      const status = addText(this, INTERNAL_WIDTH / 2, 447, '진행 저장 중… 잠시만 기다려 주세요', 16, '#8f9aac', 'center').setOrigin(0.5);
+      const unlockText = addText(this, INTERNAL_WIDTH / 2, compact ? 390 : 395, unlockSlot ? (compact ? `동료 · ${unlockSlot.displayName}` : `첫 클리어 동료 보상 · ${unlockSlot.displayName}`) : compact ? '동료 해금 없음' : '이번 스테이지는 동료 해금 없음', compact ? 24 : 20, unlockSlot ? '#9ccfff' : '#8f9aac', 'center').setOrigin(0.5);
+      const status = addText(this, INTERNAL_WIDTH / 2, compact ? 446 : 447, compact ? '진행 저장 중…' : '진행 저장 중… 잠시만 기다려 주세요', compact ? 21 : 16, '#8f9aac', 'center').setOrigin(0.5);
       void recordStageClear(this.stage.id, this.stage.treasure.id).then((result) => {
         this.progressionSaved = true;
         if (!this.scene.isActive()) return;
         if (result.persisted) {
-          status.setText(result.firstClear ? '첫 클리어 저장 완료 · 다음 스테이지 개방' : '재클리어 저장 완료 · 보물 반복 파밍 불필요');
+          status.setText(compact
+            ? result.firstClear ? '저장 완료 · 다음 스테이지 개방' : '재클리어 저장 완료'
+            : result.firstClear ? '첫 클리어 저장 완료 · 다음 스테이지 개방' : '재클리어 저장 완료 · 보물 반복 파밍 불필요');
           status.setColor('#8ee3aa');
         } else {
-          status.setText('브라우저 영구 저장 실패 · 현재 탭에서는 진행 유지');
+          status.setText(compact ? '영구 저장 실패 · 현재 탭 진행 유지' : '브라우저 영구 저장 실패 · 현재 탭에서는 진행 유지');
           status.setColor('#ffb37c');
         }
-        if (unlockSlot) unlockText.setText(result.firstClear ? `신규 동료 합류 · ${unlockSlot.displayName}` : `보유 동료 · ${unlockSlot.displayName}`);
+        if (unlockSlot) unlockText.setText(result.firstClear ? `신규 동료 · ${unlockSlot.displayName}` : `보유 동료 · ${unlockSlot.displayName}`);
       });
     } else {
-      addText(this, INTERNAL_WIDTH / 2, 310, '편성과 소환 타이밍을 바꿔 다시 도전해 보자.', 24, '#dce2ec', 'center').setOrigin(0.5);
-      addText(this, INTERNAL_WIDTH / 2, 370, '패배 시 보상 손실이나 에너지 소모는 없다.', 18, '#aeb8c7', 'center').setOrigin(0.5);
-      addText(this, INTERNAL_WIDTH / 2, 425, `현재 전장 · ${BATTLEFIELD_THEME_LABELS[this.stage.theme]} / ${this.stage.mapLength}m`, 17, '#8796aa', 'center').setOrigin(0.5);
+      addText(this, INTERNAL_WIDTH / 2, compact ? 286 : 310, compact ? '소환 타이밍과 편성을 바꿔 다시 도전해 보자.' : '편성과 소환 타이밍을 바꿔 다시 도전해 보자.', compact ? 28 : 24, '#dce2ec', 'center').setOrigin(0.5);
+      addText(this, INTERNAL_WIDTH / 2, compact ? 356 : 370, compact ? '패배해도 에너지나 보상을 잃지 않는다.' : '패배 시 보상 손실이나 에너지 소모는 없다.', compact ? 24 : 18, '#aeb8c7', 'center').setOrigin(0.5);
+      addText(this, INTERNAL_WIDTH / 2, compact ? 420 : 425, compact ? `전장 ${BATTLEFIELD_THEME_LABELS[this.stage.theme]} · ${this.stage.mapLength}m` : `현재 전장 · ${BATTLEFIELD_THEME_LABELS[this.stage.theme]} / ${this.stage.mapLength}m`, compact ? 21 : 17, '#8796aa', 'center').setOrigin(0.5);
     }
 
     const guarded = (action: () => void): void => {
       if (!this.progressionSaved) return;
       action();
     };
-    addButton(this, 380, 590, 260, 68, '다시 도전', () => guarded(() => this.scene.start('battle', { stageId: this.stage.id })), 0x6d88a7);
-    addButton(this, 640, 590, 220, 68, '스테이지', () => guarded(() => this.scene.start('stage-select')), 0x667185);
-    addButton(this, 900, 590, 220, 68, '메인', () => guarded(() => this.scene.start('main-menu')), 0x667185);
+    const resultButtonHeight = compact ? 84 : 68;
+    addButton(this, 380, compact ? 600 : 590, 260, resultButtonHeight, '다시 도전', () => guarded(() => this.scene.start('battle', { stageId: this.stage.id })), 0x6d88a7);
+    addButton(this, 640, compact ? 600 : 590, 220, resultButtonHeight, '스테이지', () => guarded(() => this.scene.start('stage-select')), 0x667185);
+    addButton(this, 900, compact ? 600 : 590, 220, resultButtonHeight, '메인', () => guarded(() => this.scene.start('main-menu')), 0x667185);
   }
 }
 
