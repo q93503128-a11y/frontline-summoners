@@ -61,6 +61,14 @@ test('identical sequence produces identical final state hash', () => {
   assert.equal(run(), run());
 });
 
+test('battle hash includes map geometry and immutable base definitions', () => {
+  const base = createBattle({ mapLength: 1000, playerBaseHp: 1000, enemyBaseHp: 1000 });
+  const longer = createBattle({ mapLength: 1200, playerBaseHp: 1000, enemyBaseHp: 1000 });
+  const tougherPlayerBase = createBattle({ mapLength: 1000, playerBaseHp: 1200, enemyBaseHp: 1000 });
+  assert.notEqual(base.stateHash, longer.stateHash, 'different map lengths change future movement/base contact and must change hash');
+  assert.notEqual(base.stateHash, tougherPlayerBase.stateHash, 'different max base HP definitions must not share a hash');
+});
+
 test('specialist damage applies only to matching target traits', () => {
   const specialist = fighter({
     id: 'hunter',
