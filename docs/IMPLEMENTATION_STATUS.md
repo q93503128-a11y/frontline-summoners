@@ -2,7 +2,7 @@
 
 이 문서는 `docs/CANONICAL.md`를 대체하지 않는다. 매 작업 전 정본을 먼저 읽고, 전체 방향은 `docs/GAME_DESIGN_FULL.md`, 스테이지·특수·협동 세부는 `docs/STAGE_SYSTEM_DESIGN.md`, 개발 방식은 `docs/DEVELOPMENT_RULES.md`와 대조한다.
 
-## 2026-08-24 — campaign vertical slice 0.0.24
+## 2026-08-24 — campaign vertical slice 0.0.25
 
 ## 1. 문서 정본
 
@@ -84,27 +84,31 @@
 - `viewport-fit=cover` 환경에서는 `body`에 `safe-area-inset-*` 패딩을 적용하고 `#game`이 남은 안전 영역을 100% 채운다. 노치/컷아웃이 없는 PC에서는 inset=0이라 기존 레이아웃이 유지된다.
 - 세로 회전 안내도 각 방향 `max(32px, env(safe-area-inset-*)))` 패딩으로 컷아웃을 피한다.
 - 공용 버튼은 `pointerout`과 `pointerupoutside`에서도 scale을 1로 복구한다. 손가락이 버튼 밖으로 미끄러져도 눌린 모양으로 고착되지 않는다.
+- 390px 높이 가로폰에서 1280×720 FIT 배율은 약 0.542다. compact 핵심 터치 버튼을 84 logical px로 두어 약 45.5 CSS px 높이를 확보한다.
+- 현재 스프라이트 시트는 픽셀아트가 아니므로 Phaser 렌더 설정은 `antialias: true / pixelArt: false / roundPixels: false`가 정본이다. 모바일 축소에서 불필요한 픽셀 계단화를 만들지 않는다.
 
 ### 전투
 
 - PC: 1~0/Q/E 단축키 표기 유지.
 - 모바일: 1~0/Q/E 시각 표시는 숨기고 캐릭터명, 비용, 쿨다운, 보급소, 전선포 상태를 크게 표시.
-- compact 소환 버튼 높이 80, PC 62.
-- compact 보급소/전선포 버튼 높이 76, PC 60.
+- compact 소환 버튼 / 보급소 / 전선포 / 일시정지 / 재개 버튼은 84 logical px 높이를 사용한다. PC 크기는 각각 기존 62 / 60 / 42 / 58 규칙을 유지한다.
 - compact 하단 HUD는 y=540~720 안에 배치.
-- 소환 두 줄 중심 y=582/662, 우측 컨트롤도 y=582/662.
+- 소환 두 줄 중심 y=582/666, 우측 보급소/전선포도 y=582/666.
+- 두 줄은 높이 84로 경계만 맞닿고 겹치지 않으며 최하단은 y=708이라 HUD 안에 남는다.
 - 다섯 번째 소환칸과 우측 컨트롤 사이 19 logical px 이상 간격을 회귀 테스트로 검증.
 
 ### 스테이지 선택
 
 - PC: 전장 테마, mapLength, 부제, 확정 보물, 동료 보상 등 상세 카드 유지.
 - 모바일: 스테이지명, 난이도, 클리어/잠금, 보물, 동료 보상, 전투 버튼 중심으로 축약.
+- compact 메인/이전/다음/전투 버튼은 84 logical px 높이로 터치 영역을 확보한다. PC의 50/52px 버튼은 유지한다.
 - 5성 레거시 UI는 제거되어 `난이도 N / 12`를 사용한다.
 
 ### 편성
 
 - PC: 희귀도, 이름, 역할/비용, 속성, 특효, 캐릭터 설명 유지.
 - 모바일: 이름, 역할/비용, 속성/특효, 해금 조건 중심. 긴 설명 생략.
+- compact 메인 버튼은 84 logical px, PC는 기존 50px.
 - compact 초상화 기준 높이를 132로 사용하며 PC는 152 유지.
 - 플레이어 최대 displayScale 1.12 기준으로 둘째 줄 초상화가 첫째 줄 카드 하단을 침범하지 않도록 기하 검사를 추가했다.
 - 미해금 compact 조건 문구 Y좌표는 `y + 62`로 감사/고정. 메인·결과 수정 중 잘못 `y + 56`으로 되돌아간 회귀를 diff에서 발견해 즉시 복구했다.
@@ -113,6 +117,9 @@
 
 - PC: 캐릭터 설명, HP/공격/사거리/재생산, 보물 획득처 상세 유지.
 - 모바일: 이름, 역할/비용, 속성/특효, 핵심 HP/공격/사거리, 보물 이름/효과/획득 상태 중심으로 축약.
+- compact 메인/동료·보물 탭/이전/다음은 84 logical px 높이. PC의 50/54px 규칙은 유지한다.
+- 84px 탭과 겹치던 상단 설명문은 compact에서 숨기고 PC에서만 유지한다.
+- 도감 버튼도 `pointerout / pointerupoutside`에서 눌림 scale을 원복한다.
 
 ### 메인 화면
 
@@ -223,12 +230,13 @@
   - 마우스/키보드 공통 실패 경로.
   - camera shake 정확히 3개 전투 충격 경로.
   - compact 전투 HUD와 하단 hitbox geometry.
+  - 390px 높이 가로폰에서 84 logical px 핵심 터치 영역이 최소 44 CSS px를 확보하는지 계산.
   - 스테이지/편성 PC 상세정보 유지 + 모바일 축약.
   - 메인/결과 PC 상세 문구 유지 + compact 별도 레이아웃.
   - 공용 버튼 pointer 취소 시 scale 복구.
   - compact 편성 초상화 행간 미침범.
-  - 난이도 12단계 UI.
-- `catalog-boss-mobile-ui.test.ts`는 세로 simulation 선차단, 540px compact breakpoint, 도감 PC 상세/모바일 축약, 보스 경고, `safe-area-inset-*` 캔버스 containment를 검사한다.
+  - smooth sprite 렌더 설정과 난이도 12단계 UI.
+- `catalog-boss-mobile-ui.test.ts`는 세로 simulation 선차단, 540px compact breakpoint, 도감 PC 상세/모바일 축약, compact 84px 네비게이션, 버튼 pointer 취소, 보스 경고, `safe-area-inset-*` 캔버스 containment를 검사한다.
 - 이번 UI 감사에서 수정한 파일은 UI/HTML과 UI 테스트이며 전투 판정/경제/스폰/content 수치는 변경하지 않았다.
 - 이전 마지막 실제 완전 검증에서는 install/typecheck/build 성공, 당시 테스트 실패는 과거 ST20 baseline 1개였다.
 - 현재 `.github/workflows/ci.yml`은 main push/PR에서 install → typecheck → test → build를 실행하도록 설정되어 있다.
@@ -239,7 +247,7 @@
 ## 14. 첫 사용자 테스트 전 남은 항목
 
 1. 현재 HEAD의 실제 install → typecheck → test → build 결과를 직접 확인할 실행 경로 확보.
-2. PC/compact 모바일의 코드/정적 레이아웃 분리는 완료됐지만 **실제 렌더된 PC 브라우저와 작은 가로폰에서 텍스트 겹침, 터치감, 카드/아트 잘림, 노치 safe-area를 최종 시각 확인**해야 한다.
+2. PC/compact 모바일의 코드/정적 레이아웃과 44px급 터치 기준은 완료됐지만 **실제 렌더된 PC 브라우저와 작은 가로폰에서 텍스트 겹침, 터치감, 카드/아트 잘림, 노치 safe-area를 최종 시각 확인**해야 한다.
 3. Cloudflare Pages 실제 프로젝트 URL/최신 배포 상태 확인. 저장소에는 현재 명시적인 `pages.dev` URL/프로젝트 설정을 찾지 못했다.
 4. 첫 수동 테스트 게이트 전체를 확인한 뒤에만 사용자에게 테스트를 요청한다.
 
