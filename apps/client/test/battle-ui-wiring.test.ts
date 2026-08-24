@@ -42,10 +42,12 @@ test('player specialties are visible in deck and enemy traits are visible in bat
   assert.match(source, /unit\.team === 'ENEMY' && unit\.state !== UnitState\.Dying/);
 });
 
-test('PC battle hotkeys map 1 through 0 to units, Q to supply upgrade, and E to the base weapon', async () => {
+test('PC battle hotkeys map 1 through 0 to current deck slots, Q to supply upgrade, and E to the base weapon', async () => {
   const source = await readMain();
   assert.match(source, /'Digit1', 'Digit2', 'Digit3', 'Digit4', 'Digit5', 'Digit6', 'Digit7', 'Digit8', 'Digit9', 'Digit0'/);
   assert.match(source, /BATTLE_UNIT_HOTKEY_CODES\.indexOf\(event\.code\)/);
+  assert.match(source, /const slot = this\.activeSlots\[slotIndex\];/);
+  assert.doesNotMatch(source, /const slot = PLAYER_SLOTS\[slotIndex\];/);
   assert.match(source, /event\.code === 'KeyQ'/);
   assert.match(source, /event\.code === 'KeyE'/);
   assert.match(source, /event\.code === 'KeyP' \|\| event\.code === 'Escape'/);
@@ -69,6 +71,20 @@ test('mouse and keyboard battle actions share quiet failure paths without camera
   assert.match(actionBlock, /const result = tryFireBaseWeapon\(this\.state\);/);
   assert.match(actionBlock, /if \(result\.ok\) this\.playBaseWeaponFx\(\);/);
   assert.doesNotMatch(actionBlock, /cameras\.main\.shake/);
+});
+
+test('compact mobile battle HUD enlarges critical text and controls without changing the desktop canvas size', async () => {
+  const source = await readMain();
+  assert.match(source, /function isCompactMobileViewport\(\): boolean/);
+  assert.match(source, /Math\.min\(window\.innerWidth, window\.innerHeight\) <= 500/);
+  assert.match(source, /function battleUiFontSize\(regular: number, compact: number\): number/);
+  assert.match(source, /const buttonHeight = isCompactMobileViewport\(\) \? 70 : 62;/);
+  assert.match(source, /const controlHeight = isCompactMobileViewport\(\) \? 68 : 60;/);
+  assert.match(source, /battleUiFontSize\(15, 18\)/);
+  assert.match(source, /battleUiFontSize\(18, 21\)/);
+  assert.match(source, /battleUiFontSize\(21, 24\)/);
+  assert.match(source, /width: INTERNAL_WIDTH/);
+  assert.match(source, /height: INTERNAL_HEIGHT/);
 });
 
 test('stage cards render the restored twelve-step difficulty scale without legacy five-star overflow', async () => {
