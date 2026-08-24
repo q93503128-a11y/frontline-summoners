@@ -1,0 +1,82 @@
+# Frontline Summoners 문서 인덱스
+
+이 디렉터리의 문서는 역할을 분리해서 관리한다.
+
+## 읽는 순서
+
+### 1. `CANONICAL.md`
+가장 먼저 읽는다.
+
+- 현재 반드시 지켜야 하는 핵심 결정
+- 최근 사용자 피드백 반영
+- anti-goals
+- 첫 사용자 테스트 게이트
+
+다른 문서와 충돌하면 최신 `CANONICAL.md`를 우선한다.
+
+### 2. `GAME_DESIGN_FULL.md`
+전체 상세 기획서.
+
+- 제품 목표
+- 전투 코어
+- 경제
+- 캐릭터 수집
+- 캐릭터 시각 식별성
+- 레벨/업그레이드
+- 진화
+- 모집
+- 보물
+- 캠페인/맵
+- 아트/VFX
+- UI
+- 저장
+- 멀티
+- 서버
+- 검증
+- 개발 로드맵
+
+새 채팅에서 방향성을 복구할 때 반드시 같이 확인한다.
+
+### 3. `IMPLEMENTATION_STATUS.md`
+현재 구현 상태.
+
+- 이미 구현된 것
+- 아직 구현되지 않은 것
+- 첫 사용자 테스트 전에 남은 작업
+- 현재 검증 한계
+
+기획 문서가 아니라 작업 현황 문서다.
+
+### 4. `NEW_CHAT_PROMPT.md`
+새 채팅 인수인계 프롬프트.
+
+새 채팅을 시작할 때 이 파일의 내용을 붙여넣고, 그 채팅에서는 프롬프트만 믿지 말고 반드시 GitHub `main`을 다시 읽어 현재 정본 상태를 복원한다.
+
+## 실제 콘텐츠 수치
+
+구체 수치는 문서보다 `content/` JSON이 우선한다.
+
+- `content/units/chapter-01.json`
+- `content/enemies/chapter-01.json`
+- `content/stages/chapter-01.json`
+- `content/treasures/chapter-01.json`
+
+## 실제 동작
+
+문서와 코드가 충돌하는 경우 조용히 한쪽을 무시하지 않는다.
+
+1. `CANONICAL.md` 확인
+2. `GAME_DESIGN_FULL.md` 확인
+3. `IMPLEMENTATION_STATUS.md` 확인
+4. `content/` 수치 확인
+5. 실제 코드/테스트 확인
+6. 충돌 원인을 파악
+7. 정본/상세기획/구현을 함께 수정
+
+## 문서 유지 원칙
+
+- 큰 방향이 바뀌면 `CANONICAL.md` 버전을 올린다.
+- 상세 기획이 추가되면 `GAME_DESIGN_FULL.md`도 함께 갱신한다.
+- 구현이 완료/실패/보류되면 `IMPLEMENTATION_STATUS.md`를 갱신한다.
+- 새 채팅 종료 전 `NEW_CHAT_PROMPT.md`가 현재 상태와 어긋나지 않는지 확인한다.
+- 구현용 일시 메모를 정본처럼 사용하지 않는다.
