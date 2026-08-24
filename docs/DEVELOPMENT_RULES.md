@@ -1,6 +1,6 @@
 # Frontline Summoners 개발 정리 규칙
 
-이 문서는 게임 기획을 대체하지 않는다. 게임 방향은 `CANONICAL.md`와 `GAME_DESIGN_FULL.md`를 우선하고, 이 문서는 실제 수정 과정에서 과거 코드가 새 구현을 방해하지 않도록 유지하는 운영 규칙이다.
+이 문서는 게임 기획을 대체하지 않는다. 게임 방향은 `CANONICAL.md`, `GAME_DESIGN_FULL.md`, `STAGE_SYSTEM_DESIGN.md`를 우선하고, 이 문서는 실제 수정 과정에서 과거 코드가 새 구현을 방해하지 않도록 유지하는 운영 규칙이다.
 
 ## 작업 전 읽기
 
@@ -8,10 +8,12 @@
 
 1. `docs/CANONICAL.md`
 2. `docs/GAME_DESIGN_FULL.md`
-3. `docs/IMPLEMENTATION_STATUS.md`
-4. 관련 `content/` JSON
-5. 실제 코드와 테스트
+3. `docs/STAGE_SYSTEM_DESIGN.md`
+4. `docs/IMPLEMENTATION_STATUS.md`
+5. 관련 `content/` JSON
+6. 실제 코드와 테스트
 
+스테이지·특수 콘텐츠·협동·출격 제한·편성 제한·난이도 관련 수정에서는 `STAGE_SYSTEM_DESIGN.md`를 반드시 실제 구현과 대조한다.
 이미 구현된 기능을 기억만으로 다시 만들지 않는다.
 
 ## 레거시 청소 원칙
