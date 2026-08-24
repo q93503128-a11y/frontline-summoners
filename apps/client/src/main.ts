@@ -351,7 +351,7 @@ class BattleScene extends Phaser.Scene {
         return;
       }
       this.activeSlots = getUnlockedPlayerSlots(progress.clearedStageIds);
-      this.state = createPrototypeBattle(this.stage.id, this.activeSlots.map((slot) => slot.slotId));
+      this.state = createPrototypeBattle(this.stage.id, this.activeSlots.map((slot) => slot.slotId), progress.treasureIds);
       this.lastPlayerBaseHp = this.state.battle.bases.PLAYER.hp;
       this.lastEnemyBaseHp = this.state.battle.bases.ENEMY.hp;
       loading.destroy();
@@ -600,9 +600,11 @@ class BattleScene extends Phaser.Scene {
 
   private syncProjectileViews(): void {
     const active: ProjectileView[] = [];
+    const fractionalTick = Math.max(0, Math.min(1, this.accumulator / SIM_TICK_MS));
+    const renderTick = this.state.battle.tick + fractionalTick;
     for (const projectile of this.projectiles) {
       const span = Math.max(1, projectile.endTick - projectile.startTick);
-      const progress = Math.max(0, Math.min(1, (this.state.battle.tick - projectile.startTick) / span));
+      const progress = Math.max(0, Math.min(1, (renderTick - projectile.startTick) / span));
       projectile.body.x = projectile.startX + (projectile.endX - projectile.startX) * progress;
       projectile.body.y = projectile.startY + (projectile.endY - projectile.startY) * progress + getProjectileArcOffsetY(projectile.style, progress);
       projectile.body.setAlpha(progress > 0.88 ? Math.max(0.35, (1 - progress) / 0.12) : 1);
