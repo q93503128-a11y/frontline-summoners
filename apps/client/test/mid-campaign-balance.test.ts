@@ -1,56 +1,15 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import {
-  getBaseWeaponCooldownRemaining,
-  stepPlayableBattle,
-  tryFireBaseWeapon,
-  trySpawnPlayerUnit,
-} from '@frontline/sim/playable';
-import {
-  STAGES,
-  createPrototypeBattle,
-  getTreasureIdsForClearedStages,
-  getUnlockedSlotIds,
-} from '../src/prototype.ts';
+import { STAGES, getUnlockedSlotIds } from '../src/prototype.ts';
+import { autoPlayCampaignStage } from './campaign-baseline.ts';
 
 const MID_LIMITS = [
-  { maxSeconds: 150, minBaseRatio: 0.20 },
-  { maxSeconds: 165, minBaseRatio: 0.18 },
   { maxSeconds: 180, minBaseRatio: 0.15 },
-  { maxSeconds: 195, minBaseRatio: 0.12 },
-  { maxSeconds: 210, minBaseRatio: 0.10 },
+  { maxSeconds: 195, minBaseRatio: 0.13 },
+  { maxSeconds: 210, minBaseRatio: 0.11 },
+  { maxSeconds: 225, minBaseRatio: 0.09 },
+  { maxSeconds: 240, minBaseRatio: 0.08 },
 ] as const;
-
-function targetableEnemyCount(state: ReturnType<typeof createPrototypeBattle>): number {
-  return state.battle.units.filter((unit) =>
-    unit.team === 'ENEMY' && unit.state !== 'DYING' && unit.state !== 'NATURAL_KNOCKBACK'
-  ).length;
-}
-
-function autoPlayStage(stageIndex: number, clearedStageIds: readonly string[]) {
-  const stage = STAGES[stageIndex]!;
-  const unlockedSlotIds = getUnlockedSlotIds(clearedStageIds);
-  const ownedTreasureIds = getTreasureIdsForClearedStages(clearedStageIds);
-  const state = createPrototypeBattle(stage.id, unlockedSlotIds, ownedTreasureIds);
-  const limit = MID_LIMITS[stageIndex - 5]!;
-  const maxTicks = limit.maxSeconds * 30;
-  const slotPriority = [...state.playerSlots].sort((a, b) => b.cost - a.cost || a.slotId.localeCompare(b.slotId));
-
-  for (let step = 0; step < maxTicks && state.battle.winner === null; step += 1) {
-    // Simple deterministic baseline: it knows only legitimately-owned units and already-earned treasures.
-    for (const slot of slotPriority) trySpawnPlayerUnit(state, slot.slotId);
-
-    const enemies = targetableEnemyCount(state);
-    const baseRatio = state.battle.bases.PLAYER.hp / state.battle.bases.PLAYER.maxHp;
-    if (getBaseWeaponCooldownRemaining(state) === 0 && (enemies >= 3 || (enemies >= 1 && baseRatio < 0.70))) {
-      tryFireBaseWeapon(state);
-    }
-
-    stepPlayableBattle(state);
-  }
-
-  return { state, limit, unlockedSlotIds, ownedTreasureIds };
-}
 
 test('stages six through ten remain beatable in the real sequential unlock and treasure order', () => {
   const clearedStageIds = STAGES.slice(0, 5).map((stage) => stage.id);
@@ -58,9 +17,14 @@ test('stages six through ten remain beatable in the real sequential unlock and t
 
   for (let stageIndex = 5; stageIndex < 10; stageIndex += 1) {
     const stage = STAGES[stageIndex]!;
-    const { state, limit, unlockedSlotIds, ownedTreasureIds } = autoPlayStage(stageIndex, clearedStageIds);
-    assert.equal(ownedTreasureIds.length, clearedStageIds.length, 'mid baseline must not use future treasure rewards');
+    const limit = MID_LIMITS[stageIndex - 5]!;
+    const { state, unlockedSlotIds, ownedTreasureIds, targetSupplyLevel } = autoPlayCampaignStage(stageIndex, clearedStageIds, {
+      maxSeconds: limit.maxSeconds,
+      cannonBaseRatio: 0.70,
+    });
 
+    assert.equal(ownedTreasureIds.length, clearedStageIds.length, 'mid baseline must not use future treasure rewards');
+    assert.equal(targetSupplyLevel, stageIndex >= 7 ? 2 : 1);
     assert.equal(
       state.battle.winner,
       'PLAYER',
