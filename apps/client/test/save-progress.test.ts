@@ -13,18 +13,19 @@ test('session and durable guest progress merge without duplicates while preservi
   assert.deepEqual(merged.treasureIds, ['wind-badge', 'pot-token']);
 });
 
-test('campaign progress normalization repairs progression without deleting future special clears or non-stage rewards', () => {
+test('campaign progress normalization keeps progression sequential, repairs guaranteed treasure, and reserves special clears for a separate future field', () => {
   const normalized = normalizeGuestProgress({
     clearedStageIds: ['border-01', 'border-03', 'border-16', 'future-special-stage'],
     treasureIds: ['pot-token', 'wall-shadow', 'future-special-relic'],
   });
 
-  assert.deepEqual(normalized.clearedStageIds, ['border-01', 'future-special-stage']);
+  assert.deepEqual(normalized.clearedStageIds, ['border-01']);
   assert.deepEqual(normalized.treasureIds, ['wind-badge', 'future-special-relic']);
 });
 
 test('recordStageClear validates the canonical stage reward and normalizes storage sources before merging', async () => {
   const source = await readFile(new URL('../src/save.ts', import.meta.url), 'utf8');
+  assert.match(source, /Current schema stores sequential PROGRESSION clears only/);
   assert.match(source, /const stored = normalizeGuestProgress\(await readStoredProgress\(db\)\);/);
   assert.match(source, /const currentSession = normalizeGuestProgress\(sessionProgress\);/);
   assert.match(source, /normalizeGuestProgress\(mergeGuestProgress\(stored, currentSession\)\)/);
@@ -32,7 +33,6 @@ test('recordStageClear validates the canonical stage reward and normalizes stora
   assert.match(source, /if \(!isStageUnlocked\(stage\.id, before\.clearedStageIds\)\)/);
   assert.match(source, /if \(claimedTreasureId !== stage\.treasure\.id\)/);
   assert.match(source, /treasures\.add\(stage\.treasure\.id\)/);
-  assert.match(source, /nonProgressionStageIds/);
   assert.match(source, /nonStageTreasureIds/);
 });
 
