@@ -37,7 +37,22 @@
 
 새 채팅에서 방향성을 복구할 때 반드시 같이 확인한다.
 
-### 3. `IMPLEMENTATION_STATUS.md`
+### 3. `STAGE_SYSTEM_DESIGN.md`
+스테이지 시스템의 복원된 정밀 기획 정본 보조 문서.
+
+- 진도 스테이지 / 특수 스테이지 분리
+- 난이도 1~12
+- 아군/적 동시 출격 제한
+- 스폰·페이즈 트리거 DSL
+- 편성 제한 DSL
+- 특수 규칙
+- 2인 협동의 편성·경제·공유 자원
+- 협동에서 적 HP/공격력/거점 HP만 보정하는 원칙
+- `협동 권장` 태그 금지
+
+스테이지/협동 세부 규칙이 `GAME_DESIGN_FULL.md`의 축약 표현과 다르면 `CANONICAL.md`에 위배되지 않는 범위에서 이 문서를 우선한다.
+
+### 4. `IMPLEMENTATION_STATUS.md`
 현재 구현 상태.
 
 - 이미 구현된 것
@@ -47,7 +62,7 @@
 
 기획 문서가 아니라 작업 현황 문서다.
 
-### 4. `DEVELOPMENT_RULES.md`
+### 5. `DEVELOPMENT_RULES.md`
 실제 수정 과정의 운영 규칙.
 
 - 매 작업 전 정본/상세기획/구현상태 재확인
@@ -56,7 +71,7 @@
 - 같은 책임은 최종적으로 하나의 권위 경로만 유지
 - 실패를 수치 뻥튀기나 테스트 완화로 숨기지 않음
 
-### 5. `NEW_CHAT_PROMPT.md`
+### 6. `NEW_CHAT_PROMPT.md`
 새 채팅 인수인계 프롬프트.
 
 새 채팅을 시작할 때 이 파일의 내용을 붙여넣고, 그 채팅에서는 프롬프트만 믿지 말고 반드시 GitHub `main`을 다시 읽어 현재 정본 상태를 복원한다.
@@ -76,17 +91,19 @@
 
 1. `CANONICAL.md` 확인
 2. `GAME_DESIGN_FULL.md` 확인
-3. `IMPLEMENTATION_STATUS.md` 확인
-4. `DEVELOPMENT_RULES.md` 확인
-5. `content/` 수치 확인
-6. 실제 코드/테스트 확인
-7. 충돌 원인을 파악
-8. 정본/상세기획/구현을 함께 수정
+3. `STAGE_SYSTEM_DESIGN.md` 확인
+4. `IMPLEMENTATION_STATUS.md` 확인
+5. `DEVELOPMENT_RULES.md` 확인
+6. `content/` 수치 확인
+7. 실제 코드/테스트 확인
+8. 충돌 원인을 파악
+9. 정본/상세기획/구현을 함께 수정
 
 ## 문서 유지 원칙
 
 - 큰 방향이 바뀌면 `CANONICAL.md` 버전을 올린다.
-- 상세 기획이 추가되면 `GAME_DESIGN_FULL.md`도 함께 갱신한다.
+- 상세 기획이 추가되면 `GAME_DESIGN_FULL.md` 또는 해당 정밀 보조 문서를 함께 갱신한다.
+- 스테이지/협동 세부 규칙이 바뀌면 `STAGE_SYSTEM_DESIGN.md`를 반드시 갱신한다.
 - 구현이 완료/실패/보류되면 `IMPLEMENTATION_STATUS.md`를 갱신한다.
 - 개발 작업 방식이 바뀌면 `DEVELOPMENT_RULES.md`를 갱신한다.
 - 새 채팅 종료 전 `NEW_CHAT_PROMPT.md`가 현재 상태와 어긋나지 않는지 확인한다.
