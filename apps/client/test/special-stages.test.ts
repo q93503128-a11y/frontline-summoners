@@ -50,6 +50,31 @@ test('special pack uses materially different battlefield pressures rather than f
   );
 });
 
+test('mandatory special bosses enter early enough to define the challenge instead of sitting behind a late empty-base clear', () => {
+  const threeVow = SPECIAL_STAGES[3]!;
+  const doubleBoss = SPECIAL_STAGES[4]!;
+  assert.deepEqual(
+    threeVow.waves.map((wave) => [wave.enemyId, wave.atTick]),
+    [
+      ['enemy-knight', 300],
+      ['enemy-berserker', 900],
+      ['enemy-boss-iron', 1500],
+      ['enemy-sniper', 1600],
+    ],
+  );
+  assert.deepEqual(
+    doubleBoss.waves.map((wave) => [wave.enemyId, wave.atTick]),
+    [
+      ['enemy-cultist', 240],
+      ['enemy-shield', 600],
+      ['enemy-boss-golden', 1050],
+      ['enemy-berserker', 1800],
+      ['enemy-boss-iron', 2100],
+      ['enemy-sniper', 2200],
+    ],
+  );
+});
+
 test('special battle factory applies all chapter-one account growth while respecting stage-specific caps', () => {
   const fullChapter = STAGES.map((stage) => stage.id);
   const chapterTreasures = getTreasureIdsForClearedStages(fullChapter);
