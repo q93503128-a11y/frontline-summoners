@@ -13,6 +13,22 @@ const FINAL_LIMITS = [
 
 const EXPECTED_ROSTER_SIZE_BEFORE_STAGE = [8, 9, 9, 9, 9] as const;
 
+test('stage twenty preserves an economy opening before both mandatory boss phases', () => {
+  const stage = STAGES[19]!;
+  assert.equal(stage.id, 'border-20');
+  assert.deepEqual(
+    stage.waves.map((wave) => [wave.enemyId, wave.atTick, wave.count, wave.intervalTicks]),
+    [
+      ['enemy-shield', 450, 2, 250],
+      ['enemy-berserker', 1000, 1, 230],
+      ['enemy-boss', 1500, 1, 9999],
+      ['enemy-sniper', 1800, 1, 260],
+      ['enemy-boss-iron', 2400, 1, 9999],
+    ],
+    'STAGE 20 must keep its 15s economy opening and 50s/80s boss phases instead of reverting to the old early rush',
+  );
+});
+
 test('stages sixteen through twenty stay beatable in exact unlock/treasure order and final bosses actually appear', () => {
   const clearedStageIds = STAGES.slice(0, 15).map((stage) => stage.id);
   assert.deepEqual(
