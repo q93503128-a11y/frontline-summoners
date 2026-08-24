@@ -51,9 +51,9 @@ test('PC battle hotkeys map 1 through 0 to current deck slots, Q to supply upgra
   assert.match(source, /event\.code === 'KeyQ'/);
   assert.match(source, /event\.code === 'KeyE'/);
   assert.match(source, /event\.code === 'KeyP' \|\| event\.code === 'Escape'/);
-  assert.match(source, /Q · 보급소 강화/);
-  assert.match(source, /E · 전선포 · 발사 가능/);
-  assert.match(source, /getUnitHotkeyLabel\(index\)/);
+  assert.match(source, /compact \? '보급소 강화' : 'Q · 보급소 강화'/);
+  assert.match(source, /const weaponPrefix = isCompactMobileViewport\(\) \? '전선포' : 'E · 전선포'/);
+  assert.match(source, /if \(!compact\) addText\(this, x \+ 82, y - 25, hotkeyLabel/);
 });
 
 test('mouse and keyboard battle actions share quiet failure paths without camera shake', async () => {
@@ -95,16 +95,19 @@ test('locked-stage and save-pending clicks are quiet; camera shake is reserved f
   assert.match(source, /private playBaseImpactFx[\s\S]*?cameras\.main\.shake/);
 });
 
-test('compact mobile battle HUD enlarges critical text and controls without changing the desktop canvas size', async () => {
+test('compact mobile battle HUD prioritizes readable touch controls without changing desktop shortcuts', async () => {
   const source = await readMain();
   assert.match(source, /function isCompactMobileViewport\(\): boolean/);
-  assert.match(source, /Math\.min\(window\.innerWidth, window\.innerHeight\) <= 500/);
+  assert.match(source, /Math\.min\(window\.innerWidth, window\.innerHeight\) <= 540/);
   assert.match(source, /function battleUiFontSize\(regular: number, compact: number\): number/);
-  assert.match(source, /const buttonHeight = isCompactMobileViewport\(\) \? 70 : 62;/);
-  assert.match(source, /const controlHeight = isCompactMobileViewport\(\) \? 68 : 60;/);
-  assert.match(source, /battleUiFontSize\(15, 18\)/);
-  assert.match(source, /battleUiFontSize\(18, 21\)/);
-  assert.match(source, /battleUiFontSize\(21, 24\)/);
+  assert.match(source, /const compact = isCompactMobileViewport\(\);/);
+  assert.match(source, /const buttonHeight = compact \? 80 : 62;/);
+  assert.match(source, /const y = compact \? 582 \+ row \* 80 : 579 \+ row \* 72;/);
+  assert.match(source, /const controlHeight = compact \? 76 : 60;/);
+  assert.match(source, /const unitButtonName = compact \? slot\.displayName : `\$\{slot\.rarity\} · \$\{slot\.displayName\}`/);
+  assert.match(source, /battleUiFontSize\(15, 22\)/);
+  assert.match(source, /battleUiFontSize\(21, 28\)/);
+  assert.match(source, /compact \? '전선포 · 발사 가능' : 'E · 전선포 · 발사 가능'/);
   assert.match(source, /width: INTERNAL_WIDTH/);
   assert.match(source, /height: INTERNAL_HEIGHT/);
 });
