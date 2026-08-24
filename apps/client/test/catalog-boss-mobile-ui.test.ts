@@ -43,11 +43,13 @@ test('boss arrival warning is keyed by actual BOSS-tagged simulation units and o
 test('portrait mobile view blocks tiny layout and freezes battle before the 30Hz accumulator advances', async () => {
   const main = await readSource('../src/main.ts');
   const html = await readSource('../index.html');
-  const guardIndex = main.indexOf('if (!this.ready || this.resolved || isPortraitMobileViewport()) return;');
-  const accumulatorIndex = main.indexOf('this.accumulator += Math.min(delta, 120);');
+  const updateStart = main.indexOf('update(_: number, delta: number): void {');
+  const guardIndex = main.indexOf('isPortraitMobileViewport()) return;', updateStart);
+  const accumulatorIndex = main.indexOf('this.accumulator += Math.min(delta, 120);', updateStart);
 
   assert.match(main, /function isPortraitMobileViewport\(\): boolean/);
-  assert.ok(guardIndex >= 0 && accumulatorIndex > guardIndex, 'portrait guard must return before simulation time accumulates');
+  assert.ok(updateStart >= 0 && guardIndex > updateStart && accumulatorIndex > guardIndex, 'portrait guard must return before simulation time accumulates');
+  assert.match(main, /this\.manuallyPaused\s*\|\|\s*isPortraitMobileViewport\(\)/, 'manual pause and portrait guard must share the pre-accumulator stop path');
   assert.match(html, /viewport-fit=cover/);
   assert.match(html, /@media \(orientation: portrait\) and \(max-width: 900px\)/);
   assert.match(html, /id="orientation-hint"/);
