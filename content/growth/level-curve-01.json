@@ -1,0 +1,8 @@
+{
+  "id": "level-curve-01",
+  "status": "PROTOTYPE_BALANCE",
+  "levelCap": 50,
+  "softCapLevel": 30,
+  "hpAttackPermillePerLevelBeforeSoftCap": 15,
+  "hpAttackPermillePerLevelAfterSoftCap": 8
+}
