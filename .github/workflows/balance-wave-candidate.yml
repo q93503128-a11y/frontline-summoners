@@ -1,0 +1,48 @@
+name: Wave balance candidate
+on:
+  push:
+    branches: [main]
+    paths: [.github/workflows/balance-wave-candidate.yml]
+permissions:
+  contents: write
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with: {fetch-depth: 0}
+      - uses: actions/setup-node@v4
+        with: {node-version: 22}
+      - name: Probe targeted second wave pass
+        shell: bash
+        run: |
+          set -e
+          npm ci --ignore-scripts >/tmp/install.log 2>&1
+          cp content/stages/chapter-01.json /tmp/stages.json
+          node --input-type=module <<'NODE'
+          import {readFileSync,writeFileSync} from 'node:fs';
+          const p='content/stages/chapter-01.json', s=JSON.parse(readFileSync(p,'utf8'));
+          for(let i=7;i<s.length;i++) s[i].startingSupply += 40;
+          const counts={
+            3:[6,3,3],4:[1,5,2],5:[6,1,1],9:[2,7,1,1],10:[5,1,3,1],
+            12:[7,1,3],13:[2,2,5],14:[2,2,2],15:[2,2,2],16:[2,2,2,2],
+            17:[2,6,2],18:[6,2,2,2],19:[3,2,2,1],20:[3,3,1,2,1]
+          };
+          for(const [stageNumber,newCounts] of Object.entries(counts)) {
+            const stage=s[Number(stageNumber)-1];
+            stage.waves.forEach((wave,i)=>wave.count=newCounts[i]);
+          }
+          s[3].waves[0].atTick=360; s[3].waves[1].atTick=540; s[3].waves[2].atTick=980;
+          s[4].waves[0].atTick=240; s[4].waves[1].atTick=840; s[4].waves[2].atTick=1260;
+          s[14].waves[0].atTick=300; s[16].waves[0].atTick=300;
+          writeFileSync(p,JSON.stringify(s,null,2)+'\n');
+          NODE
+          node --experimental-transform-types --input-type=module >/tmp/candidate.log 2>&1 <<'NODE'
+          const {STAGES}=await import('./apps/client/src/prototype.ts'); const {autoPlayCampaignStage}=await import('./apps/client/test/campaign-baseline.ts');
+          const o=i=>({maxSeconds:i<5?[90,105,120,135,150][i]:i<10?[180,195,210,225,240][i-5]:i<15?[255,270,285,300,315][i-10]:[330,345,360,390,450][i-15],cannonBaseRatio:i<5?.75:i<10?.70:i<15?.72:.75,...(i<5?{cannonEnemyCount:2}:{})});
+          for(let n=0;n<20;n++){const r=autoPlayCampaignStage(n,STAGES.slice(0,n).map(x=>x.id),o(n)),b=r.state;console.log(JSON.stringify({stage:n+1,start:STAGES[n].startingSupply,winner:b.battle.winner,sec:+(b.battle.tick/30).toFixed(1),p:+(b.battle.bases.PLAYER.hp/b.battle.bases.PLAYER.maxHp).toFixed(3),e:+(b.battle.bases.ENEMY.hp/b.battle.bases.ENEMY.maxHp).toFixed(3),lvl:b.supplyLevel,sp:r.telemetry.spawnCount,up:r.telemetry.upgradeCount,empty:+(r.telemetry.longestEnemyPressureWithoutPlayerTicks/30).toFixed(1),players:[...r.telemetry.seenPlayerIds],enemies:[...r.seenEnemyIds]}));}
+          NODE
+          mv /tmp/stages.json content/stages/chapter-01.json
+          { printf 'source_sha=%s\nstrategy=ST8+40 plus targeted second wave reduction\n\n' "$GITHUB_SHA"; cat /tmp/candidate.log; } > docs/BALANCE_WAVE_CANDIDATE_RESULT.txt
+          git config user.name frontline-ci; git config user.email frontline-ci@users.noreply.github.com
+          git rm .github/workflows/balance-wave-candidate.yml; git add docs/BALANCE_WAVE_CANDIDATE_RESULT.txt; git commit -m 'chore: record targeted wave balance candidate'; git push origin HEAD:main
