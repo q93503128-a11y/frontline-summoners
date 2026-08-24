@@ -73,6 +73,26 @@ test('mouse and keyboard battle actions share quiet failure paths without camera
   assert.doesNotMatch(actionBlock, /cameras\.main\.shake/);
 });
 
+test('locked-stage and save-pending clicks are quiet; camera shake is reserved for combat impact FX', async () => {
+  const source = await readMain();
+  const stageStart = source.indexOf('class StageSelectScene');
+  const deckStart = source.indexOf('class DeckScene');
+  const resultStart = source.indexOf('class ResultScene');
+  const gameStart = source.indexOf('new Phaser.Game');
+  assert.ok(stageStart >= 0 && deckStart > stageStart && resultStart > deckStart && gameStart > resultStart);
+
+  const stageBlock = source.slice(stageStart, deckStart);
+  const resultBlock = source.slice(resultStart, gameStart);
+  assert.match(stageBlock, /if \(unlocked\) this\.scene\.start\('battle', \{ stageId: stage\.id \}\);/);
+  assert.doesNotMatch(stageBlock, /cameras\.main\.shake/);
+  assert.match(resultBlock, /if \(!this\.progressionSaved\) return;/);
+  assert.doesNotMatch(resultBlock, /cameras\.main\.shake/);
+
+  assert.match(source, /private playBaseWeaponFx\(\): void[\s\S]*?cameras\.main\.shake/);
+  assert.match(source, /private playUnitImpactFx[\s\S]*?cameras\.main\.shake/);
+  assert.match(source, /private playBaseImpactFx[\s\S]*?cameras\.main\.shake/);
+});
+
 test('compact mobile battle HUD enlarges critical text and controls without changing the desktop canvas size', async () => {
   const source = await readMain();
   assert.match(source, /function isCompactMobileViewport\(\): boolean/);
