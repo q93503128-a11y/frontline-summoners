@@ -68,7 +68,25 @@
 
 모집·성장·진화 세부가 `GAME_DESIGN_FULL.md`의 과거 축약 표현과 다르면 `CANONICAL.md`에 위배되지 않는 범위에서 이 문서를 우선한다.
 
-### 5. `IMPLEMENTATION_STATUS.md`
+### 5. `FEATURE_COVERAGE_MATRIX.md`
+초기 전체 기획의 **필수 기능 누락 방지 감사표**.
+
+- 전투 핵심
+- 캐릭터 수집/희귀도
+- 모집/천장/중복
+- Lv1~50 업그레이드
+- 3형태 진화
+- 수동 10칸 덱
+- 성장/모집/도감 UI
+- 스테이지/특수전/출정 계층
+- 저장/계정
+- 협동/PvP 장기 구조
+
+각 기능을 `DONE / PARTIAL / MISSING / PLANNED / CANDIDATE`로 구분한다.
+
+**중요:** 전투 vertical slice가 잘 돌아가더라도 모집·수동10칸덱·레벨/강화·3형태 진화·메타 UI·저장이 빠져 있으면 전체 게임 필수 기능이 완료된 것이 아니다. 모든 의미 있는 작업 전에 이 매트릭스에서 변경 대상과 인접 기능을 확인한다.
+
+### 6. `IMPLEMENTATION_STATUS.md`
 현재 구현 상태.
 
 - 이미 구현된 것
@@ -78,16 +96,16 @@
 
 기획 문서가 아니라 작업 현황 문서다.
 
-### 6. `DEVELOPMENT_RULES.md`
+### 7. `DEVELOPMENT_RULES.md`
 실제 수정 과정의 운영 규칙.
 
-- 매 작업 전 정본/상세기획/구현상태 재확인
+- 매 작업 전 정본/상세기획/정밀설계/기능 커버리지/구현상태 재확인
 - 구식 핫픽스·override·중복 구현 동시 제거
 - 새 코드를 과거 코드 위에 덧씌우는 방식 금지
 - 같은 책임은 최종적으로 하나의 권위 경로만 유지
 - 실패를 수치 뻥튀기나 테스트 완화로 숨기지 않음
 
-### 7. `NEW_CHAT_PROMPT.md`
+### 8. `NEW_CHAT_PROMPT.md`
 새 채팅 인수인계 프롬프트.
 
 새 채팅을 시작할 때 이 파일의 내용을 붙여넣고, 그 채팅에서는 프롬프트만 믿지 말고 반드시 GitHub `main`을 다시 읽어 현재 정본 상태를 복원한다.
@@ -118,12 +136,13 @@
 3. 관련 정밀 문서 확인
    - 스테이지/협동: `STAGE_SYSTEM_DESIGN.md`
    - 모집/성장/진화: `GROWTH_RECRUITMENT_DESIGN.md`
-4. `IMPLEMENTATION_STATUS.md` 확인
-5. `DEVELOPMENT_RULES.md` 확인
-6. `content/` 수치 확인
-7. 실제 코드/테스트 확인
-8. 충돌 원인을 파악
-9. 정본/상세기획/구현을 함께 수정
+4. `FEATURE_COVERAGE_MATRIX.md`에서 필수 기능 상태 확인
+5. `IMPLEMENTATION_STATUS.md` 확인
+6. `DEVELOPMENT_RULES.md` 확인
+7. `content/` 수치 확인
+8. 실제 코드/테스트 확인
+9. 충돌 원인을 파악
+10. 정본/상세기획/구현을 함께 수정
 
 ## 문서 유지 원칙
 
@@ -131,6 +150,7 @@
 - 상세 기획이 추가되면 `GAME_DESIGN_FULL.md` 또는 해당 정밀 보조 문서를 함께 갱신한다.
 - 스테이지/협동 세부 규칙이 바뀌면 `STAGE_SYSTEM_DESIGN.md`를 반드시 갱신한다.
 - 모집/성장/진화 세부 규칙이 바뀌면 `GROWTH_RECRUITMENT_DESIGN.md`를 반드시 갱신한다.
+- 필수 기능의 구현 상태가 바뀌면 `FEATURE_COVERAGE_MATRIX.md`를 반드시 갱신한다.
 - 구현이 완료/실패/보류되면 `IMPLEMENTATION_STATUS.md`를 갱신한다.
 - 개발 작업 방식이 바뀌면 `DEVELOPMENT_RULES.md`를 갱신한다.
 - 새 채팅 종료 전 `NEW_CHAT_PROMPT.md`가 현재 상태와 어긋나지 않는지 확인한다.
