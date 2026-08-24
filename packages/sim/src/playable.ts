@@ -19,14 +19,14 @@ export interface SupplyLevelDefinition {
 }
 
 export const DEFAULT_SUPPLY_LEVELS: readonly SupplyLevelDefinition[] = [
-  { incomePerSecond: 65, maxSupply: 3000, upgradeCost: 0 },
-  { incomePerSecond: 78, maxSupply: 3600, upgradeCost: 350 },
-  { incomePerSecond: 92, maxSupply: 4300, upgradeCost: 500 },
-  { incomePerSecond: 108, maxSupply: 5100, upgradeCost: 700 },
-  { incomePerSecond: 126, maxSupply: 6000, upgradeCost: 950 },
-  { incomePerSecond: 146, maxSupply: 7000, upgradeCost: 1250 },
-  { incomePerSecond: 168, maxSupply: 8100, upgradeCost: 1600 },
-  { incomePerSecond: 192, maxSupply: 9300, upgradeCost: 2050 },
+  { incomePerSecond: 12, maxSupply: 1000, upgradeCost: 0 },
+  { incomePerSecond: 16, maxSupply: 1400, upgradeCost: 160 },
+  { incomePerSecond: 22, maxSupply: 1900, upgradeCost: 260 },
+  { incomePerSecond: 29, maxSupply: 2500, upgradeCost: 390 },
+  { incomePerSecond: 38, maxSupply: 3200, upgradeCost: 560 },
+  { incomePerSecond: 49, maxSupply: 4000, upgradeCost: 760 },
+  { incomePerSecond: 62, maxSupply: 5000, upgradeCost: 1000 },
+  { incomePerSecond: 78, maxSupply: 6200, upgradeCost: 1300 },
 ] as const;
 
 export interface BaseWeaponDefinition {
@@ -188,7 +188,7 @@ function validateConfig(config: PlayableBattleConfig): void {
 export function createPlayableBattle(config: PlayableBattleConfig): PlayableBattleState {
   validateConfig(config);
   const supplyLevels = config.supplyLevels ?? DEFAULT_SUPPLY_LEVELS;
-  const startingSupply = config.startingSupply ?? 300;
+  const startingSupply = config.startingSupply ?? 50;
   const state: PlayableBattleState = {
     battle: createBattle({ mapLength: config.mapLength, playerBaseHp: config.playerBaseHp, enemyBaseHp: config.enemyBaseHp }),
     supply: Math.min(startingSupply, supplyLevels[0]!.maxSupply),
