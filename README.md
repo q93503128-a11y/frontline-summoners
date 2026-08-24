@@ -8,23 +8,38 @@
 - 온라인 2인 협동 / 1v1 / 2v2 확장
 - 30Hz 결정론적 전투 코어를 브라우저와 권위 서버가 공유
 - 전투 조작: 유닛 생산, 보급소 투자, 거점 병기
+- 솔로 완전 일시정지 지원
 - 10칸 덱(협동/2v2는 플레이어당 5칸)
+- 기본 핵심 로스터 약 10종, 이후 모집·스테이지/보스·외전·이벤트로 캐릭터 풀 확장
+- 캐릭터는 종족/체형/장비/모션이 다른 강한 실루엣 식별성을 우선
+- 캐릭터 레벨/강화/진화는 핵심 메타 시스템
+- 진화 시 외형·애니메이션·VFX·전투 효과까지 변화 가능
 - 희귀도와 절대 성능을 분리
-- 과금 없음, 후한 캐릭터 획득
-- 기준 픽셀 화풍: LuizMelo 계열 CC0 에셋
+- 과금 없음, 후한 캐릭터 획득 방향
+- 기준 프로토타입 픽셀 화풍: LuizMelo 계열 CC0 에셋
 
-정본 요약은 [`docs/CANONICAL.md`](docs/CANONICAL.md)를 따른다.
+## 문서 — 반드시 이 순서로 확인
+
+1. [`docs/CANONICAL.md`](docs/CANONICAL.md) — 최신 핵심 결정 정본
+2. [`docs/GAME_DESIGN_FULL.md`](docs/GAME_DESIGN_FULL.md) — 통합 전체 상세 기획서
+3. [`docs/IMPLEMENTATION_STATUS.md`](docs/IMPLEMENTATION_STATUS.md) — 현재 구현/미구현 상태
+4. [`docs/INDEX.md`](docs/INDEX.md) — 문서 권위와 유지 규칙
+5. [`docs/NEW_CHAT_PROMPT.md`](docs/NEW_CHAT_PROMPT.md) — 새 채팅 인수인계 프롬프트
+
+구체 콘텐츠 수치는 `content/` JSON을 우선한다.
 
 ## 저장소 구조
 
 - `apps/client`: Phaser + Vite 브라우저 클라이언트
-- `apps/server`: Cloudflare Workers / Durable Objects 서버 자리
+- `apps/server`: Cloudflare Workers / Durable Objects 서버
 - `packages/sim`: 싱글/멀티 공용 결정론적 전투 코어
 - `packages/shared`: 공용 프로토콜/상수
 - `packages/content-schema`: 캐릭터·적·스테이지 데이터 형식
 - `content`: 실제 게임 콘텐츠 데이터
 - `assets/raw`: 원본 에셋과 라이선스 관리
 - `public/assets`: 런타임 배포 에셋
+- `docs`: 정본/통합기획/구현상태/인수인계 문서
+- `tools`: 검증 및 빌드 보조 도구
 
 ## 로컬 실행
 
@@ -33,4 +48,4 @@ npm install
 npm run dev
 ```
 
-Cloudflare 리소스는 기본 골격 검증 후 연결한다.
+정식 검증 목표는 install → typecheck → test → deterministic/content validation → build 순서다.
