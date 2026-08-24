@@ -1,9 +1,9 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
 import { ART_BY_ID, ART_FAMILIES, UNIT_ART } from '../src/assets.ts';
-import { ENEMIES, PLAYER_SLOTS } from '../src/prototype.ts';
+import { ENEMIES, PLAYER_SLOTS, RECRUITMENT_PLAYER_SLOTS } from '../src/prototype.ts';
 
-const allCombatantIds = [
+const chapterOneCombatantIds = [
   ...PLAYER_SLOTS.map((slot) => slot.definition.id),
   ...ENEMIES.map((enemy) => enemy.definition.id),
 ];
@@ -11,13 +11,28 @@ const allCombatantIds = [
 const ATTACK_FX_STYLES = new Set(['SLASH', 'PIERCE', 'BLUNT', 'MAGIC', 'FIRE', 'VOID']);
 
 test('every chapter one player and enemy has a registered art family and attack FX style', () => {
-  assert.equal(allCombatantIds.length, 20);
-  for (const id of allCombatantIds) {
+  assert.equal(chapterOneCombatantIds.length, 20);
+  for (const id of chapterOneCombatantIds) {
     const variant = UNIT_ART[id];
     assert.ok(variant, `missing UNIT_ART mapping for ${id}`);
     assert.ok(ART_BY_ID[variant.familyId], `unknown art family ${variant.familyId} for ${id}`);
     assert.ok(ATTACK_FX_STYLES.has(variant.attackFx), `unknown attack FX ${variant.attackFx} for ${id}`);
   }
+});
+
+test('every recruitment character has an explicit prototype art mapping instead of falling through to the same default warrior', () => {
+  assert.equal(RECRUITMENT_PLAYER_SLOTS.length, 15);
+  for (const slot of RECRUITMENT_PLAYER_SLOTS) {
+    const id = slot.definition.id;
+    const variant = UNIT_ART[id];
+    assert.ok(variant, `missing recruitment UNIT_ART mapping for ${id}`);
+    assert.ok(ART_BY_ID[variant.familyId], `unknown art family ${variant.familyId} for ${id}`);
+    assert.ok(ATTACK_FX_STYLES.has(variant.attackFx), `unknown attack FX ${variant.attackFx} for ${id}`);
+  }
+  assert.ok(
+    new Set(RECRUITMENT_PLAYER_SLOTS.map((slot) => UNIT_ART[slot.definition.id]?.familyId)).size >= 6,
+    'the first recruitment pool must not collapse into one or two prototype visual families',
+  );
 });
 
 test('all sprite strips are local deploy assets with coherent frame metadata', () => {
