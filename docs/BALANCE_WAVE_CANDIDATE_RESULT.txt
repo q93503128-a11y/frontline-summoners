@@ -1,0 +1,25 @@
+source_sha=1842cf887396ba9000a2259ad7262e4b1646ab49
+strategy=ST8+40 plus targeted second wave reduction
+
+{"stage":1,"start":50,"winner":"PLAYER","sec":35.4,"p":1,"e":0,"lvl":1,"sp":13,"up":0,"empty":0,"players":["militia"],"enemies":["enemy-raider"]}
+{"stage":2,"start":60,"winner":"PLAYER","sec":62.1,"p":1,"e":0,"lvl":1,"sp":12,"up":0,"empty":0,"players":["militia","guard"],"enemies":["enemy-sprinter","enemy-raider"]}
+{"stage":3,"start":70,"winner":"PLAYER","sec":105.6,"p":1,"e":0,"lvl":1,"sp":16,"up":0,"empty":0,"players":["militia","guard","hunter"],"enemies":["enemy-raider","enemy-spearman","enemy-sprinter"]}
+{"stage":4,"start":80,"winner":"PLAYER","sec":124.5,"p":1,"e":0,"lvl":1,"sp":19,"up":0,"empty":0,"players":["militia","guard","hunter"],"enemies":["enemy-shield","enemy-raider","enemy-spearman"]}
+{"stage":5,"start":90,"winner":"PLAYER","sec":77.8,"p":1,"e":0,"lvl":1,"sp":8,"up":0,"empty":0,"players":["militia","guard","hunter","duelist"],"enemies":["enemy-raider","enemy-cultist","enemy-shield"]}
+{"stage":6,"start":100,"winner":"PLAYER","sec":129.6,"p":1,"e":0,"lvl":1,"sp":19,"up":0,"empty":0,"players":["militia","guard","hunter","duelist"],"enemies":["enemy-sprinter","enemy-shield","enemy-raider"]}
+{"stage":7,"start":110,"winner":"PLAYER","sec":111.4,"p":1,"e":0,"lvl":1,"sp":16,"up":0,"empty":0,"players":["militia","guard","hunter","duelist","lancer"],"enemies":["enemy-raider","enemy-sniper","enemy-sprinter"]}
+{"stage":8,"start":160,"winner":"PLAYER","sec":182.1,"p":0.542,"e":0,"lvl":2,"sp":53,"up":1,"empty":1.9,"players":["militia","guard","hunter","duelist","lancer"],"enemies":["enemy-shield","enemy-spearman","enemy-cultist"]}
+{"stage":9,"start":170,"winner":"ENEMY","sec":119.1,"p":0,"e":0.973,"lvl":1,"sp":30,"up":0,"empty":3.8,"players":["militia","guard","hunter"],"enemies":["enemy-cultist","enemy-raider","enemy-shield"]}
+{"stage":10,"start":180,"winner":"PLAYER","sec":161,"p":0.277,"e":0,"lvl":2,"sp":37,"up":1,"empty":2.1,"players":["militia","guard","hunter","duelist","lancer"],"enemies":["enemy-raider","enemy-knight","enemy-spearman","enemy-sniper"]}
+{"stage":11,"start":190,"winner":"PLAYER","sec":178.3,"p":0.75,"e":0,"lvl":2,"sp":42,"up":1,"empty":1.8,"players":["militia","guard","hunter","duelist","lancer"],"enemies":["enemy-shield","enemy-sniper","enemy-sprinter"]}
+{"stage":12,"start":200,"winner":"PLAYER","sec":135.2,"p":1,"e":0,"lvl":2,"sp":22,"up":1,"empty":0,"players":["militia","guard","hunter","duelist","lancer","battlemage"],"enemies":["enemy-sprinter","enemy-berserker","enemy-spearman"]}
+{"stage":13,"start":210,"winner":"ENEMY","sec":100.3,"p":0,"e":0.966,"lvl":1,"sp":22,"up":0,"empty":3.5,"players":["militia","guard"],"enemies":["enemy-knight","enemy-cultist","enemy-sprinter"]}
+{"stage":14,"start":220,"winner":"ENEMY","sec":132.8,"p":0,"e":1,"lvl":2,"sp":42,"up":1,"empty":2.3,"players":["militia","guard","hunter"],"enemies":["enemy-shield","enemy-sniper","enemy-berserker"]}
+{"stage":15,"start":230,"winner":"ENEMY","sec":66.9,"p":0,"e":0.972,"lvl":1,"sp":16,"up":0,"empty":4.1,"players":["militia","guard"],"enemies":["enemy-berserker","enemy-shield","enemy-cultist"]}
+{"stage":16,"start":240,"winner":"ENEMY","sec":139,"p":0,"e":1,"lvl":2,"sp":43,"up":1,"empty":2.2,"players":["militia","guard","hunter"],"enemies":["enemy-shield","enemy-sniper","enemy-knight","enemy-cultist"]}
+{"stage":17,"start":250,"winner":"ENEMY","sec":62.2,"p":0,"e":0.987,"lvl":1,"sp":18,"up":0,"empty":3.2,"players":["militia","guard"],"enemies":["enemy-berserker","enemy-sprinter","enemy-knight"]}
+{"stage":18,"start":260,"winner":"ENEMY","sec":110.1,"p":0,"e":1,"lvl":2,"sp":28,"up":1,"empty":2.5,"players":["militia","guard","hunter","duelist"],"enemies":["enemy-raider","enemy-shield","enemy-sniper","enemy-berserker"]}
+{"stage":19,"start":280,"winner":"ENEMY","sec":113.8,"p":0,"e":1,"lvl":2,"sp":38,"up":1,"empty":2.5,"players":["militia","guard","hunter"],"enemies":["enemy-cultist","enemy-knight","enemy-sniper","enemy-boss"]}
+{"stage":20,"start":300,"winner":"ENEMY","sec":103.8,"p":0,"e":1,"lvl":2,"sp":33,"up":1,"empty":2.1,"players":["militia","guard","hunter"],"enemies":["enemy-shield","enemy-berserker","enemy-boss","enemy-sniper","enemy-boss-iron"]}
+(node:2142) ExperimentalWarning: Transform Types is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
