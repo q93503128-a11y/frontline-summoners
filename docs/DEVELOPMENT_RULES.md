@@ -11,13 +11,23 @@
 3. 관련 정밀 설계 문서
    - 스테이지/특수/협동/출정: `docs/STAGE_SYSTEM_DESIGN.md`
    - 모집/희귀도/레벨/진화/중복: `docs/GROWTH_RECRUITMENT_DESIGN.md`
-4. `docs/IMPLEMENTATION_STATUS.md`
-5. 관련 `content/` JSON
-6. 실제 코드와 테스트
+4. **`docs/FEATURE_COVERAGE_MATRIX.md` — 초기 전체 기획의 필수 기능 누락 방지표**
+5. `docs/IMPLEMENTATION_STATUS.md`
+6. 관련 `content/` JSON
+7. 실제 코드와 테스트
 
 스테이지·특수 콘텐츠·협동·출격 제한·편성 제한·난이도 관련 수정에서는 `STAGE_SYSTEM_DESIGN.md`를 반드시 실제 구현과 대조한다.
 모집·캐릭터 획득·희귀도·레벨·업그레이드·진화·중복·모집 저장 관련 수정에서는 `GROWTH_RECRUITMENT_DESIGN.md`를 반드시 실제 구현과 대조한다.
+어떤 기능을 수정하더라도 `FEATURE_COVERAGE_MATRIX.md`에서 해당 기능과 인접 필수 기능 상태를 확인한다. 전투 vertical slice에 집중한다는 이유로 초기 전체 기획의 필수 메타 시스템을 장기 누락시키지 않는다.
 이미 구현된 기능을 기억만으로 다시 만들지 않는다.
+
+## 필수 기능 커버리지 규칙
+
+- `FEATURE_COVERAGE_MATRIX.md`의 `MISSING/PARTIAL`은 실제 미완료 상태로 취급한다. UI·저장·전투 중 한 축이 빠졌다면 `DONE`으로 올리지 않는다.
+- 초기 기획에서 후보였던 기능을 문서에 있었다는 이유만으로 필수로 승격하지 않는다. `CANDIDATE`는 후보로 남긴다.
+- 반대로 출시 전 필수로 명시된 모집·수동10칸덱·레벨/강화·3형태 진화·성장/모집 UI·메타 저장은 전투가 잘 돌아간다는 이유로 삭제하거나 무기한 후순위로 내리지 않는다.
+- 새 캐릭터 풀이 10종을 넘었으면 수동 10칸 편성 경로를 반드시 유지한다.
+- 모집 결과는 소유권 → 저장 → 덱 → level/form → 실제 BattleScene까지 이어지는 한 파이프라인이어야 한다.
 
 ## 레거시 청소 원칙
 
@@ -40,7 +50,10 @@
 - 새 구현이 다른 파일의 monkey patch나 override에 의해 다시 덮어써지지 않는가.
 - 코드와 `content/` 및 문서 설명이 같은 규칙을 말하는가.
 - 모집 결과가 실제 소유권/저장/전투 가능한 캐릭터 정의와 연결되는가.
+- 수동 덱이 보유 캐릭터만 허용하고 최대 10칸이며 실제 전투 슬롯 순서를 결정하는가.
+- 저장된 level/form이 단순 UI 메타가 아니라 실제 전투 정의를 바꾸는가.
 - 진화 form이 실제 전투 정의를 바꾸며 이전 form 재선택을 막지 않는가.
+- `FEATURE_COVERAGE_MATRIX.md`에서 이번 수정 때문에 다른 필수 기능이 후퇴하지 않았는가.
 - 관련 회귀 테스트가 실제 정본 경로를 검사하는가.
 - typecheck/test/build 실패를 우회해 숨기지 않았는가.
 
