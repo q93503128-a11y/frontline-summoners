@@ -18,6 +18,8 @@ export interface StageCollection {
   readonly requiredProgressionClears: number;
 }
 
+export const STAGE_COLLECTIONS_PER_PAGE = 2;
+
 export const STAGE_COLLECTIONS: readonly StageCollection[] = [
   {
     id: 'chapter-01',
@@ -49,6 +51,20 @@ export function getStageCollectionForStage(stageId: string): StageCollection {
   const collection = STAGE_COLLECTIONS.find((candidate) => candidate.stages.some((stage) => stage.id === stageId));
   if (!collection) throw new Error(`Stage is not assigned to a collection: ${stageId}`);
   return collection;
+}
+
+export function getStageCollectionPageCount(collections: readonly StageCollection[] = STAGE_COLLECTIONS): number {
+  return Math.max(1, Math.ceil(collections.length / STAGE_COLLECTIONS_PER_PAGE));
+}
+
+export function getStageCollectionPage(
+  page: number,
+  collections: readonly StageCollection[] = STAGE_COLLECTIONS,
+): readonly StageCollection[] {
+  const pageCount = getStageCollectionPageCount(collections);
+  const safePage = Math.max(0, Math.min(pageCount - 1, Math.trunc(page)));
+  const start = safePage * STAGE_COLLECTIONS_PER_PAGE;
+  return collections.slice(start, start + STAGE_COLLECTIONS_PER_PAGE);
 }
 
 export function isStageCollectionUnlocked(collection: StageCollection, clearedStageIds: readonly string[]): boolean {
