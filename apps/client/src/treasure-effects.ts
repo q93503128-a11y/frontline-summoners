@@ -24,18 +24,27 @@ export interface TreasureUnitSelector {
   readonly attackMinRangeAtLeast?: number;
 }
 
-export type TreasureModifier =
-  | { readonly kind: 'STARTING_SUPPLY_PERCENT'; readonly percent: number }
-  | { readonly kind: 'PLAYER_BASE_HP_PERCENT'; readonly percent: number }
-  | { readonly kind: 'PLAYER_UNIT_CAP_FLAT'; readonly amount: number }
-  | { readonly kind: 'SUPPLY_UPGRADE_COST_PERCENT'; readonly percent: number }
-  | { readonly kind: 'ENEMY_REWARD_PERCENT'; readonly percent: number }
+export type TreasureUnitModifier =
   | {
       readonly kind: 'UNIT_STAT_PERCENT';
       readonly stat: TreasureUnitStat;
       readonly percent: number;
       readonly selector: TreasureUnitSelector;
     }
+  | {
+      readonly kind: 'UNIT_STAT_FLAT';
+      readonly stat: TreasureUnitStat;
+      readonly amount: number;
+      readonly selector: TreasureUnitSelector;
+    };
+
+export type TreasureModifier =
+  | { readonly kind: 'STARTING_SUPPLY_PERCENT'; readonly percent: number }
+  | { readonly kind: 'PLAYER_BASE_HP_PERCENT'; readonly percent: number }
+  | { readonly kind: 'PLAYER_UNIT_CAP_FLAT'; readonly amount: number }
+  | { readonly kind: 'SUPPLY_UPGRADE_COST_PERCENT'; readonly percent: number }
+  | { readonly kind: 'ENEMY_REWARD_PERCENT'; readonly percent: number }
+  | TreasureUnitModifier
   | { readonly kind: 'CHAPTER_FLAG'; readonly flag: string };
 
 export interface TreasureEffectDefinition {
@@ -138,13 +147,23 @@ function parseModifier(value: unknown, context: string): TreasureModifier {
     if (typeof value.flag !== 'string' || value.flag.length === 0) throw new Error(`${context}.flag must be a string`);
     return { kind: value.kind, flag: value.flag };
   }
-  if (value.kind === 'UNIT_STAT_PERCENT') {
+  if (value.kind === 'UNIT_STAT_PERCENT' || value.kind === 'UNIT_STAT_FLAT') {
     if (typeof value.stat !== 'string' || !UNIT_STATS.has(value.stat as TreasureUnitStat)) throw new Error(`${context}.stat is unknown`);
+    const stat = value.stat as TreasureUnitStat;
+    const selector = parseSelector(value.selector, `${context}.selector`);
+    if (value.kind === 'UNIT_STAT_PERCENT') {
+      return {
+        kind: value.kind,
+        stat,
+        percent: requireInteger(value.percent, `${context}.percent`, -90, 500),
+        selector,
+      };
+    }
     return {
       kind: value.kind,
-      stat: value.stat as TreasureUnitStat,
-      percent: requireInteger(value.percent, `${context}.percent`, -90, 500),
-      selector: parseSelector(value.selector, `${context}.selector`),
+      stat,
+      amount: requireInteger(value.amount, `${context}.amount`, -100000, 100000),
+      selector,
     };
   }
   throw new Error(`${context}.kind is unknown: ${value.kind}`);
@@ -167,8 +186,9 @@ export const TREASURE_EFFECTS: readonly TreasureEffectDefinition[] = parseDefini
 const EFFECT_BY_ID = new Map(TREASURE_EFFECTS.map((effect) => [effect.id, effect] as const));
 
 /**
- * The simulation is currently integer based. A non-zero percentage must never silently become a no-op
- * on a small stat, so percentage modifiers move an applicable positive integer by at least one point/frame.
+ * The simulation is currently integer based. Percentage modifiers are rounded deterministically;
+ * if a non-zero percentage would otherwise vanish on a positive integer, it moves by one unit.
+ * Tiny discrete stats should prefer UNIT_STAT_FLAT in content data.
  */
 export function applyIntegerPercent(value: number, percent: number, minimum = 1): number {
   if (percent === 0 || value === 0) return value;
@@ -187,25 +207,30 @@ function selectorMatches(slot: TreasureApplicableSlot, selector: TreasureUnitSel
   return true;
 }
 
-function modifySlot<TSlot extends TreasureApplicableSlot>(slot: TSlot, modifier: Extract<TreasureModifier, { kind: 'UNIT_STAT_PERCENT' }>): TSlot {
+function modifyInteger(value: number, modifier: TreasureUnitModifier, minimum: number): number {
+  if (modifier.kind === 'UNIT_STAT_PERCENT') return applyIntegerPercent(value, modifier.percent, minimum);
+  return Math.max(minimum, value + modifier.amount);
+}
+
+function modifySlot<TSlot extends TreasureApplicableSlot>(slot: TSlot, modifier: TreasureUnitModifier): TSlot {
   if (!selectorMatches(slot, modifier.selector)) return slot;
   if (modifier.stat === 'rechargeFrames') {
-    return { ...slot, rechargeFrames: applyIntegerPercent(slot.rechargeFrames, modifier.percent) } as TSlot;
+    return { ...slot, rechargeFrames: modifyInteger(slot.rechargeFrames, modifier, 1) } as TSlot;
   }
 
   const definition = { ...slot.definition };
   if (modifier.stat === 'range') {
-    definition.standingRange = applyIntegerPercent(definition.standingRange, modifier.percent, 0);
-    definition.attackMinRange = definition.attackMinRange === 0 ? 0 : applyIntegerPercent(definition.attackMinRange, modifier.percent, 0);
-    definition.attackMaxRange = applyIntegerPercent(definition.attackMaxRange, modifier.percent, 0);
+    definition.standingRange = modifyInteger(definition.standingRange, modifier, 0);
+    definition.attackMinRange = definition.attackMinRange === 0 ? 0 : modifyInteger(definition.attackMinRange, modifier, 0);
+    definition.attackMaxRange = modifyInteger(definition.attackMaxRange, modifier, 0);
   } else if (modifier.stat === 'naturalKnockbackFrames') {
-    definition.naturalKnockbackFrames = applyIntegerPercent(definition.naturalKnockbackFrames, modifier.percent);
+    definition.naturalKnockbackFrames = modifyInteger(definition.naturalKnockbackFrames, modifier, 1);
   } else if (modifier.stat === 'maxHp') {
-    definition.maxHp = applyIntegerPercent(definition.maxHp, modifier.percent);
+    definition.maxHp = modifyInteger(definition.maxHp, modifier, 1);
   } else if (modifier.stat === 'attackDamage') {
-    definition.attackDamage = applyIntegerPercent(definition.attackDamage, modifier.percent, 0);
+    definition.attackDamage = modifyInteger(definition.attackDamage, modifier, 0);
   } else {
-    definition.moveSpeed = applyIntegerPercent(definition.moveSpeed, modifier.percent, 0);
+    definition.moveSpeed = modifyInteger(definition.moveSpeed, modifier, 0);
   }
   return { ...slot, definition } as TSlot;
 }
@@ -234,7 +259,7 @@ export function applyTreasureBattleEffects<TSlot extends TreasureApplicableSlot>
         supplyLevels = supplyLevels.map((level, index) => index === 0 ? level : { ...level, upgradeCost: applyIntegerPercent(level.upgradeCost, modifier.percent, 0) });
       } else if (modifier.kind === 'ENEMY_REWARD_PERCENT') {
         enemies = enemies.map((enemy) => ({ ...enemy, rewardSupply: applyIntegerPercent(enemy.rewardSupply, modifier.percent, 0) }));
-      } else if (modifier.kind === 'UNIT_STAT_PERCENT') {
+      } else if (modifier.kind === 'UNIT_STAT_PERCENT' || modifier.kind === 'UNIT_STAT_FLAT') {
         playerSlots = playerSlots.map((slot) => modifySlot(slot, modifier));
       } else {
         chapterFlags.add(modifier.flag);
