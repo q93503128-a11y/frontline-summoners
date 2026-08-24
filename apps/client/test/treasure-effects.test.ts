@@ -80,8 +80,30 @@ test('unit-targeted treasures apply only to matching roster roles, traits and id
   assert.equal(boostedHunter.definition.maxHp, originalHunter.definition.maxHp, 'unmatched role/trait HP bonuses must not leak to hunter');
 });
 
-test('integer percentage progression never silently becomes a no-op on a positive small stat', () => {
-  assert.equal(applyIntegerPercent(6, 2), 7);
-  assert.equal(applyIntegerPercent(12, -2), 11);
+test('small discrete stats use exact flat modifiers instead of misleading tiny percentages', () => {
+  const output = applyTreasureBattleEffects({
+    ownedTreasureIds: ['barefoot-ribbon', 'wagon-wheel', 'dust-charm'],
+    startingSupply: 500,
+    playerBaseHp: 5000,
+    playerSlots: PLAYER_SLOTS,
+    enemies: ENEMIES,
+  });
+  const byId = new Map(output.playerSlots.map((slot) => [slot.slotId, slot]));
+
+  const militia = PLAYER_SLOTS.find((slot) => slot.slotId === 'militia')!;
+  const boostedMilitia = byId.get('militia')!;
+  assert.equal(boostedMilitia.definition.moveSpeed, militia.definition.moveSpeed + 1, 'low-cost move reward is exactly +1');
+  assert.equal(boostedMilitia.rechargeFrames, militia.rechargeFrames - 1, 'wagon wheel is exactly -1 recharge frame');
+  assert.equal(boostedMilitia.definition.naturalKnockbackFrames, militia.definition.naturalKnockbackFrames - 1, 'dust charm is exactly -1 natural-KB frame');
+
+  const hunter = PLAYER_SLOTS.find((slot) => slot.slotId === 'hunter')!;
+  const boostedHunter = byId.get('hunter')!;
+  assert.equal(boostedHunter.definition.moveSpeed, hunter.definition.moveSpeed, 'move +1 must not leak above the 200-supply selector');
+  assert.equal(boostedHunter.rechargeFrames, hunter.rechargeFrames - 1);
+});
+
+test('integer percentage progression is deterministic for larger integer stats', () => {
+  assert.equal(applyIntegerPercent(500, 3), 515);
+  assert.equal(applyIntegerPercent(500, -2), 490);
   assert.equal(applyIntegerPercent(0, 10, 0), 0);
 });
