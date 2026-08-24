@@ -44,7 +44,7 @@
 | ROSTER-03 | C/B/A/S/SS 희귀도 | 필수 | DONE | 전투/도감/모집에서 같은 희귀도 정본 사용 |
 | ROSTER-04 | 희귀도 ≠ 절대 성능 | 필수 | PARTIAL | 실제 15종 역할 차별 + 장기 밸런스 검증 필요 |
 | ROSTER-05 | 종족/체형/장비/모션 기반 실루엣 다양성 | 필수 | PARTIAL | 현재는 임시 7 art family; 정식 고유 아트 필요 |
-| DECK-01 | 솔로/1v1 수동 10칸 덱 | 필수 | MISSING | 보유 캐릭터가 10종 초과 시 직접 편성/저장/전투 반영 |
+| DECK-01 | 솔로/1v1 수동 10칸 덱 | 필수 | PARTIAL | save v6 + 전투 파생은 구현, FormationScene에서 실제 편성/저장 UI 연결 필요 |
 | DECK-02 | 협동/2v2 플레이어당 5칸 | 필수(멀티) | PLANNED | 멀티 준비 단계에서 구현 |
 | ACQUIRE-01 | 모집 외 획득 루트 | 필수 | PARTIAL | 캠페인 해금 존재; 보스/외전/도전 캐릭터는 미구현 |
 
@@ -73,7 +73,7 @@
 | LEVEL-01 | Lv1~50 | 필수 | DONE | 레벨 곡선/전투 파생 존재 |
 | LEVEL-02 | HP/공격 중심 완만 성장, Lv30 이후 완화 | 필수 | DONE | 현재 prototype curve 존재 |
 | LEVEL-03 | 사거리/비용/KB 등 정체성 스탯 레벨 고정 | 필수 | DONE | 성장 엔진에서 유지 |
-| LEVEL-04 | 캐릭터별 레벨 저장 | 필수 | DONE | save v5부터 저장/정규화 |
+| LEVEL-04 | 캐릭터별 레벨 저장 | 필수 | DONE | save v6에서 저장/정규화 |
 | LEVEL-05 | 강화 비용/골드 경제 | 필수 | MISSING | 보상 경제와 함께 비용 곡선 확정/저장/소비 |
 | LEVEL-06 | 성장 화면 | 필수 | MISSING | 현재/다음 Lv, 상승량, 비용, 강화 실행 |
 
@@ -135,9 +135,9 @@
 | --- | --- | --- | --- | --- |
 | SAVE-01 | guest IndexedDB + session fallback | 필수 | DONE | 저장 실패 거짓 성공 금지 |
 | SAVE-02 | stage/treasure/special 저장 | 필수 | DONE | 연속 진도 정규화 |
-| SAVE-03 | 모집 소유권/천장 저장 | 필수 | DONE | 현재 v5 포함 |
-| SAVE-04 | level/form 저장 | 필수 | DONE | 현재 v5 포함 |
-| SAVE-05 | 10칸 덱 저장 | 필수 | MISSING | 수동 덱 구현과 함께 연결 |
+| SAVE-03 | 모집 소유권/천장 저장 | 필수 | DONE | 현재 save v6 포함 |
+| SAVE-04 | level/form 저장 | 필수 | DONE | 현재 save v6 포함 |
+| SAVE-05 | 10칸 덱 저장 | 필수 | DONE | 명시적 1~10칸 덱 저장 + legacy 자동 편성 fallback |
 | SAVE-06 | 성장/모집 재화/조각 저장 | 필수 | MISSING | 메타 경제 정본화 후 연결 |
 | ACCOUNT-01 | Google/이메일 로그인 | 장기 필수 | PLANNED | 로그인 경제/소유권 서버 source of truth |
 
