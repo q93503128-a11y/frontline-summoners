@@ -24,18 +24,24 @@ test('catalog is progress-aware and pages allies and guaranteed treasures instea
   assert.match(source, /능력치는 합류 후 공개/);
 });
 
-test('compact mobile breakpoint covers short landscape phones in core and catalog scenes', async () => {
+test('core and catalog scenes share one coarse-pointer compact-mobile classifier instead of treating short desktop windows as phones', async () => {
   const main = await readSource('../src/main.ts');
   const catalog = await readSource('../src/catalog-scene.ts');
+  const viewport = await readSource('../src/viewport.ts');
 
-  assert.match(main, /function isCompactMobileViewport\(\): boolean/);
-  assert.match(main, /Math\.min\(window\.innerWidth, window\.innerHeight\) <= 540/);
+  assert.match(main, /import \{ isCompactMobileViewport, isPortraitMobileViewport \} from '\.\/viewport';/);
+  assert.match(catalog, /import \{ isCompactMobileViewport \} from '\.\/viewport';/);
+  assert.doesNotMatch(main, /function isCompactMobileViewport\(/);
+  assert.doesNotMatch(main, /function isPortraitMobileViewport\(/);
+  assert.doesNotMatch(catalog, /function isCompactMobileViewport\(/);
+
+  assert.match(viewport, /COMPACT_MOBILE_SHORT_SIDE = 540/);
+  assert.match(viewport, /coarsePointer && Math\.min\(width, height\) <= COMPACT_MOBILE_SHORT_SIDE/);
+  assert.match(viewport, /window\.matchMedia\('\(pointer: coarse\)'\)\.matches/);
+
   assert.match(main, /const renderedSize = isCompactMobileViewport\(\) \? Math\.max\(size, 16\) : size;/);
   assert.match(main, /fontSize: `\$\{renderedSize\}px`/);
   assert.match(main, /strokeThickness: renderedSize >= 30 \? 4 : 0/);
-
-  assert.match(catalog, /function isCompactMobileViewport\(\): boolean/);
-  assert.match(catalog, /Math\.min\(window\.innerWidth, window\.innerHeight\) <= 540/);
   assert.match(catalog, /const renderedSize = isCompactMobileViewport\(\) \? Math\.max\(size, 16\) : size;/);
   assert.match(catalog, /fontSize: `\$\{renderedSize\}px`/);
 });
@@ -53,11 +59,12 @@ test('catalog keeps desktop descriptions while compact cards prioritize readable
   assert.match(source, /compact \? 20 : 14/);
 });
 
-test('compact catalog navigation stays finger-sized and cancelled drags restore button scale', async () => {
+test('compact catalog navigation stays finger-sized, drops decorative header copy, and cancelled drags restore button scale', async () => {
   const source = await readSource('../src/catalog-scene.ts');
   assert.match(source, /const navigationHeight = compact \? 84 : 50;/);
   assert.match(source, /const tabHeight = compact \? 84 : 54;/);
   assert.match(source, /isCompactMobileViewport\(\) \? 26 : 18/);
+  assert.match(source, /if \(!compact\) addText\(this, 56, 88, '제1장 동료와 확정 보물을 한곳에서 확인한다\.'/);
   assert.match(source, /bg\.on\('pointerout', \(\) => \{[\s\S]*?container\.setScale\(1\);/);
   assert.match(source, /bg\.on\('pointerupoutside', \(\) => container\.setScale\(1\)\);/);
 
@@ -83,16 +90,20 @@ test('boss arrival warning is keyed by actual BOSS-tagged simulation units and o
 
 test('portrait mobile view blocks tiny layout and freezes battle before the 30Hz accumulator advances', async () => {
   const main = await readSource('../src/main.ts');
+  const viewport = await readSource('../src/viewport.ts');
   const html = await readSource('../index.html');
   const updateStart = main.indexOf('update(_: number, delta: number): void {');
   const guardIndex = main.indexOf('isPortraitMobileViewport()) return;', updateStart);
   const accumulatorIndex = main.indexOf('this.accumulator += Math.min(delta, 120);', updateStart);
 
-  assert.match(main, /function isPortraitMobileViewport\(\): boolean/);
+  assert.match(main, /import \{ isCompactMobileViewport, isPortraitMobileViewport \} from '\.\/viewport';/);
+  assert.match(viewport, /shouldBlockPortraitMobile\(width: number, height: number, coarsePointer: boolean\)/);
+  assert.match(viewport, /coarsePointer && width <= PORTRAIT_MOBILE_MAX_WIDTH && height > width/);
   assert.ok(updateStart >= 0 && guardIndex > updateStart && accumulatorIndex > guardIndex, 'portrait guard must return before simulation time accumulates');
   assert.match(main, /this\.manuallyPaused\s*\|\|\s*isPortraitMobileViewport\(\)/, 'manual pause and portrait guard must share the pre-accumulator stop path');
   assert.match(html, /viewport-fit=cover/);
-  assert.match(html, /@media \(orientation: portrait\) and \(max-width: 900px\)/);
+  assert.match(html, /@media \(orientation: portrait\) and \(max-width: 900px\) and \(pointer: coarse\)/);
+  assert.doesNotMatch(html, /@media \(orientation: portrait\) and \(max-width: 900px\)\s*\{/);
   assert.match(html, /id="orientation-hint"/);
   assert.match(html, /가로 화면으로 돌려 주세요/);
   assert.doesNotMatch(html, /canvas\s*\{[^}]*image-rendering:\s*pixelated/s);
