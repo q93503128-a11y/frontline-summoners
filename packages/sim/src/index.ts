@@ -440,7 +440,7 @@ function fnv1a(text: string): string {
   return (hash >>> 0).toString(16).padStart(8, '0');
 }
 
-function definitionCombatSignature(definition: BattleUnitDefinition): string {
+export function getBattleUnitDefinitionSignature(definition: BattleUnitDefinition): string {
   const traits = [...(definition.traits ?? [])].sort().join(',');
   const bonuses = [...(definition.damageBonuses ?? [])]
     .sort((a, b) => a.trait.localeCompare(b.trait))
@@ -473,7 +473,7 @@ export function computeStateHash(state: BattleState): string {
     .sort((a, b) => a.simulationId - b.simulationId)
     .map((unit) => [
       unit.simulationId,
-      definitionCombatSignature(unit.definition),
+      getBattleUnitDefinitionSignature(unit.definition),
       unit.team,
       unit.hp,
       unit.anchorX,
@@ -486,5 +486,13 @@ export function computeStateHash(state: BattleState): string {
       unit.forcedDisplacementFrames,
     ].join(':'))
     .join('|');
-  return fnv1a([state.tick, state.nextSimulationId, state.bases.PLAYER.hp, state.bases.ENEMY.hp, state.winner ?? '-', units].join('#'));
+  const bases = [
+    state.bases.PLAYER.anchorX,
+    state.bases.PLAYER.maxHp,
+    state.bases.PLAYER.hp,
+    state.bases.ENEMY.anchorX,
+    state.bases.ENEMY.maxHp,
+    state.bases.ENEMY.hp,
+  ].join(':');
+  return fnv1a([state.tick, state.nextSimulationId, state.mapLength, bases, state.winner ?? '-', units].join('#'));
 }
