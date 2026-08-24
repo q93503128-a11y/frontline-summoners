@@ -110,13 +110,13 @@
   {
     "id": "border-19", "chapter": "제1장 · 뒤집힌 국경", "name": "대주술사의 계단", "subtitle": "장거리 주문과 전열 압박을 동시에 견뎌라", "difficulty": 5,
     "playerBaseHp": 6100, "enemyBaseHp": 9400, "startingSupply": 540, "mapLength": 1180, "theme": "golden", "decorSeed": 193,
-    "waves": [{ "enemyId": "enemy-cultist", "atTick": 160, "count": 7, "intervalTicks": 165 }, { "enemyId": "enemy-knight", "atTick": 500, "count": 5, "intervalTicks": 220 }, { "enemyId": "enemy-sniper", "atTick": 820, "count": 5, "intervalTicks": 215 }, { "enemyId": "enemy-boss", "atTick": 1370, "count": 1, "intervalTicks": 9999 }],
+    "waves": [{ "enemyId": "enemy-cultist", "atTick": 160, "count": 7, "intervalTicks": 165 }, { "enemyId": "enemy-knight", "atTick": 500, "count": 5, "intervalTicks": 220 }, { "enemyId": "enemy-sniper", "atTick": 820, "count": 5, "intervalTicks": 215 }, { "enemyId": "enemy-boss", "atTick": 1000, "count": 1, "intervalTicks": 9999 }],
     "treasure": { "id": "mask-thread", "name": "황금가면 끈", "effect": "마법 계열 HP +2%" }
   },
   {
     "id": "border-20", "chapter": "제1장 · 뒤집힌 국경", "name": "철문과 황금가면", "subtitle": "제1장 최종전 · 두 지휘관이 합류한다", "difficulty": 5,
     "playerBaseHp": 6500, "enemyBaseHp": 11000, "startingSupply": 580, "mapLength": 1280, "theme": "golden", "decorSeed": 211,
-    "waves": [{ "enemyId": "enemy-shield", "atTick": 150, "count": 6, "intervalTicks": 205 }, { "enemyId": "enemy-berserker", "atTick": 440, "count": 6, "intervalTicks": 190 }, { "enemyId": "enemy-sniper", "atTick": 760, "count": 5, "intervalTicks": 220 }, { "enemyId": "enemy-boss", "atTick": 1220, "count": 1, "intervalTicks": 9999 }, { "enemyId": "enemy-boss-iron", "atTick": 1580, "count": 1, "intervalTicks": 9999 }],
+    "waves": [{ "enemyId": "enemy-shield", "atTick": 150, "count": 6, "intervalTicks": 205 }, { "enemyId": "enemy-berserker", "atTick": 440, "count": 6, "intervalTicks": 190 }, { "enemyId": "enemy-sniper", "atTick": 760, "count": 5, "intervalTicks": 220 }, { "enemyId": "enemy-boss", "atTick": 900, "count": 1, "intervalTicks": 9999 }, { "enemyId": "enemy-boss-iron", "atTick": 1250, "count": 1, "intervalTicks": 9999 }],
     "treasure": { "id": "border-crown", "name": "뒤집힌 국경의 왕관", "effect": "제1장 영구 보너스 묶음 해금" }, "unlockUnitId": "voidsage"
   }
 ]
