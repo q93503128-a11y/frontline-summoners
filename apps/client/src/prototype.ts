@@ -209,14 +209,12 @@ export function getTreasureIdsForClearedStages(clearedStageIds: readonly string[
   return STAGES.filter((stage) => cleared.has(stage.id)).map((stage) => stage.treasure.id);
 }
 
-export function createPrototypeBattle(
-  stageId = STAGES[0]!.id,
-  unlockedSlotIds: readonly string[] = [STARTER_SLOT_ID],
+export function createPrototypeBattleWithPlayerSlots(
+  stageId: string,
+  playerSlots: readonly PrototypeRosterSlot[],
   ownedTreasureIds: readonly string[] = [],
 ): PlayableBattleState {
   const stage = getStage(stageId);
-  const unlocked = new Set(unlockedSlotIds);
-  const playerSlots = ALL_PLAYER_SLOTS.filter((slot) => unlocked.has(slot.slotId));
   const safeSlots = playerSlots.length > 0 ? playerSlots : [PLAYER_SLOTS[0]!];
   const progression = applyTreasureBattleEffects({
     ownedTreasureIds,
@@ -238,4 +236,14 @@ export function createPrototypeBattle(
     enemyUnitCap: stage.enemyUnitCap,
     supplyLevels: progression.supplyLevels,
   });
+}
+
+export function createPrototypeBattle(
+  stageId = STAGES[0]!.id,
+  unlockedSlotIds: readonly string[] = [STARTER_SLOT_ID],
+  ownedTreasureIds: readonly string[] = [],
+): PlayableBattleState {
+  const unlocked = new Set(unlockedSlotIds);
+  const playerSlots = ALL_PLAYER_SLOTS.filter((slot) => unlocked.has(slot.slotId));
+  return createPrototypeBattleWithPlayerSlots(stageId, playerSlots, ownedTreasureIds);
 }
