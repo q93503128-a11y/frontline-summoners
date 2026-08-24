@@ -881,7 +881,13 @@ class ResultScene extends Phaser.Scene {
       void recordStageClear(this.stage.id, this.stage.treasure.id).then((result) => {
         this.progressionSaved = true;
         if (!this.scene.isActive()) return;
-        status.setText(result.firstClear ? '첫 클리어 저장 완료 · 다음 스테이지 개방' : '재클리어 완료 · 보물 반복 파밍 불필요');
+        if (result.persisted) {
+          status.setText(result.firstClear ? '첫 클리어 저장 완료 · 다음 스테이지 개방' : '재클리어 저장 완료 · 보물 반복 파밍 불필요');
+          status.setColor('#8ee3aa');
+        } else {
+          status.setText('브라우저 영구 저장 실패 · 현재 탭에서는 진행 유지');
+          status.setColor('#ffb37c');
+        }
         if (unlockSlot) unlockText.setText(result.firstClear ? `신규 동료 합류 · ${unlockSlot.displayName}` : `보유 동료 · ${unlockSlot.displayName}`);
       });
     } else {
