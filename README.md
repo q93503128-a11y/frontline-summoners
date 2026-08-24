@@ -14,10 +14,11 @@
 - 10칸 덱(협동/2v2는 플레이어당 5칸)
 - 진도 스테이지와 특수 스테이지를 별도 콘텐츠 축으로 운영
 - 난이도 1~12, 스테이지별 동시 출격/편성 제한 확장
-- 기본 핵심 로스터 약 10종, 이후 모집·스테이지/보스·외전·이벤트로 캐릭터 풀 확장
+- 기본 무료 캠페인 로스터 10종 + 첫 모집 전용 15종
+- 모집 희귀도 C/B/A/S/SS, 기본 확률 C30/B28/A24/S13/SS5
+- 10연 A+, 30연 S+, 60연 픽업 SS, 100연 배너 캐릭터 직접 선택권
 - 캐릭터는 종족/체형/장비/모션이 다른 강한 실루엣 식별성을 우선
-- 캐릭터 레벨/강화/진화는 핵심 메타 시스템
-- 진화 시 외형·애니메이션·VFX·전투 효과까지 변화 가능
+- 캐릭터 Lv1~50 성장, 3형태 진화와 이전 형태 재선택을 핵심 메타로 설계
 - 희귀도와 절대 성능을 분리
 - 과금 없음, 후한 캐릭터 획득 방향
 - 기준 프로토타입 픽셀 화풍: LuizMelo 계열 CC0 에셋
@@ -27,10 +28,11 @@
 1. [`docs/CANONICAL.md`](docs/CANONICAL.md) — 최신 핵심 결정 정본
 2. [`docs/GAME_DESIGN_FULL.md`](docs/GAME_DESIGN_FULL.md) — 통합 전체 상세 기획서
 3. [`docs/STAGE_SYSTEM_DESIGN.md`](docs/STAGE_SYSTEM_DESIGN.md) — 진도/특수·난이도·출격/편성 제한·협동 정밀 기획
-4. [`docs/IMPLEMENTATION_STATUS.md`](docs/IMPLEMENTATION_STATUS.md) — 현재 구현/미구현 상태
-5. [`docs/DEVELOPMENT_RULES.md`](docs/DEVELOPMENT_RULES.md) — 레거시/중복 구현 정리와 작업 규칙
-6. [`docs/INDEX.md`](docs/INDEX.md) — 문서 권위와 유지 규칙
-7. [`docs/NEW_CHAT_PROMPT.md`](docs/NEW_CHAT_PROMPT.md) — 새 채팅 인수인계 프롬프트
+4. [`docs/GROWTH_RECRUITMENT_DESIGN.md`](docs/GROWTH_RECRUITMENT_DESIGN.md) — 모집·희귀도·중복·레벨·3형태 진화 정밀 기획
+5. [`docs/IMPLEMENTATION_STATUS.md`](docs/IMPLEMENTATION_STATUS.md) — 현재 구현/미구현 상태
+6. [`docs/DEVELOPMENT_RULES.md`](docs/DEVELOPMENT_RULES.md) — 레거시/중복 구현 정리와 작업 규칙
+7. [`docs/INDEX.md`](docs/INDEX.md) — 문서 권위와 유지 규칙
+8. [`docs/NEW_CHAT_PROMPT.md`](docs/NEW_CHAT_PROMPT.md) — 새 채팅 인수인계 프롬프트
 
 구체 콘텐츠 수치는 `content/` JSON을 우선한다.
 
@@ -44,7 +46,7 @@
 - `content`: 실제 게임 콘텐츠 데이터
 - `assets/raw`: 원본 에셋과 라이선스 관리
 - `public/assets`: 런타임 배포 에셋
-- `docs`: 정본/통합기획/구현상태/인수인계 문서
+- `docs`: 정본/통합기획/정밀기획/구현상태/인수인계 문서
 - `tools`: 검증 및 빌드 보조 도구
 
 ## 로컬 실행
