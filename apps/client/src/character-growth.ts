@@ -216,7 +216,7 @@ export function applyEvolutionForm(slot: PlayerRosterSlot, formId: string): Play
       attackMinRange,
       attackMaxRange,
       targetMode: modifiers.targetMode ?? slot.definition.targetMode,
-      damageBonuses: modifiers.damageBonuses ?? slot.definition.damageBonuses,
+      ...(modifiers.damageBonuses === undefined ? {} : { damageBonuses: modifiers.damageBonuses }),
     },
   };
 }
