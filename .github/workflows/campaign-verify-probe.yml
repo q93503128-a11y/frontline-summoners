@@ -1,0 +1,33 @@
+name: Campaign baseline probe
+on:
+  push:
+    branches: [main]
+    paths: [.github/workflows/campaign-verify-probe.yml]
+permissions:
+  contents: write
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with: {fetch-depth: 0}
+      - uses: actions/setup-node@v4
+        with: {node-version: 22}
+      - name: Probe baseline
+        shell: bash
+        run: |
+          set +e
+          npm ci --ignore-scripts >/tmp/install.log 2>&1; install_status=$?
+          if [ "$install_status" -eq 0 ]; then
+            npm test -w @frontline/client >/tmp/client.log 2>&1; client_status=$?
+            node --experimental-transform-types --input-type=module >/tmp/report.log 2>&1 <<'NODE'
+          const {STAGES}=await import('./apps/client/src/prototype.ts');
+          const {autoPlayCampaignStage}=await import('./apps/client/test/campaign-baseline.ts');
+          const o=i=>({maxSeconds:i<5?[90,105,120,135,150][i]:i<10?[180,195,210,225,240][i-5]:i<15?[255,270,285,300,315][i-10]:[330,345,360,390,450][i-15],cannonBaseRatio:i<5?.75:i<10?.70:i<15?.72:.75,...(i<5?{cannonEnemyCount:2}:{})});
+          for(let i=0;i<20;i++){const r=autoPlayCampaignStage(i,STAGES.slice(0,i).map(s=>s.id),o(i)),s=r.state;console.log(JSON.stringify({stage:i+1,winner:s.battle.winner,sec:+(s.battle.tick/30).toFixed(1),p:+(s.battle.bases.PLAYER.hp/s.battle.bases.PLAYER.maxHp).toFixed(3),e:+(s.battle.bases.ENEMY.hp/s.battle.bases.ENEMY.maxHp).toFixed(3),lvl:s.supplyLevel,sp:r.telemetry.spawnCount,up:r.telemetry.upgradeCount,empty:+(r.telemetry.longestEnemyPressureWithoutPlayerTicks/30).toFixed(1),players:[...r.telemetry.seenPlayerIds]}));}
+          NODE
+            report_status=$?
+          else client_status=99; report_status=99; :>/tmp/client.log; :>/tmp/report.log; fi
+          { printf 'source_sha=%s\ninstall=%s\nclient_test=%s\ncampaign_report=%s\n\n== failures ==\n' "$GITHUB_SHA" "$install_status" "$client_status" "$report_status"; grep -E '^(not ok|# tests|# pass|# fail)|failed with|exceeded' /tmp/client.log|tail -n 80; printf '\n== campaign ==\n'; cat /tmp/report.log; } > docs/CI_PROBE_RESULT.txt
+          git config user.name frontline-ci; git config user.email frontline-ci@users.noreply.github.com; git rm .github/workflows/campaign-verify-probe.yml; git add docs/CI_PROBE_RESULT.txt; git commit -m 'chore: record campaign baseline probe'; git push origin HEAD:main
+          [ "$client_status" -eq 0 ] && [ "$report_status" -eq 0 ]
