@@ -88,11 +88,7 @@ function selectTacticalCombatSlot(state: ReturnType<typeof createPrototypeBattle
     .filter((slot) => slot.cost <= supplyLevel.maxSupply && getCooldownRemaining(state, slot.slotId) === 0)
     .map((slot) => {
       const missingSupply = Math.max(0, slot.cost - state.supply);
-      const waitSeconds = missingSupply === 0
-        ? 0
-        : supplyLevel.incomePerSecond > 0
-          ? missingSupply / supplyLevel.incomePerSecond
-          : Number.POSITIVE_INFINITY;
+      const waitSeconds = missingSupply / Math.max(1, supplyLevel.incomePerSecond);
       if (waitSeconds > TACTICAL_MAX_SAVE_SECONDS) return null;
 
       const multiplierPermille = (slot.definition.damageBonuses ?? [])
@@ -107,10 +103,16 @@ function selectTacticalCombatSlot(state: ReturnType<typeof createPrototypeBattle
       const durabilityValue = slot.definition.maxHp / 1200;
       const rawScore = dpsPerFrame * areaFactor * rangeFactor + durabilityValue;
       const score = rawScore / (1 + waitSeconds / TACTICAL_WAIT_PENALTY_SECONDS);
-      return { slot, score, waitSeconds };
+      return { slot, score, rawScore, waitSeconds };
     })
     .filter((candidate): candidate is NonNullable<typeof candidate> => candidate !== null)
-    .sort((a, b) => b.score - a.score || a.waitSeconds - b.waitSeconds || a.slot.cost - b.slot.cost || a.slot.slotId.localeCompare(b.slot.slotId))[0]?.slot;
+    .sort((a, b) =>
+      b.score - a.score ||
+      b.rawScore - a.rawScore ||
+      a.waitSeconds - b.waitSeconds ||
+      a.slot.cost - b.slot.cost ||
+      a.slot.slotId.localeCompare(b.slot.slotId)
+    )[0]?.slot;
 }
 
 export function autoPlayCampaignStage(
@@ -198,13 +200,11 @@ export function autoPlayCampaignStage(
           : 1 + Math.floor(spawnCount / DEPLOYMENTS_PER_ECONOMY_LEVEL);
         const plannedEconomyLevel = Math.min(targetSupplyLevel, deploymentUnlockedEconomyLevel);
         if (state.supplyLevel < plannedEconomyLevel) {
+          acted = true;
           const next = getNextSupplyLevel(state);
           if (next && state.supply >= next.upgradeCost) {
             const upgraded = tryUpgradeSupply(state);
-            if (upgraded.ok) {
-              upgradeCount += 1;
-              acted = true;
-            }
+            if (upgraded.ok) upgradeCount += 1;
           }
         }
       }
@@ -212,7 +212,7 @@ export function autoPlayCampaignStage(
       if (!acted) {
         if (enemiesAtDecision === 0) {
           // Establish a small screen before first contact, then bank rather than filling the field with cheap units.
-          if (spawnCount < TACTICAL_PREP_COUNT) {
+          if (alivePlayersAtDecision < TACTICAL_PREP_COUNT) {
             const prep = selectCheapestAffordableReady(state);
             if (prep) recordSpawn(prep.slotId);
           }
