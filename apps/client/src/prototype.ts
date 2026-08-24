@@ -86,7 +86,9 @@ export const ENEMIES: readonly EnemyArchetype[] = CAMPAIGN.enemies.map((enemy) =
 export const STAGES: readonly PrototypeStage[] = CAMPAIGN.stages;
 
 export function getStage(stageId: string): PrototypeStage {
-  return STAGES.find((stage) => stage.id === stageId) ?? STAGES[0]!;
+  const stage = STAGES.find((candidate) => candidate.id === stageId);
+  if (!stage) throw new Error(`Unknown campaign stage: ${stageId}`);
+  return stage;
 }
 
 export function getStageNumber(stageId: string): number {
