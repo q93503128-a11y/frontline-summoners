@@ -34,6 +34,7 @@ import {
   type PrototypeStage,
 } from './prototype';
 import { loadGuestProgress, recordStageClear, type GuestProgress } from './save';
+import { selectVisibleTraitLabelIds } from './trait-label-visibility';
 
 const FONT = '"Malgun Gothic", "Apple SD Gothic Neo", "Noto Sans KR", sans-serif';
 const COLORS = {
@@ -766,7 +767,7 @@ class BattleScene extends Phaser.Scene {
       view.hpBg.x = view.sprite.x;
       view.hp.x = view.sprite.x - 26;
       view.trait.x = view.sprite.x;
-      view.trait.setVisible(unit.team === 'ENEMY' && unit.state !== UnitState.Dying);
+      view.trait.setVisible(false);
       view.hpBg.setVisible(unit.state !== UnitState.Dying);
       view.hp.setVisible(unit.state !== UnitState.Dying);
       view.hp.displayWidth = Math.max(1, 52 * Math.max(0, unit.hp / unit.definition.maxHp));
@@ -779,6 +780,26 @@ class BattleScene extends Phaser.Scene {
       view.hp.destroy();
       view.trait.destroy();
       this.views.delete(id);
+    }
+    this.syncTraitLabelVisibility();
+  }
+
+  private syncTraitLabelVisibility(): void {
+    const candidates = this.state.battle.units.flatMap((unit) => {
+      if (unit.team !== 'ENEMY' || unit.state === UnitState.Dying) return [];
+      const view = this.views.get(unit.simulationId);
+      if (!view) return [];
+      return [{
+        simulationId: unit.simulationId,
+        screenX: view.sprite.x,
+        isBoss: (unit.definition.traits ?? []).includes('BOSS'),
+      }];
+    });
+    const visibleIds = selectVisibleTraitLabelIds(candidates, 76);
+    for (const unit of this.state.battle.units) {
+      const view = this.views.get(unit.simulationId);
+      if (!view) continue;
+      view.trait.setVisible(unit.team === 'ENEMY' && unit.state !== UnitState.Dying && visibleIds.has(unit.simulationId));
     }
   }
 
