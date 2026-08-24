@@ -1,0 +1,35 @@
+name: Campaign rebalance verify
+on:
+  push:
+    branches: [main]
+    paths: [.github/workflows/campaign-verify-probe.yml]
+permissions:
+  contents: write
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with: {fetch-depth: 0}
+      - uses: actions/setup-node@v4
+        with: {node-version: 22}
+      - name: Verify
+        shell: bash
+        run: |
+          set +e
+          npm ci --ignore-scripts >/tmp/install.log 2>&1; i=$?
+          if [ "$i" -eq 0 ]; then
+            npm run typecheck >/tmp/type.log 2>&1; y=$?
+            npm test -w @frontline/client >/tmp/client.log 2>&1; c=$?
+            npm test >/tmp/test.log 2>&1; t=$?
+            npm run build >/tmp/build.log 2>&1; b=$?
+            node --experimental-transform-types --input-type=module >/tmp/report.log 2>&1 <<'NODE'
+          const {STAGES}=await import('./apps/client/src/prototype.ts'); const {autoPlayCampaignStage}=await import('./apps/client/test/campaign-baseline.ts');
+          const o=i=>({maxSeconds:i<5?[90,105,120,135,150][i]:i<10?[180,195,210,225,240][i-5]:i<15?[255,270,285,300,315][i-10]:[330,345,360,390,450][i-15],cannonBaseRatio:i<5?.75:i<10?.70:i<15?.72:.75,...(i<5?{cannonEnemyCount:2}:{})});
+          for(let n=0;n<20;n++){const r=autoPlayCampaignStage(n,STAGES.slice(0,n).map(s=>s.id),o(n)),s=r.state;console.log(JSON.stringify({stage:n+1,winner:s.battle.winner,sec:+(s.battle.tick/30).toFixed(1),p:+(s.battle.bases.PLAYER.hp/s.battle.bases.PLAYER.maxHp).toFixed(3),e:+(s.battle.bases.ENEMY.hp/s.battle.bases.ENEMY.maxHp).toFixed(3),lvl:s.supplyLevel,sp:r.telemetry.spawnCount,up:r.telemetry.upgradeCount,empty:+(r.telemetry.longestEnemyPressureWithoutPlayerTicks/30).toFixed(1),players:[...r.telemetry.seenPlayerIds],enemies:[...r.seenEnemyIds]}));}
+          NODE
+            r=$?
+          else y=99;c=99;t=99;b=99;r=99;:>/tmp/client.log;:>/tmp/test.log;:>/tmp/build.log;:>/tmp/report.log; fi
+          { printf 'source_sha=%s\ninstall=%s\ntypecheck=%s\nclient_test=%s\ntest=%s\nbuild=%s\ncampaign_report=%s\n\n== client failures ==\n' "$GITHUB_SHA" "$i" "$y" "$c" "$t" "$b" "$r"; grep -E '^(not ok|# tests|# pass|# fail)|AssertionError|failed with|exceeded' /tmp/client.log|tail -n 140; printf '\n== root failures ==\n'; grep -E '^(not ok|# tests|# pass|# fail)|AssertionError|failed with' /tmp/test.log|tail -n 160; printf '\n== campaign ==\n'; cat /tmp/report.log; printf '\n== build ==\n'; tail -n 40 /tmp/build.log; } > docs/CI_PROBE_RESULT.txt
+          git config user.name frontline-ci; git config user.email frontline-ci@users.noreply.github.com; git rm .github/workflows/campaign-verify-probe.yml; git add docs/CI_PROBE_RESULT.txt; git commit -m 'chore: record campaign rebalance verify'; git push origin HEAD:main
+          [ "$i" -eq 0 ] && [ "$y" -eq 0 ] && [ "$c" -eq 0 ] && [ "$t" -eq 0 ] && [ "$b" -eq 0 ] && [ "$r" -eq 0 ]
