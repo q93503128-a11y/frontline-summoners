@@ -1,10 +1,12 @@
 import {
   parseCampaignBundle,
   parseCampaignStages,
+  parsePlayerUnits,
   type BattlefieldThemeId as ContentBattlefieldThemeId,
   type CampaignStageContent,
   type CombatContent,
   type PlayerRole,
+  type PlayerUnitContent,
   type Rarity,
 } from '@frontline/content-schema';
 import type { BattleUnitDefinition } from '@frontline/sim';
@@ -15,6 +17,7 @@ import {
   type PlayerRosterSlot,
 } from '@frontline/sim/playable';
 import playerUnitsJson from '../../../content/units/chapter-01.json' with { type: 'json' };
+import recruitmentUnitsJson from '../../../content/units/recruitment-01.json' with { type: 'json' };
 import enemiesJson from '../../../content/enemies/chapter-01.json' with { type: 'json' };
 import stagesJson from '../../../content/stages/chapter-01.json' with { type: 'json' };
 import specialStagesJson from '../../../content/stages/special-01.json' with { type: 'json' };
@@ -43,8 +46,14 @@ const CAMPAIGN = parseCampaignBundle({
   requiredThemeCount: 7,
 });
 
+const RECRUITMENT_UNIT_CONTENT = parsePlayerUnits(recruitmentUnitsJson);
+const campaignUnitIds = new Set(CAMPAIGN.playerUnits.map((unit) => unit.id));
+for (const unit of RECRUITMENT_UNIT_CONTENT) {
+  if (campaignUnitIds.has(unit.id)) throw new Error(`recruitment unit duplicates chapter-one unit id: ${unit.id}`);
+}
+
 const SPECIAL_STAGE_CONTENT = parseCampaignStages(specialStagesJson, {
-  playerUnitIds: new Set(CAMPAIGN.playerUnits.map((unit) => unit.id)),
+  playerUnitIds: new Set([...CAMPAIGN.playerUnits, ...RECRUITMENT_UNIT_CONTENT].map((unit) => unit.id)),
   enemyIds: new Set(CAMPAIGN.enemies.map((enemy) => enemy.id)),
   starterUnitId: STARTER_SLOT_ID,
   expectedStageCount: 5,
@@ -79,16 +88,29 @@ function fighter(content: CombatContent): BattleUnitDefinition {
   };
 }
 
-export const PLAYER_SLOTS: readonly PrototypeRosterSlot[] = CAMPAIGN.playerUnits.map((unit) => ({
-  slotId: unit.id,
-  displayName: unit.displayName,
-  rarity: unit.rarity,
-  role: unit.role,
-  description: unit.description,
-  definition: fighter(unit),
-  cost: unit.cost,
-  rechargeFrames: unit.rechargeFrames,
-}));
+function rosterSlot(unit: PlayerUnitContent): PrototypeRosterSlot {
+  return {
+    slotId: unit.id,
+    displayName: unit.displayName,
+    rarity: unit.rarity,
+    role: unit.role,
+    description: unit.description,
+    definition: fighter(unit),
+    cost: unit.cost,
+    rechargeFrames: unit.rechargeFrames,
+  };
+}
+
+/** Free chapter-one campaign roster. Keep this stable for progression unlock math. */
+export const PLAYER_SLOTS: readonly PrototypeRosterSlot[] = CAMPAIGN.playerUnits.map(rosterSlot);
+/** Recruitment-only roster. These are never unlocked by chapter-one progression. */
+export const RECRUITMENT_PLAYER_SLOTS: readonly PrototypeRosterSlot[] = RECRUITMENT_UNIT_CONTENT.map(rosterSlot);
+/** Every playable character definition currently known to the battle adapter. */
+export const ALL_PLAYER_SLOTS: readonly PrototypeRosterSlot[] = [...PLAYER_SLOTS, ...RECRUITMENT_PLAYER_SLOTS];
+
+if (new Set(ALL_PLAYER_SLOTS.map((slot) => slot.slotId)).size !== ALL_PLAYER_SLOTS.length) {
+  throw new Error('campaign and recruitment player slot ids must be globally unique');
+}
 
 export const ENEMIES: readonly EnemyArchetype[] = CAMPAIGN.enemies.map((enemy) => ({
   enemyId: enemy.id,
@@ -126,7 +148,7 @@ export function getSpecialStageNumber(stageId: string): number {
 }
 
 export function getSlotById(slotId: string): PrototypeRosterSlot | undefined {
-  return PLAYER_SLOTS.find((slot) => slot.slotId === slotId);
+  return ALL_PLAYER_SLOTS.find((slot) => slot.slotId === slotId);
 }
 
 export function getUnlockStageForSlot(slotId: string): PrototypeStage | undefined {
@@ -194,7 +216,7 @@ export function createPrototypeBattle(
 ): PlayableBattleState {
   const stage = getStage(stageId);
   const unlocked = new Set(unlockedSlotIds);
-  const playerSlots = PLAYER_SLOTS.filter((slot) => unlocked.has(slot.slotId));
+  const playerSlots = ALL_PLAYER_SLOTS.filter((slot) => unlocked.has(slot.slotId));
   const safeSlots = playerSlots.length > 0 ? playerSlots : [PLAYER_SLOTS[0]!];
   const progression = applyTreasureBattleEffects({
     ownedTreasureIds,
