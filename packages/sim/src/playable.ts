@@ -1,4 +1,15 @@
-import { SIM_TICK_RATE, applyAreaDamageToTeam, computeStateHash, createBattle, spawnUnit, stepBattle, UnitState, type BattleState, type BattleUnitDefinition } from './index.ts';
+import {
+  SIM_TICK_RATE,
+  UnitState,
+  applyAreaDamageToTeam,
+  applyForcedDisplacementToTeam,
+  computeStateHash,
+  createBattle,
+  spawnUnit,
+  stepBattle,
+  type BattleState,
+  type BattleUnitDefinition,
+} from './index.ts';
 
 export interface SupplyLevelDefinition {
   readonly incomePerSecond: number;
@@ -20,11 +31,16 @@ export const DEFAULT_SUPPLY_LEVELS: readonly SupplyLevelDefinition[] = [
 export interface BaseWeaponDefinition {
   readonly damage: number;
   readonly cooldownFrames: number;
+  /** Backward world-space displacement applied after damage to survivors not already in natural KB. */
+  readonly pushDistance: number;
+  readonly pushFrames: number;
 }
 
 export const DEFAULT_BASE_WEAPON: BaseWeaponDefinition = {
   damage: 90,
   cooldownFrames: 900,
+  pushDistance: 60,
+  pushFrames: 10,
 };
 
 export interface PlayerRosterSlot {
@@ -134,6 +150,8 @@ function validateConfig(config: PlayableBattleConfig): void {
   const weapon = config.baseWeapon ?? DEFAULT_BASE_WEAPON;
   if (!Number.isInteger(weapon.damage) || weapon.damage < 0) throw new Error('base weapon damage must be a non-negative integer');
   assertPositiveInteger(weapon.cooldownFrames, 'base weapon cooldownFrames');
+  if (!Number.isInteger(weapon.pushDistance) || weapon.pushDistance < 0) throw new Error('base weapon pushDistance must be a non-negative integer');
+  assertPositiveInteger(weapon.pushFrames, 'base weapon pushFrames');
 }
 
 export function createPlayableBattle(config: PlayableBattleConfig): PlayableBattleState {
@@ -249,7 +267,10 @@ function processEnemyWaves(state: PlayableBattleState): void {
 function processPendingBaseWeapon(state: PlayableBattleState): void {
   if (!state.baseWeaponPending) return;
   state.baseWeaponPending = false;
+  // Damage first. Targets that die or enter natural KB are no longer eligible for forced movement,
+  // preventing a single cannon shot from applying two independent displacement paths to one unit.
   applyAreaDamageToTeam(state.battle, 'ENEMY', state.baseWeapon.damage);
+  applyForcedDisplacementToTeam(state.battle, 'ENEMY', state.baseWeapon.pushDistance, state.baseWeapon.pushFrames);
 }
 
 function grantNewDeathRewards(state: PlayableBattleState, aliveBefore: ReadonlySet<number>): void {
@@ -287,6 +308,6 @@ export function computePlayableStateHash(state: PlayableBattleState): string {
   const cooldowns = Object.entries(state.cooldownReadyTick).sort(([a], [b]) => a.localeCompare(b)).map(([slot, tick]) => `${slot}:${tick}`).join('|');
   const waves = state.enemyWaves.map((wave) => `${wave.enemyId}:${wave.spawned}:${wave.nextTick}`).join('|');
   const rewards = Object.entries(state.rewardBySimulationId).sort(([a], [b]) => Number(a) - Number(b)).map(([id, reward]) => `${id}:${reward}`).join('|');
-  const weapon = `${state.baseWeapon.damage}:${state.baseWeapon.cooldownFrames}:${state.baseWeaponReadyTick}:${state.baseWeaponPending ? 1 : 0}:${state.baseWeaponLastFiredTick}`;
+  const weapon = `${state.baseWeapon.damage}:${state.baseWeapon.cooldownFrames}:${state.baseWeapon.pushDistance}:${state.baseWeapon.pushFrames}:${state.baseWeaponReadyTick}:${state.baseWeaponPending ? 1 : 0}:${state.baseWeaponLastFiredTick}`;
   return fnv1a([computeStateHash(state.battle), state.supply, state.supplyLevel, state.incomeRemainder, cooldowns, waves, rewards, weapon].join('#'));
 }
