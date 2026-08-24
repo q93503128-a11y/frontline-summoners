@@ -70,8 +70,11 @@ export interface BattleUnit {
   stateFrame: number;
   nextAttackTick: number;
   naturalKnockbacksConsumed: number;
+  /** Shared displacement interpolation anchors. State decides whether this is natural KB or forced movement. */
   knockbackStartX: number;
   knockbackTargetX: number;
+  /** Runtime duration used only by FORCED_DISPLACEMENT. */
+  forcedDisplacementFrames: number;
 }
 
 export interface BattleBase {
@@ -120,6 +123,7 @@ function assertDefinition(definition: BattleUnitDefinition): void {
   if (!Number.isInteger(timing.backswingFrames) || timing.backswingFrames < 0) throw new Error('backswingFrames must be non-negative');
   if (!Number.isInteger(definition.naturalKnockbackCount) || definition.naturalKnockbackCount < 0) throw new Error('naturalKnockbackCount must be non-negative');
   if (!Number.isInteger(definition.naturalKnockbackFrames) || definition.naturalKnockbackFrames <= 0) throw new Error('naturalKnockbackFrames must be positive');
+  if (!Number.isInteger(definition.naturalKnockbackDistance) || definition.naturalKnockbackDistance < 0) throw new Error('naturalKnockbackDistance must be a non-negative integer');
   if (!Number.isInteger(definition.deathFrames) || definition.deathFrames <= 0) throw new Error('deathFrames must be positive');
 
   const traits = definition.traits ?? [];
@@ -152,6 +156,8 @@ export function getUnitAttackDamageAgainst(source: BattleUnitDefinition, target:
 
 export function createBattle(config: BattleConfig): BattleState {
   if (!Number.isInteger(config.mapLength) || config.mapLength <= 0) throw new Error('mapLength must be a positive integer');
+  if (!Number.isInteger(config.playerBaseHp) || config.playerBaseHp <= 0) throw new Error('playerBaseHp must be a positive integer');
+  if (!Number.isInteger(config.enemyBaseHp) || config.enemyBaseHp <= 0) throw new Error('enemyBaseHp must be a positive integer');
   const state: BattleState = {
     tick: 0,
     nextSimulationId: 1,
@@ -174,11 +180,13 @@ export function spawnUnit(state: BattleState, definition: BattleUnitDefinition, 
     simulationId: state.nextSimulationId++, definition, team, hp: definition.maxHp,
     anchorX: clamp(Math.trunc(anchorX), 0, state.mapLength), state: UnitState.Moving, stateFrame: 0,
     nextAttackTick: 0, naturalKnockbacksConsumed: 0, knockbackStartX: 0, knockbackTargetX: 0,
+    forcedDisplacementFrames: 0,
   };
   state.units.push(unit);
   return unit;
 }
 
+/** Natural KB is untargetable. Forced displacement intentionally keeps the hurtbox active. */
 function isTargetable(unit: BattleUnit): boolean {
   return unit.state !== UnitState.NaturalKnockback && unit.state !== UnitState.Dying;
 }
@@ -200,18 +208,24 @@ function findNearestDetectionDistance(state: BattleState, source: BattleUnit): n
   return nearest;
 }
 
+function advanceDisplacement(unit: BattleUnit, duration: number): void {
+  const elapsed = Math.min(unit.stateFrame, duration);
+  unit.anchorX = unit.knockbackStartX + Math.trunc(((unit.knockbackTargetX - unit.knockbackStartX) * elapsed) / duration);
+  if (elapsed >= duration) {
+    unit.anchorX = unit.knockbackTargetX;
+    unit.state = UnitState.Moving;
+    unit.stateFrame = 0;
+    unit.forcedDisplacementFrames = 0;
+  }
+}
+
 function advanceTimers(state: BattleState): void {
   for (const unit of state.units) {
     if (unit.state !== UnitState.Moving) unit.stateFrame += 1;
     if (unit.state === UnitState.NaturalKnockback) {
-      const duration = unit.definition.naturalKnockbackFrames;
-      const elapsed = Math.min(unit.stateFrame, duration);
-      unit.anchorX = unit.knockbackStartX + Math.trunc(((unit.knockbackTargetX - unit.knockbackStartX) * elapsed) / duration);
-      if (elapsed >= duration) {
-        unit.anchorX = unit.knockbackTargetX;
-        unit.state = UnitState.Moving;
-        unit.stateFrame = 0;
-      }
+      advanceDisplacement(unit, unit.definition.naturalKnockbackFrames);
+    } else if (unit.state === UnitState.ForcedDisplacement) {
+      advanceDisplacement(unit, Math.max(1, unit.forcedDisplacementFrames));
     } else if (unit.state === UnitState.AttackWait && state.tick >= unit.nextAttackTick) {
       unit.state = UnitState.Moving;
       unit.stateFrame = 0;
@@ -286,12 +300,23 @@ function enterNaturalKnockback(state: BattleState, unit: BattleUnit): void {
   unit.stateFrame = 0;
   unit.knockbackStartX = unit.anchorX;
   unit.knockbackTargetX = clamp(unit.anchorX - direction * unit.definition.naturalKnockbackDistance, 0, state.mapLength);
+  unit.forcedDisplacementFrames = 0;
+}
+
+function enterForcedDisplacement(state: BattleState, unit: BattleUnit, distance: number, frames: number): void {
+  const direction = directionFor(unit.team);
+  unit.state = UnitState.ForcedDisplacement;
+  unit.stateFrame = 0;
+  unit.knockbackStartX = unit.anchorX;
+  unit.knockbackTargetX = clamp(unit.anchorX - direction * distance, 0, state.mapLength);
+  unit.forcedDisplacementFrames = frames;
 }
 
 function enterDying(unit: BattleUnit): void {
   unit.hp = 0;
   unit.state = UnitState.Dying;
   unit.stateFrame = 0;
+  unit.forcedDisplacementFrames = 0;
 }
 
 function applyHits(state: BattleState, hits: readonly HitEvent[]): void {
@@ -335,6 +360,26 @@ export function applyAreaDamageToTeam(state: BattleState, targetTeam: BattleTeam
   if (targets.length === 0) return 0;
   applyHits(state, targets.map((unit) => ({ targetKind: 'UNIT' as const, targetId: unit.simulationId, damage })));
   state.stateHash = computeStateHash(state);
+  return targets.length;
+}
+
+/**
+ * Pushes all currently targetable units of a team backward toward their own base.
+ * Forced movement is separate from natural KB: it cancels the current action but keeps the hurtbox active.
+ * Units already in natural KB or DYING are skipped, so one effect cannot double-displace the same target.
+ */
+export function applyForcedDisplacementToTeam(
+  state: BattleState,
+  targetTeam: BattleTeam,
+  distance: number,
+  frames: number,
+): number {
+  if (!Number.isInteger(distance) || distance < 0) throw new Error('forced displacement distance must be a non-negative integer');
+  if (!Number.isInteger(frames) || frames <= 0) throw new Error('forced displacement frames must be a positive integer');
+  if (distance === 0 || state.winner !== null) return 0;
+  const targets = state.units.filter((unit) => unit.team === targetTeam && isTargetable(unit));
+  for (const unit of targets) enterForcedDisplacement(state, unit, distance, frames);
+  if (targets.length > 0) state.stateHash = computeStateHash(state);
   return targets.length;
 }
 
@@ -401,13 +446,45 @@ function definitionCombatSignature(definition: BattleUnitDefinition): string {
     .sort((a, b) => a.trait.localeCompare(b.trait))
     .map((bonus) => `${bonus.trait}:${bonus.multiplierPermille}`)
     .join(',');
-  return `${definition.id}[${traits}][${bonuses}]`;
+  const timing = definition.attackTiming;
+  return [
+    definition.id,
+    definition.maxHp,
+    definition.attackDamage,
+    definition.moveSpeed,
+    definition.standingRange,
+    definition.attackMinRange,
+    definition.attackMaxRange,
+    definition.targetMode,
+    definition.naturalKnockbackCount,
+    definition.naturalKnockbackFrames,
+    definition.naturalKnockbackDistance,
+    definition.deathFrames,
+    timing.cycleFrames,
+    timing.hitFrames.join(','),
+    timing.backswingFrames,
+    `[${traits}]`,
+    `[${bonuses}]`,
+  ].join('/');
 }
 
 export function computeStateHash(state: BattleState): string {
   const units = [...state.units]
     .sort((a, b) => a.simulationId - b.simulationId)
-    .map((unit) => [unit.simulationId, definitionCombatSignature(unit.definition), unit.team, unit.hp, unit.anchorX, unit.state, unit.stateFrame, unit.nextAttackTick, unit.naturalKnockbacksConsumed].join(':'))
+    .map((unit) => [
+      unit.simulationId,
+      definitionCombatSignature(unit.definition),
+      unit.team,
+      unit.hp,
+      unit.anchorX,
+      unit.state,
+      unit.stateFrame,
+      unit.nextAttackTick,
+      unit.naturalKnockbacksConsumed,
+      unit.knockbackStartX,
+      unit.knockbackTargetX,
+      unit.forcedDisplacementFrames,
+    ].join(':'))
     .join('|');
   return fnv1a([state.tick, state.nextSimulationId, state.bases.PLAYER.hp, state.bases.ENEMY.hp, state.winner ?? '-', units].join('#'));
 }
