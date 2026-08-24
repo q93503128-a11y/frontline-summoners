@@ -89,7 +89,7 @@ test('locked-stage and save-pending clicks are quiet; camera shake is reserved f
   const resultBlock = source.slice(resultStart, gameStart);
   assert.match(stageBlock, /if \(unlocked\) this\.scene\.start\('battle', \{ stageId: stage\.id \}\);/);
   assert.doesNotMatch(stageBlock, /cameras\.main\.shake/);
-  assert.match(resultBlock, /if \(!this\.progressionSaved\) return;/);
+  assert.match(resultBlock, /if \(!this\.resultRecorded\) return;/);
   assert.doesNotMatch(resultBlock, /cameras\.main\.shake/);
 
   const shakeCalls = source.match(/cameras\.main\.shake\(/g) ?? [];
@@ -97,6 +97,22 @@ test('locked-stage and save-pending clicks are quiet; camera shake is reserved f
   assert.match(source, /private playBaseWeaponFx\(\): void[\s\S]*?cameras\.main\.shake/);
   assert.match(source, /private playUnitImpactFx[\s\S]*?cameras\.main\.shake/);
   assert.match(source, /private playBaseImpactFx[\s\S]*?cameras\.main\.shake/);
+});
+
+test('special challenge screen is a separate optional axis with its own battle and result wiring', async () => {
+  const source = await readMain();
+  assert.match(source, /class SpecialStageSelectScene extends Phaser\.Scene/);
+  assert.match(source, /super\('special-select'\)/);
+  assert.match(source, /SPECIAL_STAGES\.forEach\(\(stage, index\) =>/);
+  assert.match(source, /isSpecialStageUnlocked\(stage\.id, this\.progress\.clearedStageIds\)/);
+  assert.match(source, /this\.progress\.specialClearedStageIds\.includes\(stage\.id\)/);
+  assert.match(source, /this\.scene\.start\('special-select'\)/);
+  assert.match(source, /isBattleStageUnlocked\(this\.stage\.id, progress\.clearedStageIds\)/);
+  assert.match(source, /recordSpecialStageClear\(this\.stage\.id\)/);
+  assert.match(source, /recordStageClear\(this\.stage\.id, this\.stage\.treasure\.id\)/);
+  assert.match(source, /special \? '특수전' : '스테이지'/);
+  assert.match(source, /scene: \[BootScene, MainMenuScene, StageSelectScene, SpecialStageSelectScene, DeckScene, CatalogScene, BattleScene, ResultScene\]/);
+  assert.doesNotMatch(source, /협동 권장/);
 });
 
 test('compact mobile battle HUD uses the shared coarse-pointer classifier and keeps desktop shortcuts intact', async () => {
@@ -155,20 +171,23 @@ test('compact two-row summon and right-side control hitboxes stay inside the bot
   assert.ok(unitHeight * scaleAt390High >= 44, 'compact battle targets must stay finger-sized on a 390px-high landscape phone');
 });
 
-test('compact navigation buttons stay finger-sized across stage, deck, battle pause, and result screens', async () => {
+test('compact navigation buttons stay finger-sized across progression, special, deck, battle pause, and result screens', async () => {
   const source = await readMain();
   const stageStart = source.indexOf('class StageSelectScene');
+  const specialStart = source.indexOf('class SpecialStageSelectScene');
   const deckStart = source.indexOf('class DeckScene');
   const battleStart = source.indexOf('class BattleScene');
   const resultStart = source.indexOf('class ResultScene');
-  assert.ok(stageStart >= 0 && deckStart > stageStart && battleStart > deckStart && resultStart > battleStart);
+  assert.ok(stageStart >= 0 && specialStart > stageStart && deckStart > specialStart && battleStart > deckStart && resultStart > battleStart);
 
-  const stageBlock = source.slice(stageStart, deckStart);
+  const stageBlock = source.slice(stageStart, specialStart);
+  const specialBlock = source.slice(specialStart, deckStart);
   const deckBlock = source.slice(deckStart, battleStart);
   const battleBlock = source.slice(battleStart, resultStart);
   assert.match(stageBlock, /compact \? 84 : 50/);
   assert.match(stageBlock, /compact \? 84 : 52/);
-  assert.match(stageBlock, /compact \? 84 : 52, unlocked/);
+  assert.match(specialBlock, /compact \? 84 : 50/);
+  assert.match(specialBlock, /compact \? 84 : 52/);
   assert.match(deckBlock, /compact \? 84 : 50/);
   assert.match(battleBlock, /compact \? 84 : 42, '일시정지'/);
   assert.match(battleBlock, /isCompactMobileViewport\(\) \? 84 : 58, '계 속'/);
@@ -180,19 +199,24 @@ test('compact navigation buttons stay finger-sized across stage, deck, battle pa
 test('stage and deck cards keep desktop detail while compact mobile renders a reduced high-priority information set', async () => {
   const source = await readMain();
   const stageStart = source.indexOf('class StageSelectScene');
+  const specialStart = source.indexOf('class SpecialStageSelectScene');
   const deckStart = source.indexOf('class DeckScene');
   const battleStart = source.indexOf('class BattleScene');
-  assert.ok(stageStart >= 0 && deckStart > stageStart && battleStart > deckStart);
-  const stageBlock = source.slice(stageStart, deckStart);
+  assert.ok(stageStart >= 0 && specialStart > stageStart && deckStart > specialStart && battleStart > deckStart);
+  const stageBlock = source.slice(stageStart, specialStart);
+  const specialBlock = source.slice(specialStart, deckStart);
   const deckBlock = source.slice(deckStart, battleStart);
 
   assert.match(stageBlock, /const compact = isCompactMobileViewport\(\);/);
   assert.match(stageBlock, /if \(compact\) \{/);
   assert.match(stageBlock, /compact \? 28 : 25/);
   assert.match(stageBlock, /compact \? 535 : 548/);
-  assert.match(stageBlock, /BATTLEFIELD_THEME_LABELS\[stage\.theme\]/, 'desktop stage detail must keep battlefield theme');
-  assert.match(stageBlock, /`전장 \$\{stage\.mapLength\}m`/, 'desktop stage detail must keep map length');
-  assert.match(stageBlock, /stage\.subtitle/, 'desktop stage detail must keep subtitle');
+  assert.match(stageBlock, /BATTLEFIELD_THEME_LABELS\[stage\.theme\]/, 'desktop progression detail must keep battlefield theme');
+  assert.match(stageBlock, /`전장 \$\{stage\.mapLength\}m`/, 'desktop progression detail must keep map length');
+  assert.match(stageBlock, /stage\.subtitle/, 'desktop progression detail must keep subtitle');
+  assert.match(specialBlock, /BATTLEFIELD_THEME_LABELS\[stage\.theme\]/, 'desktop special detail must keep battlefield theme');
+  assert.match(specialBlock, /stage\.subtitle/, 'desktop special detail must keep challenge description');
+  assert.match(specialBlock, /동시 출격 \$\{effectiveCap\}기/);
 
   assert.match(deckBlock, /const compact = isCompactMobileViewport\(\);/);
   assert.match(deckBlock, /compact \? 27 : 22/);
@@ -222,7 +246,7 @@ test('main and result scenes use separate compact layouts while desktop keeps th
   assert.match(mainBlock, /const menuButtonHeight = compact \? 108 : 92;/);
   assert.match(mainBlock, /compact \? '승리할수록 전선과 동료가 열린다\.' : '첫 출정은 징집병 하나\. 승리할수록 전선과 동료가 열린다\.'/);
   assert.match(mainBlock, /if \(!compact\) addText\(this, 1185, 675, 'PRE-ALPHA'/);
-  assert.match(mainBlock, /`클리어 \$\{progress\.clearedStageIds\.length\}\/\$\{STAGES\.length\} · 보물 \$\{progress\.treasureIds\.length\}\/\$\{STAGES\.length\} · 동료 \$\{unlocked\}\/\$\{PLAYER_SLOTS\.length\}`/);
+  assert.match(mainBlock, /`진도 \$\{progress\.clearedStageIds\.length\}\/\$\{STAGES\.length\} · 특수 \$\{progress\.specialClearedStageIds\.length\}\/\$\{SPECIAL_STAGES\.length\} · 보물 \$\{progress\.treasureIds\.length\}\/\$\{STAGES\.length\} · 동료 \$\{unlocked\}\/\$\{PLAYER_SLOTS\.length\}`/);
 
   assert.match(resultBlock, /const compact = isCompactMobileViewport\(\);/);
   assert.match(resultBlock, /compact \? 820 : 760/);
@@ -230,7 +254,9 @@ test('main and result scenes use separate compact layouts while desktop keeps th
   assert.match(resultBlock, /const resultButtonHeight = compact \? 84 : 68;/);
   assert.match(resultBlock, /compact \? '진행 저장 중…' : '진행 저장 중… 잠시만 기다려 주세요'/);
   assert.match(resultBlock, /'첫 클리어 저장 완료 · 다음 스테이지 개방'/, 'desktop result must retain full first-clear wording');
-  assert.match(resultBlock, /'브라우저 영구 저장 실패 · 현재 탭에서는 진행 유지'/, 'desktop result must retain full save-failure wording');
+  assert.match(resultBlock, /'브라우저 영구 저장 실패 · 현재 탭에서는 진행 유지'/, 'desktop progression result must retain full save-failure wording');
+  assert.match(resultBlock, /'특수전 훈장 획득'/);
+  assert.match(resultBlock, /'특수전 첫 클리어 저장 완료'/);
 });
 
 test('shared buttons recover from touch or pointer cancellation instead of staying visually pressed', async () => {
