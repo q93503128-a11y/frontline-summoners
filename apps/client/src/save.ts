@@ -1,9 +1,11 @@
 import {
+  ALL_PLAYER_SLOTS,
   SPECIAL_STAGES,
   STAGES,
   getContiguousClearedStageIds,
   getStage,
   getTreasureIdsForClearedStages,
+  getUnlockedSlotIds,
   isSpecialStageUnlocked,
   isStageUnlocked,
 } from './prototype.ts';
@@ -16,6 +18,17 @@ import {
   type RecruitmentProgress,
   type RecruitmentRandomSource,
 } from './recruitment.ts';
+import {
+  getEvolutionForm,
+  getEvolutionForms,
+  normalizeCharacterLevel,
+} from './character-growth.ts';
+
+export interface CharacterMetaProgress {
+  readonly level: number;
+  readonly unlockedFormIds: readonly string[];
+  readonly selectedFormId?: string;
+}
 
 export interface GuestProgress {
   /** Sequential PROGRESSION clears only. */
@@ -27,6 +40,8 @@ export interface GuestProgress {
   readonly ownedRecruitmentCharacterIds?: readonly string[];
   /** Sparse per-banner pity/selection state. Missing means zero pulls and zero credits. */
   readonly recruitmentProgressByBanner?: Readonly<Record<string, RecruitmentProgress>>;
+  /** Level/form state for currently owned characters. */
+  readonly characterProgressById?: Readonly<Record<string, CharacterMetaProgress>>;
 }
 
 export interface StageClearResult {
@@ -57,6 +72,13 @@ export interface GuestBannerSelectionResult {
   readonly guestProgress: GuestProgress;
 }
 
+export interface GuestCharacterProgressResult {
+  readonly characterId: string;
+  readonly characterProgress: CharacterMetaProgress;
+  readonly persisted: boolean;
+  readonly guestProgress: GuestProgress;
+}
+
 interface StoredGuestProgressV2 {
   readonly schemaVersion: 2;
   readonly clearedStageIds: readonly string[];
@@ -79,20 +101,32 @@ interface StoredGuestProgressV4 {
   readonly recruitmentProgressByBanner: Readonly<Record<string, RecruitmentProgress>>;
 }
 
+interface StoredGuestProgressV5 {
+  readonly schemaVersion: 5;
+  readonly clearedStageIds: readonly string[];
+  readonly specialClearedStageIds: readonly string[];
+  readonly treasureIds: readonly string[];
+  readonly ownedRecruitmentCharacterIds: readonly string[];
+  readonly recruitmentProgressByBanner: Readonly<Record<string, RecruitmentProgress>>;
+  readonly characterProgressById: Readonly<Record<string, CharacterMetaProgress>>;
+}
+
 const DB_NAME = 'frontline-summoners';
 const STORE_NAME = 'guest-progress';
 const KEY = 'progress';
-const SCHEMA_VERSION = 4;
+const SCHEMA_VERSION = 5;
 const EMPTY_PROGRESS: GuestProgress = {
   clearedStageIds: [],
   specialClearedStageIds: [],
   treasureIds: [],
   ownedRecruitmentCharacterIds: [],
   recruitmentProgressByBanner: {},
+  characterProgressById: {},
 };
 const STAGE_TREASURE_IDS = new Set(STAGES.map((stage) => stage.treasure.id));
 const SPECIAL_STAGE_IDS = new Set(SPECIAL_STAGES.map((stage) => stage.id));
 const RECRUITMENT_CHARACTER_IDS = new Set(RECRUITMENT_UNITS.map((unit) => unit.id));
+const ALL_CHARACTER_IDS = new Set(ALL_PLAYER_SLOTS.map((slot) => slot.slotId));
 let sessionProgress: GuestProgress = EMPTY_PROGRESS;
 
 function stringArray(value: unknown): readonly string[] {
@@ -150,6 +184,92 @@ function mergeRecruitmentMaps(
   return merged;
 }
 
+function parseCharacterMetaProgress(value: unknown): CharacterMetaProgress | null {
+  if (typeof value !== 'object' || value === null || Array.isArray(value)) return null;
+  const raw = value as Record<string, unknown>;
+  const level = raw.level;
+  if (!Number.isFinite(level)) return null;
+  const unlockedFormIds = stringArray(raw.unlockedFormIds);
+  const selectedFormId = typeof raw.selectedFormId === 'string' ? raw.selectedFormId : undefined;
+  return {
+    level: normalizeCharacterLevel(level as number),
+    unlockedFormIds,
+    ...(selectedFormId === undefined ? {} : { selectedFormId }),
+  };
+}
+
+function mergeCharacterProgressMaps(
+  a: Readonly<Record<string, CharacterMetaProgress>>,
+  b: Readonly<Record<string, CharacterMetaProgress>>,
+): Readonly<Record<string, CharacterMetaProgress>> {
+  const merged: Record<string, CharacterMetaProgress> = {};
+  for (const characterId of new Set([...Object.keys(a), ...Object.keys(b)])) {
+    const left = a[characterId];
+    const right = b[characterId];
+    if (!left) {
+      if (right) merged[characterId] = right;
+      continue;
+    }
+    if (!right) {
+      merged[characterId] = left;
+      continue;
+    }
+    const unlockedFormIds = [...new Set([...left.unlockedFormIds, ...right.unlockedFormIds])];
+    // loadGuestProgress calls mergeGuestProgress(stored, session), so the current session wins a
+    // same-level form-selection tie. Higher level progress still wins if the other source is stale.
+    const preferredSelection = right.level >= left.level
+      ? right.selectedFormId ?? left.selectedFormId
+      : left.selectedFormId ?? right.selectedFormId;
+    merged[characterId] = {
+      level: Math.max(left.level, right.level),
+      unlockedFormIds,
+      ...(preferredSelection === undefined ? {} : { selectedFormId: preferredSelection }),
+    };
+  }
+  return merged;
+}
+
+function ownedCharacterIdsForProgress(
+  clearedStageIds: readonly string[],
+  ownedRecruitmentCharacterIds: readonly string[],
+): ReadonlySet<string> {
+  return new Set([
+    ...getUnlockedSlotIds(clearedStageIds),
+    ...ownedRecruitmentCharacterIds,
+  ]);
+}
+
+function normalizeCharacterProgressMap(
+  value: unknown,
+  ownedCharacterIds: ReadonlySet<string>,
+): Readonly<Record<string, CharacterMetaProgress>> {
+  const rawMap = typeof value === 'object' && value !== null && !Array.isArray(value)
+    ? value as Record<string, unknown>
+    : {};
+  const result: Record<string, CharacterMetaProgress> = {};
+
+  for (const characterId of ownedCharacterIds) {
+    if (!ALL_CHARACTER_IDS.has(characterId)) continue;
+    const parsed = parseCharacterMetaProgress(rawMap[characterId]);
+    const forms = getEvolutionForms(characterId);
+    const validFormIds = new Set(forms.map((form) => form.formId));
+    const baseFormId = forms.find((form) => form.formOrder === 1)?.formId;
+    const unlockedFormIds = [...new Set([
+      ...(baseFormId ? [baseFormId] : []),
+      ...(parsed?.unlockedFormIds ?? []).filter((formId) => validFormIds.has(formId)),
+    ])];
+    const selectedFormId = parsed?.selectedFormId && unlockedFormIds.includes(parsed.selectedFormId)
+      ? parsed.selectedFormId
+      : baseFormId;
+    result[characterId] = {
+      level: normalizeCharacterLevel(parsed?.level ?? 1),
+      unlockedFormIds,
+      ...(selectedFormId === undefined ? {} : { selectedFormId }),
+    };
+  }
+  return result;
+}
+
 export function mergeGuestProgress(a: GuestProgress, b: GuestProgress): GuestProgress {
   return {
     clearedStageIds: [...new Set([...a.clearedStageIds, ...b.clearedStageIds])],
@@ -163,6 +283,10 @@ export function mergeGuestProgress(a: GuestProgress, b: GuestProgress): GuestPro
       a.recruitmentProgressByBanner ?? {},
       b.recruitmentProgressByBanner ?? {},
     ),
+    characterProgressById: mergeCharacterProgressMaps(
+      a.characterProgressById ?? {},
+      b.characterProgressById ?? {},
+    ),
   };
 }
 
@@ -174,12 +298,14 @@ export function normalizeGuestProgress(progress: GuestProgress): GuestProgress {
   const ownedRecruitmentCharacterIds = [...new Set(
     (progress.ownedRecruitmentCharacterIds ?? []).filter((characterId) => RECRUITMENT_CHARACTER_IDS.has(characterId)),
   )];
+  const ownedCharacterIds = ownedCharacterIdsForProgress(clearedStageIds, ownedRecruitmentCharacterIds);
   return {
     clearedStageIds,
     specialClearedStageIds,
     treasureIds: [...new Set([...guaranteedTreasureIds, ...nonStageTreasureIds])],
     ownedRecruitmentCharacterIds,
     recruitmentProgressByBanner: normalizeRecruitmentMap(progress.recruitmentProgressByBanner ?? {}),
+    characterProgressById: normalizeCharacterProgressMap(progress.characterProgressById ?? {}, ownedCharacterIds),
   };
 }
 
@@ -200,20 +326,27 @@ function readStoredProgress(db: IDBDatabase): Promise<GuestProgress> {
     const tx = db.transaction(STORE_NAME, 'readonly');
     const request = tx.objectStore(STORE_NAME).get(KEY);
     request.onsuccess = () => {
-      const value = request.result as Partial<StoredGuestProgressV2 | StoredGuestProgressV3 | StoredGuestProgressV4> | undefined;
-      if (value?.schemaVersion !== 2 && value?.schemaVersion !== 3 && value?.schemaVersion !== SCHEMA_VERSION) {
+      const value = request.result as Partial<StoredGuestProgressV2 | StoredGuestProgressV3 | StoredGuestProgressV4 | StoredGuestProgressV5> | undefined;
+      if (value?.schemaVersion !== 2 && value?.schemaVersion !== 3 && value?.schemaVersion !== 4 && value?.schemaVersion !== SCHEMA_VERSION) {
         resolve(EMPTY_PROGRESS);
         return;
       }
-      const isV3OrLater = value.schemaVersion === 3 || value.schemaVersion === SCHEMA_VERSION;
-      const isV4 = value.schemaVersion === SCHEMA_VERSION;
+      const version = value.schemaVersion;
+      const hasSpecial = version >= 3;
+      const hasRecruitment = version >= 4;
+      const hasCharacterProgress = version >= 5;
       resolve({
         clearedStageIds: stringArray(value.clearedStageIds),
-        specialClearedStageIds: isV3OrLater ? stringArray((value as Partial<StoredGuestProgressV3 | StoredGuestProgressV4>).specialClearedStageIds) : [],
+        specialClearedStageIds: hasSpecial ? stringArray((value as Partial<StoredGuestProgressV3 | StoredGuestProgressV4 | StoredGuestProgressV5>).specialClearedStageIds) : [],
         treasureIds: stringArray(value.treasureIds),
-        ownedRecruitmentCharacterIds: isV4 ? stringArray((value as Partial<StoredGuestProgressV4>).ownedRecruitmentCharacterIds) : [],
-        recruitmentProgressByBanner: isV4
-          ? normalizeRecruitmentMap((value as Partial<StoredGuestProgressV4>).recruitmentProgressByBanner)
+        ownedRecruitmentCharacterIds: hasRecruitment
+          ? stringArray((value as Partial<StoredGuestProgressV4 | StoredGuestProgressV5>).ownedRecruitmentCharacterIds)
+          : [],
+        recruitmentProgressByBanner: hasRecruitment
+          ? normalizeRecruitmentMap((value as Partial<StoredGuestProgressV4 | StoredGuestProgressV5>).recruitmentProgressByBanner)
+          : {},
+        characterProgressById: hasCharacterProgress
+          ? (value as Partial<StoredGuestProgressV5>).characterProgressById ?? {}
           : {},
       });
     };
@@ -224,13 +357,14 @@ function readStoredProgress(db: IDBDatabase): Promise<GuestProgress> {
 
 async function persistProgress(progress: GuestProgress): Promise<boolean> {
   const normalized = normalizeGuestProgress(progress);
-  const stored: StoredGuestProgressV4 = {
+  const stored: StoredGuestProgressV5 = {
     schemaVersion: SCHEMA_VERSION,
     clearedStageIds: normalized.clearedStageIds,
     specialClearedStageIds: normalized.specialClearedStageIds,
     treasureIds: normalized.treasureIds,
     ownedRecruitmentCharacterIds: normalized.ownedRecruitmentCharacterIds ?? [],
     recruitmentProgressByBanner: normalized.recruitmentProgressByBanner ?? {},
+    characterProgressById: normalized.characterProgressById ?? {},
   };
   try {
     const db = await openDb();
@@ -360,4 +494,75 @@ export async function redeemGuestBannerSelection(
   sessionProgress = progress;
   const persisted = await persistProgress(progress);
   return { characterId, duplicate: selected.duplicate, persisted, guestProgress: progress };
+}
+
+function requireOwnedCharacter(progress: GuestProgress, characterId: string): CharacterMetaProgress {
+  const normalized = normalizeGuestProgress(progress);
+  const characterProgress = normalized.characterProgressById?.[characterId];
+  if (!characterProgress) throw new Error(`Character is not owned: ${characterId}`);
+  return characterProgress;
+}
+
+export async function recordGuestCharacterLevel(
+  characterId: string,
+  level: number,
+): Promise<GuestCharacterProgressResult> {
+  const before = normalizeGuestProgress(await loadGuestProgress());
+  const current = requireOwnedCharacter(before, characterId);
+  const nextLevel = normalizeCharacterLevel(level);
+  if (nextLevel < current.level) throw new Error('character level cannot decrease');
+  const progress = normalizeGuestProgress({
+    ...before,
+    characterProgressById: {
+      ...(before.characterProgressById ?? {}),
+      [characterId]: { ...current, level: nextLevel },
+    },
+  });
+  sessionProgress = progress;
+  const persisted = await persistProgress(progress);
+  return { characterId, characterProgress: progress.characterProgressById![characterId]!, persisted, guestProgress: progress };
+}
+
+export async function recordGuestEvolutionUnlock(
+  characterId: string,
+  formId: string,
+): Promise<GuestCharacterProgressResult> {
+  const before = normalizeGuestProgress(await loadGuestProgress());
+  const current = requireOwnedCharacter(before, characterId);
+  const form = getEvolutionForm(formId);
+  if (form.characterId !== characterId) throw new Error(`Evolution form ${formId} does not belong to ${characterId}`);
+  const progress = normalizeGuestProgress({
+    ...before,
+    characterProgressById: {
+      ...(before.characterProgressById ?? {}),
+      [characterId]: {
+        ...current,
+        unlockedFormIds: [...new Set([...current.unlockedFormIds, formId])],
+      },
+    },
+  });
+  sessionProgress = progress;
+  const persisted = await persistProgress(progress);
+  return { characterId, characterProgress: progress.characterProgressById![characterId]!, persisted, guestProgress: progress };
+}
+
+export async function selectGuestEvolutionForm(
+  characterId: string,
+  formId: string,
+): Promise<GuestCharacterProgressResult> {
+  const before = normalizeGuestProgress(await loadGuestProgress());
+  const current = requireOwnedCharacter(before, characterId);
+  const form = getEvolutionForm(formId);
+  if (form.characterId !== characterId) throw new Error(`Evolution form ${formId} does not belong to ${characterId}`);
+  if (!current.unlockedFormIds.includes(formId)) throw new Error(`Evolution form is not unlocked: ${formId}`);
+  const progress = normalizeGuestProgress({
+    ...before,
+    characterProgressById: {
+      ...(before.characterProgressById ?? {}),
+      [characterId]: { ...current, selectedFormId: formId },
+    },
+  });
+  sessionProgress = progress;
+  const persisted = await persistProgress(progress);
+  return { characterId, characterProgress: progress.characterProgressById![characterId]!, persisted, guestProgress: progress };
 }
