@@ -188,11 +188,11 @@ function parseCharacterMetaProgress(value: unknown): CharacterMetaProgress | nul
   if (typeof value !== 'object' || value === null || Array.isArray(value)) return null;
   const raw = value as Record<string, unknown>;
   const level = raw.level;
-  if (!Number.isFinite(level)) return null;
+  if (typeof level !== 'number' || !Number.isFinite(level)) return null;
   const unlockedFormIds = stringArray(raw.unlockedFormIds);
   const selectedFormId = typeof raw.selectedFormId === 'string' ? raw.selectedFormId : undefined;
   return {
-    level: normalizeCharacterLevel(level as number),
+    level: normalizeCharacterLevel(level),
     unlockedFormIds,
     ...(selectedFormId === undefined ? {} : { selectedFormId }),
   };
