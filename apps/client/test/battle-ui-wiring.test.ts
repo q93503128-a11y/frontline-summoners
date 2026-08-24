@@ -112,6 +112,35 @@ test('compact mobile battle HUD prioritizes readable touch controls without chan
   assert.match(source, /height: INTERNAL_HEIGHT/);
 });
 
+test('compact two-row summon and right-side control hitboxes stay inside the bottom HUD without overlap', async () => {
+  const source = await readMain();
+  assert.match(source, /const x = 102 \+ col \* 205;/);
+  assert.match(source, /const y = compact \? 582 \+ row \* 80 : 579 \+ row \* 72;/);
+  assert.match(source, /this\.add\.rectangle\(x, y, 188, buttonHeight/);
+  assert.match(source, /this\.add\.rectangle\(1145, upgradeY, 220, controlHeight/);
+  assert.match(source, /this\.add\.rectangle\(1145, weaponY, 220, controlHeight/);
+
+  const hudTop = 540;
+  const hudBottom = 720;
+  const unitHeight = 80;
+  const unitRows = [582, 662];
+  const controlHeight = 76;
+  const controlRows = [582, 662];
+  for (const center of unitRows) {
+    assert.ok(center - unitHeight / 2 >= hudTop);
+    assert.ok(center + unitHeight / 2 <= hudBottom);
+  }
+  for (const center of controlRows) {
+    assert.ok(center - controlHeight / 2 >= hudTop);
+    assert.ok(center + controlHeight / 2 <= hudBottom);
+  }
+
+  const lastUnitCenter = 102 + 4 * 205;
+  const lastUnitRight = lastUnitCenter + 188 / 2;
+  const controlLeft = 1145 - 220 / 2;
+  assert.ok(lastUnitRight < controlLeft, `expected horizontal gap, got last unit right ${lastUnitRight} and control left ${controlLeft}`);
+});
+
 test('stage cards render the restored twelve-step difficulty scale without legacy five-star overflow', async () => {
   const source = await readMain();
   assert.match(source, /`난이도 \$\{stage\.difficulty\} \/ 12`/);
