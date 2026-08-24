@@ -7,7 +7,7 @@ import { RecruitmentScene } from './recruitment-scene';
 import { BootScene, MainMenuScene, StageHubScene, StageSelectScene } from './navigation-scenes';
 import { ResultScene } from './result-scene';
 
-new Phaser.Game({
+const game = new Phaser.Game({
   type: Phaser.AUTO,
   parent: 'game',
   width: INTERNAL_WIDTH,
@@ -16,9 +16,11 @@ new Phaser.Game({
   antialias: true,
   pixelArt: false,
   roundPixels: false,
-  scene: [BootScene, MainMenuScene, StageHubScene, StageSelectScene, DeckScene, CatalogScene, RecruitmentScene, BattleScene, ResultScene],
+  scene: [BootScene, MainMenuScene, StageHubScene, StageSelectScene, DeckScene, CatalogScene, BattleScene, ResultScene],
   scale: {
     mode: Phaser.Scale.FIT,
     autoCenter: Phaser.Scale.CENTER_BOTH,
   },
 });
+
+game.scene.add('recruitment', RecruitmentScene, false);
