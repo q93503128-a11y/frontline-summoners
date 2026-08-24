@@ -83,8 +83,9 @@ function readStoredProgress(db: IDBDatabase): Promise<GuestProgress> {
 export async function loadGuestProgress(): Promise<GuestProgress> {
   try {
     const db = await openDb();
-    const stored = await readStoredProgress(db);
-    sessionProgress = normalizeGuestProgress(mergeGuestProgress(stored, sessionProgress));
+    const stored = normalizeGuestProgress(await readStoredProgress(db));
+    const currentSession = normalizeGuestProgress(sessionProgress);
+    sessionProgress = normalizeGuestProgress(mergeGuestProgress(stored, currentSession));
   } catch {
     // IndexedDB can be unavailable in restrictive/private browser contexts.
     // Preserve progress already earned in this tab instead of silently resetting the session.
