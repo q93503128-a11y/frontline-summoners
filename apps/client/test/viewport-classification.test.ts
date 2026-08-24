@@ -5,7 +5,7 @@ import {
   PORTRAIT_MOBILE_MAX_WIDTH,
   shouldBlockPortraitMobile,
   shouldUseCompactMobileUi,
-} from '../src/viewport';
+} from '../src/viewport.ts';
 
 test('compact UI requires a coarse primary pointer as well as a short mobile-sized viewport', () => {
   assert.equal(COMPACT_MOBILE_SHORT_SIDE, 540);
