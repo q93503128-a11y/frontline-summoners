@@ -31,6 +31,7 @@ export interface CampaignBaselineTelemetry {
 }
 
 const DEPLOYMENTS_PER_ECONOMY_LEVEL = 3;
+const EMERGENCY_FRONTLINE_COUNT = 1;
 
 export function targetSupplyLevelForStage(stageIndex: number, state: ReturnType<typeof createPrototypeBattle>): number {
   const highestUnlockedCost = Math.max(...state.playerSlots.map((slot) => slot.cost));
@@ -83,6 +84,13 @@ export function autoPlayCampaignStage(
     return true;
   };
 
+  const spawnStrongestAffordableNow = (): boolean => {
+    const emergency = [...state.playerSlots]
+      .filter((slot) => slot.cost <= state.supply && getCooldownRemaining(state, slot.slotId) === 0)
+      .sort((a, b) => b.cost - a.cost || a.slotId.localeCompare(b.slotId))[0];
+    return emergency ? recordSpawn(emergency.slotId) : false;
+  };
+
   const advancePastCoolingSlots = (): void => {
     for (let offset = 0; offset < state.playerSlots.length; offset += 1) {
       const index = (rosterCursor + offset) % state.playerSlots.length;
@@ -98,30 +106,31 @@ export function autoPlayCampaignStage(
     advancePastCoolingSlots();
     const targetSlot = state.playerSlots[rosterCursor]!;
     const currentWallet = getCurrentSupplyLevel(state).maxSupply;
+    const enemiesAtDecision = targetableEnemyCount(state);
+    const alivePlayersAtDecision = alivePlayerUnitCount(state);
 
-    // Do not rush worker/economy levels before fielding troops. Each additional planned economy
-    // level requires another three real deployments first, so the test models the same production
-    // versus investment tradeoff expected from a human player instead of abandoning the frontline.
-    const deploymentUnlockedEconomyLevel = 1 + Math.floor(spawnCount / DEPLOYMENTS_PER_ECONOMY_LEVEL);
-    const plannedEconomyLevel = Math.min(targetSupplyLevel, deploymentUnlockedEconomyLevel);
-    const targetNeedsWalletUpgrade = targetSlot.cost > currentWallet;
-    const shouldInvestEconomy = state.supplyLevel < plannedEconomyLevel || targetNeedsWalletUpgrade;
+    // Actual pressure overrides planned saving. A human player would not keep hoarding for the next
+    // roster slot or worker level while the final defender is disappearing in front of an active wave.
+    const emergencyPressure = enemiesAtDecision > 0 && alivePlayersAtDecision <= EMERGENCY_FRONTLINE_COUNT;
+    const emergencySpawned = emergencyPressure && spawnStrongestAffordableNow();
 
-    if (shouldInvestEconomy) {
-      const next = getNextSupplyLevel(state);
-      if (next && state.supply >= next.upgradeCost) {
-        const upgraded = tryUpgradeSupply(state);
-        if (upgraded.ok) upgradeCount += 1;
+    if (!emergencySpawned) {
+      // Do not rush worker/economy levels before fielding troops. Each additional planned economy
+      // level requires another three real deployments first, so production and investment compete.
+      const deploymentUnlockedEconomyLevel = 1 + Math.floor(spawnCount / DEPLOYMENTS_PER_ECONOMY_LEVEL);
+      const plannedEconomyLevel = Math.min(targetSupplyLevel, deploymentUnlockedEconomyLevel);
+      const targetNeedsWalletUpgrade = targetSlot.cost > currentWallet;
+      const shouldInvestEconomy = state.supplyLevel < plannedEconomyLevel || targetNeedsWalletUpgrade;
+
+      if (shouldInvestEconomy) {
+        const next = getNextSupplyLevel(state);
+        if (next && state.supply >= next.upgradeCost) {
+          const upgraded = tryUpgradeSupply(state);
+          if (upgraded.ok) upgradeCount += 1;
+        }
+      } else if (state.supply >= targetSlot.cost && getCooldownRemaining(state, targetSlot.slotId) === 0) {
+        if (recordSpawn(targetSlot.slotId)) rosterCursor = (rosterCursor + 1) % state.playerSlots.length;
       }
-    } else if (state.supply >= targetSlot.cost && getCooldownRemaining(state, targetSlot.slotId) === 0) {
-      if (recordSpawn(targetSlot.slotId)) rosterCursor = (rosterCursor + 1) % state.playerSlots.length;
-    } else if (alivePlayerUnitCount(state) === 0 && targetableEnemyCount(state) > 0) {
-      // A collapsing line is the only exception to the planned roster order. Use any immediately
-      // affordable ready reinforcement rather than intentionally letting the base take free hits.
-      const emergency = [...state.playerSlots]
-        .filter((slot) => slot.cost <= state.supply && getCooldownRemaining(state, slot.slotId) === 0)
-        .sort((a, b) => b.cost - a.cost || a.slotId.localeCompare(b.slotId))[0];
-      if (emergency) recordSpawn(emergency.slotId);
     }
 
     const enemies = targetableEnemyCount(state);
