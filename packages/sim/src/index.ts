@@ -18,21 +18,34 @@ export type BattleTeam = 'PLAYER' | 'ENEMY';
 export type AttackTargetMode = 'SINGLE' | 'AREA';
 export type BattleWinner = BattleTeam | 'DRAW' | null;
 
-export const CombatTrait = {
-  Light: 'LIGHT',
-  Armored: 'ARMORED',
+export const CombatAttribute = {
+  Neutral: 'NEUTRAL',
+  Beast: 'BEAST',
+  Undead: 'UNDEAD',
+  Nature: 'NATURE',
   Arcane: 'ARCANE',
+  Demon: 'DEMON',
+  Machine: 'MACHINE',
+  Anomaly: 'ANOMALY',
+} as const;
+export type CombatAttribute = (typeof CombatAttribute)[keyof typeof CombatAttribute];
+const COMBAT_ATTRIBUTE_VALUES = new Set<CombatAttribute>(Object.values(CombatAttribute));
+
+export const CombatTag = {
+  Armored: 'ARMORED',
+  Floating: 'FLOATING',
+  Flying: 'FLYING',
+  Giant: 'GIANT',
+  Structure: 'STRUCTURE',
+  Summon: 'SUMMON',
   Boss: 'BOSS',
 } as const;
+export type CombatTag = (typeof CombatTag)[keyof typeof CombatTag];
+const COMBAT_TAG_VALUES = new Set<CombatTag>(Object.values(CombatTag));
 
-export type CombatTrait = (typeof CombatTrait)[keyof typeof CombatTrait];
-const COMBAT_TRAIT_VALUES = new Set<CombatTrait>(Object.values(CombatTrait));
-
-export interface TraitDamageBonus {
-  readonly trait: CombatTrait;
-  /** 1000 = normal damage, 1250 = 1.25x. Matching bonuses do not stack; the strongest one wins. */
-  readonly multiplierPermille: number;
-}
+export type DamageBonus =
+  | { readonly targetKind: 'ATTRIBUTE'; readonly target: CombatAttribute; readonly multiplierPermille: number }
+  | { readonly targetKind: 'TAG'; readonly target: CombatTag; readonly multiplierPermille: number };
 
 export interface AttackTiming {
   readonly cycleFrames: number;
@@ -54,10 +67,12 @@ export interface BattleUnitDefinition {
   readonly naturalKnockbackDistance: number;
   readonly deathFrames: number;
   readonly attackTiming: AttackTiming;
-  /** Attributes are specialist tags, not a global rock-paper-scissors chart. */
-  readonly traits?: readonly CombatTrait[];
-  /** Optional specialist damage. Only the strongest bonus matching a target trait applies. */
-  readonly damageBonuses?: readonly TraitDamageBonus[];
+  /** One or two identity attributes. NEUTRAL is used alone. There is no global RPS table. */
+  readonly attributes?: readonly CombatAttribute[];
+  /** Supplemental combat taxonomy such as ARMORED/GIANT/BOSS. */
+  readonly combatTags?: readonly CombatTag[];
+  /** Optional specialist damage. Only the strongest matching bonus is applied. */
+  readonly damageBonuses?: readonly DamageBonus[];
 }
 
 export interface BattleUnit {
@@ -70,10 +85,8 @@ export interface BattleUnit {
   stateFrame: number;
   nextAttackTick: number;
   naturalKnockbacksConsumed: number;
-  /** Shared displacement interpolation anchors. State decides whether this is natural KB or forced movement. */
   knockbackStartX: number;
   knockbackTargetX: number;
-  /** Runtime duration used only by FORCED_DISPLACEMENT. */
   forcedDisplacementFrames: number;
 }
 
@@ -126,30 +139,41 @@ function assertDefinition(definition: BattleUnitDefinition): void {
   if (!Number.isInteger(definition.naturalKnockbackDistance) || definition.naturalKnockbackDistance < 0) throw new Error('naturalKnockbackDistance must be a non-negative integer');
   if (!Number.isInteger(definition.deathFrames) || definition.deathFrames <= 0) throw new Error('deathFrames must be positive');
 
-  const traits = definition.traits ?? [];
-  if (new Set(traits).size !== traits.length) throw new Error('traits must be unique');
-  if (traits.some((trait) => !COMBAT_TRAIT_VALUES.has(trait))) throw new Error('unknown combat trait');
+  const attributes = definition.attributes ?? [];
+  if (attributes.length === 0 || attributes.length > 2) throw new Error('attributes must contain one or two values');
+  if (new Set(attributes).size !== attributes.length) throw new Error('attributes must be unique');
+  if (attributes.some((attribute) => !COMBAT_ATTRIBUTE_VALUES.has(attribute))) throw new Error('unknown combat attribute');
+  if (attributes.includes('NEUTRAL') && attributes.length !== 1) throw new Error('NEUTRAL cannot be combined with another attribute');
+
+  const tags = definition.combatTags ?? [];
+  if (new Set(tags).size !== tags.length) throw new Error('combatTags must be unique');
+  if (tags.some((tag) => !COMBAT_TAG_VALUES.has(tag))) throw new Error('unknown combat tag');
 
   const bonuses = definition.damageBonuses ?? [];
-  if (new Set(bonuses.map((bonus) => bonus.trait)).size !== bonuses.length) throw new Error('damage bonus traits must be unique');
+  const bonusKeys = bonuses.map((bonus) => `${bonus.targetKind}:${bonus.target}`);
+  if (new Set(bonusKeys).size !== bonuses.length) throw new Error('damage bonus targets must be unique');
   for (const bonus of bonuses) {
-    if (!COMBAT_TRAIT_VALUES.has(bonus.trait)) throw new Error('unknown damage bonus trait');
+    if (bonus.targetKind === 'ATTRIBUTE') {
+      if (!COMBAT_ATTRIBUTE_VALUES.has(bonus.target)) throw new Error('unknown damage bonus attribute');
+    } else if (!COMBAT_TAG_VALUES.has(bonus.target)) {
+      throw new Error('unknown damage bonus tag');
+    }
     if (!Number.isInteger(bonus.multiplierPermille) || bonus.multiplierPermille < 1000 || bonus.multiplierPermille > 3000) {
       throw new Error('damage bonus multiplierPermille must be an integer from 1000 to 3000');
     }
   }
 }
 
-/**
- * Returns deterministic damage against a unit target. Attributes have no inherent
- * matchup table: only explicit specialist bonuses on the attacker matter.
- * If a target has multiple matching traits, only the strongest bonus is used.
- */
+/** No implicit attribute matchup exists. Only explicit specialist bonuses apply. */
 export function getUnitAttackDamageAgainst(source: BattleUnitDefinition, target: BattleUnitDefinition): number {
-  const targetTraits = new Set(target.traits ?? []);
+  const targetAttributes = new Set(target.attributes ?? []);
+  const targetTags = new Set(target.combatTags ?? []);
   let multiplierPermille = 1000;
   for (const bonus of source.damageBonuses ?? []) {
-    if (targetTraits.has(bonus.trait)) multiplierPermille = Math.max(multiplierPermille, bonus.multiplierPermille);
+    const matches = bonus.targetKind === 'ATTRIBUTE'
+      ? targetAttributes.has(bonus.target)
+      : targetTags.has(bonus.target);
+    if (matches) multiplierPermille = Math.max(multiplierPermille, bonus.multiplierPermille);
   }
   return Math.trunc((source.attackDamage * multiplierPermille) / 1000);
 }
@@ -186,7 +210,6 @@ export function spawnUnit(state: BattleState, definition: BattleUnitDefinition, 
   return unit;
 }
 
-/** Natural KB is untargetable. Forced displacement intentionally keeps the hurtbox active. */
 function isTargetable(unit: BattleUnit): boolean {
   return unit.state !== UnitState.NaturalKnockback && unit.state !== UnitState.Dying;
 }
@@ -273,7 +296,6 @@ function collectHits(state: BattleState): HitEvent[] {
       for (const target of unitTargets) {
         hits.push({ targetKind: 'UNIT', targetId: target.simulationId, damage: getUnitAttackDamageAgainst(source.definition, target.definition) });
       }
-      // Bases do not have traits, so specialist bonuses never inflate structure damage.
       if (baseIsInRange) hits.push({ targetKind: 'BASE', targetTeam: base.team, damage: source.definition.attackDamage });
       continue;
     }
@@ -348,11 +370,6 @@ function applyHits(state: BattleState, hits: readonly HitEvent[]): void {
   for (const team of ['PLAYER', 'ENEMY'] as const) state.bases[team].hp = Math.max(0, state.bases[team].hp - baseDamage[team]);
 }
 
-/**
- * Applies one deterministic, simultaneous damage packet to every currently targetable unit on a team.
- * This intentionally does not damage bases. It reuses the same natural-KB/death rules as normal attacks.
- * Callers that grant kill rewards should capture the alive set before calling this function.
- */
 export function applyAreaDamageToTeam(state: BattleState, targetTeam: BattleTeam, damage: number): number {
   if (!Number.isInteger(damage) || damage < 0) throw new Error('area damage must be a non-negative integer');
   if (damage === 0 || state.winner !== null) return 0;
@@ -363,11 +380,6 @@ export function applyAreaDamageToTeam(state: BattleState, targetTeam: BattleTeam
   return targets.length;
 }
 
-/**
- * Pushes all currently targetable units of a team backward toward their own base.
- * Forced movement is separate from natural KB: it cancels the current action but keeps the hurtbox active.
- * Units already in natural KB or DYING are skipped, so one effect cannot double-displace the same target.
- */
 export function applyForcedDisplacementToTeam(
   state: BattleState,
   targetTeam: BattleTeam,
@@ -441,10 +453,11 @@ function fnv1a(text: string): string {
 }
 
 export function getBattleUnitDefinitionSignature(definition: BattleUnitDefinition): string {
-  const traits = [...(definition.traits ?? [])].sort().join(',');
+  const attributes = [...(definition.attributes ?? [])].sort().join(',');
+  const tags = [...(definition.combatTags ?? [])].sort().join(',');
   const bonuses = [...(definition.damageBonuses ?? [])]
-    .sort((a, b) => a.trait.localeCompare(b.trait))
-    .map((bonus) => `${bonus.trait}:${bonus.multiplierPermille}`)
+    .sort((a, b) => `${a.targetKind}:${a.target}`.localeCompare(`${b.targetKind}:${b.target}`))
+    .map((bonus) => `${bonus.targetKind}:${bonus.target}:${bonus.multiplierPermille}`)
     .join(',');
   const timing = definition.attackTiming;
   return [
@@ -463,7 +476,8 @@ export function getBattleUnitDefinitionSignature(definition: BattleUnitDefinitio
     timing.cycleFrames,
     timing.hitFrames.join(','),
     timing.backswingFrames,
-    `[${traits}]`,
+    `[${attributes}]`,
+    `[${tags}]`,
     `[${bonuses}]`,
   ].join('/');
 }
