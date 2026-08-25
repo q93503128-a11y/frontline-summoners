@@ -3,7 +3,6 @@ import { INTERNAL_HEIGHT, INTERNAL_WIDTH } from '@frontline/shared';
 import {
   CRYPTO_RECRUITMENT_RANDOM_SOURCE,
   FIRST_RECRUITMENT_BANNER,
-  RECRUITMENT_UNITS,
   type RecruitmentPullResult,
 } from './recruitment';
 import { getSlotById } from './prototype';
@@ -21,6 +20,7 @@ const EMPTY_PROGRESS: GuestProgress = {
   treasureIds: [],
 };
 const RARITY_ORDER = ['C', 'B', 'A', 'S', 'SS'] as const;
+const BANNER_CHARACTER_IDS = RARITY_ORDER.flatMap((rarity) => FIRST_RECRUITMENT_BANNER.poolByRarity[rarity]);
 
 export class RecruitmentScene extends Phaser.Scene {
   private progress: GuestProgress = EMPTY_PROGRESS;
@@ -83,10 +83,10 @@ export class RecruitmentScene extends Phaser.Scene {
   private refreshProgress(): void {
     const bannerProgress = this.progress.recruitmentProgressByBanner?.[FIRST_RECRUITMENT_BANNER.id] ?? { totalPulls: 0 };
     const owned = new Set(this.progress.ownedRecruitmentCharacterIds ?? []);
-    const ownedInBanner = RECRUITMENT_UNITS.filter((unit) => owned.has(unit.id)).length;
+    const ownedInBanner = BANNER_CHARACTER_IDS.filter((characterId) => owned.has(characterId)).length;
     this.progressText?.setText([
       `누적 모집 ${bannerProgress.totalPulls}회`,
-      `획득 ${ownedInBanner}/${RECRUITMENT_UNITS.length}종`,
+      `획득 ${ownedInBanner}/${BANNER_CHARACTER_IDS.length}종`,
       '',
       '보장 횟수 없음',
       '각 모집은 독립 추첨',
