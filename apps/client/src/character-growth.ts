@@ -1,16 +1,28 @@
-import { COMBAT_TRAITS, TARGET_MODES, type CombatTrait, type TargetMode } from '@frontline/content-schema';
-import type { PlayerRosterSlot } from '@frontline/sim/playable';
+import {
+  ATTRIBUTES,
+  COMBAT_TAGS,
+  DAMAGE_BONUS_TARGET_KINDS,
+  TARGET_MODES,
+  type DamageBonusContent,
+  type TargetMode,
+} from '@frontline/content-schema';
+import { MIN_PLAYER_RECHARGE_FRAMES, type PlayerRosterSlot } from '@frontline/sim/playable';
 import levelCurveJson from '../../../content/growth/level-curve-01.json' with { type: 'json' };
 import evolutionJson from '../../../content/evolution/recruitment-01.json' with { type: 'json' };
 import { ALL_PLAYER_SLOTS } from './prototype.ts';
 
+export interface CharacterLevelAnchor {
+  readonly level: number;
+  readonly multiplierPermille: number;
+}
+
 export interface CharacterLevelCurve {
   readonly id: string;
-  readonly status: 'PROTOTYPE_BALANCE';
+  readonly status: 'DESIGN_TARGET';
   readonly levelCap: number;
-  readonly softCapLevel: number;
-  readonly hpAttackPermillePerLevelBeforeSoftCap: number;
-  readonly hpAttackPermillePerLevelAfterSoftCap: number;
+  readonly plusLevelCap: number;
+  readonly plusHpAttackPermillePerLevel: number;
+  readonly anchors: readonly CharacterLevelAnchor[];
 }
 
 export interface EvolutionFormModifiers {
@@ -23,7 +35,7 @@ export interface EvolutionFormModifiers {
   readonly attackMinRangeDelta: number;
   readonly attackMaxRangeDelta: number;
   readonly targetMode?: TargetMode;
-  readonly damageBonuses?: readonly { readonly trait: CombatTrait; readonly multiplierPermille: number }[];
+  readonly damageBonuses?: readonly DamageBonusContent[];
 }
 
 export interface EvolutionFormDefinition {
@@ -39,17 +51,14 @@ function record(value: unknown, context: string): Record<string, unknown> {
   if (typeof value !== 'object' || value === null || Array.isArray(value)) throw new Error(`${context} must be an object`);
   return value as Record<string, unknown>;
 }
-
 function nonEmptyString(value: unknown, context: string): string {
   if (typeof value !== 'string' || value.trim().length === 0) throw new Error(`${context} must be a non-empty string`);
   return value;
 }
-
 function integer(value: unknown, context: string, min: number, max = Number.MAX_SAFE_INTEGER): number {
   if (!Number.isInteger(value) || (value as number) < min || (value as number) > max) throw new Error(`${context} must be an integer in ${min}..${max}`);
   return value as number;
 }
-
 function signedInteger(value: unknown, context: string, fallback = 0): number {
   if (value === undefined) return fallback;
   if (!Number.isInteger(value)) throw new Error(`${context} must be an integer`);
@@ -58,34 +67,52 @@ function signedInteger(value: unknown, context: string, fallback = 0): number {
 
 function parseLevelCurve(value: unknown): CharacterLevelCurve {
   const raw = record(value, 'level curve');
+  if (raw.status !== 'DESIGN_TARGET') throw new Error('level curve status must be DESIGN_TARGET');
   const levelCap = integer(raw.levelCap, 'levelCap', 1, 100);
-  const softCapLevel = integer(raw.softCapLevel, 'softCapLevel', 1, levelCap);
-  if (raw.status !== 'PROTOTYPE_BALANCE') throw new Error('level curve status must be PROTOTYPE_BALANCE until balance is canonized');
+  const plusLevelCap = integer(raw.plusLevelCap, 'plusLevelCap', 0, 200);
+  if (!Array.isArray(raw.anchors) || raw.anchors.length < 2) throw new Error('level curve anchors must contain at least two entries');
+  const anchors = raw.anchors.map((value, index) => {
+    const item = record(value, `anchors[${index}]`);
+    return {
+      level: integer(item.level, `anchors[${index}].level`, 1, levelCap),
+      multiplierPermille: integer(item.multiplierPermille, `anchors[${index}].multiplierPermille`, 1, 100000),
+    };
+  });
+  if (anchors[0]!.level !== 1 || anchors[anchors.length - 1]!.level !== levelCap) throw new Error('level curve anchors must start at 1 and end at levelCap');
+  for (let index = 1; index < anchors.length; index += 1) {
+    if (anchors[index]!.level <= anchors[index - 1]!.level) throw new Error('level curve anchor levels must strictly increase');
+    if (anchors[index]!.multiplierPermille < anchors[index - 1]!.multiplierPermille) throw new Error('level curve multipliers must not decrease');
+  }
   return {
     id: nonEmptyString(raw.id, 'level curve id'),
-    status: 'PROTOTYPE_BALANCE',
+    status: 'DESIGN_TARGET',
     levelCap,
-    softCapLevel,
-    hpAttackPermillePerLevelBeforeSoftCap: integer(raw.hpAttackPermillePerLevelBeforeSoftCap, 'pre-soft-cap growth', 0, 1000),
-    hpAttackPermillePerLevelAfterSoftCap: integer(raw.hpAttackPermillePerLevelAfterSoftCap, 'post-soft-cap growth', 0, 1000),
+    plusLevelCap,
+    plusHpAttackPermillePerLevel: integer(raw.plusHpAttackPermillePerLevel, 'plus growth', 0, 5000),
+    anchors,
   };
 }
 
 export const CHARACTER_LEVEL_CURVE = parseLevelCurve(levelCurveJson);
 
-function parseDamageBonuses(value: unknown, context: string): readonly { readonly trait: CombatTrait; readonly multiplierPermille: number }[] | undefined {
+function parseDamageBonuses(value: unknown, context: string): readonly DamageBonusContent[] | undefined {
   if (value === undefined) return undefined;
   if (!Array.isArray(value)) throw new Error(`${context} must be an array`);
-  const bonuses = value.map((item, index) => {
+  const bonuses = value.map((item, index): DamageBonusContent => {
     const raw = record(item, `${context}[${index}]`);
-    const trait = nonEmptyString(raw.trait, `${context}[${index}].trait`);
-    if (!(COMBAT_TRAITS as readonly string[]).includes(trait)) throw new Error(`${context}[${index}].trait is unknown`);
-    return {
-      trait: trait as CombatTrait,
-      multiplierPermille: integer(raw.multiplierPermille, `${context}[${index}].multiplierPermille`, 1000, 3000),
-    };
+    const targetKind = nonEmptyString(raw.targetKind, `${context}[${index}].targetKind`);
+    if (!(DAMAGE_BONUS_TARGET_KINDS as readonly string[]).includes(targetKind)) throw new Error(`${context}[${index}].targetKind is unknown`);
+    const target = nonEmptyString(raw.target, `${context}[${index}].target`);
+    const multiplierPermille = integer(raw.multiplierPermille, `${context}[${index}].multiplierPermille`, 1000, 3000);
+    if (targetKind === 'ATTRIBUTE') {
+      if (!(ATTRIBUTES as readonly string[]).includes(target)) throw new Error(`${context}[${index}].target attribute is unknown`);
+      return { targetKind, target: target as (typeof ATTRIBUTES)[number], multiplierPermille };
+    }
+    if (!(COMBAT_TAGS as readonly string[]).includes(target)) throw new Error(`${context}[${index}].target tag is unknown`);
+    return { targetKind: 'TAG', target: target as (typeof COMBAT_TAGS)[number], multiplierPermille };
   });
-  if (new Set(bonuses.map((bonus) => bonus.trait)).size !== bonuses.length) throw new Error(`${context} traits must be unique`);
+  const keys = bonuses.map((bonus) => `${bonus.targetKind}:${bonus.target}`);
+  if (new Set(keys).size !== keys.length) throw new Error(`${context} targets must be unique`);
   return bonuses;
 }
 
@@ -118,7 +145,6 @@ function buildEvolutionForms(): readonly EvolutionFormDefinition[] {
   const characterIds = new Set<string>();
   const formIds = new Set<string>();
   const result: EvolutionFormDefinition[] = [];
-
   evolutionJson.forEach((entry, entryIndex) => {
     const raw = record(entry, `evolution[${entryIndex}]`);
     const characterId = nonEmptyString(raw.characterId, `evolution[${entryIndex}].characterId`);
@@ -126,7 +152,6 @@ function buildEvolutionForms(): readonly EvolutionFormDefinition[] {
     if (characterIds.has(characterId)) throw new Error(`duplicate evolution character: ${characterId}`);
     characterIds.add(characterId);
     if (!Array.isArray(raw.forms) || raw.forms.length !== 3) throw new Error(`${characterId} must define exactly three forms`);
-
     raw.forms.forEach((formValue, formIndex) => {
       const form = record(formValue, `${characterId}.forms[${formIndex}]`);
       const formId = nonEmptyString(form.formId, `${characterId}.forms[${formIndex}].formId`);
@@ -134,17 +159,9 @@ function buildEvolutionForms(): readonly EvolutionFormDefinition[] {
       formIds.add(formId);
       const formOrder = integer(form.formOrder, `${formId}.formOrder`, 1, 3) as 1 | 2 | 3;
       if (formOrder !== formIndex + 1) throw new Error(`${characterId} forms must be ordered 1,2,3`);
-      result.push({
-        characterId,
-        formId,
-        formOrder,
-        name: nonEmptyString(form.name, `${formId}.name`),
-        description: nonEmptyString(form.description, `${formId}.description`),
-        modifiers: parseModifiers(form.modifiers ?? {}, `${formId}.modifiers`),
-      });
+      result.push({ characterId, formId, formOrder, name: nonEmptyString(form.name, `${formId}.name`), description: nonEmptyString(form.description, `${formId}.description`), modifiers: parseModifiers(form.modifiers ?? {}, `${formId}.modifiers`) });
     });
   });
-
   return result;
 }
 
@@ -154,36 +171,44 @@ export function normalizeCharacterLevel(level: number): number {
   if (!Number.isFinite(level)) return 1;
   return Math.max(1, Math.min(CHARACTER_LEVEL_CURVE.levelCap, Math.trunc(level)));
 }
+export function normalizeCharacterPlusLevel(plusLevel: number): number {
+  if (!Number.isFinite(plusLevel)) return 0;
+  return Math.max(0, Math.min(CHARACTER_LEVEL_CURVE.plusLevelCap, Math.trunc(plusLevel)));
+}
 
 export function getCharacterLevelMultiplierPermille(level: number): number {
   const normalized = normalizeCharacterLevel(level);
-  const beforeSoftCapLevels = Math.min(normalized, CHARACTER_LEVEL_CURVE.softCapLevel) - 1;
-  const afterSoftCapLevels = Math.max(0, normalized - CHARACTER_LEVEL_CURVE.softCapLevel);
-  return 1000
-    + beforeSoftCapLevels * CHARACTER_LEVEL_CURVE.hpAttackPermillePerLevelBeforeSoftCap
-    + afterSoftCapLevels * CHARACTER_LEVEL_CURVE.hpAttackPermillePerLevelAfterSoftCap;
+  const anchors = CHARACTER_LEVEL_CURVE.anchors;
+  const exact = anchors.find((anchor) => anchor.level === normalized);
+  if (exact) return exact.multiplierPermille;
+  for (let index = 1; index < anchors.length; index += 1) {
+    const right = anchors[index]!;
+    const left = anchors[index - 1]!;
+    if (normalized < right.level) {
+      const numerator = (right.multiplierPermille - left.multiplierPermille) * (normalized - left.level);
+      return left.multiplierPermille + Math.trunc(numerator / (right.level - left.level));
+    }
+  }
+  return anchors[anchors.length - 1]!.multiplierPermille;
+}
+
+export function getCharacterTotalMultiplierPermille(level: number, plusLevel = 0): number {
+  return getCharacterLevelMultiplierPermille(level)
+    + normalizeCharacterPlusLevel(plusLevel) * CHARACTER_LEVEL_CURVE.plusHpAttackPermillePerLevel;
 }
 
 function scale(value: number, permille: number, minimum = 0): number {
   return Math.max(minimum, Math.trunc((value * permille) / 1000));
 }
 
-export function applyCharacterLevel(slot: PlayerRosterSlot, level: number): PlayerRosterSlot {
-  const multiplier = getCharacterLevelMultiplierPermille(level);
-  return {
-    ...slot,
-    definition: {
-      ...slot.definition,
-      maxHp: scale(slot.definition.maxHp, multiplier, 1),
-      attackDamage: scale(slot.definition.attackDamage, multiplier, 0),
-    },
-  };
+export function applyCharacterLevel(slot: PlayerRosterSlot, level: number, plusLevel = 0): PlayerRosterSlot {
+  const multiplier = getCharacterTotalMultiplierPermille(level, plusLevel);
+  return { ...slot, definition: { ...slot.definition, maxHp: scale(slot.definition.maxHp, multiplier, 1), attackDamage: scale(slot.definition.attackDamage, multiplier, 0) } };
 }
 
 export function getEvolutionForms(characterId: string): readonly EvolutionFormDefinition[] {
   return EVOLUTION_FORMS.filter((form) => form.characterId === characterId);
 }
-
 export function getEvolutionForm(formId: string): EvolutionFormDefinition {
   const form = EVOLUTION_FORMS.find((candidate) => candidate.formId === formId);
   if (!form) throw new Error(`Unknown evolution form: ${formId}`);
@@ -198,15 +223,12 @@ export function applyEvolutionForm(slot: PlayerRosterSlot, formId: string): Play
   const attackMinRange = slot.definition.attackMinRange + modifiers.attackMinRangeDelta;
   const attackMaxRange = slot.definition.attackMaxRange + modifiers.attackMaxRangeDelta;
   const moveSpeed = slot.definition.moveSpeed + modifiers.moveSpeedDelta;
-  if (standingRange < 0 || attackMinRange < 0 || attackMaxRange < 0 || attackMinRange > attackMaxRange) {
-    throw new Error(`Evolution form produces invalid ranges: ${formId}`);
-  }
+  if (standingRange < 0 || attackMinRange < 0 || attackMaxRange < 0 || attackMinRange > attackMaxRange) throw new Error(`Evolution form produces invalid ranges: ${formId}`);
   if (moveSpeed < 0) throw new Error(`Evolution form produces negative move speed: ${formId}`);
-
   return {
     ...slot,
     cost: scale(slot.cost, modifiers.costPermille, 0),
-    rechargeFrames: scale(slot.rechargeFrames, modifiers.rechargePermille, 1),
+    rechargeFrames: Math.max(MIN_PLAYER_RECHARGE_FRAMES, scale(slot.rechargeFrames, modifiers.rechargePermille, 1)),
     definition: {
       ...slot.definition,
       maxHp: scale(slot.definition.maxHp, modifiers.maxHpPermille, 1),
@@ -221,7 +243,7 @@ export function applyEvolutionForm(slot: PlayerRosterSlot, formId: string): Play
   };
 }
 
-export function buildCharacterCombatSlot(slot: PlayerRosterSlot, level: number, formId?: string): PlayerRosterSlot {
-  const leveled = applyCharacterLevel(slot, level);
+export function buildCharacterCombatSlot(slot: PlayerRosterSlot, level: number, formId?: string, plusLevel = 0): PlayerRosterSlot {
+  const leveled = applyCharacterLevel(slot, level, plusLevel);
   return formId ? applyEvolutionForm(leveled, formId) : leveled;
 }
