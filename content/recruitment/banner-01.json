@@ -1,24 +1,14 @@
 {
-  "id": "border-wonders-01",
-  "name": "뒤집힌 국경의 별난 자들",
-  "description": "제1장 이후 모집에서 만나는 첫 별난 동료들.",
-  "ratesPermille": {
-    "C": 300,
-    "B": 280,
-    "A": 240,
-    "S": 130,
-    "SS": 50
-  },
-  "tenPullMinimumRarity": "A",
-  "thirtyPullMinimumRarity": "S",
-  "pickupSsGuaranteeEvery": 60,
-  "selectionCreditEvery": 100,
-  "pickupSsIds": ["moon-eater"],
-  "poolByRarity": {
-    "C": ["turnip-rider", "tin-mole", "sling-goblin", "pot-mimic"],
-    "B": ["coffin-porter", "lantern-witch", "goat-ballista", "bell-hermit"],
-    "A": ["clockwork-duck", "cloud-herder", "candle-golem"],
-    "S": ["banquet-ogre", "mirror-exorcist"],
-    "SS": ["moon-eater", "castle-crab"]
+  "id":"border-wonders-01",
+  "seriesId":"legacy-01",
+  "name":"뒤집힌 국경의 별난 자들",
+  "description":"현재 전투 로스터 전환 기간에 사용하는 모집 묶음. 누적 보장이나 선택권 없이 각 모집은 같은 확률표를 사용한다.",
+  "ratesPermille":{"C":420,"B":320,"A":227,"S":30,"SS":3},
+  "poolByRarity":{
+    "C":["turnip-rider","tin-mole","sling-goblin","pot-mimic"],
+    "B":["coffin-porter","lantern-witch","goat-ballista","bell-hermit"],
+    "A":["clockwork-duck","cloud-herder","candle-golem"],
+    "S":["banquet-ogre","mirror-exorcist"],
+    "SS":["moon-eater"]
   }
 }
