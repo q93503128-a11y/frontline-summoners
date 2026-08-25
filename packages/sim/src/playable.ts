@@ -62,15 +62,27 @@ export interface EnemyArchetype {
 export interface EnemyWaveDefinition {
   readonly enemyId: string;
   readonly atTick: number;
+  /** Enemies per cycle. */
   readonly count: number;
+  /** Delay between spawns inside one cycle. */
   readonly intervalTicks: number;
+  /** Delay after a cycle finishes. Missing means one-shot. */
+  readonly repeatDelayTicks?: number;
+  /** Total cycles including the first. Missing with repeatDelayTicks means repeat until battle end. */
+  readonly maxCycles?: number;
 }
 
 interface EnemyWaveRuntime {
   readonly enemyId: string;
   readonly count: number;
   readonly intervalTicks: number;
+  readonly repeatDelayTicks?: number;
+  readonly maxCycles?: number;
+  /** Total number spawned by this pattern. */
   spawned: number;
+  /** Current cycle, one-based. */
+  cycle: number;
+  spawnedInCycle: number;
   nextTick: number;
 }
 
@@ -176,6 +188,11 @@ function validateConfig(config: PlayableBattleConfig): void {
     assertNonNegativeInteger(wave.atTick, 'wave atTick');
     assertPositiveInteger(wave.count, 'wave count');
     assertPositiveInteger(wave.intervalTicks, 'wave intervalTicks');
+    if (wave.repeatDelayTicks !== undefined) assertPositiveInteger(wave.repeatDelayTicks, 'wave repeatDelayTicks');
+    if (wave.maxCycles !== undefined) {
+      assertPositiveInteger(wave.maxCycles, 'wave maxCycles');
+      if (wave.repeatDelayTicks === undefined) throw new Error('wave maxCycles requires repeatDelayTicks');
+    }
   }
 
   const weapon = config.baseWeapon ?? DEFAULT_BASE_WEAPON;
@@ -202,7 +219,13 @@ export function createPlayableBattle(config: PlayableBattleConfig): PlayableBatt
     playerSlots: config.playerSlots,
     enemies: config.enemies,
     cooldownReadyTick: Object.fromEntries(config.playerSlots.map((slot) => [slot.slotId, 0])),
-    enemyWaves: config.enemyWaves.map((wave) => ({ ...wave, spawned: 0, nextTick: wave.atTick })),
+    enemyWaves: config.enemyWaves.map((wave) => ({
+      ...wave,
+      spawned: 0,
+      cycle: 1,
+      spawnedInCycle: 0,
+      nextTick: wave.atTick,
+    })),
     rewardBySimulationId: {},
     playerUnitCap: config.playerUnitCap ?? 50,
     enemyUnitCap: config.enemyUnitCap ?? 50,
@@ -278,11 +301,17 @@ function accrueSupply(state: PlayableBattleState): void {
   if (gained > 0) state.supply = Math.min(level.maxSupply, state.supply + gained);
 }
 
+function canRepeatWave(wave: EnemyWaveRuntime): boolean {
+  if (wave.repeatDelayTicks === undefined) return false;
+  return wave.maxCycles === undefined || wave.cycle < wave.maxCycles;
+}
+
 function processEnemyWaves(state: PlayableBattleState): void {
   if (state.battle.winner !== null) return;
   const enemies = new Map(state.enemies.map((enemy) => [enemy.enemyId, enemy]));
   for (const wave of state.enemyWaves) {
-    if (wave.spawned >= wave.count || state.battle.tick < wave.nextTick) continue;
+    if (state.battle.tick < wave.nextTick) continue;
+    if (wave.spawnedInCycle >= wave.count) continue;
     if (aliveUnitCount(state, 'ENEMY') >= state.enemyUnitCap) continue;
     const enemy = enemies.get(wave.enemyId);
     if (!enemy) continue;
@@ -290,7 +319,18 @@ function processEnemyWaves(state: PlayableBattleState): void {
     const unit = spawnUnit(state.battle, enemy.definition, 'ENEMY', spawnX);
     state.rewardBySimulationId[unit.simulationId] = enemy.rewardSupply;
     wave.spawned += 1;
-    wave.nextTick += wave.intervalTicks;
+    wave.spawnedInCycle += 1;
+
+    if (wave.spawnedInCycle < wave.count) {
+      // Schedule relative to the actual spawn so a cap stall cannot cause a burst of catch-up spawns.
+      wave.nextTick = state.battle.tick + wave.intervalTicks;
+    } else if (canRepeatWave(wave)) {
+      wave.cycle += 1;
+      wave.spawnedInCycle = 0;
+      wave.nextTick = state.battle.tick + wave.repeatDelayTicks!;
+    } else {
+      wave.nextTick = Number.MAX_SAFE_INTEGER;
+    }
   }
 }
 
@@ -351,7 +391,17 @@ export function computePlayableStateHash(state: PlayableBattleState): string {
     .map(([slot, tick]) => `${slot}:${tick}`)
     .join('|');
   const waves = state.enemyWaves
-    .map((wave) => `${wave.enemyId}:${wave.count}:${wave.intervalTicks}:${wave.spawned}:${wave.nextTick}`)
+    .map((wave) => [
+      wave.enemyId,
+      wave.count,
+      wave.intervalTicks,
+      wave.repeatDelayTicks ?? 0,
+      wave.maxCycles ?? 0,
+      wave.spawned,
+      wave.cycle,
+      wave.spawnedInCycle,
+      wave.nextTick,
+    ].join(':'))
     .join('|');
   const rewards = Object.entries(state.rewardBySimulationId)
     .sort(([a], [b]) => Number(a) - Number(b))

@@ -57,9 +57,16 @@ export interface EnemyContent extends CombatContent {
 
 export interface CampaignWaveContent {
   readonly enemyId: string;
+  /** First cycle start. */
   readonly atTick: number;
+  /** Number of enemies spawned in each cycle. */
   readonly count: number;
+  /** Delay between enemies inside one cycle. */
   readonly intervalTicks: number;
+  /** Delay after a completed cycle before the next cycle starts. Missing means this wave runs once. */
+  readonly repeatDelayTicks?: number;
+  /** Total cycles including the first. Missing with repeatDelayTicks means repeat until battle end. */
+  readonly maxCycles?: number;
 }
 
 export interface CampaignTreasureContent {
@@ -291,11 +298,18 @@ function parseWave(value: unknown, context: string, enemyIds?: ReadonlySet<strin
   if (!isRecord(value)) throw new Error(`${context} must be an object`);
   const enemyId = requireString(value, 'enemyId', context);
   if (enemyIds && !enemyIds.has(enemyId)) throw new Error(`${context}.enemyId references unknown enemy: ${enemyId}`);
+  const repeatDelayTicks = optionalInteger(value, 'repeatDelayTicks', context, 1);
+  const maxCycles = optionalInteger(value, 'maxCycles', context, 1, 1000);
+  if (maxCycles !== undefined && repeatDelayTicks === undefined) {
+    throw new Error(`${context}.maxCycles requires repeatDelayTicks`);
+  }
   return {
     enemyId,
     atTick: requireInteger(value, 'atTick', context, 0),
     count: requireInteger(value, 'count', context, 1, 1000),
     intervalTicks: requireInteger(value, 'intervalTicks', context, 1),
+    ...(repeatDelayTicks === undefined ? {} : { repeatDelayTicks }),
+    ...(maxCycles === undefined ? {} : { maxCycles }),
   };
 }
 

@@ -16,7 +16,7 @@
     "enemyUnitCap": 18,
     "waves": [
       { "enemyId": "enemy-shield", "atTick": 240, "count": 2, "intervalTicks": 210 },
-      { "enemyId": "enemy-sprinter", "atTick": 600, "count": 8, "intervalTicks": 90 },
+      { "enemyId": "enemy-sprinter", "atTick": 600, "count": 8, "intervalTicks": 90, "repeatDelayTicks": 900 },
       { "enemyId": "enemy-knight", "atTick": 1200, "count": 1, "intervalTicks": 320 }
     ],
     "treasure": {
@@ -43,8 +43,8 @@
     "playerUnitCap": 10,
     "enemyUnitCap": 25,
     "waves": [
-      { "enemyId": "enemy-sprinter", "atTick": 90, "count": 18, "intervalTicks": 45 },
-      { "enemyId": "enemy-raider", "atTick": 500, "count": 12, "intervalTicks": 60 },
+      { "enemyId": "enemy-sprinter", "atTick": 90, "count": 18, "intervalTicks": 45, "repeatDelayTicks": 360 },
+      { "enemyId": "enemy-raider", "atTick": 500, "count": 12, "intervalTicks": 60, "repeatDelayTicks": 540 },
       { "enemyId": "enemy-berserker", "atTick": 1100, "count": 2, "intervalTicks": 240 }
     ],
     "treasure": {
@@ -71,8 +71,8 @@
     "playerUnitCap": 8,
     "enemyUnitCap": 20,
     "waves": [
-      { "enemyId": "enemy-shield", "atTick": 180, "count": 3, "intervalTicks": 180 },
-      { "enemyId": "enemy-sniper", "atTick": 480, "count": 6, "intervalTicks": 210 },
+      { "enemyId": "enemy-shield", "atTick": 180, "count": 3, "intervalTicks": 180, "repeatDelayTicks": 1200 },
+      { "enemyId": "enemy-sniper", "atTick": 480, "count": 6, "intervalTicks": 210, "repeatDelayTicks": 1500 },
       { "enemyId": "enemy-knight", "atTick": 1200, "count": 2, "intervalTicks": 320 },
       { "enemyId": "enemy-cultist", "atTick": 1800, "count": 3, "intervalTicks": 250 }
     ],
@@ -100,7 +100,7 @@
     "playerUnitCap": 2,
     "enemyUnitCap": 15,
     "waves": [
-      { "enemyId": "enemy-knight", "atTick": 300, "count": 2, "intervalTicks": 300 },
+      { "enemyId": "enemy-knight", "atTick": 300, "count": 2, "intervalTicks": 300, "repeatDelayTicks": 1500 },
       { "enemyId": "enemy-berserker", "atTick": 900, "count": 3, "intervalTicks": 260 },
       { "enemyId": "enemy-boss-iron", "atTick": 1500, "count": 1, "intervalTicks": 1 },
       { "enemyId": "enemy-sniper", "atTick": 1600, "count": 2, "intervalTicks": 260 }
@@ -129,8 +129,8 @@
     "playerUnitCap": 8,
     "enemyUnitCap": 20,
     "waves": [
-      { "enemyId": "enemy-cultist", "atTick": 240, "count": 3, "intervalTicks": 210 },
-      { "enemyId": "enemy-shield", "atTick": 600, "count": 3, "intervalTicks": 240 },
+      { "enemyId": "enemy-cultist", "atTick": 240, "count": 3, "intervalTicks": 210, "repeatDelayTicks": 1500 },
+      { "enemyId": "enemy-shield", "atTick": 600, "count": 3, "intervalTicks": 240, "repeatDelayTicks": 1800 },
       { "enemyId": "enemy-boss", "atTick": 1050, "count": 1, "intervalTicks": 1 },
       { "enemyId": "enemy-berserker", "atTick": 1800, "count": 2, "intervalTicks": 240 },
       { "enemyId": "enemy-boss-iron", "atTick": 2100, "count": 1, "intervalTicks": 1 },
