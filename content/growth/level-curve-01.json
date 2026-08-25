@@ -1,8 +1,15 @@
 {
-  "id": "level-curve-01",
-  "status": "PROTOTYPE_BALANCE",
-  "levelCap": 50,
-  "softCapLevel": 30,
-  "hpAttackPermillePerLevelBeforeSoftCap": 15,
-  "hpAttackPermillePerLevelAfterSoftCap": 8
+  "id":"level-curve-v1",
+  "status":"DESIGN_TARGET",
+  "levelCap":50,
+  "plusLevelCap":50,
+  "plusHpAttackPermillePerLevel":200,
+  "anchors":[
+    {"level":1,"multiplierPermille":1000},
+    {"level":10,"multiplierPermille":1900},
+    {"level":20,"multiplierPermille":3250},
+    {"level":30,"multiplierPermille":5000},
+    {"level":40,"multiplierPermille":7250},
+    {"level":50,"multiplierPermille":10000}
+  ]
 }
