@@ -20,7 +20,12 @@ export function buildGuestDeckSlots(progress: GuestProgress): readonly Prototype
     const baseSlot = getSlotById(slotId);
     if (!baseSlot) throw new Error(`Unknown deck character: ${slotId}`);
     const meta = characterProgress[slotId];
-    const resolved = buildCharacterCombatSlot(baseSlot, meta?.level ?? 1, meta?.selectedFormId);
+    const resolved = buildCharacterCombatSlot(
+      baseSlot,
+      meta?.level ?? 1,
+      meta?.selectedFormId,
+      meta?.plusLevel ?? 0,
+    );
     return {
       ...baseSlot,
       ...resolved,
