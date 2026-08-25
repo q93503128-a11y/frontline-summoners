@@ -12,6 +12,9 @@ import {
   type BattleUnitDefinition,
 } from './index.ts';
 
+/** No character, form, treasure or future modifier may reduce summon recharge below two seconds. */
+export const MIN_PLAYER_RECHARGE_FRAMES = SIM_TICK_RATE * 2;
+
 export interface SupplyLevelDefinition {
   readonly incomePerSecond: number;
   readonly maxSupply: number;
@@ -32,7 +35,6 @@ export const DEFAULT_SUPPLY_LEVELS: readonly SupplyLevelDefinition[] = [
 export interface BaseWeaponDefinition {
   readonly damage: number;
   readonly cooldownFrames: number;
-  /** Backward world-space displacement applied after damage to survivors not already in natural KB. */
   readonly pushDistance: number;
   readonly pushFrames: number;
 }
@@ -62,13 +64,9 @@ export interface EnemyArchetype {
 export interface EnemyWaveDefinition {
   readonly enemyId: string;
   readonly atTick: number;
-  /** Enemies per cycle. */
   readonly count: number;
-  /** Delay between spawns inside one cycle. */
   readonly intervalTicks: number;
-  /** Delay after a cycle finishes. Missing means one-shot. */
   readonly repeatDelayTicks?: number;
-  /** Total cycles including the first. Missing with repeatDelayTicks means repeat until battle end. */
   readonly maxCycles?: number;
 }
 
@@ -78,9 +76,7 @@ interface EnemyWaveRuntime {
   readonly intervalTicks: number;
   readonly repeatDelayTicks?: number;
   readonly maxCycles?: number;
-  /** Total number spawned by this pattern. */
   spawned: number;
-  /** Current cycle, one-based. */
   cycle: number;
   spawnedInCycle: number;
   nextTick: number;
@@ -127,11 +123,9 @@ export type BaseWeaponFailureReason = 'battle_over' | 'cooldown' | 'already_pend
 export type SpawnResult =
   | { readonly ok: true; readonly simulationId: number }
   | { readonly ok: false; readonly reason: SpawnFailureReason };
-
 export type UpgradeResult =
   | { readonly ok: true; readonly level: number }
   | { readonly ok: false; readonly reason: UpgradeFailureReason };
-
 export type BaseWeaponResult =
   | { readonly ok: true; readonly readyTick: number }
   | { readonly ok: false; readonly reason: BaseWeaponFailureReason };
@@ -139,7 +133,6 @@ export type BaseWeaponResult =
 function assertPositiveInteger(value: number, name: string): void {
   if (!Number.isInteger(value) || value <= 0) throw new Error(`${name} must be a positive integer`);
 }
-
 function assertNonNegativeInteger(value: number, name: string): void {
   if (!Number.isInteger(value) || value < 0) throw new Error(`${name} must be a non-negative integer`);
 }
@@ -175,6 +168,9 @@ function validateConfig(config: PlayableBattleConfig): void {
     slotIds.add(slot.slotId);
     assertNonNegativeInteger(slot.cost, 'slot cost');
     assertPositiveInteger(slot.rechargeFrames, 'rechargeFrames');
+    if (slot.rechargeFrames < MIN_PLAYER_RECHARGE_FRAMES) {
+      throw new Error(`rechargeFrames must be >= ${MIN_PLAYER_RECHARGE_FRAMES}`);
+    }
   }
 
   const enemyIds = new Set<string>();
@@ -219,13 +215,7 @@ export function createPlayableBattle(config: PlayableBattleConfig): PlayableBatt
     playerSlots: config.playerSlots,
     enemies: config.enemies,
     cooldownReadyTick: Object.fromEntries(config.playerSlots.map((slot) => [slot.slotId, 0])),
-    enemyWaves: config.enemyWaves.map((wave) => ({
-      ...wave,
-      spawned: 0,
-      cycle: 1,
-      spawnedInCycle: 0,
-      nextTick: wave.atTick,
-    })),
+    enemyWaves: config.enemyWaves.map((wave) => ({ ...wave, spawned: 0, cycle: 1, spawnedInCycle: 0, nextTick: wave.atTick })),
     rewardBySimulationId: {},
     playerUnitCap: config.playerUnitCap ?? 50,
     enemyUnitCap: config.enemyUnitCap ?? 50,
@@ -238,19 +228,15 @@ export function createPlayableBattle(config: PlayableBattleConfig): PlayableBatt
 function aliveUnitCount(state: PlayableBattleState, team: 'PLAYER' | 'ENEMY'): number {
   return state.battle.units.filter((unit) => unit.team === team && unit.state !== UnitState.Dying).length;
 }
-
 export function getCurrentSupplyLevel(state: PlayableBattleState): SupplyLevelDefinition {
   return state.supplyLevels[state.supplyLevel - 1]!;
 }
-
 export function getNextSupplyLevel(state: PlayableBattleState): SupplyLevelDefinition | null {
   return state.supplyLevels[state.supplyLevel] ?? null;
 }
-
 export function getCooldownRemaining(state: PlayableBattleState, slotId: string): number {
   return Math.max(0, (state.cooldownReadyTick[slotId] ?? 0) - state.battle.tick);
 }
-
 export function getBaseWeaponCooldownRemaining(state: PlayableBattleState): number {
   return Math.max(0, state.baseWeaponReadyTick - state.battle.tick);
 }
@@ -262,11 +248,10 @@ export function trySpawnPlayerUnit(state: PlayableBattleState, slotId: string): 
   if (state.supply < slot.cost) return { ok: false, reason: 'insufficient_supply' };
   if (getCooldownRemaining(state, slotId) > 0) return { ok: false, reason: 'cooldown' };
   if (aliveUnitCount(state, 'PLAYER') >= state.playerUnitCap) return { ok: false, reason: 'unit_cap' };
-
   const spawnX = Math.min(24, state.battle.mapLength);
   const unit = spawnUnit(state.battle, slot.definition, 'PLAYER', spawnX);
   state.supply -= slot.cost;
-  state.cooldownReadyTick[slotId] = state.battle.tick + slot.rechargeFrames;
+  state.cooldownReadyTick[slotId] = state.battle.tick + Math.max(MIN_PLAYER_RECHARGE_FRAMES, slot.rechargeFrames);
   state.stateHash = computePlayableStateHash(state);
   return { ok: true, simulationId: unit.simulationId };
 }
@@ -300,12 +285,10 @@ function accrueSupply(state: PlayableBattleState): void {
   state.incomeRemainder %= SIM_TICK_RATE;
   if (gained > 0) state.supply = Math.min(level.maxSupply, state.supply + gained);
 }
-
 function canRepeatWave(wave: EnemyWaveRuntime): boolean {
   if (wave.repeatDelayTicks === undefined) return false;
   return wave.maxCycles === undefined || wave.cycle < wave.maxCycles;
 }
-
 function processEnemyWaves(state: PlayableBattleState): void {
   if (state.battle.winner !== null) return;
   const enemies = new Map(state.enemies.map((enemy) => [enemy.enemyId, enemy]));
@@ -320,29 +303,20 @@ function processEnemyWaves(state: PlayableBattleState): void {
     state.rewardBySimulationId[unit.simulationId] = enemy.rewardSupply;
     wave.spawned += 1;
     wave.spawnedInCycle += 1;
-
-    if (wave.spawnedInCycle < wave.count) {
-      // Schedule relative to the actual spawn so a cap stall cannot cause a burst of catch-up spawns.
-      wave.nextTick = state.battle.tick + wave.intervalTicks;
-    } else if (canRepeatWave(wave)) {
+    if (wave.spawnedInCycle < wave.count) wave.nextTick = state.battle.tick + wave.intervalTicks;
+    else if (canRepeatWave(wave)) {
       wave.cycle += 1;
       wave.spawnedInCycle = 0;
       wave.nextTick = state.battle.tick + wave.repeatDelayTicks!;
-    } else {
-      wave.nextTick = Number.MAX_SAFE_INTEGER;
-    }
+    } else wave.nextTick = Number.MAX_SAFE_INTEGER;
   }
 }
-
 function processPendingBaseWeapon(state: PlayableBattleState): void {
   if (!state.baseWeaponPending) return;
   state.baseWeaponPending = false;
-  // Damage first. Targets that die or enter natural KB are no longer eligible for forced movement,
-  // preventing a single cannon shot from applying two independent displacement paths to one unit.
   applyAreaDamageToTeam(state.battle, 'ENEMY', state.baseWeapon.damage);
   applyForcedDisplacementToTeam(state.battle, 'ENEMY', state.baseWeapon.pushDistance, state.baseWeapon.pushFrames);
 }
-
 function grantNewDeathRewards(state: PlayableBattleState, aliveBefore: ReadonlySet<number>): void {
   const maxSupply = getCurrentSupplyLevel(state).maxSupply;
   for (const unit of state.battle.units) {
@@ -352,7 +326,6 @@ function grantNewDeathRewards(state: PlayableBattleState, aliveBefore: ReadonlyS
     delete state.rewardBySimulationId[unit.simulationId];
   }
 }
-
 export function stepPlayableBattle(state: PlayableBattleState): PlayableBattleState {
   if (state.battle.winner !== null) return state;
   accrueSupply(state);
@@ -375,53 +348,13 @@ function fnv1a(text: string): string {
 }
 
 export function computePlayableStateHash(state: PlayableBattleState): string {
-  const supplyDefinitions = state.supplyLevels
-    .map((level) => `${level.incomePerSecond}:${level.maxSupply}:${level.upgradeCost}`)
-    .join('|');
-  const slotDefinitions = [...state.playerSlots]
-    .sort((a, b) => a.slotId.localeCompare(b.slotId))
-    .map((slot) => `${slot.slotId}:${slot.cost}:${slot.rechargeFrames}:${getBattleUnitDefinitionSignature(slot.definition)}`)
-    .join('|');
-  const enemyDefinitions = [...state.enemies]
-    .sort((a, b) => a.enemyId.localeCompare(b.enemyId))
-    .map((enemy) => `${enemy.enemyId}:${enemy.rewardSupply}:${getBattleUnitDefinitionSignature(enemy.definition)}`)
-    .join('|');
-  const cooldowns = Object.entries(state.cooldownReadyTick)
-    .sort(([a], [b]) => a.localeCompare(b))
-    .map(([slot, tick]) => `${slot}:${tick}`)
-    .join('|');
-  const waves = state.enemyWaves
-    .map((wave) => [
-      wave.enemyId,
-      wave.count,
-      wave.intervalTicks,
-      wave.repeatDelayTicks ?? 0,
-      wave.maxCycles ?? 0,
-      wave.spawned,
-      wave.cycle,
-      wave.spawnedInCycle,
-      wave.nextTick,
-    ].join(':'))
-    .join('|');
-  const rewards = Object.entries(state.rewardBySimulationId)
-    .sort(([a], [b]) => Number(a) - Number(b))
-    .map(([id, reward]) => `${id}:${reward}`)
-    .join('|');
+  const supplyDefinitions = state.supplyLevels.map((level) => `${level.incomePerSecond}:${level.maxSupply}:${level.upgradeCost}`).join('|');
+  const slotDefinitions = [...state.playerSlots].sort((a, b) => a.slotId.localeCompare(b.slotId)).map((slot) => `${slot.slotId}:${slot.cost}:${slot.rechargeFrames}:${getBattleUnitDefinitionSignature(slot.definition)}`).join('|');
+  const enemyDefinitions = [...state.enemies].sort((a, b) => a.enemyId.localeCompare(b.enemyId)).map((enemy) => `${enemy.enemyId}:${enemy.rewardSupply}:${getBattleUnitDefinitionSignature(enemy.definition)}`).join('|');
+  const cooldowns = Object.entries(state.cooldownReadyTick).sort(([a], [b]) => a.localeCompare(b)).map(([slot, tick]) => `${slot}:${tick}`).join('|');
+  const waves = state.enemyWaves.map((wave) => [wave.enemyId, wave.count, wave.intervalTicks, wave.repeatDelayTicks ?? 0, wave.maxCycles ?? 0, wave.spawned, wave.cycle, wave.spawnedInCycle, wave.nextTick].join(':')).join('|');
+  const rewards = Object.entries(state.rewardBySimulationId).sort(([a], [b]) => Number(a) - Number(b)).map(([id, reward]) => `${id}:${reward}`).join('|');
   const weapon = `${state.baseWeapon.damage}:${state.baseWeapon.cooldownFrames}:${state.baseWeapon.pushDistance}:${state.baseWeapon.pushFrames}:${state.baseWeaponReadyTick}:${state.baseWeaponPending ? 1 : 0}:${state.baseWeaponLastFiredTick}`;
   const caps = `${state.playerUnitCap}:${state.enemyUnitCap}`;
-  return fnv1a([
-    computeStateHash(state.battle),
-    state.battle.mapLength,
-    state.supply,
-    state.supplyLevel,
-    state.incomeRemainder,
-    supplyDefinitions,
-    slotDefinitions,
-    enemyDefinitions,
-    cooldowns,
-    waves,
-    rewards,
-    weapon,
-    caps,
-  ].join('#'));
+  return fnv1a([computeStateHash(state.battle), state.battle.mapLength, state.supply, state.supplyLevel, state.incomeRemainder, supplyDefinitions, slotDefinitions, enemyDefinitions, cooldowns, waves, rewards, weapon, caps].join('#'));
 }
