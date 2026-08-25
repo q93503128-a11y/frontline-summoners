@@ -1,102 +1,42 @@
 [
   {
-    "characterId": "turnip-rider",
-    "forms": [
-      {
-        "formId": "turnip-rider-base", "formOrder": 1, "name": "순무기수",
-        "description": "빠른 순환과 값싼 돌격이 핵심인 기본 형태.",
-        "modifiers": {}
-      },
-      {
-        "formId": "turnip-rider-rush", "formOrder": 2, "name": "순무돌격대",
-        "description": "더 싸고 더 자주 나오지만 한 기의 화력은 낮은 물량 전문 형태.",
-        "modifiers": { "maxHpPermille": 1100, "attackDamagePermille": 950, "moveSpeedDelta": 1, "costPermille": 900, "rechargePermille": 900 }
-      },
-      {
-        "formId": "turnip-rider-king", "formOrder": 3, "name": "왕순무기병",
-        "description": "거대한 순무를 몰아 여러 적을 들이받는 고비용 광역 돌격 형태.",
-        "modifiers": { "maxHpPermille": 1250, "attackDamagePermille": 1200, "costPermille": 1250, "rechargePermille": 1150, "targetMode": "AREA" }
-      }
+    "characterId":"turnip-rider",
+    "forms":[
+      {"formId":"turnip-rider-base","formOrder":1,"name":"순무기수","description":"빠른 순환과 값싼 돌격이 핵심인 기본 형태.","modifiers":{}},
+      {"formId":"turnip-rider-rush","formOrder":2,"name":"순무돌격대","description":"더 싸고 더 자주 나오지만 한 기의 화력은 낮은 물량 전문 형태.","modifiers":{"maxHpPermille":1100,"attackDamagePermille":950,"moveSpeedDelta":1,"costPermille":900,"rechargePermille":900}},
+      {"formId":"turnip-rider-king","formOrder":3,"name":"왕순무기병","description":"거대한 순무를 몰아 여러 적을 들이받는 고비용 광역 돌격 형태.","modifiers":{"maxHpPermille":1250,"attackDamagePermille":1200,"costPermille":1250,"rechargePermille":1150,"targetMode":"AREA"}}
     ]
   },
   {
-    "characterId": "lantern-witch",
-    "forms": [
-      {
-        "formId": "lantern-witch-base", "formOrder": 1, "name": "등불마녀",
-        "description": "경량 적 무리를 태우는 중거리 광역 기본 형태.",
-        "modifiers": {}
-      },
-      {
-        "formId": "lantern-witch-procession", "formOrder": 2, "name": "등불행렬마녀",
-        "description": "등불을 더 멀리 흩뿌려 경량 적을 안전하게 지우는 장거리 전문 형태.",
-        "modifiers": { "attackDamagePermille": 1100, "standingRangeDelta": 20, "attackMinRangeDelta": 10, "attackMaxRangeDelta": 25, "costPermille": 1100, "damageBonuses": [{ "trait": "LIGHT", "multiplierPermille": 1300 }] }
-      },
-      {
-        "formId": "lantern-witch-funeral", "formOrder": 3, "name": "장례등마녀",
-        "description": "사각지대가 커지는 대신 비전 적을 멀리서 크게 태우는 전문화 형태.",
-        "modifiers": { "maxHpPermille": 900, "attackDamagePermille": 1250, "standingRangeDelta": 35, "attackMinRangeDelta": 35, "attackMaxRangeDelta": 45, "costPermille": 1180, "damageBonuses": [{ "trait": "ARCANE", "multiplierPermille": 1350 }] }
-      }
+    "characterId":"lantern-witch",
+    "forms":[
+      {"formId":"lantern-witch-base","formOrder":1,"name":"등불마녀","description":"적 무리를 태우는 중거리 광역 기본 형태.","modifiers":{}},
+      {"formId":"lantern-witch-procession","formOrder":2,"name":"등불행렬마녀","description":"등불을 더 멀리 흩뿌려 적을 안전하게 지우는 장거리 전문 형태.","modifiers":{"attackDamagePermille":1100,"standingRangeDelta":20,"attackMinRangeDelta":10,"attackMaxRangeDelta":25,"costPermille":1100,"damageBonuses":[{"targetKind":"ATTRIBUTE","target":"NEUTRAL","multiplierPermille":1300}]}},
+      {"formId":"lantern-witch-funeral","formOrder":3,"name":"장례등마녀","description":"사각지대가 커지는 대신 마력 적을 멀리서 크게 태우는 전문화 형태.","modifiers":{"maxHpPermille":900,"attackDamagePermille":1250,"standingRangeDelta":35,"attackMinRangeDelta":35,"attackMaxRangeDelta":45,"costPermille":1180,"damageBonuses":[{"targetKind":"ATTRIBUTE","target":"ARCANE","multiplierPermille":1350}]}}
     ]
   },
   {
-    "characterId": "clockwork-duck",
-    "forms": [
-      {
-        "formId": "clockwork-duck-base", "formOrder": 1, "name": "태엽오리기사",
-        "description": "높은 체력과 빠른 전진을 겸한 기계 전열 기본 형태.",
-        "modifiers": {}
-      },
-      {
-        "formId": "clockwork-duck-bulwark", "formOrder": 2, "name": "태엽방벽오리",
-        "description": "속도를 포기하고 전선 유지에 집중하는 방벽 전문 형태.",
-        "modifiers": { "maxHpPermille": 1250, "attackDamagePermille": 900, "moveSpeedDelta": -1, "costPermille": 1100, "rechargePermille": 1100 }
-      },
-      {
-        "formId": "clockwork-duck-overwind", "formOrder": 3, "name": "과태엽돌격오리",
-        "description": "내구 일부를 화력과 속도로 바꿔 돌파에 집중하는 공격형 형태.",
-        "modifiers": { "maxHpPermille": 1050, "attackDamagePermille": 1300, "moveSpeedDelta": 1, "costPermille": 1250, "rechargePermille": 1200 }
-      }
+    "characterId":"clockwork-duck",
+    "forms":[
+      {"formId":"clockwork-duck-base","formOrder":1,"name":"태엽오리기사","description":"높은 체력과 빠른 전진을 겸한 기계 전열 기본 형태.","modifiers":{}},
+      {"formId":"clockwork-duck-bulwark","formOrder":2,"name":"태엽방벽오리","description":"속도를 포기하고 전선 유지에 집중하는 방벽 전문 형태.","modifiers":{"maxHpPermille":1250,"attackDamagePermille":900,"moveSpeedDelta":-1,"costPermille":1100,"rechargePermille":1100}},
+      {"formId":"clockwork-duck-overwind","formOrder":3,"name":"과태엽돌격오리","description":"내구 일부를 화력과 속도로 바꿔 돌파에 집중하는 공격형 형태.","modifiers":{"maxHpPermille":1050,"attackDamagePermille":1300,"moveSpeedDelta":1,"costPermille":1250,"rechargePermille":1200}}
     ]
   },
   {
-    "characterId": "mirror-exorcist",
-    "forms": [
-      {
-        "formId": "mirror-exorcist-base", "formOrder": 1, "name": "거울퇴마사",
-        "description": "넓은 사각지대와 비전 특효를 가진 초장거리 기본 형태.",
-        "modifiers": {}
-      },
-      {
-        "formId": "mirror-exorcist-deep", "formOrder": 2, "name": "심경거울퇴마사",
-        "description": "사각지대가 더 커지는 대신 비전 적을 더 멀리서 강하게 노리는 형태.",
-        "modifiers": { "attackDamagePermille": 1150, "standingRangeDelta": 25, "attackMinRangeDelta": 25, "attackMaxRangeDelta": 35, "costPermille": 1120, "damageBonuses": [{ "trait": "ARCANE", "multiplierPermille": 1500 }] }
-      },
-      {
-        "formId": "mirror-exorcist-war", "formOrder": 3, "name": "전경거울퇴마사",
-        "description": "사거리를 일부 줄여 전선에 가까이 서는 대신 보스까지 견제하는 전투형 형태.",
-        "modifiers": { "maxHpPermille": 1250, "attackDamagePermille": 1200, "standingRangeDelta": -35, "attackMinRangeDelta": -45, "attackMaxRangeDelta": -20, "costPermille": 1200, "damageBonuses": [{ "trait": "BOSS", "multiplierPermille": 1300 }] }
-      }
+    "characterId":"mirror-exorcist",
+    "forms":[
+      {"formId":"mirror-exorcist-base","formOrder":1,"name":"거울퇴마사","description":"넓은 사각지대와 마력 특효를 가진 초장거리 기본 형태.","modifiers":{}},
+      {"formId":"mirror-exorcist-deep","formOrder":2,"name":"심경거울퇴마사","description":"사각지대가 더 커지는 대신 마력 적을 더 멀리서 강하게 노리는 형태.","modifiers":{"attackDamagePermille":1150,"standingRangeDelta":25,"attackMinRangeDelta":25,"attackMaxRangeDelta":35,"costPermille":1120,"damageBonuses":[{"targetKind":"ATTRIBUTE","target":"ARCANE","multiplierPermille":1500}]}},
+      {"formId":"mirror-exorcist-war","formOrder":3,"name":"전경거울퇴마사","description":"사거리를 일부 줄여 전선에 가까이 서는 대신 보스까지 견제하는 전투형 형태.","modifiers":{"maxHpPermille":1250,"attackDamagePermille":1200,"standingRangeDelta":-35,"attackMinRangeDelta":-45,"attackMaxRangeDelta":-20,"costPermille":1200,"damageBonuses":[{"targetKind":"TAG","target":"BOSS","multiplierPermille":1300}]}}
     ]
   },
   {
-    "characterId": "moon-eater",
-    "forms": [
-      {
-        "formId": "moon-eater-base", "formOrder": 1, "name": "달먹는룡",
-        "description": "보스전에 특화된 초장거리 결정타 기본 형태.",
-        "modifiers": {}
-      },
-      {
-        "formId": "moon-eater-hollow", "formOrder": 2, "name": "빈달먹는룡",
-        "description": "몸을 가볍게 비워 더 먼 거리에서 보스를 저격하는 극장거리 형태.",
-        "modifiers": { "maxHpPermille": 900, "attackDamagePermille": 1100, "standingRangeDelta": 30, "attackMinRangeDelta": 20, "attackMaxRangeDelta": 40, "costPermille": 1080, "damageBonuses": [{ "trait": "BOSS", "multiplierPermille": 1650 }] }
-      },
-      {
-        "formId": "moon-eater-eclipse", "formOrder": 3, "name": "월식포식룡",
-        "description": "사거리를 일부 포기하고 몸집과 한 방을 키운 고화력 보스 압박 형태.",
-        "modifiers": { "maxHpPermille": 1250, "attackDamagePermille": 1300, "standingRangeDelta": -25, "attackMinRangeDelta": -20, "attackMaxRangeDelta": -15, "costPermille": 1250, "rechargePermille": 1200, "damageBonuses": [{ "trait": "BOSS", "multiplierPermille": 1700 }] }
-      }
+    "characterId":"moon-eater",
+    "forms":[
+      {"formId":"moon-eater-base","formOrder":1,"name":"달먹는룡","description":"보스전에 특화된 초장거리 결정타 기본 형태.","modifiers":{}},
+      {"formId":"moon-eater-hollow","formOrder":2,"name":"빈달먹는룡","description":"몸을 가볍게 비워 더 먼 거리에서 보스를 저격하는 극장거리 형태.","modifiers":{"maxHpPermille":900,"attackDamagePermille":1100,"standingRangeDelta":30,"attackMinRangeDelta":20,"attackMaxRangeDelta":40,"costPermille":1080,"damageBonuses":[{"targetKind":"TAG","target":"BOSS","multiplierPermille":1650}]}},
+      {"formId":"moon-eater-eclipse","formOrder":3,"name":"월식포식룡","description":"사거리를 일부 포기하고 몸집과 한 방을 키운 고화력 보스 압박 형태.","modifiers":{"maxHpPermille":1250,"attackDamagePermille":1300,"standingRangeDelta":-25,"attackMinRangeDelta":-20,"attackMaxRangeDelta":-15,"costPermille":1250,"rechargePermille":1200,"damageBonuses":[{"targetKind":"TAG","target":"BOSS","multiplierPermille":1700}]}}
     ]
   }
 ]
