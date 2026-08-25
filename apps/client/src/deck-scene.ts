@@ -31,6 +31,8 @@ const rarityColor: Record<string, string> = {
   S: '#d79aff',
   SS: '#ffd56f',
 };
+const STORY_BADGE_COLOR = '#d7c79f';
+const SPECIAL_BADGE_COLOR = '#9fd7d0';
 
 function text(
   scene: Phaser.Scene,
@@ -104,6 +106,13 @@ function selectedFormName(progress: GuestProgress, characterId: string): string 
   }
 }
 
+function acquisitionBadge(slot: PrototypeRosterSlot): { readonly label: string; readonly color: string } {
+  if (slot.rarity) return { label: slot.rarity, color: rarityColor[slot.rarity] ?? '#ffffff' };
+  if (slot.acquisitionClass === 'STORY') return { label: '스토리', color: STORY_BADGE_COLOR };
+  if (slot.acquisitionClass === 'SPECIAL') return { label: '특수', color: SPECIAL_BADGE_COLOR };
+  return { label: '동료', color: '#ffffff' };
+}
+
 export class DeckScene extends Phaser.Scene {
   private progress: GuestProgress = { clearedStageIds: [], specialClearedStageIds: [], treasureIds: [] };
   private selectedIds: string[] = [];
@@ -175,7 +184,7 @@ export class DeckScene extends Phaser.Scene {
     this.deckLayer?.destroy(true);
     this.deckLayer = this.add.container(0, 0);
     const compact = isCompactMobileViewport();
-    const slotWidth = compact ? 112 : 112;
+    const slotWidth = 112;
     const startX = 76;
     const y = compact ? 140 : 142;
 
@@ -183,8 +192,9 @@ export class DeckScene extends Phaser.Scene {
       const slotId = this.selectedIds[index];
       const rosterSlot = slotId ? getSlotById(slotId) : undefined;
       const x = startX + index * slotWidth + slotWidth / 2;
-      const border = rosterSlot
-        ? Phaser.Display.Color.HexStringToColor(rarityColor[rosterSlot.rarity] ?? '#ffffff').color
+      const badge = rosterSlot ? acquisitionBadge(rosterSlot) : undefined;
+      const border = badge
+        ? Phaser.Display.Color.HexStringToColor(badge.color).color
         : 0x4b5666;
       const bg = this.add.rectangle(x, y, slotWidth - 8, compact ? 58 : 54, rosterSlot ? 0x293242 : 0x1d232d, 0.98).setStrokeStyle(2, border, 0.9);
       this.deckLayer.add(bg);
@@ -221,7 +231,8 @@ export class DeckScene extends Phaser.Scene {
       const isOwned = owned.has(slot.slotId);
       const selectedIndex = this.selectedIds.indexOf(slot.slotId);
       const selected = selectedIndex >= 0;
-      const baseBorder = Phaser.Display.Color.HexStringToColor(rarityColor[slot.rarity] ?? '#ffffff').color;
+      const badge = acquisitionBadge(slot);
+      const baseBorder = Phaser.Display.Color.HexStringToColor(badge.color).color;
       const border = selected ? 0xf2d56f : isOwned ? baseBorder : 0x4a5260;
       const bg = this.add.rectangle(x, y, cardWidth, cardHeight, isOwned ? (selected ? 0x343329 : 0x252c3a) : 0x1b2029, 0.98).setStrokeStyle(selected ? 4 : 3, border, isOwned ? 0.95 : 0.6);
       this.cardsLayer!.add(bg);
@@ -233,7 +244,7 @@ export class DeckScene extends Phaser.Scene {
       portrait.setScale(((compact ? 76 : 70) / art.family.idle.frameHeight) * art.displayScale);
       this.cardsLayer!.add(portrait);
 
-      this.cardsLayer!.add(text(this, x - cardWidth / 2 + 12, y - cardHeight / 2 + 8, isOwned ? slot.rarity : 'LOCK', compact ? 17 : 14, isOwned ? (rarityColor[slot.rarity] ?? '#ffffff') : '#656d78'));
+      this.cardsLayer!.add(text(this, x - cardWidth / 2 + 12, y - cardHeight / 2 + 8, isOwned ? badge.label : 'LOCK', compact ? 17 : 14, isOwned ? badge.color : '#656d78'));
       if (selected) this.cardsLayer!.add(text(this, x + cardWidth / 2 - 12, y - cardHeight / 2 + 8, `#${hotkeyLabel(selectedIndex)}`, compact ? 18 : 15, '#ffe18a', 'right').setOrigin(1, 0));
 
       const infoX = x - cardWidth / 2 + (compact ? 100 : 88);
@@ -242,9 +253,11 @@ export class DeckScene extends Phaser.Scene {
       if (isOwned) {
         const meta = this.progress.characterProgressById?.[slot.slotId];
         const level = meta?.level ?? 1;
-        const currentSlot = buildCharacterCombatSlot(slot, level, meta?.selectedFormId);
+        const plusLevel = meta?.plusLevel ?? 0;
+        const currentSlot = buildCharacterCombatSlot(slot, level, meta?.selectedFormId, plusLevel);
         const form = selectedFormName(this.progress, slot.slotId);
-        this.cardsLayer!.add(text(this, infoX, y - 29, `${slot.role} · Lv${level} · ${form}`, compact ? 16 : 13, '#acd2f3'));
+        const levelText = plusLevel > 0 ? `Lv${level} +${plusLevel}` : `Lv${level}`;
+        this.cardsLayer!.add(text(this, infoX, y - 29, `${slot.role} · ${levelText} · ${form}`, compact ? 16 : 13, '#acd2f3'));
         this.cardsLayer!.add(text(this, infoX, y - 1, `${currentSlot.cost} 보급 · ${formatCombatTraits(currentSlot.definition)}`, compact ? 15 : 12, '#f2d37c'));
         const specialty = formatDamageSpecialty(currentSlot.definition);
         this.cardsLayer!.add(text(this, infoX, y + 26, specialty || '범용 공격', compact ? 15 : 12, specialty ? '#ffd493' : '#9da8b8'));
@@ -252,7 +265,7 @@ export class DeckScene extends Phaser.Scene {
         bg.setInteractive({ useHandCursor: true });
         bg.on('pointerdown', () => this.toggleCharacter(slot.slotId));
       } else {
-        this.cardsLayer!.add(text(this, infoX, y - 23, `${slot.rarity} · ${slot.role}`, compact ? 16 : 13, '#737c88'));
+        this.cardsLayer!.add(text(this, infoX, y - 23, `${badge.label} · ${slot.role}`, compact ? 16 : 13, '#737c88'));
         this.cardsLayer!.add(text(this, infoX, y + 8, this.acquisitionHint(slot), compact ? 15 : 12, '#777f8a').setWordWrapWidth(cardWidth - (compact ? 112 : 100)));
       }
     });
