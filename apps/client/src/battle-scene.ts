@@ -64,6 +64,16 @@ interface UnitButtonView {
   readonly cost: Phaser.GameObjects.Text;
 }
 
+const STORY_BADGE_COLOR = '#d7c79f';
+const SPECIAL_BADGE_COLOR = '#9fd7d0';
+
+function getSlotBadge(slot: PrototypeRosterSlot): { readonly label: string; readonly color: string } {
+  if (slot.rarity) return { label: slot.rarity, color: rarityColor[slot.rarity] ?? '#ffffff' };
+  if (slot.acquisitionClass === 'STORY') return { label: '스토리', color: STORY_BADGE_COLOR };
+  if (slot.acquisitionClass === 'SPECIAL') return { label: '특수', color: SPECIAL_BADGE_COLOR };
+  return { label: '동료', color: '#ffffff' };
+}
+
 export class BattleScene extends Phaser.Scene {
   private state!: PlayableBattleState;
   private stage!: PrototypeStage;
@@ -218,7 +228,7 @@ export class BattleScene extends Phaser.Scene {
   private syncBossWarnings(): void {
     for (const unit of this.state.battle.units) {
       if (unit.team !== 'ENEMY' || unit.state === UnitState.Dying) continue;
-      if (!(unit.definition.traits ?? []).includes('BOSS')) continue;
+      if (!(unit.definition.combatTags ?? []).includes('BOSS')) continue;
       if (this.seenBossSimulationIds.has(unit.simulationId)) continue;
       this.seenBossSimulationIds.add(unit.simulationId);
       const enemy = this.state.enemies.find((candidate) => candidate.definition.id === unit.definition.id);
@@ -277,7 +287,8 @@ export class BattleScene extends Phaser.Scene {
       const x = 102 + col * 205;
       const y = compact ? 582 + row * 84 : 579 + row * 72;
       const hotkeyLabel = getUnitHotkeyLabel(index);
-      const border = Phaser.Display.Color.HexStringToColor(rarityColor[slot.rarity] ?? '#ffffff').color;
+      const badge = getSlotBadge(slot);
+      const border = Phaser.Display.Color.HexStringToColor(badge.color).color;
       const bg = this.add.rectangle(x, y, 188, buttonHeight, 0x28303e).setStrokeStyle(2, border, 0.85);
       const art = familyForUnit(slot.definition.id);
       const portrait = this.add.sprite(x - 69, y, art.family.idle.key, 0).setTint(art.tint).setDepth(4);
@@ -286,7 +297,7 @@ export class BattleScene extends Phaser.Scene {
 
       bg.setInteractive({ useHandCursor: true });
       const shade = this.add.rectangle(x, y, 188, buttonHeight, 0x05070b, 0).setDepth(6);
-      const unitButtonName = compact ? slot.displayName : `${slot.rarity} · ${slot.displayName}`;
+      const unitButtonName = compact ? slot.displayName : `${badge.label} · ${slot.displayName}`;
       addText(this, x - 43, y - 26, unitButtonName, battleUiFontSize(15, 22), '#ffffff').setDepth(5);
       const cost = addText(this, x - 43, y + 5, `${slot.cost} 보급`, battleUiFontSize(15, 21), '#f2d37c').setDepth(5);
       const cooldown = addText(this, x + 82, y + 5, '', battleUiFontSize(15, 21), '#d8e1ef', 'right').setOrigin(1, 0).setDepth(7);
@@ -605,7 +616,7 @@ export class BattleScene extends Phaser.Scene {
       return [{
         simulationId: unit.simulationId,
         screenX: view.sprite.x,
-        isBoss: (unit.definition.traits ?? []).includes('BOSS'),
+        isBoss: (unit.definition.combatTags ?? []).includes('BOSS'),
       }];
     });
     const visibleIds = selectVisibleTraitLabelIds(candidates, 76);
