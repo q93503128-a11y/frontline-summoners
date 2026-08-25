@@ -5,7 +5,6 @@ import {
   FIRST_RECRUITMENT_BANNER,
   RECRUITMENT_UNITS,
   recruit,
-  redeemBannerSelection,
   type RecruitmentRandomSource,
 } from '../src/recruitment.ts';
 import {
@@ -24,18 +23,22 @@ class ZeroRandom implements RecruitmentRandomSource {
   }
 }
 
-const rarityRank = { C: 0, B: 1, A: 2, S: 3, SS: 4 } as const;
+class SequenceRandom implements RecruitmentRandomSource {
+  private index = 0;
+  constructor(private readonly sequence: readonly number[]) {}
+  nextInt(maxExclusive: number): number {
+    const value = this.sequence[this.index++ % this.sequence.length] ?? 0;
+    return Math.abs(value) % maxExclusive;
+  }
+}
 
-test('first recruitment pool is separate from the ten free chapter-one characters and spans all five rarities', () => {
-  assert.equal(RECRUITMENT_UNITS.length, 15);
-  const counts = Object.fromEntries(['C', 'B', 'A', 'S', 'SS'].map((rarity) => [rarity, RECRUITMENT_UNITS.filter((unit) => unit.rarity === rarity).length]));
-  assert.deepEqual(counts, { C: 4, B: 4, A: 3, S: 2, SS: 2 });
-});
-
-test('the free campaign roster stays ten while recruitment adds fifteen battle-ready definitions without auto-unlocking them', () => {
+test('current executable recruitment slice stays separate from the ten story characters', () => {
   assert.equal(PLAYER_SLOTS.length, 10);
-  assert.equal(RECRUITMENT_PLAYER_SLOTS.length, 15);
-  assert.equal(ALL_PLAYER_SLOTS.length, 25);
+  assert.equal(RECRUITMENT_PLAYER_SLOTS.length, RECRUITMENT_UNITS.length);
+  assert.equal(ALL_PLAYER_SLOTS.length, PLAYER_SLOTS.length + RECRUITMENT_PLAYER_SLOTS.length);
+  assert.ok(RECRUITMENT_UNITS.every((unit) => unit.acquisitionClass === 'RECRUITMENT' && unit.rarity !== null));
+  assert.ok(PLAYER_SLOTS.every((unit) => unit.acquisitionClass === 'STORY' && unit.rarity === null));
+
   const fullChapter = STAGES.map((stage) => stage.id);
   assert.equal(getUnlockedSlotIds(fullChapter).length, 10);
   assert.equal(getUnlockedSlotIds(fullChapter).includes('moon-eater'), false);
@@ -44,54 +47,54 @@ test('the free campaign roster stays ten while recruitment adds fifteen battle-r
   assert.deepEqual(battle.playerSlots.map((slot) => slot.slotId), ['militia', 'moon-eater']);
 });
 
-test('restored recruitment rates are 30/28/24/13/5 and sum to 100 percent', () => {
+test('v1 candidate recruitment rates sum to 100 percent and keep S/SS intentionally rare', () => {
   assert.deepEqual(FIRST_RECRUITMENT_BANNER.ratesPermille, {
-    C: 300,
-    B: 280,
-    A: 240,
-    S: 130,
-    SS: 50,
+    C: 420,
+    B: 320,
+    A: 227,
+    S: 30,
+    SS: 3,
   });
   assert.equal(Object.values(FIRST_RECRUITMENT_BANNER.ratesPermille).reduce((sum, value) => sum + value, 0), 1000);
+  assert.equal(FIRST_RECRUITMENT_BANNER.poolByRarity.SS.length, 1);
 });
 
-test('ten-pull and thirty-pull milestones enforce the restored minimum rarities while normal pulls still use the banner table', () => {
-  const batch = recruit(EMPTY_RECRUITMENT_PROGRESS, [], 30, new ZeroRandom());
-  assert.equal(batch.results.length, 30);
-  assert.equal(batch.results[0]?.rarity, 'C');
+test('pull count is history only: 10/30/60/100 milestones do not alter the random table', () => {
+  const batch = recruit({ totalPulls: 9 }, [], 92, new ZeroRandom());
+  assert.equal(batch.results.length, 92);
+  assert.equal(batch.results[0]?.pullNumber, 10);
+  assert.equal(batch.results[20]?.pullNumber, 30);
+  assert.equal(batch.results[50]?.pullNumber, 60);
+  assert.equal(batch.results[90]?.pullNumber, 100);
+  assert.equal(batch.progress.totalPulls, 101);
+  assert.ok(batch.results.every((result) => result.rarity === 'C'));
+  assert.ok(batch.results.every((result) => result.characterId === FIRST_RECRUITMENT_BANNER.poolByRarity.C[0]));
+});
 
-  for (const pullNumber of [10, 20]) {
-    const result = batch.results[pullNumber - 1]!;
-    assert.ok(rarityRank[result.rarity] >= rarityRank.A);
-    assert.equal(result.guaranteedBy, 'TEN_PULL_A_PLUS');
+test('rarity selection follows the banner table without guarantee overrides', () => {
+  const thresholds = [
+    { roll: 0, rarity: 'C' },
+    { roll: 419, rarity: 'C' },
+    { roll: 420, rarity: 'B' },
+    { roll: 739, rarity: 'B' },
+    { roll: 740, rarity: 'A' },
+    { roll: 966, rarity: 'A' },
+    { roll: 967, rarity: 'S' },
+    { roll: 996, rarity: 'S' },
+    { roll: 997, rarity: 'SS' },
+    { roll: 999, rarity: 'SS' },
+  ] as const;
+
+  for (const { roll, rarity } of thresholds) {
+    const result = recruit(EMPTY_RECRUITMENT_PROGRESS, [], 1, new SequenceRandom([roll, 0]));
+    assert.equal(result.results[0]?.rarity, rarity);
   }
-  const thirtieth = batch.results[29]!;
-  assert.ok(rarityRank[thirtieth.rarity] >= rarityRank.S);
-  assert.equal(thirtieth.guaranteedBy, 'THIRTY_PULL_S_PLUS');
 });
 
-test('the sixtieth pull overrides lower milestones with the pickup SS guarantee', () => {
-  const batch = recruit(EMPTY_RECRUITMENT_PROGRESS, [], 60, new ZeroRandom());
-  const sixtieth = batch.results[59]!;
-  assert.equal(sixtieth.rarity, 'SS');
-  assert.equal(sixtieth.characterId, 'moon-eater');
-  assert.equal(sixtieth.guaranteedBy, 'SIXTY_PULL_PICKUP_SS');
-});
-
-test('every hundred pulls grants a selectable banner-character credit rather than silently replacing the random result', () => {
-  const batch = recruit(EMPTY_RECRUITMENT_PROGRESS, [], 100, new ZeroRandom());
-  assert.equal(batch.progress.totalPulls, 100);
-  assert.equal(batch.progress.selectionCredits, 1);
-  assert.equal(batch.results[99]?.selectionCreditGranted, true);
-
-  const selected = redeemBannerSelection(batch.progress, batch.ownedCharacterIds, 'castle-crab');
-  assert.equal(selected.progress.selectionCredits, 0);
-  assert.equal(selected.ownedCharacterIds.includes('castle-crab'), true);
-});
-
-test('duplicate pulls are detected but do not invent shard quantities before the economy table is canonized', () => {
-  const owned = ['turnip-rider'];
-  const batch = recruit(EMPTY_RECRUITMENT_PROGRESS, owned, 1, new ZeroRandom());
-  assert.equal(batch.results[0]?.characterId, 'turnip-rider');
+test('duplicate pulls are detected without changing odds or inventing a pity state', () => {
+  const firstC = FIRST_RECRUITMENT_BANNER.poolByRarity.C[0]!;
+  const batch = recruit(EMPTY_RECRUITMENT_PROGRESS, [firstC], 1, new ZeroRandom());
+  assert.equal(batch.results[0]?.characterId, firstC);
   assert.equal(batch.results[0]?.duplicate, true);
+  assert.deepEqual(batch.progress, { totalPulls: 1 });
 });
