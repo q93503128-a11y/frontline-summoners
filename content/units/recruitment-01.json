@@ -1,148 +1,17 @@
 [
-  {
-    "id": "turnip-rider", "displayName": "순무기수", "rarity": "C", "role": "물량",
-    "description": "순무를 타고 들이받는 값싼 돌격병. 빠른 순환으로 빈 전선을 메운다.",
-    "maxHp": 180, "attackDamage": 18, "moveSpeed": 4,
-    "standingRange": 38, "attackMinRange": 0, "attackMaxRange": 48,
-    "cycleFrames": 28, "hitFrames": [6], "backswingFrames": 5,
-    "naturalKnockbackCount": 3, "targetMode": "SINGLE", "traits": ["LIGHT"], "damageBonuses": [],
-    "cost": 80, "rechargeFrames": 46
-  },
-  {
-    "id": "tin-mole", "displayName": "양철두더지", "rarity": "C", "role": "전열",
-    "description": "찌그러진 양철갑옷을 뒤집어쓴 두더지. 싸고 단단한 전열 유지용 병력.",
-    "maxHp": 720, "attackDamage": 24, "moveSpeed": 1,
-    "standingRange": 40, "attackMinRange": 0, "attackMaxRange": 52,
-    "cycleFrames": 58, "hitFrames": [14], "backswingFrames": 10,
-    "naturalKnockbackCount": 1, "targetMode": "SINGLE", "traits": ["ARMORED"], "damageBonuses": [],
-    "cost": 190, "rechargeFrames": 100
-  },
-  {
-    "id": "sling-goblin", "displayName": "새총고블린", "rarity": "C", "role": "원거리",
-    "description": "돌멩이를 아끼지 않는 고블린 사수. 가벼운 적을 멀리서 꾸준히 압박한다.",
-    "maxHp": 210, "attackDamage": 42, "moveSpeed": 2,
-    "standingRange": 145, "attackMinRange": 55, "attackMaxRange": 168,
-    "cycleFrames": 50, "hitFrames": [13], "backswingFrames": 8,
-    "naturalKnockbackCount": 3, "targetMode": "SINGLE", "traits": ["LIGHT"],
-    "damageBonuses": [{ "trait": "LIGHT", "multiplierPermille": 1200 }],
-    "cost": 250, "rechargeFrames": 108
-  },
-  {
-    "id": "pot-mimic", "displayName": "항아리미믹", "rarity": "C", "role": "변칙",
-    "description": "평소엔 항아리처럼 굴러다니다 가까워지면 깨물어 버린다. 짧은 사거리 대신 체력이 높다.",
-    "maxHp": 840, "attackDamage": 48, "moveSpeed": 2,
-    "standingRange": 34, "attackMinRange": 0, "attackMaxRange": 42,
-    "cycleFrames": 62, "hitFrames": [16], "backswingFrames": 10,
-    "naturalKnockbackCount": 2, "targetMode": "SINGLE", "traits": ["ARMORED"], "damageBonuses": [],
-    "cost": 300, "rechargeFrames": 132
-  },
-  {
-    "id": "coffin-porter", "displayName": "관짝운반꾼", "rarity": "B", "role": "전열",
-    "description": "커다란 관짝을 방패처럼 세우는 운반꾼. 느리지만 광역 공격으로 앞줄을 밀어낸다.",
-    "maxHp": 1350, "attackDamage": 82, "moveSpeed": 1,
-    "standingRange": 58, "attackMinRange": 0, "attackMaxRange": 76,
-    "cycleFrames": 76, "hitFrames": [22], "backswingFrames": 12,
-    "naturalKnockbackCount": 1, "targetMode": "AREA", "traits": ["ARMORED"], "damageBonuses": [],
-    "cost": 620, "rechargeFrames": 190
-  },
-  {
-    "id": "lantern-witch", "displayName": "등불마녀", "rarity": "B", "role": "광역",
-    "description": "떠다니는 등불 불씨를 흩뿌리는 마녀. 경량 적 무리를 상대하는 중거리 광역형.",
-    "maxHp": 330, "attackDamage": 118, "moveSpeed": 2,
-    "standingRange": 195, "attackMinRange": 70, "attackMaxRange": 225,
-    "cycleFrames": 74, "hitFrames": [23], "backswingFrames": 12,
-    "naturalKnockbackCount": 3, "targetMode": "AREA", "traits": ["ARCANE"],
-    "damageBonuses": [{ "trait": "LIGHT", "multiplierPermille": 1250 }],
-    "cost": 680, "rechargeFrames": 176
-  },
-  {
-    "id": "goat-ballista", "displayName": "염소발리스타", "rarity": "B", "role": "원거리",
-    "description": "염소가 끄는 소형 발리스타. 느린 재장전 대신 중갑 적에게 묵직한 한 발을 꽂는다.",
-    "maxHp": 430, "attackDamage": 175, "moveSpeed": 1,
-    "standingRange": 235, "attackMinRange": 95, "attackMaxRange": 275,
-    "cycleFrames": 96, "hitFrames": [30], "backswingFrames": 14,
-    "naturalKnockbackCount": 2, "targetMode": "SINGLE", "traits": ["ARMORED"],
-    "damageBonuses": [{ "trait": "ARMORED", "multiplierPermille": 1300 }],
-    "cost": 820, "rechargeFrames": 210
-  },
-  {
-    "id": "bell-hermit", "displayName": "종지기은둔자", "rarity": "B", "role": "변칙",
-    "description": "전투종을 휘둘러 비전 존재를 후려치는 은둔자. 사거리는 짧지만 비전 특효가 강하다.",
-    "maxHp": 760, "attackDamage": 120, "moveSpeed": 2,
-    "standingRange": 82, "attackMinRange": 0, "attackMaxRange": 105,
-    "cycleFrames": 64, "hitFrames": [18], "backswingFrames": 10,
-    "naturalKnockbackCount": 3, "targetMode": "AREA", "traits": ["LIGHT"],
-    "damageBonuses": [{ "trait": "ARCANE", "multiplierPermille": 1350 }],
-    "cost": 760, "rechargeFrames": 185
-  },
-  {
-    "id": "clockwork-duck", "displayName": "태엽오리기사", "rarity": "A", "role": "전열",
-    "description": "태엽이 풀릴 때까지 기세 좋게 전진하는 오리형 기계기사. 높은 체력과 빠른 전진이 장점.",
-    "maxHp": 1850, "attackDamage": 155, "moveSpeed": 3,
-    "standingRange": 62, "attackMinRange": 0, "attackMaxRange": 82,
-    "cycleFrames": 70, "hitFrames": [19], "backswingFrames": 11,
-    "naturalKnockbackCount": 2, "targetMode": "AREA", "traits": ["ARMORED"],
-    "damageBonuses": [{ "trait": "LIGHT", "multiplierPermille": 1150 }],
-    "cost": 1180, "rechargeFrames": 250
-  },
-  {
-    "id": "cloud-herder", "displayName": "구름몰이꾼", "rarity": "A", "role": "원거리",
-    "description": "구름떼를 몰아 번개를 떨어뜨리는 목동. 긴 사거리에서 넓은 범위를 안정적으로 친다.",
-    "maxHp": 420, "attackDamage": 210, "moveSpeed": 1,
-    "standingRange": 260, "attackMinRange": 110, "attackMaxRange": 315,
-    "cycleFrames": 92, "hitFrames": [31], "backswingFrames": 15,
-    "naturalKnockbackCount": 3, "targetMode": "AREA", "traits": ["ARCANE"],
-    "damageBonuses": [{ "trait": "LIGHT", "multiplierPermille": 1200 }],
-    "cost": 1280, "rechargeFrames": 270
-  },
-  {
-    "id": "candle-golem", "displayName": "촛농골렘", "rarity": "A", "role": "광역",
-    "description": "몸이 녹아도 다시 굳어 버티는 거대한 촛농 골렘. 중갑 전열을 넓게 태운다.",
-    "maxHp": 1500, "attackDamage": 230, "moveSpeed": 1,
-    "standingRange": 115, "attackMinRange": 20, "attackMaxRange": 155,
-    "cycleFrames": 88, "hitFrames": [28], "backswingFrames": 14,
-    "naturalKnockbackCount": 2, "targetMode": "AREA", "traits": ["ARCANE"],
-    "damageBonuses": [{ "trait": "ARMORED", "multiplierPermille": 1250 }],
-    "cost": 1320, "rechargeFrames": 295
-  },
-  {
-    "id": "banquet-ogre", "displayName": "연회거인", "rarity": "S", "role": "광역",
-    "description": "식탁째 들고 전선에 나오는 거인. 거대한 상판을 내려쳐 다수의 적을 한꺼번에 쓸어낸다.",
-    "maxHp": 2900, "attackDamage": 360, "moveSpeed": 1,
-    "standingRange": 92, "attackMinRange": 0, "attackMaxRange": 132,
-    "cycleFrames": 104, "hitFrames": [37], "backswingFrames": 18,
-    "naturalKnockbackCount": 2, "targetMode": "AREA", "traits": ["LIGHT"],
-    "damageBonuses": [{ "trait": "LIGHT", "multiplierPermille": 1200 }],
-    "cost": 1800, "rechargeFrames": 360
-  },
-  {
-    "id": "mirror-exorcist", "displayName": "거울퇴마사", "rarity": "S", "role": "변칙",
-    "description": "커다란 거울로 비전 존재의 힘을 되비추는 퇴마사. 넓은 사각지대를 가진 초장거리 비전 특효형.",
-    "maxHp": 620, "attackDamage": 330, "moveSpeed": 1,
-    "standingRange": 315, "attackMinRange": 145, "attackMaxRange": 365,
-    "cycleFrames": 110, "hitFrames": [39], "backswingFrames": 17,
-    "naturalKnockbackCount": 4, "targetMode": "AREA", "traits": ["ARCANE"],
-    "damageBonuses": [{ "trait": "ARCANE", "multiplierPermille": 1400 }],
-    "cost": 1950, "rechargeFrames": 390
-  },
-  {
-    "id": "moon-eater", "displayName": "달먹는룡", "rarity": "SS", "role": "결정타",
-    "description": "달빛을 삼켰다가 거대한 광선으로 토해내는 기묘한 용. 보스전에 특화된 초장거리 결정타.",
-    "maxHp": 1700, "attackDamage": 690, "moveSpeed": 1,
-    "standingRange": 300, "attackMinRange": 95, "attackMaxRange": 370,
-    "cycleFrames": 146, "hitFrames": [52], "backswingFrames": 24,
-    "naturalKnockbackCount": 3, "targetMode": "AREA", "traits": ["ARCANE"],
-    "damageBonuses": [{ "trait": "BOSS", "multiplierPermille": 1550 }],
-    "cost": 2550, "rechargeFrames": 510
-  },
-  {
-    "id": "castle-crab", "displayName": "성채게", "rarity": "SS", "role": "전열",
-    "description": "등껍질 위에 작은 성채를 통째로 얹고 다니는 거대 게. 극단적으로 단단한 전열이지만 느리고 비싸다.",
-    "maxHp": 5200, "attackDamage": 260, "moveSpeed": 1,
-    "standingRange": 68, "attackMinRange": 0, "attackMaxRange": 96,
-    "cycleFrames": 90, "hitFrames": [30], "backswingFrames": 15,
-    "naturalKnockbackCount": 1, "targetMode": "AREA", "traits": ["ARMORED"],
-    "damageBonuses": [{ "trait": "ARMORED", "multiplierPermille": 1200 }],
-    "cost": 2800, "rechargeFrames": 540
-  }
+  {"id":"turnip-rider","displayName":"순무기수","acquisitionClass":"RECRUITMENT","seriesId":"legacy-01","rarity":"C","role":"물량","description":"순무를 타고 들이받는 값싼 돌격병. 빠른 순환으로 빈 전선을 메운다.","maxHp":180,"attackDamage":18,"moveSpeed":4,"standingRange":38,"attackMinRange":0,"attackMaxRange":48,"cycleFrames":28,"hitFrames":[6],"backswingFrames":5,"naturalKnockbackCount":3,"targetMode":"SINGLE","attributes":["NATURE"],"combatTags":[],"damageBonuses":[],"cost":80,"rechargeFrames":60},
+  {"id":"tin-mole","displayName":"양철두더지","acquisitionClass":"RECRUITMENT","seriesId":"legacy-01","rarity":"C","role":"전열","description":"찌그러진 양철갑옷을 뒤집어쓴 두더지. 싸고 단단한 전열 유지용 병력.","maxHp":720,"attackDamage":24,"moveSpeed":1,"standingRange":40,"attackMinRange":0,"attackMaxRange":52,"cycleFrames":58,"hitFrames":[14],"backswingFrames":10,"naturalKnockbackCount":1,"targetMode":"SINGLE","attributes":["BEAST"],"combatTags":["ARMORED"],"damageBonuses":[],"cost":190,"rechargeFrames":100},
+  {"id":"sling-goblin","displayName":"새총고블린","acquisitionClass":"RECRUITMENT","seriesId":"legacy-01","rarity":"C","role":"원거리","description":"돌멩이를 아끼지 않는 고블린 사수. 가벼운 적을 멀리서 꾸준히 압박한다.","maxHp":210,"attackDamage":42,"moveSpeed":2,"standingRange":145,"attackMinRange":55,"attackMaxRange":168,"cycleFrames":50,"hitFrames":[13],"backswingFrames":8,"naturalKnockbackCount":3,"targetMode":"SINGLE","attributes":["NEUTRAL"],"combatTags":[],"damageBonuses":[{"targetKind":"ATTRIBUTE","target":"NEUTRAL","multiplierPermille":1200}],"cost":250,"rechargeFrames":108},
+  {"id":"pot-mimic","displayName":"항아리미믹","acquisitionClass":"RECRUITMENT","seriesId":"legacy-01","rarity":"C","role":"변칙","description":"평소엔 항아리처럼 굴러다니다 가까워지면 깨물어 버린다. 짧은 사거리 대신 체력이 높다.","maxHp":840,"attackDamage":48,"moveSpeed":2,"standingRange":34,"attackMinRange":0,"attackMaxRange":42,"cycleFrames":62,"hitFrames":[16],"backswingFrames":10,"naturalKnockbackCount":2,"targetMode":"SINGLE","attributes":["ANOMALY"],"combatTags":["ARMORED"],"damageBonuses":[],"cost":300,"rechargeFrames":132},
+  {"id":"coffin-porter","displayName":"관짝운반꾼","acquisitionClass":"RECRUITMENT","seriesId":"legacy-01","rarity":"B","role":"전열","description":"커다란 관짝을 방패처럼 세우는 운반꾼. 느리지만 광역 공격으로 앞줄을 밀어낸다.","maxHp":1350,"attackDamage":82,"moveSpeed":1,"standingRange":58,"attackMinRange":0,"attackMaxRange":76,"cycleFrames":76,"hitFrames":[22],"backswingFrames":12,"naturalKnockbackCount":1,"targetMode":"AREA","attributes":["UNDEAD"],"combatTags":["ARMORED"],"damageBonuses":[],"cost":620,"rechargeFrames":190},
+  {"id":"lantern-witch","displayName":"등불마녀","acquisitionClass":"RECRUITMENT","seriesId":"legacy-01","rarity":"B","role":"광역","description":"떠다니는 등불 불씨를 흩뿌리는 마녀. 적 무리를 상대하는 중거리 광역형.","maxHp":330,"attackDamage":118,"moveSpeed":2,"standingRange":195,"attackMinRange":70,"attackMaxRange":225,"cycleFrames":74,"hitFrames":[23],"backswingFrames":12,"naturalKnockbackCount":3,"targetMode":"AREA","attributes":["ARCANE"],"combatTags":[],"damageBonuses":[{"targetKind":"ATTRIBUTE","target":"NEUTRAL","multiplierPermille":1250}],"cost":680,"rechargeFrames":176},
+  {"id":"goat-ballista","displayName":"염소발리스타","acquisitionClass":"RECRUITMENT","seriesId":"legacy-01","rarity":"B","role":"원거리","description":"염소가 끄는 소형 발리스타. 느린 재장전 대신 중갑 적에게 묵직한 한 발을 꽂는다.","maxHp":430,"attackDamage":175,"moveSpeed":1,"standingRange":235,"attackMinRange":95,"attackMaxRange":275,"cycleFrames":96,"hitFrames":[30],"backswingFrames":14,"naturalKnockbackCount":2,"targetMode":"SINGLE","attributes":["BEAST"],"combatTags":[],"damageBonuses":[{"targetKind":"TAG","target":"ARMORED","multiplierPermille":1300}],"cost":820,"rechargeFrames":210},
+  {"id":"bell-hermit","displayName":"종지기은둔자","acquisitionClass":"RECRUITMENT","seriesId":"legacy-01","rarity":"B","role":"변칙","description":"전투종을 휘둘러 마력 존재를 후려치는 은둔자. 사거리는 짧지만 마력 특효가 강하다.","maxHp":760,"attackDamage":120,"moveSpeed":2,"standingRange":82,"attackMinRange":0,"attackMaxRange":105,"cycleFrames":64,"hitFrames":[18],"backswingFrames":10,"naturalKnockbackCount":3,"targetMode":"AREA","attributes":["NEUTRAL"],"combatTags":[],"damageBonuses":[{"targetKind":"ATTRIBUTE","target":"ARCANE","multiplierPermille":1350}],"cost":760,"rechargeFrames":185},
+  {"id":"clockwork-duck","displayName":"태엽오리기사","acquisitionClass":"RECRUITMENT","seriesId":"legacy-01","rarity":"A","role":"전열","description":"태엽이 풀릴 때까지 기세 좋게 전진하는 오리형 기계기사. 높은 체력과 빠른 전진이 장점.","maxHp":1850,"attackDamage":155,"moveSpeed":3,"standingRange":62,"attackMinRange":0,"attackMaxRange":82,"cycleFrames":70,"hitFrames":[19],"backswingFrames":11,"naturalKnockbackCount":2,"targetMode":"AREA","attributes":["MACHINE"],"combatTags":["ARMORED"],"damageBonuses":[{"targetKind":"ATTRIBUTE","target":"NEUTRAL","multiplierPermille":1150}],"cost":1180,"rechargeFrames":250},
+  {"id":"cloud-herder","displayName":"구름몰이꾼","acquisitionClass":"RECRUITMENT","seriesId":"legacy-01","rarity":"A","role":"원거리","description":"구름떼를 몰아 번개를 떨어뜨리는 목동. 긴 사거리에서 넓은 범위를 안정적으로 친다.","maxHp":420,"attackDamage":210,"moveSpeed":1,"standingRange":260,"attackMinRange":110,"attackMaxRange":315,"cycleFrames":92,"hitFrames":[31],"backswingFrames":15,"naturalKnockbackCount":3,"targetMode":"AREA","attributes":["ARCANE"],"combatTags":["FLOATING"],"damageBonuses":[{"targetKind":"ATTRIBUTE","target":"NEUTRAL","multiplierPermille":1200}],"cost":1280,"rechargeFrames":270},
+  {"id":"candle-golem","displayName":"촛농골렘","acquisitionClass":"RECRUITMENT","seriesId":"legacy-01","rarity":"A","role":"광역","description":"몸이 녹아도 다시 굳어 버티는 거대한 촛농 골렘. 중갑 전열을 넓게 태운다.","maxHp":1500,"attackDamage":230,"moveSpeed":1,"standingRange":115,"attackMinRange":20,"attackMaxRange":155,"cycleFrames":88,"hitFrames":[28],"backswingFrames":14,"naturalKnockbackCount":2,"targetMode":"AREA","attributes":["ARCANE"],"combatTags":["GIANT"],"damageBonuses":[{"targetKind":"TAG","target":"ARMORED","multiplierPermille":1250}],"cost":1320,"rechargeFrames":295},
+  {"id":"banquet-ogre","displayName":"연회거인","acquisitionClass":"RECRUITMENT","seriesId":"legacy-01","rarity":"S","role":"광역","description":"식탁째 들고 전선에 나오는 거인. 거대한 상판을 내려쳐 다수의 적을 한꺼번에 쓸어낸다.","maxHp":2900,"attackDamage":360,"moveSpeed":1,"standingRange":92,"attackMinRange":0,"attackMaxRange":132,"cycleFrames":104,"hitFrames":[37],"backswingFrames":18,"naturalKnockbackCount":2,"targetMode":"AREA","attributes":["NEUTRAL"],"combatTags":["GIANT"],"damageBonuses":[{"targetKind":"ATTRIBUTE","target":"NEUTRAL","multiplierPermille":1200}],"cost":1800,"rechargeFrames":360},
+  {"id":"mirror-exorcist","displayName":"거울퇴마사","acquisitionClass":"RECRUITMENT","seriesId":"legacy-01","rarity":"S","role":"변칙","description":"커다란 거울로 마력 존재의 힘을 되비추는 퇴마사. 넓은 사각지대를 가진 초장거리 특효형.","maxHp":620,"attackDamage":330,"moveSpeed":1,"standingRange":315,"attackMinRange":145,"attackMaxRange":365,"cycleFrames":110,"hitFrames":[39],"backswingFrames":17,"naturalKnockbackCount":4,"targetMode":"AREA","attributes":["ARCANE"],"combatTags":[],"damageBonuses":[{"targetKind":"ATTRIBUTE","target":"ARCANE","multiplierPermille":1400}],"cost":1950,"rechargeFrames":390},
+  {"id":"moon-eater","displayName":"달먹는룡","acquisitionClass":"RECRUITMENT","seriesId":"legacy-01","rarity":"SS","role":"결정타","description":"달빛을 삼켰다가 거대한 광선으로 토해내는 기묘한 용. 보스전에 특화된 초장거리 결정타.","maxHp":1700,"attackDamage":690,"moveSpeed":1,"standingRange":300,"attackMinRange":95,"attackMaxRange":370,"cycleFrames":146,"hitFrames":[52],"backswingFrames":24,"naturalKnockbackCount":3,"targetMode":"AREA","attributes":["BEAST","ARCANE"],"combatTags":["GIANT"],"damageBonuses":[{"targetKind":"TAG","target":"BOSS","multiplierPermille":1550}],"cost":2550,"rechargeFrames":510},
+  {"id":"castle-crab","displayName":"성채게","acquisitionClass":"RECRUITMENT","seriesId":"legacy-01","rarity":"SS","role":"전열","description":"등껍질 위에 작은 성채를 통째로 얹고 다니는 거대 게. 극단적으로 단단한 전열이지만 느리고 비싸다.","maxHp":5200,"attackDamage":260,"moveSpeed":1,"standingRange":68,"attackMinRange":0,"attackMaxRange":96,"cycleFrames":90,"hitFrames":[30],"backswingFrames":15,"naturalKnockbackCount":1,"targetMode":"AREA","attributes":["BEAST"],"combatTags":["ARMORED","GIANT","STRUCTURE"],"damageBonuses":[{"targetKind":"TAG","target":"ARMORED","multiplierPermille":1200}],"cost":2800,"rechargeFrames":540}
 ]
