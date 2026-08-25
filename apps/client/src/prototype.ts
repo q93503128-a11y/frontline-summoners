@@ -2,6 +2,7 @@ import {
   parseCampaignBundle,
   parseCampaignStages,
   parsePlayerUnits,
+  type AcquisitionClass,
   type BattlefieldThemeId as ContentBattlefieldThemeId,
   type CampaignStageContent,
   type CombatContent,
@@ -23,18 +24,19 @@ import stagesJson from '../../../content/stages/chapter-01.json' with { type: 'j
 import specialStagesJson from '../../../content/stages/special-01.json' with { type: 'json' };
 import { applyTreasureBattleEffects } from './treasure-effects.ts';
 
-export type PrototypeRarity = Rarity;
+export type PrototypeRarity = Rarity | null;
 export type PrototypeRole = PlayerRole;
 export type BattlefieldThemeId = ContentBattlefieldThemeId;
 
 export interface PrototypeRosterSlot extends PlayerRosterSlot {
+  readonly acquisitionClass: AcquisitionClass;
   readonly rarity: PrototypeRarity;
+  readonly seriesId?: string;
   readonly role: PrototypeRole;
   readonly description: string;
 }
 
 export type PrototypeStage = CampaignStageContent;
-
 export const STARTER_SLOT_ID = 'militia';
 
 const CAMPAIGN = parseCampaignBundle({
@@ -50,6 +52,7 @@ const RECRUITMENT_UNIT_CONTENT = parsePlayerUnits(recruitmentUnitsJson);
 const campaignUnitIds = new Set(CAMPAIGN.playerUnits.map((unit) => unit.id));
 for (const unit of RECRUITMENT_UNIT_CONTENT) {
   if (campaignUnitIds.has(unit.id)) throw new Error(`recruitment unit duplicates chapter-one unit id: ${unit.id}`);
+  if (unit.acquisitionClass !== 'RECRUITMENT') throw new Error(`recruitment file contains non-recruitment unit: ${unit.id}`);
 }
 
 const SPECIAL_STAGE_CONTENT = parseCampaignStages(specialStagesJson, {
@@ -74,7 +77,8 @@ function fighter(content: CombatContent): BattleUnitDefinition {
     attackMinRange: content.attackMinRange,
     attackMaxRange: content.attackMaxRange,
     targetMode: content.targetMode,
-    traits: content.traits,
+    attributes: content.attributes,
+    combatTags: content.combatTags,
     damageBonuses: content.damageBonuses,
     naturalKnockbackCount: content.naturalKnockbackCount,
     naturalKnockbackFrames: 12,
@@ -92,7 +96,9 @@ function rosterSlot(unit: PlayerUnitContent): PrototypeRosterSlot {
   return {
     slotId: unit.id,
     displayName: unit.displayName,
+    acquisitionClass: unit.acquisitionClass,
     rarity: unit.rarity,
+    ...(unit.seriesId === undefined ? {} : { seriesId: unit.seriesId }),
     role: unit.role,
     description: unit.description,
     definition: fighter(unit),
@@ -101,16 +107,11 @@ function rosterSlot(unit: PlayerUnitContent): PrototypeRosterSlot {
   };
 }
 
-/** Free chapter-one campaign roster. Keep this stable for progression unlock math. */
 export const PLAYER_SLOTS: readonly PrototypeRosterSlot[] = CAMPAIGN.playerUnits.map(rosterSlot);
-/** Recruitment-only roster. These are never unlocked by chapter-one progression. */
 export const RECRUITMENT_PLAYER_SLOTS: readonly PrototypeRosterSlot[] = RECRUITMENT_UNIT_CONTENT.map(rosterSlot);
-/** Every playable character definition currently known to the battle adapter. */
 export const ALL_PLAYER_SLOTS: readonly PrototypeRosterSlot[] = [...PLAYER_SLOTS, ...RECRUITMENT_PLAYER_SLOTS];
 
-if (new Set(ALL_PLAYER_SLOTS.map((slot) => slot.slotId)).size !== ALL_PLAYER_SLOTS.length) {
-  throw new Error('campaign and recruitment player slot ids must be globally unique');
-}
+if (new Set(ALL_PLAYER_SLOTS.map((slot) => slot.slotId)).size !== ALL_PLAYER_SLOTS.length) throw new Error('campaign and recruitment player slot ids must be globally unique');
 
 export const ENEMIES: readonly EnemyArchetype[] = CAMPAIGN.enemies.map((enemy) => ({
   enemyId: enemy.id,
@@ -119,43 +120,33 @@ export const ENEMIES: readonly EnemyArchetype[] = CAMPAIGN.enemies.map((enemy) =
   rewardSupply: enemy.rewardSupply,
 }));
 
-/** Sequential chapter-one progression only. Keep this array stable for campaign progression/save math. */
 export const STAGES: readonly PrototypeStage[] = CAMPAIGN.stages;
-/** First optional challenge pack. It intentionally does not participate in the 20-stage progression prefix. */
 export const SPECIAL_STAGES: readonly PrototypeStage[] = SPECIAL_STAGE_CONTENT;
 export const ALL_STAGES: readonly PrototypeStage[] = [...STAGES, ...SPECIAL_STAGES];
-
-if (new Set(ALL_STAGES.map((stage) => stage.id)).size !== ALL_STAGES.length) {
-  throw new Error('progression and special stage ids must be globally unique');
-}
+if (new Set(ALL_STAGES.map((stage) => stage.id)).size !== ALL_STAGES.length) throw new Error('progression and special stage ids must be globally unique');
 
 export function getStage(stageId: string): PrototypeStage {
   const stage = ALL_STAGES.find((candidate) => candidate.id === stageId);
   if (!stage) throw new Error(`Unknown stage: ${stageId}`);
   return stage;
 }
-
 export function getStageNumber(stageId: string): number {
   const index = STAGES.findIndex((stage) => stage.id === stageId);
   if (index < 0) throw new Error(`Unknown progression stage: ${stageId}`);
   return index + 1;
 }
-
 export function getSpecialStageNumber(stageId: string): number {
   const index = SPECIAL_STAGES.findIndex((stage) => stage.id === stageId);
   if (index < 0) throw new Error(`Unknown special stage: ${stageId}`);
   return index + 1;
 }
-
 export function getSlotById(slotId: string): PrototypeRosterSlot | undefined {
   return ALL_PLAYER_SLOTS.find((slot) => slot.slotId === slotId);
 }
-
 export function getUnlockStageForSlot(slotId: string): PrototypeStage | undefined {
   if (slotId === STARTER_SLOT_ID) return undefined;
   return STAGES.find((stage) => stage.unlockUnitId === slotId);
 }
-
 export function getContiguousClearedStageIds(clearedStageIds: readonly string[]): readonly string[] {
   const cleared = new Set(clearedStageIds);
   const contiguous: string[] = [];
@@ -165,55 +156,37 @@ export function getContiguousClearedStageIds(clearedStageIds: readonly string[])
   }
   return contiguous;
 }
-
 export function getUnlockedSlotIds(clearedStageIds: readonly string[]): readonly string[] {
   const cleared = new Set(getContiguousClearedStageIds(clearedStageIds));
   const unlocked = new Set<string>([STARTER_SLOT_ID]);
-  for (const stage of STAGES) {
-    if (cleared.has(stage.id) && stage.unlockUnitId) unlocked.add(stage.unlockUnitId);
-  }
+  for (const stage of STAGES) if (cleared.has(stage.id) && stage.unlockUnitId) unlocked.add(stage.unlockUnitId);
   return PLAYER_SLOTS.filter((slot) => unlocked.has(slot.slotId)).map((slot) => slot.slotId);
 }
-
 export function getUnlockedPlayerSlots(clearedStageIds: readonly string[]): readonly PrototypeRosterSlot[] {
   const unlocked = new Set(getUnlockedSlotIds(clearedStageIds));
   return PLAYER_SLOTS.filter((slot) => unlocked.has(slot.slotId));
 }
-
 export function isStageUnlocked(stageId: string, clearedStageIds: readonly string[]): boolean {
   const index = STAGES.findIndex((stage) => stage.id === stageId);
   if (index < 0) return false;
   if (index === 0) return true;
   return getContiguousClearedStageIds(clearedStageIds).length >= index;
 }
-
-/**
- * The first special pack opens when chapter one is fully cleared.
- * It remains independent from progression order: clearing or skipping a special challenge never gates chapter progression.
- */
 export function isSpecialStageUnlocked(stageId: string, clearedStageIds: readonly string[]): boolean {
   if (!SPECIAL_STAGES.some((stage) => stage.id === stageId)) return false;
   return getContiguousClearedStageIds(clearedStageIds).length === STAGES.length;
 }
-
 export function isBattleStageUnlocked(stageId: string, clearedStageIds: readonly string[]): boolean {
   const stage = ALL_STAGES.find((candidate) => candidate.id === stageId);
   if (!stage) return false;
-  return stage.stageType === 'SPECIAL'
-    ? isSpecialStageUnlocked(stageId, clearedStageIds)
-    : isStageUnlocked(stageId, clearedStageIds);
+  return stage.stageType === 'SPECIAL' ? isSpecialStageUnlocked(stageId, clearedStageIds) : isStageUnlocked(stageId, clearedStageIds);
 }
-
 export function getTreasureIdsForClearedStages(clearedStageIds: readonly string[]): readonly string[] {
   const cleared = new Set(getContiguousClearedStageIds(clearedStageIds));
   return STAGES.filter((stage) => cleared.has(stage.id)).map((stage) => stage.treasure.id);
 }
 
-export function createPrototypeBattleWithPlayerSlots(
-  stageId: string,
-  playerSlots: readonly PrototypeRosterSlot[],
-  ownedTreasureIds: readonly string[] = [],
-): PlayableBattleState {
+export function createPrototypeBattleWithPlayerSlots(stageId: string, playerSlots: readonly PrototypeRosterSlot[], ownedTreasureIds: readonly string[] = []): PlayableBattleState {
   const stage = getStage(stageId);
   const safeSlots = playerSlots.length > 0 ? playerSlots : [PLAYER_SLOTS[0]!];
   const progression = applyTreasureBattleEffects({
@@ -238,11 +211,7 @@ export function createPrototypeBattleWithPlayerSlots(
   });
 }
 
-export function createPrototypeBattle(
-  stageId = STAGES[0]!.id,
-  unlockedSlotIds: readonly string[] = [STARTER_SLOT_ID],
-  ownedTreasureIds: readonly string[] = [],
-): PlayableBattleState {
+export function createPrototypeBattle(stageId = STAGES[0]!.id, unlockedSlotIds: readonly string[] = [STARTER_SLOT_ID], ownedTreasureIds: readonly string[] = []): PlayableBattleState {
   const unlocked = new Set(unlockedSlotIds);
   const playerSlots = ALL_PLAYER_SLOTS.filter((slot) => unlocked.has(slot.slotId));
   return createPrototypeBattleWithPlayerSlots(stageId, playerSlots, ownedTreasureIds);
