@@ -19,16 +19,9 @@ const EMPTY_PROGRESS: GuestProgress = { clearedStageIds: [], specialClearedStage
 const ALLY_PAGE_SIZE = 5;
 const TREASURE_PAGE_SIZE = 5;
 const MEDAL_PAGE_SIZE = 5;
+const STORY_BADGE_COLOR = '#d7c79f';
 
 type CatalogMode = 'ALLIES' | 'TREASURES' | 'MEDALS';
-
-const rarityColor: Record<string, string> = {
-  C: '#b9c2cf',
-  B: '#8bd6a3',
-  A: '#79baff',
-  S: '#d79aff',
-  SS: '#ffd56f',
-};
 
 function addText(
   scene: Phaser.Scene,
@@ -177,7 +170,7 @@ export class CatalogScene extends Phaser.Scene {
       const x = 145 + localIndex * 247;
       const unlocked = unlockedIds.has(slot.slotId);
       const border = unlocked
-        ? Phaser.Display.Color.HexStringToColor(rarityColor[slot.rarity] ?? '#ffffff').color
+        ? Phaser.Display.Color.HexStringToColor(STORY_BADGE_COLOR).color
         : 0x46505e;
       const card = this.add.rectangle(x, 398, 220, 430, unlocked ? 0x252c3a : 0x1d222b, 0.98)
         .setStrokeStyle(3, border, unlocked ? 0.95 : 0.65);
@@ -190,7 +183,7 @@ export class CatalogScene extends Phaser.Scene {
       portrait.setScale(((compact ? 132 : 145) / art.family.idle.frameHeight) * art.displayScale);
       this.contentLayer!.add(portrait);
 
-      this.contentLayer!.add(addText(this, x - 96, 200, unlocked ? slot.rarity : 'LOCK', compact ? 20 : 15, unlocked ? rarityColor[slot.rarity] ?? '#ffffff' : '#69727e'));
+      this.contentLayer!.add(addText(this, x - 96, 200, unlocked ? '스토리' : 'LOCK', compact ? 20 : 15, unlocked ? STORY_BADGE_COLOR : '#69727e'));
       this.contentLayer!.add(addText(this, x, compact ? 360 : 342, slot.displayName, compact ? 27 : 22, unlocked ? '#ffffff' : '#7b8591', 'center').setOrigin(0.5));
 
       if (unlocked) {
