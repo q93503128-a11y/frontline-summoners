@@ -1,201 +1,220 @@
-# 전선소환전 — 전체 기획 기능 커버리지 매트릭스
+# 전선소환전 — v1.0 기능 커버리지 매트릭스
 
-문서 상태: **초기 전체 기획 누락 방지용 필수 감사표**  
 최상위 정본: `docs/CANONICAL.md`  
-상세 기획: `docs/GAME_DESIGN_FULL.md`  
-스테이지 정밀: `docs/STAGE_SYSTEM_DESIGN.md`  
-모집·성장 정밀: `docs/GROWTH_RECRUITMENT_DESIGN.md`  
-현재 구현: `docs/IMPLEMENTATION_STATUS.md`
+성장/모집: `docs/GROWTH_RECRUITMENT_DESIGN.md`  
+스테이지/온라인: `docs/STAGE_SYSTEM_DESIGN.md`  
+콘텐츠 상세: `docs/content-wiki/`  
+구현 현황: `docs/IMPLEMENTATION_STATUS.md`
 
-> 목적: 전투 vertical slice에 집중하는 동안 초기 전체 기획의 핵심 메타 시스템이 뒤로 밀리거나 사라지는 일을 다시 허용하지 않는다. 이 문서는 새 기능을 즉흥적으로 추가하는 목록이 아니라, 초기 전체 기획과 이후 확정 결정을 기준으로 **무엇이 필수인지 / 무엇이 후순위인지 / 무엇이 후보인지**를 한눈에 고정한다.
+## 상태
 
-## 상태 표기
-
-- `DONE`: 실제 데이터·코드·저장/화면 중 해당 책임까지 연결되어 있음.
-- `PARTIAL`: 기반은 있으나 사용자 루프의 일부가 빠져 있음.
-- `MISSING`: 기획상 필수지만 아직 실사용 경로가 없음.
-- `PLANNED`: 출시/장기 확장에 필요하지만 현재 vertical slice보다 뒤 단계.
-- `CANDIDATE`: 초기 기획에서도 확정이 아니라 후보였음. 필수처럼 강제하지 않는다.
+- `DONE`: 현재 v1.0 정본 기준으로 실제 사용자 경로까지 연결됨.
+- `PARTIAL`: 기반은 있으나 v1.0 기능 일부가 빠짐.
+- `MISSING`: v1.0 필수지만 아직 없음.
+- `REWORK`: 구현은 있으나 v1.0 정본과 충돌하여 교체 필요.
+- `PLANNED`: 1차 완성 이후 업데이트 범위.
 
 ---
 
-# A. 전투 핵심 — 필수
+## A. 전투 코어
 
-| ID | 기능 | 중요도 | 현재 상태 | 완료 기준 |
-| --- | --- | --- | --- | --- |
-| BATTLE-01 | 30Hz 결정론적 공용 전투 코어 | 필수 | DONE | 브라우저/서버가 같은 sim 사용 |
-| BATTLE-02 | 보급 → 생산 → 전선 → 사거리 → 공격 frame → KB → 재생산 → 적 스폰 | 필수 | DONE | 한 경로로 실제 전투 동작 |
-| BATTLE-03 | SINGLE/AREA, standingRange와 attack range 분리 | 필수 | DONE | 실제 판정에 반영 |
-| BATTLE-04 | 자연 KB / ForcedDisplacement / DYING | 필수 | DONE | 결정론 테스트 포함 |
-| BATTLE-05 | 보급소 Lv1~8 | 필수 | DONE | 비용/수입/지갑 실제 적용 |
-| BATTLE-06 | 거점 병기 1슬롯 | 필수 | DONE | 현재 전선포 실제 사용 |
-| BATTLE-07 | 솔로 완전 일시정지 | 필수 | DONE | tick/경제/쿨/스폰/렌더 진행 정지 |
-| BATTLE-08 | PC/모바일 입력 분리 | 필수 | DONE | PC 1~0/Q/E, 모바일 터치 UI |
-| BATTLE-09 | 정상 실패 입력에 화면 흔들림 없음 | 필수 | DONE | 쿨/돈/cap/MAX 실패 무진동 |
-
----
-
-# B. 캐릭터 수집 / 덱 — 필수 메타
-
-| ID | 기능 | 중요도 | 현재 상태 | 완료 기준 |
-| --- | --- | --- | --- | --- |
-| ROSTER-01 | 제1장 무료 기본 로스터 10종 | 필수 | DONE | 캠페인 확정 해금, 모집 의존 없음 |
-| ROSTER-02 | 기본 10종 이후 캐릭터 풀 확장 | 필수 | DONE | 첫 모집 전용 15종 데이터/전투 정의 존재 |
-| ROSTER-03 | C/B/A/S/SS 희귀도 | 필수 | DONE | 전투/도감/모집에서 같은 희귀도 정본 사용 |
-| ROSTER-04 | 희귀도 ≠ 절대 성능 | 필수 | PARTIAL | 실제 15종 역할 차별 + 장기 밸런스 검증 필요 |
-| ROSTER-05 | 종족/체형/장비/모션 기반 실루엣 다양성 | 필수 | PARTIAL | 현재는 임시 7 art family; 정식 고유 아트 필요 |
-| DECK-01 | 솔로/1v1 수동 10칸 덱 | 필수 | PARTIAL | save v6 + 전투 파생은 구현, FormationScene에서 실제 편성/저장 UI 연결 필요 |
-| DECK-02 | 협동/2v2 플레이어당 5칸 | 필수(멀티) | PLANNED | 멀티 준비 단계에서 구현 |
-| ACQUIRE-01 | 모집 외 획득 루트 | 필수 | PARTIAL | 캠페인 해금 존재; 보스/외전/도전 캐릭터는 미구현 |
+| ID | 기능 | 상태 | v1.0 완료 기준 |
+| --- | --- | --- | --- |
+| BATTLE-01 | 30Hz 결정론 공용 sim | DONE | 싱글/서버 동일 코어 |
+| BATTLE-02 | 사거리/선딜/hit frame/후딜/KB | DONE | 실제 판정과 시각 일치 |
+| BATTLE-03 | 동시 피해 일괄 처리 | DONE | 순회 순서 비의존 |
+| BATTLE-04 | 자연 KB/강제이동/DYING | DONE | 결정론 테스트 유지 |
+| BATTLE-05 | 재생산 최종 2초 하한 | MISSING | 모든 보정 후 공용 함수에서 clamp |
+| BATTLE-06 | 전투 경제/보급소 | PARTIAL | 현재 저속 경제 유지 + 4장 곡선 확장 |
+| BATTLE-07 | 솔로 완전 일시정지 | DONE | tick/경제/스폰 모두 정지 |
+| BATTLE-08 | 무료 재클리어 2배속 | MISSING | 1회 클리어 후 1×/2× |
+| BATTLE-09 | 소탕권 | MISSING | 재클리어 반복보상 즉시 처리 |
 
 ---
 
-# C. 모집 / 뽑기 — 필수 메타
+## B. 속성/태그/도감
 
-| ID | 기능 | 중요도 | 현재 상태 | 완료 기준 |
-| --- | --- | --- | --- | --- |
-| GACHA-01 | 데이터 기반 모집 배너/풀 | 필수 | DONE | `content/recruitment`가 확률 source of truth |
-| GACHA-02 | C30/B28/A24/S13/SS5 | 필수 | DONE | 합계100%, 테스트 고정 |
-| GACHA-03 | 10연 A+ / 30연 S+ / 60연 픽업 SS | 필수 | DONE | milestone 우선순위와 확률비 검증 |
-| GACHA-04 | 100연 배너 캐릭터 선택권 | 필수 | DONE | 랜덤 결과와 별도 credit 적립/소비 |
-| GACHA-05 | 모집 소유권/천장 저장 | 필수 | DONE | guest save에 배너별 진행 저장 |
-| GACHA-06 | 모집 화면/결과 연출 | 필수 | MISSING | 메인 → 배너 → 1/10회 → 결과 → 보유/천장 표시 |
-| DUP-01 | 중복 → 캐릭터 조각 + 공용 성장재화 | 필수 | PARTIAL | 중복 판정만 구현; 지급량/교환비 경제 미확정 |
-| DUP-02 | 조각 교환으로 원하는 캐릭터 선택 | 필수 | MISSING | 교환 UI/경제/저장 구현 |
-| DUP-03 | 중복 강제 성능 잠금 금지 | 필수 | DONE(규칙) | 기본 성능에 N돌 요구 금지 |
+| ID | 기능 | 상태 | v1.0 완료 기준 |
+| --- | --- | --- | --- |
+| ATTR-01 | NEUTRAL/BEAST/UNDEAD/NATURE/ARCANE/DEMON/MACHINE/ANOMALY | REWORK | 옛 LIGHT/ARMORED/ARCANE 분류 교체 |
+| ATTR-02 | 아군도 속성 보유 | REWORK | PvE/PvP 동일 규칙 |
+| ATTR-03 | 전투 태그 분리 | REWORK | ARMORED/FLOATING/GIANT/BOSS/STRUCTURE 등 |
+| CODEX-01 | 미발견 적 실루엣+??? | MISSING | 첫 발견 전 정보 숨김 |
+| CODEX-02 | 미획득 아군 실루엣+??? | MISSING | 도감에만 실루엣, 편성에는 미표시 |
+| CODEX-03 | 출현 적 → 도감 바로가기 | MISSING | 발견 적 클릭 시 상세 이동 |
+| CODEX-04 | 게임 내부 고급 전투 정보 | PARTIAL | 외부 위키 없이 속성/사거리/능력 확인 |
 
 ---
 
-# D. 레벨 / 업그레이드 — 필수 메타
+## C. 스토리 로스터
 
-| ID | 기능 | 중요도 | 현재 상태 | 완료 기준 |
-| --- | --- | --- | --- | --- |
-| LEVEL-01 | Lv1~50 | 필수 | DONE | 레벨 곡선/전투 파생 존재 |
-| LEVEL-02 | HP/공격 중심 완만 성장, Lv30 이후 완화 | 필수 | DONE | 현재 prototype curve 존재 |
-| LEVEL-03 | 사거리/비용/KB 등 정체성 스탯 레벨 고정 | 필수 | DONE | 성장 엔진에서 유지 |
-| LEVEL-04 | 캐릭터별 레벨 저장 | 필수 | DONE | save v6에서 저장/정규화 |
-| LEVEL-05 | 강화 비용/골드 경제 | 필수 | MISSING | 보상 경제와 함께 비용 곡선 확정/저장/소비 |
-| LEVEL-06 | 성장 화면 | 필수 | MISSING | 현재/다음 Lv, 상승량, 비용, 강화 실행 |
+| ID | 기능 | 상태 | v1.0 완료 기준 |
+| --- | --- | --- | --- |
+| STORY-01 | 기본/스토리 10종 | REWORK | 희귀도 제거 + 새 속성/3형태/외형/수치 |
+| STORY-02 | 스토리 캐릭터 확정 획득 | DONE | 모집 의존 없음 |
+| STORY-03 | 후반까지 사용 가치 | PARTIAL | Lv50/3형태 기준 역할 유지 검증 |
 
----
-
-# E. 3형태 진화 — 필수 메타
-
-| ID | 기능 | 중요도 | 현재 상태 | 완료 기준 |
-| --- | --- | --- | --- | --- |
-| EVO-01 | 기본/2형태/3형태 | 필수 | PARTIAL | 대표 5명 구현, 전체 캐릭터로 확장 필요 |
-| EVO-02 | 이전 형태 재선택 | 필수 | DONE(엔진/저장) | 해금된 form 선택/복귀 가능 |
-| EVO-03 | form 간 소유권/레벨 공유 | 필수 | DONE | 새 캐릭터 ID로 재획득하지 않음 |
-| EVO-04 | 실제 전투 방식 변화/sidegrade | 필수 | DONE(대표5) | 비용/쿨/사거리/AREA/특효 등 실변화 |
-| EVO-05 | form2/3 해금 조건/진화 재료 | 필수 | MISSING | 성장경제와 함께 조건 정본화 |
-| EVO-06 | form별 고유 아트/모션/VFX/SFX | 필수 | MISSING | 색놀이가 아닌 실제 외형 차이 |
-| EVO-07 | 진화 비교/선택 UI | 필수 | MISSING | 전/후 외형·수치·효과 비교 + 이전 form 선택 |
+상세: `content-wiki/characters/STORY_ROSTER_V1.md`
 
 ---
 
-# F. 스테이지 / 캠페인 / 도전 — 필수
+## D. 모집 로스터/희귀도
 
-| ID | 기능 | 중요도 | 현재 상태 | 완료 기준 |
-| --- | --- | --- | --- | --- |
-| STAGE-01 | PROGRESSION / SPECIAL 분리 | 필수 | DONE | 저장/Collection 분리 |
-| STAGE-02 | 난이도 1~12 | 필수 | DONE(스키마) | 향후 콘텐츠가 전 범위 사용 |
-| STAGE-03 | 제1장20 + 7 전장계열 | 필수 | DONE | 현재 content 존재 |
-| STAGE-04 | 첫 SPECIAL 5 | 필수 | PARTIAL | 데이터/테스트 존재, 최신 실행 green 미확인 |
-| STAGE-05 | stage별 player/enemy unit cap | 필수 | DONE | sim까지 실제 전달 |
-| STAGE-06 | 편성 제한 DSL evaluator | 필수(특수전) | MISSING | rarity/role/cost/tag/max-types 등을 실제 입장 검증 |
-| STAGE-07 | 복합 spawn/phase trigger DSL | 필수(확장) | MISSING | 시간/거점HP/적사망/누적/AND/OR 실제 evaluator |
-| STAGE-08 | specialRules deterministic registry | 필수(확장) | MISSING | 임의 문자열 핫픽스 없이 등록 규칙 실행 |
-| HUB-01 | 출정 허브 → Collection → StageSelect | 필수 | PARTIAL | 현재 2 Collection은 작동, 3+ paging UI 미완료 |
-| HUB-02 | 결과 후 정확한 Collection/page 복귀 | 필수 | PARTIAL | Collection 복귀는 있음, 내부 page 복원 미완료 |
-| CONTENT-01 | 제2장 이상 | 장기 필수 | PLANNED | 첫 vertical slice 이후 확장 |
-| CONTENT-02 | 외전/보스/제한전 | 장기 필수 | PARTIAL | SPECIAL 기반만 시작 |
-| CONTENT-03 | 무한/도전 | 장기 확장 | PLANNED | 초기 전체기획 단계 D |
-| CONTENT-04 | 샌드박스 | 장기 확장 | PLANNED | 초기 전체기획 단계 D |
+| ID | 기능 | 상태 | v1.0 완료 기준 |
+| --- | --- | --- | --- |
+| ROSTER-01 | C/B/A 공통 풀 | REWORK | 초기 공통 15종 새 설계/데이터/아트 |
+| ROSTER-02 | 성휘의 기사단 S5+SS1 | MISSING | 검수 후 3형태/전투/연출 |
+| ROSTER-03 | 태고의 거수 S5+SS1 | MISSING | 검수 후 3형태/전투/연출 |
+| ROSTER-04 | 제로 엣지 S5+SS1 | MISSING | 검수 후 3형태/전투/연출 |
+| ROSTER-05 | SS 시리즈당 1명 | MISSING | schema/검증기로 위반 방지 |
+| ROSTER-06 | 비인간/괴수/기계 실루엣 다양성 | PARTIAL | 실제 정식 아트에서 검증 |
+
+상세: `content-wiki/recruitment/COMMON_POOL_V1.md`, `INITIAL_SERIES_01_03.md`
 
 ---
 
-# G. 보상 / 도감 / 메타 UI — 필수
+## E. 모집 시스템
 
-| ID | 기능 | 중요도 | 현재 상태 | 완료 기준 |
-| --- | --- | --- | --- | --- |
-| REWARD-01 | 제1장 보물20 첫 클리어 100% | 필수 | DONE | RNG 파밍 없음 |
-| REWARD-02 | 캐릭터 해금과 보물 보상 분리 | 필수 | DONE | 캠페인 해금 별도 |
-| METAUI-01 | 메인 화면 | 필수 | DONE | 출정/편성/도감 등 진입 |
-| METAUI-02 | 도감 | 필수 | PARTIAL | 현재 기본10/보물20/훈장; 모집25 기준 확장 필요 |
-| METAUI-03 | 성장 화면 | 필수 | MISSING | LEVEL/EVO UI 통합 |
-| METAUI-04 | 모집 화면 | 필수 | MISSING | GACHA-06과 동일 |
-| METAUI-05 | 보유 캐릭터 검색/필터 | 필수(풀 확장) | MISSING | 희귀도/역할/속성/레벨/form/획득루트 |
-| ECON-01 | 골드 + 모집 관련 재화 + 조각 중심의 단순 메타 경제 | 필수 방향 | MISSING | 재화 정의/획득/소비/저장 확정 |
+| ID | 기능 | 상태 | v1.0 완료 기준 |
+| --- | --- | --- | --- |
+| GACHA-01 | 여러 시리즈 배너 | PARTIAL | C/B/A 공유 + 시리즈별 S/SS |
+| GACHA-02 | v1.0 확률 데이터 | REWORK | 현재 후보 42/32/22.7/3/0.3 검증 |
+| GACHA-03 | 천장/직접선택 제거 | REWORK | 옛 10/30/60/100 보장 코드/저장/UI 제거 |
+| GACHA-04 | S 고유 연출 | MISSING | 스킵 가능 |
+| GACHA-05 | SS 시리즈 전용 최고 연출 | MISSING | 시리즈당 1명과 연결 |
+| GACHA-06 | 후한 모집재화 공급 | MISSING | 메인/SPECIAL/이벤트 경제 완성 |
 
 ---
 
-# H. 저장 / 계정 — 필수
+## F. 레벨/+레벨/진화
 
-| ID | 기능 | 중요도 | 현재 상태 | 완료 기준 |
-| --- | --- | --- | --- | --- |
-| SAVE-01 | guest IndexedDB + session fallback | 필수 | DONE | 저장 실패 거짓 성공 금지 |
-| SAVE-02 | stage/treasure/special 저장 | 필수 | DONE | 연속 진도 정규화 |
-| SAVE-03 | 모집 소유권/천장 저장 | 필수 | DONE | 현재 save v6 포함 |
-| SAVE-04 | level/form 저장 | 필수 | DONE | 현재 save v6 포함 |
-| SAVE-05 | 10칸 덱 저장 | 필수 | DONE | 명시적 1~10칸 덱 저장 + legacy 자동 편성 fallback |
-| SAVE-06 | 성장/모집 재화/조각 저장 | 필수 | MISSING | 메타 경제 정본화 후 연결 |
-| ACCOUNT-01 | Google/이메일 로그인 | 장기 필수 | PLANNED | 로그인 경제/소유권 서버 source of truth |
-
----
-
-# I. 멀티 — 장기 필수
-
-| ID | 기능 | 중요도 | 현재 상태 | 완료 기준 |
-| --- | --- | --- | --- | --- |
-| COOP-01 | 2인 협동, 각5칸/팀10 | 장기 필수 | PLANNED | 공용 sim 사용 |
-| COOP-02 | 개인 보급/보급소/생산쿨 + 공유 거점/승패/병기 | 장기 필수 | PLANNED | 서버 권위 |
-| COOP-03 | 필요 시 적 HP/공격/거점HP만 단순 배율 | 장기 필수 | PLANNED | AI/웨이브 이중화 금지 |
-| COOP-04 | `협동 권장` 태그 금지 | 필수 규칙 | DONE(규칙) | 싱글을 틀린 선택처럼 보이지 않음 |
-| COOP-05 | 팀 덱 전체 콤보 계산 | CANDIDATE | CANDIDATE | 확정 전 강제 구현 금지 |
-| COOP-06 | 합동 병기 1.5초 연계 | CANDIDATE | CANDIDATE | 초기 전체기획 후보 |
-| NET-01 | 약30초 재접속 유예 후 AI 인계 | CANDIDATE | CANDIDATE | 멀티 구현 시 재검토 |
-| PVP-01 | 1v1 / 2v2 | 장기 필수 | PLANNED | 동일 sim |
-| PVP-02 | 랭크 Lv30 표준화 | CANDIDATE | CANDIDATE | 실제 PvP 경제와 함께 확정 |
+| ID | 기능 | 상태 | v1.0 완료 기준 |
+| --- | --- | --- | --- |
+| LEVEL-01 | 메인 진행식 Lv10→20→30→40→50 | MISSING | 1~4장 최종 보상과 연결 |
+| LEVEL-02 | 강한 Lv1~50 곡선 | REWORK | 과거 Lv50 1.595× 폐기, 목표 8~10× 검증 |
+| LEVEL-03 | 골드 강화 비용 | MISSING | 80메인/SPECIAL 경제와 연결 |
+| PLUS-01 | 캐릭터별 +레벨 | MISSING | +50 후보 상한/전투 적용 |
+| PLUS-02 | 중복 직접 +1 | MISSING | 가장 높은 효율 |
+| PLUS-03 | 중복 분해 → 공용 +재화 | MISSING | 교차 효율 약 20~30% 후보 검증 |
+| EVO-01 | 모든 정식 캐릭터 3형태 | PARTIAL | 현재 대표 일부만 존재, 전체 확장 |
+| EVO-02 | 이전 형태 재선택 | PARTIAL | UI까지 완성 |
+| EVO-03 | 형태별 역할/비용/사거리 대변화 | PARTIAL | 단순 상위호환/색놀이 금지 |
+| EVO-04 | 희귀도별 진화재료 차등 | MISSING | SS≈C 4~5배 목표 |
 
 ---
 
-# J. 절대 누락 금지 핵심 메타 묶음
+## G. 덱/편성 UI
 
-다음 항목은 **전투 vertical slice 뒤로 영구 미뤄서는 안 되는 출시 전 필수 묶음**이다.
-
-1. 모집 전용 캐릭터 풀 + 희귀도.
-2. 데이터 기반 모집/천장/선택권.
-3. 모집 결과 소유권 저장.
-4. 중복 조각/교환 경제.
-5. Lv1~50 캐릭터 업그레이드.
-6. 강화 비용/골드 경제.
-7. 3형태 진화 + 이전 형태 재선택.
-8. form별 실제 전투 변화 + 고유 아트/애니/VFX.
-9. **보유 캐릭터가 10종을 넘으면 수동 10칸 덱.**
-10. 성장 화면.
-11. 모집 화면.
-12. 도감의 전체 캐릭터/희귀도/역할/레벨/form/획득루트 확장.
-13. level/form/deck/재화/조각 저장.
-14. 모집/성장 캐릭터가 실제 BattleScene에서 저장된 덱/level/form으로 싸우는 연결.
-
-이 14개 중 하나라도 `MISSING/PARTIAL`이면 “메타 시스템 완성”이라고 부르지 않는다.
+| ID | 기능 | 상태 | v1.0 완료 기준 |
+| --- | --- | --- | --- |
+| DECK-01 | 솔로/1v1 10칸 저장 | PARTIAL | 실제 편성 UI/전투 연결 완성 |
+| DECK-02 | 협동/2v2 플레이어당 5칸 | MISSING | 팀 10종 |
+| DECK-03 | 드래그 앤 드롭 | MISSING | PC/모바일 슬롯 직접 배치/교환 |
+| DECK-04 | 희귀도/속성/역할 필터 | MISSING | 상세 필터 + 빠른 칩 |
+| DECK-05 | 미획득 캐릭터 편성 미표시 | MISSING | 보유 목록만 렌더 |
 
 ---
 
-# K. 작업 전/후 감사 규칙
+## H. 메인 캠페인/영구 보상
 
-모집·성장만이 아니라 **모든 의미 있는 작업** 전에 다음을 수행한다.
+| ID | 기능 | 상태 | v1.0 완료 기준 |
+| --- | --- | --- | --- |
+| MAIN-01 | 제1장 20스테이지 | REWORK | 새 속성/적/영구보상/난이도 기준 적용 |
+| MAIN-02 | 제2장 20 | MISSING | NATURE/UNDEAD |
+| MAIN-03 | 제3장 20 | MISSING | ARCANE/DEMON |
+| MAIN-04 | 제4장 20 | MISSING | MACHINE/ANOMALY |
+| TREASURE-01 | 같은 영구 효과 반복 허용 | REWORK | 20개를 억지로 다르게 만들지 않음 |
+| TREASURE-02 | 이속/배치한도 보너스 제거 | REWORK | 옛 보상 삭제 |
+| TREASURE-03 | 체감 가능한 보상 수치 | REWORK | HP/공격/경제/재생산 중심 테스트 |
+| MAIN-05 | 장 최종 Lv상한+추가보상 | MISSING | 1~4장 20/30/40/50 |
 
-1. `CANONICAL.md` 확인.
-2. `GAME_DESIGN_FULL.md` 확인.
-3. 관련 정밀 문서 확인.
-4. **이 `FEATURE_COVERAGE_MATRIX.md`에서 변경 대상과 인접 필수 기능 상태 확인.**
-5. `IMPLEMENTATION_STATUS.md`에서 실제 구현 여부 확인.
-6. 관련 `content/` + 코드 + 테스트 확인.
+상세: `content-wiki/stages/main/INITIAL_MAIN_4_CHAPTERS.md`
 
-작업 후:
+---
 
-- 새 기능 때문에 기존 필수 기능이 `DONE → PARTIAL/MISSING`으로 후퇴하지 않았는지 검사.
-- 구현했지만 UI/저장/전투 연결이 빠졌으면 `DONE`으로 올리지 않는다.
-- 후보 기능을 초기 기획에 있었다는 이유만으로 필수로 승격하지 않는다.
-- 확인되지 않은 과거 세부 수치는 임의 복원하지 않는다.
+## I. SPECIAL
+
+| ID | 기능 | 상태 | v1.0 완료 기준 |
+| --- | --- | --- | --- |
+| SPECIAL-01 | 상시 묶음 | REWORK | 다단계 보스/속성/외전 |
+| SPECIAL-02 | 주기 재화 묶음 | MISSING | 황금/혼/진화/별빛 |
+| SPECIAL-03 | 기간 이벤트 | MISSING | 복각 가능 소형 캠페인 |
+| SPECIAL-04 | 끝없는 전선 | MISSING | 솔로 신기록 1분 최초 보상 |
+| SPECIAL-05 | 보스 러시 | MISSING | 솔로 기록/구간 보상 |
+| SPECIAL-06 | 대부분 솔로+협동 | MISSING | 기록전만 솔로 기본 |
+| SPECIAL-07 | 보상 충전 | MISSING | 플레이 입장 제한 없이 고효율 반복 통제 |
+| SPECIAL-08 | 다단계 SPECIAL 카드 UI | MISSING | 카드 → 내부 단계 목록 |
+
+상세: `content-wiki/stages/special/INITIAL_SPECIAL_COLLECTIONS.md`
+
+---
+
+## J. 협동/친구
+
+| ID | 기능 | 상태 | v1.0 완료 기준 |
+| --- | --- | --- | --- |
+| COOP-01 | 같은 메인/SPECIAL 2인 협동 | MISSING | 별도 복사맵 없이 같은 Stage + scaling |
+| COOP-02 | 개인 5칸/보급/보급소/쿨 | MISSING | 공유 기지/승패/병기 |
+| COOP-03 | 적 소폭 스탯 보정 | MISSING | HP/공격/기지만, 숨은 추가웨이브 없음 |
+| COOP-04 | 협동 첫 클리어 정상 진행 | MISSING | 보상/해금 동일 |
+| COOP-05 | 공개 매칭 | MISSING | 대기/취소/실패 흐름 포함 |
+| COOP-06 | 재접속/임시 AI | MISSING | 상태 보존 후 복귀 |
+| FRIEND-01 | 친구 요청/목록/검색 | MISSING | 코드/검색/온라인 상태 |
+| FRIEND-02 | 협동/친선 초대 | MISSING | 친구 UI에서 직접 실행 |
+| FRIEND-03 | 차단/최근 플레이어 | MISSING | 안전/편의 |
+| FRIEND-04 | 빠른 통신 | MISSING | 자유 텍스트 없이 핑/프리셋 |
+
+---
+
+## K. PvP
+
+| ID | 기능 | 상태 | v1.0 완료 기준 |
+| --- | --- | --- | --- |
+| PVP-01 | 1v1 일반전 | MISSING | 레이팅 없음 |
+| PVP-02 | 1v1 랭킹전 | MISSING | MMR/티어/랭킹 |
+| PVP-03 | 친선전 | MISSING | 친구/방 코드, 보상 없음 |
+| PVP-04 | PvP 성장 표준화 | MISSING | Lv/+Lv/영구보상 표준화 |
+| PVP-05 | 티어/시즌 보상 | MISSING | 성장 보조+장식, 필수재화 독점 금지 |
+| PVP-06 | 2v2 일반/친선 | MISSING | 플레이어당 5칸 |
+| PVP-07 | 2v2 랭킹 | PLANNED | 동접 확인 후 업데이트 가능 |
+
+---
+
+## L. 계정/저장
+
+| ID | 기능 | 상태 | v1.0 완료 기준 |
+| --- | --- | --- | --- |
+| SAVE-01 | 게스트 저장 | DONE | 로컬 권위/실패 처리 |
+| SAVE-02 | v1 메타 저장 | REWORK | 새 속성/덱/레벨/+레벨/진화/모집/도감 |
+| ACCOUNT-01 | 로그인 계정 | PARTIAL | 서버 canonical save 실제 사용자 루프 |
+| ACCOUNT-02 | 게스트→로그인 1회 이전 | MISSING | 중복/충돌 규칙 포함 |
+| ACCOUNT-03 | 진행 초기화 | MISSING | 계정 유지, 진행만 삭제 |
+| ACCOUNT-04 | 계정 삭제 | MISSING | 서버 계정/저장 삭제 + 2단계 확인 |
+
+---
+
+## M. UI/연출/플레이 감각
+
+| ID | 기능 | 상태 | v1.0 완료 기준 |
+| --- | --- | --- | --- |
+| UI-01 | 세계관형 UI 비주얼 언어 | REWORK | 단순 사각형 반복 감소 |
+| UI-02 | PC/모바일 반응형/안전영역 | PARTIAL | 겹침/잘림/화면 밖 0 |
+| UI-03 | 모집 고희귀 연출 | MISSING | S/SS 차등 + 스킵 |
+| UI-04 | 돈 부족/쿨/선택 불가 피드백 | PARTIAL | 이유 즉시 판독 |
+| UI-05 | 재도전/편성/도감 동선 | PARTIAL | 불필요한 클릭 최소화 |
+| UI-06 | 개발자 문구 노출 0 | REWORK | prototype/debug/ID/TMI 전체 검색 |
+
+---
+
+## N. 1차 완성 후 업데이트
+
+| ID | 기능 | 상태 | 범위 |
+| --- | --- | --- | --- |
+| POST-01 | 본능 대응 고유 후반 성장 | PLANNED | 1차 완성 후 새 설계 |
+| POST-02 | 난이도 9~12 본격 콘텐츠 | PLANNED | 후반 성장과 함께 |
+| POST-03 | 추가 모집 시리즈 | PLANNED | S5~7 + SS1 원칙 |
+| POST-04 | 메인 5장 이후 | PLANNED | Lv50 추가 알파 보상 |
+
+## 1차 완성 판정
+
+전투 프로토타입이 실행된다는 이유로 완료로 보지 않는다. **메인80 + 핵심 SPECIAL + 성장/모집/3형태/+레벨 + 편성/도감 + 계정 + 협동/친구 + 1v1 일반/랭킹/친선 + 플레이 감각 QA**까지 실제 사용자 루프로 연결되어야 1차 완성이다.
