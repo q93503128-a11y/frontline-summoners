@@ -1,14 +1,23 @@
 export const RARITIES = ['C', 'B', 'A', 'S', 'SS'] as const;
 export type Rarity = (typeof RARITIES)[number];
 
+export const ACQUISITION_CLASSES = ['STORY', 'RECRUITMENT', 'SPECIAL'] as const;
+export type AcquisitionClass = (typeof ACQUISITION_CLASSES)[number];
+
 export const PLAYER_ROLES = ['물량', '전열', '원거리', '광역', '결정타', '변칙'] as const;
 export type PlayerRole = (typeof PLAYER_ROLES)[number];
 
 export const TARGET_MODES = ['SINGLE', 'AREA'] as const;
 export type TargetMode = (typeof TARGET_MODES)[number];
 
-export const COMBAT_TRAITS = ['LIGHT', 'ARMORED', 'ARCANE', 'BOSS'] as const;
-export type CombatTrait = (typeof COMBAT_TRAITS)[number];
+export const ATTRIBUTES = ['NEUTRAL', 'BEAST', 'UNDEAD', 'NATURE', 'ARCANE', 'DEMON', 'MACHINE', 'ANOMALY'] as const;
+export type Attribute = (typeof ATTRIBUTES)[number];
+
+export const COMBAT_TAGS = ['ARMORED', 'FLOATING', 'FLYING', 'GIANT', 'STRUCTURE', 'SUMMON', 'BOSS'] as const;
+export type CombatTag = (typeof COMBAT_TAGS)[number];
+
+export const DAMAGE_BONUS_TARGET_KINDS = ['ATTRIBUTE', 'TAG'] as const;
+export type DamageBonusTargetKind = (typeof DAMAGE_BONUS_TARGET_KINDS)[number];
 
 export const STAGE_TYPES = ['PROGRESSION', 'SPECIAL'] as const;
 export type StageType = (typeof STAGE_TYPES)[number];
@@ -17,10 +26,9 @@ export const MAX_STAGE_DIFFICULTY = 12;
 export const DEFAULT_PLAYER_UNIT_CAP = 50;
 export const DEFAULT_ENEMY_UNIT_CAP = 50;
 
-export interface TraitDamageBonusContent {
-  readonly trait: CombatTrait;
-  readonly multiplierPermille: number;
-}
+export type DamageBonusContent =
+  | { readonly targetKind: 'ATTRIBUTE'; readonly target: Attribute; readonly multiplierPermille: number }
+  | { readonly targetKind: 'TAG'; readonly target: CombatTag; readonly multiplierPermille: number };
 
 export const BATTLEFIELD_THEME_IDS = ['meadow', 'canyon', 'burning', 'ruins', 'moon', 'fortress', 'golden'] as const;
 export type BattlefieldThemeId = (typeof BATTLEFIELD_THEME_IDS)[number];
@@ -39,12 +47,17 @@ export interface CombatContent {
   readonly backswingFrames: number;
   readonly naturalKnockbackCount: number;
   readonly targetMode: TargetMode;
-  readonly traits: readonly CombatTrait[];
-  readonly damageBonuses: readonly TraitDamageBonusContent[];
+  readonly attributes: readonly Attribute[];
+  readonly combatTags: readonly CombatTag[];
+  readonly damageBonuses: readonly DamageBonusContent[];
 }
 
 export interface PlayerUnitContent extends CombatContent {
-  readonly rarity: Rarity;
+  readonly acquisitionClass: AcquisitionClass;
+  /** STORY/SPECIAL characters do not use recruitment rarity. */
+  readonly rarity: Rarity | null;
+  /** COMMON for shared C/B/A or a concrete series id for series-specific S/SS. */
+  readonly seriesId?: string;
   readonly role: PlayerRole;
   readonly description: string;
   readonly cost: number;
@@ -76,13 +89,14 @@ export interface CampaignTreasureContent {
 }
 
 export interface FormationRestrictionContent {
-  /** Empty means no rarity allow-list restriction. */
+  /** Empty means no recruitment-rarity allow-list restriction. STORY characters have no rarity. */
   readonly allowedRarities: readonly Rarity[];
   readonly maxRarity?: Rarity;
+  /** Empty means no acquisition-source restriction. */
+  readonly allowedAcquisitionClasses: readonly AcquisitionClass[];
   /** Empty means no role allow-list restriction. */
   readonly allowedRoles: readonly PlayerRole[];
   readonly maxUnitCost?: number;
-  /** Long-term unit taxonomy tags such as MELEE, HUMAN or MAGIC. */
   readonly requiredUnitTags: readonly string[];
   readonly forbiddenUnitTags: readonly string[];
   readonly maxDistinctUnits?: number;
@@ -94,9 +108,7 @@ export interface CampaignStageContent {
   readonly chapter: string;
   readonly name: string;
   readonly subtitle: string;
-  /** PROGRESSION is the default for the current chapter-one JSON. */
   readonly stageType: StageType;
-  /** Shared fine-grained difficulty scale for progression and special stages. */
   readonly difficulty: number;
   readonly playerBaseHp: number;
   readonly enemyBaseHp: number;
@@ -106,11 +118,9 @@ export interface CampaignStageContent {
   readonly decorSeed: number;
   readonly waves: readonly CampaignWaveContent[];
   readonly treasure: CampaignTreasureContent;
-  /** Base simultaneous living-unit caps before account/treasure modifiers. */
   readonly playerUnitCap: number;
   readonly enemyUnitCap: number;
   readonly formationRestrictions: FormationRestrictionContent;
-  /** Registered deterministic rule IDs. Empty means no special rule. */
   readonly specialRules: readonly string[];
   readonly unlockUnitId?: string;
 }
@@ -137,6 +147,11 @@ function requireString(record: Record<string, unknown>, key: string, context: st
   const value = record[key];
   if (typeof value !== 'string' || value.trim().length === 0) throw new Error(`${context}.${key} must be a non-empty string`);
   return value;
+}
+
+function optionalString(record: Record<string, unknown>, key: string, context: string): string | undefined {
+  if (record[key] === undefined) return undefined;
+  return requireString(record, key, context);
 }
 
 function requireInteger(record: Record<string, unknown>, key: string, context: string, min: number, max = Number.MAX_SAFE_INTEGER): number {
@@ -205,33 +220,33 @@ function requireHitFrames(record: Record<string, unknown>, context: string, cycl
   return frames;
 }
 
-function parseTraits(record: Record<string, unknown>, context: string): readonly CombatTrait[] {
-  const raw = record.traits;
-  if (raw === undefined) return [];
-  if (!Array.isArray(raw)) throw new Error(`${context}.traits must be an array`);
-  const traits = raw.map((trait, index) => {
-    if (typeof trait !== 'string' || !(COMBAT_TRAITS as readonly string[]).includes(trait)) {
-      throw new Error(`${context}.traits[${index}] is unknown: ${String(trait)}`);
-    }
-    return trait as CombatTrait;
-  });
-  if (new Set(traits).size !== traits.length) throw new Error(`${context}.traits must be unique`);
-  return traits;
+function parseAttributes(record: Record<string, unknown>, context: string): readonly Attribute[] {
+  const attributes = parseEnumArray(record, 'attributes', context, ATTRIBUTES);
+  if (attributes.length === 0 || attributes.length > 2) throw new Error(`${context}.attributes must contain one or two attributes`);
+  if (attributes.includes('NEUTRAL') && attributes.length !== 1) throw new Error(`${context}.NEUTRAL cannot be combined with another attribute`);
+  return attributes;
 }
 
-function parseDamageBonuses(record: Record<string, unknown>, context: string): readonly TraitDamageBonusContent[] {
+function parseCombatTags(record: Record<string, unknown>, context: string): readonly CombatTag[] {
+  return parseEnumArray(record, 'combatTags', context, COMBAT_TAGS);
+}
+
+function parseDamageBonuses(record: Record<string, unknown>, context: string): readonly DamageBonusContent[] {
   const raw = record.damageBonuses;
   if (raw === undefined) return [];
   if (!Array.isArray(raw)) throw new Error(`${context}.damageBonuses must be an array`);
-  const bonuses = raw.map((bonus, index) => {
+  const bonuses = raw.map((bonus, index): DamageBonusContent => {
     const itemContext = `${context}.damageBonuses[${index}]`;
     if (!isRecord(bonus)) throw new Error(`${itemContext} must be an object`);
-    return {
-      trait: requireEnum(bonus, 'trait', itemContext, COMBAT_TRAITS),
-      multiplierPermille: requireInteger(bonus, 'multiplierPermille', itemContext, 1000, 3000),
-    };
+    const targetKind = requireEnum(bonus, 'targetKind', itemContext, DAMAGE_BONUS_TARGET_KINDS);
+    const multiplierPermille = requireInteger(bonus, 'multiplierPermille', itemContext, 1000, 3000);
+    if (targetKind === 'ATTRIBUTE') {
+      return { targetKind, target: requireEnum(bonus, 'target', itemContext, ATTRIBUTES), multiplierPermille };
+    }
+    return { targetKind, target: requireEnum(bonus, 'target', itemContext, COMBAT_TAGS), multiplierPermille };
   });
-  if (new Set(bonuses.map((bonus) => bonus.trait)).size !== bonuses.length) throw new Error(`${context}.damageBonuses traits must be unique`);
+  const keys = bonuses.map((bonus) => `${bonus.targetKind}:${bonus.target}`);
+  if (new Set(keys).size !== keys.length) throw new Error(`${context}.damageBonuses targets must be unique`);
   return bonuses;
 }
 
@@ -256,9 +271,15 @@ function parseCombat(value: unknown, context: string): CombatContent {
     backswingFrames: requireInteger(value, 'backswingFrames', context, 0, 3600),
     naturalKnockbackCount: requireInteger(value, 'naturalKnockbackCount', context, 0, 100),
     targetMode: requireEnum(value, 'targetMode', context, TARGET_MODES),
-    traits: parseTraits(value, context),
+    attributes: parseAttributes(value, context),
+    combatTags: parseCombatTags(value, context),
     damageBonuses: parseDamageBonuses(value, context),
   };
+}
+
+function parseNullableRarity(raw: Record<string, unknown>, context: string): Rarity | null {
+  if (raw.rarity === null) return null;
+  return requireEnum(raw, 'rarity', context, RARITIES);
 }
 
 export function parsePlayerUnits(value: unknown): readonly PlayerUnitContent[] {
@@ -270,9 +291,21 @@ export function parsePlayerUnits(value: unknown): readonly PlayerUnitContent[] {
     const combat = parseCombat(raw, context);
     if (ids.has(combat.id)) throw new Error(`duplicate player unit id: ${combat.id}`);
     ids.add(combat.id);
+    const acquisitionClass = requireEnum(raw, 'acquisitionClass', context, ACQUISITION_CLASSES);
+    const rarity = parseNullableRarity(raw, context);
+    const seriesId = optionalString(raw, 'seriesId', context);
+    if (acquisitionClass === 'RECRUITMENT') {
+      if (rarity === null) throw new Error(`${context}.RECRUITMENT character requires rarity`);
+      if (!seriesId) throw new Error(`${context}.RECRUITMENT character requires seriesId`);
+    } else {
+      if (rarity !== null) throw new Error(`${context}.${acquisitionClass} character must use rarity:null`);
+      if (seriesId !== undefined) throw new Error(`${context}.${acquisitionClass} character must not define seriesId`);
+    }
     return {
       ...combat,
-      rarity: requireEnum(raw, 'rarity', context, RARITIES),
+      acquisitionClass,
+      rarity,
+      ...(seriesId === undefined ? {} : { seriesId }),
       role: requireEnum(raw, 'role', context, PLAYER_ROLES),
       description: requireString(raw, 'description', context),
       cost: requireInteger(raw, 'cost', context, 0, 1000000),
@@ -300,9 +333,7 @@ function parseWave(value: unknown, context: string, enemyIds?: ReadonlySet<strin
   if (enemyIds && !enemyIds.has(enemyId)) throw new Error(`${context}.enemyId references unknown enemy: ${enemyId}`);
   const repeatDelayTicks = optionalInteger(value, 'repeatDelayTicks', context, 1);
   const maxCycles = optionalInteger(value, 'maxCycles', context, 1, 1000);
-  if (maxCycles !== undefined && repeatDelayTicks === undefined) {
-    throw new Error(`${context}.maxCycles requires repeatDelayTicks`);
-  }
+  if (maxCycles !== undefined && repeatDelayTicks === undefined) throw new Error(`${context}.maxCycles requires repeatDelayTicks`);
   return {
     enemyId,
     atTick: requireInteger(value, 'atTick', context, 0),
@@ -322,6 +353,7 @@ function parseFormationRestrictions(value: unknown, context: string): FormationR
   if (value === undefined) {
     return {
       allowedRarities: [],
+      allowedAcquisitionClasses: [],
       allowedRoles: [],
       requiredUnitTags: [],
       forbiddenUnitTags: [],
@@ -335,6 +367,7 @@ function parseFormationRestrictions(value: unknown, context: string): FormationR
   return {
     allowedRarities: parseEnumArray(value, 'allowedRarities', context, RARITIES),
     ...(maxRarity === undefined ? {} : { maxRarity }),
+    allowedAcquisitionClasses: parseEnumArray(value, 'allowedAcquisitionClasses', context, ACQUISITION_CLASSES),
     allowedRoles: parseEnumArray(value, 'allowedRoles', context, PLAYER_ROLES),
     ...(maxUnitCost === undefined ? {} : { maxUnitCost }),
     requiredUnitTags: parseStringArray(value, 'requiredUnitTags', context),
