@@ -15,38 +15,34 @@ test('main menu exposes recruitment and the scene is registered without replacin
   assert.match(main, /scene: \[BootScene, MainMenuScene, StageHubScene, StageSelectScene, DeckScene, CatalogScene, BattleScene, ResultScene\]/);
 });
 
-test('recruitment UI consumes banner data and the save recruitment authority instead of duplicating roll rules', async () => {
+test('recruitment UI consumes banner data and save authority without duplicating roll rules', async () => {
   const source = await readSource('../src/recruitment-scene.ts');
   assert.match(source, /FIRST_RECRUITMENT_BANNER\.ratesPermille\[rarity\] \/ 10/);
   assert.match(source, /FIRST_RECRUITMENT_BANNER\.poolByRarity\[rarity\]\.length/);
-  assert.match(source, /FIRST_RECRUITMENT_BANNER\.tenPullMinimumRarity/);
-  assert.match(source, /FIRST_RECRUITMENT_BANNER\.thirtyPullMinimumRarity/);
-  assert.match(source, /FIRST_RECRUITMENT_BANNER\.pickupSsGuaranteeEvery/);
-  assert.match(source, /FIRST_RECRUITMENT_BANNER\.selectionCreditEvery/);
   assert.match(source, /performGuestRecruitment\(count, CRYPTO_RECRUITMENT_RANDOM_SOURCE, FIRST_RECRUITMENT_BANNER\)/);
   assert.doesNotMatch(source, /Math\.random\(/);
 });
 
-test('recruitment result screen exposes new, duplicate, guarantee, save, and selection-credit outcomes', async () => {
+test('active-banner collection count is derived from the actual banner pool rather than every recruitment definition', async () => {
+  const source = await readSource('../src/recruitment-scene.ts');
+  assert.match(source, /const BANNER_CHARACTER_IDS = RARITY_ORDER\.flatMap\(\(rarity\) => FIRST_RECRUITMENT_BANNER\.poolByRarity\[rarity\]\);/);
+  assert.match(source, /BANNER_CHARACTER_IDS\.filter\(\(characterId\) => owned\.has\(characterId\)\)\.length/);
+  assert.match(source, /BANNER_CHARACTER_IDS\.length/);
+  assert.doesNotMatch(source, /RECRUITMENT_UNITS\.filter/);
+});
+
+test('recruitment UI explicitly communicates independent pulls and contains no pity, milestone guarantee, or selector flow', async () => {
+  const source = await readSource('../src/recruitment-scene.ts');
+  assert.match(source, /보장 횟수 없음/);
+  assert.match(source, /각 모집은 독립 추첨/);
+  assert.doesNotMatch(source, /tenPullMinimumRarity|thirtyPullMinimumRarity|pickupSsGuaranteeEvery|selectionCreditEvery/);
+  assert.doesNotMatch(source, /guaranteedBy|selectionCreditGranted|redeemGuestBannerSelection|selectionCredits/);
+});
+
+test('recruitment result screen exposes new, duplicate, and persistence outcomes only', async () => {
   const source = await readSource('../src/recruitment-scene.ts');
   assert.match(source, /pull\.duplicate \? '중복' : 'NEW'/);
-  assert.match(source, /GUARANTEE_LABELS\[pull\.guaranteedBy\]/);
-  assert.match(source, /pull\.selectionCreditGranted/);
-  assert.match(source, /result\.persisted \? '저장 완료' : '영구 저장 실패 · 현재 탭 유지'/);
   assert.match(source, /result\.results\.filter\(\(pull\) => !pull\.duplicate\)\.length/);
-});
-
-test('100-pull banner selection stays a separate saved action and allows explicit banner character choice', async () => {
-  const source = await readSource('../src/recruitment-scene.ts');
-  assert.match(source, /bannerProgress\.selectionCredits <= 0/);
-  assert.match(source, /RECRUITMENT_UNITS\.forEach\(\(unit, index\) =>/);
-  assert.match(source, /redeemGuestBannerSelection\(characterId, FIRST_RECRUITMENT_BANNER\)/);
-  assert.match(source, /result\.duplicate \? '중복' : '신규 획득'/);
-});
-
-test('unfinalized economy is not fabricated in the recruitment UI', async () => {
-  const source = await readSource('../src/recruitment-scene.ts');
-  assert.match(source, /모집 재화\/가격 미적용/);
-  assert.match(source, /중복은 현재 판정만 저장 · 조각\/교환 경제는 아직 미적용/);
-  assert.doesNotMatch(source, /보석|다이아|티켓 \d+|골드 \d+/);
+  assert.match(source, /result\.persisted \? '저장 완료' : '저장에 실패했습니다'/);
+  assert.doesNotMatch(source, /GUARANTEE_LABELS|guaranteedBy|selectionCreditGranted/);
 });
