@@ -7,9 +7,9 @@ import {
   STAGES,
   createPrototypeBattle,
   getContiguousClearedStageIds,
+  getPermanentRewardIdsForClearedStages,
   getStage,
   getStageNumber,
-  getTreasureIdsForClearedStages,
   getUnlockedSlotIds,
   isStageUnlocked,
 } from '../src/prototype.ts';
@@ -47,16 +47,22 @@ test('progression rejects unknown stage ids and cannot be skipped by a non-conti
   assert.deepEqual(getContiguousClearedStageIds(outOfOrder), []);
   assert.equal(isStageUnlocked(STAGES[3]!.id, outOfOrder), false, 'out-of-order clear records must not open later campaign stages');
   assert.deepEqual(getUnlockedSlotIds(outOfOrder), ['militia'], 'out-of-order clear records must not grant later roster rewards');
-  assert.deepEqual(getTreasureIdsForClearedStages(outOfOrder), [], 'out-of-order clear records must not grant derived treasure effects');
+  assert.deepEqual(getPermanentRewardIdsForClearedStages(outOfOrder), [], 'out-of-order clear records must not grant permanent stage rewards');
 
   const contiguous = [STAGES[0]!.id, STAGES[1]!.id, STAGES[2]!.id];
   assert.deepEqual(getContiguousClearedStageIds(contiguous), contiguous);
   assert.equal(isStageUnlocked(STAGES[3]!.id, contiguous), true);
+  assert.deepEqual(
+    getPermanentRewardIdsForClearedStages(contiguous),
+    contiguous.map((stageId) => getStage(stageId).permanentRewardId),
+    'each normally cleared progression stage grants its canonical permanent reward',
+  );
 });
 
-test('full chapter progression unlocks all ten player units', () => {
+test('full chapter progression unlocks all ten player units and all twenty permanent rewards', () => {
   const cleared = STAGES.map((stage) => stage.id);
   assert.deepEqual(getUnlockedSlotIds(cleared), PLAYER_SLOTS.map((slot) => slot.slotId));
+  assert.deepEqual(getPermanentRewardIdsForClearedStages(cleared), STAGES.map((stage) => stage.permanentRewardId));
 });
 
 test('runtime stage definitions stay identical to canonical chapter json', async () => {
@@ -65,8 +71,8 @@ test('runtime stage definitions stay identical to canonical chapter json', async
 });
 
 test('chapter one has visible battlefield variety in both theme and length', () => {
+  const lengths = STAGES.map((stage) => stage.mapLength);
   assert.equal(new Set(STAGES.map((stage) => stage.theme)).size, 7);
-  assert.ok(new Set(STAGES.map((stage) => stage.mapLength)).size >= 12);
-  assert.ok(Math.min(...STAGES.map((stage) => stage.mapLength)) <= 800);
-  assert.ok(Math.max(...STAGES.map((stage) => stage.mapLength)) >= 1300);
+  assert.ok(new Set(lengths).size >= 12);
+  assert.ok(Math.max(...lengths) - Math.min(...lengths) >= 1000, 'chapter should include meaningfully short and long battlefields');
 });
