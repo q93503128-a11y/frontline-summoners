@@ -1,147 +1,52 @@
 [
   {
-    "id": "special-01",
-    "chapter": "특수전 · 뒤집힌 국경",
-    "name": "세 자리 전선",
-    "subtitle": "동시에 세 명만 세울 수 있는 작은 정예전",
-    "stageType": "SPECIAL",
-    "difficulty": 6,
-    "playerBaseHp": 2500,
-    "enemyBaseHp": 3200,
-    "startingSupply": 420,
-    "mapLength": 900,
-    "theme": "meadow",
-    "decorSeed": 211,
-    "playerUnitCap": 2,
-    "enemyUnitCap": 18,
-    "waves": [
-      { "enemyId": "enemy-shield", "atTick": 240, "count": 2, "intervalTicks": 210 },
-      { "enemyId": "enemy-sprinter", "atTick": 600, "count": 8, "intervalTicks": 90, "repeatDelayTicks": 900 },
-      { "enemyId": "enemy-knight", "atTick": 1200, "count": 1, "intervalTicks": 320 }
-    ],
-    "treasure": {
-      "id": "special-three-seal",
-      "name": "세 자리 전선 훈장",
-      "effect": "특수전 첫 클리어 기록"
-    },
-    "formationRestrictions": {},
-    "specialRules": []
+    "id":"special-01","chapter":"특수전 · 뒤집힌 국경","name":"세 자리 전선","subtitle":"동시에 세 명만 세울 수 있는 작은 정예전","stageType":"SPECIAL","difficulty":6,
+    "playerBaseHp":2500,"enemyBaseHp":3200,"startingSupply":420,"mapLength":900,"theme":"meadow","decorSeed":211,"playerUnitCap":2,"enemyUnitCap":18,
+    "waves":[
+      {"id":"W1","trigger":{"type":"TIME","frame":240},"spawn":{"enemyId":"enemy-shield","count":2,"intervalFrames":210}},
+      {"id":"W2","trigger":{"type":"TIME","frame":600},"spawn":{"enemyId":"enemy-sprinter","count":8,"intervalFrames":90},"repeat":{"delayFrames":900}},
+      {"id":"W3","trigger":{"type":"TIME","frame":1200},"spawn":{"enemyId":"enemy-knight","count":1,"intervalFrames":320}}
+    ],"formationRestrictions":{},"specialRules":[]
   },
   {
-    "id": "special-02",
-    "chapter": "특수전 · 뒤집힌 국경",
-    "name": "광란의 짧은 길",
-    "subtitle": "짧은 전장에 돌격병이 끊임없이 밀려든다",
-    "stageType": "SPECIAL",
-    "difficulty": 7,
-    "playerBaseHp": 2800,
-    "enemyBaseHp": 3800,
-    "startingSupply": 500,
-    "mapLength": 650,
-    "theme": "burning",
-    "decorSeed": 223,
-    "playerUnitCap": 10,
-    "enemyUnitCap": 25,
-    "waves": [
-      { "enemyId": "enemy-sprinter", "atTick": 90, "count": 18, "intervalTicks": 45, "repeatDelayTicks": 360 },
-      { "enemyId": "enemy-raider", "atTick": 500, "count": 12, "intervalTicks": 60, "repeatDelayTicks": 540 },
-      { "enemyId": "enemy-berserker", "atTick": 1100, "count": 2, "intervalTicks": 240 }
-    ],
-    "treasure": {
-      "id": "special-rush-seal",
-      "name": "광란의 짧은 길 훈장",
-      "effect": "특수전 첫 클리어 기록"
-    },
-    "formationRestrictions": {},
-    "specialRules": []
+    "id":"special-02","chapter":"특수전 · 뒤집힌 국경","name":"광란의 짧은 길","subtitle":"짧은 전장에 돌격병이 끊임없이 밀려든다","stageType":"SPECIAL","difficulty":7,
+    "playerBaseHp":2800,"enemyBaseHp":3800,"startingSupply":500,"mapLength":650,"theme":"burning","decorSeed":223,"playerUnitCap":10,"enemyUnitCap":25,
+    "waves":[
+      {"id":"W1","trigger":{"type":"TIME","frame":90},"spawn":{"enemyId":"enemy-sprinter","count":18,"intervalFrames":45},"repeat":{"delayFrames":360}},
+      {"id":"W2","trigger":{"type":"TIME","frame":500},"spawn":{"enemyId":"enemy-raider","count":12,"intervalFrames":60},"repeat":{"delayFrames":540}},
+      {"id":"W3","trigger":{"type":"TIME","frame":1100},"spawn":{"enemyId":"enemy-berserker","count":2,"intervalFrames":240}}
+    ],"formationRestrictions":{},"specialRules":[]
   },
   {
-    "id": "special-03",
-    "chapter": "특수전 · 뒤집힌 국경",
-    "name": "유리봉 저격선",
-    "subtitle": "긴 전장을 방패와 저격수가 층층이 잠근다",
-    "stageType": "SPECIAL",
-    "difficulty": 8,
-    "playerBaseHp": 3000,
-    "enemyBaseHp": 4600,
-    "startingSupply": 600,
-    "mapLength": 1500,
-    "theme": "ruins",
-    "decorSeed": 239,
-    "playerUnitCap": 8,
-    "enemyUnitCap": 20,
-    "waves": [
-      { "enemyId": "enemy-shield", "atTick": 180, "count": 3, "intervalTicks": 180, "repeatDelayTicks": 1200 },
-      { "enemyId": "enemy-sniper", "atTick": 480, "count": 6, "intervalTicks": 210, "repeatDelayTicks": 1500 },
-      { "enemyId": "enemy-knight", "atTick": 1200, "count": 2, "intervalTicks": 320 },
-      { "enemyId": "enemy-cultist", "atTick": 1800, "count": 3, "intervalTicks": 250 }
-    ],
-    "treasure": {
-      "id": "special-glassline-seal",
-      "name": "유리봉 저격선 훈장",
-      "effect": "특수전 첫 클리어 기록"
-    },
-    "formationRestrictions": {},
-    "specialRules": []
+    "id":"special-03","chapter":"특수전 · 뒤집힌 국경","name":"유리봉 저격선","subtitle":"긴 전장을 방패와 저격수가 층층이 잠근다","stageType":"SPECIAL","difficulty":8,
+    "playerBaseHp":3000,"enemyBaseHp":4600,"startingSupply":600,"mapLength":1500,"theme":"ruins","decorSeed":239,"playerUnitCap":8,"enemyUnitCap":20,
+    "waves":[
+      {"id":"W1","trigger":{"type":"TIME","frame":180},"spawn":{"enemyId":"enemy-shield","count":3,"intervalFrames":180},"repeat":{"delayFrames":1200}},
+      {"id":"W2","trigger":{"type":"TIME","frame":480},"spawn":{"enemyId":"enemy-sniper","count":6,"intervalFrames":210},"repeat":{"delayFrames":1500}},
+      {"id":"W3","trigger":{"type":"TIME","frame":1200},"spawn":{"enemyId":"enemy-knight","count":2,"intervalFrames":320}},
+      {"id":"W4","trigger":{"type":"TIME","frame":1800},"spawn":{"enemyId":"enemy-cultist","count":3,"intervalFrames":250}}
+    ],"formationRestrictions":{},"specialRules":[]
   },
   {
-    "id": "special-04",
-    "chapter": "특수전 · 뒤집힌 국경",
-    "name": "삼인 결사대",
-    "subtitle": "세 자리만으로 중장갑 전열과 철문장군을 돌파한다",
-    "stageType": "SPECIAL",
-    "difficulty": 9,
-    "playerBaseHp": 3200,
-    "enemyBaseHp": 5200,
-    "startingSupply": 750,
-    "mapLength": 1000,
-    "theme": "fortress",
-    "decorSeed": 251,
-    "playerUnitCap": 2,
-    "enemyUnitCap": 15,
-    "waves": [
-      { "enemyId": "enemy-knight", "atTick": 300, "count": 2, "intervalTicks": 300, "repeatDelayTicks": 1500 },
-      { "enemyId": "enemy-berserker", "atTick": 900, "count": 3, "intervalTicks": 260 },
-      { "enemyId": "enemy-boss-iron", "atTick": 1500, "count": 1, "intervalTicks": 1 },
-      { "enemyId": "enemy-sniper", "atTick": 1600, "count": 2, "intervalTicks": 260 }
-    ],
-    "treasure": {
-      "id": "special-three-vow-seal",
-      "name": "삼인 결사대 훈장",
-      "effect": "특수전 첫 클리어 기록"
-    },
-    "formationRestrictions": {},
-    "specialRules": []
+    "id":"special-04","chapter":"특수전 · 뒤집힌 국경","name":"삼인 결사대","subtitle":"세 자리만으로 중장갑 전열과 철문장군을 돌파한다","stageType":"SPECIAL","difficulty":9,
+    "playerBaseHp":3200,"enemyBaseHp":5200,"startingSupply":750,"mapLength":1000,"theme":"fortress","decorSeed":251,"playerUnitCap":2,"enemyUnitCap":15,
+    "waves":[
+      {"id":"W1","trigger":{"type":"TIME","frame":300},"spawn":{"enemyId":"enemy-knight","count":2,"intervalFrames":300},"repeat":{"delayFrames":1500}},
+      {"id":"W2","trigger":{"type":"TIME","frame":900},"spawn":{"enemyId":"enemy-berserker","count":3,"intervalFrames":260}},
+      {"id":"W3","trigger":{"type":"TIME","frame":1500},"spawn":{"enemyId":"enemy-boss-iron","count":1,"intervalFrames":1}},
+      {"id":"W4","trigger":{"type":"TIME","frame":1600},"spawn":{"enemyId":"enemy-sniper","count":2,"intervalFrames":260}}
+    ],"formationRestrictions":{},"specialRules":[]
   },
   {
-    "id": "special-05",
-    "chapter": "특수전 · 뒤집힌 국경",
-    "name": "가면과 철문",
-    "subtitle": "황금가면과 철문장군을 한 전장에서 연달아 상대한다",
-    "stageType": "SPECIAL",
-    "difficulty": 10,
-    "playerBaseHp": 3600,
-    "enemyBaseHp": 6800,
-    "startingSupply": 900,
-    "mapLength": 1280,
-    "theme": "golden",
-    "decorSeed": 269,
-    "playerUnitCap": 8,
-    "enemyUnitCap": 20,
-    "waves": [
-      { "enemyId": "enemy-cultist", "atTick": 240, "count": 3, "intervalTicks": 210, "repeatDelayTicks": 1500 },
-      { "enemyId": "enemy-shield", "atTick": 600, "count": 3, "intervalTicks": 240, "repeatDelayTicks": 1800 },
-      { "enemyId": "enemy-boss", "atTick": 1050, "count": 1, "intervalTicks": 1 },
-      { "enemyId": "enemy-berserker", "atTick": 1800, "count": 2, "intervalTicks": 240 },
-      { "enemyId": "enemy-boss-iron", "atTick": 2100, "count": 1, "intervalTicks": 1 },
-      { "enemyId": "enemy-sniper", "atTick": 2200, "count": 2, "intervalTicks": 260 }
-    ],
-    "treasure": {
-      "id": "special-double-boss-seal",
-      "name": "가면과 철문 훈장",
-      "effect": "특수전 첫 클리어 기록"
-    },
-    "formationRestrictions": {},
-    "specialRules": []
+    "id":"special-05","chapter":"특수전 · 뒤집힌 국경","name":"가면과 철문","subtitle":"황금가면과 철문장군을 한 전장에서 연달아 상대한다","stageType":"SPECIAL","difficulty":10,
+    "playerBaseHp":3600,"enemyBaseHp":6800,"startingSupply":900,"mapLength":1280,"theme":"golden","decorSeed":269,"playerUnitCap":8,"enemyUnitCap":20,
+    "waves":[
+      {"id":"W1","trigger":{"type":"TIME","frame":240},"spawn":{"enemyId":"enemy-cultist","count":3,"intervalFrames":210},"repeat":{"delayFrames":1500}},
+      {"id":"W2","trigger":{"type":"TIME","frame":600},"spawn":{"enemyId":"enemy-shield","count":3,"intervalFrames":240},"repeat":{"delayFrames":1800}},
+      {"id":"W3","trigger":{"type":"TIME","frame":1050},"spawn":{"enemyId":"enemy-boss","count":1,"intervalFrames":1}},
+      {"id":"W4","trigger":{"type":"TIME","frame":1800},"spawn":{"enemyId":"enemy-berserker","count":2,"intervalFrames":240}},
+      {"id":"W5","trigger":{"type":"TIME","frame":2100},"spawn":{"enemyId":"enemy-boss-iron","count":1,"intervalFrames":1}},
+      {"id":"W6","trigger":{"type":"TIME","frame":2200},"spawn":{"enemyId":"enemy-sniper","count":2,"intervalFrames":260}}
+    ],"formationRestrictions":{},"specialRules":[]
   }
 ]
