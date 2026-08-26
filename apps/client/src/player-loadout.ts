@@ -42,6 +42,6 @@ export function createGuestPrototypeBattle(
   return createPrototypeBattleWithPlayerSlots(
     stageId,
     buildGuestDeckSlots(normalized),
-    normalized.treasureIds,
+    normalized.permanentRewardIds,
   );
 }
