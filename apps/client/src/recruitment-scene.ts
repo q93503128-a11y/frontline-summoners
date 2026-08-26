@@ -17,7 +17,7 @@ import { isCompactMobileViewport } from './viewport';
 const EMPTY_PROGRESS: GuestProgress = {
   clearedStageIds: [],
   specialClearedStageIds: [],
-  treasureIds: [],
+  permanentRewardIds: [],
 };
 const RARITY_ORDER = ['C', 'B', 'A', 'S', 'SS'] as const;
 const BANNER_CHARACTER_IDS = RARITY_ORDER.flatMap((rarity) => FIRST_RECRUITMENT_BANNER.poolByRarity[rarity]);
