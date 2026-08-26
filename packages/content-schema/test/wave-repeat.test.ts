@@ -15,47 +15,45 @@ const stage = (wave: Record<string, unknown>) => ({
   theme: 'meadow',
   decorSeed: 1,
   waves: [wave],
-  treasure: { id: 'test-treasure', name: 'test', effect: 'test' },
+  permanentRewardId: 'test-reward',
 });
 
 const options = { enemyIds: new Set(['enemy']) };
 
+const wave = (repeat?: Record<string, unknown>) => ({
+  id: 'W1',
+  trigger: { type: 'TIME', frame: 30 },
+  spawn: { enemyId: 'enemy', count: 4, intervalFrames: 20 },
+  ...(repeat === undefined ? {} : { repeat }),
+});
+
 test('campaign wave parser preserves optional repeat-cycle controls', () => {
-  const parsed = parseCampaignStages([stage({
-    enemyId: 'enemy',
-    atTick: 30,
-    count: 4,
-    intervalTicks: 20,
-    repeatDelayTicks: 180,
-    maxCycles: 3,
-  })], options);
+  const parsed = parseCampaignStages([stage(wave({ delayFrames: 180, maxCycles: 3 }))], options);
 
   assert.deepEqual(parsed[0]!.waves[0], {
-    enemyId: 'enemy',
-    atTick: 30,
-    count: 4,
-    intervalTicks: 20,
-    repeatDelayTicks: 180,
-    maxCycles: 3,
+    id: 'W1',
+    trigger: { type: 'TIME', frame: 30 },
+    spawn: { enemyId: 'enemy', count: 4, intervalFrames: 20, magnificationPermille: 1000 },
+    repeat: { delayFrames: 180, maxCycles: 3 },
   });
 });
 
-test('repeatDelayTicks without maxCycles represents an indefinite battle-long pattern', () => {
-  const parsed = parseCampaignStages([stage({
-    enemyId: 'enemy', atTick: 0, count: 1, intervalTicks: 30, repeatDelayTicks: 300,
-  })], options);
-  assert.equal(parsed[0]!.waves[0]!.repeatDelayTicks, 300);
-  assert.equal(parsed[0]!.waves[0]!.maxCycles, undefined);
+test('repeat delay without maxCycles represents an indefinite battle-long pattern', () => {
+  const parsed = parseCampaignStages([stage(wave({ delayFrames: 300 }))], options);
+  assert.equal(parsed[0]!.waves[0]!.repeat?.delayFrames, 300);
+  assert.equal(parsed[0]!.waves[0]!.repeat?.maxCycles, undefined);
 });
 
-test('maxCycles cannot silently turn a one-shot wave into an underspecified repeat', () => {
-  assert.throws(() => parseCampaignStages([stage({
-    enemyId: 'enemy', atTick: 0, count: 1, intervalTicks: 30, maxCycles: 2,
-  })], options), /maxCycles requires repeatDelayTicks/);
+test('repeat object cannot omit its delay', () => {
+  assert.throws(
+    () => parseCampaignStages([stage(wave({ maxCycles: 2 }))], options),
+    /repeat\.delayFrames must be an integer/,
+  );
 });
 
 test('repeat delays must be positive', () => {
-  assert.throws(() => parseCampaignStages([stage({
-    enemyId: 'enemy', atTick: 0, count: 1, intervalTicks: 30, repeatDelayTicks: 0,
-  })], options), /repeatDelayTicks must be an integer/);
+  assert.throws(
+    () => parseCampaignStages([stage(wave({ delayFrames: 0 }))], options),
+    /repeat\.delayFrames must be an integer in 1/,
+  );
 });
