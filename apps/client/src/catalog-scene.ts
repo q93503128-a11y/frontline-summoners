@@ -2,6 +2,7 @@ import Phaser from 'phaser';
 import { INTERNAL_HEIGHT, INTERNAL_WIDTH } from '@frontline/shared';
 import { ART_BY_ID, ART_FAMILIES, UNIT_ART, type UnitArtVariant } from './assets';
 import { formatCombatTraits, formatDamageSpecialty } from './combat-trait-labels';
+import { getPermanentRewardEffectText } from './permanent-reward-ui';
 import {
   PLAYER_SLOTS,
   SPECIAL_STAGES,
@@ -15,13 +16,13 @@ import { loadGuestProgress, type GuestProgress } from './save';
 import { isCompactMobileViewport } from './viewport';
 
 const FONT = '"Malgun Gothic", "Apple SD Gothic Neo", "Noto Sans KR", sans-serif';
-const EMPTY_PROGRESS: GuestProgress = { clearedStageIds: [], specialClearedStageIds: [], treasureIds: [] };
+const EMPTY_PROGRESS: GuestProgress = { clearedStageIds: [], specialClearedStageIds: [], permanentRewardIds: [] };
 const ALLY_PAGE_SIZE = 5;
-const TREASURE_PAGE_SIZE = 5;
-const MEDAL_PAGE_SIZE = 5;
+const REWARD_PAGE_SIZE = 5;
+const SPECIAL_PAGE_SIZE = 5;
 const STORY_BADGE_COLOR = '#d7c79f';
 
-type CatalogMode = 'ALLIES' | 'TREASURES' | 'MEDALS';
+type CatalogMode = 'ALLIES' | 'REWARDS' | 'SPECIAL';
 
 function addText(
   scene: Phaser.Scene,
@@ -96,8 +97,8 @@ export class CatalogScene extends Phaser.Scene {
   private contentLayer?: Phaser.GameObjects.Container;
   private pageText?: Phaser.GameObjects.Text;
   private allyTab?: Phaser.GameObjects.Container;
-  private treasureTab?: Phaser.GameObjects.Container;
-  private medalTab?: Phaser.GameObjects.Container;
+  private rewardTab?: Phaser.GameObjects.Container;
+  private specialTab?: Phaser.GameObjects.Container;
 
   constructor() {
     super('catalog');
@@ -109,12 +110,12 @@ export class CatalogScene extends Phaser.Scene {
     const navigationHeight = compact ? 84 : 50;
     const tabHeight = compact ? 84 : 54;
     addText(this, 54, 34, '도 감', 44, '#fff4cf');
-    if (!compact) addText(this, 56, 88, '동료, 제1장 확정 보물, 특수전 훈장을 한곳에서 확인한다.', 18, '#b8c0ce');
+    if (!compact) addText(this, 56, 88, '동료, 메인 영구 보상, 특수전 클리어 기록을 한곳에서 확인한다.', 18, '#b8c0ce');
     addButton(this, 1165, compact ? 70 : 62, 160, navigationHeight, '메인', () => this.scene.start('main-menu'), 0x586275);
 
     this.allyTab = addButton(this, 210, 135, 230, tabHeight, '동료 10종', () => this.setMode('ALLIES'), 0x6d91b5);
-    this.treasureTab = addButton(this, 465, 135, 230, tabHeight, '보물 20종', () => this.setMode('TREASURES'), 0xb69755);
-    this.medalTab = addButton(this, 720, 135, 230, tabHeight, '훈장 5종', () => this.setMode('MEDALS'), 0x9569a5);
+    this.rewardTab = addButton(this, 465, 135, 230, tabHeight, '영구 보상 20개', () => this.setMode('REWARDS'), 0xb69755);
+    this.specialTab = addButton(this, 720, 135, 230, tabHeight, '특수 기록 5개', () => this.setMode('SPECIAL'), 0x9569a5);
     addButton(this, 92, compact ? 660 : 664, 140, navigationHeight, '◀ 이전', () => this.changePage(-1), 0x586275);
     addButton(this, 1188, compact ? 660 : 664, 140, navigationHeight, '다음 ▶', () => this.changePage(1), 0x586275);
     this.pageText = addText(this, INTERNAL_WIDTH / 2, 652, '', compact ? 22 : 18, '#aab4c3', 'center').setOrigin(0.5);
@@ -136,8 +137,8 @@ export class CatalogScene extends Phaser.Scene {
 
   private getPageCount(): number {
     if (this.mode === 'ALLIES') return Math.ceil(PLAYER_SLOTS.length / ALLY_PAGE_SIZE);
-    if (this.mode === 'TREASURES') return Math.ceil(STAGES.length / TREASURE_PAGE_SIZE);
-    return Math.ceil(SPECIAL_STAGES.length / MEDAL_PAGE_SIZE);
+    if (this.mode === 'REWARDS') return Math.ceil(STAGES.length / REWARD_PAGE_SIZE);
+    return Math.ceil(SPECIAL_STAGES.length / SPECIAL_PAGE_SIZE);
   }
 
   private changePage(delta: number): void {
@@ -149,15 +150,15 @@ export class CatalogScene extends Phaser.Scene {
     this.contentLayer?.destroy(true);
     this.contentLayer = this.add.container(0, 0);
     this.page = Phaser.Math.Clamp(this.page, 0, Math.max(0, this.getPageCount() - 1));
-    const modeLabel = this.mode === 'ALLIES' ? '동료' : this.mode === 'TREASURES' ? '보물' : '훈장';
+    const modeLabel = this.mode === 'ALLIES' ? '동료' : this.mode === 'REWARDS' ? '영구 보상' : '특수 기록';
     this.pageText?.setText(`${modeLabel} · ${this.page + 1} / ${this.getPageCount()}`);
     this.allyTab?.setAlpha(this.mode === 'ALLIES' ? 1 : 0.62);
-    this.treasureTab?.setAlpha(this.mode === 'TREASURES' ? 1 : 0.62);
-    this.medalTab?.setAlpha(this.mode === 'MEDALS' ? 1 : 0.62);
+    this.rewardTab?.setAlpha(this.mode === 'REWARDS' ? 1 : 0.62);
+    this.specialTab?.setAlpha(this.mode === 'SPECIAL' ? 1 : 0.62);
 
     if (this.mode === 'ALLIES') this.renderAllies();
-    else if (this.mode === 'TREASURES') this.renderTreasures();
-    else this.renderMedals();
+    else if (this.mode === 'REWARDS') this.renderRewards();
+    else this.renderSpecialRecords();
   }
 
   private renderAllies(): void {
@@ -190,9 +191,7 @@ export class CatalogScene extends Phaser.Scene {
         this.contentLayer!.add(addText(this, x, compact ? 400 : 376, `${slot.role} · ${slot.cost} 보급`, compact ? 21 : 14, '#f2d37c', 'center').setOrigin(0.5));
         this.contentLayer!.add(addText(this, x, compact ? 438 : 402, formatCombatTraits(slot.definition), compact ? 19 : 13, '#9fcfff', 'center').setOrigin(0.5));
         const specialty = formatDamageSpecialty(slot.definition);
-        if (specialty) {
-          this.contentLayer!.add(addText(this, x, compact ? 474 : 430, specialty, compact ? 19 : 13, '#ffd493', 'center').setOrigin(0.5));
-        }
+        if (specialty) this.contentLayer!.add(addText(this, x, compact ? 474 : 430, specialty, compact ? 19 : 13, '#ffd493', 'center').setOrigin(0.5));
         if (compact) {
           this.contentLayer!.add(addText(this, x, 532, `HP ${slot.definition.maxHp} · 공격 ${slot.definition.attackDamage}\n사거리 ${slot.definition.attackMaxRange}`, 18, '#aeb8c8', 'center').setOrigin(0.5).setWordWrapWidth(190));
         } else {
@@ -211,16 +210,16 @@ export class CatalogScene extends Phaser.Scene {
     });
   }
 
-  private renderTreasures(): void {
+  private renderRewards(): void {
     const compact = isCompactMobileViewport();
-    const start = this.page * TREASURE_PAGE_SIZE;
-    const owned = new Set(this.progress.treasureIds);
-    const visible = STAGES.slice(start, start + TREASURE_PAGE_SIZE);
+    const start = this.page * REWARD_PAGE_SIZE;
+    const owned = new Set(this.progress.permanentRewardIds);
+    const visible = STAGES.slice(start, start + REWARD_PAGE_SIZE);
 
     visible.forEach((stage, localIndex) => {
       const x = 145 + localIndex * 247;
       const stageNumber = getStageNumber(stage.id);
-      const isOwned = owned.has(stage.treasure.id);
+      const isOwned = !!stage.permanentRewardId && owned.has(stage.permanentRewardId);
       const card = this.add.rectangle(x, 398, 220, 430, isOwned ? 0x2a302f : 0x1d222b, 0.98)
         .setStrokeStyle(3, isOwned ? 0xb79958 : 0x46505e, isOwned ? 0.95 : 0.65);
       this.contentLayer!.add(card);
@@ -233,20 +232,18 @@ export class CatalogScene extends Phaser.Scene {
       this.contentLayer!.add(addText(this, x, compact ? 290 : 280, isOwned ? '✓' : '?', compact ? 36 : 34, isOwned ? '#fff1bd' : '#747e8b', 'center').setOrigin(0.5));
 
       this.contentLayer!.add(addText(this, x, 205, `STAGE ${stageNumber}`, compact ? 20 : 15, isOwned ? '#d7bd82' : '#6f7987', 'center').setOrigin(0.5));
-      this.contentLayer!.add(addText(this, x, compact ? 382 : 365, stage.treasure.name, compact ? 24 : 20, isOwned ? '#ffe19a' : '#8b939e', 'center').setOrigin(0.5).setWordWrapWidth(190));
-      this.contentLayer!.add(addText(this, x, compact ? 445 : 425, stage.treasure.effect, compact ? 19 : 15, isOwned ? '#dce6d7' : '#6f7885', 'center').setOrigin(0.5).setWordWrapWidth(188));
+      this.contentLayer!.add(addText(this, x, compact ? 382 : 365, `영구 보상 #${String(stageNumber).padStart(2, '0')}`, compact ? 24 : 20, isOwned ? '#ffe19a' : '#8b939e', 'center').setOrigin(0.5).setWordWrapWidth(190));
+      this.contentLayer!.add(addText(this, x, compact ? 445 : 425, getPermanentRewardEffectText(stage.permanentRewardId), compact ? 19 : 15, isOwned ? '#dce6d7' : '#6f7885', 'center').setOrigin(0.5).setWordWrapWidth(188));
       this.contentLayer!.add(addText(this, x, compact ? 520 : 505, isOwned ? '획득 완료' : '미획득', compact ? 20 : 14, isOwned ? '#8ee3aa' : '#7b8591', 'center').setOrigin(0.5));
-      if (!compact) {
-        this.contentLayer!.add(addText(this, x, 548, `${stage.name}\n첫 클리어 100% 확정`, 12, isOwned ? '#aab6c5' : '#687381', 'center').setOrigin(0.5).setWordWrapWidth(188));
-      }
+      if (!compact) this.contentLayer!.add(addText(this, x, 548, `${stage.name}\nNORMAL_CLEAR 첫 승리 시 확정`, 12, isOwned ? '#aab6c5' : '#687381', 'center').setOrigin(0.5).setWordWrapWidth(188));
     });
   }
 
-  private renderMedals(): void {
+  private renderSpecialRecords(): void {
     const compact = isCompactMobileViewport();
-    const start = this.page * MEDAL_PAGE_SIZE;
+    const start = this.page * SPECIAL_PAGE_SIZE;
     const cleared = new Set(this.progress.specialClearedStageIds);
-    const visible = SPECIAL_STAGES.slice(start, start + MEDAL_PAGE_SIZE);
+    const visible = SPECIAL_STAGES.slice(start, start + SPECIAL_PAGE_SIZE);
 
     visible.forEach((stage, localIndex) => {
       const x = 145 + localIndex * 247;
@@ -264,13 +261,11 @@ export class CatalogScene extends Phaser.Scene {
       this.contentLayer!.add(addText(this, x, compact ? 290 : 280, isCleared ? '★' : '?', compact ? 34 : 32, isCleared ? '#f3d5ff' : '#747e8b', 'center').setOrigin(0.5));
 
       this.contentLayer!.add(addText(this, x, 205, `SPECIAL ${specialNumber}`, compact ? 20 : 15, isCleared ? '#d6b5e3' : '#6f7987', 'center').setOrigin(0.5));
-      this.contentLayer!.add(addText(this, x, compact ? 374 : 360, stage.treasure.name, compact ? 23 : 19, isCleared ? '#f1ceff' : '#8b939e', 'center').setOrigin(0.5).setWordWrapWidth(190));
-      this.contentLayer!.add(addText(this, x, compact ? 435 : 418, stage.name, compact ? 20 : 15, isCleared ? '#d8ddea' : '#737c89', 'center').setOrigin(0.5).setWordWrapWidth(188));
+      this.contentLayer!.add(addText(this, x, compact ? 374 : 360, stage.name, compact ? 23 : 19, isCleared ? '#f1ceff' : '#8b939e', 'center').setOrigin(0.5).setWordWrapWidth(190));
+      this.contentLayer!.add(addText(this, x, compact ? 435 : 418, '특수전 클리어 기록', compact ? 20 : 15, isCleared ? '#d8ddea' : '#737c89', 'center').setOrigin(0.5).setWordWrapWidth(188));
       this.contentLayer!.add(addText(this, x, compact ? 482 : 462, `난이도 ${stage.difficulty} / 12`, compact ? 19 : 14, isCleared ? '#efb6ff' : '#707886', 'center').setOrigin(0.5));
-      this.contentLayer!.add(addText(this, x, compact ? 528 : 510, isCleared ? '도전 완료' : '미획득', compact ? 20 : 14, isCleared ? '#8ee3aa' : '#7b8591', 'center').setOrigin(0.5));
-      if (!compact) {
-        this.contentLayer!.add(addText(this, x, 548, '전투 능력치 보너스 없음', 12, isCleared ? '#aa9bb5' : '#687381', 'center').setOrigin(0.5));
-      }
+      this.contentLayer!.add(addText(this, x, compact ? 528 : 510, isCleared ? '도전 완료' : '미클리어', compact ? 20 : 14, isCleared ? '#8ee3aa' : '#7b8591', 'center').setOrigin(0.5));
+      if (!compact) this.contentLayer!.add(addText(this, x, 548, '메인 영구 성장과 별도 기록', 12, isCleared ? '#aa9bb5' : '#687381', 'center').setOrigin(0.5));
     });
   }
 }
