@@ -11,19 +11,19 @@ const MID_LIMITS = [
   { maxSeconds: 240, minBaseRatio: 0.08 },
 ] as const;
 
-test('stages six through ten remain beatable in the real sequential unlock and treasure order', () => {
+test('stages six through ten remain beatable in the real sequential unlock and permanent reward order', () => {
   const clearedStageIds = STAGES.slice(0, 5).map((stage) => stage.id);
   assert.deepEqual(getUnlockedSlotIds(clearedStageIds), ['militia', 'guard', 'hunter', 'duelist']);
 
   for (let stageIndex = 5; stageIndex < 10; stageIndex += 1) {
     const stage = STAGES[stageIndex]!;
     const limit = MID_LIMITS[stageIndex - 5]!;
-    const { state, unlockedSlotIds, ownedTreasureIds, targetSupplyLevel } = autoPlayCampaignStage(stageIndex, clearedStageIds, {
+    const { state, unlockedSlotIds, ownedPermanentRewardIds, targetSupplyLevel } = autoPlayCampaignStage(stageIndex, clearedStageIds, {
       maxSeconds: limit.maxSeconds,
       cannonBaseRatio: 0.70,
     });
 
-    assert.equal(ownedTreasureIds.length, clearedStageIds.length, 'mid baseline must not use future treasure rewards');
+    assert.equal(ownedPermanentRewardIds.length, clearedStageIds.length, 'mid baseline must not use future permanent rewards');
     assert.equal(targetSupplyLevel, stageIndex >= 7 ? 2 : 1);
     assert.equal(
       state.battle.winner,
