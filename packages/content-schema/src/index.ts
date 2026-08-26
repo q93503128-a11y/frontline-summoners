@@ -13,7 +13,7 @@ export type TargetMode = (typeof TARGET_MODES)[number];
 export const ATTRIBUTES = ['NEUTRAL', 'BEAST', 'UNDEAD', 'NATURE', 'ARCANE', 'DEMON', 'MACHINE', 'ANOMALY'] as const;
 export type Attribute = (typeof ATTRIBUTES)[number];
 
-export const COMBAT_TAGS = ['ARMORED', 'FLOATING', 'FLYING', 'GIANT', 'STRUCTURE', 'SUMMON', 'BOSS'] as const;
+export const COMBAT_TAGS = ['ARMORED', 'FLOATING', 'GIANT', 'BOSS', 'STRUCTURE', 'SUMMON', 'SWARM'] as const;
 export type CombatTag = (typeof COMBAT_TAGS)[number];
 
 export const DAMAGE_BONUS_TARGET_KINDS = ['ATTRIBUTE', 'TAG'] as const;
@@ -25,6 +25,8 @@ export const MIN_STAGE_DIFFICULTY = 1;
 export const MAX_STAGE_DIFFICULTY = 12;
 export const DEFAULT_PLAYER_UNIT_CAP = 50;
 export const DEFAULT_ENEMY_UNIT_CAP = 50;
+/** Locked v1 rule: final player production recharge may never be below 60 frames / 2 seconds at 30 Hz. */
+export const MIN_PLAYER_RECHARGE_FRAMES = 60;
 
 export type DamageBonusContent =
   | { readonly targetKind: 'ATTRIBUTE'; readonly target: Attribute; readonly multiplierPermille: number }
@@ -309,7 +311,7 @@ export function parsePlayerUnits(value: unknown): readonly PlayerUnitContent[] {
       role: requireEnum(raw, 'role', context, PLAYER_ROLES),
       description: requireString(raw, 'description', context),
       cost: requireInteger(raw, 'cost', context, 0, 1000000),
-      rechargeFrames: requireInteger(raw, 'rechargeFrames', context, 1, 36000),
+      rechargeFrames: requireInteger(raw, 'rechargeFrames', context, MIN_PLAYER_RECHARGE_FRAMES, 36000),
     };
   });
 }
