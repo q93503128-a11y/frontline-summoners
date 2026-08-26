@@ -13,23 +13,35 @@ const FINAL_LIMITS = [
 
 const EXPECTED_ROSTER_SIZE_BEFORE_STAGE = [8, 9, 9, 9, 9] as const;
 
-test('stage twenty preserves an economy opening before both mandatory boss phases', () => {
+test('stage twenty locks the canonical sequential boss trigger structure', () => {
   const stage = STAGES[19]!;
-  assert.equal(stage.id, 'border-20');
-  assert.deepEqual(
-    stage.waves.map((wave) => [wave.enemyId, wave.atTick, wave.count, wave.intervalTicks]),
-    [
-      ['enemy-shield', 450, 2, 250],
-      ['enemy-berserker', 1000, 1, 230],
-      ['enemy-boss', 1500, 1, 9999],
-      ['enemy-sniper', 1800, 1, 260],
-      ['enemy-boss-iron', 2400, 1, 9999],
+  assert.equal(stage.id, 'main_01_020');
+  assert.equal(stage.permanentRewardId, 'border-crown');
+  assert.deepEqual(stage.specialRules, ['chapterClear:1', 'levelCap:20', 'specialHubUnlock:true']);
+
+  const waves = new Map(stage.waves.map((wave) => [wave.id, wave] as const));
+  assert.deepEqual(waves.get('GOLD')?.trigger, {
+    type: 'ANY_OF',
+    conditions: [
+      { type: 'TIME', frame: 900 },
+      { type: 'ENEMY_BASE_HP_BELOW', percent: 80 },
     ],
-    'STAGE 20 must keep its 15s economy opening and 50s/80s boss phases instead of reverting to the old early rush',
-  );
+  }, 'golden-mask phase must begin at 30s or when the enemy base reaches 80% HP');
+  assert.deepEqual(waves.get('GOLD_H50A')?.trigger, { type: 'BOSS_HP_BELOW', enemyId: 'enemy-boss', percent: 50 });
+  assert.deepEqual(waves.get('GOLD_H50B')?.trigger, { type: 'BOSS_HP_BELOW', enemyId: 'enemy-boss', percent: 50 });
+  assert.deepEqual(waves.get('IRON')?.trigger, {
+    type: 'ANY_OF',
+    conditions: [
+      { type: 'AFTER_WAVE_CLEARED', waveId: 'GOLD', delayFrames: 180 },
+      { type: 'ENEMY_BASE_HP_BELOW', percent: 45 },
+    ],
+  }, 'iron-general phase must follow the golden-mask clear with delay or emergency base threshold');
+  assert.deepEqual(waves.get('IRON_H65')?.trigger, { type: 'BOSS_HP_BELOW', enemyId: 'enemy-boss-iron', percent: 65 });
+  assert.deepEqual(waves.get('IRON_H35A')?.trigger, { type: 'BOSS_HP_BELOW', enemyId: 'enemy-boss-iron', percent: 35 });
+  assert.deepEqual(waves.get('IRON_H35B')?.trigger, { type: 'BOSS_HP_BELOW', enemyId: 'enemy-boss-iron', percent: 35 });
 });
 
-test('stages sixteen through twenty stay beatable in exact unlock/treasure order and final bosses actually appear', () => {
+test('stages sixteen through twenty stay beatable in exact unlock/permanent-reward order and final bosses actually appear', () => {
   const clearedStageIds = STAGES.slice(0, 15).map((stage) => stage.id);
   assert.deepEqual(
     getUnlockedSlotIds(clearedStageIds),
@@ -39,12 +51,12 @@ test('stages sixteen through twenty stay beatable in exact unlock/treasure order
   for (let stageIndex = 15; stageIndex < 20; stageIndex += 1) {
     const stage = STAGES[stageIndex]!;
     const limit = FINAL_LIMITS[stageIndex - 15]!;
-    const { state, unlockedSlotIds, ownedTreasureIds, seenEnemyIds, targetSupplyLevel } = autoPlayCampaignStage(stageIndex, clearedStageIds, {
+    const { state, unlockedSlotIds, ownedPermanentRewardIds, seenEnemyIds, targetSupplyLevel } = autoPlayCampaignStage(stageIndex, clearedStageIds, {
       maxSeconds: limit.maxSeconds,
       cannonBaseRatio: 0.75,
     });
 
-    assert.equal(ownedTreasureIds.length, clearedStageIds.length, 'final baseline must not receive a treasure before its stage is cleared');
+    assert.equal(ownedPermanentRewardIds.length, clearedStageIds.length, 'final baseline must not receive a permanent reward before its stage is cleared');
     assert.equal(targetSupplyLevel, stageIndex >= 16 ? 3 : 2, 'final baseline must upgrade enough wallet capacity for legitimately unlocked expensive units');
     assert.equal(
       unlockedSlotIds.length,
