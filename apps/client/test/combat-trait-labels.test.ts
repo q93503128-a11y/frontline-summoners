@@ -29,11 +29,11 @@ test('all current attributes and combat tags have Korean player-facing labels', 
   assert.equal(getCombatAttributeLabel('ANOMALY'), '이상');
   assert.equal(getCombatTagLabel('ARMORED'), '중갑');
   assert.equal(getCombatTagLabel('FLOATING'), '부유');
-  assert.equal(getCombatTagLabel('FLYING'), '비행');
   assert.equal(getCombatTagLabel('GIANT'), '거대');
+  assert.equal(getCombatTagLabel('BOSS'), '보스');
   assert.equal(getCombatTagLabel('STRUCTURE'), '구조물');
   assert.equal(getCombatTagLabel('SUMMON'), '소환체');
-  assert.equal(getCombatTagLabel('BOSS'), '보스');
+  assert.equal(getCombatTagLabel('SWARM'), '군집');
 });
 
 test('attribute identity and combat tags are rendered as separate layers', () => {
