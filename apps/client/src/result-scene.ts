@@ -9,6 +9,7 @@ import {
   getStageNumber,
   type PrototypeStage,
 } from './prototype';
+import { getPermanentRewardEffectText } from './permanent-reward-ui';
 import { recordNormalStageClear, recordSpecialStageClear } from './save';
 import { addButton, addText, COLORS, drawBackdrop } from './scene-ui';
 import { getStageCollectionForStage } from './stage-navigation';
@@ -40,10 +41,10 @@ export class ResultScene extends Phaser.Scene {
 
     this.add.rectangle(INTERNAL_WIDTH / 2, compact ? 345 : 355, compact ? 820 : 760, compact ? 360 : 320, 0x242b38, 0.98).setStrokeStyle(3, victory ? 0xb99449 : 0x805151);
     if (victory && special) {
-      addText(this, INTERNAL_WIDTH / 2, compact ? 210 : 238, '특수전 훈장 획득', compact ? 28 : 23, '#d8b4ef', 'center').setOrigin(0.5);
-      addText(this, INTERNAL_WIDTH / 2, compact ? 264 : 290, this.stage.treasure.name, compact ? 38 : 35, '#f1ceff', 'center').setOrigin(0.5);
+      addText(this, INTERNAL_WIDTH / 2, compact ? 210 : 238, '특수전 클리어 기록', compact ? 28 : 23, '#d8b4ef', 'center').setOrigin(0.5);
+      addText(this, INTERNAL_WIDTH / 2, compact ? 264 : 290, this.stage.name, compact ? 38 : 35, '#f1ceff', 'center').setOrigin(0.5);
       addText(this, INTERNAL_WIDTH / 2, compact ? 322 : 342, this.stage.subtitle, compact ? 24 : 18, '#c8d0dc', 'center').setOrigin(0.5).setWordWrapWidth(compact ? 720 : 680);
-      addText(this, INTERNAL_WIDTH / 2, compact ? 390 : 395, '메인 진도와 별도 기록 · 반복 파밍 필요 없음', compact ? 24 : 20, '#b9a5c8', 'center').setOrigin(0.5);
+      addText(this, INTERNAL_WIDTH / 2, compact ? 390 : 395, '메인 NORMAL_CLEAR와 별도 기록 · 전투 능력치 보상 없음', compact ? 24 : 20, '#b9a5c8', 'center').setOrigin(0.5);
       const status = addText(this, INTERNAL_WIDTH / 2, compact ? 446 : 447, compact ? '특수전 기록 저장 중…' : '특수전 클리어 기록 저장 중…', compact ? 21 : 16, '#8f9aac', 'center').setOrigin(0.5);
       void recordSpecialStageClear(this.stage.id).then((result) => {
         this.resultRecorded = true;
@@ -58,8 +59,8 @@ export class ResultScene extends Phaser.Scene {
       });
     } else if (victory) {
       addText(this, INTERNAL_WIDTH / 2, compact ? 210 : 238, '영구 보상 획득', compact ? 28 : 23, '#8ee3aa', 'center').setOrigin(0.5);
-      addText(this, INTERNAL_WIDTH / 2, compact ? 264 : 290, this.stage.treasure.name, compact ? 38 : 35, '#ffe18a', 'center').setOrigin(0.5);
-      addText(this, INTERNAL_WIDTH / 2, compact ? 322 : 342, this.stage.treasure.effect, compact ? 24 : 18, '#c8d0dc', 'center').setOrigin(0.5).setWordWrapWidth(compact ? 720 : 680);
+      addText(this, INTERNAL_WIDTH / 2, compact ? 264 : 290, `STAGE ${getStageNumber(this.stage.id)} 영구 성장`, compact ? 38 : 35, '#ffe18a', 'center').setOrigin(0.5);
+      addText(this, INTERNAL_WIDTH / 2, compact ? 322 : 342, getPermanentRewardEffectText(this.stage.permanentRewardId), compact ? 24 : 18, '#c8d0dc', 'center').setOrigin(0.5).setWordWrapWidth(compact ? 720 : 680);
       const unlockSlot = this.stage.unlockUnitId ? getSlotById(this.stage.unlockUnitId) : undefined;
       const unlockText = addText(this, INTERNAL_WIDTH / 2, compact ? 390 : 395, unlockSlot ? (compact ? `동료 · ${unlockSlot.displayName}` : `첫 클리어 동료 보상 · ${unlockSlot.displayName}`) : compact ? '동료 해금 없음' : '이번 스테이지는 동료 해금 없음', compact ? 24 : 20, unlockSlot ? '#9ccfff' : '#8f9aac', 'center').setOrigin(0.5);
       const status = addText(this, INTERNAL_WIDTH / 2, compact ? 446 : 447, compact ? '진행 저장 중…' : 'NORMAL_CLEAR 진행 저장 중…', compact ? 21 : 16, '#8f9aac', 'center').setOrigin(0.5);
