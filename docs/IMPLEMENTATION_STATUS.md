@@ -1,244 +1,264 @@
-# Frontline Summoners 구현 상태 — v1.0 재기획 기준
+# Frontline Summoners 구현 상태 — v1.0 재감사 대기
 
-기준일: 2026-08-25  
+기준일: 2026-08-26  
 최상위 정본: `docs/CANONICAL.md`
 
-이 문서는 **현재 코드가 실제로 어디까지 와 있는지**만 기록한다. v1.0 문서에 적혔다고 구현 완료가 아니다.
+> **중요:** 2026-08-26 현재 기획서/콘텐츠 바이블을 크게 세밀화하는 문서 전용 패스를 진행했다. 이 패스에서는 최신 코드, content JSON, save migration, test, CI를 다시 전수검증하지 않았다. 이전 개발 과정에서 기반 코드가 여러 차례 변경됐으므로 이 파일이 과거 스냅샷을 “현재 구현”처럼 단정하지 않게 한다. 다음 구현 작업의 첫 단계는 반드시 repo-wide implementation audit이다.
 
-읽기 순서:
-
-`CANONICAL → 관련 정밀 문서 → content-wiki → FEATURE_COVERAGE_MATRIX → IMPLEMENTATION_STATUS → DEVELOPMENT_RULES → content/code/test`
+이 문서는 당분간 `현재 무엇이 구현됐다고 확정할 수 있는가`보다 **무엇을 다시 검증해야 하는가**를 기록한다.
 
 ---
 
-## 1. 현재 유지 가치가 높은 기반
+# 1. 설계는 어디를 읽는가
 
-### 전투 코어
+1. `docs/CANONICAL.md`
+2. `docs/GAME_DESIGN_FULL.md`
+3. `docs/GROWTH_RECRUITMENT_DESIGN.md`
+4. `docs/STAGE_SYSTEM_DESIGN.md`
+5. 관련 `docs/content-wiki/`
+6. `docs/FEATURE_COVERAGE_MATRIX.md`
 
-- `packages/sim` 기반 30Hz 결정론 전투 구조가 존재한다.
-- 이동, 사거리, 선딜/hit frame/후딜, SINGLE/AREA, KB, DYING, 보급, 생산, 적 스폰의 기본 vertical slice가 있다.
-- 현재 1차 완성은 이 코어를 버리고 새로 만드는 작업이 아니라 **콘텐츠/성장/온라인/UX를 새 정본에 맞춰 확장**하는 작업이다.
-
-### 현재 제1장 프로토타입
-
-- PROGRESSION 20 스테이지 데이터가 존재한다.
-- SPECIAL 5 스테이지 데이터가 존재한다.
-- 보급소/시작 보급/맵 길이/거점 HP/웨이브 데이터 기반 구조가 존재한다.
-- 현재 값들은 v1.0 80스테이지 설계의 완성 데이터가 아니라 제1장 프로토타입으로 취급한다.
-
-### 메타 기반
-
-- 게스트 저장 기반이 있다.
-- 캐릭터 소유/레벨/form/덱 관련 저장 및 파생 코드가 일부 구현되어 있다.
-- 모집 엔진/배너 데이터와 대표 3형태 데이터가 일부 존재한다.
-- 이 기반은 재사용 가능하지만 **옛 확률/천장/희귀도/저장 필드는 v1.0에 맞춰 마이그레이션/삭제가 필요**하다.
+이 파일은 기획 정본이 아니다.
 
 ---
 
-## 2. 현재 구현이 v1.0과 충돌하는 영역 — REWORK
+# 2. 코드 감사 전 재사용 가치가 높은 것으로 알려진 기반
 
-### 스토리 캐릭터 10종
+아래 항목은 과거 감사/개발에서 존재가 확인됐던 기반이지만 **현재 main에서 다시 확인하기 전 VERIFIED_DONE이라고 부르지 않는다.**
 
-현재 `content/units/chapter-01.json`은 스토리 캐릭터에 C/B/A/S/SS를 부여한다.
+- `packages/sim` 중심 30Hz 결정론 전투 구조
+- 이동/standing range/공격 frame/KB/사망
+- 보급/보급소/생산
+- 스테이지 wave 기반 구조
+- 브라우저 클라이언트/Phaser
+- Workers/Durable Objects 기반 서버 구조 일부
+- 게스트 저장 기반
+- 캐릭터 소유/level/form/deck 관련 코드 일부
+- 모집/성장/진화 프로토타입 코드 일부
+- 제1장/기존 SPECIAL 프로토타입 content
 
-v1.0에서는:
-
-- 스토리 캐릭터 모집 희귀도 제거.
-- 새 속성 체계 적용.
-- 전체 3형태/외형/밸런스 재작업.
-
-상세: `docs/content-wiki/characters/STORY_ROSTER_V1.md`.
-
-### 현재 모집 15종
-
-현재 첫 모집 풀/배너는 v1.0의 `공통 C/B/A + 시리즈별 S/SS + SS 1명` 구조가 아니다.
-
-- 기존 좋은 콘셉트는 재사용 가능.
-- 현재 S/SS 지위는 보존 대상이 아니다.
-- 새 공통 풀과 3개 초기 시리즈로 교체한다.
-
-상세:
-
-- `content-wiki/recruitment/COMMON_POOL_V1.md`
-- `content-wiki/recruitment/INITIAL_SERIES_01_03.md`
-
-### 모집 보장/천장
-
-현재 코드/저장에 과거 10/30/60/100회 보장 또는 selection credit 계열이 남아 있을 가능성이 있다.
-
-v1.0에서는 전부 폐기 대상이다.
-
-구현 시 해야 할 일:
-
-1. 코드/저장/schema/UI/test 전체 참조 검색.
-2. 새 데이터 기반 시리즈 풀로 교체.
-3. 필요한 저장 마이그레이션 작성.
-4. 마이그레이션 이후 옛 경로 제거.
-
-### 속성
-
-현재 `LIGHT / ARMORED / ARCANE / BOSS` 중심 데이터는 v1.0 정본이 아니다.
-
-교체 목표:
-
-- NEUTRAL / BEAST / UNDEAD / NATURE / ARCANE / DEMON / MACHINE / ANOMALY
-- BOSS/ARMORED/FLOATING/GIANT/STRUCTURE 등은 전투 태그로 분리
-
-상세: `content-wiki/systems/ATTRIBUTE_TAG_CATALOG.md`.
-
-### 제1장 영구 보상
-
-현재 보상에는 이동속도 +1, 아군 배치한도 +1, 재생산 -1F 같은 v1.0 폐기/저체감 효과가 있다.
-
-v1.0에서는:
-
-- 이속/배치한도 영구 증가 제거.
-- 재생산은 백분율/의미 있는 값으로 바꾸되 최종 2초 하한.
-- HP/공격/경제/거점 중심의 반복 가능한 영구 성장으로 재설계.
-
-### 성장 곡선
-
-현재 Lv50≈1.595× 프로토타입은 v1.0 정본과 충돌한다.
-
-새 목표는 Lv50 약 8~10× 범위에서 장/골드/+레벨과 함께 재설계.
+이 기반은 `삭제 대상`이라고 가정하지도, `완료`라고 가정하지도 않는다. 새 정본과 비교해서 살릴 것과 교체할 것을 결정한다.
 
 ---
 
-## 3. v1.0에서 아직 새로 구현해야 하는 핵심
+# 3. 다음 코드 감사에서 반드시 확인할 레거시
 
-### 메인 콘텐츠
+다음 항목은 v1 설계에서 폐기되었으므로 현재 main에 활성 경로가 남아 있으면 정리 대상이다.
 
-- 제1장 20 전면 리밸런스/새 적/새 보상.
-- 제2~4장 각 20 = 추가 60.
-- 장 최종 레벨 상한 20/30/40/50.
+- `LIGHT` 기반 옛 속성
+- `ARMORED`, `BOSS`를 속성 enum으로 쓰는 구조
+- `FLYING` 태그 — 공식은 `FLOATING`
+- 스토리 캐릭터 C/B/A/S/SS 희귀도
+- X 희귀도
+- 10/30/60/100 모집 보장
+- pity/selectionCredits/직접선택
+- Lv50 약 ×1.595 성장곡선
+- 이동속도 영구 보물
+- 아군 출격한도 영구 보물
+- -1F 같은 저체감 재생산 보물의 구식 처리
+- SPECIAL 5개가 전체 특수 콘텐츠라고 가정하는 UI/data
+- 난이도 9~10을 1차 프로토타입 SPECIAL에 억지 지정한 구식 데이터
+- 메인 전체를 솔로 전용으로 고정한 gate
+- 별도 협동용 복제 스테이지만 허용하는 구조
+- 개발자 문구/내부 ID/save version의 플레이어 UI 노출
 
-설계 지도: `content-wiki/stages/main/INITIAL_MAIN_4_CHAPTERS.md`.
-
-### SPECIAL
-
-- 상시/주기/이벤트/기록 묶음 구조.
-- 다단계 SPECIAL UI.
-- 황금 수송대/혼의 제련소/진화의 문/별빛 균열.
-- 상시 보스/속성 SPECIAL.
-- 끝없는 전선/보스 러시.
-- 보상 충전/소탕.
-
-설계: `content-wiki/stages/special/INITIAL_SPECIAL_COLLECTIONS.md`.
-
-### 성장/모집
-
-- 메인 진행식 레벨 상한.
-- 새 강한 레벨 곡선과 골드 비용.
-- +레벨/중복 직접 사용/분해/공용 재화.
-- 전체 캐릭터 3형태.
-- 희귀도별 진화재료 차등.
-- 3개 모집 시리즈.
-- S/SS 연출.
-
-### 덱/도감/UI
-
-- 실제 드래그 앤 드롭 10칸 편성.
-- 협동/2v2 5칸 편성.
-- 희귀도/속성 대항/역할/비용/레벨/+레벨 필터.
-- 미획득 아군/미발견 적 실루엣+???.
-- 출현 적 → 도감.
-- UI 비주얼 언어 재설계와 PC/모바일 overflow QA.
-
-### 재클리어 편의
-
-- 클리어 스테이지 무료 2배속.
-- 소탕권.
-- 주기 SPECIAL 보상 충전.
-
-### 온라인
-
-- 친구 요청/검색/목록/상태/차단.
-- 친구/공개 2인 PvE 협동.
-- 같은 메인/SPECIAL을 SOLO_OR_COOP로 플레이.
-- 개인 5칸/보급/보급소/쿨, 공유 기지/병기/승패.
-- 협동 소폭 stat scaling.
-- 재접속/임시 AI.
-- 1v1 일반/랭킹/친선.
-- MMR/티어/랭킹/보상.
-- PvP 성장 표준화.
-- 2v2 일반/친선.
-
-### 계정
-
-- 로그인 사용자 루프 완성.
-- 게스트 → 로그인 이전.
-- 진행 초기화.
-- 계정 삭제.
+레거시 검색 결과가 0인지 직접 확인한다.
 
 ---
 
-## 4. 1차 구현 우선순위
+# 4. 새 v1 설계와 구현을 비교할 핵심 축
 
-### P0 — 정본과 현재 코드 충돌 제거
+## 데이터/schema
 
-- 옛 희귀도/천장/속성/보물/성장 필드 인벤토리.
-- schema/save migration 설계.
-- 재생산 2초 공용 하한.
-- 개발자 문구 전체 검색.
+- acquisitionClass
+- nullable rarity
+- seriesId
+- attributes[]
+- combatTags[]
+- roles[]
+- F1/F2/F3
+- +level
+- final recharge clamp 60F
+- stage multiplayerPolicy
+- NORMAL_CLEAR
+- speedUpEligibility
+- sweepEligibility
+- rewardChargePolicy
+- coopStatScaling
+- record milestones
+- PvP standardization
 
-### P1 — 새 데이터 골격
+## 저장
 
-- v1 속성/태그 schema.
-- acquisitionClass + nullable rarity + seriesId.
-- +level/save.
-- SPECIAL collection/multiplayerPolicy/rewardCharge/sweep fields.
-- PvP standardization 데이터 경로.
+- 현재 schemaVersion
+- 구버전 migration
+- +level/form/deck
+- 모집 레거시 필드 제거 여부
+- 게스트 progression
+- 서버 계정 save 여부
+- idempotency/revision 구조
 
-### P2 — 1차 로스터 vertical slice
+## 콘텐츠
 
-- 스토리 10 재작업.
-- 공통 C/B/A 15.
-- 각 초기 시리즈 대표 S/SS 몇 명부터 실제 아트/전투 검증.
-- 전체를 한 번에 숫자만 채우지 않고 대표군으로 밸런스 언어 확정 후 확장.
+- 실제 플레이어 unit 수/분류
+- 실제 enemy/boss 수
+- 현재 main stage 수
+- current SPECIAL collections
+- 영구 보상
+- 배너/확률
+- level curve
+- evolution data
 
-### P3 — 제1장 재완성
+## UI
 
-- 새 적/속성/영구보상.
-- 난이도 1~6 재측정.
-- 2배속/소탕.
-- 대부분 SOLO_OR_COOP 구조를 염두에 둔 stage schema.
-
-### P4 — 메타 UI
-
-- 편성/필터/도감.
-- 성장/+레벨/진화.
-- 모집 시리즈/연출.
-
-### P5 — 제2~4장 + SPECIAL 확장
-
-- 각 장 20.
-- 주기/상시/기록 SPECIAL.
-- 최종 Lv50 루프 완성.
-
-### P6 — 온라인 사용자 루프
-
-- 친구 → 협동 → 재접속.
-- 일반전 → 랭킹전 → 친선.
-- 2v2 일반/친선.
-
-### P7 — 1차 완성 QA
-
-- 밸런스 시뮬레이션.
-- 실제 사람 플레이.
-- PC/모바일 해상도.
-- 개발자 문구 노출 0.
-- 죽은 레거시 참조 0.
-- 저장 마이그레이션.
-- 멀티 reconnect/동기화.
+- 편성/드래그
+- 도감 unknown 처리
+- 모집
+- 성장/진화
+- 2배속/소탕
+- 친구/협동/PvP
+- 개발자 문구
 
 ---
 
-## 5. 아직 1차 완성에 넣지 않는 것
+# 5. 재감사 후 상태 표기
 
-- 본능 대응 후반 성장 시스템.
-- 난이도 9~12를 채우기 위한 억지 콘텐츠.
-- 2v2 랭킹전은 동접 규모 확인 전 필수 아님.
-- 추가 모집 시리즈 4개 이상.
-- 메인 5장 이후.
+코드 감사 후 `FEATURE_COVERAGE_MATRIX.md`의 구현 검증 열을 다음으로 갱신한다.
 
-이 항목들은 1차 완성 후 업데이트 설계로 남긴다.
+- `VERIFIED_DONE`
+- `VERIFIED_PARTIAL`
+- `VERIFIED_MISSING`
+
+단순 파일 존재로 DONE 처리하지 않는다.
+
+예:
+
+`recruitment.ts`가 있어도 실제 UI→재화차감→결과→소유/중복→저장까지 연결되지 않으면 DONE이 아니다.
+
+---
+
+# 6. 실제 구현 순서 후보
+
+재감사 뒤 아직 필요하다면 다음 순서를 기본으로 한다.
+
+## P0 — 레거시/기반 정리
+
+- schema/필드 충돌
+- save migration
+- 구식 희귀도/속성/천장/보물
+- 60F 하한
+
+## P1 — v1 데이터 골격
+
+- 8속성/태그
+- STORY vs RECRUITMENT
+- series/rank
+- +level
+- stage collection/multiplayer/charge/sweep
+
+## P2 — 대표 로스터 플레이테스트
+
+43종 숫자를 한 번에 LOCKED하지 않는다.
+
+- 스토리 대표 역할
+- 공통 C/B/A 대표
+- 각 시리즈 S/SS 대표
+
+를 실제 전투로 검증해 밸런스 언어를 먼저 만든다.
+
+## P3 — 메인 1장 재완성
+
+문서의 CH1 상세 spec을 실제 JSON/sim에 연결하고 난이도 1~6을 재측정한다.
+
+## P4 — 성장/편성/도감/모집
+
+실제 사용자 메타 루프 연결.
+
+## P5 — 2~4장 + SPECIAL
+
+80메인과 1차 SPECIAL 범위 완성.
+
+## P6 — 온라인
+
+친구 → 같은 stage 협동 → 재접속 → 일반 PvP → 랭킹 → 친선/2v2.
+
+## P7 — 릴리스 QA
+
+- 자동검증
+- 사람 플레이
+- PC/모바일
+- 저장 migration
+- reconnect
+- 문서/실행값 정합
+- 레거시 참조 0
+
+---
+
+# 7. 코드 감사 필수 명령 범주
+
+실제 repository script 명칭은 `package.json`을 다시 읽고 사용한다.
+
+최소 범주:
+
+- install
+- typecheck
+- unit/integration tests
+- content/schema validation
+- deterministic baseline
+- build
+- 필요 시 server tests
+
+과거 run 결과를 최신 HEAD 결과처럼 재사용하지 않는다.
+
+---
+
+# 8. 문서 전용 패스에서 완료된 것
+
+이 항목은 **기획 문서 작성 완료**를 뜻하며 구현 완료가 아니다.
+
+- 통합 v1.2 기획
+- 콘텐츠 바이블 권위/상태 규칙
+- 스토리 10 설계/전투 목표
+- 공통 C/B/A 15 설계/전투 목표
+- 초기 3시리즈 S15/SS3 설계/전투 목표
+- 메인 일반 적 32 / 보스 8 설계
+- SPECIAL 전용 적/보스 설계
+- 메인 80 stage 상세 timeline 목표
+- SPECIAL 주기/상시/이벤트/기록 상세 목표
+- Lv/+Lv/골드/진화 재료 목표
+- 80 영구 보상 목표
+- 난이도 측정 규칙
+- 2배속/소탕/보상충전
+- 친구/협동/PvP
+- PvP MMR/티어/보상
+- 계정/save/sync/delete
+- UI/도감
+- 43종 공격 contact frame 목표
+
+---
+
+# 9. 1차 완성 후 범위
+
+아직 구현 목록에 섞지 않는다.
+
+- 본능 대응 후반 성장
+- 난이도 9~12 본격 콘텐츠
+- 메인 5장 이후
+- 추가 모집 시리즈
+- 2v2 랭킹
+
+---
+
+# 10. 다음 구현 작업 시작 조건
+
+문서 작업이 종료된 뒤 사용자가 구현을 지시하면:
+
+1. 현재 main HEAD 재확인
+2. repository tree/inventory
+3. package scripts
+4. content/schema/save/sim/UI/test 전수 검색
+5. 위의 레거시 키워드 감사
+6. FEATURE_COVERAGE_MATRIX 구현 열 갱신
+7. 그 결과에 따라 첫 coherent slice 구현
+
+이 과정을 거치기 전 `현재 오류 다 고쳐졌다`, `기능이 구현됐다`, `CI green이다` 같은 주장을 하지 않는다.
