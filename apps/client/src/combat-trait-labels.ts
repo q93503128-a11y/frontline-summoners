@@ -19,11 +19,11 @@ const ATTRIBUTE_LABELS: Readonly<Record<CombatAttribute, string>> = {
 const TAG_LABELS: Readonly<Record<CombatTag, string>> = {
   ARMORED: '중갑',
   FLOATING: '부유',
-  FLYING: '비행',
   GIANT: '거대',
+  BOSS: '보스',
   STRUCTURE: '구조물',
   SUMMON: '소환체',
-  BOSS: '보스',
+  SWARM: '군집',
 };
 
 export function getCombatAttributeLabel(attribute: CombatAttribute): string {
