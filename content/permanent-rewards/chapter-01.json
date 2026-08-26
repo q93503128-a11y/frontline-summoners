@@ -1,0 +1,22 @@
+[
+  {"id":"wind-badge","modifiers":[{"kind":"STARTING_SUPPLY_PERCENT","percent":5}]},
+  {"id":"barefoot-ribbon","modifiers":[{"kind":"UNIT_HP_PERCENT","scope":"ALL","percent":3}]},
+  {"id":"pot-token","modifiers":[{"kind":"UNIT_ATTACK_PERCENT","scope":"ALL","percent":3}]},
+  {"id":"rust-nail","modifiers":[{"kind":"PLAYER_BASE_HP_PERCENT","percent":5}]},
+  {"id":"ember-vial","modifiers":[{"kind":"UNIT_HP_PERCENT","scope":"FRONTLINE","percent":5}]},
+  {"id":"wagon-wheel","modifiers":[{"kind":"RECHARGE_REDUCTION_PERCENT","percent":2}]},
+  {"id":"glass-splinter","modifiers":[{"kind":"UNIT_ATTACK_PERCENT","scope":"RANGED","percent":5}]},
+  {"id":"double-plank","modifiers":[{"kind":"STARTING_SUPPLY_PERCENT","percent":5}]},
+  {"id":"charred-grain","modifiers":[{"kind":"KILL_SUPPLY_PERCENT","percent":4}]},
+  {"id":"fallen-crest","modifiers":[{"kind":"UNIT_HP_PERCENT","scope":"ALL","percent":3}]},
+  {"id":"clear-lens","modifiers":[{"kind":"UNIT_ATTACK_PERCENT","scope":"RANGED","percent":5}]},
+  {"id":"dust-charm","modifiers":[{"kind":"PLAYER_BASE_HP_PERCENT","percent":5}]},
+  {"id":"moon-pass","modifiers":[{"kind":"UNIT_ATTACK_PERCENT","scope":"ALL","percent":3}]},
+  {"id":"black-banner","modifiers":[{"kind":"WORKER_COST_REDUCTION_PERCENT","percent":3}]},
+  {"id":"iron-bolt","modifiers":[{"kind":"UNIT_ATTACK_PERCENT","scope":"FRONTLINE","percent":5}]},
+  {"id":"wall-shadow","modifiers":[{"kind":"RECHARGE_REDUCTION_PERCENT","percent":2}]},
+  {"id":"mace-ring","modifiers":[{"kind":"UNIT_HP_PERCENT","scope":"ALL","percent":3}]},
+  {"id":"gold-road-stone","modifiers":[{"kind":"KILL_SUPPLY_PERCENT","percent":4}]},
+  {"id":"mask-thread","modifiers":[{"kind":"UNIT_ATTACK_PERCENT","scope":"ALL","percent":3}]},
+  {"id":"border-crown","modifiers":[{"kind":"CHAPTER_FLAG","flag":"chapter-01-complete"}]}
+]
