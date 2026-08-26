@@ -82,7 +82,7 @@ characterId: `char_common_c_bell_crab`
 
 characterId: `char_common_c_lantern_moth`  
 속성: BEAST + ARCANE 후보  
-태그: FLYING  
+태그: FLOATING  
 역할: 빠른 후열 교란
 
 | 형태 | HP | 공격 | 주기 | range | 비용 | 재생산 | 이속 | KB |
@@ -169,7 +169,7 @@ characterId: `char_common_b_moss_golem`
 
 characterId: `char_common_b_ink_raven`  
 속성: BEAST + ARCANE 후보  
-태그: FLYING  
+태그: FLOATING  
 역할: 장거리 Weaken 보조
 
 | 형태 | HP | 공격 | 주기 | range | 비용 | 재생산 | 이속 | KB |
@@ -224,7 +224,7 @@ characterId: `char_common_a_bonedrum`
 
 characterId: `char_common_a_paper_dragon`  
 속성: ARCANE  
-태그: FLYING  
+태그: FLOATING  
 역할: 넓은 중거리 광역
 
 | 형태 | HP | 공격 | 주기 | range | 비용 | 재생산 | 이속 | KB |
