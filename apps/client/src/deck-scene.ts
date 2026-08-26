@@ -114,7 +114,7 @@ function acquisitionBadge(slot: PrototypeRosterSlot): { readonly label: string; 
 }
 
 export class DeckScene extends Phaser.Scene {
-  private progress: GuestProgress = { clearedStageIds: [], specialClearedStageIds: [], treasureIds: [] };
+  private progress: GuestProgress = { clearedStageIds: [], specialClearedStageIds: [], permanentRewardIds: [] };
   private selectedIds: string[] = [];
   private page = 0;
   private cardsLayer?: Phaser.GameObjects.Container;
