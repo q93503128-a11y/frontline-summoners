@@ -77,6 +77,14 @@ function enemy(id = 'enemy'): Record<string, unknown> {
   };
 }
 
+function timeWave(enemyId = 'enemy', frame = 0): Record<string, unknown> {
+  return {
+    id: 'W1',
+    trigger: { type: 'TIME', frame },
+    spawn: { enemyId, count: 1, intervalFrames: 1 },
+  };
+}
+
 function stage(id = 's1'): Record<string, unknown> {
   return {
     id,
@@ -90,8 +98,8 @@ function stage(id = 's1'): Record<string, unknown> {
     mapLength: 800,
     theme: 'meadow',
     decorSeed: 1,
-    waves: [{ enemyId: 'enemy', atTick: 0, count: 1, intervalTicks: 1 }],
-    treasure: { id: `reward-${id}`, name: id, effect: id },
+    waves: [timeWave()],
+    permanentRewardId: `reward-${id}`,
   };
 }
 
@@ -101,8 +109,8 @@ test('chapter one bundle has 10 player units, 10 enemies, 20 stages and seven ba
   assert.equal(bundle.enemies.length, 10);
   assert.equal(bundle.stages.length, 20);
   assert.equal(bundle.playerUnits[0]?.id, 'militia');
-  assert.equal(bundle.stages[0]?.id, 'border-01');
-  assert.equal(bundle.stages[19]?.id, 'border-20');
+  assert.equal(bundle.stages[0]?.id, 'main_01_001');
+  assert.equal(bundle.stages[19]?.id, 'main_01_020');
   assert.ok(new Set(bundle.stages.map((candidate) => candidate.theme)).size >= 7);
 });
 
@@ -112,7 +120,8 @@ test('chapter one defaults to progression stages and live simultaneous unit caps
   assert.ok(bundle.stages.every((candidate) => candidate.playerUnitCap === DEFAULT_PLAYER_UNIT_CAP));
   assert.ok(bundle.stages.every((candidate) => candidate.enemyUnitCap === DEFAULT_ENEMY_UNIT_CAP));
   assert.ok(bundle.stages.every((candidate) => candidate.formationRestrictions.allowedRarities.length === 0));
-  assert.ok(bundle.stages.every((candidate) => candidate.specialRules.length === 0));
+  assert.ok(bundle.stages.slice(0, 19).every((candidate) => candidate.specialRules.length === 0));
+  assert.deepEqual(bundle.stages[19]?.specialRules, ['chapterClear:1', 'levelCap:20', 'specialHubUnlock:true']);
 });
 
 test('chapter one keeps exactly nine deterministic STORY character unlock milestones', async () => {
@@ -171,7 +180,7 @@ test('campaign bundle rejects a non-starter STORY unit that can never be unlocke
 });
 
 test('campaign validator rejects unknown enemy references', () => {
-  const bad = [{ ...stage('a'), waves: [{ enemyId: 'missing', atTick: 0, count: 1, intervalTicks: 1 }] }];
+  const bad = [{ ...stage('a'), waves: [timeWave('missing')] }];
   assert.throws(() => parseCampaignStages(bad, { enemyIds: new Set(['enemy']) }), /unknown enemy/);
 });
 
@@ -182,6 +191,7 @@ test('stage schema supports twelve difficulty levels, per-stage unit caps and re
     name: 'special',
     subtitle: 'special',
     stageType: 'SPECIAL',
+    permanentRewardId: undefined,
     difficulty: MAX_STAGE_DIFFICULTY,
     playerUnitCap: 5,
     enemyUnitCap: 20,
