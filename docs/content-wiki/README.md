@@ -2,276 +2,340 @@
 
 이 디렉터리는 **캐릭터·적·보스·스테이지·모집 시리즈·이벤트·세부 시스템을 구현 전에 제작 가능한 수준까지 설계하는 내부 콘텐츠 바이블**이다.
 
-플레이어가 보는 공개 위키가 아니다. 내부 ID, 구현 경로, 테스트 결과, 밸런스 의도, 스폰 프레임처럼 개발에 필요한 정보를 기록할 수 있다. 단 이런 내부 정보는 게임 UI에 직접 노출하지 않는다.
+플레이어가 보는 공개 위키가 아니다. 내부 ID, 코드 연결, 밸런스 의도, 스폰 frame, 테스트 결과를 기록할 수 있다. 단 내부 용어는 게임 UI에 직접 노출하지 않는다.
 
 ---
 
 # 1. 문서 권위
 
 1. `docs/CANONICAL.md` — 최상위 규칙
-2. `docs/GAME_DESIGN_FULL.md` — 게임 전체 상세 기획
-3. `docs/GROWTH_RECRUITMENT_DESIGN.md`, `docs/STAGE_SYSTEM_DESIGN.md` — 시스템 상세 규칙
-4. **이 콘텐츠 위키의 `LOCKED` 페이지** — 개별 콘텐츠 정본
-5. `content/` JSON과 실제 코드 — 정본을 구현한 결과
-6. `docs/IMPLEMENTATION_STATUS.md` — 구현 진척 기록
+2. `docs/GAME_DESIGN_FULL.md` — 통합 전체 기획
+3. `docs/GROWTH_RECRUITMENT_DESIGN.md`, `docs/STAGE_SYSTEM_DESIGN.md` — 시스템 정밀 규칙
+4. 이 위키의 해당 상세 페이지
+5. 실제 content/schema/code/test — 정본을 구현한 결과
+6. `FEATURE_COVERAGE_MATRIX.md`, `IMPLEMENTATION_STATUS.md` — 구현 현황 기록
 
-`LOCKED` 위키와 실행 데이터가 다르면 **구현 불일치**다. “코드가 돌아가니까 코드가 정답”으로 처리하지 않는다.
+`LOCKED` 위키와 실행값이 다르면 구현 불일치다.
 
-반대로 `DESIGN_TARGET`은 아직 테스트 전 목표이므로 실제 플레이 후 조정 가능하다. 조정할 때는 코드만 바꾸지 말고 위키에도 수정값·이유·테스트 결과를 함께 남긴다.
+`DESIGN_TARGET`은 테스트 전 목표이므로 조정 가능하다. 조정한 경우 코드만 바꾸지 말고 위키 값, 이유, 검증 결과를 함께 변경한다.
 
 ---
 
-# 2. 상태 체계
+# 2. 상태
 
-모든 콘텐츠 페이지 상단에는 상태를 쓴다.
+- `CONCEPT` — 방향만 있음, 구현 시작 금지
+- `DESIGN_TARGET` — 구현 가능한 필드/숫자 있음, 테스트 전
+- `TESTED` — 자동검증 + 실제 플레이 완료
+- `LOCKED` — 현재 릴리스 기준 정본
+- `REWORK` — 현재 구현/설계를 그대로 사용하지 않음
+- `DEPRECATED` — 역사 참고만 가능, 신규 구현 금지
 
-- `CONCEPT` — 방향만 있음. 구현 시작 금지.
-- `DESIGN_TARGET` — 구현 가능한 세부 목표가 있음. 테스트 전.
-- `TESTED` — 자동/수동 테스트 완료. 밸런스 조정 가능.
-- `LOCKED` — 현재 릴리스 기준 정본.
-- `REWORK` — 기존 설계를 그대로 쓰지 않고 재작성해야 함.
-- `DEPRECATED` — 더 이상 참조하지 않는 역사 자료. 신규 구현 금지.
-
-상태가 없는 페이지는 `CONCEPT`로 간주한다.
+상태가 없으면 `CONCEPT`로 본다.
 
 ---
 
 # 3. 디렉터리
 
-- `characters/` — 플레이어 캐릭터, 형태별 전투/아트 사양
-- `enemies/` — 일반 적
-- `bosses/` — 보스/준보스/페이즈
-- `recruitment/` — 공통 C/B/A, 시리즈 S/SS, 모집 연출
-- `stages/main/` — 메인 80스테이지
-- `stages/special/` — 상시/주기/이벤트/기록 SPECIAL
-- `systems/` — 콘텐츠 제작 공통 규칙
-- `events/` — 이벤트 단위 바이블. 필요 시 생성
+- `characters/` — 스토리/확정 획득 아군
+- `recruitment/` — 공통 C/B/A, 시리즈 S/SS
+- `enemies/` — 메인/SPECIAL 일반 적 및 전용 적
+- `bosses/` — 메인 보스/준보스
+- `stages/main/` — 메인 80
+- `stages/special/` — 주기/상시/이벤트/기록 SPECIAL
+- `systems/` — 모든 콘텐츠에 적용되는 공통 설계 규칙
+- `events/` — 필요 시 이벤트 단위 장기 바이블
 
 ---
 
-# 4. 공통 상세 사양 문서
+# 4. 시스템 위키 읽기 순서
 
-세부 페이지 작성 전에 다음 문서를 따른다.
+## 제작 규칙
 
-- `systems/CONTENT_BIBLE_RULES.md` — ID, 상태, 변경, 중복검사, 승인 규칙
-- `systems/CHARACTER_SPEC_SCHEMA.md` — 아군/적/보스 전투 사양 필드
-- `systems/STAGE_SPEC_SCHEMA.md` — 스테이지 타임라인/보상/협동 필드
-- `systems/DIFFICULTY_CALIBRATION.md` — 난이도 1~12 산정법
-- `systems/REWARD_ECONOMY_AND_SKIP.md` — 보상, 충전, 소탕, 2배속
-- `systems/MULTIPLAYER_SOCIAL_PVP.md` — 친구, 협동, PvP, 재접속
-- `systems/UI_UX_ENCYCLOPEDIA.md` — 편성/도감/전투/메뉴 가독성
-- `systems/ATTRIBUTE_TAG_CATALOG.md` — 속성/태그 정의
+- `CONTENT_BIBLE_RULES.md` — ID/상태/변경/중복/승인
+- `CHARACTER_SPEC_SCHEMA.md` — 캐릭터 필수 사양
+- `STAGE_SPEC_SCHEMA.md` — 스테이지 필수 사양
+- `ATTRIBUTE_TAG_CATALOG.md` — 속성/전투 태그
+- `ANIMATION_CONTACT_FRAME_TARGETS.md` — 공격 판정/아트 contact 목표
+
+## 성장/밸런스
+
+- `PROGRESSION_NUMERICAL_TARGETS.md` — Lv/+Lv/골드/중복/진화 재료
+- `MAIN_PERMANENT_REWARDS.md` — 메인 80 영구 보상
+- `DIFFICULTY_CALIBRATION.md` — 난이도 1~12
+- `REWARD_ECONOMY_AND_SKIP.md` — 반복보상/충전/2배속/소탕
+
+## 온라인/계정
+
+- `MULTIPLAYER_SOCIAL_PVP.md` — 친구/협동/PvP 공통
+- `PVP_RANKING_MMR_REWARDS.md` — 랭킹 표준화/MMR/티어/보상
+- `ACCOUNT_SAVE_SYNC_SPEC.md` — 게스트/로그인/저장/이전/충돌/삭제
+
+## UX
+
+- `UI_UX_ENCYCLOPEDIA.md` — 메뉴/편성/성장/모집/도감/전투/멀티 UI
 
 ---
 
-# 5. 캐릭터 페이지 필수 항목
+# 5. 플레이어 로스터
 
-캐릭터 하나를 구현할 때 다음이 빠지면 `DESIGN_TARGET`으로 올릴 수 없다.
+현재 1차 DESIGN_TARGET은 43종이다.
+
+## STORY 10
+
+- `characters/STORY_ROSTER_V1.md`
+- `characters/STORY_ROSTER_V1_COMBAT_SPECS.md`
+
+스토리 캐릭터는 `rarity:null`이다.
+
+## 공통 C/B/A 15
+
+- `recruitment/COMMON_POOL_V1.md`
+- `recruitment/COMMON_POOL_V1_COMBAT_SPECS.md`
+
+C5/B5/A5.
+
+## 초기 시리즈 S/SS 18
+
+- `recruitment/INITIAL_SERIES_01_03.md`
+- `recruitment/INITIAL_SERIES_01_03_COMBAT_SPECS.md`
+
+시리즈:
+
+- 성휘의 기사단
+- 태고의 거수
+- 제로 엣지
+
+각 S5+SS1. **SS는 시리즈당 정확히 1명.**
+
+---
+
+# 6. 적/보스
+
+메인:
+
+- `enemies/INITIAL_ENEMY_ROSTER_V1.md`
+- `enemies/INITIAL_ENEMY_ROSTER_V1_COMBAT_SPECS.md`
+- `bosses/INITIAL_BOSSES_V1.md`
+- `bosses/INITIAL_BOSSES_V1_COMBAT_SPECS.md`
+
+현재 메인 설계군:
+
+- 일반 적 32종
+- 메인 보스/준보스 8종
+
+SPECIAL:
+
+- `enemies/SPECIAL_ENEMIES_AND_BOSSES_V1_COMBAT_SPECS.md`
+
+색만 바꾼 새 도감 종을 만들지 않는다. 같은 종의 stage magnification은 같은 enemy ID를 사용한다.
+
+---
+
+# 7. 메인 80
+
+지도:
+
+- `stages/main/INITIAL_MAIN_4_CHAPTERS.md`
+
+상세:
+
+- `CHAPTER_01_DETAILED_STAGE_SPECS.md`
+- `CHAPTER_02_DETAILED_STAGE_SPECS.md`
+- `CHAPTER_03_DETAILED_STAGE_SPECS.md`
+- `CHAPTER_04_DETAILED_STAGE_SPECS.md`
+
+각 스테이지에는 최소 다음이 있어야 한다.
+
+- 목적/학습 요소
+- 난이도와 근거
+- 권장 성장
+- multiplayerPolicy
+- map/base/supply
+- 정확한 spawn frame/반복 wave/trigger
+- boss phase
+- FIRST_CLEAR/repeat/permanent reward
+- 2배속/소탕
+- coop scaling
+- 목표 시간
+- deterministic baseline
+- 사람 플레이테스트 기록
+
+---
+
+# 8. SPECIAL
+
+요약:
+
+- `stages/special/INITIAL_SPECIAL_COLLECTIONS.md`
+
+상세:
+
+- `PERIODIC_RESOURCE_SPECIALS_DETAILED.md`
+- `PERMANENT_CHALLENGE_SPECIALS_DETAILED.md`
+- `EVENT_AND_RECORD_SPECIALS_DETAILED.md`
+
+1차 기록 SPECIAL은 정확히 두 핵심 모드만 둔다.
+
+- 끝없는 전선
+- 보스 러시
+
+대부분의 다른 SPECIAL은 `SOLO_OR_COOP`.
+
+---
+
+# 9. 정상 클리어
+
+`NORMAL_CLEAR`는 실제 전투 승리다.
+
+- 솔로 실제 승리
+- 허용된 스테이지의 정상 2인 협동 승리
+
+둘 모두 같은 정상 클리어다.
+
+NORMAL_CLEAR 후:
+
+- 진행/첫 클리어/영구 보상 인정
+- 재클리어 2배속 해금
+- sweep 허용 스테이지는 소탕 해금
+
+소탕 자체는 NORMAL_CLEAR를 만들지 않는다.
+
+---
+
+# 10. 캐릭터 페이지 필수 항목
 
 ## 메타
 
-- 표시 이름
-- 내부 characterId
-- 획득 분류
-- 모집 희귀도 또는 `null`
-- seriesId
-- 해금/획득 경로
-- 속성 `attributes[]`
-- 전투 태그 `combatTags[]`
-- 역할 `roles[]`
+- 표시 이름 / characterId
+- acquisitionClass / rarity / seriesId
+- 획득/해금
+- attributes[] / combatTags[] / roles[]
 
-## 1/2/3형태 각각
+## F1/F2/F3 각각
 
-- formId / formOrder
-- 형태 이름
-- 형태 해금 조건
-- Lv1 기준 HP/공격
-- 공격별 피해 배율
-- 공격주기
-- 선딜/hit frame/backswing
-- standingRange / attackMin / attackMax
-- 단일/범위/omni/멀티히트
-- 이동속도
-- 자연 KB
-- 비용
-- 재생산
-- 대항 속성/태그
-- 상태효과와 확률/시간
-- Strengthen/Critical/방어관통 등 능력
-- 장점/약점/운용 목적
-- 이전 형태와의 선택 이유
+- formId/order/name/unlock
+- Lv1 HP/ATK
+- hit별 피해 배율
+- attackCycle / hitFrames / backswing
+- standing/attackMin/attackMax
+- targeting/멀티히트
+- 이속/KB/비용/재생산
+- 대항/상태효과/확률/지속
+- 장점/약점/이전형태와의 선택 이유
 
-## 시각/사운드
+## 아트/사운드
 
-- 실루엣 한 줄 설명
-- 체형과 화면 점유율
-- 얼굴/머리/몸/대표 소품
-- 무기와 공격 방향
-- Idle / Move / Attack / KB / Death
-- 투사체/VFX
-- 타격음/소환음/특수음
-- hit frame과 시각 contact frame 대응
-- 1→2→3형태에서 반드시 달라지는 요소
-- 비슷한 기존 캐릭터와의 시각 차이
+- 실루엣/체형/화면점유율
+- 대표 무기/소품
+- Idle/Move/Attack/KB/Death
+- anticipation/contact/recovery
+- projectile/VFX/SFX
+- hit와 시각 contact 동기화
+- F1→F2→F3의 실질적 외형 변화
 
 ## 밸런스
 
-- 정상 해금 시점 권장 기본 레벨/+레벨
-- 비교 기준 캐릭터 2~4종
-- 비용 대비 기대 역할
-- 사거리 상성
+- 정상 해금 시점
+- 비교 캐릭터
+- 비용 대비 목적
 - 카운터
-- 지나치게 강해질 조합
-- 협동에서의 위험 요소
-- PvP 표준화 시 위험 요소
-- 테스트 결과
+- 위험 조합
+- coop/PvP 위험
+- 플레이테스트
 
 ---
 
-# 6. 적/보스 페이지 필수 항목
+# 11. 적/보스 필수 항목
 
-- enemyId/bossId
-- 이름/도감명
-- 첫 등장
-- 실루엣과 이동 방식
+- ID/이름/첫 등장
+- 실루엣/이동 방식
 - 속성/태그
-- 기준 HP/공격/사거리/공격주기/이속/KB
-- 공격 타이밍과 범위
+- 기준 HP/ATK/range/cycle/speed/KB
+- attack timing/range
 - 처치 보급
-- 스테이지 배율 허용 범위
-- 전투 역할
-- 플레이어에게 가르치는 대응
-- 함께 등장하면 위험한 다른 적
-- 금지 조합 또는 동시 등장 상한
+- stage magnification 허용 범위
+- 전투 역할/학습 목적
+- 위험 조합
 - 도감 설명
-- 등장 VFX/SFX
-- 보스 페이즈/트리거
+- VFX/SFX
+- boss phase/trigger
 - 테스트 결과
 
-적은 단순 색상 변경으로 새 종을 만들지 않는다. 강화 배율이 다른 동일 적은 같은 도감 종으로 취급한다.
-
 ---
 
-# 7. 스테이지 페이지 필수 항목
+# 12. 모집 시리즈 필수 항목
 
-- stageId / 표시 이름
-- MAIN/SPECIAL/EVENT/RECORD
-- 장/묶음/순서
-- 상태
-- 해금 조건
-- 난이도 1~12와 산정 근거
-- 정상 도전 시점의 권장 Lv/+Lv/형태
-- 목적: 무엇을 가르치거나 시험하는지
-- SOLO_ONLY / SOLO_OR_COOP / COOP_ONLY
-- 맵 길이/테마/거점 HP
-- 시작 보급/보급소 조건
-- 전체 스폰 타임라인
-- 반복 웨이브의 시작/주기/종료 조건
-- 기지 HP 트리거
-- 보스 등장 조건
-- 보스 페이즈
-- 승/패 특수 조건
-- 예상 전투 시간
-- 첫 클리어 보상
-- 반복 보상
-- 영구 보상
-- 보상 충전 사용 여부
-- 2배속 허용
-- 소탕 허용
-- 협동 스탯 보정
-- 협동에서 깨지는 패턴 여부
-- deterministic baseline 결과
-- 사람 플레이테스트 결과
-
-정확한 스폰은 “초반에 몇 마리” 같은 문장으로 끝내지 말고 시간/조건을 데이터로 옮길 수 있게 기록한다.
-
----
-
-# 8. 모집 시리즈 페이지 필수 항목
-
-- seriesId / 표시 이름
+- seriesId/표시명
 - 세계관·시각 언어
-- 배너 UI 모티프
-- 대표 배경/문장/효과음
-- 공통 C/B/A 포함 정책
+- 배너 UI/문장/SFX
+- 공통 C/B/A 정책
 - S 전체 목록
-- SS 정확히 1명
-- 시리즈 역할 분포
-- 실루엣 중복 검사
-- 3형태 변화 방향
-- S 연출
-- SS 전용 연출
+- SS 정확히 1
+- 역할/실루엣 중복 검사
+- 3형태 방향
+- S/SS 결과 연출
 - 복각 정책
 - 모집 확률 참조
-- 최종 검수 상태
-
-S/SS는 실제 제작 전 사용자 콘셉트 검수를 거친다.
+- 사용자 콘셉트 검수 상태
 
 ---
 
-# 9. 스테이지 묶음과 이벤트
+# 13. 폐기·금지 용어/규칙
 
-묶음 페이지에는 개별 스테이지 외에 다음을 기록한다.
+다음은 신규 v1 설계에 사용하지 않는다.
 
-- collectionId
-- 해금/등장 주기
-- 내부 단계 수
-- 단계별 성장 곡선
-- 전용 적/보스
-- 첫 클리어 보상 총합
-- 반복 경제 총량
-- 보상 충전 정책
-- 초보/중반/고수의 목표 단계
-- 협동 지원
-- 복각/종료 후 처리
+| 구식 | 현재 규칙 |
+| --- | --- |
+| `LIGHT` 속성 | 삭제. 8속성 카탈로그 사용 |
+| `ARMORED`, `BOSS`를 속성처럼 사용 | `combatTags[]`로 분리 |
+| `FLYING` | **`FLOATING`** |
+| 스토리 캐릭터 C/B/A/S/SS | STORY + `rarity:null` |
+| X 희귀도 | 사용하지 않음 |
+| 10/30/60/100 모집 보장 | 없음 |
+| pity/selectionCredits | 없음 |
+| Lv50 약 ×1.595 | 폐기, 현재 앵커 ×10 DESIGN_TARGET |
+| 이동속도 영구 보물 | 금지 |
+| 아군 출격한도 영구 보물 | 금지 |
+| `SPECIAL 5개가 최종 범위` | 폐기. 다단계 상시/주기/이벤트/기록 구조 |
+| 난이도 9~12를 1차에 억지 사용 | 금지 |
+| 메인 솔로 전용 고정 | 폐기. 대부분 SOLO_OR_COOP |
+| 협동은 별도 전용 맵만 | 폐기. 같은 메인/SPECIAL에서 선택 가능 |
 
-`황금 수송대`처럼 5단계가 있는 경우 단순 HP 배율 5개가 아니라 각 단계의 적 조합과 요구 대응이 발전해야 한다.
-
----
-
-# 10. 변경 절차
-
-1. 상위 정본과 충돌 여부 확인
-2. 위키 `DESIGN_TARGET` 작성
-3. 기존 캐릭터/적/스테이지와 중복 검사
-4. 필요한 경우 사용자 콘셉트 검수
-5. content/schema 구현
-6. 자동 테스트
-7. 정상 진행 계정으로 플레이테스트
-8. 결과를 위키에 기록하고 수치 수정
-9. `TESTED`
-10. 릴리스에 포함되는 최종값을 `LOCKED`
-11. 폐기된 코드/데이터/테스트 제거
-
-한쪽만 수정하는 것을 금지한다.
+역사 설명을 위해 위 단어를 문서에 적을 때는 반드시 `폐기/legacy/REWORK`라는 맥락을 함께 둔다.
 
 ---
 
-# 11. 변경 기록 최소 형식
+# 14. 변경 절차
 
-각 상세 페이지 하단에 필요한 경우 다음 표를 둔다.
+1. 상위 정본 확인
+2. 관련 위키 DESIGN_TARGET 작성/수정
+3. 상위호환·역할·실루엣·경제 중복 검사
+4. 필요한 S/SS 콘셉트 사용자 검수
+5. content/schema/code 구현
+6. 자동검증
+7. 정상 진행 계정 실제 플레이
+8. 위키에 결과/수정 이유 기록
+9. TESTED
+10. 릴리스 기준 LOCKED
+11. 폐기된 code/data/test 제거
 
-| 날짜 | 상태 | 변경 | 이유 | 검증 |
-| --- | --- | --- | --- | --- |
-| YYYY-MM-DD | DESIGN_TARGET | 최초 작성 | 구현 전 상세 설계 | 미검증 |
-
-밸런스 숫자를 바꾸면 “상향/하향”만 쓰지 말고 실제 수치와 원인을 적는다.
+한쪽만 수정하지 않는다.
 
 ---
 
-# 12. 구현 전에 반드시 확인할 것
+# 15. LOCKED 전 공통 QA
 
 - 이름/ID 중복 없음
-- 역할이 기존 콘텐츠 완전 상위호환이 아님
-- 실루엣 중복 없음
-- 필요한 속성/태그가 카탈로그에 존재
-- 형태별 수치가 정의됨
-- 공격 frame과 아트 contact frame 정의 가능
-- 스테이지가 정상 해금 시점의 성장으로 클리어 가능
-- 협동 보정이 솔로보다 오히려 불리하게 만들지 않음
-- 첫 클리어/반복/충전 보상이 경제를 터뜨리지 않음
-- 소탕 가능 여부가 명확함
-- 난이도 숫자에 근거가 있음
-- 게임 UI에 필요한 설명이 외부 문서에만 존재하지 않음
+- 참조 속성/태그가 카탈로그에 존재
+- 희귀도가 전투력 서열이 아님
+- 형태별 선택 이유 존재
+- 공격 hit/contact 일치
+- 정상 해금 성장으로 클리어 가능
+- 난이도 숫자에 근거 있음
+- coop scaling이 숨은 추가웨이브를 만들지 않음
+- FIRST_CLEAR/repeat/charge 경제가 중복 지급되지 않음
+- 2배속/소탕 정책 명확
+- 외부 위키 없이 게임 안에서 필요한 전략 정보 제공
+- 개발자 문구가 플레이어 UI에 노출되지 않음
 
-이 조건을 만족하지 않는 콘텐츠는 구현을 서두르지 않는다.
+이 조건을 만족하지 않는 콘텐츠를 문서가 길다는 이유만으로 LOCKED로 올리지 않는다.
