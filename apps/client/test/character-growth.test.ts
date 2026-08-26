@@ -25,8 +25,12 @@ test('v1 level curve uses strong Lv1-50 anchor growth', () => {
   assert.equal(getCharacterLevelMultiplierPermille(999), 10000);
 });
 
-test('+levels are meaningful late growth and clamp at +50', () => {
-  assert.equal(CHARACTER_LEVEL_CURVE.plusHpAttackPermillePerLevel, 200);
+test('+levels apply multiplicatively at +2% per level and clamp at +50', () => {
+  assert.equal(CHARACTER_LEVEL_CURVE.plusHpAttackPermillePerLevel, 20);
+  assert.equal(getCharacterTotalMultiplierPermille(10, 10), 2280);
+  assert.equal(getCharacterTotalMultiplierPermille(20, 20), 4550);
+  assert.equal(getCharacterTotalMultiplierPermille(30, 30), 8000);
+  assert.equal(getCharacterTotalMultiplierPermille(40, 40), 13050);
   assert.equal(getCharacterTotalMultiplierPermille(50, 0), 10000);
   assert.equal(getCharacterTotalMultiplierPermille(50, 50), 20000);
   assert.equal(getCharacterTotalMultiplierPermille(50, 999), 20000);
@@ -35,8 +39,8 @@ test('+levels are meaningful late growth and clamp at +50', () => {
 test('level and plus growth change HP and base attack only, preserving identity stats', () => {
   const slot = getSlotById('turnip-rider')!;
   const leveled = applyCharacterLevel(slot, 30, 10);
-  assert.ok(leveled.definition.maxHp > slot.definition.maxHp);
-  assert.ok(leveled.definition.attackDamage > slot.definition.attackDamage);
+  assert.equal(leveled.definition.maxHp, 1080);
+  assert.equal(leveled.definition.attackDamage, 108);
   assert.equal(leveled.definition.standingRange, slot.definition.standingRange);
   assert.equal(leveled.definition.attackMinRange, slot.definition.attackMinRange);
   assert.equal(leveled.definition.attackMaxRange, slot.definition.attackMaxRange);
