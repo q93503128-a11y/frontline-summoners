@@ -9,7 +9,7 @@ import {
   getStageNumber,
   type PrototypeStage,
 } from './prototype';
-import { recordSpecialStageClear, recordStageClear } from './save';
+import { recordNormalStageClear, recordSpecialStageClear } from './save';
 import { addButton, addText, COLORS, drawBackdrop } from './scene-ui';
 import { getStageCollectionForStage } from './stage-navigation';
 import { isCompactMobileViewport } from './viewport';
@@ -57,19 +57,19 @@ export class ResultScene extends Phaser.Scene {
         }
       });
     } else if (victory) {
-      addText(this, INTERNAL_WIDTH / 2, compact ? 210 : 238, '확정 보물 획득', compact ? 28 : 23, '#8ee3aa', 'center').setOrigin(0.5);
+      addText(this, INTERNAL_WIDTH / 2, compact ? 210 : 238, '영구 보상 획득', compact ? 28 : 23, '#8ee3aa', 'center').setOrigin(0.5);
       addText(this, INTERNAL_WIDTH / 2, compact ? 264 : 290, this.stage.treasure.name, compact ? 38 : 35, '#ffe18a', 'center').setOrigin(0.5);
       addText(this, INTERNAL_WIDTH / 2, compact ? 322 : 342, this.stage.treasure.effect, compact ? 24 : 18, '#c8d0dc', 'center').setOrigin(0.5).setWordWrapWidth(compact ? 720 : 680);
       const unlockSlot = this.stage.unlockUnitId ? getSlotById(this.stage.unlockUnitId) : undefined;
       const unlockText = addText(this, INTERNAL_WIDTH / 2, compact ? 390 : 395, unlockSlot ? (compact ? `동료 · ${unlockSlot.displayName}` : `첫 클리어 동료 보상 · ${unlockSlot.displayName}`) : compact ? '동료 해금 없음' : '이번 스테이지는 동료 해금 없음', compact ? 24 : 20, unlockSlot ? '#9ccfff' : '#8f9aac', 'center').setOrigin(0.5);
-      const status = addText(this, INTERNAL_WIDTH / 2, compact ? 446 : 447, compact ? '진행 저장 중…' : '진행 저장 중… 잠시만 기다려 주세요', compact ? 21 : 16, '#8f9aac', 'center').setOrigin(0.5);
-      void recordStageClear(this.stage.id, this.stage.treasure.id).then((result) => {
+      const status = addText(this, INTERNAL_WIDTH / 2, compact ? 446 : 447, compact ? '진행 저장 중…' : 'NORMAL_CLEAR 진행 저장 중…', compact ? 21 : 16, '#8f9aac', 'center').setOrigin(0.5);
+      void recordNormalStageClear(this.stage.id, 'SOLO_BATTLE').then((result) => {
         this.resultRecorded = true;
         if (!this.scene.isActive()) return;
         if (result.persisted) {
           status.setText(compact
-            ? result.firstClear ? '저장 완료 · 다음 스테이지 개방' : '재클리어 저장 완료'
-            : result.firstClear ? '첫 클리어 저장 완료 · 다음 스테이지 개방' : '재클리어 저장 완료 · 보물 반복 파밍 불필요');
+            ? result.firstClear ? 'NORMAL_CLEAR · 다음 스테이지 개방' : '재클리어 저장 완료'
+            : result.firstClear ? 'NORMAL_CLEAR 저장 완료 · 다음 스테이지 개방' : '재클리어 저장 완료 · 영구 보상 반복 획득 없음');
           status.setColor('#8ee3aa');
         } else {
           status.setText(compact ? '영구 저장 실패 · 현재 탭 진행 유지' : '브라우저 영구 저장 실패 · 현재 탭에서는 진행 유지');
