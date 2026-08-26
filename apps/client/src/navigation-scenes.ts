@@ -2,6 +2,7 @@ import Phaser from 'phaser';
 import { APP_NAME, INTERNAL_HEIGHT, INTERNAL_WIDTH } from '@frontline/shared';
 import { ART_FAMILIES } from './assets';
 import { BATTLEFIELD_THEME_LABELS } from './battlefield';
+import { getPermanentRewardEffectText } from './permanent-reward-ui';
 import {
   ALL_PLAYER_SLOTS,
   SPECIAL_STAGES,
@@ -23,7 +24,7 @@ import {
 import { addButton, addText, COLORS, drawBackdrop } from './scene-ui';
 import { isCompactMobileViewport } from './viewport';
 
-const EMPTY_PROGRESS: GuestProgress = { clearedStageIds: [], specialClearedStageIds: [], treasureIds: [] };
+const EMPTY_PROGRESS: GuestProgress = { clearedStageIds: [], specialClearedStageIds: [], permanentRewardIds: [] };
 
 export class BootScene extends Phaser.Scene {
   constructor() { super('boot'); }
@@ -67,7 +68,7 @@ export class MainMenuScene extends Phaser.Scene {
     addButton(this, 480, compact ? 425 : 435, 250, menuButtonHeight, '편 성', () => this.scene.start('deck'), 0x5f8fb8);
     addButton(this, 790, compact ? 425 : 435, 250, menuButtonHeight, '모 집', () => this.scene.start('recruitment'), 0x8b6fb5);
     addButton(this, 1100, compact ? 425 : 435, 250, menuButtonHeight, '도 감', () => this.scene.start('catalog'), 0x8c7650);
-    addText(this, compact ? 74 : 88, compact ? 610 : 628, compact ? '보물 첫 클리어 100% · 에너지 제한 없음' : '출정에서 전선 묶음을 고른 뒤 스테이지로 진입 · 에너지 제한 없음', compact ? 24 : 20, '#9cd6ad');
+    addText(this, compact ? 74 : 88, compact ? 610 : 628, compact ? '첫 NORMAL_CLEAR 영구 보상 · 에너지 제한 없음' : '출정에서 전선 묶음을 고른 뒤 스테이지로 진입 · 에너지 제한 없음', compact ? 24 : 20, '#9cd6ad');
     if (!compact) addText(this, 1185, 675, 'PRE-ALPHA', 17, '#657086').setOrigin(1, 0.5);
 
     void loadGuestProgress().then((progress) => {
@@ -75,7 +76,7 @@ export class MainMenuScene extends Phaser.Scene {
       const owned = getOwnedCharacterIds(progress).length;
       progressText.setText(compact
         ? `진도 ${progress.clearedStageIds.length}/${STAGES.length} · 특수 ${progress.specialClearedStageIds.length}/${SPECIAL_STAGES.length} · 동료 ${owned}`
-        : `진도 ${progress.clearedStageIds.length}/${STAGES.length} · 특수 ${progress.specialClearedStageIds.length}/${SPECIAL_STAGES.length} · 보물 ${progress.treasureIds.length}/${STAGES.length} · 동료 ${owned}/${ALL_PLAYER_SLOTS.length}`);
+        : `진도 ${progress.clearedStageIds.length}/${STAGES.length} · 특수 ${progress.specialClearedStageIds.length}/${SPECIAL_STAGES.length} · 영구 보상 ${progress.permanentRewardIds.length}/${STAGES.length} · 동료 ${owned}/${ALL_PLAYER_SLOTS.length}`);
     });
   }
 }
@@ -200,7 +201,8 @@ export class StageSelectScene extends Phaser.Scene {
       const cleared = special
         ? this.progress.specialClearedStageIds.includes(stage.id)
         : this.progress.clearedStageIds.includes(stage.id);
-      const treasureOwned = !special && this.progress.treasureIds.includes(stage.treasure.id);
+      const rewardOwned = !special && stage.permanentRewardId !== undefined && this.progress.permanentRewardIds.includes(stage.permanentRewardId);
+      const rewardText = getPermanentRewardEffectText(stage.permanentRewardId);
       const last = index === this.collection.stages.length - 1;
       const border = unlocked ? (special ? (last ? 0xc28bcb : 0x80659b) : (last ? 0xbf9252 : 0x596c86)) : 0x3c4554;
       const card = this.add.rectangle(x, 360, 220, 445, unlocked ? (special ? 0x2b2535 : 0x242b3a) : 0x1d222c, 0.98).setStrokeStyle(3, border, 1);
@@ -214,13 +216,13 @@ export class StageSelectScene extends Phaser.Scene {
         this.stageLayer!.add(addText(this, x, 302, cleared ? '✓ 클리어' : unlocked ? (special ? '도전 가능' : '미클리어') : '잠김', 22, cleared ? '#8ee3aa' : unlocked ? '#a3adbb' : '#6b7480', 'center').setOrigin(0.5));
         if (special) {
           const effectiveCap = unlocked
-            ? createPrototypeBattle(stage.id, getUnlockedSlotIds(this.progress.clearedStageIds), this.progress.treasureIds).playerUnitCap
+            ? createPrototypeBattle(stage.id, getUnlockedSlotIds(this.progress.clearedStageIds), this.progress.permanentRewardIds).playerUnitCap
             : stage.playerUnitCap;
           this.stageLayer!.add(addText(this, x, 350, unlocked ? `동시 출격 ${effectiveCap}기` : '제1장 완료 필요', 20, unlocked ? '#ffd493' : '#6d6858', 'center').setOrigin(0.5));
-          this.stageLayer!.add(addText(this, x, 402, cleared ? `✓ ${stage.treasure.name}` : stage.treasure.name, 19, cleared ? '#9fe4b5' : unlocked ? '#e2ca8d' : '#6d6858', 'center').setOrigin(0.5).setWordWrapWidth(196));
+          this.stageLayer!.add(addText(this, x, 402, cleared ? '✓ 특수전 클리어 기록 완료' : '특수전 클리어 기록', 19, cleared ? '#9fe4b5' : unlocked ? '#e2ca8d' : '#6d6858', 'center').setOrigin(0.5).setWordWrapWidth(196));
         } else {
-          this.stageLayer!.add(addText(this, x, 350, '확정 보물', 19, unlocked ? '#8dd9a8' : '#596a60', 'center').setOrigin(0.5));
-          this.stageLayer!.add(addText(this, x, 386, treasureOwned ? `✓ ${stage.treasure.name}` : stage.treasure.name, 20, treasureOwned ? '#9fe4b5' : unlocked ? '#f2d37c' : '#6d6858', 'center').setOrigin(0.5).setWordWrapWidth(196));
+          this.stageLayer!.add(addText(this, x, 350, '첫 NORMAL_CLEAR 영구 보상', 18, unlocked ? '#8dd9a8' : '#596a60', 'center').setOrigin(0.5));
+          this.stageLayer!.add(addText(this, x, 390, rewardOwned ? `✓ ${rewardText}` : rewardText, 18, rewardOwned ? '#9fe4b5' : unlocked ? '#f2d37c' : '#6d6858', 'center').setOrigin(0.5).setWordWrapWidth(196));
         }
       } else {
         this.stageLayer!.add(addText(this, x, 282, BATTLEFIELD_THEME_LABELS[stage.theme], 16, unlocked ? (special ? '#bba8ca' : '#9ec5d7') : '#606874', 'center').setOrigin(0.5));
@@ -229,13 +231,13 @@ export class StageSelectScene extends Phaser.Scene {
         this.stageLayer!.add(addText(this, x, 401, cleared ? '✓ 클리어' : unlocked ? (special ? '도전 가능' : '미클리어') : '잠김', 17, cleared ? '#8ee3aa' : unlocked ? '#a3adbb' : '#6b7480', 'center').setOrigin(0.5));
         if (special) {
           const effectiveCap = unlocked
-            ? createPrototypeBattle(stage.id, getUnlockedSlotIds(this.progress.clearedStageIds), this.progress.treasureIds).playerUnitCap
+            ? createPrototypeBattle(stage.id, getUnlockedSlotIds(this.progress.clearedStageIds), this.progress.permanentRewardIds).playerUnitCap
             : stage.playerUnitCap;
           this.stageLayer!.add(addText(this, x, 432, unlocked ? `동시 출격 ${effectiveCap}기 · 적 최대 ${stage.enemyUnitCap}기` : '제1장 20스테이지 완료 후 개방', 14, unlocked ? '#ffd493' : '#666d78', 'center').setOrigin(0.5).setWordWrapWidth(196));
-          this.stageLayer!.add(addText(this, x, 474, cleared ? `✓ ${stage.treasure.name}` : `첫 클리어 훈장 · ${stage.treasure.name}`, 13, cleared ? '#9fe4b5' : unlocked ? '#e2ca8d' : '#6d6858', 'center').setOrigin(0.5).setWordWrapWidth(196));
+          this.stageLayer!.add(addText(this, x, 474, cleared ? '✓ 특수전 클리어 기록 완료' : '메인 진도와 별도 클리어 기록', 13, cleared ? '#9fe4b5' : unlocked ? '#e2ca8d' : '#6d6858', 'center').setOrigin(0.5).setWordWrapWidth(196));
         } else {
-          this.stageLayer!.add(addText(this, x, 434, '확정 보물', 14, unlocked ? '#8dd9a8' : '#596a60', 'center').setOrigin(0.5));
-          this.stageLayer!.add(addText(this, x, 458, treasureOwned ? `✓ ${stage.treasure.name}` : stage.treasure.name, 14, treasureOwned ? '#9fe4b5' : unlocked ? '#f2d37c' : '#6d6858', 'center').setOrigin(0.5).setWordWrapWidth(196));
+          this.stageLayer!.add(addText(this, x, 434, '첫 NORMAL_CLEAR 영구 보상', 13, unlocked ? '#8dd9a8' : '#596a60', 'center').setOrigin(0.5));
+          this.stageLayer!.add(addText(this, x, 466, rewardOwned ? `✓ ${rewardText}` : rewardText, 13, rewardOwned ? '#9fe4b5' : unlocked ? '#f2d37c' : '#6d6858', 'center').setOrigin(0.5).setWordWrapWidth(196));
         }
       }
 
