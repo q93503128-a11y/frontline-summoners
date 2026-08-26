@@ -213,7 +213,7 @@ characterId: `char_s02_zirka`
 
 characterId: `char_s02_mogu`  
 속성: `NATURE`  
-태그: `FLYING`  
+태그: `FLOATING`  
 역할: 광역 Slow/Weaken 보조
 
 | 형태 | HP | 총공격 | 주기 | range | 비용 | 재생산 | 이속 | KB |
@@ -317,7 +317,7 @@ characterId: `char_s03_k17`
 
 characterId: `char_s03_arc_railer`  
 속성: `MACHINE`  
-태그: `FLYING` 후보  
+태그: `FLOATING` 후보  
 역할: 극단적 초장거리 레일건
 
 | 형태 | HP | 총공격 | 주기 | standing / 범위 | 비용 | 재생산 | 이속 | KB |
@@ -393,7 +393,7 @@ characterId: `char_s03_blade_hound`
 
 characterId: `char_s03_overlay_astra`  
 속성: `MACHINE` + `ANOMALY` 후보  
-태그: `FLYING`  
+태그: `FLOATING`  
 역할: 부유 블레이드 다단 + 마지막 강타
 
 | 형태 | HP | 총공격 | 주기 | standing | 비용 | 재생산 | 이속 | KB |
