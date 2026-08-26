@@ -22,7 +22,12 @@ import recruitmentUnitsJson from '../../../content/units/recruitment-01.json' wi
 import enemiesJson from '../../../content/enemies/chapter-01.json' with { type: 'json' };
 import stagesJson from '../../../content/stages/chapter-01.json' with { type: 'json' };
 import specialStagesJson from '../../../content/stages/special-01.json' with { type: 'json' };
-import { applyTreasureBattleEffects } from './treasure-effects.ts';
+import rewardScopesJson from '../../../content/permanent-rewards/reward-scopes.json' with { type: 'json' };
+import {
+  REWARD_SCOPES,
+  applyPermanentRewardBattleEffects,
+  type RewardScope,
+} from './permanent-rewards.ts';
 
 export type PrototypeRarity = Rarity | null;
 export type PrototypeRole = PlayerRole;
@@ -34,6 +39,7 @@ export interface PrototypeRosterSlot extends PlayerRosterSlot {
   readonly seriesId?: string;
   readonly role: PrototypeRole;
   readonly description: string;
+  readonly rewardScopes: readonly RewardScope[];
 }
 
 export type PrototypeStage = CampaignStageContent;
@@ -67,6 +73,23 @@ for (const stage of SPECIAL_STAGE_CONTENT) {
   if (stage.unlockUnitId) throw new Error(`special stage must not unlock chapter-one core roster units: ${stage.id}`);
 }
 
+const VALID_REWARD_SCOPES = new Set<string>(REWARD_SCOPES);
+function parseRewardScopeRegistry(value: unknown): ReadonlyMap<string, readonly RewardScope[]> {
+  if (typeof value !== 'object' || value === null || Array.isArray(value)) throw new Error('reward scope registry must be an object');
+  const registry = new Map<string, readonly RewardScope[]>();
+  for (const [unitId, rawScopes] of Object.entries(value as Record<string, unknown>)) {
+    if (!Array.isArray(rawScopes) || rawScopes.length === 0) throw new Error(`reward scopes must be non-empty for ${unitId}`);
+    const scopes = rawScopes.map((scope) => {
+      if (typeof scope !== 'string' || !VALID_REWARD_SCOPES.has(scope)) throw new Error(`unknown reward scope for ${unitId}: ${String(scope)}`);
+      return scope as RewardScope;
+    });
+    if (new Set(scopes).size !== scopes.length) throw new Error(`duplicate reward scope for ${unitId}`);
+    registry.set(unitId, scopes);
+  }
+  return registry;
+}
+const REWARD_SCOPE_BY_UNIT_ID = parseRewardScopeRegistry(rewardScopesJson);
+
 function fighter(content: CombatContent): BattleUnitDefinition {
   return {
     id: content.id,
@@ -93,6 +116,8 @@ function fighter(content: CombatContent): BattleUnitDefinition {
 }
 
 function rosterSlot(unit: PlayerUnitContent): PrototypeRosterSlot {
+  const rewardScopes = REWARD_SCOPE_BY_UNIT_ID.get(unit.id);
+  if (!rewardScopes) throw new Error(`missing explicit permanent reward scopes for unit: ${unit.id}`);
   return {
     slotId: unit.id,
     displayName: unit.displayName,
@@ -101,6 +126,7 @@ function rosterSlot(unit: PlayerUnitContent): PrototypeRosterSlot {
     ...(unit.seriesId === undefined ? {} : { seriesId: unit.seriesId }),
     role: unit.role,
     description: unit.description,
+    rewardScopes,
     definition: fighter(unit),
     cost: unit.cost,
     rechargeFrames: unit.rechargeFrames,
@@ -112,6 +138,9 @@ export const RECRUITMENT_PLAYER_SLOTS: readonly PrototypeRosterSlot[] = RECRUITM
 export const ALL_PLAYER_SLOTS: readonly PrototypeRosterSlot[] = [...PLAYER_SLOTS, ...RECRUITMENT_PLAYER_SLOTS];
 
 if (new Set(ALL_PLAYER_SLOTS.map((slot) => slot.slotId)).size !== ALL_PLAYER_SLOTS.length) throw new Error('campaign and recruitment player slot ids must be globally unique');
+for (const unitId of REWARD_SCOPE_BY_UNIT_ID.keys()) {
+  if (!ALL_PLAYER_SLOTS.some((slot) => slot.slotId === unitId)) throw new Error(`reward scope registry references unknown unit: ${unitId}`);
+}
 
 export const ENEMIES: readonly EnemyArchetype[] = CAMPAIGN.enemies.map((enemy) => ({
   enemyId: enemy.id,
@@ -181,16 +210,16 @@ export function isBattleStageUnlocked(stageId: string, clearedStageIds: readonly
   if (!stage) return false;
   return stage.stageType === 'SPECIAL' ? isSpecialStageUnlocked(stageId, clearedStageIds) : isStageUnlocked(stageId, clearedStageIds);
 }
-export function getTreasureIdsForClearedStages(clearedStageIds: readonly string[]): readonly string[] {
+export function getPermanentRewardIdsForClearedStages(clearedStageIds: readonly string[]): readonly string[] {
   const cleared = new Set(getContiguousClearedStageIds(clearedStageIds));
   return STAGES.filter((stage) => cleared.has(stage.id)).map((stage) => stage.treasure.id);
 }
 
-export function createPrototypeBattleWithPlayerSlots(stageId: string, playerSlots: readonly PrototypeRosterSlot[], ownedTreasureIds: readonly string[] = []): PlayableBattleState {
+export function createPrototypeBattleWithPlayerSlots(stageId: string, playerSlots: readonly PrototypeRosterSlot[], ownedRewardIds: readonly string[] = []): PlayableBattleState {
   const stage = getStage(stageId);
   const safeSlots = playerSlots.length > 0 ? playerSlots : [PLAYER_SLOTS[0]!];
-  const progression = applyTreasureBattleEffects({
-    ownedTreasureIds,
+  const progression = applyPermanentRewardBattleEffects({
+    ownedRewardIds,
     startingSupply: stage.startingSupply,
     playerBaseHp: stage.playerBaseHp,
     playerUnitCap: stage.playerUnitCap,
@@ -211,8 +240,8 @@ export function createPrototypeBattleWithPlayerSlots(stageId: string, playerSlot
   });
 }
 
-export function createPrototypeBattle(stageId = STAGES[0]!.id, unlockedSlotIds: readonly string[] = [STARTER_SLOT_ID], ownedTreasureIds: readonly string[] = []): PlayableBattleState {
+export function createPrototypeBattle(stageId = STAGES[0]!.id, unlockedSlotIds: readonly string[] = [STARTER_SLOT_ID], ownedRewardIds: readonly string[] = []): PlayableBattleState {
   const unlocked = new Set(unlockedSlotIds);
   const playerSlots = ALL_PLAYER_SLOTS.filter((slot) => unlocked.has(slot.slotId));
-  return createPrototypeBattleWithPlayerSlots(stageId, playerSlots, ownedTreasureIds);
+  return createPrototypeBattleWithPlayerSlots(stageId, playerSlots, ownedRewardIds);
 }
