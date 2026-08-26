@@ -13,7 +13,7 @@ const LATE_LIMITS = [
 
 const EXPECTED_ROSTER_SIZE_BEFORE_STAGE = [7, 7, 7, 8, 8] as const;
 
-test('stages eleven through fifteen remain beatable without future unlocks or future treasures', () => {
+test('stages eleven through fifteen remain beatable without future unlocks or permanent rewards', () => {
   const clearedStageIds = STAGES.slice(0, 10).map((stage) => stage.id);
   assert.deepEqual(
     getUnlockedSlotIds(clearedStageIds),
@@ -23,12 +23,12 @@ test('stages eleven through fifteen remain beatable without future unlocks or fu
   for (let stageIndex = 10; stageIndex < 15; stageIndex += 1) {
     const stage = STAGES[stageIndex]!;
     const limit = LATE_LIMITS[stageIndex - 10]!;
-    const { state, unlockedSlotIds, ownedTreasureIds, targetSupplyLevel } = autoPlayCampaignStage(stageIndex, clearedStageIds, {
+    const { state, unlockedSlotIds, ownedPermanentRewardIds, targetSupplyLevel } = autoPlayCampaignStage(stageIndex, clearedStageIds, {
       maxSeconds: limit.maxSeconds,
       cannonBaseRatio: 0.72,
     });
 
-    assert.equal(ownedTreasureIds.length, clearedStageIds.length, 'late baseline must apply only already-earned treasures');
+    assert.equal(ownedPermanentRewardIds.length, clearedStageIds.length, 'late baseline must apply only already-earned permanent rewards');
     assert.equal(targetSupplyLevel, 2, 'mid/late chapter economy baseline should invest into at least wallet Lv2');
     assert.equal(
       unlockedSlotIds.length,
