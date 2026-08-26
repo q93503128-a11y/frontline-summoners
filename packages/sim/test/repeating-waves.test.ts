@@ -1,7 +1,12 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
 import { UnitState, type BattleUnitDefinition } from '../src/index.ts';
-import { createPlayableBattle, stepPlayableBattle, type PlayableBattleConfig } from '../src/playable.ts';
+import {
+  createPlayableBattle,
+  stepPlayableBattle,
+  type EnemyWaveDefinition,
+  type PlayableBattleConfig,
+} from '../src/playable.ts';
 
 const unit = (id: string): BattleUnitDefinition => ({
   id,
@@ -17,6 +22,20 @@ const unit = (id: string): BattleUnitDefinition => ({
   naturalKnockbackDistance: 20,
   deathFrames: 1,
   attackTiming: { cycleFrames: 30, hitFrames: [5], backswingFrames: 6 },
+  attributes: ['NEUTRAL'],
+  combatTags: [],
+  damageBonuses: [],
+});
+
+const wave = (
+  count: number,
+  intervalFrames: number,
+  repeat?: EnemyWaveDefinition['repeat'],
+): EnemyWaveDefinition => ({
+  id: 'W1',
+  trigger: { type: 'TIME', frame: 0 },
+  spawn: { enemyId: 'grunt', count, intervalFrames, magnificationPermille: 1000 },
+  ...(repeat === undefined ? {} : { repeat }),
 });
 
 const config = (enemyWaves: PlayableBattleConfig['enemyWaves'], enemyUnitCap = 50): PlayableBattleConfig => ({
@@ -24,7 +43,7 @@ const config = (enemyWaves: PlayableBattleConfig['enemyWaves'], enemyUnitCap = 5
   playerBaseHp: 1000000,
   enemyBaseHp: 1000000,
   startingSupply: 0,
-  playerSlots: [{ slotId: 'dummy', displayName: 'dummy', definition: unit('dummy'), cost: 0, rechargeFrames: 30 }],
+  playerSlots: [{ slotId: 'dummy', displayName: 'dummy', definition: unit('dummy'), cost: 0, rechargeFrames: 60 }],
   enemies: [{ enemyId: 'grunt', displayName: 'grunt', definition: unit('grunt'), rewardSupply: 0 }],
   enemyWaves,
   enemyUnitCap,
@@ -37,32 +56,26 @@ const step = (state: ReturnType<typeof createPlayableBattle>, ticks: number): vo
 const enemySpawnCount = (state: ReturnType<typeof createPlayableBattle>): number => state.battle.nextSimulationId - 1;
 
 test('one-shot wave still stops after one cycle', () => {
-  const state = createPlayableBattle(config([{ enemyId: 'grunt', atTick: 0, count: 2, intervalTicks: 2 }]));
+  const state = createPlayableBattle(config([wave(2, 2)]));
   step(state, 20);
   assert.equal(enemySpawnCount(state), 2);
 });
 
 test('finite repeating wave executes the requested number of cycles and then stops', () => {
-  const state = createPlayableBattle(config([{
-    enemyId: 'grunt', atTick: 0, count: 2, intervalTicks: 2, repeatDelayTicks: 3, maxCycles: 2,
-  }]));
+  const state = createPlayableBattle(config([wave(2, 2, { delayFrames: 3, maxCycles: 2 })]));
   step(state, 30);
   assert.equal(enemySpawnCount(state), 4);
 });
 
 test('repeating wave without maxCycles continues until battle end', () => {
-  const state = createPlayableBattle(config([{
-    enemyId: 'grunt', atTick: 0, count: 2, intervalTicks: 2, repeatDelayTicks: 3,
-  }]));
+  const state = createPlayableBattle(config([wave(2, 2, { delayFrames: 3 })]));
   step(state, 20);
   assert.equal(enemySpawnCount(state), 8);
   assert.equal(state.battle.winner, null);
 });
 
 test('enemy cap defers a scheduled spawn and resumes spacing from the actual spawn tick', () => {
-  const state = createPlayableBattle(config([{
-    enemyId: 'grunt', atTick: 0, count: 3, intervalTicks: 10,
-  }], 1));
+  const state = createPlayableBattle(config([wave(3, 10)], 1));
 
   step(state, 100);
   assert.equal(enemySpawnCount(state), 1);
@@ -85,17 +98,15 @@ test('enemy cap defers a scheduled spawn and resumes spacing from the actual spa
 });
 
 test('repeat configuration is validated and participates in playable state hash', () => {
-  assert.throws(() => createPlayableBattle(config([{
-    enemyId: 'grunt', atTick: 0, count: 1, intervalTicks: 1, maxCycles: 2,
-  }])), /maxCycles requires repeatDelayTicks/);
+  const malformedRepeat = { maxCycles: 2 } as unknown as NonNullable<EnemyWaveDefinition['repeat']>;
+  assert.throws(
+    () => createPlayableBattle(config([wave(1, 1, malformedRepeat)])),
+    /W1\.repeat\.delayFrames must be a positive integer/,
+  );
 
-  const oneShot = createPlayableBattle(config([{ enemyId: 'grunt', atTick: 0, count: 1, intervalTicks: 1 }]));
-  const repeating = createPlayableBattle(config([{
-    enemyId: 'grunt', atTick: 0, count: 1, intervalTicks: 1, repeatDelayTicks: 10,
-  }]));
-  const finite = createPlayableBattle(config([{
-    enemyId: 'grunt', atTick: 0, count: 1, intervalTicks: 1, repeatDelayTicks: 10, maxCycles: 2,
-  }]));
+  const oneShot = createPlayableBattle(config([wave(1, 1)]));
+  const repeating = createPlayableBattle(config([wave(1, 1, { delayFrames: 10 })]));
+  const finite = createPlayableBattle(config([wave(1, 1, { delayFrames: 10, maxCycles: 2 })]));
 
   assert.notEqual(oneShot.stateHash, repeating.stateHash);
   assert.notEqual(repeating.stateHash, finite.stateHash);
