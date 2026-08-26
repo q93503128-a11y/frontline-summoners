@@ -3,7 +3,7 @@
   "status":"DESIGN_TARGET",
   "levelCap":50,
   "plusLevelCap":50,
-  "plusHpAttackPermillePerLevel":200,
+  "plusHpAttackPermillePerLevel":20,
   "anchors":[
     {"level":1,"multiplierPermille":1000},
     {"level":10,"multiplierPermille":1900},
