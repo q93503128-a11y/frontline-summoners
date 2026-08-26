@@ -1,21 +1,19 @@
-# Frontline Summoners 문서 인덱스 v1.0
+# Frontline Summoners 문서 인덱스 v1.2
 
-이 저장소의 문서는 **최상위 규칙 / 통합 기획 / 시스템 정밀 규칙 / 콘텐츠 위키 / 구현 상태**로 분리한다. 같은 숫자를 여러 문서에 독립 정본으로 두지 않는다.
+이 저장소의 문서는 **최상위 규칙 / 통합 기획 / 시스템 정밀 규칙 / 콘텐츠 바이블 / 구현 검증 상태**로 분리한다. 같은 숫자를 여러 문서에 독립 정본으로 두지 않는다.
 
 ---
 
 # 1. 권위 순서
 
-의도 정본의 우선순위는 다음과 같다.
-
 1. `docs/CANONICAL.md`
 2. `docs/GAME_DESIGN_FULL.md`
 3. 관련 시스템 정밀 문서
 4. 해당 `docs/content-wiki/` 상세 페이지
-5. `docs/FEATURE_COVERAGE_MATRIX.md`, `docs/IMPLEMENTATION_STATUS.md`는 구현 현황 기록
-6. 실제 `content/`/code/test는 실행 상태이며, 의도 정본과 다르면 구현 불일치로 감사한다.
+5. 실제 content/schema/code/test는 위 설계를 구현한 결과
+6. `FEATURE_COVERAGE_MATRIX.md`, `IMPLEMENTATION_STATUS.md`는 구현 검증 상태 기록
 
-`content JSON이 현재 실행된다`는 이유만으로 기획 정본을 덮지 않는다.
+실행된다는 이유만으로 content/code가 새 기획 정본을 덮지 않는다.
 
 ---
 
@@ -23,252 +21,300 @@
 
 ## `CANONICAL.md`
 
-게임의 헌법.
+게임 헌법.
+
+핵심:
 
 - 1차 완성 = 본능 대응 후반 성장 직전
-- 메인 4장 × 20 = 80
-- Lv10 → 20 → 30 → 40 → 50
+- 메인 4×20=80
+- Lv10→20→30→40→50
 - 3형태/+레벨
-- 스토리 캐릭터와 C/B/A/S/SS 모집 희귀도 분리
-- 시리즈당 SS 정확히 1명
-- 천장/직접 선택 없음
+- STORY와 모집 희귀도 분리
+- SS 시리즈당 정확히 1
+- 무천장/무직접선택
 - 재생산 최소 60F
-- SPECIAL/소탕/2배속
-- 협동/친구/PvP
-- 개발자 문구 노출 금지
-
-큰 방향을 바꾸면 가장 먼저 확인/수정한다.
+- 대부분 메인/SPECIAL 협동
+- 기록 SPECIAL 2종
+- 2배속/소탕
+- 친구/PvP
 
 ## `GAME_DESIGN_FULL.md`
 
-현재 v1.0의 사람이 읽는 **통합 전체 기획서**다. 역사 자료가 아니다.
+현재 **통합 전체 기획서 v1.2**.
 
-- 게임 정의/톤
-- 전투 코어
-- 성장/모집/진화
-- 메인/SPECIAL
-- 온라인
-- UI/UX
-- 계정/저장
-- QA/1차 완성 경계
-
-개별 캐릭터 HP, 스폰 프레임 같은 미세 수치는 여기서 중복 정본화하지 않는다.
-
----
-
-# 3. 시스템 정밀 문서
+개별 HP/spawn frame 같은 제작 수치를 중복 보관하지 않고 각 위키로 연결한다.
 
 ## `GROWTH_RECRUITMENT_DESIGN.md`
 
-- Lv1~50
-- +레벨
-- 중복 분해
-- 모집 확률/무천장
-- C/B/A 공통 풀
-- 시리즈 S/SS
-- 진화 3형태
-- 편성/도감 성장 규칙
+성장/모집/진화 공통 규칙.
 
 ## `STAGE_SYSTEM_DESIGN.md`
 
-- 메인 80
-- 난이도 1~12
-- 영구 보상
-- SPECIAL 구조
-- 2배속/소탕
-- 솔로/협동
-- 친구/PvP 연결
+메인/SPECIAL/NORMAL_CLEAR/2배속/소탕/협동/PvP 연결 규칙.
 
 ---
 
-# 4. 콘텐츠 위키 운영
+# 3. 콘텐츠 바이블 시작점
 
-## 시작점
-
-`docs/content-wiki/README.md`
-
-`docs/content-wiki/systems/CONTENT_BIBLE_RULES.md`
+- `docs/content-wiki/README.md`
+- `docs/content-wiki/systems/CONTENT_BIBLE_RULES.md`
 
 상태:
 
 `CONCEPT → DESIGN_TARGET → TESTED → LOCKED`
 
-테스트 전 숫자를 LOCKED로 부르지 않는다.
+보조 상태:
+
+- REWORK
+- DEPRECATED
+
+테스트 전 숫자는 확정값이 아니다.
 
 ---
 
-# 5. 시스템 위키
+# 4. 공통 제작·감사 시스템 위키
 
-## 공통 제작 규격
-
-- `systems/CONTENT_BIBLE_RULES.md` — 권위/ID/상태/변경 절차
+- `systems/CONTENT_BIBLE_RULES.md` — 권위/ID/변경 절차
 - `systems/CHARACTER_SPEC_SCHEMA.md` — 캐릭터 필수 필드
 - `systems/STAGE_SPEC_SCHEMA.md` — 스테이지 필수 필드
-- `systems/ATTRIBUTE_TAG_CATALOG.md` — 속성/태그
-- `systems/ANIMATION_CONTACT_FRAME_TARGETS.md` — 43종 공격 contact/hit 목표
+- `systems/ATTRIBUTE_TAG_CATALOG.md` — 8속성/태그
+- `systems/ANIMATION_CONTACT_FRAME_TARGETS.md` — 43종 hit/contact 목표
+- `systems/DESIGN_DOCUMENT_AUDIT_V1.md` — 문서 일관성 감사/남은 설계 공백
 
-공식 부유 태그는 **`FLOATING`**이다. `FLYING`은 구식/금지 별칭이며 새 데이터에 사용하지 않는다.
-
-## 밸런스/성장
-
-- `systems/PROGRESSION_NUMERICAL_TARGETS.md` — Lv/+Lv/골드/중복/진화재료 수치
-- `systems/MAIN_PERMANENT_REWARDS.md` — 메인 80 영구보상 및 합연산
-- `systems/DIFFICULTY_CALIBRATION.md` — 난이도 1~12 산정
-- `systems/REWARD_ECONOMY_AND_SKIP.md` — 반복보상/충전/2배속/소탕
-
-## 온라인/계정
-
-- `systems/MULTIPLAYER_SOCIAL_PVP.md` — 친구/협동/PvP 공통
-- `systems/PVP_RANKING_MMR_REWARDS.md` — 랭킹 표준화/MMR/티어/시즌/보상
-- `systems/ACCOUNT_SAVE_SYNC_SPEC.md` — 게스트/로그인/동기화/삭제/충돌
-
-## UI
-
-- `systems/UI_UX_ENCYCLOPEDIA.md` — 메인/출정/편성/성장/모집/도감/전투/멀티 UI
+공식 부유 태그는 `FLOATING`. `FLYING`은 금지 legacy alias.
 
 ---
 
-# 6. 플레이어 캐릭터 위키
+# 5. 성장·경제·보상 위키
 
-## 스토리 10종
+- `systems/PROGRESSION_NUMERICAL_TARGETS.md`
+  - Lv1~50 앵커
+  - +레벨
+  - 레벨업 Gold
+  - 중복 분해/+1 비용
+  - 진화 재료 체급
 
-- `characters/STORY_ROSTER_V1.md` — 개념/외형/형태 방향
-- `characters/STORY_ROSTER_V1_COMBAT_SPECS.md` — Lv1 F1/F2/F3 전투 목표
+- `systems/CHARACTER_EVOLUTION_RECIPES_V1.md`
+  - 초기 43종 각각의 F2/F3 정확 recipe DESIGN_TARGET
 
-스토리 캐릭터는 모집 희귀도 `null`이다.
+- `systems/MAIN_PERMANENT_REWARDS.md`
+  - 메인80 영구 HP/ATK/경제/재생산 보너스
 
-## 공통 C/B/A 15종
+- `systems/MAIN_STAGE_CURRENCY_REWARDS_V1.md`
+  - 메인80 각각의 first Gold/모집재화/repeat Gold
+  - milestone 진화재료/소탕권
+
+- `systems/REWARD_ECONOMY_AND_SKIP.md`
+  - 반복보상/충전/2배속/소탕
+
+- `systems/DIFFICULTY_CALIBRATION.md`
+  - 난이도 1~12 산정
+
+---
+
+# 6. 전투 개입·UI 위키
+
+- `systems/BASE_WEAPON_SYSTEM_V1.md`
+  - 전선포
+  - 결계발진기
+  - 보급투하기
+  - 협동 shared weapon/PvP 규칙
+
+- `systems/UI_UX_ENCYCLOPEDIA.md`
+  - 메뉴/편성/성장/모집/도감/전투/멀티 UX
+
+---
+
+# 7. 온라인·계정 위키
+
+- `systems/MULTIPLAYER_SOCIAL_PVP.md`
+  - 친구/협동/PvP 공통
+
+- `systems/PVP_RANKING_MMR_REWARDS.md`
+  - Lv50/+0 표준화
+  - Elo/MMR
+  - 티어/시즌/랭킹/보상
+
+- `systems/ACCOUNT_SAVE_SYNC_SPEC.md`
+  - guest/login
+  - server authority
+  - revision/conflict
+  - guest migration
+  - progress reset/account delete/local delete
+  - idempotency
+
+---
+
+# 8. 플레이어 캐릭터
+
+현재 1차 DESIGN_TARGET 총 43종.
+
+## STORY 10
+
+- `characters/STORY_ROSTER_V1.md`
+- `characters/STORY_ROSTER_V1_COMBAT_SPECS.md`
+
+STORY는 `rarity:null`.
+
+## 공통 C/B/A 15
 
 - `recruitment/COMMON_POOL_V1.md`
 - `recruitment/COMMON_POOL_V1_COMBAT_SPECS.md`
 
-## 초기 모집 3시리즈
+C5/B5/A5.
+
+## 초기 3시리즈 S/SS 18
 
 - `recruitment/INITIAL_SERIES_01_03.md`
 - `recruitment/INITIAL_SERIES_01_03_COMBAT_SPECS.md`
-
-초기 시리즈:
 
 1. 성휘의 기사단
 2. 태고의 거수
 3. 제로 엣지
 
-각각 S 5 + SS 1로 시작한다.
-
-현재 1차 플레이어 설계 대상 총합:
-
-- STORY 10
-- 공통 C/B/A 15
-- S/SS 18
-- 합계 43종
+각 S5+SS1.
 
 ---
 
-# 7. 적/보스 위키
+# 9. 적/보스
 
-- `enemies/INITIAL_ENEMY_ROSTER_V1.md` — 메인 일반 적 32종 개념
-- `enemies/INITIAL_ENEMY_ROSTER_V1_COMBAT_SPECS.md` — 메인 일반 적 전투 목표
-- `bosses/INITIAL_BOSSES_V1.md` — 메인 보스 8종 개념
-- `bosses/INITIAL_BOSSES_V1_COMBAT_SPECS.md` — 메인 보스 전투/페이즈 목표
-- `enemies/SPECIAL_ENEMIES_AND_BOSSES_V1_COMBAT_SPECS.md` — SPECIAL 전용 적/보스
+메인:
 
-적은 색놀이/HP 배율만으로 수를 늘리지 않는다.
+- `enemies/INITIAL_ENEMY_ROSTER_V1.md`
+- `enemies/INITIAL_ENEMY_ROSTER_V1_COMBAT_SPECS.md`
+- `bosses/INITIAL_BOSSES_V1.md`
+- `bosses/INITIAL_BOSSES_V1_COMBAT_SPECS.md`
+
+현재 메인 일반 적 32 + 메인 보스/준보스 8.
+
+SPECIAL:
+
+- `enemies/SPECIAL_ENEMIES_AND_BOSSES_V1_COMBAT_SPECS.md`
+
+색변경만으로 새 enemyId를 만들지 않는다.
 
 ---
 
-# 8. 메인 스테이지 위키
+# 10. 메인 80
 
-기본 지도:
+지도:
 
 - `stages/main/INITIAL_MAIN_4_CHAPTERS.md`
 
-상세 사양:
+상세:
 
-- `stages/main/CHAPTER_01_DETAILED_STAGE_SPECS.md`
-- `stages/main/CHAPTER_02_DETAILED_STAGE_SPECS.md`
-- `stages/main/CHAPTER_03_DETAILED_STAGE_SPECS.md`
-- `stages/main/CHAPTER_04_DETAILED_STAGE_SPECS.md`
+- `CHAPTER_01_DETAILED_STAGE_SPECS.md`
+- `CHAPTER_02_DETAILED_STAGE_SPECS.md`
+- `CHAPTER_03_DETAILED_STAGE_SPECS.md`
+- `CHAPTER_04_DETAILED_STAGE_SPECS.md`
 
-각 장 상세 문서에는 맵 길이, 기지 HP, 시작 보급, 권장 성장, 스폰 frame/반복 wave/보스 trigger, 난이도, 협동 보정, 목표 시간이 들어간다.
+장별 stage spec:
 
-1차 최대 난이도는 일부 8 정도. 9~12를 채우기 위해 억지 적 뻥튀기를 하지 않는다.
+- stageId/name
+- 난이도
+- 권장 성장
+- map/base/supply
+- spawn frame/repeat wave/trigger
+- boss
+- coop
+- target time
+
+재화/영구보상은 시스템 위키의 별도 80개 표와 함께 사용한다.
 
 ---
 
-# 9. SPECIAL 위키
+# 11. SPECIAL
 
 요약:
 
 - `stages/special/INITIAL_SPECIAL_COLLECTIONS.md`
 
-세부:
+상세:
 
 - `PERIODIC_RESOURCE_SPECIALS_DETAILED.md`
 - `PERMANENT_CHALLENGE_SPECIALS_DETAILED.md`
 - `EVENT_AND_RECORD_SPECIALS_DETAILED.md`
 
-기록전은 1차에서:
+기록 SPECIAL:
 
 - 끝없는 전선
 - 보스 러시
 
-두 개만 핵심으로 둔다.
+둘만 1차 핵심 기록 모드이며 SOLO_ONLY.
 
-대부분 SPECIAL은 `SOLO_OR_COOP`, 기록전은 `SOLO_ONLY`.
+대부분 나머지 SPECIAL은 SOLO_OR_COOP.
 
 ---
 
-# 10. 구현 상태 문서
+# 12. NORMAL_CLEAR
+
+NORMAL_CLEAR = 실제 전투 승리.
+
+- 솔로 실제 승리
+- 허용된 정상 협동 실제 승리
+
+둘 모두 동일.
+
+NORMAL_CLEAR 후:
+
+- 진행/first/permanent reward
+- 재클리어 2배속
+- sweep eligible stage 소탕
+
+소탕은 NORMAL_CLEAR를 새로 만들지 않는다.
+
+---
+
+# 13. 구현 검증 문서
 
 ## `FEATURE_COVERAGE_MATRIX.md`
 
-출시 범위에서 기능 누락을 찾기 위한 매트릭스.
+이제 `기획 준비도`와 `구현 검증 상태`를 분리한다.
 
-기획 정본이 아니라 구현 상태를 보고하며, 정본과 과거 내용이 충돌하면 갱신 대상이다.
+2026-08-26 문서 전용 패스 후 실제 구현은 repo-wide 재감사 전 대부분 `RE-AUDIT`.
 
 ## `IMPLEMENTATION_STATUS.md`
 
-현재 실제 코드/콘텐츠가 어디까지 구현됐는지 기록.
+현재 코드가 무엇을 실제로 구현했는지는 다음 구현 작업 첫 단계에서 재감사한다.
 
-`DESIGN_TARGET` 문서가 존재한다는 이유만으로 구현 완료라고 쓰지 않는다.
+과거 코드 스냅샷을 최신 사실로 읽지 않는다.
 
 ## `DEVELOPMENT_RULES.md`
 
-- main 직접 작업 원칙
-- 구형 경로 병존 금지
-- 누적 hotfix 금지
-- 자동/수동 검사
-- 개발자 문구 게임 노출 금지
+구형 경로 병존/누적 hotfix 금지, 검증, main 작업 원칙.
 
 ---
 
-# 11. 정본과 구현이 다를 때
+# 14. 폐기 규칙
 
-예:
+신규 설계에 사용 금지:
 
-- 위키 `FLOATING`, JSON `FLYING`
-- 위키 무천장, 코드 selectionCredits 유지
-- 위키 Lv50×10, 실행값 Lv50×1.595
+- LIGHT
+- FLYING
+- story rarity
+- X rarity
+- 10/30/60/100 guarantee
+- pity/selectionCredits
+- Lv50×1.595
+- permanent movement-speed reward
+- permanent allied deployment-cap reward
+- SPECIAL5를 전체 특수콘텐츠로 간주
+- 메인 전체 solo-only
+- 협동 전용 복제맵만 지원
+- 1차에서 난이도 9~12 억지 사용
 
-이 경우 `현재 실행값이니까 유지`하지 않는다.
-
-1. 의도 정본이 최신인지 확인
-2. 최신이면 구현 불일치로 기록
-3. schema/data/code/test/UI를 함께 수정
-4. 자동검증
-5. 실제 플레이테스트
-6. 해당 위키 상태를 TESTED/LOCKED로 올림
-7. 구식 경로 삭제
+과거 설명에서 언급할 때는 폐기/REWORK 맥락이 명확해야 한다.
 
 ---
 
-# 12. 문서 수정 규칙
+# 15. 문서 수정 규칙
 
-- 게임 철학/1차 범위 변경 → CANONICAL + GAME_DESIGN_FULL
-- 시스템 전체 규칙 변경 → 해당 정밀 문서 + 시스템 위키
-- 개별 캐릭터/적/스테이지 변경 → 해당 콘텐츠 위키
-- 실행 수치 변경 → 위키 상태 확인 후 content/code/test와 동기화
+- 게임 철학/1차 범위 → CANONICAL + GAME_DESIGN_FULL
+- 공통 시스템 → 관련 정밀 문서 + system wiki
+- 개별 캐릭터/적/스테이지 → content wiki
+- 경제 수치 → 해당 numerical/reward wiki
 - 구현 진척 → FEATURE_COVERAGE_MATRIX + IMPLEMENTATION_STATUS
-- 새 채팅 인수인계 → NEW_CHAT_PROMPT 최신화
+- 새 채팅 → NEW_CHAT_PROMPT
+- 문서 대규모 변경 뒤 → DESIGN_DOCUMENT_AUDIT 갱신
 
-DOCX는 사람이 읽는 시점별 스냅샷으로 만들 수 있지만 GitHub 정본과 독립적으로 별도 수정해 두 번째 정본으로 만들지 않는다.
+DOCX는 사람이 읽는 시점별 snapshot으로 사용할 수 있으나 GitHub 정본과 별도 수정하여 제2의 정본으로 만들지 않는다.
