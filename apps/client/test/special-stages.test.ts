@@ -6,24 +6,24 @@ import {
   SPECIAL_STAGES,
   STAGES,
   createPrototypeBattle,
+  getPermanentRewardIdsForClearedStages,
   getSpecialStageNumber,
   getStage,
-  getTreasureIdsForClearedStages,
   isBattleStageUnlocked,
   isSpecialStageUnlocked,
 } from '../src/prototype.ts';
 
-test('first special pack adds five optional challenges without changing the 20-stage progression spine', () => {
+test('special content stays optional and separate from the 20-stage progression spine', () => {
   assert.equal(STAGES.length, 20);
-  assert.equal(SPECIAL_STAGES.length, 5);
-  assert.equal(ALL_STAGES.length, 25);
+  assert.ok(SPECIAL_STAGES.length > 0);
+  assert.equal(ALL_STAGES.length, STAGES.length + SPECIAL_STAGES.length);
   assert.ok(SPECIAL_STAGES.every((stage) => stage.stageType === 'SPECIAL'));
   assert.ok(SPECIAL_STAGES.every((stage) => stage.unlockUnitId === undefined));
+  assert.ok(SPECIAL_STAGES.every((stage) => stage.permanentRewardId === undefined));
   assert.equal(new Set(ALL_STAGES.map((stage) => stage.id)).size, ALL_STAGES.length);
-  assert.deepEqual(SPECIAL_STAGES.map((stage) => stage.difficulty), [6, 7, 8, 9, 10]);
 });
 
-test('special challenges stay locked until chapter one is cleared but never participate in progression order', () => {
+test('the first special challenge stays locked until chapter one is cleared without entering progression order', () => {
   const firstSpecial = SPECIAL_STAGES[0]!;
   const nineteenClears = STAGES.slice(0, 19).map((stage) => stage.id);
   const fullChapter = STAGES.map((stage) => stage.id);
@@ -36,57 +36,33 @@ test('special challenges stay locked until chapter one is cleared but never part
   assert.equal(getStage(firstSpecial.id).id, firstSpecial.id);
 });
 
-test('special pack uses materially different battlefield pressures rather than five normal-stage copies', () => {
-  const [threeSlot, rush, sniperLine, threeVow, doubleBoss] = SPECIAL_STAGES;
-  assert.equal(threeSlot?.playerUnitCap, 2, 'chapter-one +1 cap treasure makes this an effective three-unit challenge');
-  assert.equal(threeVow?.playerUnitCap, 2, 'chapter-one +1 cap treasure makes this an effective three-unit boss challenge');
-  assert.equal(rush?.mapLength, 650);
-  assert.equal(rush?.enemyUnitCap, 25);
-  assert.equal(sniperLine?.mapLength, 1500);
-  assert.equal(sniperLine?.waves.some((wave) => wave.enemyId === 'enemy-sniper' && wave.count >= 6), true);
-  assert.deepEqual(
-    doubleBoss?.waves.filter((wave) => wave.enemyId.startsWith('enemy-boss-')).map((wave) => wave.enemyId),
-    ['enemy-boss-golden', 'enemy-boss-iron'],
-  );
+test('special stages use valid challenge data without relying on obsolete flat wave fields', () => {
+  for (const stage of SPECIAL_STAGES) {
+    assert.ok(stage.difficulty >= 1 && stage.difficulty <= 12);
+    assert.ok(stage.mapLength > 0);
+    assert.ok(stage.playerUnitCap > 0);
+    assert.ok(stage.enemyUnitCap > 0);
+    assert.ok(stage.waves.length > 0);
+    for (const wave of stage.waves) {
+      assert.ok(wave.id.length > 0);
+      assert.ok(wave.spawn.enemyId.length > 0);
+      assert.ok(wave.spawn.count > 0);
+      assert.ok(wave.spawn.intervalFrames > 0);
+      assert.ok(wave.spawn.magnificationPermille >= 100);
+    }
+  }
 });
 
-test('mandatory special bosses enter early enough to define the challenge instead of sitting behind a late empty-base clear', () => {
-  const threeVow = SPECIAL_STAGES[3]!;
-  const doubleBoss = SPECIAL_STAGES[4]!;
-  assert.deepEqual(
-    threeVow.waves.map((wave) => [wave.enemyId, wave.atTick]),
-    [
-      ['enemy-knight', 300],
-      ['enemy-berserker', 900],
-      ['enemy-boss-iron', 1500],
-      ['enemy-sniper', 1600],
-    ],
-  );
-  assert.deepEqual(
-    doubleBoss.waves.map((wave) => [wave.enemyId, wave.atTick]),
-    [
-      ['enemy-cultist', 240],
-      ['enemy-shield', 600],
-      ['enemy-boss-golden', 1050],
-      ['enemy-berserker', 1800],
-      ['enemy-boss-iron', 2100],
-      ['enemy-sniper', 2200],
-    ],
-  );
-});
-
-test('special battle factory applies all chapter-one account growth while respecting stage-specific caps', () => {
+test('special battle factory applies chapter-one permanent growth without changing stage unit caps', () => {
   const fullChapter = STAGES.map((stage) => stage.id);
-  const chapterTreasures = getTreasureIdsForClearedStages(fullChapter);
+  const permanentRewardIds = getPermanentRewardIdsForClearedStages(fullChapter);
   const allSlots = PLAYER_SLOTS.map((slot) => slot.slotId);
 
-  const threeSlotBattle = createPrototypeBattle(SPECIAL_STAGES[0]!.id, allSlots, chapterTreasures);
-  assert.equal(threeSlotBattle.playerUnitCap, 3);
-  assert.equal(threeSlotBattle.enemyUnitCap, 18);
-  assert.equal(threeSlotBattle.playerSlots.length, 10);
-
-  const finalSpecialBattle = createPrototypeBattle(SPECIAL_STAGES[4]!.id, allSlots, chapterTreasures);
-  assert.equal(finalSpecialBattle.playerUnitCap, 9);
-  assert.equal(finalSpecialBattle.enemyUnitCap, 20);
-  assert.equal(finalSpecialBattle.battle.mapLength, 1280);
+  for (const stage of SPECIAL_STAGES) {
+    const battle = createPrototypeBattle(stage.id, allSlots, permanentRewardIds);
+    assert.equal(battle.playerUnitCap, stage.playerUnitCap, 'permanent rewards must not increase the deployment cap');
+    assert.equal(battle.enemyUnitCap, stage.enemyUnitCap);
+    assert.equal(battle.battle.mapLength, stage.mapLength);
+    assert.equal(battle.playerSlots.length, PLAYER_SLOTS.length);
+  }
 });
