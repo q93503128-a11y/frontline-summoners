@@ -34,11 +34,11 @@ const COMBAT_ATTRIBUTE_VALUES = new Set<CombatAttribute>(Object.values(CombatAtt
 export const CombatTag = {
   Armored: 'ARMORED',
   Floating: 'FLOATING',
-  Flying: 'FLYING',
   Giant: 'GIANT',
+  Boss: 'BOSS',
   Structure: 'STRUCTURE',
   Summon: 'SUMMON',
-  Boss: 'BOSS',
+  Swarm: 'SWARM',
 } as const;
 export type CombatTag = (typeof CombatTag)[keyof typeof CombatTag];
 const COMBAT_TAG_VALUES = new Set<CombatTag>(Object.values(CombatTag));
