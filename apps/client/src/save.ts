@@ -4,8 +4,8 @@ import {
   STAGES,
   STARTER_SLOT_ID,
   getContiguousClearedStageIds,
+  getPermanentRewardIdsForClearedStages,
   getStage,
-  getTreasureIdsForClearedStages,
   getUnlockedSlotIds,
   isSpecialStageUnlocked,
   isStageUnlocked,
@@ -42,10 +42,9 @@ export interface GuestProgress {
   /** First actual-battle source for each NORMAL_CLEAR progression stage. */
   readonly normalClearSourceByStage?: Readonly<Record<string, NormalClearSource>>;
   readonly specialClearedStageIds: readonly string[];
-  /** Legacy field name retained until the stage schema migration; contains permanent reward ids. */
-  readonly treasureIds: readonly string[];
+  readonly permanentRewardIds: readonly string[];
   readonly ownedRecruitmentCharacterIds?: readonly string[];
-  /** Pull history only. No pity, guarantee, or selection credit is stored in v8. */
+  /** Pull history only. No pity, guarantee, or selection credit is stored. */
   readonly recruitmentProgressByBanner?: Readonly<Record<string, RecruitmentProgress>>;
   readonly characterProgressById?: Readonly<Record<string, CharacterMetaProgress>>;
   readonly deckSlotIds?: readonly string[];
@@ -79,12 +78,12 @@ export interface GuestDeckResult {
   readonly guestProgress: GuestProgress;
 }
 
-interface StoredGuestProgressV8 {
-  readonly schemaVersion: 8;
+interface StoredGuestProgressV9 {
+  readonly schemaVersion: 9;
   readonly clearedStageIds: readonly string[];
   readonly normalClearSourceByStage: Readonly<Record<string, NormalClearSource>>;
   readonly specialClearedStageIds: readonly string[];
-  readonly treasureIds: readonly string[];
+  readonly permanentRewardIds: readonly string[];
   readonly ownedRecruitmentCharacterIds: readonly string[];
   readonly recruitmentProgressByBanner: Readonly<Record<string, RecruitmentProgress>>;
   readonly characterProgressById: Readonly<Record<string, CharacterMetaProgress>>;
@@ -94,25 +93,34 @@ interface StoredGuestProgressV8 {
 const DB_NAME = 'frontline-summoners';
 const STORE_NAME = 'guest-progress';
 const KEY = 'progress';
-const SCHEMA_VERSION = 8;
+const SCHEMA_VERSION = 9;
 const EMPTY_PROGRESS: GuestProgress = {
   clearedStageIds: [],
   normalClearSourceByStage: {},
   specialClearedStageIds: [],
-  treasureIds: [],
+  permanentRewardIds: [],
   ownedRecruitmentCharacterIds: [],
   recruitmentProgressByBanner: {},
   characterProgressById: {},
 };
-const STAGE_TREASURE_IDS = new Set(STAGES.map((stage) => stage.treasure.id));
+const STAGE_PERMANENT_REWARD_IDS = new Set(STAGES.flatMap((stage) => stage.permanentRewardId ? [stage.permanentRewardId] : []));
 const SPECIAL_STAGE_IDS = new Set(SPECIAL_STAGES.map((stage) => stage.id));
 const RECRUITMENT_CHARACTER_IDS = new Set(RECRUITMENT_UNITS.map((unit) => unit.id));
 const ALL_CHARACTER_IDS = new Set(ALL_PLAYER_SLOTS.map((slot) => slot.slotId));
 const NORMAL_CLEAR_SOURCE_SET = new Set<string>(NORMAL_CLEAR_SOURCES);
+const LEGACY_MAIN_STAGE_ID_MAP = new Map<string, string>(STAGES.map((stage, index) => [`border-${String(index + 1).padStart(2, '0')}`, stage.id]));
 let sessionProgress: GuestProgress = EMPTY_PROGRESS;
 
 function stringArray(value: unknown): readonly string[] {
   return Array.isArray(value) ? value.filter((id): id is string => typeof id === 'string') : [];
+}
+
+function canonicalStageId(stageId: string): string {
+  return LEGACY_MAIN_STAGE_ID_MAP.get(stageId) ?? stageId;
+}
+
+function canonicalStageIds(value: unknown): readonly string[] {
+  return stringArray(value).map(canonicalStageId);
 }
 
 function normalizeNormalClearSourceMap(
@@ -122,9 +130,11 @@ function normalizeNormalClearSourceMap(
   const raw = typeof value === 'object' && value !== null && !Array.isArray(value)
     ? value as Record<string, unknown>
     : {};
+  const canonicalRaw: Record<string, unknown> = {};
+  for (const [stageId, source] of Object.entries(raw)) canonicalRaw[canonicalStageId(stageId)] = source;
   const result: Record<string, NormalClearSource> = {};
   for (const stageId of clearedStageIds) {
-    const candidate = raw[stageId];
+    const candidate = canonicalRaw[stageId];
     result[stageId] = typeof candidate === 'string' && NORMAL_CLEAR_SOURCE_SET.has(candidate)
       ? candidate as NormalClearSource
       : 'SOLO_BATTLE';
@@ -238,12 +248,13 @@ function normalizeExplicitDeckSlotIds(value: unknown, ownedCharacterIds: Readonl
 }
 
 export function hasNormalClear(progress: GuestProgress, stageId: string): boolean {
-  return normalizeGuestProgress(progress).clearedStageIds.includes(stageId);
+  return normalizeGuestProgress(progress).clearedStageIds.includes(canonicalStageId(stageId));
 }
 
 export function getNormalClearSource(progress: GuestProgress, stageId: string): NormalClearSource | undefined {
   const normalized = normalizeGuestProgress(progress);
-  return normalized.clearedStageIds.includes(stageId) ? normalized.normalClearSourceByStage?.[stageId] : undefined;
+  const canonicalId = canonicalStageId(stageId);
+  return normalized.clearedStageIds.includes(canonicalId) ? normalized.normalClearSourceByStage?.[canonicalId] : undefined;
 }
 
 export function getOwnedCharacterIds(progress: GuestProgress): readonly string[] {
@@ -260,10 +271,10 @@ export function getEffectiveDeckSlotIds(progress: GuestProgress): readonly strin
 
 export function mergeGuestProgress(a: GuestProgress, b: GuestProgress): GuestProgress {
   return {
-    clearedStageIds: [...new Set([...a.clearedStageIds, ...b.clearedStageIds])],
+    clearedStageIds: [...new Set([...a.clearedStageIds, ...b.clearedStageIds].map(canonicalStageId))],
     normalClearSourceByStage: { ...(b.normalClearSourceByStage ?? {}), ...(a.normalClearSourceByStage ?? {}) },
     specialClearedStageIds: [...new Set([...a.specialClearedStageIds, ...b.specialClearedStageIds])],
-    treasureIds: [...new Set([...a.treasureIds, ...b.treasureIds])],
+    permanentRewardIds: [...new Set([...a.permanentRewardIds, ...b.permanentRewardIds])],
     ownedRecruitmentCharacterIds: [...new Set([...(a.ownedRecruitmentCharacterIds ?? []), ...(b.ownedRecruitmentCharacterIds ?? [])])],
     recruitmentProgressByBanner: mergeRecruitmentMaps(a.recruitmentProgressByBanner ?? {}, b.recruitmentProgressByBanner ?? {}),
     characterProgressById: mergeCharacterProgressMaps(a.characterProgressById ?? {}, b.characterProgressById ?? {}),
@@ -272,11 +283,11 @@ export function mergeGuestProgress(a: GuestProgress, b: GuestProgress): GuestPro
 }
 
 export function normalizeGuestProgress(progress: GuestProgress): GuestProgress {
-  const clearedStageIds = getContiguousClearedStageIds(progress.clearedStageIds);
+  const clearedStageIds = getContiguousClearedStageIds(progress.clearedStageIds.map(canonicalStageId));
   const normalClearSourceByStage = normalizeNormalClearSourceMap(progress.normalClearSourceByStage, clearedStageIds);
   const specialClearedStageIds = [...new Set(progress.specialClearedStageIds.filter((stageId) => SPECIAL_STAGE_IDS.has(stageId)))];
-  const guaranteedTreasureIds = getTreasureIdsForClearedStages(clearedStageIds);
-  const nonStageTreasureIds = progress.treasureIds.filter((treasureId) => !STAGE_TREASURE_IDS.has(treasureId));
+  const guaranteedPermanentRewardIds = getPermanentRewardIdsForClearedStages(clearedStageIds);
+  const nonStagePermanentRewardIds = progress.permanentRewardIds.filter((rewardId) => !STAGE_PERMANENT_REWARD_IDS.has(rewardId));
   const ownedRecruitmentCharacterIds = [...new Set((progress.ownedRecruitmentCharacterIds ?? []).filter((id) => RECRUITMENT_CHARACTER_IDS.has(id)))];
   const ownedCharacterIds = ownedCharacterIdsForProgress(clearedStageIds, ownedRecruitmentCharacterIds);
   const deckSlotIds = normalizeExplicitDeckSlotIds(progress.deckSlotIds, ownedCharacterIds);
@@ -284,7 +295,7 @@ export function normalizeGuestProgress(progress: GuestProgress): GuestProgress {
     clearedStageIds,
     normalClearSourceByStage,
     specialClearedStageIds,
-    treasureIds: [...new Set([...guaranteedTreasureIds, ...nonStageTreasureIds])],
+    permanentRewardIds: [...new Set([...guaranteedPermanentRewardIds, ...nonStagePermanentRewardIds])],
     ownedRecruitmentCharacterIds,
     recruitmentProgressByBanner: normalizeRecruitmentMap(progress.recruitmentProgressByBanner ?? {}),
     characterProgressById: normalizeCharacterProgressMap(progress.characterProgressById ?? {}, ownedCharacterIds),
@@ -310,14 +321,14 @@ function readStoredProgress(db: IDBDatabase): Promise<GuestProgress> {
       const version = value?.schemaVersion;
       if (!Number.isInteger(version) || (version as number) < 2 || (version as number) > SCHEMA_VERSION) { resolve(EMPTY_PROGRESS); return; }
       const versionNumber = version as number;
-      const clearedStageIds = stringArray(value?.clearedStageIds);
+      const clearedStageIds = canonicalStageIds(value?.clearedStageIds);
       resolve({
         clearedStageIds,
         normalClearSourceByStage: versionNumber >= 8
           ? normalizeNormalClearSourceMap(value?.normalClearSourceByStage, clearedStageIds)
           : normalizeNormalClearSourceMap({}, clearedStageIds),
         specialClearedStageIds: versionNumber >= 3 ? stringArray(value?.specialClearedStageIds) : [],
-        treasureIds: stringArray(value?.treasureIds),
+        permanentRewardIds: versionNumber >= 9 ? stringArray(value?.permanentRewardIds) : stringArray(value?.treasureIds),
         ownedRecruitmentCharacterIds: versionNumber >= 4 ? stringArray(value?.ownedRecruitmentCharacterIds) : [],
         recruitmentProgressByBanner: versionNumber >= 4 ? normalizeRecruitmentMap(value?.recruitmentProgressByBanner) : {},
         characterProgressById: versionNumber >= 5 && typeof value?.characterProgressById === 'object' && value.characterProgressById !== null
@@ -332,12 +343,12 @@ function readStoredProgress(db: IDBDatabase): Promise<GuestProgress> {
 
 async function persistProgress(progress: GuestProgress): Promise<boolean> {
   const normalized = normalizeGuestProgress(progress);
-  const stored: StoredGuestProgressV8 = {
+  const stored: StoredGuestProgressV9 = {
     schemaVersion: SCHEMA_VERSION,
     clearedStageIds: normalized.clearedStageIds,
     normalClearSourceByStage: normalized.normalClearSourceByStage ?? {},
     specialClearedStageIds: normalized.specialClearedStageIds,
-    treasureIds: normalized.treasureIds,
+    permanentRewardIds: normalized.permanentRewardIds,
     ownedRecruitmentCharacterIds: normalized.ownedRecruitmentCharacterIds ?? [],
     recruitmentProgressByBanner: normalized.recruitmentProgressByBanner ?? {},
     characterProgressById: normalized.characterProgressById ?? {},
@@ -368,22 +379,23 @@ export async function loadGuestProgress(): Promise<GuestProgress> {
 export async function recordNormalStageClear(stageId: string, source: NormalClearSource): Promise<NormalStageClearResult> {
   if (!NORMAL_CLEAR_SOURCE_SET.has(source)) throw new Error(`Unknown NORMAL_CLEAR source: ${source}`);
   const before = await loadGuestProgress();
-  const stage = getStage(stageId);
+  const stage = getStage(canonicalStageId(stageId));
   if (stage.stageType !== 'PROGRESSION') throw new Error(`Not a progression stage: ${stage.id}`);
+  if (!stage.permanentRewardId) throw new Error(`Progression stage has no permanent reward: ${stage.id}`);
   if (!isStageUnlocked(stage.id, before.clearedStageIds)) throw new Error(`Campaign stage is not unlocked: ${stage.id}`);
   const cleared = new Set(before.clearedStageIds);
-  const rewards = new Set(before.treasureIds);
+  const rewards = new Set(before.permanentRewardIds);
   const firstClear = !cleared.has(stage.id);
-  const permanentRewardNew = !rewards.has(stage.treasure.id);
+  const permanentRewardNew = !rewards.has(stage.permanentRewardId);
   const normalClearSourceByStage = { ...(before.normalClearSourceByStage ?? {}) };
   cleared.add(stage.id);
-  rewards.add(stage.treasure.id);
+  rewards.add(stage.permanentRewardId);
   if (firstClear) normalClearSourceByStage[stage.id] = source;
   const progress = normalizeGuestProgress({
     ...before,
     clearedStageIds: [...cleared],
     normalClearSourceByStage,
-    treasureIds: [...rewards],
+    permanentRewardIds: [...rewards],
   });
   sessionProgress = progress;
   return {
