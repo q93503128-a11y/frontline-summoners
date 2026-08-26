@@ -1,4 +1,4 @@
-# Frontline Summoners 새 채팅 인수인계 — v1.3 콘텐츠 바이블 기준
+# Frontline Summoners 새 채팅 인수인계 — v1.4 콘텐츠 바이블 기준
 
 전선소환전 / Frontline Summoners 작업을 이전 채팅에서 그대로 이어서 진행한다. 새 게임을 다시 기획하지 말고 **반드시 현재 GitHub `main`을 직접 읽은 뒤 시작**한다.
 
@@ -177,9 +177,9 @@ S/SS 아트 바이블은 상세 DESIGN_TARGET이지만 **정식 아트 제작 �
 
 # 7. 메인 80
 
-1장 뒤집힌 국경 — NEUTRAL/BEAST
-2장 뒤틀린 숲 — NATURE/UNDEAD
-3장 마도도시 세라페 — ARCANE/DEMON
+1장 뒤집힌 국경 — NEUTRAL/BEAST  
+2장 뒤틀린 숲 — NATURE/UNDEAD  
+3장 마도도시 세라페 — ARCANE/DEMON  
 4장 기어 제국의 균열 — MACHINE/ANOMALY
 
 상세:
@@ -217,7 +217,23 @@ NORMAL_CLEAR 후:
 
 ---
 
-# 9. SPECIAL
+# 9. SPECIAL — 중요 신규 고정 규칙
+
+**SPECIAL 허브는 제1장 최종 `main_01_020`을 NORMAL_CLEAR한 후 처음 열린다.**
+
+```text
+main_01_020 NORMAL_CLEAR
+→ 제1장 완료
+→ Lv20 상한
+→ SPECIAL 허브 개방
+```
+
+- 솔로/협동 동일.
+- ST19까진 미개방.
+- 소탕으로 최초 해금 불가.
+- 허브 해금 후에도 collection/고단계는 메인 진행에 따라 잠길 수 있음.
+
+SPECIAL 종류:
 
 - 주기 재화 다단계
 - 상시/보스 도전
@@ -226,8 +242,14 @@ NORMAL_CLEAR 후:
 
 기록 2종은 SOLO_ONLY. 대부분 다른 SPECIAL은 SOLO_OR_COOP.
 
+해금 후보:
+
+- 끝없는 전선: 제3장 완료
+- 보스 러시: 제4장 완료
+
 상세:
 
+- `systems/SPECIAL_ACCESS_AND_STORY_PRESENTATION.md`
 - `stages/special/INITIAL_SPECIAL_COLLECTIONS.md`
 - `PERIODIC_RESOURCE_SPECIALS_DETAILED.md`
 - `PERMANENT_CHALLENGE_SPECIALS_DETAILED.md`
@@ -236,7 +258,47 @@ NORMAL_CLEAR 후:
 
 ---
 
-# 10. 거점 병기
+# 10. 스토리 정책 — 중요 신규 고정 규칙
+
+스토리는 선택형 분위기 요소다.
+
+- 장대한 스토리 바이블은 1차 핵심 아님.
+- 장 시작/중요 보스/장 종료에 짧은 대사·연출 후보.
+- **처음 보는 비전투 스토리도 즉시 건너뛰기 가능.**
+- 설정에 `스토리 연출 자동 건너뛰기`.
+- 스킵해도 진행/보상/튜토리얼/시스템 해금 정보 동일.
+- gameplay boss telegraph와 story cutscene 분리.
+- 협동 상대를 컷신 감상 때문에 장시간 기다리게 하지 않음.
+
+상세:
+`systems/SPECIAL_ACCESS_AND_STORY_PRESENTATION.md`
+
+---
+
+# 11. UI — 상세 사양 작성됨
+
+일반 UX:
+`systems/UI_UX_ENCYCLOPEDIA.md`
+
+화면별 실제 레이아웃/터치:
+`systems/UI_SCREEN_LAYOUT_TOUCH_SPEC.md`
+
+핵심:
+
+- COMPACT/MEDIUM/WIDE breakpoint
+- 640×360~1920×1080 검사
+- safe area
+- 일반 최소 touch 44×44
+- 편성 mobile long press 220ms
+- drag fallback으로 tap→slot 방식 제공
+- 전투 10슬롯 실제 입력 가능 크기 유지
+- SPECIAL 잠금 이유 자연어 표시
+- story Skip 첫 frame부터 노출
+- 모바일/PC overflow 0 목표
+
+---
+
+# 12. 거점 병기
 
 상세:
 `systems/BASE_WEAPON_SYSTEM_V1.md`
@@ -251,7 +313,7 @@ NORMAL_CLEAR 후:
 
 ---
 
-# 11. 협동/친구/PvP
+# 13. 협동/친구/PvP
 
 협동:
 
@@ -287,7 +349,7 @@ PvP:
 
 ---
 
-# 12. 계정/저장
+# 14. 계정/저장
 
 상세:
 `systems/ACCOUNT_SAVE_SYNC_SPEC.md`
@@ -301,7 +363,7 @@ PvP:
 
 ---
 
-# 13. 구현 상태 주의
+# 15. 구현 상태 주의
 
 현재 문서 바이블은 runtime보다 앞서 있을 수 있다.
 
@@ -315,30 +377,36 @@ legacy 후보:
 - Lv50×1.595
 - 이동속도/출격한도 영구보상
 - SPECIAL5를 전체 출시 범위로 간주
+- SPECIAL 시작부터 전부 개방
 - 메인 전체 solo-only
 
-하지만 실제 code에 이미 제거됐을 수 있으므로 **구현 작업 전 main을 다시 감사**한다.
+실제 code에 이미 제거됐을 수 있으므로 **구현 작업 전 main을 다시 감사**한다.
 
 ---
 
-# 14. 다음 문서 우선순위
+# 16. 다음 문서 우선순위
 
-현재 `거점 병기`, `43종 진화 recipe`, `43종 아트·모션 바이블`까지 작성됨.
+이미 작성:
+
+- 거점 병기
+- 43종 진화 recipe
+- 43종 art/motion bible
+- SPECIAL 접근/스토리 Skip
+- UI 화면별 layout/touch/breakpoint
 
 다음:
 
-1. **메인 4장 narrative/story bible**
-2. UI 화면별 layout/touch/breakpoint spec
-3. BGM/SFX/accessibility spec
-4. 캐릭터 portrait/도감 문구 + S/SS reveal storyboard
-5. 업적/프로필 장식 catalog
-6. 최종 링크/ID/schema 검증
+1. BGM/SFX/accessibility spec
+2. 캐릭터 portrait/도감 문구 + S/SS reveal storyboard
+3. 업적/프로필 장식 catalog
+4. 최종 링크/ID/schema 검증
+5. 실제 구현/플레이테스트로 DESIGN_TARGET → TESTED
 
-새 시스템을 더 늘리기보다 이 범위를 완성한 뒤 실제 구현/플레이테스트로 DESIGN_TARGET을 TESTED로 올린다.
+장대한 narrative 작업은 우선순위에서 제외한다.
 
 ---
 
-# 15. 구현을 요청받으면
+# 17. 구현을 요청받으면
 
 1. 최신 `main` commit 확인
 2. CANONICAL/관련 위키 재확인
