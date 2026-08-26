@@ -8,6 +8,7 @@ const fighter = (): BattleUnitDefinition => ({
   standingRange: 40, attackMinRange: 0, attackMaxRange: 50, targetMode: 'SINGLE',
   naturalKnockbackCount: 1, naturalKnockbackFrames: 12, naturalKnockbackDistance: 20,
   deathFrames: 12, attackTiming: { cycleFrames: 30, hitFrames: [5], backswingFrames: 6 },
+  attributes: ['NEUTRAL'], combatTags: [], damageBonuses: [],
 });
 
 const base = (): PlayableBattleConfig => ({
@@ -15,9 +16,13 @@ const base = (): PlayableBattleConfig => ({
   playerBaseHp: 1000,
   enemyBaseHp: 1000,
   startingSupply: 300,
-  playerSlots: [{ slotId: 'unit', displayName: 'unit', definition: fighter(), cost: 50, rechargeFrames: 30 }],
+  playerSlots: [{ slotId: 'unit', displayName: 'unit', definition: fighter(), cost: 50, rechargeFrames: 60 }],
   enemies: [{ enemyId: 'enemy', displayName: 'enemy', definition: { ...fighter(), id: 'enemy' }, rewardSupply: 10 }],
-  enemyWaves: [{ enemyId: 'enemy', atTick: 30, count: 1, intervalTicks: 30 }],
+  enemyWaves: [{
+    id: 'W1',
+    trigger: { type: 'TIME', frame: 30 },
+    spawn: { enemyId: 'enemy', count: 1, intervalFrames: 30, magnificationPermille: 1000 },
+  }],
 });
 
 test('playable config rejects invalid deployment caps and starting supply', () => {
