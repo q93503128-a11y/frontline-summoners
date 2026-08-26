@@ -13,7 +13,7 @@ import {
   SPECIAL_STAGES,
   STAGES,
   createPrototypeBattle,
-  getTreasureIdsForClearedStages,
+  getPermanentRewardIdsForClearedStages,
 } from '../src/prototype.ts';
 
 type SpecialBattle = ReturnType<typeof createPrototypeBattle>;
@@ -30,7 +30,7 @@ export interface SpecialBaselineResult {
 }
 
 const FULL_CHAPTER_CLEARS = STAGES.map((stage) => stage.id);
-const FULL_CHAPTER_TREASURES = getTreasureIdsForClearedStages(FULL_CHAPTER_CLEARS);
+const FULL_CHAPTER_REWARDS = getPermanentRewardIdsForClearedStages(FULL_CHAPTER_CLEARS);
 const FULL_ROSTER = PLAYER_SLOTS.map((slot) => slot.slotId);
 const TARGET_SUPPLY_LEVEL = 4;
 
@@ -54,13 +54,17 @@ function readyAndAffordable(state: SpecialBattle, slotId: string): boolean {
 }
 
 function strongestMatchingSlot(state: SpecialBattle, enemyCount: number) {
-  const enemyTraits = new Set(targetableEnemies(state).flatMap((unit) => unit.definition.traits ?? []));
+  const enemies = targetableEnemies(state);
+  const enemyAttributes = new Set(enemies.flatMap((unit) => unit.definition.attributes));
+  const enemyTags = new Set(enemies.flatMap((unit) => unit.definition.combatTags));
   const supplyLevel = getCurrentSupplyLevel(state);
   return [...state.playerSlots]
     .filter((slot) => slot.cost <= supplyLevel.maxSupply && getCooldownRemaining(state, slot.slotId) === 0)
     .map((slot) => {
-      const multiplier = (slot.definition.damageBonuses ?? [])
-        .filter((bonus) => enemyTraits.has(bonus.trait))
+      const multiplier = slot.definition.damageBonuses
+        .filter((bonus) => bonus.targetKind === 'ATTRIBUTE'
+          ? enemyAttributes.has(bonus.target)
+          : enemyTags.has(bonus.target))
         .reduce((best, bonus) => Math.max(best, bonus.multiplierPermille), 1000);
       const dps = (slot.definition.attackDamage * multiplier * 30) /
         (1000 * Math.max(1, slot.definition.attackTiming.cycleFrames));
@@ -69,7 +73,7 @@ function strongestMatchingSlot(state: SpecialBattle, enemyCount: number) {
       const range = 1 + Math.min(330, slot.definition.standingRange) / 900;
       const missing = Math.max(0, slot.cost - state.supply);
       const wait = missing / Math.max(1, supplyLevel.incomePerSecond);
-      const bossBonus = enemyTraits.has('BOSS') && slot.slotId === 'voidsage' ? 2.2 : 1;
+      const bossBonus = enemyTags.has('BOSS') && slot.slotId === 'voidsage' ? 2.2 : 1;
       const score = ((dps * area * range * bossBonus) + durability) / (1 + wait / 8);
       return { slot, score, wait };
     })
@@ -78,14 +82,13 @@ function strongestMatchingSlot(state: SpecialBattle, enemyCount: number) {
 }
 
 /**
- * Deterministic competent-account baseline for the first SPECIAL pack.
- * It is intentionally separate from the chapter-one teaching baseline: these challenges open only
- * after ST20, so the account owns all ten core units and all twenty guaranteed chapter treasures.
+ * Deterministic competent-account baseline for SPECIAL stages available after chapter one.
+ * The account owns all ten chapter-one core units and every guaranteed permanent reward from the chapter.
  */
 export function autoPlaySpecialStage(stageIndex: number, maxSeconds = 720): SpecialBaselineResult {
   const stage = SPECIAL_STAGES[stageIndex];
   if (!stage) throw new Error(`Unknown special stage index: ${stageIndex}`);
-  const state = createPrototypeBattle(stage.id, FULL_ROSTER, FULL_CHAPTER_TREASURES);
+  const state = createPrototypeBattle(stage.id, FULL_ROSTER, FULL_CHAPTER_REWARDS);
   const seenEnemyIds = new Set<string>();
   const seenPlayerIds = new Set<string>();
   let spawnCount = 0;
@@ -100,8 +103,6 @@ export function autoPlaySpecialStage(stageIndex: number, maxSeconds = 720): Spec
     return true;
   };
 
-  // Open with one reliable anchor, then raise the wallet to Lv4 so the post-ST20 roster — including
-  // 공허현자 — is genuinely usable. Every upgrade still pays the live in-battle cost.
   const lv2 = getNextSupplyLevel(state);
   if (lv2 && state.supply >= lv2.upgradeCost + 150) {
     if (tryUpgradeSupply(state).ok) upgradeCount += 1;
@@ -114,8 +115,6 @@ export function autoPlaySpecialStage(stageIndex: number, maxSeconds = 720): Spec
     const players = alivePlayerUnits(state);
     maxAlivePlayerUnits = Math.max(maxAlivePlayerUnits, players.length);
 
-    // Complete the wallet investment as soon as one anchor is on the field. Low-cap challenges must
-    // not fill their three real slots with disposable units before the expensive counter roster is available.
     if (state.supplyLevel < TARGET_SUPPLY_LEVEL && players.length >= 1) {
       const next = getNextSupplyLevel(state);
       if (next && state.supply >= next.upgradeCost) {
@@ -126,13 +125,12 @@ export function autoPlaySpecialStage(stageIndex: number, maxSeconds = 720): Spec
     const hasCapacity = players.length < state.playerUnitCap;
     if (hasCapacity) {
       let acted = false;
-      const hasBoss = enemies.some((unit) => (unit.definition.traits ?? []).includes('BOSS'));
+      const hasBoss = enemies.some((unit) => unit.definition.combatTags.includes('BOSS'));
 
       if (hasBoss && readyAndAffordable(state, 'voidsage')) {
         acted = spawn('voidsage');
       }
 
-      // A completely broken front is repaired immediately instead of waiting for an ideal damage dealer.
       if (!acted && enemies.length > 0 && players.length === 0) {
         for (const anchorId of ['royal', 'guard', 'duelist']) {
           if (readyAndAffordable(state, anchorId)) {
@@ -147,7 +145,6 @@ export function autoPlaySpecialStage(stageIndex: number, maxSeconds = 720): Spec
         if (tactical && tactical.cost <= state.supply) acted = spawn(tactical.slotId);
       }
 
-      // Before contact, build only a small prepared screen and preserve room for counters in cap-3 stages.
       if (!acted && enemies.length === 0) {
         const prepTarget = state.playerUnitCap <= 3 ? 2 : Math.min(4, state.playerUnitCap);
         if (players.length < prepTarget) {
