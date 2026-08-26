@@ -1,4 +1,4 @@
-# Frontline Summoners 문서 인덱스 v1.3
+# Frontline Summoners 문서 인덱스 v1.4
 
 이 저장소의 문서는 **최상위 규칙 / 통합 기획 / 시스템 정밀 규칙 / 콘텐츠 바이블 / 구현 검증 상태**로 분리한다. 같은 숫자를 여러 문서에 독립 정본으로 두지 않는다.
 
@@ -48,7 +48,13 @@
 
 ## `STAGE_SYSTEM_DESIGN.md`
 
-메인/SPECIAL/NORMAL_CLEAR/2배속/소탕/협동/PvP 연결 규칙.
+현재 v1.2.
+
+- 메인/SPECIAL
+- NORMAL_CLEAR
+- 제1장 ST20 이후 SPECIAL 허브 최초 개방
+- 2배속/소탕
+- 협동/PvP 연결 규칙
 
 ---
 
@@ -77,7 +83,7 @@
 - `systems/STAGE_SPEC_SCHEMA.md` — 스테이지 필수 필드
 - `systems/ATTRIBUTE_TAG_CATALOG.md` — 8속성/태그
 - `systems/ANIMATION_CONTACT_FRAME_TARGETS.md` — 43종 hit/contact 목표
-- `systems/CHARACTER_ART_MOTION_PRODUCTION_RULES.md` — 캐릭터 공통 실루엣/scale/Idle·Move·Attack·KB·Death/VFX/SFX/모바일 식별 규칙
+- `systems/CHARACTER_ART_MOTION_PRODUCTION_RULES.md` — 공통 실루엣/scale/Idle·Move·Attack·KB·Death/VFX/SFX
 - `systems/DESIGN_DOCUMENT_AUDIT_V1.md` — 문서 일관성 감사/남은 설계 공백
 
 공식 부유 태그는 `FLOATING`. `FLYING`은 금지 legacy alias.
@@ -111,7 +117,34 @@
 
 ---
 
-# 6. 전투 개입·UI
+# 6. SPECIAL 접근·스토리·UI
+
+- `systems/SPECIAL_ACCESS_AND_STORY_PRESENTATION.md`
+  - SPECIAL 허브는 `main_01_020 NORMAL_CLEAR` 후 최초 개방
+  - collection/고단계 추가 해금
+  - 기록전 후반 해금 후보
+  - 스토리는 선택형
+  - 모든 비전투 스토리 즉시 Skip
+  - 자동 스토리 스킵
+  - 협동에서 narrative로 파트너 대기시키지 않음
+
+- `systems/UI_UX_ENCYCLOPEDIA.md`
+  - 메뉴/편성/성장/모집/도감/전투/멀티 UX 일반 원칙
+
+- `systems/UI_SCREEN_LAYOUT_TOUCH_SPEC.md`
+  - COMPACT/MEDIUM/WIDE breakpoint
+  - 640×360~1920×1080 검증
+  - safe area
+  - 44px 최소 touch
+  - 220ms long-press drag
+  - 출정/SPECIAL/편성/성장/모집/도감/친구/PvP 상세 레이아웃
+  - 전투 HUD/10칸 슬롯/카메라 gesture
+  - 스토리 Skip UI
+  - 결과/소탕/modal/network QA
+
+---
+
+# 7. 전투 개입
 
 - `systems/BASE_WEAPON_SYSTEM_V1.md`
   - 전선포
@@ -119,12 +152,9 @@
   - 보급투하기
   - 협동 shared weapon/PvP 규칙
 
-- `systems/UI_UX_ENCYCLOPEDIA.md`
-  - 메뉴/편성/성장/모집/도감/전투/멀티 UX
-
 ---
 
-# 7. 온라인·계정
+# 8. 온라인·계정
 
 - `systems/MULTIPLAYER_SOCIAL_PVP.md`
 - `systems/PVP_RANKING_MMR_REWARDS.md`
@@ -134,7 +164,7 @@
 
 ---
 
-# 8. 플레이어 캐릭터 — 43종
+# 9. 플레이어 캐릭터 — 43종
 
 ## STORY 10
 
@@ -168,7 +198,7 @@ S/SS 아트 바이블은 상세 DESIGN_TARGET이지만 **정식 아트 제작 �
 
 ---
 
-# 9. 적/보스
+# 10. 적/보스
 
 메인:
 
@@ -185,7 +215,7 @@ SPECIAL:
 
 ---
 
-# 10. 메인 80
+# 11. 메인 80
 
 지도:
 
@@ -204,7 +234,7 @@ SPECIAL:
 
 ---
 
-# 11. SPECIAL
+# 12. SPECIAL
 
 요약:
 
@@ -216,11 +246,18 @@ SPECIAL:
 - `PERMANENT_CHALLENGE_SPECIALS_DETAILED.md`
 - `EVENT_AND_RECORD_SPECIALS_DETAILED.md`
 
+글로벌 규칙:
+
+- 제1장 ST20 NORMAL_CLEAR 전에는 SPECIAL 허브 잠금
+- 제1장 완료 후 허브 개방
+- collection/단계는 진행별 추가 잠금 가능
+- 끝없는 전선/보스 러시는 후반 추가 해금 후보
+
 기록 SPECIAL은 끝없는 전선/보스 러시 두 개가 1차 핵심이며 SOLO_ONLY. 대부분 나머지는 SOLO_OR_COOP.
 
 ---
 
-# 12. NORMAL_CLEAR
+# 13. NORMAL_CLEAR
 
 NORMAL_CLEAR = 실제 전투 승리.
 
@@ -231,9 +268,26 @@ NORMAL_CLEAR = 실제 전투 승리.
 
 NORMAL_CLEAR 후 진행/FIRST/permanent reward/재클리어 2배속/sweep eligible 소탕을 인정한다.
 
+제1장 ST20 NORMAL_CLEAR은 SPECIAL 허브 최초 개방도 만든다.
+
 ---
 
-# 13. 구현 검증 문서
+# 14. 스토리 정책
+
+스토리는 핵심 진행 시스템이 아니다.
+
+- 짧은 장 시작/보스/종료 분위기 연출만 후보
+- 처음 보는 장면도 즉시 건너뛰기 가능
+- 자동 스토리 스킵 설정
+- 스킵해도 진행/보상/튜토리얼/시스템 해금 정보 동일
+- gameplay boss telegraph는 narrative와 분리
+- 협동 상대를 스토리 감상 때문에 기다리게 하지 않음
+
+장대한 narrative bible은 1차 우선순위에서 제외한다.
+
+---
+
+# 15. 구현 검증 문서
 
 ## `FEATURE_COVERAGE_MATRIX.md`
 
@@ -249,7 +303,7 @@ NORMAL_CLEAR 후 진행/FIRST/permanent reward/재클리어 2배속/sweep eligib
 
 ---
 
-# 14. 폐기 규칙
+# 16. 폐기 규칙
 
 신규 설계에 사용 금지:
 
@@ -263,22 +317,35 @@ NORMAL_CLEAR 후 진행/FIRST/permanent reward/재클리어 2배속/sweep eligib
 - permanent movement-speed reward
 - permanent allied deployment-cap reward
 - SPECIAL5를 전체 특수콘텐츠로 간주
+- SPECIAL을 게임 시작부터 전부 개방
 - 메인 전체 solo-only
 - 협동 전용 복제맵만 지원
 - 1차에서 난이도 9~12 억지 사용
+- 스토리를 읽어야만 튜토리얼/진행조건을 알 수 있게 함
 
 과거 설명에서 언급할 때는 폐기/REWORK 문맥이 명확해야 한다.
 
 ---
 
-# 15. 다음 세밀화 순서
+# 17. 다음 세밀화 순서
 
-1. 메인 4장 narrative/story bible
-2. UI 화면별 layout/touch/breakpoint spec
-3. BGM/SFX/accessibility spec
-4. 캐릭터 portrait/도감 문구 + S/SS reveal storyboard
-5. 업적/프로필 장식 catalog
-6. 최종 링크/ID/schema 검증
-7. 실제 구현/플레이테스트 → TESTED
+현재 완료된 큰 문서 패스:
+
+- 43종 combat/art/motion/진화 recipe
+- 메인80 전투/보상
+- SPECIAL 상세
+- 거점 병기
+- SPECIAL 접근/스토리 Skip 정책
+- 화면별 UI layout/touch/breakpoint
+
+다음:
+
+1. BGM/SFX/accessibility spec
+2. 캐릭터 portrait/도감 문구 + S/SS reveal storyboard
+3. 업적/프로필 장식 catalog
+4. 최종 링크/ID/schema 검증
+5. 실제 구현/플레이테스트 → TESTED
+
+새 시스템을 더 늘리기보다 이 범위를 닫는다.
 
 DOCX는 사람이 읽는 시점별 snapshot으로 사용할 수 있으나 GitHub 정본과 독립 수정해 제2 정본으로 만들지 않는다.
