@@ -11,7 +11,7 @@ import {
 import {
   STAGES,
   createPrototypeBattle,
-  getTreasureIdsForClearedStages,
+  getPermanentRewardIdsForClearedStages,
   getUnlockedSlotIds,
 } from '../src/prototype.ts';
 
@@ -122,8 +122,8 @@ export function autoPlayCampaignStage(
 ) {
   const stage = STAGES[stageIndex]!;
   const unlockedSlotIds = getUnlockedSlotIds(clearedStageIds);
-  const ownedTreasureIds = getTreasureIdsForClearedStages(clearedStageIds);
-  const state = createPrototypeBattle(stage.id, unlockedSlotIds, ownedTreasureIds);
+  const ownedPermanentRewardIds = getPermanentRewardIdsForClearedStages(clearedStageIds);
+  const state = createPrototypeBattle(stage.id, unlockedSlotIds, ownedPermanentRewardIds);
   const maxTicks = options.maxSeconds * 30;
   const targetSupplyLevel = targetSupplyLevelForStage(stageIndex, state);
   const seenEnemyIds = new Set<string>();
@@ -164,8 +164,6 @@ export function autoPlayCampaignStage(
     }
   };
 
-  // Once the campaign has introduced supply upgrades as a real strategic choice, a competent
-  // baseline may invest immediately if it can still retain enough supply for the cheapest defender.
   if (stageIndex >= OPENING_ECONOMY_STAGE_INDEX && state.supplyLevel < targetSupplyLevel) {
     const next = getNextSupplyLevel(state);
     const cheapestCost = Math.min(...state.playerSlots.map((slot) => slot.cost));
@@ -185,16 +183,12 @@ export function autoPlayCampaignStage(
     if (tacticalFinalStage) {
       let acted = false;
 
-      // When the field is completely empty under pressure, rebuild one efficient anchor immediately.
-      // Do not let a planned worker level or high-cost damage dealer turn a recoverable position into a loss.
       if (enemiesAtDecision > 0 && alivePlayersAtDecision === 0) {
         const anchor = selectAffordableAnchor(state);
         acted = anchor ? recordSpawn(anchor.slotId) : false;
       }
 
       if (!acted) {
-        // The late-campaign baseline needs five real deployments before Lv3 investment. This is slightly
-        // faster than the generic 3-per-level rule because the opening Lv2 investment already happened.
         const deploymentUnlockedEconomyLevel = spawnCount >= TACTICAL_LEVEL_THREE_DEPLOYMENTS
           ? 3
           : 1 + Math.floor(spawnCount / DEPLOYMENTS_PER_ECONOMY_LEVEL);
@@ -211,27 +205,20 @@ export function autoPlayCampaignStage(
 
       if (!acted) {
         if (enemiesAtDecision === 0) {
-          // Establish a small screen before first contact, then bank rather than filling the field with cheap units.
           if (alivePlayersAtDecision < TACTICAL_PREP_COUNT) {
             const prep = selectCheapestAffordableReady(state);
             if (prep) recordSpawn(prep.slotId);
           }
         } else {
-          // Under pressure, choose from the roster the player actually owns using current enemy traits,
-          // area value, range, durability and the real time required to save the missing supply.
           const tacticalSlot = selectTacticalCombatSlot(state, enemiesAtDecision);
           if (tacticalSlot) {
             if (state.supply >= tacticalSlot.cost) recordSpawn(tacticalSlot.slotId);
-            // Otherwise intentionally save for at most TACTICAL_MAX_SAVE_SECONDS. If the line fully breaks,
-            // the anchor rule above takes over immediately on the next decision tick.
           } else {
             spawnStrongestAffordableNow();
           }
         }
       }
     } else {
-      // Early and mid campaign keep the deliberately simple roster-cycle baseline. This prevents a final-stage
-      // tuning change from silently rewriting the already-established first fifteen stages.
       const emergencyPressure = enemiesAtDecision > 0 && alivePlayersAtDecision <= EMERGENCY_FRONTLINE_COUNT;
       const emergencySpawned = emergencyPressure && spawnStrongestAffordableNow();
 
@@ -292,7 +279,7 @@ export function autoPlayCampaignStage(
   return {
     state,
     unlockedSlotIds,
-    ownedTreasureIds,
+    ownedPermanentRewardIds,
     targetSupplyLevel,
     seenEnemyIds,
     finalSupplyLevel: getCurrentSupplyLevel(state),
