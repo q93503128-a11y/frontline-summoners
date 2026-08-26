@@ -1,7 +1,8 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
 import {
-  CombatTrait,
+  CombatAttribute,
+  CombatTag,
   UnitState,
   applyForcedDisplacementToTeam,
   computeStateHash,
@@ -16,7 +17,9 @@ const fighter = (overrides: Partial<BattleUnitDefinition> = {}): BattleUnitDefin
   id: 'fighter', maxHp: 100, attackDamage: 100, moveSpeed: 0, standingRange: 100,
   attackMinRange: 0, attackMaxRange: 100, targetMode: 'SINGLE', naturalKnockbackCount: 0,
   naturalKnockbackFrames: 12, naturalKnockbackDistance: 30, deathFrames: 12,
-  attackTiming: { cycleFrames: 30, hitFrames: [0], backswingFrames: 6 }, ...overrides,
+  attackTiming: { cycleFrames: 30, hitFrames: [0], backswingFrames: 6 },
+  attributes: [CombatAttribute.Neutral], combatTags: [], damageBonuses: [],
+  ...overrides,
 });
 
 test('same-frame lethal attacks resolve simultaneously', () => {
@@ -69,33 +72,33 @@ test('battle hash includes map geometry and immutable base definitions', () => {
   assert.notEqual(base.stateHash, tougherPlayerBase.stateHash, 'different max base HP definitions must not share a hash');
 });
 
-test('specialist damage applies only to matching target traits', () => {
+test('specialist damage applies only to matching canonical attributes', () => {
   const specialist = fighter({
     id: 'hunter',
-    damageBonuses: [{ trait: CombatTrait.Light, multiplierPermille: 1250 }],
+    damageBonuses: [{ targetKind: 'ATTRIBUTE', target: CombatAttribute.Arcane, multiplierPermille: 1250 }],
   });
-  const light = fighter({ id: 'light', maxHp: 500, attackDamage: 0, traits: [CombatTrait.Light] });
-  const armored = fighter({ id: 'armored', maxHp: 500, attackDamage: 0, traits: [CombatTrait.Armored] });
-  assert.equal(getUnitAttackDamageAgainst(specialist, light), 125);
+  const arcane = fighter({ id: 'arcane', maxHp: 500, attackDamage: 0, attributes: [CombatAttribute.Arcane] });
+  const armored = fighter({ id: 'armored', maxHp: 500, attackDamage: 0, combatTags: [CombatTag.Armored] });
+  assert.equal(getUnitAttackDamageAgainst(specialist, arcane), 125);
   assert.equal(getUnitAttackDamageAgainst(specialist, armored), 100);
 
   const state = createBattle({ mapLength: 1000, playerBaseHp: 1000, enemyBaseHp: 1000 });
   spawnUnit(state, specialist, 'PLAYER', 500);
-  const target = spawnUnit(state, light, 'ENEMY', 500);
+  const target = spawnUnit(state, arcane, 'ENEMY', 500);
   stepBattle(state);
   assert.equal(target.hp, 375);
 });
 
-test('multiple matching target traits use strongest bonus rather than stacking', () => {
+test('multiple matching target tags use strongest bonus rather than stacking', () => {
   const attacker = fighter({
     id: 'boss-hunter',
     attackDamage: 100,
     damageBonuses: [
-      { trait: CombatTrait.Armored, multiplierPermille: 1300 },
-      { trait: CombatTrait.Boss, multiplierPermille: 1500 },
+      { targetKind: 'TAG', target: CombatTag.Armored, multiplierPermille: 1300 },
+      { targetKind: 'TAG', target: CombatTag.Boss, multiplierPermille: 1500 },
     ],
   });
-  const target = fighter({ id: 'iron-boss', traits: [CombatTrait.Armored, CombatTrait.Boss] });
+  const target = fighter({ id: 'iron-boss', combatTags: [CombatTag.Armored, CombatTag.Boss] });
   assert.equal(getUnitAttackDamageAgainst(attacker, target), 150);
 });
 
@@ -103,7 +106,7 @@ test('specialist bonuses never inflate base damage', () => {
   const state = createBattle({ mapLength: 1000, playerBaseHp: 1000, enemyBaseHp: 1000 });
   spawnUnit(state, fighter({
     id: 'boss-hunter',
-    damageBonuses: [{ trait: CombatTrait.Boss, multiplierPermille: 3000 }],
+    damageBonuses: [{ targetKind: 'TAG', target: CombatTag.Boss, multiplierPermille: 3000 }],
   }), 'PLAYER', 950);
   stepBattle(state);
   assert.equal(state.bases.ENEMY.hp, 900);
