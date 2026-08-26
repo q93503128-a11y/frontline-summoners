@@ -25,8 +25,18 @@ export const MIN_STAGE_DIFFICULTY = 1;
 export const MAX_STAGE_DIFFICULTY = 12;
 export const DEFAULT_PLAYER_UNIT_CAP = 50;
 export const DEFAULT_ENEMY_UNIT_CAP = 50;
-/** Locked v1 rule: final player production recharge may never be below 60 frames / 2 seconds at 30 Hz. */
 export const MIN_PLAYER_RECHARGE_FRAMES = 60;
+
+export const WAVE_TRIGGER_TYPES = [
+  'TIME',
+  'ENEMY_BASE_HP_BELOW',
+  'PLAYER_BASE_HP_BELOW',
+  'BOSS_HP_BELOW',
+  'AFTER_WAVE_TRIGGERED',
+  'AFTER_WAVE_CLEARED',
+  'ANY_OF',
+] as const;
+export type WaveTriggerType = (typeof WAVE_TRIGGER_TYPES)[number];
 
 export type DamageBonusContent =
   | { readonly targetKind: 'ATTRIBUTE'; readonly target: Attribute; readonly multiplierPermille: number }
@@ -56,9 +66,7 @@ export interface CombatContent {
 
 export interface PlayerUnitContent extends CombatContent {
   readonly acquisitionClass: AcquisitionClass;
-  /** STORY/SPECIAL characters do not use recruitment rarity. */
   readonly rarity: Rarity | null;
-  /** COMMON for shared C/B/A or a concrete series id for series-specific S/SS. */
   readonly seriesId?: string;
   readonly role: PlayerRole;
   readonly description: string;
@@ -70,33 +78,41 @@ export interface EnemyContent extends CombatContent {
   readonly rewardSupply: number;
 }
 
-export interface CampaignWaveContent {
+export type SimpleCampaignWaveTriggerContent =
+  | { readonly type: 'TIME'; readonly frame: number }
+  | { readonly type: 'ENEMY_BASE_HP_BELOW'; readonly percent: number }
+  | { readonly type: 'PLAYER_BASE_HP_BELOW'; readonly percent: number }
+  | { readonly type: 'BOSS_HP_BELOW'; readonly enemyId: string; readonly percent: number }
+  | { readonly type: 'AFTER_WAVE_TRIGGERED'; readonly waveId: string; readonly delayFrames: number }
+  | { readonly type: 'AFTER_WAVE_CLEARED'; readonly waveId: string; readonly delayFrames: number };
+
+export type CampaignWaveTriggerContent =
+  | SimpleCampaignWaveTriggerContent
+  | { readonly type: 'ANY_OF'; readonly conditions: readonly SimpleCampaignWaveTriggerContent[] };
+
+export interface CampaignWaveSpawnContent {
   readonly enemyId: string;
-  /** First cycle start. */
-  readonly atTick: number;
-  /** Number of enemies spawned in each cycle. */
   readonly count: number;
-  /** Delay between enemies inside one cycle. */
-  readonly intervalTicks: number;
-  /** Delay after a completed cycle before the next cycle starts. Missing means this wave runs once. */
-  readonly repeatDelayTicks?: number;
-  /** Total cycles including the first. Missing with repeatDelayTicks means repeat until battle end. */
+  readonly intervalFrames: number;
+  readonly magnificationPermille: number;
+}
+
+export interface CampaignWaveRepeatContent {
+  readonly delayFrames: number;
   readonly maxCycles?: number;
 }
 
-export interface CampaignTreasureContent {
+export interface CampaignWaveContent {
   readonly id: string;
-  readonly name: string;
-  readonly effect: string;
+  readonly trigger: CampaignWaveTriggerContent;
+  readonly spawn: CampaignWaveSpawnContent;
+  readonly repeat?: CampaignWaveRepeatContent;
 }
 
 export interface FormationRestrictionContent {
-  /** Empty means no recruitment-rarity allow-list restriction. STORY characters have no rarity. */
   readonly allowedRarities: readonly Rarity[];
   readonly maxRarity?: Rarity;
-  /** Empty means no acquisition-source restriction. */
   readonly allowedAcquisitionClasses: readonly AcquisitionClass[];
-  /** Empty means no role allow-list restriction. */
   readonly allowedRoles: readonly PlayerRole[];
   readonly maxUnitCost?: number;
   readonly requiredUnitTags: readonly string[];
@@ -119,7 +135,8 @@ export interface CampaignStageContent {
   readonly theme: BattlefieldThemeId;
   readonly decorSeed: number;
   readonly waves: readonly CampaignWaveContent[];
-  readonly treasure: CampaignTreasureContent;
+  /** MAIN first-clear account growth. SPECIAL stages do not define one by default. */
+  readonly permanentRewardId?: string;
   readonly playerUnitCap: number;
   readonly enemyUnitCap: number;
   readonly formationRestrictions: FormationRestrictionContent;
@@ -162,15 +179,15 @@ function requireInteger(record: Record<string, unknown>, key: string, context: s
   return value as number;
 }
 
+function optionalInteger(record: Record<string, unknown>, key: string, context: string, min: number, max = Number.MAX_SAFE_INTEGER): number | undefined {
+  if (record[key] === undefined) return undefined;
+  return requireInteger(record, key, context, min, max);
+}
+
 function requireEnum<T extends readonly string[]>(record: Record<string, unknown>, key: string, context: string, values: T): T[number] {
   const value = requireString(record, key, context);
   if (!(values as readonly string[]).includes(value)) throw new Error(`${context}.${key} is unknown: ${value}`);
   return value as T[number];
-}
-
-function optionalInteger(record: Record<string, unknown>, key: string, context: string, min: number, max = Number.MAX_SAFE_INTEGER): number | undefined {
-  if (record[key] === undefined) return undefined;
-  return requireInteger(record, key, context, min, max);
 }
 
 function optionalEnum<T extends readonly string[]>(record: Record<string, unknown>, key: string, context: string, values: T): T[number] | undefined {
@@ -213,9 +230,7 @@ function requireHitFrames(record: Record<string, unknown>, context: string, cycl
   const value = record.hitFrames;
   if (!Array.isArray(value) || value.length === 0) throw new Error(`${context}.hitFrames must be a non-empty array`);
   const frames = value.map((frame, index) => {
-    if (!Number.isInteger(frame) || (frame as number) < 0 || (frame as number) >= cycleFrames) {
-      throw new Error(`${context}.hitFrames[${index}] must be inside cycleFrames`);
-    }
+    if (!Number.isInteger(frame) || (frame as number) < 0 || (frame as number) >= cycleFrames) throw new Error(`${context}.hitFrames[${index}] must be inside cycleFrames`);
     return frame as number;
   });
   if (frames.some((frame, index) => index > 0 && frame <= frames[index - 1]!)) throw new Error(`${context}.hitFrames must be strictly increasing`);
@@ -242,9 +257,7 @@ function parseDamageBonuses(record: Record<string, unknown>, context: string): r
     if (!isRecord(bonus)) throw new Error(`${itemContext} must be an object`);
     const targetKind = requireEnum(bonus, 'targetKind', itemContext, DAMAGE_BONUS_TARGET_KINDS);
     const multiplierPermille = requireInteger(bonus, 'multiplierPermille', itemContext, 1000, 3000);
-    if (targetKind === 'ATTRIBUTE') {
-      return { targetKind, target: requireEnum(bonus, 'target', itemContext, ATTRIBUTES), multiplierPermille };
-    }
+    if (targetKind === 'ATTRIBUTE') return { targetKind, target: requireEnum(bonus, 'target', itemContext, ATTRIBUTES), multiplierPermille };
     return { targetKind, target: requireEnum(bonus, 'target', itemContext, COMBAT_TAGS), multiplierPermille };
   });
   const keys = bonuses.map((bonus) => `${bonus.targetKind}:${bonus.target}`);
@@ -329,39 +342,67 @@ export function parseEnemies(value: unknown): readonly EnemyContent[] {
   });
 }
 
+function parseSimpleWaveTrigger(value: unknown, context: string, enemyIds?: ReadonlySet<string>): SimpleCampaignWaveTriggerContent {
+  if (!isRecord(value)) throw new Error(`${context} must be an object`);
+  const type = requireEnum(value, 'type', context, WAVE_TRIGGER_TYPES);
+  if (type === 'ANY_OF') throw new Error(`${context}.ANY_OF cannot be nested`);
+  if (type === 'TIME') return { type, frame: requireInteger(value, 'frame', context, 0) };
+  if (type === 'ENEMY_BASE_HP_BELOW' || type === 'PLAYER_BASE_HP_BELOW') return { type, percent: requireInteger(value, 'percent', context, 1, 100) };
+  if (type === 'BOSS_HP_BELOW') {
+    const enemyId = requireString(value, 'enemyId', context);
+    if (enemyIds && !enemyIds.has(enemyId)) throw new Error(`${context}.enemyId references unknown enemy: ${enemyId}`);
+    return { type, enemyId, percent: requireInteger(value, 'percent', context, 1, 100) };
+  }
+  const waveId = requireString(value, 'waveId', context);
+  const delayFrames = value.delayFrames === undefined ? 0 : requireInteger(value, 'delayFrames', context, 0);
+  return { type, waveId, delayFrames };
+}
+
+function parseWaveTrigger(value: unknown, context: string, enemyIds?: ReadonlySet<string>): CampaignWaveTriggerContent {
+  if (!isRecord(value)) throw new Error(`${context} must be an object`);
+  const type = requireEnum(value, 'type', context, WAVE_TRIGGER_TYPES);
+  if (type !== 'ANY_OF') return parseSimpleWaveTrigger(value, context, enemyIds);
+  if (!Array.isArray(value.conditions) || value.conditions.length < 2) throw new Error(`${context}.conditions must contain at least two conditions`);
+  return { type, conditions: value.conditions.map((condition, index) => parseSimpleWaveTrigger(condition, `${context}.conditions[${index}]`, enemyIds)) };
+}
+
 function parseWave(value: unknown, context: string, enemyIds?: ReadonlySet<string>): CampaignWaveContent {
   if (!isRecord(value)) throw new Error(`${context} must be an object`);
-  const enemyId = requireString(value, 'enemyId', context);
-  if (enemyIds && !enemyIds.has(enemyId)) throw new Error(`${context}.enemyId references unknown enemy: ${enemyId}`);
-  const repeatDelayTicks = optionalInteger(value, 'repeatDelayTicks', context, 1);
-  const maxCycles = optionalInteger(value, 'maxCycles', context, 1, 1000);
-  if (maxCycles !== undefined && repeatDelayTicks === undefined) throw new Error(`${context}.maxCycles requires repeatDelayTicks`);
+  if (!isRecord(value.spawn)) throw new Error(`${context}.spawn must be an object`);
+  const enemyId = requireString(value.spawn, 'enemyId', `${context}.spawn`);
+  if (enemyIds && !enemyIds.has(enemyId)) throw new Error(`${context}.spawn.enemyId references unknown enemy: ${enemyId}`);
+  const magnificationPermille = value.spawn.magnificationPermille === undefined ? 1000 : requireInteger(value.spawn, 'magnificationPermille', `${context}.spawn`, 100, 10000);
+  let repeat: CampaignWaveRepeatContent | undefined;
+  if (value.repeat !== undefined) {
+    if (!isRecord(value.repeat)) throw new Error(`${context}.repeat must be an object`);
+    const maxCycles = optionalInteger(value.repeat, 'maxCycles', `${context}.repeat`, 1, 1000);
+    repeat = {
+      delayFrames: requireInteger(value.repeat, 'delayFrames', `${context}.repeat`, 1),
+      ...(maxCycles === undefined ? {} : { maxCycles }),
+    };
+  }
   return {
-    enemyId,
-    atTick: requireInteger(value, 'atTick', context, 0),
-    count: requireInteger(value, 'count', context, 1, 1000),
-    intervalTicks: requireInteger(value, 'intervalTicks', context, 1),
-    ...(repeatDelayTicks === undefined ? {} : { repeatDelayTicks }),
-    ...(maxCycles === undefined ? {} : { maxCycles }),
+    id: requireString(value, 'id', context),
+    trigger: parseWaveTrigger(value.trigger, `${context}.trigger`, enemyIds),
+    spawn: {
+      enemyId,
+      count: requireInteger(value.spawn, 'count', `${context}.spawn`, 1, 1000),
+      intervalFrames: requireInteger(value.spawn, 'intervalFrames', `${context}.spawn`, 1),
+      magnificationPermille,
+    },
+    ...(repeat === undefined ? {} : { repeat }),
   };
 }
 
-function parseTreasure(value: unknown, context: string): CampaignTreasureContent {
-  if (!isRecord(value)) throw new Error(`${context} must be an object`);
-  return { id: requireString(value, 'id', context), name: requireString(value, 'name', context), effect: requireString(value, 'effect', context) };
-}
-
 function parseFormationRestrictions(value: unknown, context: string): FormationRestrictionContent {
-  if (value === undefined) {
-    return {
-      allowedRarities: [],
-      allowedAcquisitionClasses: [],
-      allowedRoles: [],
-      requiredUnitTags: [],
-      forbiddenUnitTags: [],
-      sameFactionOnly: false,
-    };
-  }
+  if (value === undefined) return {
+    allowedRarities: [],
+    allowedAcquisitionClasses: [],
+    allowedRoles: [],
+    requiredUnitTags: [],
+    forbiddenUnitTags: [],
+    sameFactionOnly: false,
+  };
   if (!isRecord(value)) throw new Error(`${context} must be an object`);
   const maxRarity = optionalEnum(value, 'maxRarity', context, RARITIES);
   const maxUnitCost = optionalInteger(value, 'maxUnitCost', context, 0, 1000000);
@@ -379,32 +420,49 @@ function parseFormationRestrictions(value: unknown, context: string): FormationR
   };
 }
 
+function referencedWaveIds(trigger: CampaignWaveTriggerContent): readonly string[] {
+  const conditions = trigger.type === 'ANY_OF' ? trigger.conditions : [trigger];
+  return conditions.flatMap((condition) => condition.type === 'AFTER_WAVE_TRIGGERED' || condition.type === 'AFTER_WAVE_CLEARED' ? [condition.waveId] : []);
+}
+
 function parseStage(value: unknown, index: number, options: CampaignValidationOptions): CampaignStageContent {
   const context = `stages[${index}]`;
   if (!isRecord(value)) throw new Error(`${context} must be an object`);
-  const theme = requireEnum(value, 'theme', context, BATTLEFIELD_THEME_IDS);
+  const stageType = value.stageType === undefined ? 'PROGRESSION' : requireEnum(value, 'stageType', context, STAGE_TYPES);
   const wavesValue = value.waves;
   if (!Array.isArray(wavesValue) || wavesValue.length === 0) throw new Error(`${context}.waves must contain at least one wave`);
-  const unlockRaw = value.unlockUnitId;
-  const unlockUnitId = unlockRaw === undefined ? undefined : requireString(value, 'unlockUnitId', context);
+  const waves = wavesValue.map((wave, waveIndex) => parseWave(wave, `${context}.waves[${waveIndex}]`, options.enemyIds));
+  const waveIds = new Set<string>();
+  for (let waveIndex = 0; waveIndex < waves.length; waveIndex += 1) {
+    const wave = waves[waveIndex]!;
+    if (waveIds.has(wave.id)) throw new Error(`${context}.waves duplicate id: ${wave.id}`);
+    const priorWaveIds = new Set(waves.slice(0, waveIndex).map((candidate) => candidate.id));
+    for (const reference of referencedWaveIds(wave.trigger)) {
+      if (!priorWaveIds.has(reference)) throw new Error(`${context}.${wave.id} must reference an earlier wave: ${reference}`);
+    }
+    waveIds.add(wave.id);
+  }
+  const unlockUnitId = optionalString(value, 'unlockUnitId', context);
   if (unlockUnitId && options.playerUnitIds && !options.playerUnitIds.has(unlockUnitId)) throw new Error(`${context}.unlockUnitId references unknown player unit: ${unlockUnitId}`);
   if (unlockUnitId && options.starterUnitId && unlockUnitId === options.starterUnitId) throw new Error(`${context} must not unlock the starter unit again`);
-
+  const permanentRewardId = optionalString(value, 'permanentRewardId', context);
+  if (stageType === 'PROGRESSION' && !permanentRewardId) throw new Error(`${context}.PROGRESSION stage requires permanentRewardId`);
+  if (stageType === 'SPECIAL' && permanentRewardId) throw new Error(`${context}.SPECIAL stage must not define permanentRewardId`);
   const base: Omit<CampaignStageContent, 'unlockUnitId'> = {
     id: requireString(value, 'id', context),
     chapter: requireString(value, 'chapter', context),
     name: requireString(value, 'name', context),
     subtitle: requireString(value, 'subtitle', context),
-    stageType: value.stageType === undefined ? 'PROGRESSION' : requireEnum(value, 'stageType', context, STAGE_TYPES),
+    stageType,
     difficulty: requireInteger(value, 'difficulty', context, MIN_STAGE_DIFFICULTY, MAX_STAGE_DIFFICULTY),
     playerBaseHp: requireInteger(value, 'playerBaseHp', context, 1),
     enemyBaseHp: requireInteger(value, 'enemyBaseHp', context, 1),
     startingSupply: requireInteger(value, 'startingSupply', context, 0, 100000),
     mapLength: requireInteger(value, 'mapLength', context, 500, 5000),
-    theme,
+    theme: requireEnum(value, 'theme', context, BATTLEFIELD_THEME_IDS),
     decorSeed: requireInteger(value, 'decorSeed', context, 0),
-    waves: wavesValue.map((wave, waveIndex) => parseWave(wave, `${context}.waves[${waveIndex}]`, options.enemyIds)),
-    treasure: parseTreasure(value.treasure, `${context}.treasure`),
+    waves,
+    ...(permanentRewardId === undefined ? {} : { permanentRewardId }),
     playerUnitCap: value.playerUnitCap === undefined ? DEFAULT_PLAYER_UNIT_CAP : requireInteger(value, 'playerUnitCap', context, 1, 500),
     enemyUnitCap: value.enemyUnitCap === undefined ? DEFAULT_ENEMY_UNIT_CAP : requireInteger(value, 'enemyUnitCap', context, 1, 500),
     formationRestrictions: parseFormationRestrictions(value.formationRestrictions, `${context}.formationRestrictions`),
@@ -415,32 +473,28 @@ function parseStage(value: unknown, index: number, options: CampaignValidationOp
 
 export function parseCampaignStages(value: unknown, options: CampaignValidationOptions = {}): readonly CampaignStageContent[] {
   if (!Array.isArray(value) || value.length === 0) throw new Error('campaign stages must be a non-empty array');
-  if (options.expectedStageCount !== undefined && value.length !== options.expectedStageCount) {
-    throw new Error(`campaign must contain exactly ${options.expectedStageCount} stages, got ${value.length}`);
-  }
+  if (options.expectedStageCount !== undefined && value.length !== options.expectedStageCount) throw new Error(`campaign must contain exactly ${options.expectedStageCount} stages, got ${value.length}`);
   const stages = value.map((stage, index) => parseStage(stage, index, options));
   const stageIds = new Set<string>();
-  const treasureIds = new Set<string>();
+  const rewardIds = new Set<string>();
   const unlockIds = new Set<string>();
   const themes = new Set<BattlefieldThemeId>();
-
   for (let index = 0; index < stages.length; index += 1) {
     const stage = stages[index]!;
     if (stageIds.has(stage.id)) throw new Error(`duplicate stage id: ${stage.id}`);
-    if (treasureIds.has(stage.treasure.id)) throw new Error(`duplicate treasure id: ${stage.treasure.id}`);
     stageIds.add(stage.id);
-    treasureIds.add(stage.treasure.id);
+    if (stage.permanentRewardId) {
+      if (rewardIds.has(stage.permanentRewardId)) throw new Error(`duplicate permanent reward id: ${stage.permanentRewardId}`);
+      rewardIds.add(stage.permanentRewardId);
+    }
     themes.add(stage.theme);
     if (stage.unlockUnitId) {
       if (unlockIds.has(stage.unlockUnitId)) throw new Error(`player unit is unlocked more than once: ${stage.unlockUnitId}`);
       unlockIds.add(stage.unlockUnitId);
     }
-    const waveStarts = stage.waves.map((wave) => wave.atTick);
-    if (waveStarts.some((tick, waveIndex) => waveIndex > 0 && tick < waveStarts[waveIndex - 1]!)) throw new Error(`${stage.id} waves must be ordered by atTick`);
     const previous = stages[index - 1];
     if (previous && stage.mapLength === previous.mapLength && stage.theme === previous.theme) throw new Error(`${stage.id} repeats both theme and mapLength from the immediately previous stage`);
   }
-
   if (options.requiredThemeCount !== undefined && themes.size < options.requiredThemeCount) throw new Error(`campaign must use at least ${options.requiredThemeCount} battlefield themes, got ${themes.size}`);
   return stages;
 }
@@ -466,9 +520,7 @@ export function parseCampaignBundle(input: {
     requiredThemeCount: input.requiredThemeCount,
   });
   const unlockedIds = new Set(stages.flatMap((stage) => stage.unlockUnitId ? [stage.unlockUnitId] : []));
-  for (const unit of playerUnits) {
-    if (unit.id !== input.starterUnitId && !unlockedIds.has(unit.id)) throw new Error(`player unit is never unlocked by campaign: ${unit.id}`);
-  }
+  for (const unit of playerUnits) if (unit.id !== input.starterUnitId && !unlockedIds.has(unit.id)) throw new Error(`player unit is never unlocked by campaign: ${unit.id}`);
   if (unlockedIds.size !== playerUnits.length - 1) throw new Error('campaign unlock count must match all non-starter player units exactly once');
   return { playerUnits, enemies, stages };
 }
