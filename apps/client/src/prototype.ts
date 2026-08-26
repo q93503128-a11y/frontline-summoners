@@ -212,10 +212,8 @@ export function isBattleStageUnlocked(stageId: string, clearedStageIds: readonly
 }
 export function getPermanentRewardIdsForClearedStages(clearedStageIds: readonly string[]): readonly string[] {
   const cleared = new Set(getContiguousClearedStageIds(clearedStageIds));
-  return STAGES.filter((stage) => cleared.has(stage.id)).map((stage) => stage.treasure.id);
+  return STAGES.flatMap((stage) => cleared.has(stage.id) && stage.permanentRewardId ? [stage.permanentRewardId] : []);
 }
-/** Save-schema migration bridge; remove when GuestProgress v8 renames treasureIds to permanentRewardIds. */
-export const getTreasureIdsForClearedStages = getPermanentRewardIdsForClearedStages;
 
 export function createPrototypeBattleWithPlayerSlots(stageId: string, playerSlots: readonly PrototypeRosterSlot[], ownedRewardIds: readonly string[] = []): PlayableBattleState {
   const stage = getStage(stageId);
