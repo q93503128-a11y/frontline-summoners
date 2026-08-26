@@ -186,24 +186,30 @@ export function getCharacterLevelMultiplierPermille(level: number): number {
     const left = anchors[index - 1]!;
     if (normalized < right.level) {
       const numerator = (right.multiplierPermille - left.multiplierPermille) * (normalized - left.level);
-      return left.multiplierPermille + Math.trunc(numerator / (right.level - left.level));
+      return left.multiplierPermille + numerator / (right.level - left.level);
     }
   }
   return anchors[anchors.length - 1]!.multiplierPermille;
 }
 
 export function getCharacterTotalMultiplierPermille(level: number, plusLevel = 0): number {
-  return getCharacterLevelMultiplierPermille(level)
+  const baseMultiplierPermille = getCharacterLevelMultiplierPermille(level);
+  const plusMultiplierPermille = 1000
     + normalizeCharacterPlusLevel(plusLevel) * CHARACTER_LEVEL_CURVE.plusHpAttackPermillePerLevel;
+  return (baseMultiplierPermille * plusMultiplierPermille) / 1000;
 }
 
 function scale(value: number, permille: number, minimum = 0): number {
   return Math.max(minimum, Math.trunc((value * permille) / 1000));
 }
 
+function scaleFinalStat(value: number, permille: number, minimum = 0): number {
+  return Math.max(minimum, Math.round((value * permille) / 1000));
+}
+
 export function applyCharacterLevel(slot: PlayerRosterSlot, level: number, plusLevel = 0): PlayerRosterSlot {
   const multiplier = getCharacterTotalMultiplierPermille(level, plusLevel);
-  return { ...slot, definition: { ...slot.definition, maxHp: scale(slot.definition.maxHp, multiplier, 1), attackDamage: scale(slot.definition.attackDamage, multiplier, 0) } };
+  return { ...slot, definition: { ...slot.definition, maxHp: scaleFinalStat(slot.definition.maxHp, multiplier, 1), attackDamage: scaleFinalStat(slot.definition.attackDamage, multiplier, 0) } };
 }
 
 export function getEvolutionForms(characterId: string): readonly EvolutionFormDefinition[] {
