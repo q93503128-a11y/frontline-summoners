@@ -10,6 +10,7 @@ import {
   tryFireBaseWeapon,
   trySpawnPlayerUnit,
   tryUpgradeSupply,
+  type EnemyWaveDefinition,
   type PlayableBattleConfig,
 } from '../src/playable.ts';
 
@@ -27,7 +28,16 @@ const unit = (id: string, overrides: Partial<BattleUnitDefinition> = {}): Battle
   naturalKnockbackDistance: 20,
   deathFrames: 12,
   attackTiming: { cycleFrames: 30, hitFrames: [5], backswingFrames: 6 },
+  attributes: ['NEUTRAL'],
+  combatTags: [],
+  damageBonuses: [],
   ...overrides,
+});
+
+const wave = (frame: number, count: number, intervalFrames: number, id = 'W1'): EnemyWaveDefinition => ({
+  id,
+  trigger: { type: 'TIME', frame },
+  spawn: { enemyId: 'grunt', count, intervalFrames, magnificationPermille: 1000 },
 });
 
 const config = (): PlayableBattleConfig => ({
@@ -36,14 +46,12 @@ const config = (): PlayableBattleConfig => ({
   enemyBaseHp: 1000,
   startingSupply: 300,
   playerSlots: [
-    { slotId: 'cheap', displayName: 'cheap', definition: unit('cheap'), cost: 50, rechargeFrames: 45 },
+    { slotId: 'cheap', displayName: 'cheap', definition: unit('cheap'), cost: 50, rechargeFrames: 60 },
   ],
   enemies: [
     { enemyId: 'grunt', displayName: 'grunt', definition: unit('grunt'), rewardSupply: 25 },
   ],
-  enemyWaves: [
-    { enemyId: 'grunt', atTick: 10, count: 2, intervalTicks: 20 },
-  ],
+  enemyWaves: [wave(10, 2, 20)],
 });
 
 test('default economy starts with a deliberately small wallet and meaningful upgrade income', () => {
@@ -64,10 +72,10 @@ test('spawning consumes supply and starts deterministic cooldown', () => {
   const result = trySpawnPlayerUnit(state, 'cheap');
   assert.equal(result.ok, true);
   assert.equal(state.supply, 250);
-  assert.equal(getCooldownRemaining(state, 'cheap'), 45);
+  assert.equal(getCooldownRemaining(state, 'cheap'), 60);
   const blocked = trySpawnPlayerUnit(state, 'cheap');
   assert.deepEqual(blocked, { ok: false, reason: 'cooldown' });
-  for (let i = 0; i < 45; i += 1) stepPlayableBattle(state);
+  for (let i = 0; i < 60; i += 1) stepPlayableBattle(state);
   assert.equal(getCooldownRemaining(state, 'cheap'), 0);
 });
 
@@ -96,7 +104,7 @@ test('base weapon is initially ready and natural KB takes priority over cannon p
   const state = createPlayableBattle({
     ...config(),
     baseWeapon: { damage: 60, cooldownFrames: 90, pushDistance: 60, pushFrames: 10 },
-    enemyWaves: [{ enemyId: 'grunt', atTick: 0, count: 1, intervalTicks: 999 }],
+    enemyWaves: [wave(0, 1, 999)],
   });
   assert.equal(getBaseWeaponCooldownRemaining(state), 0);
   assert.deepEqual(tryFireBaseWeapon(state), { ok: true, readyTick: 90 });
@@ -135,7 +143,7 @@ test('base weapon kills grant the same enemy reward and remain deterministic', (
     const state = createPlayableBattle({
       ...config(),
       baseWeapon: { damage: 120, cooldownFrames: 120, pushDistance: 60, pushFrames: 10 },
-      enemyWaves: [{ enemyId: 'grunt', atTick: 0, count: 1, intervalTicks: 999 }],
+      enemyWaves: [wave(0, 1, 999)],
     });
     tryFireBaseWeapon(state);
     stepPlayableBattle(state);
@@ -170,7 +178,7 @@ test('playable hash includes future economy, slot, enemy, wave and cap configura
   });
   const pricierSlot = createPlayableBattle({
     ...config(),
-    playerSlots: [{ slotId: 'cheap', displayName: 'cheap', definition: unit('cheap'), cost: 51, rechargeFrames: 45 }],
+    playerSlots: [{ slotId: 'cheap', displayName: 'cheap', definition: unit('cheap'), cost: 51, rechargeFrames: 60 }],
   });
   const richerEnemy = createPlayableBattle({
     ...config(),
@@ -178,7 +186,7 @@ test('playable hash includes future economy, slot, enemy, wave and cap configura
   });
   const widerWave = createPlayableBattle({
     ...config(),
-    enemyWaves: [{ enemyId: 'grunt', atTick: 10, count: 3, intervalTicks: 20 }],
+    enemyWaves: [wave(10, 3, 20)],
   });
   const smallerCap = createPlayableBattle({ ...config(), playerUnitCap: 49 });
 
