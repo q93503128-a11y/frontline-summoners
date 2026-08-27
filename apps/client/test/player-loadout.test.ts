@@ -5,12 +5,13 @@ import { STAGES } from '../src/prototype.ts';
 import type { GuestProgress } from '../src/save.ts';
 
 const fullChapter = STAGES.map((stage) => stage.id);
+const firstStageId = STAGES[0]!.id;
 
 function progress(overrides: Partial<GuestProgress> = {}): GuestProgress {
   return {
     clearedStageIds: fullChapter,
     specialClearedStageIds: [],
-    treasureIds: [],
+    permanentRewardIds: [],
     ownedRecruitmentCharacterIds: ['moon-eater', 'castle-crab'],
     recruitmentProgressByBanner: {},
     characterProgressById: {},
@@ -23,11 +24,11 @@ test('explicit saved deck order becomes the actual battle slot order', () => {
   const slots = buildGuestDeckSlots(guest);
   assert.deepEqual(slots.map((slot) => slot.slotId), ['moon-eater', 'militia', 'castle-crab']);
 
-  const battle = createGuestPrototypeBattle('border-01', guest);
+  const battle = createGuestPrototypeBattle(firstStageId, guest);
   assert.deepEqual(battle.playerSlots.map((slot) => slot.slotId), ['moon-eater', 'militia', 'castle-crab']);
 });
 
-test('saved level and selected evolution form alter the battle-ready definition rather than only UI metadata', () => {
+test('saved level, plus level, and selected evolution form alter the battle-ready definition rather than only UI metadata', () => {
   const baseGuest = progress({ deckSlotIds: ['moon-eater'] });
   const base = buildGuestDeckSlots(baseGuest)[0]!;
 
@@ -36,6 +37,7 @@ test('saved level and selected evolution form alter the battle-ready definition 
     characterProgressById: {
       'moon-eater': {
         level: 30,
+        plusLevel: 0,
         unlockedFormIds: ['moon-eater-base', 'moon-eater-hollow', 'moon-eater-eclipse'],
         selectedFormId: 'moon-eater-eclipse',
       },
@@ -50,7 +52,7 @@ test('saved level and selected evolution form alter the battle-ready definition 
   assert.equal(evolved.definition.damageBonuses?.[0]?.trait, 'BOSS');
   assert.equal(evolved.definition.damageBonuses?.[0]?.multiplierPermille, 1700);
 
-  const battle = createGuestPrototypeBattle('border-01', evolvedGuest);
+  const battle = createGuestPrototypeBattle(firstStageId, evolvedGuest);
   const battleMoon = battle.playerSlots[0]!;
   assert.equal(battleMoon.slotId, 'moon-eater');
   assert.equal(battleMoon.definition.maxHp, evolved.definition.maxHp);
@@ -58,7 +60,7 @@ test('saved level and selected evolution form alter the battle-ready definition 
   assert.equal(battleMoon.definition.standingRange, evolved.definition.standingRange);
 });
 
-test('legacy automatic formation still selects the first ten owned definitions in canonical roster order', () => {
+test('automatic formation still selects the first ten owned definitions in canonical roster order', () => {
   const guest = progress();
   const slots = buildGuestDeckSlots(guest);
   assert.equal(slots.length, 10);
