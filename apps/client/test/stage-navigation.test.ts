@@ -19,25 +19,29 @@ import {
 } from '../src/stage-navigation.ts';
 import { SPECIAL_STAGES, STAGES } from '../src/prototype.ts';
 
+const FIRST_MAIN_STAGE_ID = 'main_01_001';
+const SECOND_MAIN_STAGE_ID = 'main_01_002';
+const FINAL_MAIN_STAGE_ID = 'main_01_020';
+
 test('stage navigation groups progression and special stages instead of flattening all future content into one menu', () => {
   assert.equal(STAGE_COLLECTIONS.length, 2);
   assert.deepEqual(STAGE_COLLECTIONS.map((collection) => collection.id), ['chapter-01', 'special-border-01']);
   assert.equal(getStageCollection('chapter-01').stages, STAGES);
   assert.equal(getStageCollection('special-border-01').stages, SPECIAL_STAGES);
-  assert.equal(getStageCollectionForStage('border-01').id, 'chapter-01');
+  assert.equal(getStageCollectionForStage(FIRST_MAIN_STAGE_ID).id, 'chapter-01');
   assert.equal(getStageCollectionForStage('special-05').id, 'special-border-01');
 });
 
-test('collection unlocks are anchored to a progression stage id instead of a brittle hard-coded clear count', async () => {
+test('collection unlocks are anchored to a canonical progression stage id instead of a brittle hard-coded clear count', async () => {
   const chapter = getStageCollection('chapter-01');
   const special = getStageCollection('special-border-01');
   assert.equal(chapter.unlockAfterStageId, undefined);
   assert.equal(chapter.requiredProgressionClears, 0);
-  assert.equal(special.unlockAfterStageId, 'border-20');
-  assert.equal(special.requiredProgressionClears, 20, 'the UI countdown is derived from the border-20 ordinal');
+  assert.equal(special.unlockAfterStageId, FINAL_MAIN_STAGE_ID);
+  assert.equal(special.requiredProgressionClears, 20, 'the UI countdown is derived from the canonical chapter-final ordinal');
 
   const raw = await readFile(new URL('../../../content/stage-collections.json', import.meta.url), 'utf8');
-  assert.match(raw, /"unlockAfterStageId"\s*:\s*"border-20"/);
+  assert.match(raw, /"unlockAfterStageId"\s*:\s*"main_01_020"/);
   assert.doesNotMatch(raw, /"requiredProgressionClears"/, 'collection content must not persist a duplicated numeric gate');
 });
 
@@ -71,8 +75,8 @@ test('stage pages inside a collection use one five-stage paging rule and can rec
   assert.deepEqual(getCollectionStagePage(progression, 0).map((stage) => stage.id), STAGES.slice(0, 5).map((stage) => stage.id));
   assert.deepEqual(getCollectionStagePage(progression, 3).map((stage) => stage.id), STAGES.slice(15, 20).map((stage) => stage.id));
   assert.deepEqual(getCollectionStagePage(progression, 99).map((stage) => stage.id), STAGES.slice(15, 20).map((stage) => stage.id));
-  assert.equal(getCollectionStagePageIndexForStage(progression, 'border-01'), 0);
-  assert.equal(getCollectionStagePageIndexForStage(progression, 'border-20'), 3);
+  assert.equal(getCollectionStagePageIndexForStage(progression, FIRST_MAIN_STAGE_ID), 0);
+  assert.equal(getCollectionStagePageIndexForStage(progression, FINAL_MAIN_STAGE_ID), 3);
   assert.equal(getCollectionStagePageIndexForStage(special, 'special-05'), 0);
   assert.throws(() => getCollectionStagePageIndexForStage(progression, 'special-01'), /not part of collection/);
 });
@@ -81,11 +85,11 @@ test('collection-aware sortie gate keeps progression sequential and SPECIAL tied
   const fullChapter = STAGES.map((stage) => stage.id);
   const nineteen = STAGES.slice(0, 19).map((stage) => stage.id);
 
-  assert.equal(isSortieStageUnlocked('border-01', []), true);
-  assert.equal(isSortieStageUnlocked('border-02', []), false);
-  assert.equal(isSortieStageUnlocked('border-02', ['border-01']), true);
+  assert.equal(isSortieStageUnlocked(FIRST_MAIN_STAGE_ID, []), true);
+  assert.equal(isSortieStageUnlocked(SECOND_MAIN_STAGE_ID, []), false);
+  assert.equal(isSortieStageUnlocked(SECOND_MAIN_STAGE_ID, [FIRST_MAIN_STAGE_ID]), true);
   assert.equal(isSortieStageUnlocked('special-01', nineteen), false);
-  assert.equal(isSortieStageUnlocked('special-01', ['border-20']), false, 'scattered late clear cannot unlock the collection');
+  assert.equal(isSortieStageUnlocked('special-01', [FINAL_MAIN_STAGE_ID]), false, 'scattered late clear cannot unlock the collection');
   assert.equal(isSortieStageUnlocked('special-01', fullChapter), true);
   assert.equal(isSortieStageUnlocked('special-05', fullChapter), true, 'the first SPECIAL collection opens all five challenges together');
   assert.equal(isSortieStageUnlocked('missing-stage', fullChapter), false);
@@ -94,7 +98,7 @@ test('collection-aware sortie gate keeps progression sequential and SPECIAL tied
 test('special collection unlock uses contiguous campaign progress and cannot be opened by scattered late-stage save fragments', () => {
   const special = getStageCollection('special-border-01');
   assert.equal(isStageCollectionUnlocked(special, STAGES.map((stage) => stage.id)), true);
-  assert.equal(isStageCollectionUnlocked(special, ['border-20']), false);
+  assert.equal(isStageCollectionUnlocked(special, [FINAL_MAIN_STAGE_ID]), false);
   assert.equal(isStageCollectionUnlocked(special, STAGES.slice(0, 19).map((stage) => stage.id)), false);
 });
 
