@@ -120,8 +120,17 @@ test('chapter one defaults to progression stages and live simultaneous unit caps
   assert.ok(bundle.stages.every((candidate) => candidate.playerUnitCap === DEFAULT_PLAYER_UNIT_CAP));
   assert.ok(bundle.stages.every((candidate) => candidate.enemyUnitCap === DEFAULT_ENEMY_UNIT_CAP));
   assert.ok(bundle.stages.every((candidate) => candidate.formationRestrictions.allowedRarities.length === 0));
-  assert.ok(bundle.stages.slice(0, 19).every((candidate) => candidate.specialRules.length === 0));
-  assert.deepEqual(bundle.stages[19]?.specialRules, ['chapterClear:1', 'levelCap:20', 'specialHubUnlock:true']);
+  assert.ok(bundle.stages
+    .filter((candidate) => candidate.id !== 'main_01_009' && candidate.id !== 'main_01_020')
+    .every((candidate) => candidate.specialRules.length === 0));
+  assert.deepEqual(
+    bundle.stages.find((candidate) => candidate.id === 'main_01_009')?.specialRules,
+    ['killSupplyMultiplier:1.05'],
+  );
+  assert.deepEqual(
+    bundle.stages.find((candidate) => candidate.id === 'main_01_020')?.specialRules,
+    ['chapterClear:1', 'levelCap:20', 'specialHubUnlock:true'],
+  );
 });
 
 test('chapter one keeps exactly nine deterministic STORY character unlock milestones', async () => {
