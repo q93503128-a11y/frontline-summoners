@@ -8,11 +8,10 @@ import enemiesJson from '../../../content/enemies/chapter-01.json' with { type: 
 const readSource = (relative: string): Promise<string> => readFile(new URL(relative, import.meta.url), 'utf8');
 
 test('solo pause freezes the simulation and all direct battle actions', async () => {
-  const source = await readSource('../src/main.ts');
+  const source = await readSource('../src/battle-scene.ts');
 
   assert.match(source, /private manuallyPaused = false/);
-  assert.match(source, /keydown-P/);
-  assert.match(source, /keydown-ESC/);
+  assert.match(source, /event\.code === 'KeyP' \|\| event\.code === 'Escape'/);
   assert.match(source, /this\.manuallyPaused \|\| isPortraitMobileViewport\(\)/);
   assert.match(source, /this\.tweens\.pauseAll\(\)/);
   assert.match(source, /this\.tweens\.resumeAll\(\)/);
@@ -25,6 +24,7 @@ test('solo pause freezes the simulation and all direct battle actions', async ()
 
 test('chapter one opens scarce while supply upgrades have meaningful investment value', () => {
   const first = STAGES[0]!;
+  assert.equal(first.id, 'main_01_001');
   assert.equal(first.startingSupply, 50);
   assert.equal(first.playerBaseHp, 900);
   assert.equal(first.enemyBaseHp, 800);
@@ -33,9 +33,9 @@ test('chapter one opens scarce while supply upgrades have meaningful investment 
   assert.ok(DEFAULT_SUPPLY_LEVELS[1]!.incomePerSecond > DEFAULT_SUPPLY_LEVELS[0]!.incomePerSecond * 1.5);
 
   const firstFive = STAGES.slice(0, 5);
-  assert.deepEqual(firstFive.map((stage) => stage.startingSupply), [50, 60, 70, 80, 90]);
+  assert.deepEqual(firstFive.map((stage) => stage.startingSupply), [50, 55, 65, 70, 75]);
   assert.ok(firstFive.every((stage) => stage.playerBaseHp <= 1200));
-  assert.ok(firstFive.every((stage) => stage.enemyBaseHp <= 1500));
+  assert.ok(firstFive.every((stage) => stage.enemyBaseHp <= 1350));
 });
 
 test('the first roster and enemy line advance at a deliberate pace', () => {
@@ -51,7 +51,7 @@ test('the first roster and enemy line advance at a deliberate pace', () => {
   assert.ok(PLAYER_SLOTS.every((slot) => slot.definition.moveSpeed <= 3));
 });
 
-test('the ten current units are the chapter-one core roster, not an all-game character cap', () => {
+test('the ten current story units are the chapter-one core roster, not an all-game character cap', () => {
   assert.equal(PLAYER_SLOTS.length, 10);
   assert.equal(STAGES.length, 20);
 });
