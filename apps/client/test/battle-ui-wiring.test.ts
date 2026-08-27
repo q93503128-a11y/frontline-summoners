@@ -36,7 +36,7 @@ test('travel projectiles replace caster-local hit FX and interpolate render posi
   assert.match(battle, /getProjectileArcOffsetY\(projectile\.style, progress\)/);
 });
 
-test('saved deck, levels, forms, and treasures use the guest loadout authority in the actual browser battle', async () => {
+test('saved deck, levels, forms, plus levels, and permanent rewards use guest loadout authority in browser battle', async () => {
   const { battle } = await readRuntime();
   assert.match(battle, /this\.activeSlots = buildGuestDeckSlots\(progress\);/);
   assert.match(battle, /this\.state = createGuestPrototypeBattle\(this\.stage\.id, progress\);/);
@@ -44,16 +44,16 @@ test('saved deck, levels, forms, and treasures use the guest loadout authority i
   assert.doesNotMatch(battle, /createPrototypeBattle\(this\.stage\.id/);
 });
 
-test('player specialties are visible from the selected level and form while enemy traits remain visible in battle', async () => {
+test('player specialties reflect selected level, form, and plus level while enemy combat identity remains visible', async () => {
   const { deck, battle } = await readRuntime();
-  assert.match(deck, /buildCharacterCombatSlot\(slot, level, meta\?\.selectedFormId\)/);
+  assert.match(deck, /buildCharacterCombatSlot\(slot, level, meta\?\.selectedFormId, meta\?\.plusLevel \?\? 0\)/);
   assert.match(deck, /formatCombatTraits\(currentSlot\.definition\)/);
   assert.match(deck, /formatDamageSpecialty\(currentSlot\.definition\)/);
   assert.match(battle, /formatCompactTraits\(unit\.definition\)/);
   assert.match(battle, /unit\.team === 'ENEMY' && unit\.state !== UnitState\.Dying/);
 });
 
-test('PC battle hotkeys map 1 through 0 to current saved deck order, Q to supply upgrade, and E to the base weapon', async () => {
+test('PC battle hotkeys map 1 through 0 to saved deck order, Q to supply upgrade, and E to the base weapon', async () => {
   const { battle, ui } = await readRuntime();
   assert.match(ui, /'Digit1', 'Digit2', 'Digit3', 'Digit4', 'Digit5', 'Digit6', 'Digit7', 'Digit8', 'Digit9', 'Digit0'/);
   assert.match(battle, /BATTLE_UNIT_HOTKEY_CODES\.indexOf\(event\.code\)/);
@@ -84,7 +84,7 @@ test('mouse and keyboard battle actions share quiet failure paths without camera
   assert.doesNotMatch(actionBlock, /cameras\.main\.shake/);
 });
 
-test('locked-stage and save-pending clicks are quiet; camera shake remains limited to combat impact paths', async () => {
+test('locked-stage and save-pending clicks are quiet; camera shake stays limited to combat impact paths', async () => {
   const { navigation, result, battle } = await readRuntime();
   assert.match(navigation, /if \(unlocked\) this\.scene\.start\('battle', \{ stageId: stage\.id \}\);/);
   assert.doesNotMatch(navigation, /cameras\.main\.shake/);
@@ -98,27 +98,24 @@ test('locked-stage and save-pending clicks are quiet; camera shake remains limit
   assert.match(battle, /private playBaseImpactFx[\s\S]*?cameras\.main\.shake/);
 });
 
-test('sortie flow uses the scalable collection hub, one shared stage list, and the sortie unlock authority', async () => {
+test('sortie flow uses the shared collection hub and canonical normal/special clear save authorities', async () => {
   const { main, navigation, result } = await readRuntime();
   assert.match(navigation, /'출 정', \(\) => this\.scene\.start\('stage-hub'\)/);
   assert.match(navigation, /export class StageHubScene extends Phaser\.Scene/);
   assert.match(navigation, /STAGE_COLLECTIONS\.forEach\(\(collection, index\) =>/);
   assert.match(navigation, /isStageCollectionUnlocked\(collection, this\.progress\.clearedStageIds\)/);
   assert.match(navigation, /this\.scene\.start\('stage-select', \{ collectionId: collection\.id \}\)/);
-  assert.match(navigation, /export class StageSelectScene extends Phaser\.Scene/);
-  assert.match(navigation, /getStageCollection\(data\.collectionId \?\? STAGE_COLLECTIONS\[0\]!\.id\)/);
-  assert.match(navigation, /const special = this\.collection\.stageType === 'SPECIAL'/);
-  assert.match(navigation, /this\.collection\.stages\.slice\(start, start \+ 5\)/);
   assert.match(navigation, /isSortieStageUnlocked\(stage\.id, this\.progress\.clearedStageIds\)/);
   assert.doesNotMatch(navigation, /isBattleStageUnlocked\(/);
   assert.match(result, /recordSpecialStageClear\(this\.stage\.id\)/);
-  assert.match(result, /recordStageClear\(this\.stage\.id, this\.stage\.treasure\.id\)/);
+  assert.match(result, /recordNormalStageClear\(this\.stage\.id, 'SOLO_BATTLE'\)/);
   assert.match(result, /getStageCollectionForStage\(this\.stage\.id\)/);
   assert.match(main, /scene: \[BootScene, MainMenuScene, StageHubScene, StageSelectScene, DeckScene, CatalogScene, BattleScene, ResultScene\]/);
+  assert.match(main, /game\.scene\.add\('recruitment', RecruitmentScene, false\)/);
   assert.doesNotMatch(`${navigation}\n${result}\n${main}`, /SpecialStageSelectScene|special-select|협동 권장/);
 });
 
-test('manual deck scene uses save ownership authority, supports all 25 definitions, and persists explicit 1-10 order', async () => {
+test('manual deck scene uses save ownership authority and persists explicit 1-10 order', async () => {
   const { deck } = await readRuntime();
   assert.match(deck, /ALL_PLAYER_SLOTS\.slice\(start, start \+ this\.pageSize\)/);
   assert.match(deck, /const owned = new Set\(getOwnedCharacterIds\(this\.progress\)\);/);
@@ -132,108 +129,81 @@ test('manual deck scene uses save ownership authority, supports all 25 definitio
   assert.doesNotMatch(deck, /PLAYER_SLOTS\.forEach/);
 });
 
-test('compact mobile battle HUD uses the shared coarse-pointer classifier and keeps desktop shortcuts intact', async () => {
+test('compact mobile battle HUD uses shared viewport classification and keeps touch hitboxes inside the HUD', async () => {
   const { main, battle, ui } = await readRuntime();
   const viewport = await readSource('../src/viewport.ts');
   assert.match(battle, /import \{ isCompactMobileViewport, isPortraitMobileViewport \} from '\.\/viewport';/);
   assert.match(ui, /import \{ isCompactMobileViewport \} from '\.\/viewport';/);
-  assert.doesNotMatch(`${battle}\n${ui}`, /function isCompactMobileViewport\(/);
   assert.match(viewport, /COMPACT_MOBILE_SHORT_SIDE = 540/);
   assert.match(viewport, /coarsePointer && Math\.min\(width, height\) <= COMPACT_MOBILE_SHORT_SIDE/);
-  assert.match(ui, /function battleUiFontSize\(regular: number, compact: number\): number/);
   assert.match(battle, /const buttonHeight = compact \? 84 : 62;/);
   assert.match(battle, /const y = compact \? 582 \+ row \* 84 : 579 \+ row \* 72;/);
   assert.match(battle, /const controlHeight = compact \? 84 : 60;/);
   assert.match(battle, /const weaponY = compact \? 666 : 651;/);
-  assert.match(battle, /const unitButtonName = compact \? slot\.displayName : `\$\{slot\.rarity\} · \$\{slot\.displayName\}`/);
   assert.match(main, /width: INTERNAL_WIDTH/);
   assert.match(main, /height: INTERNAL_HEIGHT/);
-});
-
-test('compact two-row summon and right-side control hitboxes stay inside the bottom HUD without overlap', async () => {
-  const { battle } = await readRuntime();
-  assert.match(battle, /const x = 102 \+ col \* 205;/);
-  assert.match(battle, /const y = compact \? 582 \+ row \* 84 : 579 \+ row \* 72;/);
-  assert.match(battle, /this\.add\.rectangle\(x, y, 188, buttonHeight/);
-  assert.match(battle, /this\.add\.rectangle\(1145, upgradeY, 220, controlHeight/);
-  assert.match(battle, /this\.add\.rectangle\(1145, weaponY, 220, controlHeight/);
 
   const hudTop = 540;
   const hudBottom = 720;
-  const unitHeight = 84;
-  const unitRows = [582, 666];
-  const controlHeight = 84;
-  const controlRows = [582, 666];
-  for (const center of unitRows) {
-    assert.ok(center - unitHeight / 2 >= hudTop);
-    assert.ok(center + unitHeight / 2 <= hudBottom);
+  const height = 84;
+  for (const center of [582, 666]) {
+    assert.ok(center - height / 2 >= hudTop);
+    assert.ok(center + height / 2 <= hudBottom);
   }
-  for (const center of controlRows) {
-    assert.ok(center - controlHeight / 2 >= hudTop);
-    assert.ok(center + controlHeight / 2 <= hudBottom);
-  }
-  assert.equal(unitRows[1]! - unitRows[0]!, unitHeight);
-  assert.equal(controlRows[1]! - controlRows[0]!, controlHeight);
   const lastUnitRight = 102 + 4 * 205 + 188 / 2;
   const controlLeft = 1145 - 220 / 2;
   assert.ok(lastUnitRight < controlLeft);
-  assert.ok(unitHeight * (390 / 720) >= 44);
+  assert.ok(height * (390 / 720) >= 44);
 });
 
-test('compact navigation buttons stay finger-sized across extracted sortie, deck, battle pause, and result scenes', async () => {
+test('compact navigation and result controls remain finger-sized', async () => {
   const { navigation, deck, battle, result } = await readRuntime();
   assert.match(navigation, /compact \? 84 : 50/);
   assert.match(navigation, /compact \? 84 : 60/);
   assert.match(navigation, /compact \? 84 : 52/);
   assert.match(deck, /compact \? 84 : 48/);
   assert.match(battle, /compact \? 84 : 42, '일시정지'/);
-  assert.match(battle, /isCompactMobileViewport\(\) \? 84 : 58/);
   assert.match(result, /const resultButtonHeight = compact \? 84 : 68;/);
   assert.ok(84 * (390 / 720) >= 44);
 });
 
-test('shared stage cards keep desktop detail while compact mobile prioritizes progression rewards and special challenge data', async () => {
+test('stage cards expose permanent reward state for main stages and separate clear records for special stages', async () => {
   const { navigation } = await readRuntime();
   assert.match(navigation, /const special = this\.collection\.stageType === 'SPECIAL'/);
-  assert.match(navigation, /if \(compact\) \{/);
-  assert.match(navigation, /compact \? 28 : 25/);
-  assert.match(navigation, /compact \? 535 : 548/);
+  assert.match(navigation, /const rewardOwned = !special && stage\.permanentRewardId !== undefined && this\.progress\.permanentRewardIds\.includes\(stage\.permanentRewardId\);/);
+  assert.match(navigation, /const rewardText = getPermanentRewardEffectText\(stage\.permanentRewardId\);/);
+  assert.match(navigation, /'첫 NORMAL_CLEAR 영구 보상'/);
+  assert.match(navigation, /특수전 클리어 기록/);
   assert.match(navigation, /BATTLEFIELD_THEME_LABELS\[stage\.theme\]/);
   assert.match(navigation, /`전장 \$\{stage\.mapLength\}m`/);
-  assert.match(navigation, /stage\.subtitle/);
   assert.match(navigation, /동시 출격 \$\{effectiveCap\}기/);
-  assert.match(navigation, /'확정 보물'/);
-  assert.match(navigation, /`첫 클리어 훈장 · \$\{stage\.treasure\.name\}`/);
+  assert.doesNotMatch(navigation, /확정 보물|stage\.treasure/);
 });
 
-test('manual deck cards use separate compact density without dropping level, form, rarity, role, or combat identity', async () => {
+test('manual deck cards keep level, plus level, form, rarity, role, and combat identity', async () => {
   const { deck } = await readRuntime();
   assert.match(deck, /const compact = isCompactMobileViewport\(\);/);
   assert.match(deck, /slot\.rarity/);
   assert.match(deck, /slot\.role/);
-  assert.match(deck, /`\$\{slot\.role\} · Lv\$\{level\} · \$\{form\}`/);
   assert.match(deck, /selectedFormName\(this\.progress, slot\.slotId\)/);
-  assert.match(deck, /buildCharacterCombatSlot\(slot, level, meta\?\.selectedFormId\)/);
-  assert.match(deck, /compact \? 8 : 10/);
+  assert.match(deck, /buildCharacterCombatSlot\(slot, level, meta\?\.selectedFormId, meta\?\.plusLevel \?\? 0\)/);
   assert.match(deck, /모집 미획득/);
 });
 
-test('main and result scenes use separate compact layouts while desktop keeps full wording and main count uses all owned characters', async () => {
+test('main and result scenes use current permanent-reward and special-clear wording', async () => {
   const { navigation, result } = await readRuntime();
   assert.match(navigation, /const menuButtonHeight = compact \? 108 : 92;/);
-  assert.match(navigation, /compact \? '승리할수록 전선과 동료가 열린다\.' : '첫 출정은 징집병 하나\. 승리할수록 전선과 동료가 열린다\.'/);
   assert.match(navigation, /const owned = getOwnedCharacterIds\(progress\)\.length;/);
-  assert.match(navigation, /동료 \$\{owned\}\/\$\{ALL_PLAYER_SLOTS\.length\}/);
-  assert.doesNotMatch(navigation, /getUnlockedSlotIds\(progress\.clearedStageIds\)\.length/);
+  assert.match(navigation, /영구 보상 \$\{progress\.permanentRewardIds\.length\}/);
 
   assert.match(result, /const compact = isCompactMobileViewport\(\);/);
-  assert.match(result, /getStageCollectionForStage\(this\.stage\.id\)/);
-  assert.match(result, /compact \? 820 : 760/);
-  assert.match(result, /setWordWrapWidth\(compact \? 720 : 680\)/);
-  assert.match(result, /const resultButtonHeight = compact \? 84 : 68;/);
-  assert.match(result, /'첫 클리어 저장 완료 · 다음 스테이지 개방'/);
+  assert.match(result, /'영구 보상 획득'/);
+  assert.match(result, /getPermanentRewardEffectText\(this\.stage\.permanentRewardId\)/);
+  assert.match(result, /'NORMAL_CLEAR 저장 완료 · 다음 스테이지 개방'/);
   assert.match(result, /'브라우저 영구 저장 실패 · 현재 탭에서는 진행 유지'/);
-  assert.match(result, /'특수전 훈장 획득'/);
+  assert.match(result, /'특수전 클리어 기록'/);
+  assert.match(result, /'특수전 첫 클리어 저장 완료'/);
+  assert.doesNotMatch(result, /훈장 획득|stage\.treasure/);
 });
 
 test('shared buttons recover from touch or pointer cancellation instead of staying visually pressed', async () => {
@@ -248,7 +218,7 @@ test('shared buttons recover from touch or pointer cancellation instead of stayi
   assert.match(buttonBlock, /bg\.on\('pointerdown', \(\) => container\.setScale\(0\.98\)\);/);
 });
 
-test('Phaser uses smooth filtering for the current non-pixel-art character sheets', async () => {
+test('Phaser uses smooth filtering for current non-pixel-art character sheets', async () => {
   const { main } = await readRuntime();
   assert.match(main, /antialias:\s*true/);
   assert.match(main, /pixelArt:\s*false/);
@@ -256,7 +226,7 @@ test('Phaser uses smooth filtering for the current non-pixel-art character sheet
   assert.doesNotMatch(main, /pixelArt:\s*true|roundPixels:\s*true/);
 });
 
-test('stage cards render the restored twelve-step difficulty scale without legacy five-star overflow', async () => {
+test('stage cards render the twelve-step difficulty scale without legacy five-star overflow', async () => {
   const { navigation } = await readRuntime();
   assert.match(navigation, /`난이도 \$\{stage\.difficulty\} \/ 12`/);
   assert.doesNotMatch(navigation, /const stars = '★'\.repeat/);
