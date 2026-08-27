@@ -53,6 +53,14 @@ export interface AttackTiming {
   readonly backswingFrames: number;
 }
 
+export interface AttackPatternStep {
+  readonly attackDamage: number;
+  readonly attackMinRange: number;
+  readonly attackMaxRange: number;
+  readonly cycleFrames: number;
+  readonly hitFrames: readonly number[];
+}
+
 export interface BattleUnitDefinition {
   readonly id: string;
   readonly maxHp: number;
@@ -67,6 +75,8 @@ export interface BattleUnitDefinition {
   readonly naturalKnockbackDistance: number;
   readonly deathFrames: number;
   readonly attackTiming: AttackTiming;
+  /** Optional deterministic attack sequence. Missing means the legacy single attack profile. */
+  readonly attackPattern?: readonly AttackPatternStep[];
   /** One or two identity attributes. NEUTRAL is used alone. There is no global RPS table. */
   readonly attributes?: readonly CombatAttribute[];
   /** Supplemental combat taxonomy such as ARMORED/GIANT/BOSS. */
@@ -84,6 +94,7 @@ export interface BattleUnit {
   state: UnitState;
   stateFrame: number;
   nextAttackTick: number;
+  attackPatternIndex: number;
   naturalKnockbacksConsumed: number;
   knockbackStartX: number;
   knockbackTargetX: number;
@@ -117,9 +128,26 @@ type UnitHit = { readonly targetKind: 'UNIT'; readonly targetId: number; readonl
 type BaseHit = { readonly targetKind: 'BASE'; readonly targetTeam: BattleTeam; readonly damage: number };
 type HitEvent = UnitHit | BaseHit;
 
+type ActiveAttackProfile = {
+  readonly attackDamage: number;
+  readonly attackMinRange: number;
+  readonly attackMaxRange: number;
+  readonly cycleFrames: number;
+  readonly hitFrames: readonly number[];
+  readonly backswingFrames: number;
+};
+
 const oppositeTeam = (team: BattleTeam): BattleTeam => (team === 'PLAYER' ? 'ENEMY' : 'PLAYER');
 const directionFor = (team: BattleTeam): 1 | -1 => (team === 'PLAYER' ? 1 : -1);
 const clamp = (value: number, min: number, max: number): number => Math.max(min, Math.min(max, value));
+
+function assertAttackFrames(cycleFrames: number, hitFrames: readonly number[], context: string): void {
+  if (!Number.isInteger(cycleFrames) || cycleFrames <= 0) throw new Error(`${context}.cycleFrames must be positive`);
+  if (hitFrames.length === 0) throw new Error(`${context}.hitFrames must contain at least one frame`);
+  if (hitFrames.some((frame) => !Number.isInteger(frame) || frame < 0)) throw new Error(`${context}.hitFrames must be non-negative integers`);
+  if (hitFrames.some((frame, index) => index > 0 && frame <= hitFrames[index - 1]!)) throw new Error(`${context}.hitFrames must be strictly increasing`);
+  if (hitFrames[hitFrames.length - 1]! >= cycleFrames) throw new Error(`${context}.last hit frame must be inside cycleFrames`);
+}
 
 function assertDefinition(definition: BattleUnitDefinition): void {
   const timing = definition.attackTiming;
@@ -128,12 +156,19 @@ function assertDefinition(definition: BattleUnitDefinition): void {
   if (!Number.isInteger(definition.moveSpeed) || definition.moveSpeed < 0) throw new Error('moveSpeed must be a non-negative integer');
   if (definition.attackMinRange > definition.attackMaxRange) throw new Error('attackMinRange must be <= attackMaxRange');
   if (definition.standingRange < 0) throw new Error('standingRange must be non-negative');
-  if (!Number.isInteger(timing.cycleFrames) || timing.cycleFrames <= 0) throw new Error('cycleFrames must be positive');
-  if (timing.hitFrames.length === 0) throw new Error('hitFrames must contain at least one frame');
-  if (timing.hitFrames.some((frame) => !Number.isInteger(frame) || frame < 0)) throw new Error('hitFrames must be non-negative integers');
-  if (timing.hitFrames.some((frame, index) => index > 0 && frame <= timing.hitFrames[index - 1]!)) throw new Error('hitFrames must be strictly increasing');
-  if (timing.hitFrames[timing.hitFrames.length - 1]! >= timing.cycleFrames) throw new Error('last hit frame must be inside cycleFrames');
+  assertAttackFrames(timing.cycleFrames, timing.hitFrames, 'attackTiming');
   if (!Number.isInteger(timing.backswingFrames) || timing.backswingFrames < 0) throw new Error('backswingFrames must be non-negative');
+  if (definition.attackPattern !== undefined) {
+    if (definition.attackPattern.length === 0) throw new Error('attackPattern must contain at least one step');
+    definition.attackPattern.forEach((step, index) => {
+      const context = `attackPattern[${index}]`;
+      if (!Number.isInteger(step.attackDamage) || step.attackDamage < 0) throw new Error(`${context}.attackDamage must be a non-negative integer`);
+      if (!Number.isInteger(step.attackMinRange) || step.attackMinRange < 0) throw new Error(`${context}.attackMinRange must be a non-negative integer`);
+      if (!Number.isInteger(step.attackMaxRange) || step.attackMaxRange < 0) throw new Error(`${context}.attackMaxRange must be a non-negative integer`);
+      if (step.attackMinRange > step.attackMaxRange) throw new Error(`${context}.attackMinRange must be <= attackMaxRange`);
+      assertAttackFrames(step.cycleFrames, step.hitFrames, context);
+    });
+  }
   if (!Number.isInteger(definition.naturalKnockbackCount) || definition.naturalKnockbackCount < 0) throw new Error('naturalKnockbackCount must be non-negative');
   if (!Number.isInteger(definition.naturalKnockbackFrames) || definition.naturalKnockbackFrames <= 0) throw new Error('naturalKnockbackFrames must be positive');
   if (!Number.isInteger(definition.naturalKnockbackDistance) || definition.naturalKnockbackDistance < 0) throw new Error('naturalKnockbackDistance must be a non-negative integer');
@@ -165,7 +200,7 @@ function assertDefinition(definition: BattleUnitDefinition): void {
 }
 
 /** No implicit attribute matchup exists. Only explicit specialist bonuses apply. */
-export function getUnitAttackDamageAgainst(source: BattleUnitDefinition, target: BattleUnitDefinition): number {
+export function getUnitAttackDamageAgainst(source: BattleUnitDefinition, target: BattleUnitDefinition, attackDamage = source.attackDamage): number {
   const targetAttributes = new Set(target.attributes ?? []);
   const targetTags = new Set(target.combatTags ?? []);
   let multiplierPermille = 1000;
@@ -175,7 +210,7 @@ export function getUnitAttackDamageAgainst(source: BattleUnitDefinition, target:
       : targetTags.has(bonus.target);
     if (matches) multiplierPermille = Math.max(multiplierPermille, bonus.multiplierPermille);
   }
-  return Math.trunc((source.attackDamage * multiplierPermille) / 1000);
+  return Math.trunc((attackDamage * multiplierPermille) / 1000);
 }
 
 export function createBattle(config: BattleConfig): BattleState {
@@ -203,7 +238,7 @@ export function spawnUnit(state: BattleState, definition: BattleUnitDefinition, 
   const unit: BattleUnit = {
     simulationId: state.nextSimulationId++, definition, team, hp: definition.maxHp,
     anchorX: clamp(Math.trunc(anchorX), 0, state.mapLength), state: UnitState.Moving, stateFrame: 0,
-    nextAttackTick: 0, naturalKnockbacksConsumed: 0, knockbackStartX: 0, knockbackTargetX: 0,
+    nextAttackTick: 0, attackPatternIndex: 0, naturalKnockbacksConsumed: 0, knockbackStartX: 0, knockbackTargetX: 0,
     forcedDisplacementFrames: 0,
   };
   state.units.push(unit);
@@ -266,46 +301,70 @@ function moveUnits(state: BattleState): void {
   }
 }
 
+function getActiveAttackProfile(unit: BattleUnit): ActiveAttackProfile {
+  const step = unit.definition.attackPattern?.[unit.attackPatternIndex];
+  if (step) {
+    return {
+      attackDamage: step.attackDamage,
+      attackMinRange: step.attackMinRange,
+      attackMaxRange: step.attackMaxRange,
+      cycleFrames: step.cycleFrames,
+      hitFrames: step.hitFrames,
+      backswingFrames: unit.definition.attackTiming.backswingFrames,
+    };
+  }
+  return {
+    attackDamage: unit.definition.attackDamage,
+    attackMinRange: unit.definition.attackMinRange,
+    attackMaxRange: unit.definition.attackMaxRange,
+    cycleFrames: unit.definition.attackTiming.cycleFrames,
+    hitFrames: unit.definition.attackTiming.hitFrames,
+    backswingFrames: unit.definition.attackTiming.backswingFrames,
+  };
+}
+
 function detectAndStartAttacks(state: BattleState): void {
   for (const unit of state.units) {
     if (unit.state !== UnitState.Moving || state.tick < unit.nextAttackTick) continue;
     const nearest = findNearestDetectionDistance(state, unit);
     if (nearest !== null && nearest <= unit.definition.standingRange) {
+      const attack = getActiveAttackProfile(unit);
       unit.state = UnitState.Foreswing;
       unit.stateFrame = 0;
-      unit.nextAttackTick = state.tick + unit.definition.attackTiming.cycleFrames;
+      unit.nextAttackTick = state.tick + attack.cycleFrames;
     }
   }
 }
 
-function isInsideAttackRange(source: BattleUnit, targetX: number): boolean {
+function isInsideAttackRange(source: BattleUnit, targetX: number, attack: ActiveAttackProfile): boolean {
   const distance = signedDistance(source, targetX);
-  return distance >= source.definition.attackMinRange && distance <= source.definition.attackMaxRange;
+  return distance >= attack.attackMinRange && distance <= attack.attackMaxRange;
 }
 
 function collectHits(state: BattleState): HitEvent[] {
   const hits: HitEvent[] = [];
   for (const source of state.units) {
-    if (source.state !== UnitState.Foreswing || !source.definition.attackTiming.hitFrames.includes(source.stateFrame)) continue;
+    const attack = getActiveAttackProfile(source);
+    if (source.state !== UnitState.Foreswing || !attack.hitFrames.includes(source.stateFrame)) continue;
     const unitTargets = state.units
-      .filter((target) => target.team !== source.team && isTargetable(target) && isInsideAttackRange(source, target.anchorX))
+      .filter((target) => target.team !== source.team && isTargetable(target) && isInsideAttackRange(source, target.anchorX, attack))
       .sort((a, b) => signedDistance(source, a.anchorX) - signedDistance(source, b.anchorX) || a.simulationId - b.simulationId);
     const base = state.bases[oppositeTeam(source.team)];
-    const baseIsInRange = isInsideAttackRange(source, base.anchorX) && base.hp > 0;
+    const baseIsInRange = isInsideAttackRange(source, base.anchorX, attack) && base.hp > 0;
     if (source.definition.targetMode === 'AREA') {
       for (const target of unitTargets) {
-        hits.push({ targetKind: 'UNIT', targetId: target.simulationId, damage: getUnitAttackDamageAgainst(source.definition, target.definition) });
+        hits.push({ targetKind: 'UNIT', targetId: target.simulationId, damage: getUnitAttackDamageAgainst(source.definition, target.definition, attack.attackDamage) });
       }
-      if (baseIsInRange) hits.push({ targetKind: 'BASE', targetTeam: base.team, damage: source.definition.attackDamage });
+      if (baseIsInRange) hits.push({ targetKind: 'BASE', targetTeam: base.team, damage: attack.attackDamage });
       continue;
     }
     const nearestUnit = unitTargets[0];
     const unitDistance = nearestUnit ? signedDistance(source, nearestUnit.anchorX) : Number.POSITIVE_INFINITY;
     const baseDistance = baseIsInRange ? signedDistance(source, base.anchorX) : Number.POSITIVE_INFINITY;
     if (nearestUnit && unitDistance <= baseDistance) {
-      hits.push({ targetKind: 'UNIT', targetId: nearestUnit.simulationId, damage: getUnitAttackDamageAgainst(source.definition, nearestUnit.definition) });
+      hits.push({ targetKind: 'UNIT', targetId: nearestUnit.simulationId, damage: getUnitAttackDamageAgainst(source.definition, nearestUnit.definition, attack.attackDamage) });
     } else if (baseIsInRange) {
-      hits.push({ targetKind: 'BASE', targetTeam: base.team, damage: source.definition.attackDamage });
+      hits.push({ targetKind: 'BASE', targetTeam: base.team, damage: attack.attackDamage });
     }
   }
   return hits;
@@ -395,23 +454,30 @@ export function applyForcedDisplacementToTeam(
   return targets.length;
 }
 
+function advanceAttackPattern(unit: BattleUnit): void {
+  const pattern = unit.definition.attackPattern;
+  if (!pattern) return;
+  unit.attackPatternIndex = (unit.attackPatternIndex + 1) % pattern.length;
+}
+
 function finishAttackOrWait(state: BattleState, unit: BattleUnit): void {
+  advanceAttackPattern(unit);
   unit.state = state.tick >= unit.nextAttackTick ? UnitState.Moving : UnitState.AttackWait;
   unit.stateFrame = 0;
 }
 
 function advanceAttackStates(state: BattleState): void {
   for (const unit of state.units) {
+    const attack = getActiveAttackProfile(unit);
     if (unit.state === UnitState.Foreswing) {
-      const hitFrames = unit.definition.attackTiming.hitFrames;
-      if (unit.stateFrame >= hitFrames[hitFrames.length - 1]!) {
-        if (unit.definition.attackTiming.backswingFrames === 0) finishAttackOrWait(state, unit);
+      if (unit.stateFrame >= attack.hitFrames[attack.hitFrames.length - 1]!) {
+        if (attack.backswingFrames === 0) finishAttackOrWait(state, unit);
         else {
           unit.state = UnitState.Backswing;
           unit.stateFrame = 0;
         }
       }
-    } else if (unit.state === UnitState.Backswing && unit.stateFrame >= unit.definition.attackTiming.backswingFrames) {
+    } else if (unit.state === UnitState.Backswing && unit.stateFrame >= attack.backswingFrames) {
       finishAttackOrWait(state, unit);
     }
   }
@@ -460,7 +526,7 @@ export function getBattleUnitDefinitionSignature(definition: BattleUnitDefinitio
     .map((bonus) => `${bonus.targetKind}:${bonus.target}:${bonus.multiplierPermille}`)
     .join(',');
   const timing = definition.attackTiming;
-  return [
+  const parts = [
     definition.id,
     definition.maxHp,
     definition.attackDamage,
@@ -479,26 +545,37 @@ export function getBattleUnitDefinitionSignature(definition: BattleUnitDefinitio
     `[${attributes}]`,
     `[${tags}]`,
     `[${bonuses}]`,
-  ].join('/');
+  ];
+  if (definition.attackPattern) {
+    const pattern = definition.attackPattern
+      .map((step) => [step.attackDamage, step.attackMinRange, step.attackMaxRange, step.cycleFrames, step.hitFrames.join(',')].join(':'))
+      .join(';');
+    parts.push(`[pattern:${pattern}]`);
+  }
+  return parts.join('/');
 }
 
 export function computeStateHash(state: BattleState): string {
   const units = [...state.units]
     .sort((a, b) => a.simulationId - b.simulationId)
-    .map((unit) => [
-      unit.simulationId,
-      getBattleUnitDefinitionSignature(unit.definition),
-      unit.team,
-      unit.hp,
-      unit.anchorX,
-      unit.state,
-      unit.stateFrame,
-      unit.nextAttackTick,
-      unit.naturalKnockbacksConsumed,
-      unit.knockbackStartX,
-      unit.knockbackTargetX,
-      unit.forcedDisplacementFrames,
-    ].join(':'))
+    .map((unit) => {
+      const fields: Array<string | number> = [
+        unit.simulationId,
+        getBattleUnitDefinitionSignature(unit.definition),
+        unit.team,
+        unit.hp,
+        unit.anchorX,
+        unit.state,
+        unit.stateFrame,
+        unit.nextAttackTick,
+        unit.naturalKnockbacksConsumed,
+        unit.knockbackStartX,
+        unit.knockbackTargetX,
+        unit.forcedDisplacementFrames,
+      ];
+      if (unit.definition.attackPattern) fields.push(unit.attackPatternIndex);
+      return fields.join(':');
+    })
     .join('|');
   const bases = [
     state.bases.PLAYER.anchorX,
