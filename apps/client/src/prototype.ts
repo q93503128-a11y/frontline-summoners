@@ -103,6 +103,7 @@ function fighter(content: CombatContent): BattleUnitDefinition {
     attributes: content.attributes,
     combatTags: content.combatTags,
     damageBonuses: content.damageBonuses,
+    ...(content.attackPattern === undefined ? {} : { attackPattern: content.attackPattern }),
     naturalKnockbackCount: content.naturalKnockbackCount,
     naturalKnockbackFrames: 12,
     naturalKnockbackDistance: 34,
