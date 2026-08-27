@@ -17,11 +17,23 @@ jobs:
         run: npm install --ignore-scripts
       - name: Typecheck
         run: npm run typecheck
-      - name: Test content schema
-        run: npm run test -w @frontline/content-schema
+      - name: Test content schema - attack pattern
+        run: node --experimental-transform-types --test packages/content-schema/test/attack-pattern.test.ts
+      - name: Test content schema - campaign
+        if: always()
+        run: node --experimental-transform-types --test packages/content-schema/test/campaign.test.ts
+      - name: Test content schema - canonical v1
+        if: always()
+        run: node --experimental-transform-types --test packages/content-schema/test/canonical-v1.test.ts
+      - name: Test content schema - wave repeat
+        if: always()
+        run: node --experimental-transform-types --test packages/content-schema/test/wave-repeat.test.ts
       - name: Test simulation
+        if: always()
         run: npm run test -w @frontline/sim
       - name: Test client
+        if: always()
         run: npm run test -w @frontline/client
       - name: Build
+        if: success()
         run: npm run build
