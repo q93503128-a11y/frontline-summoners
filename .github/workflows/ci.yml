@@ -46,9 +46,11 @@ jobs:
             special-baseline.test.ts \
             stage-navigation.test.ts
           do
-            echo "### $file" >> "$GITHUB_STEP_SUMMARY"
-            node --experimental-transform-types --test "test/$file" >> "$GITHUB_STEP_SUMMARY" 2>&1 || failed=1
-            echo >> "$GITHUB_STEP_SUMMARY"
+            echo "### $file" | tee -a "$GITHUB_STEP_SUMMARY"
+            status=0
+            node --experimental-transform-types --test "test/$file" 2>&1 | tee -a "$GITHUB_STEP_SUMMARY" || status=$?
+            if [[ $status -ne 0 ]]; then failed=1; fi
+            echo | tee -a "$GITHUB_STEP_SUMMARY"
           done
           exit $failed
       - name: Test client suite
