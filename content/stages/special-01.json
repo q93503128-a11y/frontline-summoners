@@ -1,7 +1,7 @@
 [
   {
     "id":"special-01","chapter":"특수전 · 뒤집힌 국경","name":"세 자리 전선","subtitle":"동시에 세 명만 세울 수 있는 작은 정예전","stageType":"SPECIAL","difficulty":6,
-    "playerBaseHp":2500,"enemyBaseHp":3200,"startingSupply":420,"mapLength":900,"theme":"meadow","decorSeed":211,"playerUnitCap":2,"enemyUnitCap":18,
+    "playerBaseHp":2500,"enemyBaseHp":3200,"startingSupply":420,"mapLength":900,"theme":"meadow","decorSeed":211,"playerUnitCap":3,"enemyUnitCap":18,
     "waves":[
       {"id":"W1","trigger":{"type":"TIME","frame":240},"spawn":{"enemyId":"enemy-shield","count":2,"intervalFrames":210}},
       {"id":"W2","trigger":{"type":"TIME","frame":600},"spawn":{"enemyId":"enemy-sprinter","count":8,"intervalFrames":90},"repeat":{"delayFrames":900}},
@@ -29,7 +29,7 @@
   },
   {
     "id":"special-04","chapter":"특수전 · 뒤집힌 국경","name":"삼인 결사대","subtitle":"세 자리만으로 중장갑 전열과 철문장군을 돌파한다","stageType":"SPECIAL","difficulty":9,
-    "playerBaseHp":3200,"enemyBaseHp":5200,"startingSupply":750,"mapLength":1000,"theme":"fortress","decorSeed":251,"playerUnitCap":2,"enemyUnitCap":15,
+    "playerBaseHp":3200,"enemyBaseHp":5200,"startingSupply":750,"mapLength":1000,"theme":"fortress","decorSeed":251,"playerUnitCap":3,"enemyUnitCap":15,
     "waves":[
       {"id":"W1","trigger":{"type":"TIME","frame":300},"spawn":{"enemyId":"enemy-knight","count":2,"intervalFrames":300},"repeat":{"delayFrames":1500}},
       {"id":"W2","trigger":{"type":"TIME","frame":900},"spawn":{"enemyId":"enemy-berserker","count":3,"intervalFrames":260}},
