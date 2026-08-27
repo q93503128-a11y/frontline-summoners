@@ -15,9 +15,10 @@ import {
 } from '../src/permanent-rewards.ts';
 
 test('every chapter-one progression stage has exactly one permanent reward definition', () => {
-  const stageIds = STAGES.map((stage) => stage.treasure.id).sort();
+  const stageRewardIds = STAGES.map((stage) => stage.permanentRewardId);
+  assert.equal(stageRewardIds.every((rewardId): rewardId is string => typeof rewardId === 'string'), true);
   const rewardIds = PERMANENT_REWARDS.map((reward) => reward.id).sort();
-  assert.deepEqual(rewardIds, stageIds);
+  assert.deepEqual(rewardIds, [...stageRewardIds].sort());
   assert.equal(new Set(rewardIds).size, 20);
 });
 
@@ -25,7 +26,7 @@ test('cleared stage ids resolve to permanent reward ids in stage order', () => {
   const cleared = [STAGES[0]!.id, STAGES[1]!.id, STAGES[2]!.id];
   assert.deepEqual(
     getPermanentRewardIdsForClearedStages(cleared),
-    [STAGES[0]!.treasure.id, STAGES[1]!.treasure.id, STAGES[2]!.treasure.id],
+    [STAGES[0]!.permanentRewardId, STAGES[1]!.permanentRewardId, STAGES[2]!.permanentRewardId],
   );
 });
 
