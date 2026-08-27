@@ -45,6 +45,14 @@ export type DamageBonusContent =
 export const BATTLEFIELD_THEME_IDS = ['meadow', 'canyon', 'burning', 'ruins', 'moon', 'fortress', 'golden'] as const;
 export type BattlefieldThemeId = (typeof BATTLEFIELD_THEME_IDS)[number];
 
+export interface AttackPatternStepContent {
+  readonly attackDamage: number;
+  readonly attackMinRange: number;
+  readonly attackMaxRange: number;
+  readonly cycleFrames: number;
+  readonly hitFrames: readonly number[];
+}
+
 export interface CombatContent {
   readonly id: string;
   readonly displayName: string;
@@ -62,6 +70,7 @@ export interface CombatContent {
   readonly attributes: readonly Attribute[];
   readonly combatTags: readonly CombatTag[];
   readonly damageBonuses: readonly DamageBonusContent[];
+  readonly attackPattern?: readonly AttackPatternStepContent[];
 }
 
 export interface PlayerUnitContent extends CombatContent {
@@ -237,6 +246,27 @@ function requireHitFrames(record: Record<string, unknown>, context: string, cycl
   return frames;
 }
 
+function parseAttackPattern(record: Record<string, unknown>, context: string): readonly AttackPatternStepContent[] | undefined {
+  const raw = record.attackPattern;
+  if (raw === undefined) return undefined;
+  if (!Array.isArray(raw) || raw.length === 0) throw new Error(`${context}.attackPattern must be a non-empty array`);
+  return raw.map((step, index) => {
+    const stepContext = `${context}.attackPattern[${index}]`;
+    if (!isRecord(step)) throw new Error(`${stepContext} must be an object`);
+    const cycleFrames = requireInteger(step, 'cycleFrames', stepContext, 1, 3600);
+    const attackMinRange = requireInteger(step, 'attackMinRange', stepContext, 0, 10000);
+    const attackMaxRange = requireInteger(step, 'attackMaxRange', stepContext, 0, 10000);
+    if (attackMinRange > attackMaxRange) throw new Error(`${stepContext}.attackMinRange must be <= attackMaxRange`);
+    return {
+      attackDamage: requireInteger(step, 'attackDamage', stepContext, 0, 10000000),
+      attackMinRange,
+      attackMaxRange,
+      cycleFrames,
+      hitFrames: requireHitFrames(step, stepContext, cycleFrames),
+    };
+  });
+}
+
 function parseAttributes(record: Record<string, unknown>, context: string): readonly Attribute[] {
   const attributes = parseEnumArray(record, 'attributes', context, ATTRIBUTES);
   if (attributes.length === 0 || attributes.length > 2) throw new Error(`${context}.attributes must contain one or two attributes`);
@@ -272,6 +302,7 @@ function parseCombat(value: unknown, context: string): CombatContent {
   const attackMaxRange = requireInteger(value, 'attackMaxRange', context, 0, 10000);
   const standingRange = requireInteger(value, 'standingRange', context, 0, 10000);
   if (attackMinRange > attackMaxRange) throw new Error(`${context}.attackMinRange must be <= attackMaxRange`);
+  const attackPattern = parseAttackPattern(value, context);
   return {
     id: requireString(value, 'id', context),
     displayName: requireString(value, 'displayName', context),
@@ -289,6 +320,7 @@ function parseCombat(value: unknown, context: string): CombatContent {
     attributes: parseAttributes(value, context),
     combatTags: parseCombatTags(value, context),
     damageBonuses: parseDamageBonuses(value, context),
+    ...(attackPattern === undefined ? {} : { attackPattern }),
   };
 }
 
