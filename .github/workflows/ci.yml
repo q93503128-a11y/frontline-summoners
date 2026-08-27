@@ -24,88 +24,88 @@ jobs:
         run: npm run test -w @frontline/sim
       - name: Client - art content
         if: always()
-        run: node --experimental-transform-types --test apps/client/test/art-content.test.ts
+        run: cd apps/client && node --experimental-transform-types --test test/art-content.test.ts
       - name: Client - battle ui wiring
         if: always()
-        run: node --experimental-transform-types --test apps/client/test/battle-ui-wiring.test.ts
+        run: cd apps/client && node --experimental-transform-types --test test/battle-ui-wiring.test.ts
       - name: Client - canonical economy docs
         if: always()
-        run: node --experimental-transform-types --test apps/client/test/canonical-economy-docs.test.ts
+        run: cd apps/client && node --experimental-transform-types --test test/canonical-economy-docs.test.ts
       - name: Client - catalog boss mobile ui
         if: always()
-        run: node --experimental-transform-types --test apps/client/test/catalog-boss-mobile-ui.test.ts
+        run: cd apps/client && node --experimental-transform-types --test test/catalog-boss-mobile-ui.test.ts
       - name: Client - character growth
         if: always()
-        run: node --experimental-transform-types --test apps/client/test/character-growth.test.ts
+        run: cd apps/client && node --experimental-transform-types --test test/character-growth.test.ts
       - name: Client - combat trait labels
         if: always()
-        run: node --experimental-transform-types --test apps/client/test/combat-trait-labels.test.ts
+        run: cd apps/client && node --experimental-transform-types --test test/combat-trait-labels.test.ts
       - name: Client - combat visuals
         if: always()
-        run: node --experimental-transform-types --test apps/client/test/combat-visuals.test.ts
+        run: cd apps/client && node --experimental-transform-types --test test/combat-visuals.test.ts
       - name: Client - design coverage
         if: always()
-        run: node --experimental-transform-types --test apps/client/test/design-coverage.test.ts
+        run: cd apps/client && node --experimental-transform-types --test test/design-coverage.test.ts
       - name: Client - early campaign balance
         if: always()
-        run: node --experimental-transform-types --test apps/client/test/early-campaign-balance.test.ts
+        run: cd apps/client && node --experimental-transform-types --test test/early-campaign-balance.test.ts
       - name: Client - final campaign balance
         if: always()
-        run: node --experimental-transform-types --test apps/client/test/final-campaign-balance.test.ts
+        run: cd apps/client && node --experimental-transform-types --test test/final-campaign-balance.test.ts
       - name: Client - late campaign balance
         if: always()
-        run: node --experimental-transform-types --test apps/client/test/late-campaign-balance.test.ts
+        run: cd apps/client && node --experimental-transform-types --test test/late-campaign-balance.test.ts
       - name: Client - mid campaign balance
         if: always()
-        run: node --experimental-transform-types --test apps/client/test/mid-campaign-balance.test.ts
+        run: cd apps/client && node --experimental-transform-types --test test/mid-campaign-balance.test.ts
       - name: Client - permanent rewards
         if: always()
-        run: node --experimental-transform-types --test apps/client/test/permanent-rewards.test.ts
+        run: cd apps/client && node --experimental-transform-types --test test/permanent-rewards.test.ts
       - name: Client - player loadout
         if: always()
-        run: node --experimental-transform-types --test apps/client/test/player-loadout.test.ts
+        run: cd apps/client && node --experimental-transform-types --test test/player-loadout.test.ts
       - name: Client - progression
         if: always()
-        run: node --experimental-transform-types --test apps/client/test/progression.test.ts
+        run: cd apps/client && node --experimental-transform-types --test test/progression.test.ts
       - name: Client - projectile visuals
         if: always()
-        run: node --experimental-transform-types --test apps/client/test/projectile-visuals.test.ts
+        run: cd apps/client && node --experimental-transform-types --test test/projectile-visuals.test.ts
       - name: Client - recruitment save
         if: always()
-        run: node --experimental-transform-types --test apps/client/test/recruitment-save.test.ts
+        run: cd apps/client && node --experimental-transform-types --test test/recruitment-save.test.ts
       - name: Client - recruitment ui wiring
         if: always()
-        run: node --experimental-transform-types --test apps/client/test/recruitment-ui-wiring.test.ts
+        run: cd apps/client && node --experimental-transform-types --test test/recruitment-ui-wiring.test.ts
       - name: Client - recruitment
         if: always()
-        run: node --experimental-transform-types --test apps/client/test/recruitment.test.ts
+        run: cd apps/client && node --experimental-transform-types --test test/recruitment.test.ts
       - name: Client - recurring stage pressure
         if: always()
-        run: node --experimental-transform-types --test apps/client/test/recurring-stage-pressure.test.ts
+        run: cd apps/client && node --experimental-transform-types --test test/recurring-stage-pressure.test.ts
       - name: Client - save progress
         if: always()
-        run: node --experimental-transform-types --test apps/client/test/save-progress.test.ts
+        run: cd apps/client && node --experimental-transform-types --test test/save-progress.test.ts
       - name: Client - solo pause economy
         if: always()
-        run: node --experimental-transform-types --test apps/client/test/solo-pause-economy.test.ts
+        run: cd apps/client && node --experimental-transform-types --test test/solo-pause-economy.test.ts
       - name: Client - special baseline
         if: always()
-        run: node --experimental-transform-types --test apps/client/test/special-baseline.test.ts
+        run: cd apps/client && node --experimental-transform-types --test test/special-baseline.test.ts
       - name: Client - special stages
         if: always()
-        run: node --experimental-transform-types --test apps/client/test/special-stages.test.ts
+        run: cd apps/client && node --experimental-transform-types --test test/special-stages.test.ts
       - name: Client - stage navigation
         if: always()
-        run: node --experimental-transform-types --test apps/client/test/stage-navigation.test.ts
+        run: cd apps/client && node --experimental-transform-types --test test/stage-navigation.test.ts
       - name: Client - starter balance
         if: always()
-        run: node --experimental-transform-types --test apps/client/test/starter-balance.test.ts
+        run: cd apps/client && node --experimental-transform-types --test test/starter-balance.test.ts
       - name: Client - trait label visibility
         if: always()
-        run: node --experimental-transform-types --test apps/client/test/trait-label-visibility.test.ts
+        run: cd apps/client && node --experimental-transform-types --test test/trait-label-visibility.test.ts
       - name: Client - viewport classification
         if: always()
-        run: node --experimental-transform-types --test apps/client/test/viewport-classification.test.ts
+        run: cd apps/client && node --experimental-transform-types --test test/viewport-classification.test.ts
       - name: Build
         if: success()
         run: npm run build
