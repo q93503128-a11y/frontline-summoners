@@ -12,7 +12,7 @@ import { STAGES } from '../src/prototype.ts';
 const base: GuestProgress = {
   clearedStageIds: [],
   specialClearedStageIds: [],
-  treasureIds: [],
+  permanentRewardIds: [],
   ownedRecruitmentCharacterIds: [],
   recruitmentProgressByBanner: {},
   characterProgressById: {},
