@@ -18,8 +18,9 @@ test('solo pause freezes the simulation and all direct battle actions', async ()
   assert.match(source, /솔로 전투 정지 · 보급·쿨다운·적 스폰도 멈춤/);
   assert.match(source, /'일시정지', \(\) => this\.toggleManualPause\(\)/);
 
-  const guardedActions = source.match(/if \(this\.manuallyPaused\) return;/g) ?? [];
-  assert.ok(guardedActions.length >= 3, 'spawn, supply upgrade and base weapon input must all be blocked while paused');
+  assert.match(source, /private canAcceptBattleAction\(\): boolean \{[\s\S]*?!this\.manuallyPaused[\s\S]*?!isPortraitMobileViewport\(\)/);
+  const guardedActions = source.match(/if \(!this\.canAcceptBattleAction\(\)\) return;/g) ?? [];
+  assert.ok(guardedActions.length >= 4, 'keyboard, spawn, supply upgrade and base weapon input must share the centralized pause/action gate');
 });
 
 test('chapter one opens scarce while supply upgrades have meaningful investment value', () => {

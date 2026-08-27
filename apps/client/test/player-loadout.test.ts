@@ -49,7 +49,8 @@ test('saved level, plus level, and selected evolution form alter the battle-read
   assert.ok(evolved.definition.attackDamage > base.definition.attackDamage);
   assert.ok(evolved.definition.standingRange < base.definition.standingRange);
   assert.ok(evolved.cost > base.cost);
-  assert.equal(evolved.definition.damageBonuses?.[0]?.trait, 'BOSS');
+  assert.equal(evolved.definition.damageBonuses?.[0]?.targetKind, 'TAG');
+  assert.equal(evolved.definition.damageBonuses?.[0]?.target, 'BOSS');
   assert.equal(evolved.definition.damageBonuses?.[0]?.multiplierPermille, 1700);
 
   const battle = createGuestPrototypeBattle(firstStageId, evolvedGuest);

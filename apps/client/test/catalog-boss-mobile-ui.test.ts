@@ -14,23 +14,23 @@ test('main menu opens the real catalog scene and the scene is registered', async
   assert.match(main, /scene:\s*\[[^\]]*CatalogScene[^\]]*\]/s);
 });
 
-test('catalog pages allies, gameplay treasures, and separate special medals instead of mixing reward axes', async () => {
+test('catalog pages allies, permanent rewards, and separate special clear records instead of mixing reward axes', async () => {
   const source = await readSource('../src/catalog-scene.ts');
   assert.match(source, /const ALLY_PAGE_SIZE = 5/);
-  assert.match(source, /const TREASURE_PAGE_SIZE = 5/);
-  assert.match(source, /const MEDAL_PAGE_SIZE = 5/);
-  assert.match(source, /type CatalogMode = 'ALLIES' \| 'TREASURES' \| 'MEDALS'/);
+  assert.match(source, /const REWARD_PAGE_SIZE = 5/);
+  assert.match(source, /const SPECIAL_PAGE_SIZE = 5/);
+  assert.match(source, /type CatalogMode = 'ALLIES' \| 'REWARDS' \| 'SPECIAL'/);
   assert.match(source, /'동료 10종'/);
-  assert.match(source, /'보물 20종'/);
-  assert.match(source, /'훈장 5종'/);
+  assert.match(source, /'영구 보상 20개'/);
+  assert.match(source, /'특수 기록 5개'/);
   assert.match(source, /loadGuestProgress\(\)/);
   assert.match(source, /getUnlockedSlotIds\(this\.progress\.clearedStageIds\)/);
-  assert.match(source, /new Set\(this\.progress\.treasureIds\)/);
+  assert.match(source, /new Set\(this\.progress\.permanentRewardIds\)/);
   assert.match(source, /new Set\(this\.progress\.specialClearedStageIds\)/);
   assert.match(source, /formatCombatTraits\(slot\.definition\)/);
   assert.match(source, /formatDamageSpecialty\(slot\.definition\)/);
-  assert.match(source, /첫 클리어 100% 확정/);
-  assert.match(source, /전투 능력치 보너스 없음/);
+  assert.match(source, /NORMAL_CLEAR 첫 승리 시 확정/);
+  assert.match(source, /메인 영구 성장과 별도 기록/);
 });
 
 test('runtime and catalog share the coarse-pointer compact-mobile classifier instead of treating short desktop windows as phones', async () => {
@@ -66,8 +66,8 @@ test('catalog keeps desktop descriptions while compact cards prioritize readable
   assert.match(source, /if \(compact\) \{[\s\S]*?HP \$\{slot\.definition\.maxHp\} · 공격 \$\{slot\.definition\.attackDamage\}/);
   assert.match(source, /else \{[\s\S]*?slot\.description/);
   assert.match(source, /재생산 \$\{\(slot\.rechargeFrames \/ 30\)\.toFixed\(1\)\}초/);
-  assert.match(source, /if \(!compact\) \{[\s\S]*?첫 클리어 100% 확정/);
-  assert.match(source, /private renderMedals\(\): void/);
+  assert.match(source, /if \(!compact\) this\.contentLayer!\.add\(addText\(this, x, 548, `\$\{stage\.name\}\\nNORMAL_CLEAR 첫 승리 시 확정`/);
+  assert.match(source, /private renderSpecialRecords\(\): void/);
   assert.match(source, /`SPECIAL \$\{specialNumber\}`/);
   assert.match(source, /`난이도 \$\{stage\.difficulty\} \/ 12`/);
 });
@@ -77,7 +77,7 @@ test('compact catalog navigation stays finger-sized, drops decorative header cop
   assert.match(source, /const navigationHeight = compact \? 84 : 50;/);
   assert.match(source, /const tabHeight = compact \? 84 : 54;/);
   assert.match(source, /isCompactMobileViewport\(\) \? 26 : 18/);
-  assert.match(source, /if \(!compact\) addText\(this, 56, 88, '동료, 제1장 확정 보물, 특수전 훈장을 한곳에서 확인한다\.'/);
+  assert.match(source, /if \(!compact\) addText\(this, 56, 88, '동료, 메인 영구 보상, 특수전 클리어 기록을 한곳에서 확인한다\.'/);
   assert.match(source, /bg\.on\('pointerout', \(\) => \{[\s\S]*?container\.setScale\(1\);/);
   assert.match(source, /bg\.on\('pointerupoutside', \(\) => container\.setScale\(1\)\);/);
   assert.ok(84 * (390 / 720) >= 44);
@@ -93,7 +93,7 @@ test('boss arrival warning is keyed by actual BOSS-tagged simulation units and o
 
   assert.ok(stepIndex >= 0 && warningIndex > stepIndex, 'boss warning scan must observe the post-spawn deterministic state');
   assert.match(battle, /seenBossSimulationIds = new Set<number>/);
-  assert.match(battle, /\(unit\.definition\.traits \?\? \[\]\)\.includes\('BOSS'\)/);
+  assert.match(battle, /\(unit\.definition\.combatTags \?\? \[\]\)\.includes\('BOSS'\)/);
   assert.match(battle, /this\.seenBossSimulationIds\.has\(unit\.simulationId\)/);
   assert.match(battle, /this\.seenBossSimulationIds\.add\(unit\.simulationId\)/);
   assert.match(battle, /showBossArrival\(this, enemy\?\.displayName \?\? '우두머리'\)/);

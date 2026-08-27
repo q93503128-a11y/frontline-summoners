@@ -14,9 +14,9 @@ import {
   isStageUnlocked,
 } from '../src/prototype.ts';
 
-async function loadCanonicalStageJson(): Promise<unknown> {
+async function loadCanonicalStageJson(): Promise<readonly Record<string, unknown>[]> {
   const url = new URL('../../../content/stages/chapter-01.json', import.meta.url);
-  return JSON.parse(await readFile(url, 'utf8')) as unknown;
+  return JSON.parse(await readFile(url, 'utf8')) as readonly Record<string, unknown>[];
 }
 
 test('fresh progress owns only the starter and can enter only stage one', () => {
@@ -65,9 +65,15 @@ test('full chapter progression unlocks all ten player units and all twenty perma
   assert.deepEqual(getPermanentRewardIdsForClearedStages(cleared), STAGES.map((stage) => stage.permanentRewardId));
 });
 
-test('runtime stage definitions stay identical to canonical chapter json', async () => {
+test('runtime stage definitions preserve every authored canonical field after schema normalization', async () => {
   const raw = await loadCanonicalStageJson();
-  assert.deepEqual(STAGES, raw);
+  assert.equal(STAGES.length, raw.length);
+  for (const [index, rawStage] of raw.entries()) {
+    const runtimeStage = STAGES[index] as unknown as Record<string, unknown>;
+    for (const [key, value] of Object.entries(rawStage)) {
+      assert.deepEqual(runtimeStage[key], value, `${String(rawStage.id)} changed authored field ${key}`);
+    }
+  }
 });
 
 test('chapter one has visible battlefield variety in both theme and length', () => {

@@ -46,7 +46,7 @@ test('saved deck, levels, forms, plus levels, and permanent rewards use guest lo
 
 test('player specialties reflect selected level, form, and plus level while enemy combat identity remains visible', async () => {
   const { deck, battle } = await readRuntime();
-  assert.match(deck, /buildCharacterCombatSlot\(slot, level, meta\?\.selectedFormId, meta\?\.plusLevel \?\? 0\)/);
+  assert.match(deck, /buildCharacterCombatSlot\(slot, level, meta\?\.selectedFormId, plusLevel\)/);
   assert.match(deck, /formatCombatTraits\(currentSlot\.definition\)/);
   assert.match(deck, /formatDamageSpecialty\(currentSlot\.definition\)/);
   assert.match(battle, /formatCompactTraits\(unit\.definition\)/);
@@ -186,7 +186,7 @@ test('manual deck cards keep level, plus level, form, rarity, role, and combat i
   assert.match(deck, /slot\.rarity/);
   assert.match(deck, /slot\.role/);
   assert.match(deck, /selectedFormName\(this\.progress, slot\.slotId\)/);
-  assert.match(deck, /buildCharacterCombatSlot\(slot, level, meta\?\.selectedFormId, meta\?\.plusLevel \?\? 0\)/);
+  assert.match(deck, /buildCharacterCombatSlot\(slot, level, meta\?\.selectedFormId, plusLevel\)/);
   assert.match(deck, /모집 미획득/);
 });
 

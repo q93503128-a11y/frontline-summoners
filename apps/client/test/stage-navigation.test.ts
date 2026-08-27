@@ -26,8 +26,8 @@ const FINAL_MAIN_STAGE_ID = 'main_01_020';
 test('stage navigation groups progression and special stages instead of flattening all future content into one menu', () => {
   assert.equal(STAGE_COLLECTIONS.length, 2);
   assert.deepEqual(STAGE_COLLECTIONS.map((collection) => collection.id), ['chapter-01', 'special-border-01']);
-  assert.equal(getStageCollection('chapter-01').stages, STAGES);
-  assert.equal(getStageCollection('special-border-01').stages, SPECIAL_STAGES);
+  assert.deepEqual(getStageCollection('chapter-01').stages, STAGES);
+  assert.deepEqual(getStageCollection('special-border-01').stages, SPECIAL_STAGES);
   assert.equal(getStageCollectionForStage(FIRST_MAIN_STAGE_ID).id, 'chapter-01');
   assert.equal(getStageCollectionForStage('special-05').id, 'special-border-01');
 });
