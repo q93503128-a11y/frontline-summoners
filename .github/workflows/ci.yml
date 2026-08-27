@@ -27,32 +27,31 @@ jobs:
         shell: bash
         run: |
           cd apps/client
+          diagnostics="$RUNNER_TEMP/client-test-diagnostics"
+          mkdir -p "$diagnostics"
           failed=0
-          for file in \
-            battle-ui-wiring.test.ts \
-            canonical-economy-docs.test.ts \
-            catalog-boss-mobile-ui.test.ts \
-            design-coverage.test.ts \
-            final-campaign-balance.test.ts \
-            mid-campaign-balance.test.ts \
-            permanent-rewards.test.ts \
-            player-loadout.test.ts \
-            progression.test.ts \
-            recruitment-save.test.ts \
-            recruitment.test.ts \
-            recurring-stage-pressure.test.ts \
-            save-progress.test.ts \
-            solo-pause-economy.test.ts \
-            special-baseline.test.ts \
-            stage-navigation.test.ts
-          do
+          : > "$diagnostics/failed-tests.txt"
+          for path in test/*.test.ts; do
+            file="${path#test/}"
             echo "### $file" | tee -a "$GITHUB_STEP_SUMMARY"
             status=0
-            node --experimental-transform-types --test "test/$file" 2>&1 | tee -a "$GITHUB_STEP_SUMMARY" || status=$?
-            if [[ $status -ne 0 ]]; then failed=1; fi
+            node --experimental-transform-types --test "$path" > "$diagnostics/$file.log" 2>&1 || status=$?
+            cat "$diagnostics/$file.log" >> "$GITHUB_STEP_SUMMARY"
+            if [[ $status -ne 0 ]]; then
+              echo "$file" | tee -a "$diagnostics/failed-tests.txt"
+              failed=1
+            fi
             echo | tee -a "$GITHUB_STEP_SUMMARY"
           done
           exit $failed
+      - name: Upload client test diagnostics
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: client-test-diagnostics
+          path: ${{ runner.temp }}/client-test-diagnostics
+          if-no-files-found: error
+          retention-days: 3
       - name: Test client suite
         if: always()
         run: npm run test -w @frontline/client
