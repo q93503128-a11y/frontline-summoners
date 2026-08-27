@@ -43,7 +43,7 @@ test('current executable recruitment slice stays separate from the ten story cha
   assert.equal(getUnlockedSlotIds(fullChapter).length, 10);
   assert.equal(getUnlockedSlotIds(fullChapter).includes('moon-eater'), false);
 
-  const battle = createPrototypeBattle('border-01', ['militia', 'moon-eater'], []);
+  const battle = createPrototypeBattle(STAGES[0]!.id, ['militia', 'moon-eater'], []);
   assert.deepEqual(battle.playerSlots.map((slot) => slot.slotId), ['militia', 'moon-eater']);
 });
 
