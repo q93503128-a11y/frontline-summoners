@@ -8,31 +8,35 @@ import {
   normalizeGuestProgress,
 } from '../src/save.ts';
 
+const STAGE_1 = 'main_01_001';
+const STAGE_2 = 'main_01_002';
+const STAGE_3 = 'main_01_003';
+
 test('session and durable guest progress merge NORMAL_CLEAR without duplicates and preserve first source', () => {
   const merged = normalizeGuestProgress(mergeGuestProgress(
     {
-      clearedStageIds: ['border-01', 'border-02'],
-      normalClearSourceByStage: { 'border-01': 'COOP_BATTLE', 'border-02': 'SOLO_BATTLE' },
+      clearedStageIds: [STAGE_1, STAGE_2],
+      normalClearSourceByStage: { [STAGE_1]: 'COOP_BATTLE', [STAGE_2]: 'SOLO_BATTLE' },
       specialClearedStageIds: ['special-01'],
-      treasureIds: ['wind-badge'],
+      permanentRewardIds: ['wind-badge'],
     },
     {
-      clearedStageIds: ['border-02', 'border-03'],
-      normalClearSourceByStage: { 'border-02': 'COOP_BATTLE', 'border-03': 'SOLO_BATTLE' },
+      clearedStageIds: [STAGE_2, STAGE_3],
+      normalClearSourceByStage: { [STAGE_2]: 'COOP_BATTLE', [STAGE_3]: 'SOLO_BATTLE' },
       specialClearedStageIds: ['special-01', 'special-02'],
-      treasureIds: ['wind-badge', 'pot-token'],
+      permanentRewardIds: ['wind-badge', 'pot-token'],
     },
   ));
 
-  assert.deepEqual(merged.clearedStageIds, ['border-01', 'border-02', 'border-03']);
-  assert.equal(merged.normalClearSourceByStage?.['border-01'], 'COOP_BATTLE');
-  assert.equal(merged.normalClearSourceByStage?.['border-02'], 'SOLO_BATTLE');
-  assert.equal(merged.normalClearSourceByStage?.['border-03'], 'SOLO_BATTLE');
+  assert.deepEqual(merged.clearedStageIds, [STAGE_1, STAGE_2, STAGE_3]);
+  assert.equal(merged.normalClearSourceByStage?.[STAGE_1], 'COOP_BATTLE');
+  assert.equal(merged.normalClearSourceByStage?.[STAGE_2], 'SOLO_BATTLE');
+  assert.equal(merged.normalClearSourceByStage?.[STAGE_3], 'SOLO_BATTLE');
   assert.deepEqual(merged.specialClearedStageIds, ['special-01', 'special-02']);
-  assert.deepEqual(merged.treasureIds.slice(0, 3), ['wind-badge', 'pot-token', 'double-plank']);
+  assert.deepEqual(merged.permanentRewardIds.slice(0, 3), ['wind-badge', 'barefoot-ribbon', 'pot-token']);
 });
 
-test('NORMAL_CLEAR normalization is sequential, repairs guaranteed permanent rewards, and drops orphan clear sources', () => {
+test('NORMAL_CLEAR normalization canonicalizes legacy stage ids, repairs guaranteed permanent rewards, and drops orphan clear sources', () => {
   const normalized = normalizeGuestProgress({
     clearedStageIds: ['border-01', 'border-03', 'border-16'],
     normalClearSourceByStage: {
@@ -41,57 +45,64 @@ test('NORMAL_CLEAR normalization is sequential, repairs guaranteed permanent rew
       'border-04': 'COOP_BATTLE',
     },
     specialClearedStageIds: ['special-01', 'missing-special'],
-    treasureIds: ['pot-token', 'wall-shadow', 'future-special-relic'],
+    permanentRewardIds: ['pot-token', 'wall-shadow', 'future-special-relic'],
   });
 
-  assert.deepEqual(normalized.clearedStageIds, ['border-01']);
-  assert.deepEqual(normalized.normalClearSourceByStage, { 'border-01': 'COOP_BATTLE' });
+  assert.deepEqual(normalized.clearedStageIds, [STAGE_1]);
+  assert.deepEqual(normalized.normalClearSourceByStage, { [STAGE_1]: 'COOP_BATTLE' });
   assert.deepEqual(normalized.specialClearedStageIds, ['special-01']);
-  assert.deepEqual(normalized.treasureIds, ['wind-badge', 'future-special-relic']);
-  assert.equal(hasNormalClear(normalized, 'border-01'), true);
-  assert.equal(hasNormalClear(normalized, 'border-03'), false);
-  assert.equal(getNormalClearSource(normalized, 'border-01'), 'COOP_BATTLE');
-  assert.equal(getNormalClearSource(normalized, 'border-03'), undefined);
+  assert.deepEqual(normalized.permanentRewardIds, ['wind-badge', 'future-special-relic']);
+  assert.equal(hasNormalClear(normalized, STAGE_1), true);
+  assert.equal(hasNormalClear(normalized, 'border-01'), true, 'legacy callers are canonicalized at the save boundary');
+  assert.equal(hasNormalClear(normalized, STAGE_3), false);
+  assert.equal(getNormalClearSource(normalized, STAGE_1), 'COOP_BATTLE');
+  assert.equal(getNormalClearSource(normalized, STAGE_3), undefined);
 });
 
-test('legacy progress without provenance migrates to the historical actual-battle source without inventing extra clears', () => {
+test('legacy progress without provenance migrates stage ids and defaults historical actual-battle source without inventing extra clears', () => {
   const normalized = normalizeGuestProgress({
     clearedStageIds: ['border-01', 'border-02'],
     specialClearedStageIds: [],
-    treasureIds: [],
+    permanentRewardIds: [],
   });
+  assert.deepEqual(normalized.clearedStageIds, [STAGE_1, STAGE_2]);
   assert.deepEqual(normalized.normalClearSourceByStage, {
-    'border-01': 'SOLO_BATTLE',
-    'border-02': 'SOLO_BATTLE',
+    [STAGE_1]: 'SOLO_BATTLE',
+    [STAGE_2]: 'SOLO_BATTLE',
   });
+  assert.deepEqual(normalized.permanentRewardIds, ['wind-badge', 'barefoot-ribbon']);
 
   const provenanceOnly = normalizeGuestProgress({
     clearedStageIds: [],
     normalClearSourceByStage: { 'border-01': 'COOP_BATTLE' },
     specialClearedStageIds: [],
-    treasureIds: [],
+    permanentRewardIds: [],
   });
   assert.deepEqual(provenanceOnly.clearedStageIds, []);
   assert.deepEqual(provenanceOnly.normalClearSourceByStage, {});
 });
 
-test('save schema v8 persists NORMAL_CLEAR provenance and accepts older v2-v7 data for migration', async () => {
+test('save schema v9 persists canonical permanent rewards and accepts older v2-v8 data for migration', async () => {
   const source = await readFile(new URL('../src/save.ts', import.meta.url), 'utf8');
-  assert.match(source, /const SCHEMA_VERSION = 8/);
-  assert.match(source, /interface StoredGuestProgressV8/);
-  assert.match(source, /normalClearSourceByStage: Readonly<Record<string, NormalClearSource>>/);
+  assert.match(source, /const SCHEMA_VERSION = 9/);
+  assert.match(source, /interface StoredGuestProgressV9/);
+  assert.match(source, /permanentRewardIds: readonly string\[\]/);
   assert.match(source, /\(version as number\) < 2 \|\| \(version as number\) > SCHEMA_VERSION/);
   assert.match(source, /versionNumber >= 8/);
-  assert.match(source, /normalizeNormalClearSourceMap\(\{\}, clearedStageIds\)/);
+  assert.match(source, /versionNumber >= 9 \? stringArray\(value\?\.permanentRewardIds\) : stringArray\(value\?\.treasureIds\)/);
+  assert.match(source, /LEGACY_MAIN_STAGE_ID_MAP/);
+  assert.match(source, /canonicalStageIds\(value\?\.clearedStageIds\)/);
 });
 
 test('progression writer records only explicit actual-battle NORMAL_CLEAR and derives its permanent reward internally', async () => {
   const source = await readFile(new URL('../src/save.ts', import.meta.url), 'utf8');
   assert.match(source, /export async function recordNormalStageClear\(stageId: string, source: NormalClearSource\)/);
   assert.match(source, /if \(!NORMAL_CLEAR_SOURCE_SET\.has\(source\)\)/);
+  assert.match(source, /getStage\(canonicalStageId\(stageId\)\)/);
   assert.match(source, /if \(stage\.stageType !== 'PROGRESSION'\)/);
+  assert.match(source, /if \(!stage\.permanentRewardId\)/);
   assert.match(source, /if \(!isStageUnlocked\(stage\.id, before\.clearedStageIds\)\)/);
-  assert.match(source, /rewards\.add\(stage\.treasure\.id\)/);
+  assert.match(source, /rewards\.add\(stage\.permanentRewardId\)/);
   assert.match(source, /if \(firstClear\) normalClearSourceByStage\[stage\.id\] = source/);
   assert.doesNotMatch(source, /export async function recordStageClear/);
 
