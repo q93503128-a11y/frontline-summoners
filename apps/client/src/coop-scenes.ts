@@ -29,6 +29,7 @@ import {
   encodeCoopInvite,
   guestWebsocketPath,
   type CoopBattleSnapshot,
+  type CoopPlayerLoadout,
   type CoopServerMessage,
 } from './coop-network';
 
@@ -41,6 +42,22 @@ const EMPTY_PROGRESS: GuestProgress = {
 
 function coopDeck(progress: GuestProgress): readonly string[] {
   return getEffectiveDeckSlotIds(progress).slice(0, 5);
+}
+
+function coopLoadout(progress: GuestProgress): CoopPlayerLoadout {
+  const characterProgress = progress.characterProgressById ?? {};
+  return {
+    characters: coopDeck(progress).map((characterId) => {
+      const meta = characterProgress[characterId];
+      return {
+        characterId,
+        level: meta?.level ?? 1,
+        plusLevel: meta?.plusLevel ?? 0,
+        ...(meta?.selectedFormId === undefined ? {} : { selectedFormId: meta.selectedFormId }),
+      };
+    }),
+    permanentRewardIds: [...progress.permanentRewardIds],
+  };
 }
 
 function eligibleCoopStages(progress: GuestProgress): readonly PrototypeStage[] {
@@ -266,7 +283,7 @@ export class CoopLobbyScene extends Phaser.Scene {
     const mine = this.session.room.seats.find((seat) => seat.seatId === this.session!.seatId);
     try {
       if (mine?.ready) this.session.sendUnready();
-      else this.session.sendReady(coopDeck(this.progress));
+      else this.session.sendReady(coopLoadout(this.progress));
     } catch (error) {
       this.statusText?.setText(error instanceof Error ? error.message : '준비 상태를 바꾸지 못했습니다.');
       this.statusText?.setColor('#ff9a91');
