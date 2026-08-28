@@ -15,6 +15,14 @@ import {
   createCoopPlayableBattle,
   type CoopPlayableBattleState,
 } from '@frontline/sim/coop-playable';
+import {
+  applyPermanentRewardBattleEffects,
+  buildCharacterCombatSlot,
+  getEvolutionForm,
+  normalizeCharacterLevel,
+  normalizeCharacterPlusLevel,
+  type PermanentRewardApplicableSlot,
+} from '@frontline/sim/meta-progression';
 import type {
   EnemyArchetype,
   PlayerRosterSlot,
@@ -25,6 +33,13 @@ import enemiesJson from '../../../content/enemies/chapter-01.json' with { type: 
 import stagesJson from '../../../content/stages/chapter-01.json' with { type: 'json' };
 import specialStagesJson from '../../../content/stages/special-01.json' with { type: 'json' };
 import stagePoliciesJson from '../../../content/stages/policies-01.json' with { type: 'json' };
+import type { CoopPlayerLoadout } from './coop-room.ts';
+import {
+  SERVER_CHARACTER_LEVEL_CURVE,
+  SERVER_EVOLUTION_FORMS,
+  SERVER_PERMANENT_REWARDS,
+  SERVER_REWARD_SCOPES_BY_CHARACTER,
+} from './meta-content.ts';
 
 const STARTER_SLOT_ID = 'militia';
 
@@ -93,10 +108,26 @@ const BASE_ENEMIES: readonly EnemyArchetype[] = CAMPAIGN.enemies.map((enemy) => 
   definition: fighter(enemy),
   rewardSupply: enemy.rewardSupply,
 }));
+const PERMANENT_REWARD_IDS = new Set(SERVER_PERMANENT_REWARDS.map((reward) => reward.id));
+
+for (const form of SERVER_EVOLUTION_FORMS) {
+  if (!ALL_PLAYER_UNIT_IDS.has(form.characterId)) throw new Error(`server evolution references unknown character:${form.characterId}`);
+}
+for (const characterId of ALL_PLAYER_UNIT_IDS) {
+  if (!SERVER_REWARD_SCOPES_BY_CHARACTER.has(characterId)) throw new Error(`server reward scopes missing character:${characterId}`);
+}
+for (const characterId of SERVER_REWARD_SCOPES_BY_CHARACTER.keys()) {
+  if (!ALL_PLAYER_UNIT_IDS.has(characterId)) throw new Error(`server reward scopes reference unknown character:${characterId}`);
+}
 
 export interface ServerCoopStageRuntime {
   readonly stage: CampaignStageContent;
   readonly policy: StagePolicyContent;
+}
+
+export interface ServerCoopResolvedLoadout {
+  readonly playerSlots: readonly PermanentRewardApplicableSlot[];
+  readonly permanentRewardIds: readonly string[];
 }
 
 export function getServerCoopStage(stageId: string): ServerCoopStageRuntime {
@@ -116,6 +147,43 @@ export function getServerCoopDeck(deckSlotIds: readonly string[]): readonly Play
     if (!slot) throw new Error(`unknown_coop_character:${slotId}`);
     return slot;
   });
+}
+
+export function getServerCoopLoadout(loadout: CoopPlayerLoadout): ServerCoopResolvedLoadout {
+  if (loadout.characters.length < 1 || loadout.characters.length > 5) throw new Error('co-op loadout must contain 1..5 characters');
+  const ids = loadout.characters.map((character) => character.characterId);
+  if (new Set(ids).size !== ids.length) throw new Error('co-op loadout must not contain duplicate characters');
+  if (new Set(loadout.permanentRewardIds).size !== loadout.permanentRewardIds.length) throw new Error('co-op permanent rewards must not contain duplicates');
+  for (const rewardId of loadout.permanentRewardIds) {
+    if (!PERMANENT_REWARD_IDS.has(rewardId)) throw new Error(`unknown_coop_permanent_reward:${rewardId}`);
+  }
+
+  const playerSlots = loadout.characters.map((character): PermanentRewardApplicableSlot => {
+    const baseSlot = PLAYER_SLOT_BY_ID.get(character.characterId);
+    if (!baseSlot) throw new Error(`unknown_coop_character:${character.characterId}`);
+    if (character.level !== normalizeCharacterLevel(SERVER_CHARACTER_LEVEL_CURVE, character.level)) {
+      throw new Error(`invalid_coop_level:${character.characterId}:${character.level}`);
+    }
+    if (character.plusLevel !== normalizeCharacterPlusLevel(SERVER_CHARACTER_LEVEL_CURVE, character.plusLevel)) {
+      throw new Error(`invalid_coop_plus_level:${character.characterId}:${character.plusLevel}`);
+    }
+    if (character.selectedFormId !== undefined) {
+      const form = getEvolutionForm(SERVER_EVOLUTION_FORMS, character.selectedFormId);
+      if (form.characterId !== character.characterId) throw new Error(`invalid_coop_form_owner:${character.selectedFormId}`);
+    }
+    const progressed = buildCharacterCombatSlot(
+      baseSlot,
+      SERVER_CHARACTER_LEVEL_CURVE,
+      SERVER_EVOLUTION_FORMS,
+      character.level,
+      character.selectedFormId,
+      character.plusLevel,
+    );
+    const rewardScopes = SERVER_REWARD_SCOPES_BY_CHARACTER.get(character.characterId);
+    if (!rewardScopes) throw new Error(`server reward scopes missing character:${character.characterId}`);
+    return { ...progressed, rewardScopes };
+  });
+  return { playerSlots, permanentRewardIds: [...loadout.permanentRewardIds] };
 }
 
 function scaleInteger(value: number, permille: number, minimum: number): number {
@@ -139,22 +207,71 @@ function scaleEnemy(enemy: EnemyArchetype, hpPermille: number, attackPermille: n
   };
 }
 
+function rewardSupplyMap(enemies: readonly EnemyArchetype[]): Readonly<Record<string, number>> {
+  return Object.fromEntries(enemies.map((enemy) => [enemy.enemyId, enemy.rewardSupply]));
+}
+
+function sharedRewardIds(a: readonly string[], b: readonly string[]): readonly string[] {
+  const right = new Set(b);
+  return a.filter((rewardId) => right.has(rewardId));
+}
+
 export function createServerCoopBattle(
   stageId: string,
-  deckA: readonly string[],
-  deckB: readonly string[],
+  loadoutA: CoopPlayerLoadout,
+  loadoutB: CoopPlayerLoadout,
 ): CoopPlayableBattleState {
   const { stage, policy } = getServerCoopStage(stageId);
+  const resolvedA = getServerCoopLoadout(loadoutA);
+  const resolvedB = getServerCoopLoadout(loadoutB);
+  const commonRewardIds = sharedRewardIds(resolvedA.permanentRewardIds, resolvedB.permanentRewardIds);
+
+  const progressionA = applyPermanentRewardBattleEffects({
+    ownedRewardIds: resolvedA.permanentRewardIds,
+    startingSupply: stage.startingSupply,
+    playerBaseHp: stage.playerBaseHp,
+    ...(stage.playerUnitCap === undefined ? {} : { playerUnitCap: stage.playerUnitCap }),
+    playerSlots: resolvedA.playerSlots,
+    enemies: BASE_ENEMIES,
+  }, SERVER_PERMANENT_REWARDS);
+  const progressionB = applyPermanentRewardBattleEffects({
+    ownedRewardIds: resolvedB.permanentRewardIds,
+    startingSupply: stage.startingSupply,
+    playerBaseHp: stage.playerBaseHp,
+    ...(stage.playerUnitCap === undefined ? {} : { playerUnitCap: stage.playerUnitCap }),
+    playerSlots: resolvedB.playerSlots,
+    enemies: BASE_ENEMIES,
+  }, SERVER_PERMANENT_REWARDS);
+  const sharedProgression = applyPermanentRewardBattleEffects({
+    ownedRewardIds: commonRewardIds,
+    startingSupply: stage.startingSupply,
+    playerBaseHp: stage.playerBaseHp,
+    ...(stage.playerUnitCap === undefined ? {} : { playerUnitCap: stage.playerUnitCap }),
+    playerSlots: [] as readonly PermanentRewardApplicableSlot[],
+    enemies: BASE_ENEMIES,
+  }, SERVER_PERMANENT_REWARDS);
+
   const scaling = policy.coopStatScaling;
   const enemies = BASE_ENEMIES.map((enemy) => scaleEnemy(enemy, scaling.enemyHpPermille, scaling.enemyAttackPermille));
   return createCoopPlayableBattle({
     mapLength: stage.mapLength,
-    playerBaseHp: stage.playerBaseHp,
+    playerBaseHp: sharedProgression.playerBaseHp,
     enemyBaseHp: scaleInteger(stage.enemyBaseHp, scaling.enemyBaseHpPermille, 1),
-    startingSupply: stage.startingSupply,
     players: {
-      A: getServerCoopDeck(deckA),
-      B: getServerCoopDeck(deckB),
+      A: progressionA.playerSlots,
+      B: progressionB.playerSlots,
+    },
+    playerEconomies: {
+      A: {
+        startingSupply: progressionA.startingSupply,
+        supplyLevels: progressionA.supplyLevels,
+        enemyRewardSupplyById: rewardSupplyMap(progressionA.enemies),
+      },
+      B: {
+        startingSupply: progressionB.startingSupply,
+        supplyLevels: progressionB.supplyLevels,
+        enemyRewardSupplyById: rewardSupplyMap(progressionB.enemies),
+      },
     },
     enemies,
     enemyWaves: stage.waves,
