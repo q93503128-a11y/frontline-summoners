@@ -6,7 +6,8 @@
   "exports": {
     ".": "./src/index.ts",
     "./playable": "./src/playable.ts",
-    "./coop-playable": "./src/coop-playable.ts"
+    "./coop-playable": "./src/coop-playable.ts",
+    "./meta-progression": "./src/meta-progression.ts"
   },
   "scripts": {
     "typecheck": "tsc --noEmit",
