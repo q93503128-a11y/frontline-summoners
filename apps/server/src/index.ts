@@ -1,6 +1,12 @@
 import { DurableObject } from 'cloudflare:workers';
 import { SIM_TICK_RATE } from '@frontline/shared';
 import {
+  applyCoopPlayableFrame,
+  getCoopPlayableSnapshot,
+  type CoopPlayableBattleState,
+  type CoopPlayableCommand,
+} from '@frontline/sim/coop-playable';
+import {
   connectCoopSeat,
   createCoopRoom,
   disconnectCoopSeat,
@@ -12,6 +18,11 @@ import {
   type CoopRoomState,
   type CoopSeatId,
 } from './coop-room.ts';
+import {
+  createServerCoopBattle,
+  getServerCoopDeck,
+  getServerCoopStage,
+} from './runtime-content.ts';
 
 export interface Env {
   DB: D1Database;
@@ -26,9 +37,10 @@ type SocketAttachment = {
 type StoredCoopRoom = {
   room: CoopRoomState;
   joinTokens: Record<CoopSeatId, string>;
+  battle: CoopPlayableBattleState | null;
 };
 
-const ROOM_STORAGE_KEY = 'coop-room-v1';
+const ROOM_STORAGE_KEY = 'coop-room-v2';
 
 const CORS_HEADERS = {
   'access-control-allow-origin': '*',
@@ -62,6 +74,18 @@ async function readJsonObject(request: Request): Promise<Record<string, unknown>
   }
 }
 
+function coopStageRequestError(stageId: string): string | null {
+  try {
+    getServerCoopStage(stageId);
+    return null;
+  } catch (error) {
+    const message = error instanceof Error ? error.message : '';
+    if (message.startsWith('stage_not_coop_eligible:')) return 'stage_not_coop_eligible';
+    if (message.startsWith('unknown_server_stage:')) return 'unknown_stage';
+    return 'invalid_stage';
+  }
+}
+
 export default {
   async fetch(request: Request, env: Env): Promise<Response> {
     const url = new URL(request.url);
@@ -81,6 +105,8 @@ export default {
       const body = await readJsonObject(request);
       const stageId = nonEmptyString(body.stageId);
       if (!stageId) return json({ error: 'stage_id_required' }, { status: 400 });
+      const stageError = coopStageRequestError(stageId);
+      if (stageError) return json({ error: stageError }, { status: 400 });
 
       const matchId = crypto.randomUUID();
       const hostToken = crypto.randomUUID();
@@ -152,6 +178,7 @@ export class BattleRoom extends DurableObject<Env> {
       if (!matchId || !stageId || !tokenA || !tokenB || tokenA === tokenB) {
         return json({ error: 'invalid_match_initialization' }, { status: 400 });
       }
+      if (coopStageRequestError(stageId)) return json({ error: 'invalid_coop_stage' }, { status: 400 });
       if (existing) {
         if (existing.room.matchId === matchId && existing.room.stageId === stageId) return json({ ok: true, alreadyInitialized: true });
         return json({ error: 'room_already_initialized' }, { status: 409 });
@@ -159,6 +186,7 @@ export class BattleRoom extends DurableObject<Env> {
       this.record = {
         room: createCoopRoom(matchId, stageId),
         joinTokens: { A: tokenA, B: tokenB },
+        battle: null,
       };
       this.loaded = true;
       await this.saveRecord();
@@ -197,9 +225,14 @@ export class BattleRoom extends DurableObject<Env> {
       seatId,
       simTickRate: SIM_TICK_RATE,
       room: getCoopRoomSnapshot(record.room),
+      ...(record.battle === null ? {} : { battle: getCoopPlayableSnapshot(record.battle) }),
     }));
-    if (record.room.phase === 'BATTLE') {
-      server.send(JSON.stringify({ type: 'BATTLE_RESUME', committedTick: record.room.committedTick }));
+    if (record.battle) {
+      server.send(JSON.stringify({
+        type: record.room.phase === 'FINISHED' ? 'BATTLE_FINISHED' : 'BATTLE_RESUME',
+        committedTick: record.room.committedTick,
+        battle: getCoopPlayableSnapshot(record.battle),
+      }));
     }
     this.broadcastRoomState();
     return new Response(null, { status: 101, webSocket: client });
@@ -224,15 +257,33 @@ export class BattleRoom extends DurableObject<Env> {
     try {
       const parsed = parseCoopClientMessage(JSON.parse(message) as unknown);
       if (parsed.type === 'PING') {
-        ws.send(JSON.stringify({ type: 'PONG', committedTick: record.room.committedTick }));
+        ws.send(JSON.stringify({
+          type: 'PONG',
+          committedTick: record.room.committedTick,
+          ...(record.battle === null ? {} : { simulationTick: record.battle.shared.battle.tick, stateHash: record.battle.stateHash }),
+        }));
         return;
       }
       if (parsed.type === 'READY') {
+        getServerCoopDeck(parsed.deckSlotIds);
         const result = setCoopSeatReady(record.room, attachment.seatId, attachment.clientId, parsed.deckSlotIds);
+        if (result.battleStarted) {
+          record.battle = createServerCoopBattle(
+            record.room.stageId,
+            record.room.seats.A.deckSlotIds,
+            record.room.seats.B.deckSlotIds,
+          );
+        }
         await this.saveRecord();
         this.broadcastRoomState();
-        if (result.battleStarted) {
-          this.broadcast({ type: 'BATTLE_STARTED', stageId: record.room.stageId, firstInputTick: 0, simTickRate: SIM_TICK_RATE });
+        if (result.battleStarted && record.battle) {
+          this.broadcast({
+            type: 'BATTLE_STARTED',
+            stageId: record.room.stageId,
+            firstInputTick: 0,
+            simTickRate: SIM_TICK_RATE,
+            battle: getCoopPlayableSnapshot(record.battle),
+          });
         }
         return;
       }
@@ -244,9 +295,41 @@ export class BattleRoom extends DurableObject<Env> {
       }
 
       const result = submitCoopFrameInput(record.room, attachment.seatId, attachment.clientId, parsed.input);
-      await this.saveRecord();
+      if (!record.battle) throw new Error('co-op simulation is not initialized');
       ws.send(JSON.stringify({ type: 'INPUT_ACK', tick: parsed.input.tick, sequence: parsed.input.sequence }));
-      for (const frame of result.committedFrames) this.broadcast({ type: 'FRAME_COMMITTED', frame });
+
+      let finished = record.room.phase === 'FINISHED';
+      for (const frame of result.committedFrames) {
+        if (finished) {
+          this.broadcast({
+            type: 'FRAME_COMMITTED',
+            frame,
+            terminalNoop: true,
+            outcomes: [],
+            battle: getCoopPlayableSnapshot(record.battle),
+          });
+          continue;
+        }
+        const applied = applyCoopPlayableFrame(record.battle, frame.tick, {
+          A: frame.inputs.A.commands as readonly CoopPlayableCommand[],
+          B: frame.inputs.B.commands as readonly CoopPlayableCommand[],
+        });
+        this.broadcast({ type: 'FRAME_COMMITTED', frame, outcomes: applied.outcomes, battle: applied.snapshot });
+        if (applied.snapshot.winner !== null) finished = true;
+      }
+
+      if (finished && record.room.phase !== 'FINISHED') {
+        record.room.phase = 'FINISHED';
+        this.broadcast({
+          type: 'BATTLE_FINISHED',
+          stageId: record.room.stageId,
+          clearFrames: record.battle.shared.battle.tick,
+          winner: record.battle.shared.battle.winner,
+          battle: getCoopPlayableSnapshot(record.battle),
+        });
+        this.broadcastRoomState();
+      }
+      await this.saveRecord();
     } catch (error) {
       ws.send(JSON.stringify({
         type: 'ERROR',
@@ -275,7 +358,11 @@ export class BattleRoom extends DurableObject<Env> {
 
   private broadcastRoomState(): void {
     if (!this.record) return;
-    this.broadcast({ type: 'ROOM_STATE', room: getCoopRoomSnapshot(this.record.room) });
+    this.broadcast({
+      type: 'ROOM_STATE',
+      room: getCoopRoomSnapshot(this.record.room),
+      ...(this.record.battle === null ? {} : { battle: getCoopPlayableSnapshot(this.record.battle) }),
+    });
   }
 
   private broadcast(payload: unknown): void {

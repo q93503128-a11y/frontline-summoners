@@ -5,7 +5,8 @@
   "type": "module",
   "exports": {
     ".": "./src/index.ts",
-    "./playable": "./src/playable.ts"
+    "./playable": "./src/playable.ts",
+    "./coop-playable": "./src/coop-playable.ts"
   },
   "scripts": {
     "typecheck": "tsc --noEmit",
