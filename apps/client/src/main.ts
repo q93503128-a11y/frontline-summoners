@@ -1,6 +1,6 @@
 import Phaser from 'phaser';
 import { INTERNAL_HEIGHT, INTERNAL_WIDTH } from '@frontline/shared';
-import { BattleScene } from './battle-scene';
+import { ReplayBattleScene as BattleScene } from './replay-battle-scene';
 import { CatalogScene } from './catalog-scene';
 import { DeckScene } from './deck-scene';
 import { RecruitmentScene } from './recruitment-scene';
