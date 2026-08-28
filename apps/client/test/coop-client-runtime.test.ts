@@ -39,6 +39,26 @@ test('browser transport creates a stage-bound room and reconnects by the same to
   assert.match(network, /setTimeout\(\(\) =>/);
 });
 
+test('co-op READY carries saved level plus form and permanent rewards but never raw combat stats', async () => {
+  const [network, scenes] = await Promise.all([
+    readSource('../src/coop-network.ts'),
+    readSource('../src/coop-scenes.ts'),
+  ]);
+  assert.match(network, /export interface CoopCharacterLoadout/);
+  assert.match(network, /readonly level: number;/);
+  assert.match(network, /readonly plusLevel: number;/);
+  assert.match(network, /readonly selectedFormId\?: string;/);
+  assert.match(network, /readonly permanentRewardIds: readonly string\[\];/);
+  assert.match(network, /this\.send\(\{ type: 'READY', loadout \}\)/);
+  assert.doesNotMatch(network, /maxHp.*READY|attackDamage.*READY|standingRange.*READY/);
+  assert.match(scenes, /const characterProgress = progress\.characterProgressById \?\? \{\};/);
+  assert.match(scenes, /level: meta\?\.level \?\? 1/);
+  assert.match(scenes, /plusLevel: meta\?\.plusLevel \?\? 0/);
+  assert.match(scenes, /selectedFormId: meta\.selectedFormId/);
+  assert.match(scenes, /permanentRewardIds: \[\.\.\.progress\.permanentRewardIds\]/);
+  assert.match(scenes, /this\.session\.sendReady\(coopLoadout\(this\.progress\)\)/);
+});
+
 test('co-op input pump submits at most one command packet per authoritative simulation tick', async () => {
   const network = await readSource('../src/coop-network.ts');
   assert.match(network, /const tick = battle\.tick;/);
