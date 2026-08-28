@@ -26,6 +26,12 @@ import {
 export const COOP_PLAYABLE_SEATS = ['A', 'B'] as const;
 export type CoopPlayableSeatId = (typeof COOP_PLAYABLE_SEATS)[number];
 
+export interface CoopPlayerEconomyConfig {
+  readonly startingSupply: number;
+  readonly supplyLevels: readonly SupplyLevelDefinition[];
+  readonly enemyRewardSupplyById: Readonly<Record<string, number>>;
+}
+
 export interface CoopPlayerEconomyState {
   readonly seatId: CoopPlayableSeatId;
   supply: number;
@@ -44,6 +50,7 @@ export interface CoopPlayableBattleConfig {
   readonly playerUnitCap?: number;
   readonly enemyUnitCap?: number;
   readonly supplyLevels?: readonly SupplyLevelDefinition[];
+  readonly playerEconomies?: Readonly<Record<CoopPlayableSeatId, CoopPlayerEconomyConfig>>;
   readonly baseWeapon?: BaseWeaponDefinition;
   readonly players: Readonly<Record<CoopPlayableSeatId, readonly PlayerRosterSlot[]>>;
   readonly enemies: readonly EnemyArchetype[];
@@ -53,7 +60,7 @@ export interface CoopPlayableBattleConfig {
 export interface CoopPlayableBattleState {
   readonly shared: PlayableBattleState;
   readonly players: Record<CoopPlayableSeatId, CoopPlayerEconomyState>;
-  readonly enemyRewardSupplyById: Record<string, number>;
+  readonly enemyRewardSupplyBySeat: Record<CoopPlayableSeatId, Record<string, number>>;
   readonly rewardedEnemySimulationIds: number[];
   readonly ownerBySimulationId: Record<string, CoopPlayableSeatId>;
   stateHash: string;
@@ -129,13 +136,13 @@ function assertNonNegativeInteger(value: number, context: string): void {
   if (!Number.isInteger(value) || value < 0) throw new Error(`${context} must be a non-negative integer`);
 }
 
-function validateSupplyLevels(levels: readonly SupplyLevelDefinition[]): void {
-  if (levels.length === 0) throw new Error('co-op supply levels must not be empty');
+function validateSupplyLevels(levels: readonly SupplyLevelDefinition[], context = 'supplyLevels'): void {
+  if (levels.length === 0) throw new Error(`${context} must not be empty`);
   levels.forEach((level, index) => {
-    assertNonNegativeInteger(level.incomePerSecond, `supplyLevels[${index}].incomePerSecond`);
-    assertPositiveInteger(level.maxSupply, `supplyLevels[${index}].maxSupply`);
-    assertNonNegativeInteger(level.upgradeCost, `supplyLevels[${index}].upgradeCost`);
-    if (index === 0 && level.upgradeCost !== 0) throw new Error('supplyLevels[0].upgradeCost must be 0');
+    assertNonNegativeInteger(level.incomePerSecond, `${context}[${index}].incomePerSecond`);
+    assertPositiveInteger(level.maxSupply, `${context}[${index}].maxSupply`);
+    assertNonNegativeInteger(level.upgradeCost, `${context}[${index}].upgradeCost`);
+    if (index === 0 && level.upgradeCost !== 0) throw new Error(`${context}[0].upgradeCost must be 0`);
   });
 }
 
@@ -181,19 +188,50 @@ function createPlayerEconomy(
   };
 }
 
-export function createCoopPlayableBattle(config: CoopPlayableBattleConfig): CoopPlayableBattleState {
-  const supplyLevels = config.supplyLevels ?? DEFAULT_SUPPLY_LEVELS;
-  validateSupplyLevels(supplyLevels);
-  COOP_PLAYABLE_SEATS.forEach((seatId) => validatePlayerSlots(seatId, config.players[seatId]));
-  const startingSupply = config.startingSupply ?? 50;
-  assertNonNegativeInteger(startingSupply, 'startingSupply');
-
-  const enemyRewardSupplyById: Record<string, number> = {};
-  for (const enemy of config.enemies) {
-    if (enemyRewardSupplyById[enemy.enemyId] !== undefined) throw new Error(`duplicate enemyId: ${enemy.enemyId}`);
+function baseEnemyRewardMap(enemies: readonly EnemyArchetype[]): Record<string, number> {
+  const result: Record<string, number> = {};
+  for (const enemy of enemies) {
+    if (result[enemy.enemyId] !== undefined) throw new Error(`duplicate enemyId: ${enemy.enemyId}`);
     assertNonNegativeInteger(enemy.rewardSupply, `enemy rewardSupply (${enemy.enemyId})`);
-    enemyRewardSupplyById[enemy.enemyId] = enemy.rewardSupply;
+    result[enemy.enemyId] = enemy.rewardSupply;
   }
+  return result;
+}
+
+function resolveSeatEconomy(
+  config: CoopPlayableBattleConfig,
+  seatId: CoopPlayableSeatId,
+  defaultRewards: Readonly<Record<string, number>>,
+): CoopPlayerEconomyConfig {
+  const explicit = config.playerEconomies?.[seatId];
+  if (!explicit) {
+    const levels = config.supplyLevels ?? DEFAULT_SUPPLY_LEVELS;
+    validateSupplyLevels(levels);
+    const startingSupply = config.startingSupply ?? 50;
+    assertNonNegativeInteger(startingSupply, 'startingSupply');
+    return { startingSupply, supplyLevels: levels, enemyRewardSupplyById: defaultRewards };
+  }
+  validateSupplyLevels(explicit.supplyLevels, `playerEconomies.${seatId}.supplyLevels`);
+  assertNonNegativeInteger(explicit.startingSupply, `playerEconomies.${seatId}.startingSupply`);
+  const knownEnemyIds = new Set(Object.keys(defaultRewards));
+  for (const enemyId of Object.keys(explicit.enemyRewardSupplyById)) {
+    if (!knownEnemyIds.has(enemyId)) throw new Error(`playerEconomies.${seatId} contains unknown enemy reward id: ${enemyId}`);
+  }
+  const rewards: Record<string, number> = {};
+  for (const enemyId of knownEnemyIds) {
+    const reward = explicit.enemyRewardSupplyById[enemyId];
+    if (reward === undefined) throw new Error(`playerEconomies.${seatId} is missing enemy reward id: ${enemyId}`);
+    assertNonNegativeInteger(reward, `playerEconomies.${seatId}.enemyRewardSupplyById.${enemyId}`);
+    rewards[enemyId] = reward;
+  }
+  return { startingSupply: explicit.startingSupply, supplyLevels: explicit.supplyLevels, enemyRewardSupplyById: rewards };
+}
+
+export function createCoopPlayableBattle(config: CoopPlayableBattleConfig): CoopPlayableBattleState {
+  COOP_PLAYABLE_SEATS.forEach((seatId) => validatePlayerSlots(seatId, config.players[seatId]));
+  const defaultRewards = baseEnemyRewardMap(config.enemies);
+  const economyA = resolveSeatEconomy(config, 'A', defaultRewards);
+  const economyB = resolveSeatEconomy(config, 'B', defaultRewards);
 
   const shared = createPlayableBattle({
     mapLength: config.mapLength,
@@ -212,10 +250,13 @@ export function createCoopPlayableBattle(config: CoopPlayableBattleConfig): Coop
   const state: CoopPlayableBattleState = {
     shared,
     players: {
-      A: createPlayerEconomy('A', config.players.A, supplyLevels, startingSupply),
-      B: createPlayerEconomy('B', config.players.B, supplyLevels, startingSupply),
+      A: createPlayerEconomy('A', config.players.A, economyA.supplyLevels, economyA.startingSupply),
+      B: createPlayerEconomy('B', config.players.B, economyB.supplyLevels, economyB.startingSupply),
     },
-    enemyRewardSupplyById,
+    enemyRewardSupplyBySeat: {
+      A: { ...economyA.enemyRewardSupplyById },
+      B: { ...economyB.enemyRewardSupplyById },
+    },
     rewardedEnemySimulationIds: [],
     ownerBySimulationId: {},
     stateHash: '',
@@ -288,13 +329,12 @@ function grantEnemyDeathRewards(state: CoopPlayableBattleState): void {
   const rewarded = new Set(state.rewardedEnemySimulationIds);
   for (const unit of state.shared.battle.units) {
     if (unit.team !== 'ENEMY' || unit.state !== UnitState.Dying || rewarded.has(unit.simulationId)) continue;
-    const reward = state.enemyRewardSupplyById[unit.definition.id] ?? 0;
-    if (reward > 0) {
-      for (const seatId of COOP_PLAYABLE_SEATS) {
-        const player = state.players[seatId];
-        const maxSupply = getCoopCurrentSupplyLevel(state, seatId).maxSupply;
-        player.supply = Math.min(maxSupply, player.supply + reward);
-      }
+    for (const seatId of COOP_PLAYABLE_SEATS) {
+      const reward = state.enemyRewardSupplyBySeat[seatId][unit.definition.id] ?? 0;
+      if (reward <= 0) continue;
+      const player = state.players[seatId];
+      const maxSupply = getCoopCurrentSupplyLevel(state, seatId).maxSupply;
+      player.supply = Math.min(maxSupply, player.supply + reward);
     }
     state.rewardedEnemySimulationIds.push(unit.simulationId);
     rewarded.add(unit.simulationId);
@@ -368,18 +408,19 @@ export function computeCoopPlayableStateHash(state: CoopPlayableBattleState): st
       .sort(([a], [b]) => a.localeCompare(b))
       .map(([slotId, readyTick]) => `${slotId}:${readyTick}`)
       .join('|');
-    const slots = player.slots.map((slot) => `${slot.slotId}:${slot.cost}:${slot.rechargeFrames}`).join('|');
-    return `${seatId}:${player.supply}:${player.supplyLevel}:${player.incomeRemainder}:${slots}:${cooldowns}`;
+    const slots = player.slots.map((slot) => `${slot.slotId}:${slot.cost}:${slot.rechargeFrames}:${slot.definition.maxHp}:${slot.definition.attackDamage}:${slot.definition.moveSpeed}:${slot.definition.standingRange}:${slot.definition.attackMinRange}:${slot.definition.attackMaxRange}:${slot.definition.targetMode}`).join('|');
+    const levels = player.supplyLevels.map((level) => `${level.incomePerSecond}:${level.maxSupply}:${level.upgradeCost}`).join('|');
+    return `${seatId}:${player.supply}:${player.supplyLevel}:${player.incomeRemainder}:${slots}:${levels}:${cooldowns}`;
   }).join('#');
   const owners = Object.entries(state.ownerBySimulationId)
     .sort(([a], [b]) => Number(a) - Number(b))
     .map(([simulationId, seatId]) => `${simulationId}:${seatId}`)
     .join('|');
   const rewarded = [...state.rewardedEnemySimulationIds].sort((a, b) => a - b).join(',');
-  const rewards = Object.entries(state.enemyRewardSupplyById)
+  const rewards = COOP_PLAYABLE_SEATS.map((seatId) => Object.entries(state.enemyRewardSupplyBySeat[seatId])
     .sort(([a], [b]) => a.localeCompare(b))
     .map(([enemyId, reward]) => `${enemyId}:${reward}`)
-    .join('|');
+    .join('|')).join('#');
   return fnv1a([state.shared.stateHash, players, owners, rewarded, rewards].join('#'));
 }
 
