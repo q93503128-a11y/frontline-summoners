@@ -1,15 +1,15 @@
-import { normalizeCharacterPlusLevel } from './character-growth';
+import { normalizeCharacterPlusLevel } from './character-growth.ts';
 import type {
   RecruitmentBanner,
   RecruitmentPullResult,
   RecruitmentRandomSource,
-} from './recruitment';
+} from './recruitment.ts';
 import {
   performGuestRecruitment,
   recordGuestCharacterPlusLevel,
   type GuestProgress,
   type GuestRecruitmentResult,
-} from './save';
+} from './save.ts';
 
 export interface DuplicatePlusLevelApplication {
   readonly pullIndex: number;
