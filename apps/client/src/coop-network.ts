@@ -1,6 +1,18 @@
 export type CoopSeatId = 'A' | 'B';
 export type CoopRoomPhase = 'LOBBY' | 'BATTLE' | 'FINISHED';
 
+export interface CoopCharacterLoadout {
+  readonly characterId: string;
+  readonly level: number;
+  readonly plusLevel: number;
+  readonly selectedFormId?: string;
+}
+
+export interface CoopPlayerLoadout {
+  readonly characters: readonly CoopCharacterLoadout[];
+  readonly permanentRewardIds: readonly string[];
+}
+
 export type CoopCommand =
   | { readonly type: 'SPAWN'; readonly slotId: string }
   | { readonly type: 'UPGRADE_SUPPLY' }
@@ -228,9 +240,9 @@ export class CoopSession {
     for (const subscriber of this.subscribers) subscriber(message);
   }
 
-  sendReady(deckSlotIds: readonly string[]): void {
-    if (deckSlotIds.length < 1 || deckSlotIds.length > 5) throw new Error('협동 덱은 1~5명이어야 합니다.');
-    this.send({ type: 'READY', deckSlotIds });
+  sendReady(loadout: CoopPlayerLoadout): void {
+    if (loadout.characters.length < 1 || loadout.characters.length > 5) throw new Error('협동 덱은 1~5명이어야 합니다.');
+    this.send({ type: 'READY', loadout });
     this.readySent = true;
   }
 
