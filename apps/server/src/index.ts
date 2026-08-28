@@ -42,7 +42,7 @@ type StoredCoopRoom = {
   battle: CoopPlayableBattleState | null;
 };
 
-const ROOM_STORAGE_KEY = 'coop-room-v2';
+const ROOM_STORAGE_KEY = 'coop-room-v3';
 
 const CORS_HEADERS = {
   'access-control-allow-origin': '*',
