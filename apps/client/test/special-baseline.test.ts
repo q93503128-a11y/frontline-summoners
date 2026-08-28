@@ -32,6 +32,7 @@ test('double-boss SPECIAL locks both advertised boss phases against an early bas
       { type: 'ENEMY_BASE_HP_BELOW', percent: 80 },
     ],
   });
+  assert.equal(waves.get('W3')?.spawn.enemyId, 'enemy-boss');
   assert.deepEqual(waves.get('W5')?.trigger, {
     type: 'ANY_OF',
     conditions: [
@@ -50,7 +51,7 @@ test('SPECIAL boss challenges cannot finish before their advertised bosses actua
   assert.ok(threeVow.seenEnemyIds.has('enemy-boss-iron'), '삼인 결사대 must actually spawn 철문장군');
 
   assert.equal(doubleBoss.state.battle.winner, 'PLAYER');
-  assert.ok(doubleBoss.seenEnemyIds.has('enemy-boss-golden'), '가면과 철문 must actually spawn 황금가면');
+  assert.ok(doubleBoss.seenEnemyIds.has('enemy-boss'), '가면과 철문 must actually spawn 황금가면');
   assert.ok(doubleBoss.seenEnemyIds.has('enemy-boss-iron'), '가면과 철문 must actually spawn 철문장군');
 });
 
