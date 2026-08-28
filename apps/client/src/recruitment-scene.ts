@@ -7,12 +7,14 @@ import {
   getBannerCharacterIds,
   getRecruitmentBanner,
   type RecruitmentBanner,
-  type RecruitmentPullResult,
 } from './recruitment';
+import {
+  performGuestRecruitmentWithDuplicateGrowth as performGuestRecruitment,
+  type RecruitmentPullGrowthResult,
+} from './recruitment-growth';
 import { getSlotById } from './prototype';
 import {
   loadGuestProgress,
-  performGuestRecruitment,
   type GuestProgress,
 } from './save';
 import { addButton, addText, COLORS, drawBackdrop, familyForUnit, rarityColor } from './scene-ui';
@@ -49,6 +51,7 @@ export class RecruitmentScene extends Phaser.Scene {
     addText(this, 54, 32, '모 집', compact ? 44 : 48, COLORS.cream);
     addText(this, 54, 91, this.banner.name, compact ? 27 : 26, '#ffffff');
     addText(this, 54, 128, this.banner.description, compact ? 17 : 15, COLORS.muted).setWordWrapWidth(720);
+    addButton(this, 1005, compact ? 62 : 58, 150, compact ? 84 : 50, '성장', () => this.scene.start('growth'), 0x6b7f68);
     addButton(this, 1170, compact ? 62 : 58, 150, compact ? 84 : 50, '메인', () => this.scene.start('main-menu'), 0x586275);
     this.renderSeriesTabs(compact);
 
@@ -76,8 +79,8 @@ export class RecruitmentScene extends Phaser.Scene {
 
     this.add.rectangle(1080, 320, 260, 304, 0x222936, 0.97).setStrokeStyle(3, 0x8b7045);
     this.progressText = addText(this, 970, 202, '기록 불러오는 중…', compact ? 19 : 16, '#ffffff');
-    addText(this, 970, 330, '중복 캐릭터도 결과에 포함됩니다.', compact ? 17 : 14, '#b7a98c').setWordWrapWidth(220);
-    addText(this, 970, 395, '획득한 캐릭터는 편성과 도감에서 확인할 수 있습니다.', compact ? 17 : 14, '#9eabbc').setWordWrapWidth(220);
+    addText(this, 970, 330, '중복 1장은 해당 캐릭터 +레벨 1로 바로 적용됩니다.', compact ? 17 : 14, '#b7a98c').setWordWrapWidth(220);
+    addText(this, 970, 395, '획득한 캐릭터는 편성·성장·도감에서 확인할 수 있습니다.', compact ? 17 : 14, '#9eabbc').setWordWrapWidth(220);
 
     addButton(this, 972, compact ? 525 : 520, 210, compact ? 84 : 64, '1회 모집', () => { void this.performRecruitment(1); }, 0xc5a04c);
     addButton(this, 1182, compact ? 525 : 520, 210, compact ? 84 : 64, '10회 모집', () => { void this.performRecruitment(10); }, 0x8b6fb5);
@@ -137,7 +140,7 @@ export class RecruitmentScene extends Phaser.Scene {
       this.showResults(result.results);
       const newCount = result.results.filter((pull) => !pull.duplicate).length;
       const duplicateCount = result.results.length - newCount;
-      this.statusText?.setText(`${result.persisted ? '저장 완료' : '저장에 실패했습니다'} · 신규 ${newCount} · 중복 ${duplicateCount}`);
+      this.statusText?.setText(`${result.persisted ? '저장 완료' : '저장에 실패했습니다'} · 신규 ${newCount} · 중복 ${duplicateCount} +레벨 적용`);
       this.statusText?.setColor(result.persisted ? '#8ee3aa' : '#ffb37c');
     } catch (error) {
       if (!this.scene.isActive()) return;
@@ -148,7 +151,7 @@ export class RecruitmentScene extends Phaser.Scene {
     }
   }
 
-  private showResults(results: readonly RecruitmentPullResult[]): void {
+  private showResults(results: readonly RecruitmentPullGrowthResult[]): void {
     this.resultsLayer?.destroy(true);
     this.resultsLayer = this.add.container(0, 0).setDepth(40);
     const compact = isCompactMobileViewport();
@@ -182,7 +185,11 @@ export class RecruitmentScene extends Phaser.Scene {
       this.resultsLayer!.add(portrait);
       this.resultsLayer!.add(addText(this, x, y - cardHeight / 2 + 10, pull.rarity, compact ? 20 : 17, rarityColor[pull.rarity] ?? '#ffffff', 'center').setOrigin(0.5, 0));
       this.resultsLayer!.add(addText(this, x, y + 37, slot.displayName, results.length === 1 ? 25 : 18, '#ffffff', 'center').setOrigin(0.5));
-      this.resultsLayer!.add(addText(this, x, y + 70, pull.duplicate ? '중복' : 'NEW', results.length === 1 ? 20 : 15, pull.duplicate ? '#b7bdc9' : '#8ee3aa', 'center').setOrigin(0.5));
+      const duplicateLabel = pull.duplicate ? '중복' : 'NEW';
+      this.resultsLayer!.add(addText(this, x, y + 67, duplicateLabel, results.length === 1 ? 20 : 15, pull.duplicate ? '#b7bdc9' : '#8ee3aa', 'center').setOrigin(0.5));
+      if (pull.duplicate && pull.plusLevelAfter !== undefined) {
+        this.resultsLayer!.add(addText(this, x, y + 88, `현재 +${pull.plusLevelAfter}`, results.length === 1 ? 17 : 13, '#f2d37c', 'center').setOrigin(0.5));
+      }
     });
 
     const closeY = results.length === 1 ? 520 : 620;
