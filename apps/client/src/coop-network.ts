@@ -49,6 +49,8 @@ export interface CoopBattleSnapshot {
     readonly supply: number;
     readonly maxSupply: number;
     readonly supplyLevel: number;
+    readonly nextSupplyUpgradeCost: number | null;
+    readonly costs: Readonly<Record<string, number>>;
     readonly cooldowns: Readonly<Record<string, number>>;
   }[];
   readonly units: readonly {
