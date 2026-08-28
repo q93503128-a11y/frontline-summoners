@@ -20,6 +20,28 @@ test('first SPECIAL pack is deterministically clearable by a completed chapter-o
   }
 });
 
+test('double-boss SPECIAL locks both advertised boss phases against an early base rush', () => {
+  const stage = SPECIAL_STAGES[4]!;
+  assert.equal(stage.id, 'special-05');
+  const waves = new Map(stage.waves.map((wave) => [wave.id, wave] as const));
+
+  assert.deepEqual(waves.get('W3')?.trigger, {
+    type: 'ANY_OF',
+    conditions: [
+      { type: 'TIME', frame: 1050 },
+      { type: 'ENEMY_BASE_HP_BELOW', percent: 80 },
+    ],
+  });
+  assert.deepEqual(waves.get('W5')?.trigger, {
+    type: 'ANY_OF',
+    conditions: [
+      { type: 'AFTER_WAVE_CLEARED', waveId: 'W3', delayFrames: 180 },
+      { type: 'ENEMY_BASE_HP_BELOW', percent: 45 },
+    ],
+  });
+  assert.deepEqual(waves.get('W6')?.trigger, { type: 'AFTER_WAVE_TRIGGERED', waveId: 'W5', delayFrames: 100 });
+});
+
 test('SPECIAL boss challenges cannot finish before their advertised bosses actually appear', () => {
   const threeVow = autoPlaySpecialStage(3, 720);
   const doubleBoss = autoPlaySpecialStage(4, 720);
@@ -32,7 +54,7 @@ test('SPECIAL boss challenges cannot finish before their advertised bosses actua
   assert.ok(doubleBoss.seenEnemyIds.has('enemy-boss-iron'), '가면과 철문 must actually spawn 철문장군');
 });
 
-test('the two three-unit challenges really run with the post-treasure cap of three', () => {
+test('the two three-unit challenges keep their authored fixed deployment cap of three', () => {
   const threeSlot = autoPlaySpecialStage(0, 720);
   const threeVow = autoPlaySpecialStage(3, 720);
 
