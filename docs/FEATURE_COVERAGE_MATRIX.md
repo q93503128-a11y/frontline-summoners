@@ -1,11 +1,11 @@
 # 전선소환전 — v1.0 기능 커버리지 매트릭스
 
-기준일: 2026-08-26  
+기준일: 2026-08-28  
 최상위 정본: `docs/CANONICAL.md`  
 통합 기획: `docs/GAME_DESIGN_FULL.md`  
 콘텐츠 상세: `docs/content-wiki/`
 
-> **중요:** 이 파일은 이제 `기획 준비도`와 `실제 구현 검증 상태`를 분리한다. 2026-08-26 문서 세밀화 패스에서는 코드/CI를 다시 전수검증하지 않았다. 따라서 과거 코드 상태를 추측해 DONE/MISSING으로 갱신하지 않고, 실제 구현은 다음 코드 감사 전까지 `RE-AUDIT`으로 둔다. 문서가 존재한다는 이유로 구현 완료라고 판단하지 않는다.
+> **중요:** 이 파일은 `기획 준비도`와 `실제 구현 검증 상태`를 분리한다. 2026-08-28부터 현재 `main`의 코드/데이터/test/UI를 직접 읽는 증분 구현 감사를 진행 중이다. 직접 확인한 행만 `VERIFIED_*`로 바꾸며, 문서 존재나 과거 상태만으로 완료를 추측하지 않는다. 아직 감사하지 않은 영역은 계속 `RE-AUDIT`이다.
 
 ---
 
@@ -25,7 +25,7 @@
 - `VERIFIED_PARTIAL`: 최신 감사에서 일부만 확인
 - `VERIFIED_MISSING`: 최신 감사에서 없음 확인
 
-현재 이 문서의 v1 핵심 구현 열은 의도적으로 대부분 `RE-AUDIT`이다.
+2026-08-28 증분 감사에서는 도감 unknown 처리, 실제 전투 조우 기반 적 발견/저장, 스테이지 출현 적→적 도감 직접 이동, 보유 아군 편성 필터, save v10 migration을 우선 검증했다. 해당 경로는 GitHub Actions CI #606에서 typecheck/content schema/simulation/client suite/build까지 통과했다. 다른 `RE-AUDIT` 행을 이 결과만으로 완료 처리하지 않는다.
 
 ---
 
@@ -54,10 +54,12 @@
 | ATTR-02 | 아군/적 공통 속성 | LOCKED_RULE | RE-AUDIT | PvE/PvP 동일 체계 |
 | ATTR-03 | combatTags 분리 | LOCKED_RULE | RE-AUDIT | ARMORED/FLOATING/GIANT/BOSS/STRUCTURE 등 |
 | ATTR-04 | `FLYING` 금지 | LOCKED_RULE | RE-AUDIT | 공식 표기 FLOATING만 |
-| CODEX-01 | 미발견 적 ??? | LOCKED_RULE | RE-AUDIT | 발견 전 정보 숨김 |
-| CODEX-02 | 미획득 아군 ??? | LOCKED_RULE | RE-AUDIT | 편성에는 미보유 미표시 |
-| CODEX-03 | 출현 적→도감 | DESIGN_TARGET | RE-AUDIT | 직접 이동 |
-| CODEX-04 | 게임 내부 상세 수치 | LOCKED_RULE | RE-AUDIT | 외부 위키 강제 없음 |
+| CODEX-01 | 미발견 적 ??? | LOCKED_RULE | VERIFIED_DONE | 발견 전 정보 숨김 |
+| CODEX-02 | 미획득 아군 ??? | LOCKED_RULE | VERIFIED_DONE | 편성에는 미보유 미표시 |
+| CODEX-03 | 출현 적→도감 | DESIGN_TARGET | VERIFIED_DONE | 직접 이동 |
+| CODEX-04 | 게임 내부 상세 수치 | LOCKED_RULE | VERIFIED_PARTIAL | 외부 위키 강제 없음 |
+
+`CODEX-04`는 현재 동료/적 도감에서 HP·공격·사거리·재생산/처치 보급·전투 특성 등 구현된 전투 수치를 확인할 수 있는 데까지 검증했다. 성장/진화/추가 메타 정보까지 모든 v1 상세 수치가 한 화면 체계로 완결됐다는 뜻은 아니다.
 
 ---
 
@@ -80,6 +82,8 @@
 - S/SS 시리즈 전용.
 - SS 시리즈당 정확히 1명.
 - 희귀도는 전투력/비용 서열이 아님.
+
+현재 실행 로스터가 43종으로 페이지 처리되는 사실은 확인했지만, 이 표의 각 그룹별 3형태/수치/contact까지 전수감사한 것은 아니므로 그룹 행은 `RE-AUDIT`을 유지한다.
 
 ---
 
@@ -211,10 +215,12 @@ NORMAL_CLEAR는 솔로 또는 허용된 협동 실제 승리다.
 | UI-01 | 지휘소형 시각 언어 | DESIGN_TARGET | RE-AUDIT |
 | UI-02 | PC/모바일 반응형 | LOCKED_RULE | RE-AUDIT |
 | UI-03 | drag&drop 편성 | LOCKED_RULE | RE-AUDIT |
-| UI-04 | 상세 도감 | DESIGN_TARGET | RE-AUDIT |
+| UI-04 | 상세 도감 | DESIGN_TARGET | VERIFIED_PARTIAL |
 | UI-05 | S/SS 모집 연출 | DESIGN_TARGET | RE-AUDIT |
 | UI-06 | 입력/보급/쿨 피드백 | LOCKED_RULE | RE-AUDIT |
 | UI-07 | 개발자 문구 0 | LOCKED_RULE | RE-AUDIT |
+
+`UI-04`는 현재 동료/적/영구 보상/SPECIAL 기록 탭과 unknown 처리, 적 직접 포커스 이동까지 확인했다. v1 성장/진화 정보 전체와 최종 아트/UX까지 완성 판정한 것은 아니다.
 
 ---
 
@@ -224,7 +230,7 @@ NORMAL_CLEAR는 솔로 또는 허용된 협동 실제 승리다.
 | --- | --- | --- | --- |
 | SAVE-01 | 게스트 로컬 | LOCKED_RULE | RE-AUDIT |
 | SAVE-02 | 로그인 서버 정본 | LOCKED_RULE | RE-AUDIT |
-| SAVE-03 | schemaVersion migration | DESIGN_TARGET | RE-AUDIT |
+| SAVE-03 | schemaVersion migration | DESIGN_TARGET | VERIFIED_DONE |
 | SAVE-04 | revision 충돌방지 | DESIGN_TARGET | RE-AUDIT |
 | SAVE-05 | battle/recruit idempotency | DESIGN_TARGET | RE-AUDIT |
 | ACCOUNT-01 | Google/이메일 후보 | DESIGN_TARGET | RE-AUDIT |
@@ -233,6 +239,8 @@ NORMAL_CLEAR는 솔로 또는 허용된 협동 실제 승리다.
 | ACCOUNT-04 | 진행 초기화 | LOCKED_RULE | RE-AUDIT |
 | ACCOUNT-05 | 계정 삭제 | LOCKED_RULE | RE-AUDIT |
 | ACCOUNT-06 | 게스트 데이터 삭제 | LOCKED_RULE | RE-AUDIT |
+
+`SAVE-03`은 현재 schema v10과 v2~v9 migration 계약, 적 발견 필드의 이전 버전 기본값을 회귀 테스트에서 확인했다. 이는 서버 revision/idempotency까지 검증했다는 뜻이 아니다.
 
 ---
 
@@ -254,4 +262,4 @@ NORMAL_CLEAR는 솔로 또는 허용된 협동 실제 승리다.
 
 **메인80 + SPECIAL + 43종 초기 플레이어 설계군의 실제 수집/성장/3형태 + 편성/도감/모집/성장 UI + NORMAL_CLEAR 재클리어 편의 + 계정 + 협동/친구 + 1v1 PvP + 2v2 일반/친선 + 플레이 감각 QA**가 실제 사용자 루프로 연결되어야 한다.
 
-다음 구현 작업을 시작할 때는 먼저 repo-wide implementation audit을 수행해 이 표의 `RE-AUDIT`을 실제 검증 상태로 바꾼다.
+증분 감사에서 `VERIFIED_*`가 된 행은 직접 확인된 사실로 유지한다. 나머지 `RE-AUDIT`은 관련 coherent slice를 작업하기 전에 현재 main에서 다시 검증하고, 구현과 회귀 테스트를 함께 갱신한다.
