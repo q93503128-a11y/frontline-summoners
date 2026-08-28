@@ -110,6 +110,8 @@ export interface CoopPlayableSnapshot {
     readonly supply: number;
     readonly maxSupply: number;
     readonly supplyLevel: number;
+    readonly nextSupplyUpgradeCost: number | null;
+    readonly costs: Readonly<Record<string, number>>;
     readonly cooldowns: Readonly<Record<string, number>>;
   }[];
   readonly units: readonly {
@@ -439,11 +441,14 @@ export function getCoopPlayableSnapshot(state: CoopPlayableBattleState): CoopPla
     baseWeaponCooldownFrames: getBaseWeaponCooldownRemaining(state.shared),
     players: COOP_PLAYABLE_SEATS.map((seatId) => {
       const player = state.players[seatId];
+      const nextSupplyLevel = player.supplyLevels[player.supplyLevel];
       return {
         seatId,
         supply: player.supply,
         maxSupply: getCoopCurrentSupplyLevel(state, seatId).maxSupply,
         supplyLevel: player.supplyLevel,
+        nextSupplyUpgradeCost: nextSupplyLevel?.upgradeCost ?? null,
+        costs: Object.fromEntries(player.slots.map((slot) => [slot.slotId, slot.cost])),
         cooldowns: Object.fromEntries(player.slots.map((slot) => [slot.slotId, getCoopCooldownRemaining(state, seatId, slot.slotId)])),
       };
     }),
