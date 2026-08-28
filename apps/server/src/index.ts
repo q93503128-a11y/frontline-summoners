@@ -6,6 +6,7 @@ import {
   type CoopPlayableBattleState,
   type CoopPlayableCommand,
 } from '@frontline/sim/coop-playable';
+import { drainCoopFramesAfterAiHandoff } from './coop-ai-handoff.ts';
 import {
   connectCoopSeat,
   createCoopRoom,
@@ -15,6 +16,7 @@ import {
   setCoopSeatReady,
   setCoopSeatUnready,
   submitCoopFrameInput,
+  type CoopCommittedFrame,
   type CoopRoomState,
   type CoopSeatId,
 } from './coop-room.ts';
@@ -297,38 +299,8 @@ export class BattleRoom extends DurableObject<Env> {
       const result = submitCoopFrameInput(record.room, attachment.seatId, attachment.clientId, parsed.input);
       if (!record.battle) throw new Error('co-op simulation is not initialized');
       ws.send(JSON.stringify({ type: 'INPUT_ACK', tick: parsed.input.tick, sequence: parsed.input.sequence }));
-
-      let finished = record.room.phase === 'FINISHED';
-      for (const frame of result.committedFrames) {
-        if (finished) {
-          this.broadcast({
-            type: 'FRAME_COMMITTED',
-            frame,
-            terminalNoop: true,
-            outcomes: [],
-            battle: getCoopPlayableSnapshot(record.battle),
-          });
-          continue;
-        }
-        const applied = applyCoopPlayableFrame(record.battle, frame.tick, {
-          A: frame.inputs.A.commands as readonly CoopPlayableCommand[],
-          B: frame.inputs.B.commands as readonly CoopPlayableCommand[],
-        });
-        this.broadcast({ type: 'FRAME_COMMITTED', frame, outcomes: applied.outcomes, battle: applied.snapshot });
-        if (applied.snapshot.winner !== null) finished = true;
-      }
-
-      if (finished && record.room.phase !== 'FINISHED') {
-        record.room.phase = 'FINISHED';
-        this.broadcast({
-          type: 'BATTLE_FINISHED',
-          stageId: record.room.stageId,
-          clearFrames: record.battle.shared.battle.tick,
-          winner: record.battle.shared.battle.winner,
-          battle: getCoopPlayableSnapshot(record.battle),
-        });
-        this.broadcastRoomState();
-      }
+      const finished = this.applyCommittedFrames(record, result.committedFrames);
+      if (finished) this.finishBattle(record);
       await this.saveRecord();
     } catch (error) {
       ws.send(JSON.stringify({
@@ -347,11 +319,54 @@ export class BattleRoom extends DurableObject<Env> {
     await this.handleDisconnect(ws);
   }
 
+  private applyCommittedFrames(record: StoredCoopRoom, frames: readonly CoopCommittedFrame[]): boolean {
+    if (!record.battle) return false;
+    let finished = record.room.phase === 'FINISHED';
+    for (const frame of frames) {
+      if (finished) {
+        this.broadcast({
+          type: 'FRAME_COMMITTED',
+          frame,
+          terminalNoop: true,
+          outcomes: [],
+          battle: getCoopPlayableSnapshot(record.battle),
+        });
+        continue;
+      }
+      const applied = applyCoopPlayableFrame(record.battle, frame.tick, {
+        A: frame.inputs.A.commands as readonly CoopPlayableCommand[],
+        B: frame.inputs.B.commands as readonly CoopPlayableCommand[],
+      });
+      this.broadcast({ type: 'FRAME_COMMITTED', frame, outcomes: applied.outcomes, battle: applied.snapshot });
+      if (applied.snapshot.winner !== null) finished = true;
+    }
+    return finished;
+  }
+
+  private finishBattle(record: StoredCoopRoom): void {
+    if (!record.battle || record.room.phase === 'FINISHED') return;
+    record.room.phase = 'FINISHED';
+    this.broadcast({
+      type: 'BATTLE_FINISHED',
+      stageId: record.room.stageId,
+      clearFrames: record.battle.shared.battle.tick,
+      winner: record.battle.shared.battle.winner,
+      battle: getCoopPlayableSnapshot(record.battle),
+    });
+    this.broadcastRoomState();
+  }
+
   private async handleDisconnect(ws: WebSocket): Promise<void> {
     const record = await this.loadRecord();
     const attachment = ws.deserializeAttachment() as SocketAttachment | null;
     if (!record || !attachment) return;
+    const wasController = record.room.seats[attachment.seatId].clientId === attachment.clientId;
     disconnectCoopSeat(record.room, attachment.seatId, attachment.clientId);
+    if (wasController && record.room.phase === 'BATTLE' && record.battle) {
+      const frames = drainCoopFramesAfterAiHandoff(record.room);
+      const finished = this.applyCommittedFrames(record, frames);
+      if (finished) this.finishBattle(record);
+    }
     await this.saveRecord();
     this.broadcastRoomState();
   }
