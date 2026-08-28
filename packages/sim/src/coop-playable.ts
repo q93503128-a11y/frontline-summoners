@@ -1,4 +1,5 @@
 import {
+  SIM_TICK_RATE,
   UnitState,
   spawnUnit,
   type BattleWinner,
@@ -199,8 +200,8 @@ export function createCoopPlayableBattle(config: CoopPlayableBattleConfig): Coop
     playerBaseHp: config.playerBaseHp,
     enemyBaseHp: config.enemyBaseHp,
     startingSupply: 0,
-    playerUnitCap: config.playerUnitCap,
-    enemyUnitCap: config.enemyUnitCap,
+    ...(config.playerUnitCap === undefined ? {} : { playerUnitCap: config.playerUnitCap }),
+    ...(config.enemyUnitCap === undefined ? {} : { enemyUnitCap: config.enemyUnitCap }),
     supplyLevels: SHARED_ECONOMY_LEVELS,
     baseWeapon: config.baseWeapon ?? DEFAULT_BASE_WEAPON,
     playerSlots: buildSharedSlots(config.players),
@@ -278,8 +279,8 @@ function accruePlayerSupply(state: CoopPlayableBattleState, seatId: CoopPlayable
   const player = state.players[seatId];
   const level = getCoopCurrentSupplyLevel(state, seatId);
   player.incomeRemainder += level.incomePerSecond;
-  const gained = Math.trunc(player.incomeRemainder / 30);
-  player.incomeRemainder %= 30;
+  const gained = Math.trunc(player.incomeRemainder / SIM_TICK_RATE);
+  player.incomeRemainder %= SIM_TICK_RATE;
   if (gained > 0) player.supply = Math.min(level.maxSupply, player.supply + gained);
 }
 
