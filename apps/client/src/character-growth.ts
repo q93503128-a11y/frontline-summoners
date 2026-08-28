@@ -6,46 +6,31 @@ import {
   type DamageBonusContent,
   type TargetMode,
 } from '@frontline/content-schema';
-import { MIN_PLAYER_RECHARGE_FRAMES, type PlayerRosterSlot } from '@frontline/sim/playable';
+import type { PlayerRosterSlot } from '@frontline/sim/playable';
+import {
+  applyCharacterLevel as applyCharacterLevelShared,
+  applyEvolutionForm as applyEvolutionFormShared,
+  buildCharacterCombatSlot as buildCharacterCombatSlotShared,
+  getCharacterLevelMultiplierPermille as getCharacterLevelMultiplierPermilleShared,
+  getCharacterTotalMultiplierPermille as getCharacterTotalMultiplierPermilleShared,
+  getEvolutionForm as getEvolutionFormShared,
+  normalizeCharacterLevel as normalizeCharacterLevelShared,
+  normalizeCharacterPlusLevel as normalizeCharacterPlusLevelShared,
+  type CharacterLevelAnchor,
+  type CharacterLevelCurve,
+  type EvolutionFormDefinition,
+  type EvolutionFormModifiers,
+} from '@frontline/sim/meta-progression';
 import levelCurveJson from '../../../content/growth/level-curve-01.json' with { type: 'json' };
 import evolutionJson from '../../../content/evolution/recruitment-01.json' with { type: 'json' };
 import { ALL_PLAYER_SLOTS } from './prototype.ts';
 
-export interface CharacterLevelAnchor {
-  readonly level: number;
-  readonly multiplierPermille: number;
-}
-
-export interface CharacterLevelCurve {
-  readonly id: string;
-  readonly status: 'DESIGN_TARGET';
-  readonly levelCap: number;
-  readonly plusLevelCap: number;
-  readonly plusHpAttackPermillePerLevel: number;
-  readonly anchors: readonly CharacterLevelAnchor[];
-}
-
-export interface EvolutionFormModifiers {
-  readonly maxHpPermille: number;
-  readonly attackDamagePermille: number;
-  readonly costPermille: number;
-  readonly rechargePermille: number;
-  readonly moveSpeedDelta: number;
-  readonly standingRangeDelta: number;
-  readonly attackMinRangeDelta: number;
-  readonly attackMaxRangeDelta: number;
-  readonly targetMode?: TargetMode;
-  readonly damageBonuses?: readonly DamageBonusContent[];
-}
-
-export interface EvolutionFormDefinition {
-  readonly characterId: string;
-  readonly formId: string;
-  readonly formOrder: 1 | 2 | 3;
-  readonly name: string;
-  readonly description: string;
-  readonly modifiers: EvolutionFormModifiers;
-}
+export type {
+  CharacterLevelAnchor,
+  CharacterLevelCurve,
+  EvolutionFormDefinition,
+  EvolutionFormModifiers,
+};
 
 function record(value: unknown, context: string): Record<string, unknown> {
   if (typeof value !== 'object' || value === null || Array.isArray(value)) throw new Error(`${context} must be an object`);
@@ -159,7 +144,14 @@ function buildEvolutionForms(): readonly EvolutionFormDefinition[] {
       formIds.add(formId);
       const formOrder = integer(form.formOrder, `${formId}.formOrder`, 1, 3) as 1 | 2 | 3;
       if (formOrder !== formIndex + 1) throw new Error(`${characterId} forms must be ordered 1,2,3`);
-      result.push({ characterId, formId, formOrder, name: nonEmptyString(form.name, `${formId}.name`), description: nonEmptyString(form.description, `${formId}.description`), modifiers: parseModifiers(form.modifiers ?? {}, `${formId}.modifiers`) });
+      result.push({
+        characterId,
+        formId,
+        formOrder,
+        name: nonEmptyString(form.name, `${formId}.name`),
+        description: nonEmptyString(form.description, `${formId}.description`),
+        modifiers: parseModifiers(form.modifiers ?? {}, `${formId}.modifiers`),
+      });
     });
   });
   return result;
@@ -168,88 +160,29 @@ function buildEvolutionForms(): readonly EvolutionFormDefinition[] {
 export const EVOLUTION_FORMS: readonly EvolutionFormDefinition[] = buildEvolutionForms();
 
 export function normalizeCharacterLevel(level: number): number {
-  if (!Number.isFinite(level)) return 1;
-  return Math.max(1, Math.min(CHARACTER_LEVEL_CURVE.levelCap, Math.trunc(level)));
+  return normalizeCharacterLevelShared(CHARACTER_LEVEL_CURVE, level);
 }
 export function normalizeCharacterPlusLevel(plusLevel: number): number {
-  if (!Number.isFinite(plusLevel)) return 0;
-  return Math.max(0, Math.min(CHARACTER_LEVEL_CURVE.plusLevelCap, Math.trunc(plusLevel)));
+  return normalizeCharacterPlusLevelShared(CHARACTER_LEVEL_CURVE, plusLevel);
 }
-
 export function getCharacterLevelMultiplierPermille(level: number): number {
-  const normalized = normalizeCharacterLevel(level);
-  const anchors = CHARACTER_LEVEL_CURVE.anchors;
-  const exact = anchors.find((anchor) => anchor.level === normalized);
-  if (exact) return exact.multiplierPermille;
-  for (let index = 1; index < anchors.length; index += 1) {
-    const right = anchors[index]!;
-    const left = anchors[index - 1]!;
-    if (normalized < right.level) {
-      const numerator = (right.multiplierPermille - left.multiplierPermille) * (normalized - left.level);
-      return left.multiplierPermille + numerator / (right.level - left.level);
-    }
-  }
-  return anchors[anchors.length - 1]!.multiplierPermille;
+  return getCharacterLevelMultiplierPermilleShared(CHARACTER_LEVEL_CURVE, level);
 }
-
 export function getCharacterTotalMultiplierPermille(level: number, plusLevel = 0): number {
-  const baseMultiplierPermille = getCharacterLevelMultiplierPermille(level);
-  const plusMultiplierPermille = 1000
-    + normalizeCharacterPlusLevel(plusLevel) * CHARACTER_LEVEL_CURVE.plusHpAttackPermillePerLevel;
-  return (baseMultiplierPermille * plusMultiplierPermille) / 1000;
+  return getCharacterTotalMultiplierPermilleShared(CHARACTER_LEVEL_CURVE, level, plusLevel);
 }
-
-function scale(value: number, permille: number, minimum = 0): number {
-  return Math.max(minimum, Math.trunc((value * permille) / 1000));
-}
-
-function scaleFinalStat(value: number, permille: number, minimum = 0): number {
-  return Math.max(minimum, Math.round((value * permille) / 1000));
-}
-
 export function applyCharacterLevel(slot: PlayerRosterSlot, level: number, plusLevel = 0): PlayerRosterSlot {
-  const multiplier = getCharacterTotalMultiplierPermille(level, plusLevel);
-  return { ...slot, definition: { ...slot.definition, maxHp: scaleFinalStat(slot.definition.maxHp, multiplier, 1), attackDamage: scaleFinalStat(slot.definition.attackDamage, multiplier, 0) } };
+  return applyCharacterLevelShared(slot, CHARACTER_LEVEL_CURVE, level, plusLevel);
 }
-
 export function getEvolutionForms(characterId: string): readonly EvolutionFormDefinition[] {
   return EVOLUTION_FORMS.filter((form) => form.characterId === characterId);
 }
 export function getEvolutionForm(formId: string): EvolutionFormDefinition {
-  const form = EVOLUTION_FORMS.find((candidate) => candidate.formId === formId);
-  if (!form) throw new Error(`Unknown evolution form: ${formId}`);
-  return form;
+  return getEvolutionFormShared(EVOLUTION_FORMS, formId);
 }
-
 export function applyEvolutionForm(slot: PlayerRosterSlot, formId: string): PlayerRosterSlot {
-  const form = getEvolutionForm(formId);
-  if (form.characterId !== slot.slotId) throw new Error(`Evolution form ${formId} does not belong to ${slot.slotId}`);
-  const modifiers = form.modifiers;
-  const standingRange = slot.definition.standingRange + modifiers.standingRangeDelta;
-  const attackMinRange = slot.definition.attackMinRange + modifiers.attackMinRangeDelta;
-  const attackMaxRange = slot.definition.attackMaxRange + modifiers.attackMaxRangeDelta;
-  const moveSpeed = slot.definition.moveSpeed + modifiers.moveSpeedDelta;
-  if (standingRange < 0 || attackMinRange < 0 || attackMaxRange < 0 || attackMinRange > attackMaxRange) throw new Error(`Evolution form produces invalid ranges: ${formId}`);
-  if (moveSpeed < 0) throw new Error(`Evolution form produces negative move speed: ${formId}`);
-  return {
-    ...slot,
-    cost: scale(slot.cost, modifiers.costPermille, 0),
-    rechargeFrames: Math.max(MIN_PLAYER_RECHARGE_FRAMES, scale(slot.rechargeFrames, modifiers.rechargePermille, 1)),
-    definition: {
-      ...slot.definition,
-      maxHp: scale(slot.definition.maxHp, modifiers.maxHpPermille, 1),
-      attackDamage: scale(slot.definition.attackDamage, modifiers.attackDamagePermille, 0),
-      moveSpeed,
-      standingRange,
-      attackMinRange,
-      attackMaxRange,
-      targetMode: modifiers.targetMode ?? slot.definition.targetMode,
-      ...(modifiers.damageBonuses === undefined ? {} : { damageBonuses: modifiers.damageBonuses }),
-    },
-  };
+  return applyEvolutionFormShared(slot, EVOLUTION_FORMS, formId);
 }
-
 export function buildCharacterCombatSlot(slot: PlayerRosterSlot, level: number, formId?: string, plusLevel = 0): PlayerRosterSlot {
-  const leveled = applyCharacterLevel(slot, level, plusLevel);
-  return formId ? applyEvolutionForm(leveled, formId) : leveled;
+  return buildCharacterCombatSlotShared(slot, CHARACTER_LEVEL_CURVE, EVOLUTION_FORMS, level, formId, plusLevel);
 }
