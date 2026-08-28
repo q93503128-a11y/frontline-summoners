@@ -27,7 +27,9 @@ test('catalog pages all 43 allies, permanent rewards, and separate special clear
   assert.match(source, /new Set\(getOwnedCharacterIds\(this\.progress\)\)/);
   assert.match(source, /ALL_PLAYER_SLOTS\.slice\(start, start \+ ALLY_PAGE_SIZE\)/);
   assert.match(source, /owned \? slot\.displayName : '\?\?\?'/);
-  assert.match(source, /portrait\.setTintFill\(0x07080b\)/);
+  assert.match(source, /portrait\.setTint\(0x07080b\)/);
+  assert.match(source, /portrait\.setTintFill\(\)/);
+  assert.match(source, /portrait\.setAlpha\(0\.86\)/);
   assert.match(source, /'획득 후 정보 공개'/);
   assert.match(source, /new Set\(this\.progress\.permanentRewardIds\)/);
   assert.match(source, /new Set\(this\.progress\.specialClearedStageIds\)/);
