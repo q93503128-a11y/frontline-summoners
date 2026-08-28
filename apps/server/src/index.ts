@@ -22,7 +22,7 @@ import {
 } from './coop-room.ts';
 import {
   createServerCoopBattle,
-  getServerCoopDeck,
+  getServerCoopLoadout,
   getServerCoopStage,
 } from './runtime-content.ts';
 
@@ -267,14 +267,13 @@ export class BattleRoom extends DurableObject<Env> {
         return;
       }
       if (parsed.type === 'READY') {
-        getServerCoopDeck(parsed.deckSlotIds);
-        const result = setCoopSeatReady(record.room, attachment.seatId, attachment.clientId, parsed.deckSlotIds);
+        getServerCoopLoadout(parsed.loadout);
+        const result = setCoopSeatReady(record.room, attachment.seatId, attachment.clientId, parsed.loadout);
         if (result.battleStarted) {
-          record.battle = createServerCoopBattle(
-            record.room.stageId,
-            record.room.seats.A.deckSlotIds,
-            record.room.seats.B.deckSlotIds,
-          );
+          const loadoutA = record.room.seats.A.loadout;
+          const loadoutB = record.room.seats.B.loadout;
+          if (!loadoutA || !loadoutB) throw new Error('co-op ready state is missing validated loadout');
+          record.battle = createServerCoopBattle(record.room.stageId, loadoutA, loadoutB);
         }
         await this.saveRecord();
         this.broadcastRoomState();
