@@ -117,15 +117,19 @@ test('sortie flow uses the shared collection hub and canonical normal/special cl
 
 test('manual deck scene uses save ownership authority and persists explicit 1-10 order', async () => {
   const { deck } = await readRuntime();
-  assert.match(deck, /ALL_PLAYER_SLOTS\.slice\(start, start \+ this\.pageSize\)/);
+  assert.match(deck, /private getOwnedSlots\(\): readonly PrototypeRosterSlot\[\]/);
   assert.match(deck, /const owned = new Set\(getOwnedCharacterIds\(this\.progress\)\);/);
+  assert.match(deck, /return ALL_PLAYER_SLOTS\.filter\(\(slot\) => owned\.has\(slot\.slotId\)\);/);
+  assert.match(deck, /const visible = ownedSlots\.slice\(start, start \+ this\.pageSize\);/);
+  assert.doesNotMatch(deck, /ALL_PLAYER_SLOTS\.slice\(start, start \+ this\.pageSize\)/);
   assert.match(deck, /this\.selectedIds = \[\.\.\.getEffectiveDeckSlotIds\(progress\)\];/);
   assert.match(deck, /MAX_DECK_SLOTS/);
   assert.match(deck, /this\.selectedIds\.push\(slotId\);/);
   assert.match(deck, /recordGuestDeck\(this\.selectedIds\)/);
   assert.match(deck, /resetGuestDeckToAutomatic\(\)/);
   assert.match(deck, /hotkeyLabel\(index\)/);
-  assert.match(deck, /선택 순서가 전투의 1~0 단축키 순서/);
+  assert.match(deck, /선택된 순서가 1~0 소환 순서/);
+  assert.match(deck, /미획득 캐릭터는 편성 목록에 나타나지 않는다/);
   assert.doesNotMatch(deck, /PLAYER_SLOTS\.forEach/);
 });
 
@@ -187,7 +191,9 @@ test('manual deck cards keep level, plus level, form, rarity, role, and combat i
   assert.match(deck, /slot\.role/);
   assert.match(deck, /selectedFormName\(this\.progress, slot\.slotId\)/);
   assert.match(deck, /buildCharacterCombatSlot\(slot, level, meta\?\.selectedFormId, plusLevel\)/);
-  assert.match(deck, /모집 미획득/);
+  assert.match(deck, /const ownedSlots = this\.getOwnedSlots\(\);/);
+  assert.match(deck, /미획득 캐릭터는 편성 목록에 나타나지 않는다/);
+  assert.doesNotMatch(deck, /모집 미획득|LOCK|미보유/);
 });
 
 test('main and result scenes use current permanent-reward and special-clear wording', async () => {

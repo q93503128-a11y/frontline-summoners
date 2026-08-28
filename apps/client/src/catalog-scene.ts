@@ -156,7 +156,6 @@ export class CatalogScene extends Phaser.Scene {
     this.page = Phaser.Math.Clamp(this.page + delta, 0, this.getPageCount() - 1);
     this.render();
   }
-
   private render(): void {
     this.contentLayer?.destroy(true);
     this.contentLayer = this.add.container(0, 0);
@@ -189,8 +188,14 @@ export class CatalogScene extends Phaser.Scene {
 
       const art = getArt(slot.definition.id);
       const portrait = this.add.sprite(x, compact ? 285 : 270, art.family.idle.key, 0);
-      if (owned) portrait.setTint(art.tint).setAlpha(1);
-      else portrait.setTintFill(0x07080b).setAlpha(0.86);
+      if (owned) {
+        portrait.setTint(art.tint);
+        portrait.setAlpha(1);
+      } else {
+        portrait.setTint(0x07080b);
+        portrait.setTintFill();
+        portrait.setAlpha(0.86);
+      }
       portrait.setScale(((compact ? 132 : 145) / art.family.idle.frameHeight) * art.displayScale);
       this.contentLayer!.add(portrait);
 
