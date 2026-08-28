@@ -456,12 +456,16 @@ export class CoopBattleScene extends Phaser.Scene {
       const slot = getSlotById(slotId);
       if (!slot) return;
       const remaining = mine?.cooldowns[slotId] ?? 0;
+      const actualCost = mine?.costs[slotId] ?? slot.cost;
       const label = compact
-        ? `${index + 1} ${slot.displayName}\n${remaining > 0 ? `${remaining}F` : `${slot.cost} 보급`}`
-        : `${index + 1} · ${slot.displayName}\n${remaining > 0 ? `재생산 ${remaining}F` : `${slot.cost} 보급`}`;
+        ? `${index + 1} ${slot.displayName}\n${remaining > 0 ? `${remaining}F` : `${actualCost} 보급`}`
+        : `${index + 1} · ${slot.displayName}\n${remaining > 0 ? `재생산 ${remaining}F` : `${actualCost} 보급`}`;
       this.controlsLayer!.add(addButton(this, 105 + index * 194, 650, 180, compact ? 84 : 62, label, () => this.session.queueCommand({ type: 'SPAWN', slotId }), remaining > 0 ? 0x4e5968 : 0x5f86aa));
     });
-    this.controlsLayer.add(addButton(this, 1085, 650, 170, compact ? 84 : 62, '보급소 강화', () => this.session.queueCommand({ type: 'UPGRADE_SUPPLY' }), 0x7a6e4f));
+    const upgradeLabel = mine
+      ? mine.nextSupplyUpgradeCost === null ? '보급소 MAX' : `보급소 강화\n${mine.nextSupplyUpgradeCost} 보급`
+      : '보급소 강화';
+    this.controlsLayer.add(addButton(this, 1085, 650, 170, compact ? 84 : 62, upgradeLabel, () => this.session.queueCommand({ type: 'UPGRADE_SUPPLY' }), 0x7a6e4f));
     this.controlsLayer.add(addButton(this, 1245, 650, 130, compact ? 84 : 62, '전선포', () => this.session.queueCommand({ type: 'FIRE_BASE_WEAPON' }), snapshot && snapshot.baseWeaponCooldownFrames === 0 ? 0x8a665a : 0x4d535d));
   }
 
