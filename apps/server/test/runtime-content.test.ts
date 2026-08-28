@@ -94,7 +94,7 @@ test('each co-op seat retains its own growth and permanent economy modifiers', (
   assert.ok(battle.players.A.slots[0]!.definition.attackDamage > battle.players.B.slots[0]!.definition.attackDamage);
   assert.ok(battle.players.A.supply > battle.players.B.supply, 'starting supply bonus remains personal');
   assert.ok(battle.players.A.supplyLevels[1]!.upgradeCost < battle.players.B.supplyLevels[1]!.upgradeCost, 'worker discount remains personal');
-  assert.ok(battle.enemyRewardSupplyBySeat.A.grunt > battle.enemyRewardSupplyBySeat.B.grunt, 'kill supply bonus remains personal');
+  assert.ok(battle.enemyRewardSupplyBySeat.A['enemy-raider'] > battle.enemyRewardSupplyBySeat.B['enemy-raider'], 'kill supply bonus remains personal');
 });
 
 test('shared base HP uses only permanent base rewards held by both players', () => {
