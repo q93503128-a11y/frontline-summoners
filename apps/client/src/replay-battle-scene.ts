@@ -14,7 +14,7 @@ export class ReplayBattleScene extends BattleScene {
   private replayStage: PrototypeStage = STAGES[0]!;
   private replaySpeed: BattleSpeedMultiplier = 1;
   private speedUpUnlocked = false;
-  private speedButton?: Phaser.GameObjects.Container;
+  private speedButton: Phaser.GameObjects.Container | undefined;
 
   override init(data: { stageId?: string }): void {
     super.init(data);

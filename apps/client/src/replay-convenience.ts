@@ -1,5 +1,5 @@
 import type { PrototypeStage } from './prototype';
-import { hasNormalClear, type GuestProgress } from './save';
+import type { GuestProgress } from './save';
 
 export type BattleSpeedMultiplier = 1 | 2;
 
@@ -9,13 +9,13 @@ export interface ReplayConvenienceState {
 }
 
 /**
- * NORMAL_CLEAR is always an actual battle clear. Main stages keep the authoritative
- * source map in save.ts; implemented SPECIAL clears are also only recorded by the
- * post-battle result scene, so their cleared id is an actual-battle clear as well.
+ * Guest progress is normalized before browser battle/UI consumption. Main clear ids
+ * therefore represent actual NORMAL_CLEAR; SPECIAL clear ids are likewise only written
+ * by the post-battle result flow in the current implemented slice.
  */
 export function hasStageNormalClear(stage: PrototypeStage, progress: GuestProgress): boolean {
   if (stage.stageType === 'SPECIAL') return progress.specialClearedStageIds.includes(stage.id);
-  return hasNormalClear(progress, stage.id);
+  return progress.clearedStageIds.includes(stage.id);
 }
 
 export function getReplayConvenienceState(stage: PrototypeStage, progress: GuestProgress): ReplayConvenienceState {
