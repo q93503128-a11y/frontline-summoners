@@ -5,7 +5,6 @@ import {
   ENEMIES,
   getSlotById,
   getStage,
-  isBattleStageUnlocked,
   type PrototypeStage,
 } from './prototype';
 import {
@@ -17,6 +16,11 @@ import {
   type GuestProgress,
 } from './save';
 import { addButton, addText, COLORS, drawBackdrop } from './scene-ui';
+import {
+  getCollectionStagePageIndexForStage,
+  getStageCollectionForStage,
+  isSortieStageUnlocked,
+} from './stage-navigation';
 import { isCompactMobileViewport } from './viewport';
 import {
   CoopSession,
@@ -40,7 +44,7 @@ function coopDeck(progress: GuestProgress): readonly string[] {
 }
 
 function eligibleCoopStages(progress: GuestProgress): readonly PrototypeStage[] {
-  return ALL_STAGES.filter((stage) => stage.multiplayerPolicy === 'SOLO_OR_COOP' && isBattleStageUnlocked(stage.id, progress.clearedStageIds));
+  return ALL_STAGES.filter((stage) => stage.multiplayerPolicy === 'SOLO_OR_COOP' && isSortieStageUnlocked(stage.id, progress.clearedStageIds));
 }
 
 function connectionLabel(state: CoopSession['connectionState']): string {
@@ -50,10 +54,20 @@ function connectionLabel(state: CoopSession['connectionState']): string {
   return '연결 종료';
 }
 
-function stageReturnData(stage: PrototypeStage): { scene: string; data: { collectionId: string } } {
-  return stage.stageType === 'SPECIAL'
-    ? { scene: 'stage-select', data: { collectionId: 'special-01' } }
-    : { scene: 'stage-select', data: { collectionId: 'chapter-01' } };
+function formatPermille(permille: number): string {
+  const percent = permille / 10;
+  return `${Number.isInteger(percent) ? percent.toFixed(0) : percent.toFixed(1)}%`;
+}
+
+function stageReturnData(stage: PrototypeStage): { scene: string; data: { collectionId: string; page: number } } {
+  const collection = getStageCollectionForStage(stage.id);
+  return {
+    scene: 'stage-select',
+    data: {
+      collectionId: collection.id,
+      page: getCollectionStagePageIndexForStage(collection, stage.id),
+    },
+  };
 }
 
 export class CoopLobbyScene extends Phaser.Scene {
@@ -63,8 +77,8 @@ export class CoopLobbyScene extends Phaser.Scene {
   private session: CoopSession | null = null;
   private inviteCode: string | null = null;
   private statusText?: Phaser.GameObjects.Text;
-  private unsubscribeMessage?: () => void;
-  private unsubscribeConnection?: () => void;
+  private unsubscribeMessage: (() => void) | undefined;
+  private unsubscribeConnection: (() => void) | undefined;
 
   constructor() { super('coop-lobby'); }
 
@@ -129,7 +143,8 @@ export class CoopLobbyScene extends Phaser.Scene {
       this.contentLayer!.add(addText(this, x, 270, stage.name, compact ? 27 : 23, '#ffffff', 'center').setOrigin(0.5).setWordWrapWidth(196));
       this.contentLayer!.add(addText(this, x, 320, `난이도 ${stage.difficulty}/12`, compact ? 20 : 17, COLORS.gold, 'center').setOrigin(0.5));
       this.contentLayer!.add(addText(this, x, 365, `전장 ${stage.mapLength}m`, compact ? 18 : 15, '#b6c1d0', 'center').setOrigin(0.5));
-      this.contentLayer!.add(addText(this, x, 410, '적 HP 118% · ATK 108%\n적 기지 112%', compact ? 17 : 14, '#d4b8a2', 'center').setOrigin(0.5));
+      const scaling = stage.coopStatScaling;
+      this.contentLayer!.add(addText(this, x, 410, `적 HP ${formatPermille(scaling.enemyHpPermille)} · ATK ${formatPermille(scaling.enemyAttackPermille)}\n적 기지 ${formatPermille(scaling.enemyBaseHpPermille)}`, compact ? 17 : 14, '#d4b8a2', 'center').setOrigin(0.5));
       this.contentLayer!.add(addButton(this, x, 495, 180, compact ? 84 : 58, '방 만들기', () => { void this.host(stage.id); }, special ? 0x8a6197 : 0x5f86aa));
     });
   }
@@ -197,7 +212,7 @@ export class CoopLobbyScene extends Phaser.Scene {
     }
     if (message.type === 'WELCOME') {
       const stage = getStage(message.room.stageId);
-      if (!isBattleStageUnlocked(stage.id, this.progress.clearedStageIds) || stage.multiplayerPolicy !== 'SOLO_OR_COOP') {
+      if (!isSortieStageUnlocked(stage.id, this.progress.clearedStageIds) || stage.multiplayerPolicy !== 'SOLO_OR_COOP') {
         this.statusText?.setText('현재 진행도에서는 이 협동 전장에 참가할 수 없습니다.');
         this.statusText?.setColor('#ff9a91');
         this.session.close();
@@ -299,8 +314,8 @@ export class CoopBattleScene extends Phaser.Scene {
   private resultLayer?: Phaser.GameObjects.Container;
   private headerText?: Phaser.GameObjects.Text;
   private connectionText?: Phaser.GameObjects.Text;
-  private unsubscribeMessage?: () => void;
-  private unsubscribeConnection?: () => void;
+  private unsubscribeMessage: (() => void) | undefined;
+  private unsubscribeConnection: (() => void) | undefined;
   private resultRecorded = false;
   private knownEnemyIds = new Set<string>();
 
@@ -318,7 +333,7 @@ export class CoopBattleScene extends Phaser.Scene {
   }
 
   create(): void {
-    drawBackdrop(this, 'battle');
+    drawBackdrop(this, 'map');
     const compact = isCompactMobileViewport();
     this.headerText = addText(this, 36, 24, `협동 · ${this.stage.name}`, compact ? 31 : 28, COLORS.cream);
     this.connectionText = addText(this, 1240, 30, connectionLabel(this.session.connectionState), compact ? 18 : 15, '#9fcfff', 'right').setOrigin(1, 0);
