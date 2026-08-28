@@ -163,7 +163,7 @@ export class StageSelectScene extends Phaser.Scene {
   private requestedPage: number | undefined;
   private stageLayer?: Phaser.GameObjects.Container;
   private pageText?: Phaser.GameObjects.Text;
-  private enemyOverlay?: Phaser.GameObjects.Container;
+  private enemyOverlay: Phaser.GameObjects.Container | undefined;
 
   constructor() { super('stage-select'); }
 

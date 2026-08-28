@@ -15,7 +15,6 @@ test('stage cards expose an encounter-codex path without leaking undiscovered en
   assert.match(source, /private showStageEnemies\(stage: PrototypeStage\): void/);
   assert.match(source, /discovered \? enemy\.displayName : '\?\?\?'/);
   assert.match(source, /discovered \? \(boss \? 'BOSS · 도감 열기' : '발견됨 · 도감 열기'\) : '미발견 · 정보 비공개'/);
-  assert.doesNotMatch(source, /enemy\.displayName\s*:\s*'\?\?\?'/);
 });
 
 test('stage encounter entries open the exact enemy codex card and return to the same stage page', async () => {
