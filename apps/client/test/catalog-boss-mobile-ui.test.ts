@@ -14,15 +14,17 @@ test('main menu opens the real catalog scene and the scene is registered', async
   assert.match(main, /scene:\s*\[[^\]]*CatalogScene[^\]]*\]/s);
 });
 
-test('catalog pages all 43 allies, permanent rewards, and separate special clear records without mixing reward axes', async () => {
+test('catalog pages all allies, discovered enemies, permanent rewards, and separate special clear records without mixing axes', async () => {
   const source = await readSource('../src/catalog-scene.ts');
   assert.match(source, /const ALLY_PAGE_SIZE = 5/);
+  assert.match(source, /const ENEMY_PAGE_SIZE = 5/);
   assert.match(source, /const REWARD_PAGE_SIZE = 5/);
   assert.match(source, /const SPECIAL_PAGE_SIZE = 5/);
-  assert.match(source, /type CatalogMode = 'ALLIES' \| 'REWARDS' \| 'SPECIAL'/);
+  assert.match(source, /type CatalogMode = 'ALLIES' \| 'ENEMIES' \| 'REWARDS' \| 'SPECIAL'/);
   assert.match(source, /`동료 \$\{ALL_PLAYER_SLOTS\.length\}종`/);
-  assert.match(source, /'영구 보상 20개'/);
-  assert.match(source, /'특수 기록 5개'/);
+  assert.match(source, /`적 \$\{ENEMIES\.length\}종`/);
+  assert.match(source, /`영구 보상 \$\{STAGES\.length\}개`/);
+  assert.match(source, /`특수 기록 \$\{SPECIAL_STAGES\.length\}개`/);
   assert.match(source, /loadGuestProgress\(\)/);
   assert.match(source, /new Set\(getOwnedCharacterIds\(this\.progress\)\)/);
   assert.match(source, /ALL_PLAYER_SLOTS\.slice\(start, start \+ ALLY_PAGE_SIZE\)/);
@@ -31,6 +33,9 @@ test('catalog pages all 43 allies, permanent rewards, and separate special clear
   assert.match(source, /portrait\.setTintFill\(\)/);
   assert.match(source, /portrait\.setAlpha\(0\.86\)/);
   assert.match(source, /'획득 후 정보 공개'/);
+  assert.match(source, /new Set\(this\.progress\.discoveredEnemyIds \?\? \[\]\)/);
+  assert.match(source, /discovered \? enemy\.displayName : '\?\?\?'/);
+  assert.match(source, /'전투에서 조우하면 정보 공개'/);
   assert.match(source, /new Set\(this\.progress\.permanentRewardIds\)/);
   assert.match(source, /new Set\(this\.progress\.specialClearedStageIds\)/);
   assert.match(source, /formatCombatTraits\(slot\.definition\)/);
@@ -84,7 +89,7 @@ test('compact catalog navigation stays finger-sized, drops decorative header cop
   assert.match(source, /const navigationHeight = compact \? 84 : 50;/);
   assert.match(source, /const tabHeight = compact \? 84 : 54;/);
   assert.match(source, /isCompactMobileViewport\(\) \? 26 : 18/);
-  assert.match(source, /if \(!compact\) addText\(this, 56, 88, '동료, 메인 영구 보상, 특수전 클리어 기록을 한곳에서 확인한다\.'/);
+  assert.match(source, /if \(!compact\) addText\(this, 56, 88, '획득 동료와 실제로 조우한 적만 상세 정보가 공개된다\.'/);
   assert.match(source, /bg\.on\('pointerout', \(\) => \{[\s\S]*?container\.setScale\(1\);/);
   assert.match(source, /bg\.on\('pointerupoutside', \(\) => container\.setScale\(1\)\);/);
   assert.ok(84 * (390 / 720) >= 44);

@@ -82,14 +82,16 @@ test('legacy progress without provenance migrates stage ids and defaults histori
   assert.deepEqual(provenanceOnly.normalClearSourceByStage, {});
 });
 
-test('save schema v9 persists canonical permanent rewards and accepts older v2-v8 data for migration', async () => {
+test('save schema v10 persists enemy discovery and canonical permanent rewards while accepting older v2-v9 data for migration', async () => {
   const source = await readFile(new URL('../src/save.ts', import.meta.url), 'utf8');
-  assert.match(source, /const SCHEMA_VERSION = 9/);
-  assert.match(source, /interface StoredGuestProgressV9/);
+  assert.match(source, /const SCHEMA_VERSION = 10/);
+  assert.match(source, /interface StoredGuestProgressV10/);
   assert.match(source, /permanentRewardIds: readonly string\[\]/);
+  assert.match(source, /discoveredEnemyIds: readonly string\[\]/);
   assert.match(source, /\(version as number\) < 2 \|\| \(version as number\) > SCHEMA_VERSION/);
   assert.match(source, /versionNumber >= 8/);
   assert.match(source, /versionNumber >= 9 \? stringArray\(value\?\.permanentRewardIds\) : stringArray\(value\?\.treasureIds\)/);
+  assert.match(source, /versionNumber >= 10 \? stringArray\(value\?\.discoveredEnemyIds\) : \[\]/);
   assert.match(source, /LEGACY_MAIN_STAGE_ID_MAP/);
   assert.match(source, /canonicalStageIds\(value\?\.clearedStageIds\)/);
 });
