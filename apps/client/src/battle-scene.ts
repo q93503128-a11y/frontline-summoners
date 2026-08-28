@@ -20,7 +20,7 @@ import { formatCompactTraits } from './combat-trait-labels';
 import { buildGuestDeckSlots, createGuestPrototypeBattle } from './player-loadout';
 import { getProjectileArcOffsetY, getProjectileTravelPlan, usesTravelProjectile } from './projectile-visuals';
 import { STAGES, getStage, type PrototypeRosterSlot, type PrototypeStage } from './prototype';
-import { loadGuestProgress } from './save';
+import { loadGuestProgress, recordGuestEnemyDiscoveries } from './save';
 import {
   BATTLE_UNIT_HOTKEY_CODES,
   COLORS,
@@ -83,6 +83,8 @@ export class BattleScene extends Phaser.Scene {
   private buttons = new Map<string, UnitButtonView>();
   private projectiles: ProjectileView[] = [];
   private seenBossSimulationIds = new Set<number>();
+  private discoveredEnemyIds = new Set<string>();
+  private enemyDiscoveryWrite: Promise<void> = Promise.resolve();
   private supplyText!: Phaser.GameObjects.Text;
   private supplyBar!: Phaser.GameObjects.Rectangle;
   private supplyLevelText!: Phaser.GameObjects.Text;
@@ -116,6 +118,8 @@ export class BattleScene extends Phaser.Scene {
     this.buttons.clear();
     this.projectiles = [];
     this.seenBossSimulationIds.clear();
+    this.discoveredEnemyIds.clear();
+    this.enemyDiscoveryWrite = Promise.resolve();
     this.activeSlots = [];
   }
 
@@ -129,6 +133,7 @@ export class BattleScene extends Phaser.Scene {
         this.scene.start('stage-hub');
         return;
       }
+      this.discoveredEnemyIds = new Set(progress.discoveredEnemyIds ?? []);
       this.activeSlots = buildGuestDeckSlots(progress);
       this.state = createGuestPrototypeBattle(this.stage.id, progress);
       this.lastPlayerBaseHp = this.state.battle.bases.PLAYER.hp;
@@ -138,6 +143,7 @@ export class BattleScene extends Phaser.Scene {
       this.drawBases();
       this.drawUnitButtons();
       this.ready = true;
+      this.syncEnemyDiscoveries();
       this.syncHud();
     });
   }
@@ -150,6 +156,7 @@ export class BattleScene extends Phaser.Scene {
       stepPlayableBattle(this.state);
       this.accumulator -= SIM_TICK_MS;
     }
+    this.syncEnemyDiscoveries();
     this.syncBossWarnings();
     this.syncProjectileViews();
     this.syncUnits();
@@ -223,6 +230,21 @@ export class BattleScene extends Phaser.Scene {
     const shortcut = addText(this, INTERNAL_WIDTH / 2, 352, 'P 또는 ESC로도 계속할 수 있습니다.', battleUiFontSize(15, 22), '#8f9bae', 'center').setOrigin(0.5);
     const resume = addButton(this, INTERNAL_WIDTH / 2, 414, 220, isCompactMobileViewport() ? 84 : 58, '계 속', () => this.setManualPaused(false), 0x6b94b7);
     this.pauseOverlay = this.add.container(0, 0, [blocker, panel, title, detail, shortcut, resume]).setDepth(100);
+  }
+
+  private syncEnemyDiscoveries(): void {
+    const newlySeen = [...new Set(this.state.battle.units
+      .filter((unit) => unit.team === 'ENEMY')
+      .map((unit) => unit.definition.id)
+      .filter((enemyId) => !this.discoveredEnemyIds.has(enemyId)))];
+    if (newlySeen.length === 0) return;
+    for (const enemyId of newlySeen) this.discoveredEnemyIds.add(enemyId);
+    this.enemyDiscoveryWrite = this.enemyDiscoveryWrite
+      .then(async () => {
+        const result = await recordGuestEnemyDiscoveries(newlySeen);
+        for (const enemyId of result.discoveredEnemyIds) this.discoveredEnemyIds.add(enemyId);
+      })
+      .catch(() => undefined);
   }
 
   private syncBossWarnings(): void {

@@ -5,6 +5,7 @@ import { formatCombatTraits, formatDamageSpecialty } from './combat-trait-labels
 import { getPermanentRewardEffectText } from './permanent-reward-ui';
 import {
   ALL_PLAYER_SLOTS,
+  ENEMIES,
   SPECIAL_STAGES,
   STAGES,
   getSpecialStageNumber,
@@ -14,8 +15,9 @@ import { getOwnedCharacterIds, loadGuestProgress, type GuestProgress } from './s
 import { isCompactMobileViewport } from './viewport';
 
 const FONT = '"Malgun Gothic", "Apple SD Gothic Neo", "Noto Sans KR", sans-serif';
-const EMPTY_PROGRESS: GuestProgress = { clearedStageIds: [], specialClearedStageIds: [], permanentRewardIds: [] };
+const EMPTY_PROGRESS: GuestProgress = { clearedStageIds: [], specialClearedStageIds: [], permanentRewardIds: [], discoveredEnemyIds: [] };
 const ALLY_PAGE_SIZE = 5;
+const ENEMY_PAGE_SIZE = 5;
 const REWARD_PAGE_SIZE = 5;
 const SPECIAL_PAGE_SIZE = 5;
 const STORY_BADGE_COLOR = '#d7c79f';
@@ -27,7 +29,7 @@ const RARITY_BADGE_COLORS: Readonly<Record<string, string>> = {
   SS: '#ffd873',
 };
 
-type CatalogMode = 'ALLIES' | 'REWARDS' | 'SPECIAL';
+type CatalogMode = 'ALLIES' | 'ENEMIES' | 'REWARDS' | 'SPECIAL';
 
 function addText(
   scene: Phaser.Scene,
@@ -108,6 +110,7 @@ export class CatalogScene extends Phaser.Scene {
   private contentLayer?: Phaser.GameObjects.Container;
   private pageText?: Phaser.GameObjects.Text;
   private allyTab?: Phaser.GameObjects.Container;
+  private enemyTab?: Phaser.GameObjects.Container;
   private rewardTab?: Phaser.GameObjects.Container;
   private specialTab?: Phaser.GameObjects.Container;
 
@@ -121,12 +124,13 @@ export class CatalogScene extends Phaser.Scene {
     const navigationHeight = compact ? 84 : 50;
     const tabHeight = compact ? 84 : 54;
     addText(this, 54, 34, '도 감', 44, '#fff4cf');
-    if (!compact) addText(this, 56, 88, '동료, 메인 영구 보상, 특수전 클리어 기록을 한곳에서 확인한다.', 18, '#b8c0ce');
+    if (!compact) addText(this, 56, 88, '획득 동료와 실제로 조우한 적만 상세 정보가 공개된다.', 18, '#b8c0ce');
     addButton(this, 1165, compact ? 70 : 62, 160, navigationHeight, '메인', () => this.scene.start('main-menu'), 0x586275);
 
-    this.allyTab = addButton(this, 210, 135, 230, tabHeight, `동료 ${ALL_PLAYER_SLOTS.length}종`, () => this.setMode('ALLIES'), 0x6d91b5);
-    this.rewardTab = addButton(this, 465, 135, 230, tabHeight, '영구 보상 20개', () => this.setMode('REWARDS'), 0xb69755);
-    this.specialTab = addButton(this, 720, 135, 230, tabHeight, '특수 기록 5개', () => this.setMode('SPECIAL'), 0x9569a5);
+    this.allyTab = addButton(this, 165, 135, 210, tabHeight, `동료 ${ALL_PLAYER_SLOTS.length}종`, () => this.setMode('ALLIES'), 0x6d91b5);
+    this.enemyTab = addButton(this, 405, 135, 210, tabHeight, `적 ${ENEMIES.length}종`, () => this.setMode('ENEMIES'), 0xb56d72);
+    this.rewardTab = addButton(this, 645, 135, 210, tabHeight, `영구 보상 ${STAGES.length}개`, () => this.setMode('REWARDS'), 0xb69755);
+    this.specialTab = addButton(this, 885, 135, 210, tabHeight, `특수 기록 ${SPECIAL_STAGES.length}개`, () => this.setMode('SPECIAL'), 0x9569a5);
     addButton(this, 92, compact ? 660 : 664, 140, navigationHeight, '◀ 이전', () => this.changePage(-1), 0x586275);
     addButton(this, 1188, compact ? 660 : 664, 140, navigationHeight, '다음 ▶', () => this.changePage(1), 0x586275);
     this.pageText = addText(this, INTERNAL_WIDTH / 2, 652, '', compact ? 22 : 18, '#aab4c3', 'center').setOrigin(0.5);
@@ -148,6 +152,7 @@ export class CatalogScene extends Phaser.Scene {
 
   private getPageCount(): number {
     if (this.mode === 'ALLIES') return Math.ceil(ALL_PLAYER_SLOTS.length / ALLY_PAGE_SIZE);
+    if (this.mode === 'ENEMIES') return Math.ceil(ENEMIES.length / ENEMY_PAGE_SIZE);
     if (this.mode === 'REWARDS') return Math.ceil(STAGES.length / REWARD_PAGE_SIZE);
     return Math.ceil(SPECIAL_STAGES.length / SPECIAL_PAGE_SIZE);
   }
@@ -156,17 +161,26 @@ export class CatalogScene extends Phaser.Scene {
     this.page = Phaser.Math.Clamp(this.page + delta, 0, this.getPageCount() - 1);
     this.render();
   }
+
   private render(): void {
     this.contentLayer?.destroy(true);
     this.contentLayer = this.add.container(0, 0);
     this.page = Phaser.Math.Clamp(this.page, 0, Math.max(0, this.getPageCount() - 1));
-    const modeLabel = this.mode === 'ALLIES' ? '동료' : this.mode === 'REWARDS' ? '영구 보상' : '특수 기록';
+    const modeLabel = this.mode === 'ALLIES'
+      ? '동료'
+      : this.mode === 'ENEMIES'
+        ? '적'
+        : this.mode === 'REWARDS'
+          ? '영구 보상'
+          : '특수 기록';
     this.pageText?.setText(`${modeLabel} · ${this.page + 1} / ${this.getPageCount()}`);
     this.allyTab?.setAlpha(this.mode === 'ALLIES' ? 1 : 0.62);
+    this.enemyTab?.setAlpha(this.mode === 'ENEMIES' ? 1 : 0.62);
     this.rewardTab?.setAlpha(this.mode === 'REWARDS' ? 1 : 0.62);
     this.specialTab?.setAlpha(this.mode === 'SPECIAL' ? 1 : 0.62);
 
     if (this.mode === 'ALLIES') this.renderAllies();
+    else if (this.mode === 'ENEMIES') this.renderEnemies();
     else if (this.mode === 'REWARDS') this.renderRewards();
     else this.renderSpecialRecords();
   }
@@ -216,6 +230,50 @@ export class CatalogScene extends Phaser.Scene {
       } else {
         this.contentLayer!.add(addText(this, x, compact ? 425 : 415, '미획득', compact ? 22 : 15, '#707985', 'center').setOrigin(0.5));
         this.contentLayer!.add(addText(this, x, compact ? 486 : 470, '획득 후 정보 공개', compact ? 19 : 14, '#616b78', 'center').setOrigin(0.5));
+      }
+    });
+  }
+
+  private renderEnemies(): void {
+    const compact = isCompactMobileViewport();
+    const start = this.page * ENEMY_PAGE_SIZE;
+    const discoveredIds = new Set(this.progress.discoveredEnemyIds ?? []);
+    const visible = ENEMIES.slice(start, start + ENEMY_PAGE_SIZE);
+
+    visible.forEach((enemy, localIndex) => {
+      const x = 145 + localIndex * 247;
+      const discovered = discoveredIds.has(enemy.enemyId);
+      const isBoss = (enemy.definition.combatTags ?? []).includes('BOSS');
+      const border = discovered ? (isBoss ? 0xc97772 : 0xa45f64) : 0x46505e;
+      const card = this.add.rectangle(x, 398, 220, 430, discovered ? 0x30262a : 0x1d222b, 0.98)
+        .setStrokeStyle(3, border, discovered ? 0.95 : 0.65);
+      this.contentLayer!.add(card);
+
+      const art = getArt(enemy.definition.id);
+      const portrait = this.add.sprite(x, compact ? 285 : 270, art.family.idle.key, 0);
+      if (discovered) {
+        portrait.setTint(art.tint);
+        portrait.setAlpha(1);
+      } else {
+        portrait.setTint(0x07080b);
+        portrait.setTintFill();
+        portrait.setAlpha(0.86);
+      }
+      portrait.setScale(((compact ? 132 : 145) / art.family.idle.frameHeight) * art.displayScale);
+      this.contentLayer!.add(portrait);
+
+      this.contentLayer!.add(addText(this, x - 96, 200, discovered ? (isBoss ? 'BOSS' : 'ENEMY') : '???', compact ? 20 : 15, discovered ? (isBoss ? '#ff9b92' : '#d5a0a4') : '#69727e'));
+      this.contentLayer!.add(addText(this, x, compact ? 360 : 342, discovered ? enemy.displayName : '???', compact ? 27 : 22, discovered ? '#ffffff' : '#747d89', 'center').setOrigin(0.5));
+
+      if (discovered) {
+        this.contentLayer!.add(addText(this, x, compact ? 400 : 376, `처치 보급 +${enemy.rewardSupply}`, compact ? 21 : 14, '#f2d37c', 'center').setOrigin(0.5));
+        this.contentLayer!.add(addText(this, x, compact ? 438 : 402, formatCombatTraits(enemy.definition), compact ? 19 : 13, '#ffb4ae', 'center').setOrigin(0.5));
+        const specialty = formatDamageSpecialty(enemy.definition);
+        if (specialty) this.contentLayer!.add(addText(this, x, compact ? 474 : 430, specialty, compact ? 19 : 13, '#ffd493', 'center').setOrigin(0.5));
+        this.contentLayer!.add(addText(this, x, compact ? 532 : 520, `HP ${enemy.definition.maxHp} · 공격 ${enemy.definition.attackDamage}\n사거리 ${enemy.definition.attackMaxRange}`, compact ? 18 : 12, '#aeb8c8', 'center').setOrigin(0.5).setWordWrapWidth(190));
+      } else {
+        this.contentLayer!.add(addText(this, x, compact ? 425 : 415, '미발견', compact ? 22 : 15, '#707985', 'center').setOrigin(0.5));
+        this.contentLayer!.add(addText(this, x, compact ? 486 : 470, '전투에서 조우하면 정보 공개', compact ? 19 : 14, '#616b78', 'center').setOrigin(0.5).setWordWrapWidth(188));
       }
     });
   }

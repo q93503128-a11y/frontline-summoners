@@ -1,5 +1,6 @@
 import {
   ALL_PLAYER_SLOTS,
+  ENEMIES,
   SPECIAL_STAGES,
   STAGES,
   STARTER_SLOT_ID,
@@ -43,6 +44,8 @@ export interface GuestProgress {
   readonly normalClearSourceByStage?: Readonly<Record<string, NormalClearSource>>;
   readonly specialClearedStageIds: readonly string[];
   readonly permanentRewardIds: readonly string[];
+  /** Enemy entries become visible only after that enemy has actually spawned in battle. */
+  readonly discoveredEnemyIds?: readonly string[];
   readonly ownedRecruitmentCharacterIds?: readonly string[];
   /** Pull history only. No pity, guarantee, or selection credit is stored. */
   readonly recruitmentProgressByBanner?: Readonly<Record<string, RecruitmentProgress>>;
@@ -77,13 +80,20 @@ export interface GuestDeckResult {
   readonly persisted: boolean;
   readonly guestProgress: GuestProgress;
 }
+export interface GuestEnemyDiscoveryResult {
+  readonly discoveredEnemyIds: readonly string[];
+  readonly newlyDiscoveredEnemyIds: readonly string[];
+  readonly persisted: boolean;
+  readonly guestProgress: GuestProgress;
+}
 
-interface StoredGuestProgressV9 {
-  readonly schemaVersion: 9;
+interface StoredGuestProgressV10 {
+  readonly schemaVersion: 10;
   readonly clearedStageIds: readonly string[];
   readonly normalClearSourceByStage: Readonly<Record<string, NormalClearSource>>;
   readonly specialClearedStageIds: readonly string[];
   readonly permanentRewardIds: readonly string[];
+  readonly discoveredEnemyIds: readonly string[];
   readonly ownedRecruitmentCharacterIds: readonly string[];
   readonly recruitmentProgressByBanner: Readonly<Record<string, RecruitmentProgress>>;
   readonly characterProgressById: Readonly<Record<string, CharacterMetaProgress>>;
@@ -93,12 +103,13 @@ interface StoredGuestProgressV9 {
 const DB_NAME = 'frontline-summoners';
 const STORE_NAME = 'guest-progress';
 const KEY = 'progress';
-const SCHEMA_VERSION = 9;
+const SCHEMA_VERSION = 10;
 const EMPTY_PROGRESS: GuestProgress = {
   clearedStageIds: [],
   normalClearSourceByStage: {},
   specialClearedStageIds: [],
   permanentRewardIds: [],
+  discoveredEnemyIds: [],
   ownedRecruitmentCharacterIds: [],
   recruitmentProgressByBanner: {},
   characterProgressById: {},
@@ -107,6 +118,7 @@ const STAGE_PERMANENT_REWARD_IDS = new Set(STAGES.flatMap((stage) => stage.perma
 const SPECIAL_STAGE_IDS = new Set(SPECIAL_STAGES.map((stage) => stage.id));
 const RECRUITMENT_CHARACTER_IDS = new Set(RECRUITMENT_UNITS.map((unit) => unit.id));
 const ALL_CHARACTER_IDS = new Set(ALL_PLAYER_SLOTS.map((slot) => slot.slotId));
+const ALL_ENEMY_IDS = new Set(ENEMIES.map((enemy) => enemy.enemyId));
 const NORMAL_CLEAR_SOURCE_SET = new Set<string>(NORMAL_CLEAR_SOURCES);
 const LEGACY_MAIN_STAGE_ID_MAP = new Map<string, string>(STAGES.map((stage, index) => [`border-${String(index + 1).padStart(2, '0')}`, stage.id]));
 let sessionProgress: GuestProgress = EMPTY_PROGRESS;
@@ -263,6 +275,10 @@ export function getOwnedCharacterIds(progress: GuestProgress): readonly string[]
   return ALL_PLAYER_SLOTS.filter((slot) => owned.has(slot.slotId)).map((slot) => slot.slotId);
 }
 
+export function getDiscoveredEnemyIds(progress: GuestProgress): readonly string[] {
+  return normalizeGuestProgress(progress).discoveredEnemyIds ?? [];
+}
+
 export function getEffectiveDeckSlotIds(progress: GuestProgress): readonly string[] {
   const normalized = normalizeGuestProgress(progress);
   if (normalized.deckSlotIds && normalized.deckSlotIds.length > 0) return normalized.deckSlotIds;
@@ -275,6 +291,7 @@ export function mergeGuestProgress(a: GuestProgress, b: GuestProgress): GuestPro
     normalClearSourceByStage: { ...(b.normalClearSourceByStage ?? {}), ...(a.normalClearSourceByStage ?? {}) },
     specialClearedStageIds: [...new Set([...a.specialClearedStageIds, ...b.specialClearedStageIds])],
     permanentRewardIds: [...new Set([...a.permanentRewardIds, ...b.permanentRewardIds])],
+    discoveredEnemyIds: [...new Set([...(a.discoveredEnemyIds ?? []), ...(b.discoveredEnemyIds ?? [])])],
     ownedRecruitmentCharacterIds: [...new Set([...(a.ownedRecruitmentCharacterIds ?? []), ...(b.ownedRecruitmentCharacterIds ?? [])])],
     recruitmentProgressByBanner: mergeRecruitmentMaps(a.recruitmentProgressByBanner ?? {}, b.recruitmentProgressByBanner ?? {}),
     characterProgressById: mergeCharacterProgressMaps(a.characterProgressById ?? {}, b.characterProgressById ?? {}),
@@ -288,6 +305,7 @@ export function normalizeGuestProgress(progress: GuestProgress): GuestProgress {
   const specialClearedStageIds = [...new Set(progress.specialClearedStageIds.filter((stageId) => SPECIAL_STAGE_IDS.has(stageId)))];
   const guaranteedPermanentRewardIds = getPermanentRewardIdsForClearedStages(clearedStageIds);
   const nonStagePermanentRewardIds = progress.permanentRewardIds.filter((rewardId) => !STAGE_PERMANENT_REWARD_IDS.has(rewardId));
+  const discoveredEnemyIds = [...new Set((progress.discoveredEnemyIds ?? []).filter((id) => ALL_ENEMY_IDS.has(id)))];
   const ownedRecruitmentCharacterIds = [...new Set((progress.ownedRecruitmentCharacterIds ?? []).filter((id) => RECRUITMENT_CHARACTER_IDS.has(id)))];
   const ownedCharacterIds = ownedCharacterIdsForProgress(clearedStageIds, ownedRecruitmentCharacterIds);
   const deckSlotIds = normalizeExplicitDeckSlotIds(progress.deckSlotIds, ownedCharacterIds);
@@ -296,6 +314,7 @@ export function normalizeGuestProgress(progress: GuestProgress): GuestProgress {
     normalClearSourceByStage,
     specialClearedStageIds,
     permanentRewardIds: [...new Set([...guaranteedPermanentRewardIds, ...nonStagePermanentRewardIds])],
+    discoveredEnemyIds,
     ownedRecruitmentCharacterIds,
     recruitmentProgressByBanner: normalizeRecruitmentMap(progress.recruitmentProgressByBanner ?? {}),
     characterProgressById: normalizeCharacterProgressMap(progress.characterProgressById ?? {}, ownedCharacterIds),
@@ -329,6 +348,7 @@ function readStoredProgress(db: IDBDatabase): Promise<GuestProgress> {
           : normalizeNormalClearSourceMap({}, clearedStageIds),
         specialClearedStageIds: versionNumber >= 3 ? stringArray(value?.specialClearedStageIds) : [],
         permanentRewardIds: versionNumber >= 9 ? stringArray(value?.permanentRewardIds) : stringArray(value?.treasureIds),
+        discoveredEnemyIds: versionNumber >= 10 ? stringArray(value?.discoveredEnemyIds) : [],
         ownedRecruitmentCharacterIds: versionNumber >= 4 ? stringArray(value?.ownedRecruitmentCharacterIds) : [],
         recruitmentProgressByBanner: versionNumber >= 4 ? normalizeRecruitmentMap(value?.recruitmentProgressByBanner) : {},
         characterProgressById: versionNumber >= 5 && typeof value?.characterProgressById === 'object' && value.characterProgressById !== null
@@ -343,12 +363,13 @@ function readStoredProgress(db: IDBDatabase): Promise<GuestProgress> {
 
 async function persistProgress(progress: GuestProgress): Promise<boolean> {
   const normalized = normalizeGuestProgress(progress);
-  const stored: StoredGuestProgressV9 = {
+  const stored: StoredGuestProgressV10 = {
     schemaVersion: SCHEMA_VERSION,
     clearedStageIds: normalized.clearedStageIds,
     normalClearSourceByStage: normalized.normalClearSourceByStage ?? {},
     specialClearedStageIds: normalized.specialClearedStageIds,
     permanentRewardIds: normalized.permanentRewardIds,
+    discoveredEnemyIds: normalized.discoveredEnemyIds ?? [],
     ownedRecruitmentCharacterIds: normalized.ownedRecruitmentCharacterIds ?? [],
     recruitmentProgressByBanner: normalized.recruitmentProgressByBanner ?? {},
     characterProgressById: normalized.characterProgressById ?? {},
@@ -374,6 +395,33 @@ export async function loadGuestProgress(): Promise<GuestProgress> {
     sessionProgress = normalizeGuestProgress(mergeGuestProgress(stored, normalizeGuestProgress(sessionProgress)));
   } catch { sessionProgress = normalizeGuestProgress(sessionProgress); }
   return sessionProgress;
+}
+
+export async function recordGuestEnemyDiscoveries(enemyIds: readonly string[]): Promise<GuestEnemyDiscoveryResult> {
+  const uniqueEnemyIds = [...new Set(enemyIds)];
+  for (const enemyId of uniqueEnemyIds) {
+    if (!ALL_ENEMY_IDS.has(enemyId)) throw new Error(`Unknown enemy discovery id: ${enemyId}`);
+  }
+  const before = normalizeGuestProgress(await loadGuestProgress());
+  const discovered = new Set(before.discoveredEnemyIds ?? []);
+  const newlyDiscoveredEnemyIds = uniqueEnemyIds.filter((enemyId) => !discovered.has(enemyId));
+  if (newlyDiscoveredEnemyIds.length === 0) {
+    return {
+      discoveredEnemyIds: before.discoveredEnemyIds ?? [],
+      newlyDiscoveredEnemyIds: [],
+      persisted: true,
+      guestProgress: before,
+    };
+  }
+  for (const enemyId of newlyDiscoveredEnemyIds) discovered.add(enemyId);
+  const progress = normalizeGuestProgress({ ...before, discoveredEnemyIds: [...discovered] });
+  sessionProgress = progress;
+  return {
+    discoveredEnemyIds: progress.discoveredEnemyIds ?? [],
+    newlyDiscoveredEnemyIds,
+    persisted: await persistProgress(progress),
+    guestProgress: progress,
+  };
 }
 
 export async function recordNormalStageClear(stageId: string, source: NormalClearSource): Promise<NormalStageClearResult> {
