@@ -7,6 +7,18 @@ export const COOP_DECK_SLOTS_PER_PLAYER = 5;
 export const COOP_MAX_INPUT_LEAD = 6;
 export const COOP_MAX_COMMANDS_PER_FRAME = 8;
 
+export interface CoopCharacterLoadout {
+  readonly characterId: string;
+  readonly level: number;
+  readonly plusLevel: number;
+  readonly selectedFormId?: string;
+}
+
+export interface CoopPlayerLoadout {
+  readonly characters: readonly CoopCharacterLoadout[];
+  readonly permanentRewardIds: readonly string[];
+}
+
 export type CoopBattleCommand =
   | { readonly type: 'SPAWN'; readonly slotId: string }
   | { readonly type: 'UPGRADE_SUPPLY' }
@@ -25,6 +37,7 @@ export interface CoopSeatState {
   ready: boolean;
   control: CoopControl;
   deckSlotIds: string[];
+  loadout: CoopPlayerLoadout | null;
   lastSequence: number;
 }
 
@@ -59,7 +72,7 @@ export interface CoopRoomSnapshot {
 
 export type CoopClientMessage =
   | { readonly type: 'PING' }
-  | { readonly type: 'READY'; readonly deckSlotIds: readonly string[] }
+  | { readonly type: 'READY'; readonly loadout: CoopPlayerLoadout }
   | { readonly type: 'UNREADY' }
   | { readonly type: 'FRAME_INPUT'; readonly input: CoopFrameInput };
 
@@ -78,6 +91,10 @@ function isNonEmptyString(value: unknown): value is string {
 
 function assertNonNegativeInteger(value: number, context: string): void {
   if (!Number.isInteger(value) || value < 0) throw new Error(`${context} must be a non-negative integer`);
+}
+
+function assertPositiveInteger(value: number, context: string): void {
+  if (!Number.isInteger(value) || value <= 0) throw new Error(`${context} must be a positive integer`);
 }
 
 function requireSeat(state: CoopRoomState, seatId: CoopSeatId, clientId: string): CoopSeatState {
@@ -118,16 +135,47 @@ function parseFrameInput(value: unknown): CoopFrameInput {
   };
 }
 
+function parseCharacterLoadout(value: unknown, context: string): CoopCharacterLoadout {
+  if (!isRecord(value) || !isNonEmptyString(value.characterId)) throw new Error(`${context}.characterId must be a non-empty string`);
+  if (typeof value.level !== 'number') throw new Error(`${context}.level must be a number`);
+  if (typeof value.plusLevel !== 'number') throw new Error(`${context}.plusLevel must be a number`);
+  assertPositiveInteger(value.level, `${context}.level`);
+  assertNonNegativeInteger(value.plusLevel, `${context}.plusLevel`);
+  const selectedFormId = value.selectedFormId;
+  if (selectedFormId !== undefined && !isNonEmptyString(selectedFormId)) throw new Error(`${context}.selectedFormId must be a non-empty string`);
+  return {
+    characterId: value.characterId,
+    level: value.level,
+    plusLevel: value.plusLevel,
+    ...(selectedFormId === undefined ? {} : { selectedFormId }),
+  };
+}
+
+export function validateCoopPlayerLoadout(value: unknown, context = 'co-op loadout'): CoopPlayerLoadout {
+  if (!isRecord(value)) throw new Error(`${context} must be an object`);
+  if (!Array.isArray(value.characters) || value.characters.length < 1 || value.characters.length > COOP_DECK_SLOTS_PER_PLAYER) {
+    throw new Error(`${context}.characters must contain 1..${COOP_DECK_SLOTS_PER_PLAYER} characters`);
+  }
+  const characters = value.characters.map((entry, index) => parseCharacterLoadout(entry, `${context}.characters[${index}]`));
+  const characterIds = characters.map((entry) => entry.characterId);
+  if (new Set(characterIds).size !== characterIds.length) throw new Error(`${context}.characters must not contain duplicates`);
+  if (!Array.isArray(value.permanentRewardIds) || !value.permanentRewardIds.every(isNonEmptyString)) {
+    throw new Error(`${context}.permanentRewardIds must be a string array`);
+  }
+  if (new Set(value.permanentRewardIds).size !== value.permanentRewardIds.length) {
+    throw new Error(`${context}.permanentRewardIds must not contain duplicates`);
+  }
+  return {
+    characters,
+    permanentRewardIds: [...value.permanentRewardIds],
+  };
+}
+
 export function parseCoopClientMessage(value: unknown): CoopClientMessage {
   if (!isRecord(value) || !isNonEmptyString(value.type)) throw new Error('message must be an object with type');
   if (value.type === 'PING') return { type: 'PING' };
   if (value.type === 'UNREADY') return { type: 'UNREADY' };
-  if (value.type === 'READY') {
-    if (!Array.isArray(value.deckSlotIds) || !value.deckSlotIds.every(isNonEmptyString)) {
-      throw new Error('READY.deckSlotIds must be a string array');
-    }
-    return { type: 'READY', deckSlotIds: value.deckSlotIds };
-  }
+  if (value.type === 'READY') return { type: 'READY', loadout: validateCoopPlayerLoadout(value.loadout, 'READY.loadout') };
   if (value.type === 'FRAME_INPUT') return { type: 'FRAME_INPUT', input: parseFrameInput(value.input) };
   throw new Error('unsupported_message');
 }
@@ -142,6 +190,7 @@ export function createCoopRoom(matchId: string, stageId: string): CoopRoomState 
     ready: false,
     control: 'PLAYER',
     deckSlotIds: [],
+    loadout: null,
     lastSequence: -1,
   });
   return {
@@ -190,29 +239,23 @@ export function disconnectCoopSeat(state: CoopRoomState, seatId: CoopSeatId, cli
   if (state.phase === 'LOBBY') {
     seat.ready = false;
     seat.deckSlotIds = [];
+    seat.loadout = null;
   } else if (state.phase === 'BATTLE') {
     seat.control = 'AI';
   }
-}
-
-function validateDeck(deckSlotIds: readonly string[]): string[] {
-  if (deckSlotIds.length < 1 || deckSlotIds.length > COOP_DECK_SLOTS_PER_PLAYER) {
-    throw new Error(`co-op deck must contain 1..${COOP_DECK_SLOTS_PER_PLAYER} characters`);
-  }
-  if (!deckSlotIds.every(isNonEmptyString)) throw new Error('co-op deck ids must be non-empty strings');
-  if (new Set(deckSlotIds).size !== deckSlotIds.length) throw new Error('co-op deck must not contain duplicates');
-  return [...deckSlotIds];
 }
 
 export function setCoopSeatReady(
   state: CoopRoomState,
   seatId: CoopSeatId,
   clientId: string,
-  deckSlotIds: readonly string[],
+  loadout: CoopPlayerLoadout,
 ): { readonly battleStarted: boolean } {
   if (state.phase !== 'LOBBY') throw new Error('room is not in lobby');
   const seat = requireSeat(state, seatId, clientId);
-  seat.deckSlotIds = validateDeck(deckSlotIds);
+  const validated = validateCoopPlayerLoadout(loadout);
+  seat.deckSlotIds = validated.characters.map((character) => character.characterId);
+  seat.loadout = validated;
   seat.ready = true;
   const battleStarted = COOP_SEATS.every((candidate) => state.seats[candidate].connected && state.seats[candidate].ready);
   if (battleStarted) state.phase = 'BATTLE';
@@ -224,6 +267,7 @@ export function setCoopSeatUnready(state: CoopRoomState, seatId: CoopSeatId, cli
   const seat = requireSeat(state, seatId, clientId);
   seat.ready = false;
   seat.deckSlotIds = [];
+  seat.loadout = null;
 }
 
 function validateSeatCommands(seat: CoopSeatState, input: CoopFrameInput): void {
@@ -251,6 +295,10 @@ function drainCommittedFrames(state: CoopRoomState): CoopCommittedFrame[] {
     frames.push({ tick, inputs: { A: a, B: b } });
   }
   return frames;
+}
+
+export function drainCoopCommittedFrames(state: CoopRoomState): readonly CoopCommittedFrame[] {
+  return drainCommittedFrames(state);
 }
 
 export function submitCoopFrameInput(
