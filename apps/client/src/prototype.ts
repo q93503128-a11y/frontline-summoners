@@ -10,6 +10,10 @@ import {
   type PlayerUnitContent,
   type Rarity,
 } from '@frontline/content-schema';
+import {
+  parseStagePolicies,
+  type StagePolicyContent,
+} from '@frontline/content-schema/stage-policy';
 import type { BattleUnitDefinition } from '@frontline/sim';
 import {
   createPlayableBattle,
@@ -22,6 +26,7 @@ import recruitmentUnitsJson from '../../../content/units/recruitment-01.json' wi
 import enemiesJson from '../../../content/enemies/chapter-01.json' with { type: 'json' };
 import stagesJson from '../../../content/stages/chapter-01.json' with { type: 'json' };
 import specialStagesJson from '../../../content/stages/special-01.json' with { type: 'json' };
+import stagePoliciesJson from '../../../content/stages/policies-01.json' with { type: 'json' };
 import rewardScopesJson from '../../../content/permanent-rewards/reward-scopes.json' with { type: 'json' };
 import {
   REWARD_SCOPES,
@@ -42,7 +47,7 @@ export interface PrototypeRosterSlot extends PlayerRosterSlot {
   readonly rewardScopes: readonly RewardScope[];
 }
 
-export type PrototypeStage = CampaignStageContent;
+export type PrototypeStage = CampaignStageContent & Omit<StagePolicyContent, 'stageId'>;
 export const STARTER_SLOT_ID = 'militia';
 
 const CAMPAIGN = parseCampaignBundle({
@@ -71,6 +76,23 @@ const SPECIAL_STAGE_CONTENT = parseCampaignStages(specialStagesJson, {
 for (const stage of SPECIAL_STAGE_CONTENT) {
   if (stage.stageType !== 'SPECIAL') throw new Error(`special stage must use SPECIAL stageType: ${stage.id}`);
   if (stage.unlockUnitId) throw new Error(`special stage must not unlock chapter-one core roster units: ${stage.id}`);
+}
+
+const BASE_STAGE_CONTENT: readonly CampaignStageContent[] = [...CAMPAIGN.stages, ...SPECIAL_STAGE_CONTENT];
+const STAGE_POLICIES = parseStagePolicies(stagePoliciesJson, new Set(BASE_STAGE_CONTENT.map((stage) => stage.id)));
+const STAGE_POLICY_BY_ID = new Map(STAGE_POLICIES.map((policy) => [policy.stageId, policy] as const));
+
+function withStagePolicy(stage: CampaignStageContent): PrototypeStage {
+  const policy = STAGE_POLICY_BY_ID.get(stage.id);
+  if (!policy) throw new Error(`missing stage policy at runtime: ${stage.id}`);
+  return {
+    ...stage,
+    multiplayerPolicy: policy.multiplayerPolicy,
+    speedUpEligibility: policy.speedUpEligibility,
+    sweepEligibility: policy.sweepEligibility,
+    rewardChargePolicy: policy.rewardChargePolicy,
+    coopStatScaling: policy.coopStatScaling,
+  };
 }
 
 const VALID_REWARD_SCOPES = new Set<string>(REWARD_SCOPES);
@@ -150,8 +172,8 @@ export const ENEMIES: readonly EnemyArchetype[] = CAMPAIGN.enemies.map((enemy) =
   rewardSupply: enemy.rewardSupply,
 }));
 
-export const STAGES: readonly PrototypeStage[] = CAMPAIGN.stages;
-export const SPECIAL_STAGES: readonly PrototypeStage[] = SPECIAL_STAGE_CONTENT;
+export const STAGES: readonly PrototypeStage[] = CAMPAIGN.stages.map(withStagePolicy);
+export const SPECIAL_STAGES: readonly PrototypeStage[] = SPECIAL_STAGE_CONTENT.map(withStagePolicy);
 export const ALL_STAGES: readonly PrototypeStage[] = [...STAGES, ...SPECIAL_STAGES];
 if (new Set(ALL_STAGES.map((stage) => stage.id)).size !== ALL_STAGES.length) throw new Error('progression and special stage ids must be globally unique');
 
