@@ -31,6 +31,17 @@ const RARITY_BADGE_COLORS: Readonly<Record<string, string>> = {
 
 type CatalogMode = 'ALLIES' | 'ENEMIES' | 'REWARDS' | 'SPECIAL';
 
+interface CatalogReturnTarget {
+  readonly scene: string;
+  readonly data?: Record<string, unknown>;
+}
+
+interface CatalogSceneData {
+  readonly mode?: CatalogMode;
+  readonly focusEnemyId?: string;
+  readonly returnTo?: CatalogReturnTarget;
+}
+
 function addText(
   scene: Phaser.Scene,
   x: number,
@@ -103,10 +114,16 @@ function allyBadge(slot: (typeof ALL_PLAYER_SLOTS)[number]): { label: string; co
   return { label, color: RARITY_BADGE_COLORS[label] ?? '#d7c79f' };
 }
 
+function isCatalogMode(value: unknown): value is CatalogMode {
+  return value === 'ALLIES' || value === 'ENEMIES' || value === 'REWARDS' || value === 'SPECIAL';
+}
+
 export class CatalogScene extends Phaser.Scene {
   private progress: GuestProgress = EMPTY_PROGRESS;
   private mode: CatalogMode = 'ALLIES';
   private page = 0;
+  private focusEnemyId: string | undefined;
+  private returnTo: CatalogReturnTarget | undefined;
   private contentLayer?: Phaser.GameObjects.Container;
   private pageText?: Phaser.GameObjects.Text;
   private allyTab?: Phaser.GameObjects.Container;
@@ -118,6 +135,21 @@ export class CatalogScene extends Phaser.Scene {
     super('catalog');
   }
 
+  init(data: CatalogSceneData = {}): void {
+    this.progress = EMPTY_PROGRESS;
+    this.mode = isCatalogMode(data.mode) ? data.mode : 'ALLIES';
+    this.page = 0;
+    this.focusEnemyId = typeof data.focusEnemyId === 'string' && ENEMIES.some((enemy) => enemy.enemyId === data.focusEnemyId)
+      ? data.focusEnemyId
+      : undefined;
+    this.returnTo = data.returnTo;
+
+    if (this.mode === 'ENEMIES' && this.focusEnemyId) {
+      const index = ENEMIES.findIndex((enemy) => enemy.enemyId === this.focusEnemyId);
+      if (index >= 0) this.page = Math.floor(index / ENEMY_PAGE_SIZE);
+    }
+  }
+
   create(): void {
     drawBackdrop(this);
     const compact = isCompactMobileViewport();
@@ -125,7 +157,7 @@ export class CatalogScene extends Phaser.Scene {
     const tabHeight = compact ? 84 : 54;
     addText(this, 54, 34, '도 감', 44, '#fff4cf');
     if (!compact) addText(this, 56, 88, '획득 동료와 실제로 조우한 적만 상세 정보가 공개된다.', 18, '#b8c0ce');
-    addButton(this, 1165, compact ? 70 : 62, 160, navigationHeight, '메인', () => this.scene.start('main-menu'), 0x586275);
+    addButton(this, 1165, compact ? 70 : 62, 160, navigationHeight, this.returnTo ? '스테이지' : '메인', () => this.exitCatalog(), 0x586275);
 
     this.allyTab = addButton(this, 165, 135, 210, tabHeight, `동료 ${ALL_PLAYER_SLOTS.length}종`, () => this.setMode('ALLIES'), 0x6d91b5);
     this.enemyTab = addButton(this, 405, 135, 210, tabHeight, `적 ${ENEMIES.length}종`, () => this.setMode('ENEMIES'), 0xb56d72);
@@ -141,6 +173,14 @@ export class CatalogScene extends Phaser.Scene {
       this.progress = progress;
       this.render();
     });
+  }
+
+  private exitCatalog(): void {
+    if (this.returnTo) {
+      this.scene.start(this.returnTo.scene, this.returnTo.data ?? {});
+      return;
+    }
+    this.scene.start('main-menu');
   }
 
   private setMode(mode: CatalogMode): void {
@@ -243,10 +283,11 @@ export class CatalogScene extends Phaser.Scene {
     visible.forEach((enemy, localIndex) => {
       const x = 145 + localIndex * 247;
       const discovered = discoveredIds.has(enemy.enemyId);
+      const focused = enemy.enemyId === this.focusEnemyId;
       const isBoss = (enemy.definition.combatTags ?? []).includes('BOSS');
-      const border = discovered ? (isBoss ? 0xc97772 : 0xa45f64) : 0x46505e;
+      const border = focused ? 0xf0c967 : discovered ? (isBoss ? 0xc97772 : 0xa45f64) : 0x46505e;
       const card = this.add.rectangle(x, 398, 220, 430, discovered ? 0x30262a : 0x1d222b, 0.98)
-        .setStrokeStyle(3, border, discovered ? 0.95 : 0.65);
+        .setStrokeStyle(focused ? 5 : 3, border, focused ? 1 : discovered ? 0.95 : 0.65);
       this.contentLayer!.add(card);
 
       const art = getArt(enemy.definition.id);
@@ -262,7 +303,8 @@ export class CatalogScene extends Phaser.Scene {
       portrait.setScale(((compact ? 132 : 145) / art.family.idle.frameHeight) * art.displayScale);
       this.contentLayer!.add(portrait);
 
-      this.contentLayer!.add(addText(this, x - 96, 200, discovered ? (isBoss ? 'BOSS' : 'ENEMY') : '???', compact ? 20 : 15, discovered ? (isBoss ? '#ff9b92' : '#d5a0a4') : '#69727e'));
+      const categoryLabel = discovered ? (isBoss ? 'BOSS' : 'ENEMY') : '???';
+      this.contentLayer!.add(addText(this, x - 96, 200, focused ? `▶ ${categoryLabel}` : categoryLabel, compact ? 20 : 15, focused ? '#ffe39a' : discovered ? (isBoss ? '#ff9b92' : '#d5a0a4') : '#69727e'));
       this.contentLayer!.add(addText(this, x, compact ? 360 : 342, discovered ? enemy.displayName : '???', compact ? 27 : 22, discovered ? '#ffffff' : '#747d89', 'center').setOrigin(0.5));
 
       if (discovered) {

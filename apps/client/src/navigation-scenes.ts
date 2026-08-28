@@ -5,11 +5,13 @@ import { BATTLEFIELD_THEME_LABELS } from './battlefield';
 import { getPermanentRewardEffectText } from './permanent-reward-ui';
 import {
   ALL_PLAYER_SLOTS,
+  ENEMIES,
   SPECIAL_STAGES,
   STAGES,
   createPrototypeBattle,
   getSlotById,
   getUnlockedSlotIds,
+  type PrototypeStage,
 } from './prototype';
 import { getOwnedCharacterIds, loadGuestProgress, type GuestProgress } from './save';
 import {
@@ -24,7 +26,18 @@ import {
 import { addButton, addText, COLORS, drawBackdrop } from './scene-ui';
 import { isCompactMobileViewport } from './viewport';
 
-const EMPTY_PROGRESS: GuestProgress = { clearedStageIds: [], specialClearedStageIds: [], permanentRewardIds: [] };
+const EMPTY_PROGRESS: GuestProgress = { clearedStageIds: [], specialClearedStageIds: [], permanentRewardIds: [], discoveredEnemyIds: [] };
+
+function getStageEnemyIds(stage: PrototypeStage): readonly string[] {
+  const seen = new Set<string>();
+  const enemyIds: string[] = [];
+  for (const wave of stage.waves) {
+    if (seen.has(wave.spawn.enemyId)) continue;
+    seen.add(wave.spawn.enemyId);
+    enemyIds.push(wave.spawn.enemyId);
+  }
+  return enemyIds;
+}
 
 export class BootScene extends Phaser.Scene {
   constructor() { super('boot'); }
@@ -147,14 +160,18 @@ export class StageSelectScene extends Phaser.Scene {
   private progress: GuestProgress = EMPTY_PROGRESS;
   private collection: StageCollection = STAGE_COLLECTIONS[0]!;
   private page = 0;
+  private requestedPage: number | undefined;
   private stageLayer?: Phaser.GameObjects.Container;
   private pageText?: Phaser.GameObjects.Text;
+  private enemyOverlay?: Phaser.GameObjects.Container;
 
   constructor() { super('stage-select'); }
 
-  init(data: { collectionId?: string }): void {
+  init(data: { collectionId?: string; page?: number } = {}): void {
     this.collection = getStageCollection(data.collectionId ?? STAGE_COLLECTIONS[0]!.id);
-    this.page = 0;
+    this.requestedPage = Number.isInteger(data.page) ? Math.max(0, Math.trunc(data.page!)) : undefined;
+    this.page = this.requestedPage ?? 0;
+    this.enemyOverlay = undefined;
   }
 
   create(): void {
@@ -175,8 +192,12 @@ export class StageSelectScene extends Phaser.Scene {
     void loadGuestProgress().then((progress) => {
       if (!this.scene.isActive()) return;
       this.progress = progress;
-      const firstUncleared = getFirstUnclearedCollectionStageIndex(this.collection, progress.clearedStageIds, progress.specialClearedStageIds);
-      if (firstUncleared >= 0) this.page = Math.floor(firstUncleared / 5);
+      if (this.requestedPage === undefined) {
+        const firstUncleared = getFirstUnclearedCollectionStageIndex(this.collection, progress.clearedStageIds, progress.specialClearedStageIds);
+        if (firstUncleared >= 0) this.page = Math.floor(firstUncleared / 5);
+      } else {
+        this.page = Math.min(this.pageCount() - 1, this.requestedPage);
+      }
       this.renderPage();
     });
   }
@@ -192,6 +213,7 @@ export class StageSelectScene extends Phaser.Scene {
     const special = this.collection.stageType === 'SPECIAL';
     const start = this.page * 5;
     const visible = this.collection.stages.slice(start, start + 5);
+    const discoveredEnemyIds = new Set(this.progress.discoveredEnemyIds ?? []);
     this.pageText?.setText(`${this.page + 1} / ${this.pageCount()}`);
 
     visible.forEach((stage, localIndex) => {
@@ -208,12 +230,26 @@ export class StageSelectScene extends Phaser.Scene {
       const card = this.add.rectangle(x, 360, 220, 445, unlocked ? (special ? 0x2b2535 : 0x242b3a) : 0x1d222c, 0.98).setStrokeStyle(3, border, 1);
       this.stageLayer!.add(card);
       const stageNumber = index + 1;
+      const stageEnemyIds = getStageEnemyIds(stage);
+      const discoveredStageEnemyCount = stageEnemyIds.filter((enemyId) => discoveredEnemyIds.has(enemyId)).length;
+      const clearStateLabel = cleared ? '✓ 완료' : unlocked ? (special ? '도전 가능' : '미클리어') : '잠김';
       this.stageLayer!.add(addText(this, x, 160, special ? `SPECIAL ${stageNumber}` : `STAGE ${stageNumber}`, compact ? 20 : 16, unlocked ? (special ? '#bba4d0' : '#8998ad') : '#5f6978', 'center').setOrigin(0.5));
       this.stageLayer!.add(addText(this, x, compact ? 205 : 202, stage.name, compact ? 28 : 25, unlocked ? '#ffffff' : '#747d89', 'center').setOrigin(0.5).setWordWrapWidth(195));
       this.stageLayer!.add(addText(this, x, compact ? 252 : 246, `난이도 ${stage.difficulty} / 12`, compact ? 21 : 16, unlocked ? (special ? '#efb6ff' : COLORS.gold) : '#5e6470', 'center').setOrigin(0.5));
 
+      const enemyButton = addButton(
+        this,
+        x,
+        compact ? 302 : 401,
+        194,
+        compact ? 76 : 56,
+        `${clearStateLabel}\n출현 적 ${discoveredStageEnemyCount}/${stageEnemyIds.length} ▶`,
+        () => this.showStageEnemies(stage),
+        discoveredStageEnemyCount === stageEnemyIds.length ? 0x668e76 : 0x80636c,
+      );
+      this.stageLayer!.add(enemyButton);
+
       if (compact) {
-        this.stageLayer!.add(addText(this, x, 302, cleared ? '✓ 클리어' : unlocked ? (special ? '도전 가능' : '미클리어') : '잠김', 22, cleared ? '#8ee3aa' : unlocked ? '#a3adbb' : '#6b7480', 'center').setOrigin(0.5));
         if (special) {
           const effectiveCap = unlocked
             ? createPrototypeBattle(stage.id, getUnlockedSlotIds(this.progress.clearedStageIds), this.progress.permanentRewardIds).playerUnitCap
@@ -228,7 +264,6 @@ export class StageSelectScene extends Phaser.Scene {
         this.stageLayer!.add(addText(this, x, 282, BATTLEFIELD_THEME_LABELS[stage.theme], 16, unlocked ? (special ? '#bba8ca' : '#9ec5d7') : '#606874', 'center').setOrigin(0.5));
         this.stageLayer!.add(addText(this, x, 310, `전장 ${stage.mapLength}m`, 14, unlocked ? '#aeb8c8' : '#59616d', 'center').setOrigin(0.5));
         this.stageLayer!.add(addText(this, x, 346, stage.subtitle, 14, unlocked ? (special ? '#d0c6da' : '#c4cbd7') : '#626a76', 'center').setOrigin(0.5).setWordWrapWidth(194));
-        this.stageLayer!.add(addText(this, x, 401, cleared ? '✓ 클리어' : unlocked ? (special ? '도전 가능' : '미클리어') : '잠김', 17, cleared ? '#8ee3aa' : unlocked ? '#a3adbb' : '#6b7480', 'center').setOrigin(0.5));
         if (special) {
           const effectiveCap = unlocked
             ? createPrototypeBattle(stage.id, getUnlockedSlotIds(this.progress.clearedStageIds), this.progress.permanentRewardIds).playerUnitCap
@@ -253,5 +288,76 @@ export class StageSelectScene extends Phaser.Scene {
       if (!unlocked) stageButton.setAlpha(0.62);
       this.stageLayer!.add(stageButton);
     });
+  }
+
+  private showStageEnemies(stage: PrototypeStage): void {
+    this.enemyOverlay?.destroy(true);
+    const compact = isCompactMobileViewport();
+    const enemyIds = getStageEnemyIds(stage);
+    const discoveredIds = new Set(this.progress.discoveredEnemyIds ?? []);
+    const overlay = this.add.container(0, 0).setDepth(200);
+    const blocker = this.add.rectangle(INTERNAL_WIDTH / 2, INTERNAL_HEIGHT / 2, INTERNAL_WIDTH, INTERNAL_HEIGHT, 0x080b11, 0.82)
+      .setInteractive();
+    const panel = this.add.rectangle(INTERNAL_WIDTH / 2, INTERNAL_HEIGHT / 2, compact ? 1040 : 980, compact ? 540 : 520, 0x202632, 0.99)
+      .setStrokeStyle(4, 0x8a6670, 1);
+    overlay.add([blocker, panel]);
+    overlay.add(addText(this, INTERNAL_WIDTH / 2, 150, `${stage.name} · 출현 적`, compact ? 34 : 31, '#fff4cf', 'center').setOrigin(0.5));
+    overlay.add(addText(this, INTERNAL_WIDTH / 2, 198, '발견한 적만 이름과 상세 정보가 공개된다.', compact ? 21 : 18, '#b8c0ce', 'center').setOrigin(0.5));
+
+    if (enemyIds.length === 0) {
+      overlay.add(addText(this, INTERNAL_WIDTH / 2, 360, '출현 적 정보가 없다.', compact ? 24 : 20, '#8995a7', 'center').setOrigin(0.5));
+    } else {
+      const columns = Math.min(4, Math.max(1, Math.ceil(Math.sqrt(enemyIds.length))));
+      const rows = Math.ceil(enemyIds.length / columns);
+      const spacingX = compact ? 235 : 220;
+      const spacingY = compact ? 126 : 112;
+      const startX = INTERNAL_WIDTH / 2 - ((columns - 1) * spacingX) / 2;
+      const startY = 330 - ((rows - 1) * spacingY) / 2;
+
+      enemyIds.forEach((enemyId, index) => {
+        const enemy = ENEMIES.find((candidate) => candidate.enemyId === enemyId);
+        if (!enemy) return;
+        const discovered = discoveredIds.has(enemyId);
+        const boss = (enemy.definition.combatTags ?? []).includes('BOSS');
+        const col = index % columns;
+        const row = Math.floor(index / columns);
+        const x = startX + col * spacingX;
+        const y = startY + row * spacingY;
+        const enemyButton = addButton(
+          this,
+          x,
+          y,
+          compact ? 210 : 195,
+          compact ? 78 : 64,
+          discovered ? enemy.displayName : '???',
+          () => this.scene.start('catalog', {
+            mode: 'ENEMIES',
+            focusEnemyId: enemyId,
+            returnTo: {
+              scene: 'stage-select',
+              data: { collectionId: this.collection.id, page: this.page },
+            },
+          }),
+          discovered ? (boss ? 0xc97772 : 0xa45f64) : 0x46505e,
+        );
+        overlay.add(enemyButton);
+        overlay.add(addText(
+          this,
+          x,
+          y + (compact ? 50 : 43),
+          discovered ? (boss ? 'BOSS · 도감 열기' : '발견됨 · 도감 열기') : '미발견 · 정보 비공개',
+          compact ? 17 : 14,
+          discovered ? (boss ? '#ffaaa2' : '#d8adb1') : '#707985',
+          'center',
+        ).setOrigin(0.5));
+      });
+    }
+
+    const closeButton = addButton(this, INTERNAL_WIDTH / 2, compact ? 575 : 570, 190, compact ? 84 : 58, '닫기', () => {
+      overlay.destroy(true);
+      if (this.enemyOverlay === overlay) this.enemyOverlay = undefined;
+    }, 0x586275);
+    overlay.add(closeButton);
+    this.enemyOverlay = overlay;
   }
 }
