@@ -4,6 +4,7 @@ import type { BattleUnitDefinition } from '../src/index.ts';
 import {
   applyCoopPlayableFrame,
   createCoopPlayableBattle,
+  getCoopPlayableSnapshot,
   type CoopPlayableBattleConfig,
 } from '../src/coop-playable.ts';
 
@@ -65,6 +66,16 @@ test('co-op supports distinct starting supply and worker costs for each private 
   assert.equal(state.players.B.supply, 100);
   assert.equal(state.players.A.supplyLevels[1]?.upgradeCost, 140);
   assert.equal(state.players.B.supplyLevels[1]?.upgradeCost, 160);
+});
+
+test('authoritative snapshot exposes actual slot and next worker-upgrade costs per seat', () => {
+  const snapshot = getCoopPlayableSnapshot(createCoopPlayableBattle(config()));
+  const a = snapshot.players.find((player) => player.seatId === 'A')!;
+  const b = snapshot.players.find((player) => player.seatId === 'B')!;
+  assert.equal(a.costs.a, 50);
+  assert.equal(b.costs.b, 50);
+  assert.equal(a.nextSupplyUpgradeCost, 140);
+  assert.equal(b.nextSupplyUpgradeCost, 160);
 });
 
 test('one enemy death grants each seat its own validated kill-supply amount', () => {
