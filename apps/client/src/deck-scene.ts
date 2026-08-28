@@ -3,6 +3,7 @@ import { INTERNAL_HEIGHT, INTERNAL_WIDTH } from '@frontline/shared';
 import { ART_BY_ID, ART_FAMILIES, UNIT_ART } from './assets';
 import { buildCharacterCombatSlot, getEvolutionForm } from './character-growth';
 import { formatCombatTraits, formatDamageSpecialty } from './combat-trait-labels';
+import { DECK_SLOT_WIDTH, DECK_START_X, getDeckDropIndex, placeCharacterAtDeckIndex } from './deck-drag.ts';
 import {
   ALL_PLAYER_SLOTS,
   getSlotById,
@@ -109,6 +110,10 @@ function acquisitionBadge(slot: PrototypeRosterSlot): { readonly label: string; 
   return { label: '동료', color: '#ffffff' };
 }
 
+function sameOrder(a: readonly string[], b: readonly string[]): boolean {
+  return a.length === b.length && a.every((id, index) => id === b[index]);
+}
+
 export class DeckScene extends Phaser.Scene {
   private progress: GuestProgress = { clearedStageIds: [], specialClearedStageIds: [], permanentRewardIds: [] };
   private selectedIds: string[] = [];
@@ -125,14 +130,15 @@ export class DeckScene extends Phaser.Scene {
   create(): void {
     drawBackdrop(this);
     const compact = isCompactMobileViewport();
+    this.input.dragDistanceThreshold = compact ? 18 : 8;
     this.header = text(this, 52, 28, '편성 불러오는 중…', compact ? 36 : 38, '#fff4cf');
     text(
       this,
       54,
       compact ? 78 : 80,
       compact
-        ? '보유 캐릭터를 눌러 1~10칸 편성 · 선택 순서 = 1~0 소환 순서'
-        : '보유한 캐릭터에서 1~10명을 고른다. 미획득 캐릭터는 편성 목록에 나타나지 않는다.',
+        ? '탭으로 추가·제외 · 길게 끌어 상단 슬롯에 배치·교환 · 1~0 소환 순서'
+        : '보유 캐릭터를 클릭해 추가·제외하거나 끌어서 상단 1~0 슬롯에 직접 배치한다. 미획득 캐릭터는 편성 목록에 나타나지 않는다.',
       compact ? 20 : 17,
       '#b8c0ce',
     );
@@ -186,24 +192,20 @@ export class DeckScene extends Phaser.Scene {
     this.deckLayer?.destroy(true);
     this.deckLayer = this.add.container(0, 0);
     const compact = isCompactMobileViewport();
-    const slotWidth = 112;
-    const startX = 76;
+    const startX = DECK_START_X;
     const y = compact ? 140 : 142;
 
     for (let index = 0; index < MAX_DECK_SLOTS; index += 1) {
       const slotId = this.selectedIds[index];
       const rosterSlot = slotId ? getSlotById(slotId) : undefined;
-      const x = startX + index * slotWidth + slotWidth / 2;
+      const x = startX + index * DECK_SLOT_WIDTH + DECK_SLOT_WIDTH / 2;
       const badge = rosterSlot ? acquisitionBadge(rosterSlot) : undefined;
       const border = badge ? Phaser.Display.Color.HexStringToColor(badge.color).color : 0x4b5666;
-      const bg = this.add.rectangle(x, y, slotWidth - 8, compact ? 58 : 54, rosterSlot ? 0x293242 : 0x1d232d, 0.98).setStrokeStyle(2, border, 0.9);
+      const bg = this.add.rectangle(x, y, DECK_SLOT_WIDTH - 8, compact ? 68 : 54, rosterSlot ? 0x293242 : 0x1d232d, 0.98).setStrokeStyle(2, border, 0.9);
       this.deckLayer.add(bg);
-      this.deckLayer.add(text(this, x - 44, y - 22, hotkeyLabel(index), compact ? 17 : 14, rosterSlot ? '#f0d67d' : '#667181'));
+      this.deckLayer.add(text(this, x - 44, y - (compact ? 27 : 22), hotkeyLabel(index), compact ? 17 : 14, rosterSlot ? '#f0d67d' : '#667181'));
       this.deckLayer.add(text(this, x, y + 4, rosterSlot?.displayName ?? '빈 칸', compact ? 16 : 13, rosterSlot ? '#ffffff' : '#6f7987', 'center').setOrigin(0.5));
-      if (rosterSlot) {
-        bg.setInteractive({ useHandCursor: true });
-        bg.on('pointerdown', () => this.toggleCharacter(rosterSlot.slotId));
-      }
+      if (rosterSlot) this.wireDragSurface(bg, rosterSlot.slotId, x, y);
     }
   }
 
@@ -257,10 +259,56 @@ export class DeckScene extends Phaser.Scene {
       this.cardsLayer!.add(text(this, infoX, y - 1, `${currentSlot.cost} 보급 · ${formatCombatTraits(currentSlot.definition)}`, compact ? 15 : 12, '#f2d37c'));
       const specialty = formatDamageSpecialty(currentSlot.definition);
       this.cardsLayer!.add(text(this, infoX, y + 26, specialty || '범용 공격', compact ? 15 : 12, specialty ? '#ffd493' : '#9da8b8'));
-      if (!compact) this.cardsLayer!.add(text(this, infoX, y + 51, selected ? '선택됨 · 다시 누르면 제외' : '눌러서 덱 맨 뒤에 추가', 11, selected ? '#ffe18a' : '#9aa7b8'));
-      bg.setInteractive({ useHandCursor: true });
-      bg.on('pointerdown', () => this.toggleCharacter(slot.slotId));
+      if (!compact) this.cardsLayer!.add(text(this, infoX, y + 51, selected ? '클릭 제외 · 드래그 슬롯 교환' : '클릭 추가 · 드래그 슬롯 배치', 11, selected ? '#ffe18a' : '#9aa7b8'));
+      this.wireDragSurface(bg, slot.slotId, x, y);
     });
+  }
+
+  private wireDragSurface(
+    surface: Phaser.GameObjects.Rectangle,
+    slotId: string,
+    originX: number,
+    originY: number,
+  ): void {
+    let dragged = false;
+    surface.setInteractive({ useHandCursor: true });
+    this.input.setDraggable(surface);
+    surface.on('pointerdown', () => { dragged = false; });
+    surface.on('pointerup', () => {
+      if (!dragged) this.toggleCharacter(slotId);
+    });
+    surface.on('dragstart', () => {
+      dragged = true;
+      surface.setAlpha(0.68);
+      surface.setStrokeStyle(5, 0xf2d56f, 1);
+    });
+    surface.on('drag', (_pointer: Phaser.Input.Pointer, dragX: number, dragY: number) => {
+      surface.setPosition(dragX, dragY);
+    });
+    surface.on('dragend', (_pointer: Phaser.Input.Pointer, dragX: number, dragY: number) => {
+      surface.setPosition(originX, originY).setAlpha(1);
+      const targetIndex = getDeckDropIndex(dragX, dragY, isCompactMobileViewport());
+      if (targetIndex === undefined) {
+        this.renderAll();
+        return;
+      }
+      this.dropCharacterIntoSlot(slotId, targetIndex);
+    });
+  }
+
+  private dropCharacterIntoSlot(slotId: string, targetIndex: number): void {
+    if (!getOwnedCharacterIds(this.progress).includes(slotId)) return;
+    const next = placeCharacterAtDeckIndex(this.selectedIds, slotId, targetIndex, MAX_DECK_SLOTS);
+    if (sameOrder(next, this.selectedIds)) {
+      this.statusText?.setText(`슬롯 ${hotkeyLabel(targetIndex)} 위치를 유지합니다.`);
+      this.statusText?.setColor('#9fcfff');
+      this.renderAll();
+      return;
+    }
+    this.selectedIds = next;
+    this.statusText?.setText(`드래그 편성 변경 · ${slotId}을(를) 슬롯 ${hotkeyLabel(targetIndex)} 위치에 배치했습니다. 저장 전까지 전투에는 반영되지 않습니다.`);
+    this.statusText?.setColor('#ffd493');
+    this.renderAll();
   }
 
   private toggleCharacter(slotId: string): void {
@@ -274,7 +322,7 @@ export class DeckScene extends Phaser.Scene {
       return;
     }
     if (this.selectedIds.length >= MAX_DECK_SLOTS) {
-      this.statusText?.setText('덱은 최대 10칸입니다. 기존 캐릭터를 먼저 제외하세요.');
+      this.statusText?.setText('덱은 최대 10칸입니다. 기존 캐릭터를 먼저 제외하거나 원하는 슬롯에 드래그해 교체하세요.');
       this.statusText?.setColor('#ff9a91');
       return;
     }
