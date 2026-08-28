@@ -22,6 +22,9 @@ jobs:
       - name: Test simulation
         if: always()
         run: npm run test -w @frontline/sim
+      - name: Test server co-op protocol
+        if: always()
+        run: npm run test -w @frontline/server
       - name: Diagnose failing client tests
         if: always()
         shell: bash
