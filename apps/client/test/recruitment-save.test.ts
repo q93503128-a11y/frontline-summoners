@@ -18,78 +18,81 @@ const base: GuestProgress = {
   characterProgressById: {},
 };
 
-test('guest progress keeps only known recruitment ownership ids and valid non-negative pull-history counters', () => {
+test('guest progress keeps only canonical recruitment ownership ids and valid non-negative pull-history counters', () => {
   const normalized = normalizeGuestProgress({
     ...base,
-    ownedRecruitmentCharacterIds: ['moon-eater', 'not-a-character', 'moon-eater'],
+    ownedRecruitmentCharacterIds: ['char_s01_mireille', 'moon-eater', 'not-a-character', 'char_s01_mireille'],
     recruitmentProgressByBanner: {
-      'border-wonders-01': { totalPulls: 37 },
+      'starlight-order-01': { totalPulls: 37 },
       broken: { totalPulls: -1 },
     },
   });
-  assert.deepEqual(normalized.ownedRecruitmentCharacterIds, ['moon-eater']);
+  assert.deepEqual(normalized.ownedRecruitmentCharacterIds, ['char_s01_mireille']);
   assert.deepEqual(normalized.recruitmentProgressByBanner, {
-    'border-wonders-01': { totalPulls: 37 },
+    'starlight-order-01': { totalPulls: 37 },
   });
-  assert.equal(normalized.characterProgressById?.['moon-eater']?.level, 1);
-  assert.equal(normalized.characterProgressById?.['moon-eater']?.plusLevel, 0);
-  assert.deepEqual(normalized.characterProgressById?.['moon-eater']?.unlockedFormIds, ['moon-eater-base']);
-  assert.equal(normalized.characterProgressById?.['moon-eater']?.selectedFormId, 'moon-eater-base');
+  assert.equal(normalized.characterProgressById?.char_s01_mireille?.level, 1);
+  assert.equal(normalized.characterProgressById?.char_s01_mireille?.plusLevel, 0);
+  assert.deepEqual(normalized.characterProgressById?.char_s01_mireille?.unlockedFormIds, ['char_s01_mireille_f1']);
+  assert.equal(normalized.characterProgressById?.char_s01_mireille?.selectedFormId, 'char_s01_mireille_f1');
 });
 
 test('stored character progress clamps base and plus levels, drops foreign forms and never selects a locked form', () => {
   const normalized = normalizeGuestProgress({
     ...base,
-    ownedRecruitmentCharacterIds: ['moon-eater'],
+    ownedRecruitmentCharacterIds: ['char_s01_mireille'],
     characterProgressById: {
-      'moon-eater': {
+      char_s01_mireille: {
         level: 999,
         plusLevel: 999,
-        unlockedFormIds: ['moon-eater-base', 'moon-eater-hollow', 'turnip-rider-king', 'missing-form'],
-        selectedFormId: 'moon-eater-eclipse',
+        unlockedFormIds: ['char_s01_mireille_f1', 'char_s01_mireille_f2', 'char_common_c_turnip_rider_f3', 'missing-form'],
+        selectedFormId: 'char_s01_mireille_f3',
       },
     },
   });
-  const meta = normalized.characterProgressById?.['moon-eater'];
+  const meta = normalized.characterProgressById?.char_s01_mireille;
   assert.equal(meta?.level, 50);
   assert.equal(meta?.plusLevel, 50);
-  assert.deepEqual(meta?.unlockedFormIds, ['moon-eater-base', 'moon-eater-hollow']);
-  assert.equal(meta?.selectedFormId, 'moon-eater-base');
+  assert.deepEqual(meta?.unlockedFormIds, ['char_s01_mireille_f1', 'char_s01_mireille_f2']);
+  assert.equal(meta?.selectedFormId, 'char_s01_mireille_f1');
 });
 
-test('durable/session merge keeps the farther pull history without inventing pity or selection state', () => {
+test('durable/session merge keeps the farther pull history per banner without inventing pity or selection state', () => {
   const durable: GuestProgress = {
     ...base,
-    ownedRecruitmentCharacterIds: ['moon-eater'],
+    ownedRecruitmentCharacterIds: ['char_s01_mireille'],
     recruitmentProgressByBanner: {
-      'border-wonders-01': { totalPulls: 100 },
+      'starlight-order-01': { totalPulls: 100 },
+      'primordial-titans-01': { totalPulls: 12 },
     },
   };
   const session: GuestProgress = {
     ...base,
-    ownedRecruitmentCharacterIds: ['castle-crab'],
+    ownedRecruitmentCharacterIds: ['char_common_a_meteor_cart'],
     recruitmentProgressByBanner: {
-      'border-wonders-01': { totalPulls: 73 },
+      'starlight-order-01': { totalPulls: 73 },
+      'primordial-titans-01': { totalPulls: 18 },
     },
   };
   const merged = mergeGuestProgress(durable, session);
-  assert.deepEqual(new Set(merged.ownedRecruitmentCharacterIds), new Set(['moon-eater', 'castle-crab']));
-  assert.deepEqual(merged.recruitmentProgressByBanner?.['border-wonders-01'], { totalPulls: 100 });
-  assert.deepEqual(Object.keys(merged.recruitmentProgressByBanner?.['border-wonders-01'] ?? {}), ['totalPulls']);
+  assert.deepEqual(new Set(merged.ownedRecruitmentCharacterIds), new Set(['char_s01_mireille', 'char_common_a_meteor_cart']));
+  assert.deepEqual(merged.recruitmentProgressByBanner?.['starlight-order-01'], { totalPulls: 100 });
+  assert.deepEqual(merged.recruitmentProgressByBanner?.['primordial-titans-01'], { totalPulls: 18 });
+  assert.deepEqual(Object.keys(merged.recruitmentProgressByBanner?.['starlight-order-01'] ?? {}), ['totalPulls']);
 });
 
 test('when durable and session have different pull counts the farther valid history wins instead of summing', () => {
   const merged = mergeGuestProgress(
     {
       ...base,
-      recruitmentProgressByBanner: { 'border-wonders-01': { totalPulls: 60 } },
+      recruitmentProgressByBanner: { 'zero-edge-01': { totalPulls: 60 } },
     },
     {
       ...base,
-      recruitmentProgressByBanner: { 'border-wonders-01': { totalPulls: 73 } },
+      recruitmentProgressByBanner: { 'zero-edge-01': { totalPulls: 73 } },
     },
   );
-  assert.equal(merged.recruitmentProgressByBanner?.['border-wonders-01']?.totalPulls, 73);
+  assert.equal(merged.recruitmentProgressByBanner?.['zero-edge-01']?.totalPulls, 73);
 });
 
 test('character progress merge keeps the highest base and plus growth independently', () => {
@@ -97,19 +100,19 @@ test('character progress merge keeps the highest base and plus growth independen
     {
       ...base,
       characterProgressById: {
-        'moon-eater': { level: 50, plusLevel: 3, unlockedFormIds: ['moon-eater-base'], selectedFormId: 'moon-eater-base' },
+        char_s01_mireille: { level: 50, plusLevel: 3, unlockedFormIds: ['char_s01_mireille_f1'], selectedFormId: 'char_s01_mireille_f1' },
       },
     },
     {
       ...base,
       characterProgressById: {
-        'moon-eater': { level: 30, plusLevel: 12, unlockedFormIds: ['moon-eater-base', 'moon-eater-hollow'], selectedFormId: 'moon-eater-hollow' },
+        char_s01_mireille: { level: 30, plusLevel: 12, unlockedFormIds: ['char_s01_mireille_f1', 'char_s01_mireille_f2'], selectedFormId: 'char_s01_mireille_f2' },
       },
     },
   );
-  assert.equal(merged.characterProgressById?.['moon-eater']?.level, 50);
-  assert.equal(merged.characterProgressById?.['moon-eater']?.plusLevel, 12);
-  assert.deepEqual(merged.characterProgressById?.['moon-eater']?.unlockedFormIds, ['moon-eater-base', 'moon-eater-hollow']);
+  assert.equal(merged.characterProgressById?.char_s01_mireille?.level, 50);
+  assert.equal(merged.characterProgressById?.char_s01_mireille?.plusLevel, 12);
+  assert.deepEqual(merged.characterProgressById?.char_s01_mireille?.unlockedFormIds, ['char_s01_mireille_f1', 'char_s01_mireille_f2']);
 });
 
 test('automatic formation preserves campaign unlock behavior until an explicit deck is saved', () => {
@@ -125,11 +128,11 @@ test('explicit deck keeps only unique owned characters, caps at ten and override
   const normalized = normalizeGuestProgress({
     ...base,
     clearedStageIds: fullChapter,
-    ownedRecruitmentCharacterIds: ['moon-eater', 'castle-crab'],
-    deckSlotIds: ['moon-eater', 'militia', 'moon-eater', 'not-owned', 'castle-crab'],
+    ownedRecruitmentCharacterIds: ['char_s01_mireille', 'char_common_a_meteor_cart'],
+    deckSlotIds: ['char_s01_mireille', 'militia', 'char_s01_mireille', 'not-owned', 'char_common_a_meteor_cart'],
   });
-  assert.deepEqual(normalized.deckSlotIds, ['moon-eater', 'militia', 'castle-crab']);
-  assert.deepEqual(getEffectiveDeckSlotIds(normalized), ['moon-eater', 'militia', 'castle-crab']);
+  assert.deepEqual(normalized.deckSlotIds, ['char_s01_mireille', 'militia', 'char_common_a_meteor_cart']);
+  assert.deepEqual(getEffectiveDeckSlotIds(normalized), ['char_s01_mireille', 'militia', 'char_common_a_meteor_cart']);
   assert.equal(getOwnedCharacterIds(normalized).length, 12);
 });
 

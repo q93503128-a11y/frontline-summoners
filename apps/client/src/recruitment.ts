@@ -5,7 +5,9 @@ import {
   type Rarity,
 } from '@frontline/content-schema';
 import recruitmentUnitsJson from '../../../content/units/recruitment-01.json' with { type: 'json' };
-import bannerJson from '../../../content/recruitment/banner-01.json' with { type: 'json' };
+import banner01Json from '../../../content/recruitment/banner-01.json' with { type: 'json' };
+import banner02Json from '../../../content/recruitment/banner-02.json' with { type: 'json' };
+import banner03Json from '../../../content/recruitment/banner-03.json' with { type: 'json' };
 
 export interface RecruitmentRandomSource {
   nextInt(maxExclusive: number): number;
@@ -84,6 +86,8 @@ function parseBanner(value: unknown): RecruitmentBanner {
     pools[rarity] = ids;
   }
   if (rateSum !== 1000) throw new Error(`recruitment rates must sum to 1000 permille, got ${rateSum}`);
+  if (pools.C.length !== 5 || pools.B.length !== 5 || pools.A.length !== 5) throw new Error('initial banners must share the canonical 5/5/5 common pool');
+  if (pools.S.length !== 5) throw new Error(`each initial recruitment series must contain exactly five S characters, got ${pools.S.length}`);
   if (pools.SS.length !== 1) throw new Error(`each recruitment series must contain exactly one SS character, got ${pools.SS.length}`);
 
   return {
@@ -96,7 +100,40 @@ function parseBanner(value: unknown): RecruitmentBanner {
   };
 }
 
-export const FIRST_RECRUITMENT_BANNER: RecruitmentBanner = parseBanner(bannerJson);
+export const RECRUITMENT_BANNERS: readonly RecruitmentBanner[] = [
+  parseBanner(banner01Json),
+  parseBanner(banner02Json),
+  parseBanner(banner03Json),
+];
+
+if (new Set(RECRUITMENT_BANNERS.map((banner) => banner.id)).size !== RECRUITMENT_BANNERS.length) {
+  throw new Error('recruitment banner ids must be unique');
+}
+if (new Set(RECRUITMENT_BANNERS.map((banner) => banner.seriesId)).size !== RECRUITMENT_BANNERS.length) {
+  throw new Error('initial recruitment series ids must be unique');
+}
+
+const canonicalCommonPool = JSON.stringify({
+  C: RECRUITMENT_BANNERS[0]!.poolByRarity.C,
+  B: RECRUITMENT_BANNERS[0]!.poolByRarity.B,
+  A: RECRUITMENT_BANNERS[0]!.poolByRarity.A,
+});
+for (const banner of RECRUITMENT_BANNERS.slice(1)) {
+  const commonPool = JSON.stringify({ C: banner.poolByRarity.C, B: banner.poolByRarity.B, A: banner.poolByRarity.A });
+  if (commonPool !== canonicalCommonPool) throw new Error(`initial banner ${banner.id} does not share the canonical C/B/A pool`);
+}
+
+export const FIRST_RECRUITMENT_BANNER: RecruitmentBanner = RECRUITMENT_BANNERS[0]!;
+
+export function getRecruitmentBanner(bannerId: string): RecruitmentBanner {
+  const banner = RECRUITMENT_BANNERS.find((candidate) => candidate.id === bannerId);
+  if (!banner) throw new Error(`Unknown recruitment banner: ${bannerId}`);
+  return banner;
+}
+
+export function getBannerCharacterIds(banner: RecruitmentBanner): readonly string[] {
+  return RARITIES.flatMap((rarity) => banner.poolByRarity[rarity]);
+}
 
 function checkedRoll(rng: RecruitmentRandomSource, maxExclusive: number): number {
   const roll = rng.nextInt(maxExclusive);

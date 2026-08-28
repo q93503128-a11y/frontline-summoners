@@ -12,7 +12,7 @@ function progress(overrides: Partial<GuestProgress> = {}): GuestProgress {
     clearedStageIds: fullChapter,
     specialClearedStageIds: [],
     permanentRewardIds: [],
-    ownedRecruitmentCharacterIds: ['moon-eater', 'castle-crab'],
+    ownedRecruitmentCharacterIds: ['char_s01_mireille', 'char_common_a_meteor_cart'],
     recruitmentProgressByBanner: {},
     characterProgressById: {},
     ...overrides,
@@ -20,28 +20,28 @@ function progress(overrides: Partial<GuestProgress> = {}): GuestProgress {
 }
 
 test('explicit saved deck order becomes the actual battle slot order', () => {
-  const guest = progress({ deckSlotIds: ['moon-eater', 'militia', 'castle-crab'] });
+  const guest = progress({ deckSlotIds: ['char_s01_mireille', 'militia', 'char_common_a_meteor_cart'] });
   const slots = buildGuestDeckSlots(guest);
-  assert.deepEqual(slots.map((slot) => slot.slotId), ['moon-eater', 'militia', 'castle-crab']);
+  assert.deepEqual(slots.map((slot) => slot.slotId), ['char_s01_mireille', 'militia', 'char_common_a_meteor_cart']);
 
   const battle = createGuestPrototypeBattle(firstStageId, guest);
-  assert.deepEqual(battle.playerSlots.map((slot) => slot.slotId), ['moon-eater', 'militia', 'castle-crab']);
+  assert.deepEqual(battle.playerSlots.map((slot) => slot.slotId), ['char_s01_mireille', 'militia', 'char_common_a_meteor_cart']);
 });
 
 test('saved level, plus level, and selected evolution form alter the battle-ready definition rather than only UI metadata', () => {
-  const baseGuest = progress({ deckSlotIds: ['moon-eater'] });
+  const baseGuest = progress({ deckSlotIds: ['char_s01_mireille'] });
   const base = buildGuestDeckSlots(baseGuest)[0]!;
   const baseBattle = createGuestPrototypeBattle(firstStageId, baseGuest);
-  const baseBattleMoon = baseBattle.playerSlots[0]!;
+  const baseBattleMireille = baseBattle.playerSlots[0]!;
 
   const evolvedGuest = progress({
-    deckSlotIds: ['moon-eater'],
+    deckSlotIds: ['char_s01_mireille'],
     characterProgressById: {
-      'moon-eater': {
+      char_s01_mireille: {
         level: 30,
         plusLevel: 0,
-        unlockedFormIds: ['moon-eater-base', 'moon-eater-hollow', 'moon-eater-eclipse'],
-        selectedFormId: 'moon-eater-eclipse',
+        unlockedFormIds: ['char_s01_mireille_f1', 'char_s01_mireille_f2', 'char_s01_mireille_f3'],
+        selectedFormId: 'char_s01_mireille_f3',
       },
     },
   });
@@ -49,23 +49,17 @@ test('saved level, plus level, and selected evolution form alter the battle-read
 
   assert.ok(evolved.definition.maxHp > base.definition.maxHp);
   assert.ok(evolved.definition.attackDamage > base.definition.attackDamage);
-  assert.ok(evolved.definition.standingRange < base.definition.standingRange);
+  assert.ok(evolved.definition.standingRange > base.definition.standingRange);
+  assert.ok(evolved.definition.attackMinRange > base.definition.attackMinRange);
   assert.ok(evolved.cost > base.cost);
-  assert.equal(evolved.definition.damageBonuses?.[0]?.targetKind, 'TAG');
-  assert.equal(evolved.definition.damageBonuses?.[0]?.target, 'BOSS');
-  assert.equal(evolved.definition.damageBonuses?.[0]?.multiplierPermille, 1700);
 
   const battle = createGuestPrototypeBattle(firstStageId, evolvedGuest);
-  const battleMoon = battle.playerSlots[0]!;
-  assert.equal(battleMoon.slotId, 'moon-eater');
-  assert.ok(battleMoon.definition.maxHp > baseBattleMoon.definition.maxHp);
-  assert.ok(battleMoon.definition.attackDamage > baseBattleMoon.definition.attackDamage);
-  assert.ok(battleMoon.definition.standingRange < baseBattleMoon.definition.standingRange);
-  assert.ok(battleMoon.definition.maxHp >= evolved.definition.maxHp, 'earned permanent HP rewards layer on after character growth');
-  assert.ok(battleMoon.definition.attackDamage >= evolved.definition.attackDamage, 'earned permanent attack rewards layer on after character growth');
-  assert.equal(battleMoon.definition.damageBonuses?.[0]?.targetKind, 'TAG');
-  assert.equal(battleMoon.definition.damageBonuses?.[0]?.target, 'BOSS');
-  assert.equal(battleMoon.definition.damageBonuses?.[0]?.multiplierPermille, 1700);
+  const battleMireille = battle.playerSlots[0]!;
+  assert.equal(battleMireille.slotId, 'char_s01_mireille');
+  assert.ok(battleMireille.definition.maxHp >= evolved.definition.maxHp, 'earned permanent HP rewards layer on after character growth');
+  assert.ok(battleMireille.definition.attackDamage >= evolved.definition.attackDamage, 'earned permanent attack rewards layer on after character growth');
+  assert.ok(battleMireille.definition.standingRange >= evolved.definition.standingRange);
+  assert.ok(battleMireille.definition.maxHp > baseBattleMireille.definition.maxHp);
 });
 
 test('automatic formation still selects the first ten owned definitions in canonical roster order', () => {

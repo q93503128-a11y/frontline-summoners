@@ -5,10 +5,7 @@ import { buildCharacterCombatSlot, getEvolutionForm } from './character-growth';
 import { formatCombatTraits, formatDamageSpecialty } from './combat-trait-labels';
 import {
   ALL_PLAYER_SLOTS,
-  PLAYER_SLOTS,
   getSlotById,
-  getStageNumber,
-  getUnlockStageForSlot,
   type PrototypeRosterSlot,
 } from './prototype';
 import {
@@ -23,7 +20,6 @@ import {
 import { isCompactMobileViewport } from './viewport';
 
 const FONT = '"Malgun Gothic", "Apple SD Gothic Neo", "Noto Sans KR", sans-serif';
-const CAMPAIGN_SLOT_IDS = new Set(PLAYER_SLOTS.map((slot) => slot.slotId));
 const rarityColor: Record<string, string> = {
   C: '#b9c2cf',
   B: '#8bd6a3',
@@ -136,7 +132,7 @@ export class DeckScene extends Phaser.Scene {
       compact ? 78 : 80,
       compact
         ? '보유 캐릭터를 눌러 1~10칸 편성 · 선택 순서 = 1~0 소환 순서'
-        : '무료·모집 보유 캐릭터에서 1~10명을 고른다. 선택 순서가 전투의 1~0 단축키 순서가 된다.',
+        : '보유한 캐릭터에서 1~10명을 고른다. 미획득 캐릭터는 편성 목록에 나타나지 않는다.',
       compact ? 20 : 17,
       '#b8c0ce',
     );
@@ -164,8 +160,13 @@ export class DeckScene extends Phaser.Scene {
     return isCompactMobileViewport() ? 8 : 10;
   }
 
+  private getOwnedSlots(): readonly PrototypeRosterSlot[] {
+    const owned = new Set(getOwnedCharacterIds(this.progress));
+    return ALL_PLAYER_SLOTS.filter((slot) => owned.has(slot.slotId));
+  }
+
   private get pageCount(): number {
-    return Math.max(1, Math.ceil(ALL_PLAYER_SLOTS.length / this.pageSize));
+    return Math.max(1, Math.ceil(this.getOwnedSlots().length / this.pageSize));
   }
 
   private changePage(delta: number): void {
@@ -174,8 +175,9 @@ export class DeckScene extends Phaser.Scene {
   }
 
   private renderAll(): void {
-    const ownedCount = getOwnedCharacterIds(this.progress).length;
-    this.header?.setText(`수동 10칸 편성 · 보유 ${ownedCount}/${ALL_PLAYER_SLOTS.length} · 선택 ${this.selectedIds.length}/${MAX_DECK_SLOTS}`);
+    const ownedCount = this.getOwnedSlots().length;
+    this.page = Math.min(this.page, this.pageCount - 1);
+    this.header?.setText(`수동 10칸 편성 · 보유 ${ownedCount}명 · 선택 ${this.selectedIds.length}/${MAX_DECK_SLOTS}`);
     this.renderDeckOrder();
     this.renderCards();
   }
@@ -193,9 +195,7 @@ export class DeckScene extends Phaser.Scene {
       const rosterSlot = slotId ? getSlotById(slotId) : undefined;
       const x = startX + index * slotWidth + slotWidth / 2;
       const badge = rosterSlot ? acquisitionBadge(rosterSlot) : undefined;
-      const border = badge
-        ? Phaser.Display.Color.HexStringToColor(badge.color).color
-        : 0x4b5666;
+      const border = badge ? Phaser.Display.Color.HexStringToColor(badge.color).color : 0x4b5666;
       const bg = this.add.rectangle(x, y, slotWidth - 8, compact ? 58 : 54, rosterSlot ? 0x293242 : 0x1d232d, 0.98).setStrokeStyle(2, border, 0.9);
       this.deckLayer.add(bg);
       this.deckLayer.add(text(this, x - 44, y - 22, hotkeyLabel(index), compact ? 17 : 14, rosterSlot ? '#f0d67d' : '#667181'));
@@ -211,9 +211,9 @@ export class DeckScene extends Phaser.Scene {
     this.cardsLayer?.destroy(true);
     this.cardsLayer = this.add.container(0, 0);
     const compact = isCompactMobileViewport();
-    const owned = new Set(getOwnedCharacterIds(this.progress));
+    const ownedSlots = this.getOwnedSlots();
     const start = this.page * this.pageSize;
-    const visible = ALL_PLAYER_SLOTS.slice(start, start + this.pageSize);
+    const visible = ownedSlots.slice(start, start + this.pageSize);
     const columns = compact ? 4 : 5;
     const cardWidth = compact ? 282 : 222;
     const cardHeight = compact ? 166 : 174;
@@ -221,60 +221,46 @@ export class DeckScene extends Phaser.Scene {
     const startX = compact ? 190 : 168;
     const startY = compact ? 282 : 280;
     const yGap = compact ? 184 : 190;
-    this.pageText?.setText(`${this.page + 1} / ${this.pageCount} · 전체 ${ALL_PLAYER_SLOTS.length}명`);
+    this.pageText?.setText(`${this.page + 1} / ${this.pageCount} · 보유 ${ownedSlots.length}명`);
 
     visible.forEach((slot, localIndex) => {
       const col = localIndex % columns;
       const row = Math.floor(localIndex / columns);
       const x = startX + col * xGap;
       const y = startY + row * yGap;
-      const isOwned = owned.has(slot.slotId);
       const selectedIndex = this.selectedIds.indexOf(slot.slotId);
       const selected = selectedIndex >= 0;
       const badge = acquisitionBadge(slot);
       const baseBorder = Phaser.Display.Color.HexStringToColor(badge.color).color;
-      const border = selected ? 0xf2d56f : isOwned ? baseBorder : 0x4a5260;
-      const bg = this.add.rectangle(x, y, cardWidth, cardHeight, isOwned ? (selected ? 0x343329 : 0x252c3a) : 0x1b2029, 0.98).setStrokeStyle(selected ? 4 : 3, border, isOwned ? 0.95 : 0.6);
+      const border = selected ? 0xf2d56f : baseBorder;
+      const bg = this.add.rectangle(x, y, cardWidth, cardHeight, selected ? 0x343329 : 0x252c3a, 0.98).setStrokeStyle(selected ? 4 : 3, border, 0.95);
       this.cardsLayer!.add(bg);
 
       const art = familyForUnit(slot.definition.id);
-      const portrait = this.add.sprite(x - cardWidth / 2 + (compact ? 54 : 48), y - 8, art.family.idle.key, 0)
-        .setTint(isOwned ? art.tint : 0x30343c)
-        .setAlpha(isOwned ? 1 : 0.42);
+      const portrait = this.add.sprite(x - cardWidth / 2 + (compact ? 54 : 48), y - 8, art.family.idle.key, 0).setTint(art.tint);
       portrait.setScale(((compact ? 76 : 70) / art.family.idle.frameHeight) * art.displayScale);
       this.cardsLayer!.add(portrait);
 
-      this.cardsLayer!.add(text(this, x - cardWidth / 2 + 12, y - cardHeight / 2 + 8, isOwned ? badge.label : 'LOCK', compact ? 17 : 14, isOwned ? badge.color : '#656d78'));
+      this.cardsLayer!.add(text(this, x - cardWidth / 2 + 12, y - cardHeight / 2 + 8, badge.label, compact ? 17 : 14, badge.color));
       if (selected) this.cardsLayer!.add(text(this, x + cardWidth / 2 - 12, y - cardHeight / 2 + 8, `#${hotkeyLabel(selectedIndex)}`, compact ? 18 : 15, '#ffe18a', 'right').setOrigin(1, 0));
 
       const infoX = x - cardWidth / 2 + (compact ? 100 : 88);
-      this.cardsLayer!.add(text(this, infoX, y - cardHeight / 2 + 30, isOwned ? slot.displayName : '미보유', compact ? 21 : 18, isOwned ? '#ffffff' : '#7a838f'));
+      this.cardsLayer!.add(text(this, infoX, y - cardHeight / 2 + 30, slot.displayName, compact ? 21 : 18, '#ffffff'));
 
-      if (isOwned) {
-        const meta = this.progress.characterProgressById?.[slot.slotId];
-        const level = meta?.level ?? 1;
-        const plusLevel = meta?.plusLevel ?? 0;
-        const currentSlot = buildCharacterCombatSlot(slot, level, meta?.selectedFormId, plusLevel);
-        const form = selectedFormName(this.progress, slot.slotId);
-        const levelText = plusLevel > 0 ? `Lv${level} +${plusLevel}` : `Lv${level}`;
-        this.cardsLayer!.add(text(this, infoX, y - 29, `${slot.role} · ${levelText} · ${form}`, compact ? 16 : 13, '#acd2f3'));
-        this.cardsLayer!.add(text(this, infoX, y - 1, `${currentSlot.cost} 보급 · ${formatCombatTraits(currentSlot.definition)}`, compact ? 15 : 12, '#f2d37c'));
-        const specialty = formatDamageSpecialty(currentSlot.definition);
-        this.cardsLayer!.add(text(this, infoX, y + 26, specialty || '범용 공격', compact ? 15 : 12, specialty ? '#ffd493' : '#9da8b8'));
-        if (!compact) this.cardsLayer!.add(text(this, infoX, y + 51, selected ? '선택됨 · 다시 누르면 제외' : '눌러서 덱 맨 뒤에 추가', 11, selected ? '#ffe18a' : '#9aa7b8'));
-        bg.setInteractive({ useHandCursor: true });
-        bg.on('pointerdown', () => this.toggleCharacter(slot.slotId));
-      } else {
-        this.cardsLayer!.add(text(this, infoX, y - 23, `${badge.label} · ${slot.role}`, compact ? 16 : 13, '#737c88'));
-        this.cardsLayer!.add(text(this, infoX, y + 8, this.acquisitionHint(slot), compact ? 15 : 12, '#777f8a').setWordWrapWidth(cardWidth - (compact ? 112 : 100)));
-      }
+      const meta = this.progress.characterProgressById?.[slot.slotId];
+      const level = meta?.level ?? 1;
+      const plusLevel = meta?.plusLevel ?? 0;
+      const currentSlot = buildCharacterCombatSlot(slot, level, meta?.selectedFormId, plusLevel);
+      const form = selectedFormName(this.progress, slot.slotId);
+      const levelText = plusLevel > 0 ? `Lv${level} +${plusLevel}` : `Lv${level}`;
+      this.cardsLayer!.add(text(this, infoX, y - 29, `${slot.role} · ${levelText} · ${form}`, compact ? 16 : 13, '#acd2f3'));
+      this.cardsLayer!.add(text(this, infoX, y - 1, `${currentSlot.cost} 보급 · ${formatCombatTraits(currentSlot.definition)}`, compact ? 15 : 12, '#f2d37c'));
+      const specialty = formatDamageSpecialty(currentSlot.definition);
+      this.cardsLayer!.add(text(this, infoX, y + 26, specialty || '범용 공격', compact ? 15 : 12, specialty ? '#ffd493' : '#9da8b8'));
+      if (!compact) this.cardsLayer!.add(text(this, infoX, y + 51, selected ? '선택됨 · 다시 누르면 제외' : '눌러서 덱 맨 뒤에 추가', 11, selected ? '#ffe18a' : '#9aa7b8'));
+      bg.setInteractive({ useHandCursor: true });
+      bg.on('pointerdown', () => this.toggleCharacter(slot.slotId));
     });
-  }
-
-  private acquisitionHint(slot: PrototypeRosterSlot): string {
-    if (!CAMPAIGN_SLOT_IDS.has(slot.slotId)) return '모집 미획득';
-    const stage = getUnlockStageForSlot(slot.slotId);
-    return stage ? `STAGE ${getStageNumber(stage.id)} 첫 클리어` : '시작 동료';
   }
 
   private toggleCharacter(slotId: string): void {

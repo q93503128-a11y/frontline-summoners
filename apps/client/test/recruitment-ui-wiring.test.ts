@@ -15,19 +15,27 @@ test('main menu exposes recruitment and the scene is registered without replacin
   assert.match(main, /scene: \[BootScene, MainMenuScene, StageHubScene, StageSelectScene, DeckScene, CatalogScene, BattleScene, ResultScene\]/);
 });
 
-test('recruitment UI consumes banner data and save authority without duplicating roll rules', async () => {
+test('recruitment UI consumes the selected banner and save authority without duplicating roll rules', async () => {
   const source = await readSource('../src/recruitment-scene.ts');
-  assert.match(source, /FIRST_RECRUITMENT_BANNER\.ratesPermille\[rarity\] \/ 10/);
-  assert.match(source, /FIRST_RECRUITMENT_BANNER\.poolByRarity\[rarity\]\.length/);
-  assert.match(source, /performGuestRecruitment\(count, CRYPTO_RECRUITMENT_RANDOM_SOURCE, FIRST_RECRUITMENT_BANNER\)/);
+  assert.match(source, /this\.banner\.ratesPermille\[rarity\] \/ 10/);
+  assert.match(source, /this\.banner\.poolByRarity\[rarity\]\.length/);
+  assert.match(source, /performGuestRecruitment\(count, CRYPTO_RECRUITMENT_RANDOM_SOURCE, this\.banner\)/);
   assert.doesNotMatch(source, /Math\.random\(/);
 });
 
-test('active-banner collection count is derived from the actual banner pool rather than every recruitment definition', async () => {
+test('all three initial series are selectable and scene restart preserves the selected banner id', async () => {
   const source = await readSource('../src/recruitment-scene.ts');
-  assert.match(source, /const BANNER_CHARACTER_IDS = RARITY_ORDER\.flatMap\(\(rarity\) => FIRST_RECRUITMENT_BANNER\.poolByRarity\[rarity\]\);/);
-  assert.match(source, /BANNER_CHARACTER_IDS\.filter\(\(characterId\) => owned\.has\(characterId\)\)\.length/);
-  assert.match(source, /BANNER_CHARACTER_IDS\.length/);
+  assert.match(source, /RECRUITMENT_BANNERS\.forEach/);
+  assert.match(source, /getRecruitmentBanner\(data\.bannerId\)/);
+  assert.match(source, /this\.scene\.restart\(\{ bannerId: banner\.id \}\)/);
+  assert.match(source, /SERIES_TAB_LABELS = \['성휘', '거수', '제로'\]/);
+});
+
+test('active-banner collection count is derived from that banner pool rather than every recruitment definition', async () => {
+  const source = await readSource('../src/recruitment-scene.ts');
+  assert.match(source, /const bannerCharacterIds = getBannerCharacterIds\(this\.banner\)/);
+  assert.match(source, /bannerCharacterIds\.filter\(\(characterId\) => owned\.has\(characterId\)\)\.length/);
+  assert.match(source, /bannerCharacterIds\.length/);
   assert.doesNotMatch(source, /RECRUITMENT_UNITS\.filter/);
 });
 

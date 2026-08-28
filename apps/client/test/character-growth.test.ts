@@ -37,10 +37,10 @@ test('+levels apply multiplicatively at +2% per level and clamp at +50', () => {
 });
 
 test('level and plus growth change HP and base attack only, preserving identity stats', () => {
-  const slot = getSlotById('turnip-rider')!;
+  const slot = getSlotById('char_common_c_turnip_rider')!;
   const leveled = applyCharacterLevel(slot, 30, 10);
-  assert.equal(leveled.definition.maxHp, 1080);
-  assert.equal(leveled.definition.attackDamage, 108);
+  assert.equal(leveled.definition.maxHp, 450);
+  assert.equal(leveled.definition.attackDamage, 150);
   assert.equal(leveled.definition.standingRange, slot.definition.standingRange);
   assert.equal(leveled.definition.attackMinRange, slot.definition.attackMinRange);
   assert.equal(leveled.definition.attackMaxRange, slot.definition.attackMaxRange);
@@ -48,8 +48,14 @@ test('level and plus growth change HP and base attack only, preserving identity 
   assert.equal(leveled.rechargeFrames, slot.rechargeFrames);
 });
 
-test('first evolution slice gives five examples exactly three selectable forms each', () => {
-  const characters = ['turnip-rider', 'lantern-witch', 'clockwork-duck', 'mirror-exorcist', 'moon-eater'];
+test('canonical evolution executable slice gives five characters exactly three selectable forms each', () => {
+  const characters = [
+    'char_common_c_turnip_rider',
+    'char_common_b_lantern_witch',
+    'char_common_b_clockduck',
+    'char_common_a_meteor_cart',
+    'char_s01_mireille',
+  ];
   assert.equal(EVOLUTION_FORMS.length, 15);
   for (const characterId of characters) {
     const forms = getEvolutionForms(characterId);
@@ -58,38 +64,41 @@ test('first evolution slice gives five examples exactly three selectable forms e
   }
 });
 
-test('turnip evolution remains a real sidegrade and never breaches the two-second recharge floor', () => {
-  const base = getSlotById('turnip-rider')!;
-  const rush = applyEvolutionForm(base, 'turnip-rider-rush');
-  const king = applyEvolutionForm(base, 'turnip-rider-king');
-  const restoredBase = applyEvolutionForm(base, 'turnip-rider-base');
+test('turnip forms remain sidegrades and never breach the two-second recharge floor', () => {
+  const base = getSlotById('char_common_c_turnip_rider')!;
+  const sturdy = applyEvolutionForm(base, 'char_common_c_turnip_rider_f2');
+  const king = applyEvolutionForm(base, 'char_common_c_turnip_rider_f3');
+  const restoredBase = applyEvolutionForm(base, 'char_common_c_turnip_rider_f1');
 
-  assert.ok(rush.cost < base.cost);
-  assert.ok(rush.rechargeFrames <= base.rechargeFrames);
-  assert.ok(rush.rechargeFrames >= MIN_PLAYER_RECHARGE_FRAMES);
-  assert.equal(rush.definition.targetMode, 'SINGLE');
+  assert.ok(sturdy.definition.maxHp > base.definition.maxHp);
+  assert.ok(sturdy.definition.moveSpeed < base.definition.moveSpeed);
+  assert.ok(sturdy.rechargeFrames >= MIN_PLAYER_RECHARGE_FRAMES);
+  assert.ok(king.definition.attackDamage > sturdy.definition.attackDamage);
   assert.ok(king.cost > base.cost);
-  assert.equal(king.definition.targetMode, 'AREA');
+  assert.ok(king.rechargeFrames >= MIN_PLAYER_RECHARGE_FRAMES);
   assert.deepEqual(restoredBase, base);
 });
 
-test('higher forms can specialize against attributes or combat tags', () => {
-  const mirror = getSlotById('mirror-exorcist')!;
-  const deep = applyEvolutionForm(mirror, 'mirror-exorcist-deep');
-  const war = applyEvolutionForm(mirror, 'mirror-exorcist-war');
-  assert.ok(deep.definition.standingRange > mirror.definition.standingRange);
-  assert.ok(war.definition.standingRange < mirror.definition.standingRange);
-  assert.deepEqual(deep.definition.damageBonuses?.[0], { targetKind: 'ATTRIBUTE', target: 'ARCANE', multiplierPermille: 1500 });
-  assert.deepEqual(war.definition.damageBonuses?.[0], { targetKind: 'TAG', target: 'BOSS', multiplierPermille: 1300 });
+test('higher forms can move attack geometry enough to change battlefield role', () => {
+  const meteor = getSlotById('char_common_a_meteor_cart')!;
+  const orbital = applyEvolutionForm(meteor, 'char_common_a_meteor_cart_f3');
+  assert.ok(orbital.definition.standingRange > meteor.definition.standingRange);
+  assert.ok(orbital.definition.attackMinRange > meteor.definition.attackMinRange);
+  assert.ok(orbital.definition.attackMaxRange > meteor.definition.attackMaxRange);
+
+  const mireille = getSlotById('char_s01_mireille')!;
+  const zenith = applyEvolutionForm(mireille, 'char_s01_mireille_f3');
+  assert.ok(zenith.definition.standingRange > mireille.definition.standingRange);
+  assert.ok(zenith.definition.attackDamage > mireille.definition.attackDamage);
+  assert.ok(zenith.definition.maxHp < mireille.definition.maxHp);
 });
 
 test('level, +level and form compose into one deterministic combat slot', () => {
-  const moon = getSlotById('moon-eater')!;
-  const evolved = buildCharacterCombatSlot(moon, 30, 'moon-eater-eclipse', 10);
-  assert.ok(evolved.definition.maxHp > moon.definition.maxHp);
-  assert.ok(evolved.definition.attackDamage > moon.definition.attackDamage);
-  assert.equal(evolved.definition.damageBonuses?.[0]?.targetKind, 'TAG');
-  assert.equal(evolved.definition.damageBonuses?.[0]?.target, 'BOSS');
-  assert.equal(evolved.definition.damageBonuses?.[0]?.multiplierPermille, 1700);
+  const base = getSlotById('char_s01_mireille')!;
+  const evolved = buildCharacterCombatSlot(base, 30, 'char_s01_mireille_f3', 10);
+  assert.ok(evolved.definition.maxHp > base.definition.maxHp);
+  assert.ok(evolved.definition.attackDamage > base.definition.attackDamage);
+  assert.ok(evolved.definition.standingRange > base.definition.standingRange);
+  assert.ok(evolved.cost > base.cost);
   assert.ok(evolved.rechargeFrames >= MIN_PLAYER_RECHARGE_FRAMES);
 });

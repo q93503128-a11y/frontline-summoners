@@ -20,8 +20,8 @@ test('every chapter one player and enemy has a registered art family and attack 
   }
 });
 
-test('every recruitment character has an explicit prototype art mapping instead of falling through to the same default warrior', () => {
-  assert.equal(RECRUITMENT_PLAYER_SLOTS.length, 15);
+test('all thirty-three recruitment characters have explicit temporary art mappings', () => {
+  assert.equal(RECRUITMENT_PLAYER_SLOTS.length, 33);
   for (const slot of RECRUITMENT_PLAYER_SLOTS) {
     const id = slot.definition.id;
     const variant = UNIT_ART[id];
@@ -30,9 +30,20 @@ test('every recruitment character has an explicit prototype art mapping instead 
     assert.ok(ATTACK_FX_STYLES.has(variant.attackFx), `unknown attack FX ${variant.attackFx} for ${id}`);
   }
   assert.ok(
-    new Set(RECRUITMENT_PLAYER_SLOTS.map((slot) => UNIT_ART[slot.definition.id]?.familyId)).size >= 6,
-    'the first recruitment pool must not collapse into one or two prototype visual families',
+    new Set(RECRUITMENT_PLAYER_SLOTS.map((slot) => UNIT_ART[slot.definition.id]?.familyId)).size >= 7,
+    'the structural recruitment slice should exercise every baseline visual family until production character art replaces it',
   );
+});
+
+test('canonical recruitment ids no longer fall back to legacy prototype ids', () => {
+  const ids = new Set(RECRUITMENT_PLAYER_SLOTS.map((slot) => slot.slotId));
+  assert.ok(ids.has('char_common_c_turnip_rider'));
+  assert.ok(ids.has('char_s01_arselia'));
+  assert.ok(ids.has('char_s02_gormu'));
+  assert.ok(ids.has('char_s03_overlay_astra'));
+  for (const legacyId of ['turnip-rider', 'clockwork-duck', 'mirror-exorcist', 'moon-eater', 'castle-crab']) {
+    assert.equal(ids.has(legacyId), false, `legacy recruitment id remained executable: ${legacyId}`);
+  }
 });
 
 test('all sprite strips are local deploy assets with coherent frame metadata', () => {

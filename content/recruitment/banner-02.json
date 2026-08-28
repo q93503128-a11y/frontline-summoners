@@ -1,14 +1,14 @@
 {
-  "id": "starlight-order-01",
-  "seriesId": "series_01_starlight_order",
-  "name": "성휘의 기사단",
-  "description": "서로 다른 무기와 전투 실루엣을 가진 성휘의 영웅들이 등장합니다. 공통 C/B/A 풀을 공유하며 S/SS만 시리즈 전용입니다.",
+  "id": "primordial-titans-01",
+  "seriesId": "series_02_primordial_titans",
+  "name": "태고의 거수",
+  "description": "골격과 이동 방식부터 다른 고대 괴수들이 등장합니다. 공통 C/B/A 풀을 공유하며 S/SS만 시리즈 전용입니다.",
   "ratesPermille": { "C": 420, "B": 320, "A": 227, "S": 30, "SS": 3 },
   "poolByRarity": {
     "C": ["char_common_c_turnip_rider", "char_common_c_tin_squire", "char_common_c_slinger", "char_common_c_bell_crab", "char_common_c_lantern_moth"],
     "B": ["char_common_b_lantern_witch", "char_common_b_clockduck", "char_common_b_coffin_merchant", "char_common_b_moss_golem", "char_common_b_ink_raven"],
     "A": ["char_common_a_glass_keeper", "char_common_a_bonedrum", "char_common_a_paper_dragon", "char_common_a_meteor_cart", "char_common_a_mirror_guide"],
-    "S": ["char_s01_elsia", "char_s01_riena", "char_s01_mireille", "char_s01_neria", "char_s01_totoria"],
-    "SS": ["char_s01_arselia"]
+    "S": ["char_s02_barga", "char_s02_zirka", "char_s02_mogu", "char_s02_gardo", "char_s02_kreik"],
+    "SS": ["char_s02_gormu"]
   }
 }

@@ -1,42 +1,42 @@
 [
   {
-    "characterId":"turnip-rider",
-    "forms":[
-      {"formId":"turnip-rider-base","formOrder":1,"name":"순무기수","description":"빠른 순환과 값싼 돌격이 핵심인 기본 형태.","modifiers":{}},
-      {"formId":"turnip-rider-rush","formOrder":2,"name":"순무돌격대","description":"더 싸고 더 자주 나오지만 한 기의 화력은 낮은 물량 전문 형태.","modifiers":{"maxHpPermille":1100,"attackDamagePermille":950,"moveSpeedDelta":1,"costPermille":900,"rechargePermille":900}},
-      {"formId":"turnip-rider-king","formOrder":3,"name":"왕순무기병","description":"거대한 순무를 몰아 여러 적을 들이받는 고비용 광역 돌격 형태.","modifiers":{"maxHpPermille":1250,"attackDamagePermille":1200,"costPermille":1250,"rechargePermille":1150,"targetMode":"AREA"}}
+    "characterId": "char_common_c_turnip_rider",
+    "forms": [
+      {"formId":"char_common_c_turnip_rider_f1","formOrder":1,"name":"순무기수","description":"빠르게 전선에 도착하는 저비용 돌격 기본 형태.","modifiers":{}},
+      {"formId":"char_common_c_turnip_rider_f2","formOrder":2,"name":"절임순무 기수","description":"속도를 조금 포기하고 더 오래 버티는 안정형 형태.","modifiers":{"maxHpPermille":1467,"attackDamagePermille":1200,"costPermille":1188,"rechargePermille":1125,"moveSpeedDelta":-1,"standingRangeDelta":5,"attackMaxRangeDelta":5}},
+      {"formId":"char_common_c_turnip_rider_f3","formOrder":3,"name":"왕순무 돌격대","description":"생존보다 돌파력과 한 방을 높인 공격형 형태.","modifiers":{"maxHpPermille":1200,"attackDamagePermille":2000,"costPermille":1500,"rechargePermille":1250,"moveSpeedDelta":1,"standingRangeDelta":15,"attackMaxRangeDelta":15}}
     ]
   },
   {
-    "characterId":"lantern-witch",
-    "forms":[
-      {"formId":"lantern-witch-base","formOrder":1,"name":"등불마녀","description":"적 무리를 태우는 중거리 광역 기본 형태.","modifiers":{}},
-      {"formId":"lantern-witch-procession","formOrder":2,"name":"등불행렬마녀","description":"등불을 더 멀리 흩뿌려 적을 안전하게 지우는 장거리 전문 형태.","modifiers":{"attackDamagePermille":1100,"standingRangeDelta":20,"attackMinRangeDelta":10,"attackMaxRangeDelta":25,"costPermille":1100,"damageBonuses":[{"targetKind":"ATTRIBUTE","target":"NEUTRAL","multiplierPermille":1300}]}},
-      {"formId":"lantern-witch-funeral","formOrder":3,"name":"장례등마녀","description":"사각지대가 커지는 대신 마력 적을 멀리서 크게 태우는 전문화 형태.","modifiers":{"maxHpPermille":900,"attackDamagePermille":1250,"standingRangeDelta":35,"attackMinRangeDelta":35,"attackMaxRangeDelta":45,"costPermille":1180,"damageBonuses":[{"targetKind":"ATTRIBUTE","target":"ARCANE","multiplierPermille":1350}]}}
+    "characterId": "char_common_b_lantern_witch",
+    "forms": [
+      {"formId":"char_common_b_lantern_witch_f1","formOrder":1,"name":"등불마녀","description":"살아 있는 등불의 불씨로 적 무리를 태우는 기본 형태.","modifiers":{}},
+      {"formId":"char_common_b_lantern_witch_f2","formOrder":2,"name":"푸른등 마녀","description":"조금 더 빠른 화력 순환과 안정된 사거리를 노리는 형태.","modifiers":{"maxHpPermille":1100,"attackDamagePermille":1150,"costPermille":1154,"rechargePermille":1091,"standingRangeDelta":10,"attackMaxRangeDelta":10}},
+      {"formId":"char_common_b_lantern_witch_f3","formOrder":3,"name":"밤길 인도자","description":"생존을 덜어내고 더 넓은 후방 화력에 집중하는 형태.","modifiers":{"maxHpPermille":967,"attackDamagePermille":1375,"costPermille":1346,"rechargePermille":1273,"standingRangeDelta":50,"attackMaxRangeDelta":50}}
     ]
   },
   {
-    "characterId":"clockwork-duck",
-    "forms":[
-      {"formId":"clockwork-duck-base","formOrder":1,"name":"태엽오리기사","description":"높은 체력과 빠른 전진을 겸한 기계 전열 기본 형태.","modifiers":{}},
-      {"formId":"clockwork-duck-bulwark","formOrder":2,"name":"태엽방벽오리","description":"속도를 포기하고 전선 유지에 집중하는 방벽 전문 형태.","modifiers":{"maxHpPermille":1250,"attackDamagePermille":900,"moveSpeedDelta":-1,"costPermille":1100,"rechargePermille":1100}},
-      {"formId":"clockwork-duck-overwind","formOrder":3,"name":"과태엽돌격오리","description":"내구 일부를 화력과 속도로 바꿔 돌파에 집중하는 공격형 형태.","modifiers":{"maxHpPermille":1050,"attackDamagePermille":1300,"moveSpeedDelta":1,"costPermille":1250,"rechargePermille":1200}}
+    "characterId": "char_common_b_clockduck",
+    "forms": [
+      {"formId":"char_common_b_clockduck_f1","formOrder":1,"name":"태엽오리기사","description":"꾸준한 공격과 적당한 생존을 겸한 기계 전열 기본 형태.","modifiers":{}},
+      {"formId":"char_common_b_clockduck_f2","formOrder":2,"name":"장갑오리기사","description":"속도를 낮추고 장갑을 두껍게 만든 방어형 형태.","modifiers":{"maxHpPermille":1385,"attackDamagePermille":1127,"costPermille":1188,"rechargePermille":1150,"moveSpeedDelta":-1,"standingRangeDelta":5,"attackMaxRangeDelta":5}},
+      {"formId":"char_common_b_clockduck_f3","formOrder":3,"name":"폭주 태엽오리","description":"장갑 일부를 포기하고 공격과 돌입 속도를 높인 형태.","modifiers":{"maxHpPermille":846,"attackDamagePermille":1545,"costPermille":1250,"rechargePermille":1200,"moveSpeedDelta":1,"standingRangeDelta":10,"attackMaxRangeDelta":10}}
     ]
   },
   {
-    "characterId":"mirror-exorcist",
-    "forms":[
-      {"formId":"mirror-exorcist-base","formOrder":1,"name":"거울퇴마사","description":"넓은 사각지대와 마력 특효를 가진 초장거리 기본 형태.","modifiers":{}},
-      {"formId":"mirror-exorcist-deep","formOrder":2,"name":"심경거울퇴마사","description":"사각지대가 더 커지는 대신 마력 적을 더 멀리서 강하게 노리는 형태.","modifiers":{"attackDamagePermille":1150,"standingRangeDelta":25,"attackMinRangeDelta":25,"attackMaxRangeDelta":35,"costPermille":1120,"damageBonuses":[{"targetKind":"ATTRIBUTE","target":"ARCANE","multiplierPermille":1500}]}},
-      {"formId":"mirror-exorcist-war","formOrder":3,"name":"전경거울퇴마사","description":"사거리를 일부 줄여 전선에 가까이 서는 대신 보스까지 견제하는 전투형 형태.","modifiers":{"maxHpPermille":1250,"attackDamagePermille":1200,"standingRangeDelta":-35,"attackMinRangeDelta":-45,"attackMaxRangeDelta":-20,"costPermille":1200,"damageBonuses":[{"targetKind":"TAG","target":"BOSS","multiplierPermille":1300}]}}
+    "characterId": "char_common_a_meteor_cart",
+    "forms": [
+      {"formId":"char_common_a_meteor_cart_f1","formOrder":1,"name":"고철 운석차","description":"근중거리에서 거대한 한 발을 던지는 공성 기본 형태.","modifiers":{}},
+      {"formId":"char_common_a_meteor_cart_f2","formOrder":2,"name":"강철 운석차","description":"더 무겁고 단단한 차체와 포탄으로 정면 압박을 강화한 형태.","modifiers":{"maxHpPermille":1313,"attackDamagePermille":1236,"costPermille":1167,"rechargePermille":1125,"standingRangeDelta":10,"attackMaxRangeDelta":20}},
+      {"formId":"char_common_a_meteor_cart_f3","formOrder":3,"name":"궤도 낙하포","description":"근거리 압박을 버리고 훨씬 먼 지점을 노리는 포격형 형태.","modifiers":{"maxHpPermille":813,"attackDamagePermille":1636,"costPermille":1333,"rechargePermille":1250,"standingRangeDelta":210,"attackMinRangeDelta":220,"attackMaxRangeDelta":260}}
     ]
   },
   {
-    "characterId":"moon-eater",
-    "forms":[
-      {"formId":"moon-eater-base","formOrder":1,"name":"달먹는룡","description":"보스전에 특화된 초장거리 결정타 기본 형태.","modifiers":{}},
-      {"formId":"moon-eater-hollow","formOrder":2,"name":"빈달먹는룡","description":"몸을 가볍게 비워 더 먼 거리에서 보스를 저격하는 극장거리 형태.","modifiers":{"maxHpPermille":900,"attackDamagePermille":1100,"standingRangeDelta":30,"attackMinRangeDelta":20,"attackMaxRangeDelta":40,"costPermille":1080,"damageBonuses":[{"targetKind":"TAG","target":"BOSS","multiplierPermille":1650}]}},
-      {"formId":"moon-eater-eclipse","formOrder":3,"name":"월식포식룡","description":"사거리를 일부 포기하고 몸집과 한 방을 키운 고화력 보스 압박 형태.","modifiers":{"maxHpPermille":1250,"attackDamagePermille":1300,"standingRangeDelta":-25,"attackMinRangeDelta":-20,"attackMaxRangeDelta":-15,"costPermille":1250,"rechargePermille":1200,"damageBonuses":[{"targetKind":"TAG","target":"BOSS","multiplierPermille":1700}]}}
+    "characterId": "char_s01_mireille",
+    "forms": [
+      {"formId":"char_s01_mireille_f1","formOrder":1,"name":"유리궁 사수","description":"큰 사각을 감수하고 초장거리 한 방을 노리는 기본 형태.","modifiers":{}},
+      {"formId":"char_s01_mireille_f2","formOrder":2,"name":"수정궁 귀족","description":"수정궁을 확장해 더 먼 전선을 안정적으로 겨누는 형태.","modifiers":{"maxHpPermille":1107,"attackDamagePermille":1250,"costPermille":1106,"rechargePermille":1100,"standingRangeDelta":45,"attackMinRangeDelta":30,"attackMaxRangeDelta":60}},
+      {"formId":"char_s01_mireille_f3","formOrder":3,"name":"천정의 궁수","description":"생존을 희생하고 사거리와 결정타를 극단적으로 높인 포격 형태.","modifiers":{"maxHpPermille":893,"attackDamagePermille":1577,"costPermille":1271,"rechargePermille":1233,"standingRangeDelta":90,"attackMinRangeDelta":60,"attackMaxRangeDelta":130}}
     ]
   }
 ]

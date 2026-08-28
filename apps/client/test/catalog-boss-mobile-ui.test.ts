@@ -14,23 +14,28 @@ test('main menu opens the real catalog scene and the scene is registered', async
   assert.match(main, /scene:\s*\[[^\]]*CatalogScene[^\]]*\]/s);
 });
 
-test('catalog pages allies, permanent rewards, and separate special clear records instead of mixing reward axes', async () => {
+test('catalog pages all 43 allies, permanent rewards, and separate special clear records without mixing reward axes', async () => {
   const source = await readSource('../src/catalog-scene.ts');
   assert.match(source, /const ALLY_PAGE_SIZE = 5/);
   assert.match(source, /const REWARD_PAGE_SIZE = 5/);
   assert.match(source, /const SPECIAL_PAGE_SIZE = 5/);
   assert.match(source, /type CatalogMode = 'ALLIES' \| 'REWARDS' \| 'SPECIAL'/);
-  assert.match(source, /'동료 10종'/);
+  assert.match(source, /`동료 \$\{ALL_PLAYER_SLOTS\.length\}종`/);
   assert.match(source, /'영구 보상 20개'/);
   assert.match(source, /'특수 기록 5개'/);
   assert.match(source, /loadGuestProgress\(\)/);
-  assert.match(source, /getUnlockedSlotIds\(this\.progress\.clearedStageIds\)/);
+  assert.match(source, /new Set\(getOwnedCharacterIds\(this\.progress\)\)/);
+  assert.match(source, /ALL_PLAYER_SLOTS\.slice\(start, start \+ ALLY_PAGE_SIZE\)/);
+  assert.match(source, /owned \? slot\.displayName : '\?\?\?'/);
+  assert.match(source, /portrait\.setTintFill\(0x07080b\)/);
+  assert.match(source, /'획득 후 정보 공개'/);
   assert.match(source, /new Set\(this\.progress\.permanentRewardIds\)/);
   assert.match(source, /new Set\(this\.progress\.specialClearedStageIds\)/);
   assert.match(source, /formatCombatTraits\(slot\.definition\)/);
   assert.match(source, /formatDamageSpecialty\(slot\.definition\)/);
   assert.match(source, /NORMAL_CLEAR 첫 승리 시 확정/);
   assert.match(source, /메인 영구 성장과 별도 기록/);
+  assert.doesNotMatch(source, /getUnlockedSlotIds\(this\.progress\.clearedStageIds\)/);
 });
 
 test('runtime and catalog share the coarse-pointer compact-mobile classifier instead of treating short desktop windows as phones', async () => {

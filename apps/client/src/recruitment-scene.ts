@@ -3,6 +3,10 @@ import { INTERNAL_HEIGHT, INTERNAL_WIDTH } from '@frontline/shared';
 import {
   CRYPTO_RECRUITMENT_RANDOM_SOURCE,
   FIRST_RECRUITMENT_BANNER,
+  RECRUITMENT_BANNERS,
+  getBannerCharacterIds,
+  getRecruitmentBanner,
+  type RecruitmentBanner,
   type RecruitmentPullResult,
 } from './recruitment';
 import { getSlotById } from './prototype';
@@ -20,10 +24,11 @@ const EMPTY_PROGRESS: GuestProgress = {
   permanentRewardIds: [],
 };
 const RARITY_ORDER = ['C', 'B', 'A', 'S', 'SS'] as const;
-const BANNER_CHARACTER_IDS = RARITY_ORDER.flatMap((rarity) => FIRST_RECRUITMENT_BANNER.poolByRarity[rarity]);
+const SERIES_TAB_LABELS = ['성휘', '거수', '제로'] as const;
 
 export class RecruitmentScene extends Phaser.Scene {
   private progress: GuestProgress = EMPTY_PROGRESS;
+  private banner: RecruitmentBanner = FIRST_RECRUITMENT_BANNER;
   private statusText?: Phaser.GameObjects.Text;
   private progressText?: Phaser.GameObjects.Text;
   private resultsLayer: Phaser.GameObjects.Container | undefined;
@@ -31,14 +36,21 @@ export class RecruitmentScene extends Phaser.Scene {
 
   constructor() { super('recruitment'); }
 
+  init(data: { bannerId?: string }): void {
+    this.banner = data.bannerId ? getRecruitmentBanner(data.bannerId) : FIRST_RECRUITMENT_BANNER;
+    this.resultsLayer = undefined;
+    this.busy = false;
+  }
+
   create(): void {
     drawBackdrop(this, 'menu');
     const compact = isCompactMobileViewport();
 
     addText(this, 54, 32, '모 집', compact ? 44 : 48, COLORS.cream);
-    addText(this, 54, 91, FIRST_RECRUITMENT_BANNER.name, compact ? 27 : 26, '#ffffff');
-    addText(this, 54, 128, FIRST_RECRUITMENT_BANNER.description, compact ? 18 : 16, COLORS.muted).setWordWrapWidth(770);
+    addText(this, 54, 91, this.banner.name, compact ? 27 : 26, '#ffffff');
+    addText(this, 54, 128, this.banner.description, compact ? 17 : 15, COLORS.muted).setWordWrapWidth(720);
     addButton(this, 1170, compact ? 62 : 58, 150, compact ? 84 : 50, '메인', () => this.scene.start('main-menu'), 0x586275);
+    this.renderSeriesTabs(compact);
 
     this.add.rectangle(255, 320, 420, 304, 0x222936, 0.97).setStrokeStyle(3, 0x59677f);
     addText(this, 74, 183, '희귀도 확률', compact ? 23 : 21, '#ffe29a');
@@ -46,20 +58,20 @@ export class RecruitmentScene extends Phaser.Scene {
     for (const rarity of RARITY_ORDER) {
       const color = rarityColor[rarity] ?? '#ffffff';
       addText(this, 88, probabilityY, rarity, compact ? 21 : 18, color);
-      addText(this, 188, probabilityY, `${FIRST_RECRUITMENT_BANNER.ratesPermille[rarity] / 10}%`, compact ? 21 : 18, '#ffffff');
-      addText(this, 305, probabilityY, `${FIRST_RECRUITMENT_BANNER.poolByRarity[rarity].length}종`, compact ? 18 : 15, '#9eabbc');
+      addText(this, 188, probabilityY, `${this.banner.ratesPermille[rarity] / 10}%`, compact ? 21 : 18, '#ffffff');
+      addText(this, 305, probabilityY, `${this.banner.poolByRarity[rarity].length}종`, compact ? 18 : 15, '#9eabbc');
       probabilityY += compact ? 43 : 40;
     }
-    addText(this, 74, 457, '모집할 때마다 같은 확률표를 사용합니다.', compact ? 17 : 15, '#9eabbc');
+    addText(this, 74, 457, '세 시리즈 모두 같은 희귀도 확률을 사용합니다.', compact ? 17 : 15, '#9eabbc');
 
     this.add.rectangle(720, 320, 430, 304, 0x222936, 0.97).setStrokeStyle(3, 0x7b6990);
     addText(this, 535, 183, '시리즈 구성', compact ? 23 : 21, '#e5c7ff');
-    addText(this, 550, 235, `C · ${FIRST_RECRUITMENT_BANNER.poolByRarity.C.length}종`, compact ? 20 : 17, rarityColor.C);
-    addText(this, 550, 276, `B · ${FIRST_RECRUITMENT_BANNER.poolByRarity.B.length}종`, compact ? 20 : 17, rarityColor.B);
-    addText(this, 550, 317, `A · ${FIRST_RECRUITMENT_BANNER.poolByRarity.A.length}종`, compact ? 20 : 17, rarityColor.A);
-    addText(this, 550, 358, `S · ${FIRST_RECRUITMENT_BANNER.poolByRarity.S.length}종`, compact ? 20 : 17, rarityColor.S);
-    addText(this, 550, 399, `SS · ${FIRST_RECRUITMENT_BANNER.poolByRarity.SS.length}종`, compact ? 20 : 17, rarityColor.SS);
-    const ssName = getSlotById(FIRST_RECRUITMENT_BANNER.poolByRarity.SS[0]!)?.displayName ?? '???';
+    addText(this, 550, 235, `공통 C · ${this.banner.poolByRarity.C.length}종`, compact ? 20 : 17, rarityColor.C);
+    addText(this, 550, 276, `공통 B · ${this.banner.poolByRarity.B.length}종`, compact ? 20 : 17, rarityColor.B);
+    addText(this, 550, 317, `공통 A · ${this.banner.poolByRarity.A.length}종`, compact ? 20 : 17, rarityColor.A);
+    addText(this, 550, 358, `전용 S · ${this.banner.poolByRarity.S.length}종`, compact ? 20 : 17, rarityColor.S);
+    addText(this, 550, 399, `전용 SS · ${this.banner.poolByRarity.SS.length}종`, compact ? 20 : 17, rarityColor.SS);
+    const ssName = getSlotById(this.banner.poolByRarity.SS[0]!)?.displayName ?? '???';
     addText(this, 550, 448, `시리즈 SS · ${ssName}`, compact ? 18 : 16, '#ffd873');
 
     this.add.rectangle(1080, 320, 260, 304, 0x222936, 0.97).setStrokeStyle(3, 0x8b7045);
@@ -80,13 +92,32 @@ export class RecruitmentScene extends Phaser.Scene {
     });
   }
 
+  private renderSeriesTabs(compact: boolean): void {
+    RECRUITMENT_BANNERS.forEach((banner, index) => {
+      const active = banner.id === this.banner.id;
+      addButton(
+        this,
+        828 + index * 125,
+        compact ? 122 : 118,
+        116,
+        compact ? 58 : 44,
+        SERIES_TAB_LABELS[index] ?? `S${index + 1}`,
+        () => {
+          if (!active && !this.busy && !this.resultsLayer) this.scene.restart({ bannerId: banner.id });
+        },
+        active ? 0x9a79c5 : 0x4f5968,
+      );
+    });
+  }
+
   private refreshProgress(): void {
-    const bannerProgress = this.progress.recruitmentProgressByBanner?.[FIRST_RECRUITMENT_BANNER.id] ?? { totalPulls: 0 };
+    const bannerProgress = this.progress.recruitmentProgressByBanner?.[this.banner.id] ?? { totalPulls: 0 };
     const owned = new Set(this.progress.ownedRecruitmentCharacterIds ?? []);
-    const ownedInBanner = BANNER_CHARACTER_IDS.filter((characterId) => owned.has(characterId)).length;
+    const bannerCharacterIds = getBannerCharacterIds(this.banner);
+    const ownedInBanner = bannerCharacterIds.filter((characterId) => owned.has(characterId)).length;
     this.progressText?.setText([
-      `누적 모집 ${bannerProgress.totalPulls}회`,
-      `획득 ${ownedInBanner}/${BANNER_CHARACTER_IDS.length}종`,
+      `이 시리즈 모집 ${bannerProgress.totalPulls}회`,
+      `획득 ${ownedInBanner}/${bannerCharacterIds.length}종`,
       '',
       '보장 횟수 없음',
       '각 모집은 독립 추첨',
@@ -99,7 +130,7 @@ export class RecruitmentScene extends Phaser.Scene {
     this.statusText?.setText(`${count}회 모집 중…`);
     this.statusText?.setColor('#c7d0dd');
     try {
-      const result = await performGuestRecruitment(count, CRYPTO_RECRUITMENT_RANDOM_SOURCE, FIRST_RECRUITMENT_BANNER);
+      const result = await performGuestRecruitment(count, CRYPTO_RECRUITMENT_RANDOM_SOURCE, this.banner);
       this.progress = result.guestProgress;
       if (!this.scene.isActive()) return;
       this.refreshProgress();
