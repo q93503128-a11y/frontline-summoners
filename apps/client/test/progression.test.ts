@@ -19,6 +19,27 @@ async function loadCanonicalStageJson(): Promise<readonly Record<string, unknown
   return JSON.parse(await readFile(url, 'utf8')) as readonly Record<string, unknown>[];
 }
 
+function assertAuthoredSubset(actual: unknown, authored: unknown, context: string): void {
+  if (Array.isArray(authored)) {
+    assert.ok(Array.isArray(actual), `${context} must remain an array`);
+    assert.equal(actual.length, authored.length, `${context} changed authored array length`);
+    authored.forEach((value, index) => assertAuthoredSubset(actual[index], value, `${context}[${index}]`));
+    return;
+  }
+
+  if (typeof authored === 'object' && authored !== null) {
+    assert.ok(typeof actual === 'object' && actual !== null && !Array.isArray(actual), `${context} must remain an object`);
+    const actualRecord = actual as Record<string, unknown>;
+    for (const [key, value] of Object.entries(authored as Record<string, unknown>)) {
+      assert.ok(Object.hasOwn(actualRecord, key), `${context} lost authored field ${key}`);
+      assertAuthoredSubset(actualRecord[key], value, `${context}.${key}`);
+    }
+    return;
+  }
+
+  assert.deepEqual(actual, authored, `${context} changed authored value`);
+}
+
 test('fresh progress owns only the starter and can enter only stage one', () => {
   assert.deepEqual(getUnlockedSlotIds([]), [STARTER_SLOT_ID]);
   assert.equal(STARTER_SLOT_ID, 'militia');
@@ -65,15 +86,19 @@ test('full chapter progression unlocks all ten player units and all twenty perma
   assert.deepEqual(getPermanentRewardIdsForClearedStages(cleared), STAGES.map((stage) => stage.permanentRewardId));
 });
 
-test('runtime stage definitions preserve every authored canonical field after schema normalization', async () => {
+test('runtime stage definitions preserve every authored canonical field while allowing schema defaults', async () => {
   const raw = await loadCanonicalStageJson();
   assert.equal(STAGES.length, raw.length);
   for (const [index, rawStage] of raw.entries()) {
     const runtimeStage = STAGES[index] as unknown as Record<string, unknown>;
-    for (const [key, value] of Object.entries(rawStage)) {
-      assert.deepEqual(runtimeStage[key], value, `${String(rawStage.id)} changed authored field ${key}`);
-    }
+    assertAuthoredSubset(runtimeStage, rawStage, String(rawStage.id));
   }
+
+  assert.equal(
+    STAGES[0]!.waves[0]!.spawn.magnificationPermille,
+    1000,
+    'omitted wave magnification must normalize to the neutral 1000 permille default',
+  );
 });
 
 test('chapter one has visible battlefield variety in both theme and length', () => {

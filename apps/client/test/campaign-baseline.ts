@@ -8,12 +8,13 @@ import {
   trySpawnPlayerUnit,
   tryUpgradeSupply,
 } from '@frontline/sim/playable';
+import { createGuestPrototypeBattle } from '../src/player-loadout.ts';
 import {
   STAGES,
-  createPrototypeBattle,
   getPermanentRewardIdsForClearedStages,
   getUnlockedSlotIds,
 } from '../src/prototype.ts';
+import type { GuestProgress } from '../src/save.ts';
 
 export interface CampaignBaselineOptions {
   readonly maxSeconds: number;
@@ -30,6 +31,8 @@ export interface CampaignBaselineTelemetry {
   readonly seenPlayerIds: ReadonlySet<string>;
 }
 
+type CampaignBattle = ReturnType<typeof createGuestPrototypeBattle>;
+
 const DEPLOYMENTS_PER_ECONOMY_LEVEL = 3;
 const EMERGENCY_FRONTLINE_COUNT = 1;
 const OPENING_ECONOMY_STAGE_INDEX = 7;
@@ -39,7 +42,41 @@ const TACTICAL_LEVEL_THREE_DEPLOYMENTS = 5;
 const TACTICAL_MAX_SAVE_SECONDS = 12;
 const TACTICAL_WAIT_PENALTY_SECONDS = 4;
 
-export function targetSupplyLevelForStage(stageIndex: number, state: ReturnType<typeof createPrototypeBattle>): number {
+/** Lower edge of each authored chapter-one recommended level band. */
+const CAMPAIGN_BASELINE_LEVELS = [
+  1, 1, 2, 3, 3,
+  4, 4, 5, 5, 6,
+  6, 7, 7, 7, 8,
+  8, 8, 9, 9, 10,
+] as const;
+
+function baselineCharacterLevel(stageIndex: number): number {
+  const level = CAMPAIGN_BASELINE_LEVELS[stageIndex];
+  if (level === undefined) throw new Error(`No campaign baseline level for stage index ${stageIndex}`);
+  return level;
+}
+
+function campaignProgress(
+  clearedStageIds: readonly string[],
+  unlockedSlotIds: readonly string[],
+  ownedPermanentRewardIds: readonly string[],
+  level: number,
+): GuestProgress {
+  return {
+    clearedStageIds,
+    specialClearedStageIds: [],
+    permanentRewardIds: ownedPermanentRewardIds,
+    ownedRecruitmentCharacterIds: [],
+    recruitmentProgressByBanner: {},
+    characterProgressById: Object.fromEntries(unlockedSlotIds.map((characterId) => [
+      characterId,
+      { level, plusLevel: 0, unlockedFormIds: [] },
+    ])),
+    deckSlotIds: unlockedSlotIds,
+  };
+}
+
+export function targetSupplyLevelForStage(stageIndex: number, state: CampaignBattle): number {
   const highestUnlockedCost = Math.max(...state.playerSlots.map((slot) => slot.cost));
   const walletIndex = state.supplyLevels.findIndex((level) => level.maxSupply >= highestUnlockedCost);
   if (walletIndex < 0) {
@@ -50,17 +87,21 @@ export function targetSupplyLevelForStage(stageIndex: number, state: ReturnType<
   return Math.min(state.supplyLevels.length, Math.max(walletRequired, economyPacing));
 }
 
-function targetableEnemyCount(state: ReturnType<typeof createPrototypeBattle>): number {
+function targetableEnemies(state: CampaignBattle) {
   return state.battle.units.filter((unit) =>
     unit.team === 'ENEMY' && unit.state !== 'DYING' && unit.state !== 'NATURAL_KNOCKBACK'
-  ).length;
+  );
 }
 
-function alivePlayerUnitCount(state: ReturnType<typeof createPrototypeBattle>): number {
+function targetableEnemyCount(state: CampaignBattle): number {
+  return targetableEnemies(state).length;
+}
+
+function alivePlayerUnitCount(state: CampaignBattle): number {
   return state.battle.units.filter((unit) => unit.team === 'PLAYER' && unit.state !== 'DYING').length;
 }
 
-function selectAffordableAnchor(state: ReturnType<typeof createPrototypeBattle>) {
+function selectAffordableAnchor(state: CampaignBattle) {
   return [...state.playerSlots]
     .filter((slot) => slot.cost <= state.supply && getCooldownRemaining(state, slot.slotId) === 0)
     .sort((a, b) => {
@@ -70,18 +111,29 @@ function selectAffordableAnchor(state: ReturnType<typeof createPrototypeBattle>)
     })[0];
 }
 
-function selectCheapestAffordableReady(state: ReturnType<typeof createPrototypeBattle>) {
+function selectCheapestAffordableReady(state: CampaignBattle) {
   return [...state.playerSlots]
     .filter((slot) => slot.cost <= state.supply && getCooldownRemaining(state, slot.slotId) === 0)
     .sort((a, b) => a.cost - b.cost || a.slotId.localeCompare(b.slotId))[0];
 }
 
-function selectTacticalCombatSlot(state: ReturnType<typeof createPrototypeBattle>, enemyCount: number) {
-  const enemyTraits = new Set(
-    state.battle.units
-      .filter((unit) => unit.team === 'ENEMY' && unit.state !== 'DYING')
-      .flatMap((unit) => unit.definition.traits ?? []),
-  );
+function strongestAverageMatchupPermille(slot: CampaignBattle['playerSlots'][number], state: CampaignBattle): number {
+  const enemies = targetableEnemies(state);
+  if (enemies.length === 0) return 1000;
+  const total = enemies.reduce((sum, enemy) => {
+    const attributes = new Set(enemy.definition.attributes ?? []);
+    const tags = new Set(enemy.definition.combatTags ?? []);
+    const best = (slot.definition.damageBonuses ?? [])
+      .filter((bonus) => bonus.targetKind === 'ATTRIBUTE'
+        ? attributes.has(bonus.target)
+        : tags.has(bonus.target))
+      .reduce((multiplier, bonus) => Math.max(multiplier, bonus.multiplierPermille), 1000);
+    return sum + best;
+  }, 0);
+  return total / enemies.length;
+}
+
+function selectTacticalCombatSlot(state: CampaignBattle, enemyCount: number) {
   const supplyLevel = getCurrentSupplyLevel(state);
 
   return [...state.playerSlots]
@@ -91,9 +143,7 @@ function selectTacticalCombatSlot(state: ReturnType<typeof createPrototypeBattle
       const waitSeconds = missingSupply / Math.max(1, supplyLevel.incomePerSecond);
       if (waitSeconds > TACTICAL_MAX_SAVE_SECONDS) return null;
 
-      const multiplierPermille = (slot.definition.damageBonuses ?? [])
-        .filter((bonus) => enemyTraits.has(bonus.trait))
-        .reduce((best, bonus) => Math.max(best, bonus.multiplierPermille), 1000);
+      const multiplierPermille = strongestAverageMatchupPermille(slot, state);
       const cycleFrames = slot.definition.attackTiming.cycleFrames;
       const dpsPerFrame = (slot.definition.attackDamage * multiplierPermille) / 1000 / cycleFrames;
       const areaFactor = slot.definition.targetMode === 'AREA'
@@ -123,7 +173,11 @@ export function autoPlayCampaignStage(
   const stage = STAGES[stageIndex]!;
   const unlockedSlotIds = getUnlockedSlotIds(clearedStageIds);
   const ownedPermanentRewardIds = getPermanentRewardIdsForClearedStages(clearedStageIds);
-  const state = createPrototypeBattle(stage.id, unlockedSlotIds, ownedPermanentRewardIds);
+  const characterLevel = baselineCharacterLevel(stageIndex);
+  const state = createGuestPrototypeBattle(
+    stage.id,
+    campaignProgress(clearedStageIds, unlockedSlotIds, ownedPermanentRewardIds, characterLevel),
+  );
   const maxTicks = options.maxSeconds * 30;
   const targetSupplyLevel = targetSupplyLevelForStage(stageIndex, state);
   const seenEnemyIds = new Set<string>();
@@ -281,6 +335,7 @@ export function autoPlayCampaignStage(
     unlockedSlotIds,
     ownedPermanentRewardIds,
     targetSupplyLevel,
+    characterLevel,
     seenEnemyIds,
     finalSupplyLevel: getCurrentSupplyLevel(state),
     telemetry,

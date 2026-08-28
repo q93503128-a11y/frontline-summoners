@@ -31,6 +31,8 @@ test('explicit saved deck order becomes the actual battle slot order', () => {
 test('saved level, plus level, and selected evolution form alter the battle-ready definition rather than only UI metadata', () => {
   const baseGuest = progress({ deckSlotIds: ['moon-eater'] });
   const base = buildGuestDeckSlots(baseGuest)[0]!;
+  const baseBattle = createGuestPrototypeBattle(firstStageId, baseGuest);
+  const baseBattleMoon = baseBattle.playerSlots[0]!;
 
   const evolvedGuest = progress({
     deckSlotIds: ['moon-eater'],
@@ -56,9 +58,14 @@ test('saved level, plus level, and selected evolution form alter the battle-read
   const battle = createGuestPrototypeBattle(firstStageId, evolvedGuest);
   const battleMoon = battle.playerSlots[0]!;
   assert.equal(battleMoon.slotId, 'moon-eater');
-  assert.equal(battleMoon.definition.maxHp, evolved.definition.maxHp);
-  assert.equal(battleMoon.definition.attackDamage, evolved.definition.attackDamage);
-  assert.equal(battleMoon.definition.standingRange, evolved.definition.standingRange);
+  assert.ok(battleMoon.definition.maxHp > baseBattleMoon.definition.maxHp);
+  assert.ok(battleMoon.definition.attackDamage > baseBattleMoon.definition.attackDamage);
+  assert.ok(battleMoon.definition.standingRange < baseBattleMoon.definition.standingRange);
+  assert.ok(battleMoon.definition.maxHp >= evolved.definition.maxHp, 'earned permanent HP rewards layer on after character growth');
+  assert.ok(battleMoon.definition.attackDamage >= evolved.definition.attackDamage, 'earned permanent attack rewards layer on after character growth');
+  assert.equal(battleMoon.definition.damageBonuses?.[0]?.targetKind, 'TAG');
+  assert.equal(battleMoon.definition.damageBonuses?.[0]?.target, 'BOSS');
+  assert.equal(battleMoon.definition.damageBonuses?.[0]?.multiplierPermille, 1700);
 });
 
 test('automatic formation still selects the first ten owned definitions in canonical roster order', () => {
