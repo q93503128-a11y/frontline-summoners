@@ -3,6 +3,7 @@ import { BattleScene } from './battle-scene';
 import { getReplayConvenienceState, resolveBattleSpeed, scaleReplayDeltaMs, type BattleSpeedMultiplier } from './replay-convenience';
 import { STAGES, getStage, type PrototypeStage } from './prototype';
 import { loadGuestProgress } from './save';
+import { isSortieStageUnlocked } from './stage-navigation';
 import { addButton } from './scene-ui';
 import { isCompactMobileViewport } from './viewport';
 
@@ -15,6 +16,7 @@ export class ReplayBattleScene extends BattleScene {
   private replaySpeed: BattleSpeedMultiplier = 1;
   private speedUpUnlocked = false;
   private speedButton: Phaser.GameObjects.Container | undefined;
+  private battleCreateStarted = false;
 
   override init(data: { stageId?: string }): void {
     super.init(data);
@@ -22,12 +24,18 @@ export class ReplayBattleScene extends BattleScene {
     this.replaySpeed = 1;
     this.speedUpUnlocked = false;
     this.speedButton = undefined;
+    this.battleCreateStarted = false;
   }
 
   override create(): void {
-    super.create();
     void loadGuestProgress().then((progress) => {
       if (!this.scene.isActive()) return;
+      if (!isSortieStageUnlocked(this.replayStage.id, progress.clearedStageIds, progress.specialClearedStageIds)) {
+        this.scene.start('stage-hub');
+        return;
+      }
+      this.battleCreateStarted = true;
+      super.create();
       const convenience = getReplayConvenienceState(this.replayStage, progress);
       this.speedUpUnlocked = convenience.speedUpUnlocked;
       this.replaySpeed = resolveBattleSpeed(this.replaySpeed, convenience);
@@ -36,6 +44,7 @@ export class ReplayBattleScene extends BattleScene {
   }
 
   override update(time: number, delta: number): void {
+    if (!this.battleCreateStarted) return;
     super.update(time, scaleReplayDeltaMs(delta, this.replaySpeed));
   }
 
