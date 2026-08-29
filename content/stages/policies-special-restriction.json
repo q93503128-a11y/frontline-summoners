@@ -1,0 +1,6 @@
+[
+  {"stageId":"special_five_banners_01","multiplayerPolicy":"SOLO_OR_COOP","coopStatScaling":{"enemyHpPermille":1200,"enemyAttackPermille":1080,"enemyBaseHpPermille":1120},"speedUpEligibility":"AFTER_NORMAL_CLEAR","sweepEligibility":"AFTER_NORMAL_CLEAR","rewardChargePolicy":"NONE"},
+  {"stageId":"special_five_banners_02","multiplayerPolicy":"SOLO_OR_COOP","coopStatScaling":{"enemyHpPermille":1200,"enemyAttackPermille":1100,"enemyBaseHpPermille":1120},"speedUpEligibility":"AFTER_NORMAL_CLEAR","sweepEligibility":"AFTER_NORMAL_CLEAR","rewardChargePolicy":"NONE"},
+  {"stageId":"special_light_purse_01","multiplayerPolicy":"SOLO_OR_COOP","coopStatScaling":{"enemyHpPermille":1200,"enemyAttackPermille":1080,"enemyBaseHpPermille":1120},"speedUpEligibility":"AFTER_NORMAL_CLEAR","sweepEligibility":"AFTER_NORMAL_CLEAR","rewardChargePolicy":"NONE"},
+  {"stageId":"special_light_purse_02","multiplayerPolicy":"SOLO_OR_COOP","coopStatScaling":{"enemyHpPermille":1200,"enemyAttackPermille":1100,"enemyBaseHpPermille":1120},"speedUpEligibility":"AFTER_NORMAL_CLEAR","sweepEligibility":"AFTER_NORMAL_CLEAR","rewardChargePolicy":"NONE"}
+]
