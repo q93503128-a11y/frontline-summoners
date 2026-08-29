@@ -147,6 +147,29 @@ export const UNIT_ART: Readonly<Record<string, UnitArtVariant>> = {
   enemy_ch2_revivedarmor: { familyId: 'hero-knight', tint: 0x79808a, displayScale: 1.16, attackFx: 'BLUNT' },
   boss_ch2_rootwidow: { familyId: 'evil-wizard', tint: 0x638d5a, displayScale: 1.42, attackFx: 'VOID' },
   boss_ch2_funeral_king: { familyId: 'hero-knight', tint: 0x655f69, displayScale: 1.48, attackFx: 'VOID' },
+
+  // Chapters 3 and 4 also use explicit temporary mappings. These are readability placeholders, not final character art.
+  enemy_ch3_glasseye: { familyId: 'wizard', tint: 0xccecff, displayScale: 1.00, attackFx: 'MAGIC' },
+  enemy_ch3_spellbug: { familyId: 'fantasy-warrior', tint: 0x9bc8e8, displayScale: 0.82, attackFx: 'MAGIC' },
+  enemy_ch3_floating_library: { familyId: 'wizard', tint: 0xb9a7e8, displayScale: 1.20, attackFx: 'MAGIC' },
+  enemy_ch3_inkdemon: { familyId: 'evil-wizard', tint: 0x62516e, displayScale: 0.98, attackFx: 'VOID' },
+  enemy_ch3_chain_demon: { familyId: 'fantasy-warrior', tint: 0x8d5a68, displayScale: 1.12, attackFx: 'BLUNT' },
+  enemy_ch3_contract_enforcer: { familyId: 'hero-knight', tint: 0x704c62, displayScale: 1.30, attackFx: 'SLASH' },
+  enemy_ch3_arcane_battery: { familyId: 'wizard', tint: 0x779bd8, displayScale: 1.28, attackFx: 'MAGIC' },
+  enemy_ch3_torn_mirror: { familyId: 'evil-wizard', tint: 0xbec5df, displayScale: 1.12, attackFx: 'VOID' },
+  boss_ch3_archmagus: { familyId: 'wizard', tint: 0xe7d4ff, displayScale: 1.48, attackFx: 'MAGIC' },
+  boss_ch3_belzar: { familyId: 'hero-knight', tint: 0x7d5060, displayScale: 1.50, attackFx: 'VOID' },
+
+  enemy_ch4_sawbird: { familyId: 'huntress', tint: 0xaab9c6, displayScale: 0.82, attackFx: 'SLASH' },
+  enemy_ch4_magnet_spider: { familyId: 'hero-knight-2', tint: 0x8fa8b7, displayScale: 1.02, attackFx: 'BLUNT' },
+  enemy_ch4_railworm: { familyId: 'huntress', tint: 0x8497aa, displayScale: 1.20, attackFx: 'PIERCE' },
+  enemy_ch4_furnace_golem: { familyId: 'hero-knight', tint: 0xb77a55, displayScale: 1.42, attackFx: 'FIRE' },
+  enemy_ch4_folded_soldier: { familyId: 'warrior', tint: 0x9f86bd, displayScale: 1.02, attackFx: 'SLASH' },
+  enemy_ch4_error_mass: { familyId: 'evil-wizard', tint: 0x8d70b8, displayScale: 1.18, attackFx: 'VOID' },
+  enemy_ch4_void_lens: { familyId: 'evil-wizard', tint: 0x77b1d7, displayScale: 1.16, attackFx: 'VOID' },
+  enemy_ch4_fusion_cavalry: { familyId: 'fantasy-warrior', tint: 0x7f9db5, displayScale: 1.22, attackFx: 'SLASH' },
+  boss_ch4_moving_throne: { familyId: 'hero-knight', tint: 0xb89362, displayScale: 1.58, attackFx: 'BLUNT' },
+  boss_ch4_zero_engine: { familyId: 'evil-wizard', tint: 0x6d86b9, displayScale: 1.62, attackFx: 'VOID' },
 };
 
 export const ART_BY_ID: Readonly<Record<string, ArtFamily>> = Object.fromEntries(ART_FAMILIES.map((art) => [art.id, art]));
