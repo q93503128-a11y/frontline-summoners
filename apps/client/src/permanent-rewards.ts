@@ -12,6 +12,7 @@ import {
 } from '@frontline/sim/meta-progression';
 import chapterOneRewardsJson from '../../../content/permanent-rewards/chapter-01.json' with { type: 'json' };
 import chapterTwoRewardsJson from '../../../content/permanent-rewards/chapter-02.json' with { type: 'json' };
+import chapterThreeRewardsJson from '../../../content/permanent-rewards/chapter-03.json' with { type: 'json' };
 
 export const REWARD_SCOPES = PERMANENT_REWARD_SCOPES;
 export type RewardScope = PermanentRewardScope;
@@ -67,11 +68,11 @@ function parseModifier(value: unknown, context: string): PermanentRewardModifier
   return { kind: 'RECHARGE_REDUCTION_PERCENT', percent };
 }
 
-function parseDefinitions(value: unknown): readonly PermanentRewardDefinition[] {
-  if (!Array.isArray(value)) throw new Error('permanent rewards must be an array');
+function parseDefinitions(value: unknown, label: string): readonly PermanentRewardDefinition[] {
+  if (!Array.isArray(value)) throw new Error(`${label} permanent rewards must be an array`);
   const ids = new Set<string>();
   return value.map((raw, index) => {
-    const context = `permanentRewards[${index}]`;
+    const context = `${label}PermanentRewards[${index}]`;
     if (!isRecord(raw) || typeof raw.id !== 'string' || raw.id.trim().length === 0) throw new Error(`${context}.id must be a non-empty string`);
     if (ids.has(raw.id)) throw new Error(`duplicate permanent reward id: ${raw.id}`);
     ids.add(raw.id);
@@ -83,14 +84,12 @@ function parseDefinitions(value: unknown): readonly PermanentRewardDefinition[] 
   });
 }
 
-const chapterOneRewards = parseDefinitions(chapterOneRewardsJson);
-const chapterTwoRewards = parseDefinitions(chapterTwoRewardsJson);
-const rewardIds = new Set(chapterOneRewards.map((reward) => reward.id));
-for (const reward of chapterTwoRewards) {
-  if (rewardIds.has(reward.id)) throw new Error(`chapter-two permanent reward duplicates existing id: ${reward.id}`);
-  rewardIds.add(reward.id);
-}
-export const PERMANENT_REWARDS: readonly PermanentRewardDefinition[] = [...chapterOneRewards, ...chapterTwoRewards];
+const chapterOneRewards = parseDefinitions(chapterOneRewardsJson, 'chapterOne');
+const chapterTwoRewards = parseDefinitions(chapterTwoRewardsJson, 'chapterTwo');
+const chapterThreeRewards = parseDefinitions(chapterThreeRewardsJson, 'chapterThree');
+const allRewards = [...chapterOneRewards, ...chapterTwoRewards, ...chapterThreeRewards];
+if (new Set(allRewards.map((reward) => reward.id)).size !== allRewards.length) throw new Error('permanent reward ids must be globally unique');
+export const PERMANENT_REWARDS: readonly PermanentRewardDefinition[] = allRewards;
 
 export function applyPercent(value: number, percent: number, minimum = 1): number {
   return applyPercentShared(value, percent, minimum);
