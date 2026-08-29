@@ -196,7 +196,7 @@ test('manual deck cards keep level, plus level, form, rarity, role, and combat i
   assert.doesNotMatch(deck, /모집 미획득|LOCK|미보유/);
 });
 
-test('main and result scenes use current permanent-reward and special-clear wording', async () => {
+test('main and result scenes use current permanent-reward and SPECIAL resource-clear wording', async () => {
   const { navigation, result } = await readRuntime();
   assert.match(navigation, /const menuButtonHeight = compact \? 108 : 92;/);
   assert.match(navigation, /const owned = getOwnedCharacterIds\(progress\)\.length;/);
@@ -207,8 +207,9 @@ test('main and result scenes use current permanent-reward and special-clear word
   assert.match(result, /getPermanentRewardEffectText\(this\.stage\.permanentRewardId\)/);
   assert.match(result, /'NORMAL_CLEAR 저장 완료 · 다음 스테이지 개방'/);
   assert.match(result, /'브라우저 영구 저장 실패 · 현재 탭에서는 진행 유지'/);
-  assert.match(result, /'특수전 클리어 기록'/);
-  assert.match(result, /'특수전 첫 클리어 저장 완료'/);
+  assert.match(result, /'SPECIAL 클리어'/);
+  assert.match(result, /'SPECIAL 첫 클리어 저장 완료'/);
+  assert.match(result, /'SPECIAL 재클리어 보상 저장 완료'/);
   assert.doesNotMatch(result, /훈장 획득|stage\.treasure/);
 });
 

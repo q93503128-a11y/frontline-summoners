@@ -12,8 +12,8 @@ const ATTACK_FX_STYLES = new Set(['SLASH', 'PIERCE', 'BLUNT', 'MAGIC', 'FIRE', '
 
 test('every implemented story player and enemy has a registered art family and attack FX style', () => {
   assert.equal(PLAYER_SLOTS.length, 10);
-  assert.equal(ENEMIES.length, 20, 'chapter two adds ten enemies to the chapter-one enemy line');
-  assert.equal(implementedStoryAndEnemyIds.length, 30);
+  assert.equal(ENEMIES.length, 40, 'the four-chapter v1 main campaign currently executes forty enemy and boss definitions');
+  assert.equal(implementedStoryAndEnemyIds.length, 50);
   for (const id of implementedStoryAndEnemyIds) {
     const variant = UNIT_ART[id];
     assert.ok(variant, `missing UNIT_ART mapping for ${id}`);

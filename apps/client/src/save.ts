@@ -134,7 +134,11 @@ const RECRUITMENT_CHARACTER_IDS = new Set(RECRUITMENT_UNITS.map((unit) => unit.i
 const ALL_CHARACTER_IDS = new Set(ALL_PLAYER_SLOTS.map((slot) => slot.slotId));
 const ALL_ENEMY_IDS = new Set(ENEMIES.map((enemy) => enemy.enemyId));
 const NORMAL_CLEAR_SOURCE_SET = new Set<string>(NORMAL_CLEAR_SOURCES);
-const LEGACY_MAIN_STAGE_ID_MAP = new Map<string, string>(STAGES.map((stage, index) => [`border-${String(index + 1).padStart(2, '0')}`, stage.id]));
+const LEGACY_MAIN_STAGE_ID_MAP = new Map<string, string>(
+  STAGES
+    .filter((stage) => stage.id.startsWith('main_01_'))
+    .map((stage, index) => [`border-${String(index + 1).padStart(2, '0')}`, stage.id]),
+);
 let sessionProgress: GuestProgress = EMPTY_PROGRESS;
 
 function stringArray(value: unknown): readonly string[] {

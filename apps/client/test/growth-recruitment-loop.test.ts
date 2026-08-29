@@ -55,7 +55,7 @@ test('recruitment UI routes through duplicate-growth authority and exposes the r
   assert.match(source, /현재 \+\$\{pull\.plusLevelAfter\}/);
 });
 
-test('growth scene is registered and only exposes already-unlocked form selection', async () => {
+test('growth scene is registered and exposes paid evolution unlock plus already-unlocked form selection', async () => {
   const [main, growth] = await Promise.all([
     readFile(new URL('../src/main.ts', import.meta.url), 'utf8'),
     readFile(new URL('../src/growth-scene.ts', import.meta.url), 'utf8'),
@@ -65,16 +65,26 @@ test('growth scene is registered and only exposes already-unlocked form selectio
   assert.match(growth, /getOwnedCharacterIds\(this\.progress\)/);
   assert.match(growth, /buildCharacterCombatSlot\(slot, meta\.level, meta\.selectedFormId, meta\.plusLevel\)/);
   assert.match(growth, /meta\.unlockedFormIds\.includes\(form\.formId\)/);
+  assert.match(growth, /getEvolutionRecipe\(form\.formId\)/);
+  assert.match(growth, /getGuestResourceBalance\(this\.progress, 'evo_fragment'\)/);
+  assert.match(growth, /recordGuestEvolutionUnlock\(characterId, formId\)/);
   assert.match(growth, /selectGuestEvolutionForm\(characterId, formId\)/);
-  assert.doesNotMatch(growth, /recordGuestCharacterLevel|recordGuestEvolutionUnlock/);
+  assert.doesNotMatch(growth, /recordGuestCharacterLevel/);
 });
 
-test('implemented level-cap display follows the chapter completion 10 to 20 to 30 contract', async () => {
+test('implemented level-cap display follows the four chapter completion 10 to 20 to 30 to 40 to 50 contract', async () => {
   const growth = await readFile(new URL('../src/growth-scene.ts', import.meta.url), 'utf8');
   assert.match(growth, /CHAPTER_ONE_FINAL_STAGE_ID = 'main_01_020'/);
   assert.match(growth, /CHAPTER_TWO_FINAL_STAGE_ID = 'main_02_020'/);
+  assert.match(growth, /CHAPTER_THREE_FINAL_STAGE_ID = 'main_03_020'/);
+  assert.match(growth, /CHAPTER_FOUR_FINAL_STAGE_ID = 'main_04_020'/);
+  assert.match(growth, /if \(cleared\.has\(CHAPTER_FOUR_FINAL_STAGE_ID\)\) return 50/);
+  assert.match(growth, /if \(cleared\.has\(CHAPTER_THREE_FINAL_STAGE_ID\)\) return 40/);
   assert.match(growth, /if \(cleared\.has\(CHAPTER_TWO_FINAL_STAGE_ID\)\) return 30/);
   assert.match(growth, /if \(cleared\.has\(CHAPTER_ONE_FINAL_STAGE_ID\)\) return 20/);
   assert.match(growth, /제1장 완료 시 기본 레벨 상한 Lv20/);
   assert.match(growth, /제2장 완료 시 기본 레벨 상한 Lv30/);
+  assert.match(growth, /제3장 완료 시 기본 레벨 상한 Lv40/);
+  assert.match(growth, /제4장 완료 시 기본 레벨 상한 Lv50/);
+  assert.match(growth, /제4장 완료 · 기본 레벨 상한 Lv50 · 1차 메인 엔딩 달성/);
 });

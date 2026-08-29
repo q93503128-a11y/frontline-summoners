@@ -82,17 +82,34 @@ test('legacy progress without provenance migrates stage ids and defaults histori
   assert.deepEqual(provenanceOnly.normalClearSourceByStage, {});
 });
 
-test('save schema v10 persists enemy discovery and canonical permanent rewards while accepting older v2-v9 data for migration', async () => {
+test('legacy border migration is bounded to the original twenty-stage chapter and never fabricates chapter-two clears', () => {
+  const legacyChapterOne = Array.from({ length: 20 }, (_, index) => `border-${String(index + 1).padStart(2, '0')}`);
+  const normalized = normalizeGuestProgress({
+    clearedStageIds: [...legacyChapterOne, 'border-21'],
+    specialClearedStageIds: [],
+    permanentRewardIds: [],
+  });
+  assert.equal(normalized.clearedStageIds.length, 20);
+  assert.equal(normalized.clearedStageIds[0], 'main_01_001');
+  assert.equal(normalized.clearedStageIds.at(-1), 'main_01_020');
+  assert.equal(normalized.clearedStageIds.includes('main_02_001'), false);
+  assert.equal(hasNormalClear(normalized, 'border-21'), false);
+});
+
+test('save schema v11 persists the resource ledger and current progression fields while accepting older v2-v10 data for migration', async () => {
   const source = await readFile(new URL('../src/save.ts', import.meta.url), 'utf8');
-  assert.match(source, /const SCHEMA_VERSION = 10/);
-  assert.match(source, /interface StoredGuestProgressV10/);
+  assert.match(source, /const SCHEMA_VERSION = 11/);
+  assert.match(source, /interface StoredGuestProgressV11/);
   assert.match(source, /permanentRewardIds: readonly string\[\]/);
   assert.match(source, /discoveredEnemyIds: readonly string\[\]/);
+  assert.match(source, /resourceLedgerById: ResourceLedger/);
   assert.match(source, /\(version as number\) < 2 \|\| \(version as number\) > SCHEMA_VERSION/);
   assert.match(source, /versionNumber >= 8/);
   assert.match(source, /versionNumber >= 9 \? stringArray\(value\?\.permanentRewardIds\) : stringArray\(value\?\.treasureIds\)/);
   assert.match(source, /versionNumber >= 10 \? stringArray\(value\?\.discoveredEnemyIds\) : \[\]/);
+  assert.match(source, /versionNumber >= 11 \? normalizeResourceLedger\(value\?\.resourceLedgerById\) : \{\}/);
   assert.match(source, /LEGACY_MAIN_STAGE_ID_MAP/);
+  assert.match(source, /filter\(\(stage\) => stage\.id\.startsWith\('main_01_'\)\)/);
   assert.match(source, /canonicalStageIds\(value\?\.clearedStageIds\)/);
 });
 
@@ -113,12 +130,14 @@ test('progression writer records only explicit actual-battle NORMAL_CLEAR and de
   assert.doesNotMatch(resultSource, /recordStageClear\(/);
 });
 
-test('SPECIAL writer still gates against the NORMAL_CLEAR progression axis', async () => {
+test('SPECIAL writer still gates against the NORMAL_CLEAR progression axis and grants canonical resources', async () => {
   const source = await readFile(new URL('../src/save.ts', import.meta.url), 'utf8');
   assert.match(source, /export async function recordSpecialStageClear/);
   assert.match(source, /if \(stage\.stageType !== 'SPECIAL'\)/);
   assert.match(source, /if \(!isSpecialStageUnlocked\(stage\.id, before\.clearedStageIds\)\)/);
   assert.match(source, /specialClears\.add\(stage\.id\)/);
+  assert.match(source, /getSpecialResourceReward\(stage\.id, firstClear\)/);
+  assert.match(source, /grantResources\(before\.resourceLedgerById \?\? \{\}, resourceReward\)/);
 });
 
 test('durable IndexedDB persistence remains distinct from in-tab session progress', async () => {

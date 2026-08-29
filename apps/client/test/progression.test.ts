@@ -21,6 +21,14 @@ async function loadCanonicalStageJson(): Promise<readonly Record<string, unknown
     '../../../content/stages/chapter-02-06-10.json',
     '../../../content/stages/chapter-02-11-15.json',
     '../../../content/stages/chapter-02-16-20.json',
+    '../../../content/stages/chapter-03-01-05.json',
+    '../../../content/stages/chapter-03-06-10.json',
+    '../../../content/stages/chapter-03-11-15.json',
+    '../../../content/stages/chapter-03-16-20.json',
+    '../../../content/stages/chapter-04-01-05.json',
+    '../../../content/stages/chapter-04-06-10.json',
+    '../../../content/stages/chapter-04-11-15.json',
+    '../../../content/stages/chapter-04-16-20.json',
   ];
   const chunks = await Promise.all(urls.map(async (path) => JSON.parse(await readFile(new URL(path, import.meta.url), 'utf8')) as readonly Record<string, unknown>[]));
   return chunks.flat();
@@ -67,13 +75,21 @@ test('clearing a stage opens only its immediate successor', () => {
   assert.deepEqual(getUnlockedSlotIds(cleared), ['militia', 'guard']);
 });
 
-test('chapter-two entry is the immediate successor of a contiguous chapter-one clear', () => {
-  const chapterOne = STAGES.slice(0, 20).map((stage) => stage.id);
-  assert.equal(STAGES[19]!.id, 'main_01_020');
-  assert.equal(STAGES[20]!.id, 'main_02_001');
-  assert.equal(isStageUnlocked(STAGES[20]!.id, chapterOne.slice(0, 19)), false);
-  assert.equal(isStageUnlocked(STAGES[20]!.id, chapterOne), true);
-  assert.equal(isStageUnlocked(STAGES[21]!.id, chapterOne), false);
+test('chapter boundaries remain contiguous across all four twenty-stage chapters', () => {
+  const boundaries = [
+    [19, 'main_01_020', 20, 'main_02_001'],
+    [39, 'main_02_020', 40, 'main_03_001'],
+    [59, 'main_03_020', 60, 'main_04_001'],
+  ] as const;
+  for (const [previousIndex, previousId, nextIndex, nextId] of boundaries) {
+    assert.equal(STAGES[previousIndex]!.id, previousId);
+    assert.equal(STAGES[nextIndex]!.id, nextId);
+    const clearedBeforeBoundary = STAGES.slice(0, previousIndex).map((stage) => stage.id);
+    const clearedThroughBoundary = STAGES.slice(0, previousIndex + 1).map((stage) => stage.id);
+    assert.equal(isStageUnlocked(STAGES[nextIndex]!.id, clearedBeforeBoundary), false);
+    assert.equal(isStageUnlocked(STAGES[nextIndex]!.id, clearedThroughBoundary), true);
+    assert.equal(isStageUnlocked(STAGES[nextIndex + 1]!.id, clearedThroughBoundary), false);
+  }
 });
 
 test('progression rejects unknown stage ids and cannot be skipped by a non-contiguous clear set', () => {
@@ -81,7 +97,7 @@ test('progression rejects unknown stage ids and cannot be skipped by a non-conti
   assert.throws(() => getStage('missing-stage'), /Unknown stage: missing-stage/);
   assert.throws(() => getStageNumber('missing-stage'), /Unknown progression stage: missing-stage/);
 
-  const outOfOrder = [STAGES[2]!.id, STAGES[15]!.id, STAGES[35]!.id];
+  const outOfOrder = [STAGES[2]!.id, STAGES[15]!.id, STAGES[75]!.id];
   assert.deepEqual(getContiguousClearedStageIds(outOfOrder), []);
   assert.equal(isStageUnlocked(STAGES[3]!.id, outOfOrder), false, 'out-of-order clear records must not open later campaign stages');
   assert.deepEqual(getUnlockedSlotIds(outOfOrder), ['militia'], 'out-of-order clear records must not grant later roster rewards');
@@ -97,15 +113,16 @@ test('progression rejects unknown stage ids and cannot be skipped by a non-conti
   );
 });
 
-test('full current progression keeps the ten story units and grants all forty permanent rewards', () => {
+test('full v1 main progression keeps the ten story units and grants all eighty permanent rewards', () => {
   const cleared = STAGES.map((stage) => stage.id);
-  assert.equal(STAGES.length, 40);
+  assert.equal(STAGES.length, 80);
   assert.deepEqual(getUnlockedSlotIds(cleared), PLAYER_SLOTS.map((slot) => slot.slotId));
   assert.deepEqual(getPermanentRewardIdsForClearedStages(cleared), STAGES.map((stage) => stage.permanentRewardId));
 });
 
 test('runtime stage definitions preserve every authored canonical field while allowing schema defaults', async () => {
   const raw = await loadCanonicalStageJson();
+  assert.equal(raw.length, 80);
   assert.equal(STAGES.length, raw.length);
   for (const [index, rawStage] of raw.entries()) {
     const runtimeStage = STAGES[index] as unknown as Record<string, unknown>;

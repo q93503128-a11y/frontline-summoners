@@ -52,9 +52,14 @@ test('the first roster and enemy line advance at a deliberate pace', () => {
   assert.ok(PLAYER_SLOTS.every((slot) => slot.definition.moveSpeed <= 3));
 });
 
-test('the ten story units remain the chapter-one core roster while main progression now spans two chapters', () => {
+test('the ten story units remain the core roster while v1 main progression spans four chapters', () => {
   assert.equal(PLAYER_SLOTS.length, 10);
-  assert.equal(STAGES.length, 40);
+  assert.equal(STAGES.length, 80);
   assert.equal(STAGES[19]!.id, 'main_01_020');
   assert.equal(STAGES[20]!.id, 'main_02_001');
+  assert.equal(STAGES[39]!.id, 'main_02_020');
+  assert.equal(STAGES[40]!.id, 'main_03_001');
+  assert.equal(STAGES[59]!.id, 'main_03_020');
+  assert.equal(STAGES[60]!.id, 'main_04_001');
+  assert.equal(STAGES[79]!.id, 'main_04_020');
 });
