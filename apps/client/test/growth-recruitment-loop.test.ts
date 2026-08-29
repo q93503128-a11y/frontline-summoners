@@ -69,8 +69,12 @@ test('growth scene is registered and only exposes already-unlocked form selectio
   assert.doesNotMatch(growth, /recordGuestCharacterLevel|recordGuestEvolutionUnlock/);
 });
 
-test('implemented level-cap display follows the current chapter-one 10 to 20 contract', async () => {
+test('implemented level-cap display follows the chapter completion 10 to 20 to 30 contract', async () => {
   const growth = await readFile(new URL('../src/growth-scene.ts', import.meta.url), 'utf8');
-  assert.match(growth, /progress\.clearedStageIds\.length >= STAGES\.length \? 20 : 10/);
+  assert.match(growth, /CHAPTER_ONE_FINAL_STAGE_ID = 'main_01_020'/);
+  assert.match(growth, /CHAPTER_TWO_FINAL_STAGE_ID = 'main_02_020'/);
+  assert.match(growth, /if \(cleared\.has\(CHAPTER_TWO_FINAL_STAGE_ID\)\) return 30/);
+  assert.match(growth, /if \(cleared\.has\(CHAPTER_ONE_FINAL_STAGE_ID\)\) return 20/);
   assert.match(growth, /제1장 완료 시 기본 레벨 상한 Lv20/);
+  assert.match(growth, /제2장 완료 시 기본 레벨 상한 Lv30/);
 });

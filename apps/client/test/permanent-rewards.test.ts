@@ -14,12 +14,12 @@ import {
   applyPermanentRewardBattleEffects,
 } from '../src/permanent-rewards.ts';
 
-test('every chapter-one progression stage has exactly one permanent reward definition', () => {
+test('every implemented progression stage has exactly one permanent reward definition', () => {
   const stageRewardIds = STAGES.map((stage) => stage.permanentRewardId);
   assert.equal(stageRewardIds.every((rewardId): rewardId is string => typeof rewardId === 'string'), true);
   const rewardIds = PERMANENT_REWARDS.map((reward) => reward.id).sort();
   assert.deepEqual(rewardIds, [...stageRewardIds].sort());
-  assert.equal(new Set(rewardIds).size, 20);
+  assert.equal(new Set(rewardIds).size, 40);
 });
 
 test('cleared stage ids resolve to permanent reward ids in stage order', () => {
@@ -140,6 +140,22 @@ test('chapter-one final reward carries completion only, not an extra permanent c
     enemies: ENEMIES,
   });
   assert.deepEqual(output.chapterFlags, ['chapter-01-complete']);
+  assert.equal(output.startingSupply, 500);
+  assert.equal(output.playerBaseHp, 5000);
+});
+
+test('chapter-two final reward carries the second completion flag only', () => {
+  const finalReward = PERMANENT_REWARDS.find((reward) => reward.id === 'twisted-throne')!;
+  assert.deepEqual(finalReward.modifiers, [{ kind: 'CHAPTER_FLAG', flag: 'chapter-02-complete' }]);
+
+  const output = applyPermanentRewardBattleEffects({
+    ownedRewardIds: ['twisted-throne'],
+    startingSupply: 500,
+    playerBaseHp: 5000,
+    playerSlots: PLAYER_SLOTS,
+    enemies: ENEMIES,
+  });
+  assert.deepEqual(output.chapterFlags, ['chapter-02-complete']);
   assert.equal(output.startingSupply, 500);
   assert.equal(output.playerBaseHp, 5000);
 });

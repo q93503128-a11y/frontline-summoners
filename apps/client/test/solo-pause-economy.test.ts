@@ -52,7 +52,9 @@ test('the first roster and enemy line advance at a deliberate pace', () => {
   assert.ok(PLAYER_SLOTS.every((slot) => slot.definition.moveSpeed <= 3));
 });
 
-test('the ten current story units are the chapter-one core roster, not an all-game character cap', () => {
+test('the ten story units remain the chapter-one core roster while main progression now spans two chapters', () => {
   assert.equal(PLAYER_SLOTS.length, 10);
-  assert.equal(STAGES.length, 20);
+  assert.equal(STAGES.length, 40);
+  assert.equal(STAGES[19]!.id, 'main_01_020');
+  assert.equal(STAGES[20]!.id, 'main_02_001');
 });
