@@ -88,8 +88,8 @@ function parseSpecialGroup(raw: unknown, expectedStageCount: number, label: stri
 const CHAPTER_TWO_STAGE_CONTENT = parseProgressionChapter([...chapterTwoStagesAJson, ...chapterTwoStagesBJson, ...chapterTwoStagesCJson, ...chapterTwoStagesDJson], 'chapter-two');
 const CHAPTER_THREE_STAGE_CONTENT = parseProgressionChapter([...chapterThreeStagesAJson, ...chapterThreeStagesBJson, ...chapterThreeStagesCJson, ...chapterThreeStagesDJson], 'chapter-three');
 const CHAPTER_FOUR_STAGE_CONTENT = parseProgressionChapter([...chapterFourStagesAJson, ...chapterFourStagesBJson, ...chapterFourStagesCJson, ...chapterFourStagesDJson], 'chapter-four');
-const CHALLENGE_SPECIAL_STAGE_CONTENT = parseSpecialGroup(challengeSpecialStagesJson, 5, 'challenge-special');
-const RESOURCE_SPECIAL_STAGE_CONTENT = parseSpecialGroup(resourceSpecialStagesJson, 18, 'resource-special');
+const CHALLENGE_SPECIAL_STAGE_CONTENT = parseSpecialGroup(challengeSpecialStagesJson, 9, 'challenge-special');
+const RESOURCE_SPECIAL_STAGE_CONTENT = parseSpecialGroup(resourceSpecialStagesJson, 29, 'resource-and-event-special');
 const PERMANENT_SPECIAL_STAGE_CONTENT = parseSpecialGroup([
   ...permanentGluttonStagesJson,
   ...permanentUndeadStagesJson,
