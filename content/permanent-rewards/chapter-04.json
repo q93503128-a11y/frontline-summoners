@@ -1,0 +1,22 @@
+[
+  {"id":"gear-feather","modifiers":[{"kind":"UNIT_HP_PERCENT","scope":"ALL","percent":3}]},
+  {"id":"magnet-coil","modifiers":[{"kind":"UNIT_ATTACK_PERCENT","scope":"ALL","percent":3}]},
+  {"id":"rail-tooth","modifiers":[{"kind":"UNIT_HP_PERCENT","scope":"RANGED","percent":5}]},
+  {"id":"furnace-key","modifiers":[{"kind":"PLAYER_BASE_HP_PERCENT","percent":5}]},
+  {"id":"folded-plate","modifiers":[{"kind":"UNIT_HP_PERCENT","scope":"FRONTLINE","percent":5}]},
+  {"id":"error-cache","modifiers":[{"kind":"RECHARGE_REDUCTION_PERCENT","percent":2}]},
+  {"id":"void-lens-chip","modifiers":[{"kind":"STARTING_SUPPLY_PERCENT","percent":5}]},
+  {"id":"rift-bolt","modifiers":[{"kind":"KILL_SUPPLY_PERCENT","percent":4}]},
+  {"id":"factory-pass","modifiers":[{"kind":"UNIT_ATTACK_PERCENT","scope":"AREA","percent":5}]},
+  {"id":"throne-gear","modifiers":[{"kind":"UNIT_HP_PERCENT","scope":"ALL","percent":3}]},
+  {"id":"reverse-cog","modifiers":[{"kind":"UNIT_ATTACK_PERCENT","scope":"ALL","percent":3}]},
+  {"id":"black-belt","modifiers":[{"kind":"WORKER_COST_REDUCTION_PERCENT","percent":3}]},
+  {"id":"fusion-rein","modifiers":[{"kind":"PLAYER_BASE_HP_PERCENT","percent":5}]},
+  {"id":"rift-dynamo","modifiers":[{"kind":"UNIT_ATTACK_PERCENT","scope":"RANGED","percent":5}]},
+  {"id":"imperial-spring","modifiers":[{"kind":"RECHARGE_REDUCTION_PERCENT","percent":2}]},
+  {"id":"outer-wall-core","modifiers":[{"kind":"STARTING_SUPPLY_PERCENT","percent":5}]},
+  {"id":"collapse-line","modifiers":[{"kind":"UNIT_HP_PERCENT","scope":"ALL","percent":3}]},
+  {"id":"last-march","modifiers":[{"kind":"KILL_SUPPLY_PERCENT","percent":4}]},
+  {"id":"zero-heart","modifiers":[{"kind":"UNIT_ATTACK_PERCENT","scope":"ALL","percent":3}]},
+  {"id":"frontier-end","modifiers":[{"kind":"CHAPTER_FLAG","flag":"chapter-04-complete"}]}
+]

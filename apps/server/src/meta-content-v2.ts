@@ -5,6 +5,7 @@ import {
 } from '@frontline/sim/meta-progression';
 import chapterTwoRewardsJson from '../../../content/permanent-rewards/chapter-02.json' with { type: 'json' };
 import chapterThreeRewardsJson from '../../../content/permanent-rewards/chapter-03.json' with { type: 'json' };
+import chapterFourRewardsJson from '../../../content/permanent-rewards/chapter-04.json' with { type: 'json' };
 import {
   SERVER_CHARACTER_LEVEL_CURVE,
   SERVER_EVOLUTION_FORMS,
@@ -12,24 +13,9 @@ import {
   SERVER_REWARD_SCOPES_BY_CHARACTER,
 } from './meta-content.ts';
 
-export {
-  SERVER_CHARACTER_LEVEL_CURVE,
-  SERVER_EVOLUTION_FORMS,
-  SERVER_REWARD_SCOPES_BY_CHARACTER,
-};
-
+export { SERVER_CHARACTER_LEVEL_CURVE, SERVER_EVOLUTION_FORMS, SERVER_REWARD_SCOPES_BY_CHARACTER };
 const KNOWN_REWARD_SCOPES = new Set<string>(['ALL', 'FRONTLINE', 'RANGED', 'AREA']);
-const KNOWN_REWARD_KINDS = new Set<string>([
-  'UNIT_HP_PERCENT',
-  'UNIT_ATTACK_PERCENT',
-  'STARTING_SUPPLY_PERCENT',
-  'PLAYER_BASE_HP_PERCENT',
-  'KILL_SUPPLY_PERCENT',
-  'WORKER_COST_REDUCTION_PERCENT',
-  'RECHARGE_REDUCTION_PERCENT',
-  'CHAPTER_FLAG',
-]);
-
+const KNOWN_REWARD_KINDS = new Set<string>(['UNIT_HP_PERCENT','UNIT_ATTACK_PERCENT','STARTING_SUPPLY_PERCENT','PLAYER_BASE_HP_PERCENT','KILL_SUPPLY_PERCENT','WORKER_COST_REDUCTION_PERCENT','RECHARGE_REDUCTION_PERCENT','CHAPTER_FLAG']);
 function record(value: unknown, context: string): Record<string, unknown> {
   if (typeof value !== 'object' || value === null || Array.isArray(value)) throw new Error(`${context} must be an object`);
   return value as Record<string, unknown>;
@@ -71,9 +57,11 @@ function parseDefinitions(value: unknown, label: string): readonly PermanentRewa
     return { id, modifiers: raw.modifiers.map((modifier, modifierIndex) => parseModifier(modifier, `${id}.modifiers[${modifierIndex}]`)) };
   });
 }
-
-const chapterTwoRewards = parseDefinitions(chapterTwoRewardsJson, 'chapterTwo');
-const chapterThreeRewards = parseDefinitions(chapterThreeRewardsJson, 'chapterThree');
-const allRewards = [...SERVER_CHAPTER_ONE_PERMANENT_REWARDS, ...chapterTwoRewards, ...chapterThreeRewards];
+const allRewards = [
+  ...SERVER_CHAPTER_ONE_PERMANENT_REWARDS,
+  ...parseDefinitions(chapterTwoRewardsJson, 'chapterTwo'),
+  ...parseDefinitions(chapterThreeRewardsJson, 'chapterThree'),
+  ...parseDefinitions(chapterFourRewardsJson, 'chapterFour'),
+];
 if (new Set(allRewards.map((reward) => reward.id)).size !== allRewards.length) throw new Error('server permanent reward ids must be globally unique');
 export const SERVER_PERMANENT_REWARDS: readonly PermanentRewardDefinition[] = allRewards;

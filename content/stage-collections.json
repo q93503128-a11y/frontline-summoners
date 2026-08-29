@@ -5,12 +5,7 @@
     "title": "제1장 · 뒤집힌 국경",
     "shortTitle": "제1장",
     "description": "첫 전선을 밀며 동료와 영구 보상을 확보한다.",
-    "stageIds": [
-      "main_01_001", "main_01_002", "main_01_003", "main_01_004", "main_01_005",
-      "main_01_006", "main_01_007", "main_01_008", "main_01_009", "main_01_010",
-      "main_01_011", "main_01_012", "main_01_013", "main_01_014", "main_01_015",
-      "main_01_016", "main_01_017", "main_01_018", "main_01_019", "main_01_020"
-    ]
+    "stageIds": ["main_01_001","main_01_002","main_01_003","main_01_004","main_01_005","main_01_006","main_01_007","main_01_008","main_01_009","main_01_010","main_01_011","main_01_012","main_01_013","main_01_014","main_01_015","main_01_016","main_01_017","main_01_018","main_01_019","main_01_020"]
   },
   {
     "id": "chapter-02",
@@ -18,12 +13,7 @@
     "title": "제2장 · 뒤틀린 숲",
     "shortTitle": "제2장",
     "description": "NATURE와 UNDEAD 전선을 돌파해 Lv30 상한을 연다.",
-    "stageIds": [
-      "main_02_001", "main_02_002", "main_02_003", "main_02_004", "main_02_005",
-      "main_02_006", "main_02_007", "main_02_008", "main_02_009", "main_02_010",
-      "main_02_011", "main_02_012", "main_02_013", "main_02_014", "main_02_015",
-      "main_02_016", "main_02_017", "main_02_018", "main_02_019", "main_02_020"
-    ],
+    "stageIds": ["main_02_001","main_02_002","main_02_003","main_02_004","main_02_005","main_02_006","main_02_007","main_02_008","main_02_009","main_02_010","main_02_011","main_02_012","main_02_013","main_02_014","main_02_015","main_02_016","main_02_017","main_02_018","main_02_019","main_02_020"],
     "unlockAfterStageId": "main_01_020"
   },
   {
@@ -32,13 +22,17 @@
     "title": "제3장 · 마도도시 세라페",
     "shortTitle": "제3장",
     "description": "ARCANE과 DEMON의 사거리·Push·멀티히트를 돌파해 Lv40 상한을 연다.",
-    "stageIds": [
-      "main_03_001", "main_03_002", "main_03_003", "main_03_004", "main_03_005",
-      "main_03_006", "main_03_007", "main_03_008", "main_03_009", "main_03_010",
-      "main_03_011", "main_03_012", "main_03_013", "main_03_014", "main_03_015",
-      "main_03_016", "main_03_017", "main_03_018", "main_03_019", "main_03_020"
-    ],
+    "stageIds": ["main_03_001","main_03_002","main_03_003","main_03_004","main_03_005","main_03_006","main_03_007","main_03_008","main_03_009","main_03_010","main_03_011","main_03_012","main_03_013","main_03_014","main_03_015","main_03_016","main_03_017","main_03_018","main_03_019","main_03_020"],
     "unlockAfterStageId": "main_02_020"
+  },
+  {
+    "id": "chapter-04",
+    "stageType": "PROGRESSION",
+    "title": "제4장 · 기어 제국의 균열",
+    "shortTitle": "제4장",
+    "description": "MACHINE과 ANOMALY 최종 전선을 넘어 Lv50과 1차 메인 엔딩을 연다.",
+    "stageIds": ["main_04_001","main_04_002","main_04_003","main_04_004","main_04_005","main_04_006","main_04_007","main_04_008","main_04_009","main_04_010","main_04_011","main_04_012","main_04_013","main_04_014","main_04_015","main_04_016","main_04_017","main_04_018","main_04_019","main_04_020"],
+    "unlockAfterStageId": "main_03_020"
   },
   {
     "id": "special-border-01",
@@ -46,7 +40,7 @@
     "title": "특수전 · 뒤집힌 국경",
     "shortTitle": "특수전",
     "description": "출격 제한·러시·장거리·보스 연전 도전.",
-    "stageIds": ["special-01", "special-02", "special-03", "special-04", "special-05"],
+    "stageIds": ["special-01","special-02","special-03","special-04","special-05"],
     "unlockAfterStageId": "main_01_020"
   }
 ]
