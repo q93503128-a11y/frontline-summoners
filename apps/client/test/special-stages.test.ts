@@ -1,24 +1,13 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import {
-  ALL_STAGES,
-  PLAYER_SLOTS,
-  SPECIAL_STAGES,
-  STAGES,
-  createPrototypeBattle,
-  getPermanentRewardIdsForClearedStages,
-  getSpecialStageNumber,
-  getStage,
-  isBattleStageUnlocked,
-  isSpecialStageUnlocked,
-} from '../src/prototype.ts';
+import { ALL_STAGES, PLAYER_SLOTS, SPECIAL_STAGES, STAGES, createPrototypeBattle, getPermanentRewardIdsForClearedStages, getSpecialStageNumber, getStage, isBattleStageUnlocked, isSpecialStageUnlocked } from '../src/prototype.ts';
 
 const CHAPTER_ONE_STAGES = STAGES.slice(0, 20);
 
-test('v1 runtime contains the complete 80-stage main spine plus forty-six executable SPECIAL stages', () => {
+test('v1 runtime contains eighty main stages plus sixty-one executable SPECIAL stages', () => {
   assert.equal(STAGES.length, 80);
-  assert.equal(SPECIAL_STAGES.length, 46);
-  assert.equal(ALL_STAGES.length, 126);
+  assert.equal(SPECIAL_STAGES.length, 61);
+  assert.equal(ALL_STAGES.length, 141);
   assert.ok(SPECIAL_STAGES.every((stage) => stage.stageType === 'SPECIAL'));
   assert.ok(SPECIAL_STAGES.every((stage) => stage.unlockUnitId === undefined));
   assert.ok(SPECIAL_STAGES.every((stage) => stage.permanentRewardId === undefined));
@@ -37,20 +26,29 @@ test('SPECIAL hub remains locked until chapter one is cleared', () => {
   assert.equal(getStage(firstSpecial.id).id, firstSpecial.id);
 });
 
-test('resource SPECIAL families are present with canonical stage counts', () => {
+test('resource, restriction and event SPECIAL families are present at canonical initial volume', () => {
   const ids = new Set(SPECIAL_STAGES.map((stage) => stage.id));
   for (let i = 1; i <= 5; i += 1) assert.ok(ids.has(`resource_gold_0${i}`));
   for (let i = 1; i <= 4; i += 1) assert.ok(ids.has(`resource_soul_0${i}`));
   for (let i = 1; i <= 5; i += 1) assert.ok(ids.has(`resource_evolution_0${i}`));
   for (let i = 1; i <= 4; i += 1) assert.ok(ids.has(`resource_starlight_0${i}`));
+  assert.ok(ids.has('special_five_banners_01') && ids.has('special_five_banners_02'));
+  assert.ok(ids.has('special_light_purse_01') && ids.has('special_light_purse_02'));
+  for (let i = 1; i <= 6; i += 1) assert.ok(ids.has(`event_summer_01_0${i}`));
+  for (let i = 1; i <= 5; i += 1) assert.ok(ids.has(`event_zero_edge_01_0${i}`));
 });
 
 test('permanent challenge SPECIAL families contain the authored twenty-three battles', () => {
   const ids = new Set(SPECIAL_STAGES.map((stage) => stage.id));
-  for (const prefix of ['glutton', 'undead', 'glass', 'mechcastle', 'anomaly']) {
-    for (let i = 1; i <= 4; i += 1) assert.ok(ids.has(`special_${prefix}_0${i}`));
-  }
+  for (const prefix of ['glutton', 'undead', 'glass', 'mechcastle', 'anomaly']) for (let i = 1; i <= 4; i += 1) assert.ok(ids.has(`special_${prefix}_0${i}`));
   for (let i = 1; i <= 3; i += 1) assert.ok(ids.has(`special_echoes_0${i}`));
+});
+
+test('restriction stages expose real formation metadata', () => {
+  assert.equal(getStage('special_five_banners_01').formationRestrictions.maxDistinctUnits, 5);
+  assert.equal(getStage('special_five_banners_02').formationRestrictions.maxDistinctUnits, 5);
+  assert.equal(getStage('special_light_purse_01').formationRestrictions.maxUnitCost, 400);
+  assert.equal(getStage('special_light_purse_02').formationRestrictions.maxUnitCost, 400);
 });
 
 test('special stages use valid challenge data', () => {
