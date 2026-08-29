@@ -1,0 +1,22 @@
+[
+  {"id":"twisted-leaf","modifiers":[{"kind":"UNIT_HP_PERCENT","scope":"ALL","percent":3}]},
+  {"id":"thorn-mark","modifiers":[{"kind":"UNIT_ATTACK_PERCENT","scope":"ALL","percent":3}]},
+  {"id":"mushroom-cap","modifiers":[{"kind":"PLAYER_BASE_HP_PERCENT","percent":5}]},
+  {"id":"forest-satchel","modifiers":[{"kind":"STARTING_SUPPLY_PERCENT","percent":5}]},
+  {"id":"grave-ash","modifiers":[{"kind":"UNIT_ATTACK_PERCENT","scope":"ALL","percent":3}]},
+  {"id":"bone-clock","modifiers":[{"kind":"RECHARGE_REDUCTION_PERCENT","percent":2}]},
+  {"id":"coffin-clasp","modifiers":[{"kind":"UNIT_HP_PERCENT","scope":"FRONTLINE","percent":5}]},
+  {"id":"spore-pouch","modifiers":[{"kind":"KILL_SUPPLY_PERCENT","percent":4}]},
+  {"id":"seed-silk","modifiers":[{"kind":"UNIT_HP_PERCENT","scope":"RANGED","percent":5}]},
+  {"id":"widow-thread","modifiers":[{"kind":"UNIT_HP_PERCENT","scope":"ALL","percent":3}]},
+  {"id":"funeral-wax","modifiers":[{"kind":"UNIT_ATTACK_PERCENT","scope":"ALL","percent":3}]},
+  {"id":"silent-bell","modifiers":[{"kind":"WORKER_COST_REDUCTION_PERCENT","percent":3}]},
+  {"id":"revival-nail","modifiers":[{"kind":"PLAYER_BASE_HP_PERCENT","percent":5}]},
+  {"id":"black-petal","modifiers":[{"kind":"UNIT_ATTACK_PERCENT","scope":"AREA","percent":5}]},
+  {"id":"root-bone","modifiers":[{"kind":"RECHARGE_REDUCTION_PERCENT","percent":2}]},
+  {"id":"dry-river-token","modifiers":[{"kind":"STARTING_SUPPLY_PERCENT","percent":5}]},
+  {"id":"broken-epitaph","modifiers":[{"kind":"UNIT_HP_PERCENT","scope":"ALL","percent":3}]},
+  {"id":"devoured-stone","modifiers":[{"kind":"KILL_SUPPLY_PERCENT","percent":4}]},
+  {"id":"kingless-chime","modifiers":[{"kind":"UNIT_ATTACK_PERCENT","scope":"ALL","percent":3}]},
+  {"id":"twisted-throne","modifiers":[{"kind":"CHAPTER_FLAG","flag":"chapter-02-complete"}]}
+]

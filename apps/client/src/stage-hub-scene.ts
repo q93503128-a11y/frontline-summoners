@@ -1,0 +1,136 @@
+import Phaser from 'phaser';
+import { INTERNAL_WIDTH } from '@frontline/shared';
+import { loadGuestProgress, type GuestProgress } from './save';
+import {
+  STAGE_COLLECTIONS,
+  getCollectionClearedIds,
+  getStageCollectionPage,
+  getStageCollectionPageCount,
+  isStageCollectionUnlocked,
+} from './stage-navigation';
+import { addButton, addText, COLORS, drawBackdrop } from './scene-ui';
+import { isCompactMobileViewport } from './viewport';
+
+const EMPTY_PROGRESS: GuestProgress = {
+  clearedStageIds: [],
+  specialClearedStageIds: [],
+  permanentRewardIds: [],
+  discoveredEnemyIds: [],
+};
+
+export class StageHubScene extends Phaser.Scene {
+  private progress: GuestProgress = EMPTY_PROGRESS;
+  private page = 0;
+  private collectionLayer?: Phaser.GameObjects.Container;
+  private pageText?: Phaser.GameObjects.Text;
+
+  constructor() { super('stage-hub'); }
+
+  create(): void {
+    drawBackdrop(this, 'map');
+    const compact = isCompactMobileViewport();
+    addText(this, 54, 38, '출 정', 46, COLORS.cream);
+    addText(this, 56, 94, compact ? '전선을 고르고 출격한다.' : '장과 특수전 중 진행할 전선 묶음을 고른다.', compact ? 22 : 19, COLORS.muted);
+    addButton(this, 1165, compact ? 70 : 65, 160, compact ? 84 : 50, '메인', () => this.scene.start('main-menu'), 0x586275);
+
+    addButton(this, 130, 655, 150, compact ? 82 : 52, '◀ 이전', () => this.changePage(-1), 0x586275);
+    addButton(this, 1235, 655, 150, compact ? 82 : 52, '다음 ▶', () => this.changePage(1), 0x586275);
+    this.pageText = addText(this, INTERNAL_WIDTH / 2, 650, '', compact ? 22 : 18, '#9ca9bb', 'center').setOrigin(0.5);
+
+    this.renderCollections();
+    void loadGuestProgress().then((progress) => {
+      if (!this.scene.isActive()) return;
+      this.progress = progress;
+      this.focusCurrentProgressPage();
+      this.renderCollections();
+    });
+  }
+
+  private changePage(delta: number): void {
+    const pageCount = getStageCollectionPageCount();
+    this.page = Math.max(0, Math.min(pageCount - 1, this.page + delta));
+    this.renderCollections();
+  }
+
+  private focusCurrentProgressPage(): void {
+    const pageCount = getStageCollectionPageCount();
+    for (let page = 0; page < pageCount; page += 1) {
+      const collections = getStageCollectionPage(page);
+      if (collections.some((collection) => {
+        if (!isStageCollectionUnlocked(collection, this.progress.clearedStageIds)) return false;
+        const cleared = getCollectionClearedIds(
+          collection,
+          this.progress.clearedStageIds,
+          this.progress.specialClearedStageIds,
+        ).length;
+        return cleared < collection.stages.length;
+      })) {
+        this.page = page;
+        return;
+      }
+    }
+    this.page = Math.max(0, pageCount - 1);
+  }
+
+  private renderCollections(): void {
+    this.collectionLayer?.destroy(true);
+    this.collectionLayer = this.add.container(0, 0);
+    const compact = isCompactMobileViewport();
+    const pageCount = getStageCollectionPageCount();
+    this.page = Math.max(0, Math.min(pageCount - 1, this.page));
+    const collections = getStageCollectionPage(this.page);
+    this.pageText?.setText(`${this.page + 1} / ${pageCount}`);
+
+    const positions = collections.length === 1
+      ? [INTERNAL_WIDTH / 2]
+      : collections.map((_, index) => 380 + index * 520);
+
+    collections.forEach((collection, index) => {
+      const x = positions[index] ?? INTERNAL_WIDTH / 2;
+      const unlocked = isStageCollectionUnlocked(collection, this.progress.clearedStageIds);
+      const cleared = getCollectionClearedIds(
+        collection,
+        this.progress.clearedStageIds,
+        this.progress.specialClearedStageIds,
+      ).length;
+      const special = collection.stageType === 'SPECIAL';
+      const accent = special ? 0x9066a6 : 0x6d8fb5;
+      const card = this.add.rectangle(
+        x,
+        365,
+        compact ? 430 : 440,
+        390,
+        unlocked ? (special ? 0x2b2535 : 0x242c3a) : 0x1d222c,
+        0.98,
+      ).setStrokeStyle(4, unlocked ? accent : 0x3c4554, 1);
+      this.collectionLayer!.add(card);
+      this.collectionLayer!.add(addText(this, x, 205, special ? 'SPECIAL' : 'PROGRESSION', compact ? 21 : 17, unlocked ? (special ? '#d6b5e8' : '#a9caee') : '#69727e', 'center').setOrigin(0.5));
+      this.collectionLayer!.add(addText(this, x, 252, collection.title, compact ? 31 : 30, unlocked ? '#ffffff' : '#747d89', 'center').setOrigin(0.5).setWordWrapWidth(380));
+      this.collectionLayer!.add(addText(this, x, 315, collection.description, compact ? 22 : 18, unlocked ? '#c5cedb' : '#656e7a', 'center').setOrigin(0.5).setWordWrapWidth(380));
+      this.collectionLayer!.add(addText(this, x, 382, `${cleared} / ${collection.stages.length} 클리어`, compact ? 24 : 21, unlocked ? '#8ee3aa' : '#6c7580', 'center').setOrigin(0.5));
+      const difficulties = collection.stages.map((stage) => stage.difficulty);
+      this.collectionLayer!.add(addText(this, x, 425, `난이도 ${Math.min(...difficulties)}~${Math.max(...difficulties)} / 12`, compact ? 21 : 17, unlocked ? COLORS.gold : '#6b6658', 'center').setOrigin(0.5));
+      if (!unlocked) {
+        const remaining = Math.max(0, collection.requiredProgressionClears - this.progress.clearedStageIds.length);
+        this.collectionLayer!.add(addText(this, x, 470, `메인 진도 ${remaining}개 더 필요`, compact ? 20 : 16, '#8b8290', 'center').setOrigin(0.5));
+      }
+      const button = addButton(this, x, compact ? 535 : 532, 250, compact ? 84 : 60, unlocked ? '스테이지 선택' : '잠김', () => {
+        if (unlocked) this.scene.start('stage-select', { collectionId: collection.id });
+      }, unlocked ? accent : 0x3f4855);
+      if (!unlocked) button.setAlpha(0.62);
+      this.collectionLayer!.add(button);
+    });
+
+    if (!compact) {
+      this.collectionLayer.add(addText(
+        this,
+        INTERNAL_WIDTH / 2,
+        605,
+        `전선 묶음 ${STAGE_COLLECTIONS.length}개 · 메인 진행에 따라 새 장과 특수전이 열린다.`,
+        16,
+        '#8995a7',
+        'center',
+      ).setOrigin(0.5));
+    }
+  }
+}

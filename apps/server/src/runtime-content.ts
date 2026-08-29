@@ -1,6 +1,7 @@
 import {
   parseCampaignBundle,
   parseCampaignStages,
+  parseEnemies,
   parsePlayerUnits,
   type CampaignStageContent,
   type CombatContent,
@@ -29,38 +30,56 @@ import type {
 } from '@frontline/sim/playable';
 import playerUnitsJson from '../../../content/units/chapter-01.json' with { type: 'json' };
 import recruitmentUnitsJson from '../../../content/units/recruitment-01.json' with { type: 'json' };
-import enemiesJson from '../../../content/enemies/chapter-01.json' with { type: 'json' };
-import stagesJson from '../../../content/stages/chapter-01.json' with { type: 'json' };
+import enemiesJson from '../../../content/enemies/main-01-02.json' with { type: 'json' };
+import chapterOneStagesJson from '../../../content/stages/chapter-01.json' with { type: 'json' };
+import chapterTwoStagesAJson from '../../../content/stages/chapter-02-01-05.json' with { type: 'json' };
+import chapterTwoStagesBJson from '../../../content/stages/chapter-02-06-10.json' with { type: 'json' };
+import chapterTwoStagesCJson from '../../../content/stages/chapter-02-11-15.json' with { type: 'json' };
+import chapterTwoStagesDJson from '../../../content/stages/chapter-02-16-20.json' with { type: 'json' };
 import specialStagesJson from '../../../content/stages/special-01.json' with { type: 'json' };
-import stagePoliciesJson from '../../../content/stages/policies-01.json' with { type: 'json' };
+import stagePoliciesJson from '../../../content/stages/policies-01-02.json' with { type: 'json' };
 import type { CoopPlayerLoadout } from './coop-room.ts';
 import {
   SERVER_CHARACTER_LEVEL_CURVE,
   SERVER_EVOLUTION_FORMS,
   SERVER_PERMANENT_REWARDS,
   SERVER_REWARD_SCOPES_BY_CHARACTER,
-} from './meta-content.ts';
+} from './meta-content-v2.ts';
 
 const STARTER_SLOT_ID = 'militia';
 
-const CAMPAIGN = parseCampaignBundle({
+const ENEMY_CONTENT = parseEnemies(enemiesJson);
+const ENEMY_IDS = new Set(ENEMY_CONTENT.map((enemy) => enemy.id));
+const CHAPTER_ONE = parseCampaignBundle({
   playerUnits: playerUnitsJson,
   enemies: enemiesJson,
-  stages: stagesJson,
+  stages: chapterOneStagesJson,
   starterUnitId: STARTER_SLOT_ID,
   expectedStageCount: 20,
   requiredThemeCount: 7,
 });
 const RECRUITMENT_UNITS = parsePlayerUnits(recruitmentUnitsJson);
-const ALL_PLAYER_UNIT_CONTENT: readonly PlayerUnitContent[] = [...CAMPAIGN.playerUnits, ...RECRUITMENT_UNITS];
+const ALL_PLAYER_UNIT_CONTENT: readonly PlayerUnitContent[] = [...CHAPTER_ONE.playerUnits, ...RECRUITMENT_UNITS];
 const ALL_PLAYER_UNIT_IDS = new Set(ALL_PLAYER_UNIT_CONTENT.map((unit) => unit.id));
+
+const CHAPTER_TWO_STAGES = parseCampaignStages([...chapterTwoStagesAJson, ...chapterTwoStagesBJson, ...chapterTwoStagesCJson, ...chapterTwoStagesDJson], {
+  playerUnitIds: ALL_PLAYER_UNIT_IDS,
+  enemyIds: ENEMY_IDS,
+  starterUnitId: STARTER_SLOT_ID,
+  expectedStageCount: 20,
+});
 const SPECIAL_STAGES = parseCampaignStages(specialStagesJson, {
   playerUnitIds: ALL_PLAYER_UNIT_IDS,
-  enemyIds: new Set(CAMPAIGN.enemies.map((enemy) => enemy.id)),
+  enemyIds: ENEMY_IDS,
   starterUnitId: STARTER_SLOT_ID,
   expectedStageCount: 5,
 });
-const ALL_STAGES: readonly CampaignStageContent[] = [...CAMPAIGN.stages, ...SPECIAL_STAGES];
+const ALL_STAGES: readonly CampaignStageContent[] = [
+  ...CHAPTER_ONE.stages,
+  ...CHAPTER_TWO_STAGES,
+  ...SPECIAL_STAGES,
+];
+if (new Set(ALL_STAGES.map((stage) => stage.id)).size !== ALL_STAGES.length) throw new Error('server stage ids must be globally unique');
 const STAGE_BY_ID = new Map(ALL_STAGES.map((stage) => [stage.id, stage] as const));
 const STAGE_POLICIES = parseStagePolicies(stagePoliciesJson, new Set(ALL_STAGES.map((stage) => stage.id)));
 const STAGE_POLICY_BY_ID = new Map(STAGE_POLICIES.map((policy) => [policy.stageId, policy] as const));
@@ -102,7 +121,7 @@ function rosterSlot(unit: PlayerUnitContent): PlayerRosterSlot {
 }
 
 const PLAYER_SLOT_BY_ID = new Map(ALL_PLAYER_UNIT_CONTENT.map((unit) => [unit.id, rosterSlot(unit)] as const));
-const BASE_ENEMIES: readonly EnemyArchetype[] = CAMPAIGN.enemies.map((enemy) => ({
+const BASE_ENEMIES: readonly EnemyArchetype[] = ENEMY_CONTENT.map((enemy) => ({
   enemyId: enemy.id,
   displayName: enemy.displayName,
   definition: fighter(enemy),
@@ -230,7 +249,7 @@ export function createServerCoopBattle(
     ownedRewardIds: resolvedA.permanentRewardIds,
     startingSupply: stage.startingSupply,
     playerBaseHp: stage.playerBaseHp,
-    ...(stage.playerUnitCap === undefined ? {} : { playerUnitCap: stage.playerUnitCap }),
+    playerUnitCap: stage.playerUnitCap,
     playerSlots: resolvedA.playerSlots,
     enemies: BASE_ENEMIES,
   }, SERVER_PERMANENT_REWARDS);
@@ -238,7 +257,7 @@ export function createServerCoopBattle(
     ownedRewardIds: resolvedB.permanentRewardIds,
     startingSupply: stage.startingSupply,
     playerBaseHp: stage.playerBaseHp,
-    ...(stage.playerUnitCap === undefined ? {} : { playerUnitCap: stage.playerUnitCap }),
+    playerUnitCap: stage.playerUnitCap,
     playerSlots: resolvedB.playerSlots,
     enemies: BASE_ENEMIES,
   }, SERVER_PERMANENT_REWARDS);
@@ -246,7 +265,7 @@ export function createServerCoopBattle(
     ownedRewardIds: commonRewardIds,
     startingSupply: stage.startingSupply,
     playerBaseHp: stage.playerBaseHp,
-    ...(stage.playerUnitCap === undefined ? {} : { playerUnitCap: stage.playerUnitCap }),
+    playerUnitCap: stage.playerUnitCap,
     playerSlots: [] as readonly PermanentRewardApplicableSlot[],
     enemies: BASE_ENEMIES,
   }, SERVER_PERMANENT_REWARDS);
@@ -275,8 +294,8 @@ export function createServerCoopBattle(
     },
     enemies,
     enemyWaves: stage.waves,
-    ...(stage.playerUnitCap === undefined ? {} : { playerUnitCap: stage.playerUnitCap }),
-    ...(stage.enemyUnitCap === undefined ? {} : { enemyUnitCap: stage.enemyUnitCap }),
+    playerUnitCap: stage.playerUnitCap,
+    enemyUnitCap: stage.enemyUnitCap,
   });
 }
 

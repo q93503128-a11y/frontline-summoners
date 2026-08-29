@@ -1,7 +1,7 @@
 import Phaser from 'phaser';
 import { INTERNAL_HEIGHT, INTERNAL_WIDTH } from '@frontline/shared';
 import { buildCharacterCombatSlot, getEvolutionForms } from './character-growth';
-import { STAGES, getSlotById } from './prototype';
+import { getSlotById } from './prototype';
 import {
   getOwnedCharacterIds,
   loadGuestProgress,
@@ -17,9 +17,20 @@ const EMPTY_PROGRESS: GuestProgress = {
   permanentRewardIds: [],
 };
 const PAGE_SIZE = 6;
+const CHAPTER_ONE_FINAL_STAGE_ID = 'main_01_020';
+const CHAPTER_TWO_FINAL_STAGE_ID = 'main_02_020';
 
 export function getImplementedBaseLevelCap(progress: GuestProgress): number {
-  return progress.clearedStageIds.length >= STAGES.length ? 20 : 10;
+  const cleared = new Set(progress.clearedStageIds);
+  if (cleared.has(CHAPTER_TWO_FINAL_STAGE_ID)) return 30;
+  if (cleared.has(CHAPTER_ONE_FINAL_STAGE_ID)) return 20;
+  return 10;
+}
+
+function getNextCapMessage(levelCap: number): string {
+  if (levelCap >= 30) return '제2장 완료 · 기본 레벨 상한 Lv30';
+  if (levelCap >= 20) return '제2장 완료 시 기본 레벨 상한 Lv30';
+  return '제1장 완료 시 기본 레벨 상한 Lv20';
 }
 
 export class GrowthScene extends Phaser.Scene {
@@ -177,10 +188,15 @@ export class GrowthScene extends Phaser.Scene {
       });
     }
 
-    const capText = levelCap >= 20
-      ? '제1장 완료 · 기본 레벨 상한 Lv20'
-      : '제1장 완료 시 기본 레벨 상한 Lv20';
-    this.detailLayer.add(addText(this, 830, 603, capText, compact ? 17 : 14, levelCap >= 20 ? '#8ee3aa' : '#9ca9bb', 'center').setOrigin(0.5));
+    this.detailLayer.add(addText(
+      this,
+      830,
+      603,
+      getNextCapMessage(levelCap),
+      compact ? 17 : 14,
+      levelCap >= 30 ? '#8ee3aa' : '#9ca9bb',
+      'center',
+    ).setOrigin(0.5));
   }
 
   private async selectForm(characterId: string, formId: string): Promise<void> {

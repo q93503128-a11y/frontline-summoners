@@ -18,6 +18,7 @@ function modifierLabel(modifier: PermanentRewardModifier): string {
   if (modifier.kind === 'WORKER_COST_REDUCTION_PERCENT') return `보급 업그레이드 비용 -${modifier.percent}%`;
   if (modifier.kind === 'RECHARGE_REDUCTION_PERCENT') return `재생산 시간 -${modifier.percent}%`;
   if (modifier.flag === 'chapter-01-complete') return '제1장 완료 · 레벨 상한 Lv20 · SPECIAL 개방';
+  if (modifier.flag === 'chapter-02-complete') return '제2장 완료 · 레벨 상한 Lv30';
   return `진행 플래그 · ${modifier.flag}`;
 }
 

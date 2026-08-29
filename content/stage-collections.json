@@ -13,6 +13,20 @@
     ]
   },
   {
+    "id": "chapter-02",
+    "stageType": "PROGRESSION",
+    "title": "제2장 · 뒤틀린 숲",
+    "shortTitle": "제2장",
+    "description": "NATURE와 UNDEAD 전선을 돌파해 Lv30 상한을 연다.",
+    "stageIds": [
+      "main_02_001", "main_02_002", "main_02_003", "main_02_004", "main_02_005",
+      "main_02_006", "main_02_007", "main_02_008", "main_02_009", "main_02_010",
+      "main_02_011", "main_02_012", "main_02_013", "main_02_014", "main_02_015",
+      "main_02_016", "main_02_017", "main_02_018", "main_02_019", "main_02_020"
+    ],
+    "unlockAfterStageId": "main_01_020"
+  },
+  {
     "id": "special-border-01",
     "stageType": "SPECIAL",
     "title": "특수전 · 뒤집힌 국경",

@@ -10,7 +10,8 @@ import {
   type PermanentRewardScope,
   type PermanentRewardTargetScope,
 } from '@frontline/sim/meta-progression';
-import permanentRewardsJson from '../../../content/permanent-rewards/chapter-01.json' with { type: 'json' };
+import chapterOneRewardsJson from '../../../content/permanent-rewards/chapter-01.json' with { type: 'json' };
+import chapterTwoRewardsJson from '../../../content/permanent-rewards/chapter-02.json' with { type: 'json' };
 
 export const REWARD_SCOPES = PERMANENT_REWARD_SCOPES;
 export type RewardScope = PermanentRewardScope;
@@ -82,7 +83,14 @@ function parseDefinitions(value: unknown): readonly PermanentRewardDefinition[] 
   });
 }
 
-export const PERMANENT_REWARDS: readonly PermanentRewardDefinition[] = parseDefinitions(permanentRewardsJson);
+const chapterOneRewards = parseDefinitions(chapterOneRewardsJson);
+const chapterTwoRewards = parseDefinitions(chapterTwoRewardsJson);
+const rewardIds = new Set(chapterOneRewards.map((reward) => reward.id));
+for (const reward of chapterTwoRewards) {
+  if (rewardIds.has(reward.id)) throw new Error(`chapter-two permanent reward duplicates existing id: ${reward.id}`);
+  rewardIds.add(reward.id);
+}
+export const PERMANENT_REWARDS: readonly PermanentRewardDefinition[] = [...chapterOneRewards, ...chapterTwoRewards];
 
 export function applyPercent(value: number, percent: number, minimum = 1): number {
   return applyPercentShared(value, percent, minimum);
