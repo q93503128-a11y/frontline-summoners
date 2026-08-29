@@ -10,7 +10,8 @@
     "./meta-progression": "./src/meta-progression.ts",
     "./evolution-catalog": "./src/evolution-catalog.ts",
     "./resource-ledger": "./src/resource-ledger.ts",
-    "./formation-restrictions": "./src/formation-restrictions.ts"
+    "./formation-restrictions": "./src/formation-restrictions.ts",
+    "./record-playable": "./src/record-playable.ts"
   },
   "scripts": {
     "typecheck": "tsc --noEmit",
