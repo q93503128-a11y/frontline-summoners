@@ -98,6 +98,10 @@ function fighter(content: CombatContent): BattleUnitDefinition {
     combatTags: content.combatTags,
     damageBonuses: content.damageBonuses,
     ...(content.attackPattern === undefined ? {} : { attackPattern: content.attackPattern }),
+    ...(content.closeRangeAttack === undefined ? {} : { closeRangeAttack: content.closeRangeAttack }),
+    ...(content.onHitSlow === undefined ? {} : { onHitSlow: content.onHitSlow }),
+    ...(content.onHitPush === undefined ? {} : { onHitPush: content.onHitPush }),
+    ...(content.reviveOnce === undefined ? {} : { reviveOnce: content.reviveOnce }),
     naturalKnockbackCount: content.naturalKnockbackCount,
     naturalKnockbackFrames: 12,
     naturalKnockbackDistance: 34,
@@ -221,6 +225,12 @@ function scaleEnemy(enemy: EnemyArchetype, hpPermille: number, attackPermille: n
           ...step,
           attackDamage: scaleInteger(step.attackDamage, attackPermille, 0),
         })),
+      }),
+      ...(enemy.definition.closeRangeAttack === undefined ? {} : {
+        closeRangeAttack: {
+          ...enemy.definition.closeRangeAttack,
+          attackDamage: scaleInteger(enemy.definition.closeRangeAttack.attackDamage, attackPermille, 0),
+        },
       }),
     },
   };

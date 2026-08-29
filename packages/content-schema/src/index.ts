@@ -42,6 +42,23 @@ export type DamageBonusContent =
   | { readonly targetKind: 'ATTRIBUTE'; readonly target: Attribute; readonly multiplierPermille: number }
   | { readonly targetKind: 'TAG'; readonly target: CombatTag; readonly multiplierPermille: number };
 
+export interface OnHitSlowContent {
+  readonly chancePermille: number;
+  readonly durationFrames: number;
+  readonly speedPermille: number;
+}
+
+export interface OnHitPushContent {
+  readonly chancePermille: number;
+  readonly distance: number;
+  readonly frames: number;
+}
+
+export interface ReviveOnceContent {
+  readonly delayFrames: number;
+  readonly hpPermille: number;
+}
+
 export const BATTLEFIELD_THEME_IDS = ['meadow', 'canyon', 'burning', 'ruins', 'moon', 'fortress', 'golden'] as const;
 export type BattlefieldThemeId = (typeof BATTLEFIELD_THEME_IDS)[number];
 
@@ -51,6 +68,12 @@ export interface AttackPatternStepContent {
   readonly attackMaxRange: number;
   readonly cycleFrames: number;
   readonly hitFrames: readonly number[];
+  readonly onHitSlow?: OnHitSlowContent;
+  readonly onHitPush?: OnHitPushContent;
+}
+
+export interface CloseRangeAttackContent extends AttackPatternStepContent {
+  readonly triggerMaxDistance: number;
 }
 
 export interface CombatContent {
@@ -71,6 +94,10 @@ export interface CombatContent {
   readonly combatTags: readonly CombatTag[];
   readonly damageBonuses: readonly DamageBonusContent[];
   readonly attackPattern?: readonly AttackPatternStepContent[];
+  readonly closeRangeAttack?: CloseRangeAttackContent;
+  readonly onHitSlow?: OnHitSlowContent;
+  readonly onHitPush?: OnHitPushContent;
+  readonly reviveOnce?: ReviveOnceContent;
 }
 
 export interface PlayerUnitContent extends CombatContent {
@@ -188,6 +215,12 @@ function requireInteger(record: Record<string, unknown>, key: string, context: s
   return value as number;
 }
 
+function requireFiniteNumber(record: Record<string, unknown>, key: string, context: string, min: number, max: number): number {
+  const value = record[key];
+  if (typeof value !== 'number' || !Number.isFinite(value) || value < min || value > max) throw new Error(`${context}.${key} must be a finite number in ${min}..${max}`);
+  return value;
+}
+
 function optionalInteger(record: Record<string, unknown>, key: string, context: string, min: number, max = Number.MAX_SAFE_INTEGER): number | undefined {
   if (record[key] === undefined) return undefined;
   return requireInteger(record, key, context, min, max);
@@ -246,6 +279,53 @@ function requireHitFrames(record: Record<string, unknown>, context: string, cycl
   return frames;
 }
 
+function parseSlow(value: unknown, context: string): OnHitSlowContent | undefined {
+  if (value === undefined) return undefined;
+  if (!isRecord(value)) throw new Error(`${context} must be an object`);
+  return {
+    chancePermille: requireInteger(value, 'chancePermille', context, 1, 1000),
+    durationFrames: requireInteger(value, 'durationFrames', context, 1, 3600),
+    speedPermille: requireInteger(value, 'speedPermille', context, 1, 999),
+  };
+}
+
+function parsePush(value: unknown, context: string): OnHitPushContent | undefined {
+  if (value === undefined) return undefined;
+  if (!isRecord(value)) throw new Error(`${context} must be an object`);
+  return {
+    chancePermille: requireInteger(value, 'chancePermille', context, 1, 1000),
+    distance: requireInteger(value, 'distance', context, 0, 10000),
+    frames: requireInteger(value, 'frames', context, 1, 3600),
+  };
+}
+
+function parseRevive(value: unknown, context: string): ReviveOnceContent | undefined {
+  if (value === undefined) return undefined;
+  if (!isRecord(value)) throw new Error(`${context} must be an object`);
+  return {
+    delayFrames: requireInteger(value, 'delayFrames', context, 1, 36000),
+    hpPermille: requireInteger(value, 'hpPermille', context, 1, 1000),
+  };
+}
+
+function parseAttackProfile(record: Record<string, unknown>, context: string): AttackPatternStepContent {
+  const cycleFrames = requireInteger(record, 'cycleFrames', context, 1, 3600);
+  const attackMinRange = requireInteger(record, 'attackMinRange', context, 0, 10000);
+  const attackMaxRange = requireInteger(record, 'attackMaxRange', context, 0, 10000);
+  if (attackMinRange > attackMaxRange) throw new Error(`${context}.attackMinRange must be <= attackMaxRange`);
+  const onHitSlow = parseSlow(record.onHitSlow, `${context}.onHitSlow`);
+  const onHitPush = parsePush(record.onHitPush, `${context}.onHitPush`);
+  return {
+    attackDamage: requireInteger(record, 'attackDamage', context, 0, 10000000),
+    attackMinRange,
+    attackMaxRange,
+    cycleFrames,
+    hitFrames: requireHitFrames(record, context, cycleFrames),
+    ...(onHitSlow === undefined ? {} : { onHitSlow }),
+    ...(onHitPush === undefined ? {} : { onHitPush }),
+  };
+}
+
 function parseAttackPattern(record: Record<string, unknown>, context: string): readonly AttackPatternStepContent[] | undefined {
   const raw = record.attackPattern;
   if (raw === undefined) return undefined;
@@ -253,18 +333,19 @@ function parseAttackPattern(record: Record<string, unknown>, context: string): r
   return raw.map((step, index) => {
     const stepContext = `${context}.attackPattern[${index}]`;
     if (!isRecord(step)) throw new Error(`${stepContext} must be an object`);
-    const cycleFrames = requireInteger(step, 'cycleFrames', stepContext, 1, 3600);
-    const attackMinRange = requireInteger(step, 'attackMinRange', stepContext, 0, 10000);
-    const attackMaxRange = requireInteger(step, 'attackMaxRange', stepContext, 0, 10000);
-    if (attackMinRange > attackMaxRange) throw new Error(`${stepContext}.attackMinRange must be <= attackMaxRange`);
-    return {
-      attackDamage: requireInteger(step, 'attackDamage', stepContext, 0, 10000000),
-      attackMinRange,
-      attackMaxRange,
-      cycleFrames,
-      hitFrames: requireHitFrames(step, stepContext, cycleFrames),
-    };
+    return parseAttackProfile(step, stepContext);
   });
+}
+
+function parseCloseRangeAttack(record: Record<string, unknown>, context: string): CloseRangeAttackContent | undefined {
+  const raw = record.closeRangeAttack;
+  if (raw === undefined) return undefined;
+  const itemContext = `${context}.closeRangeAttack`;
+  if (!isRecord(raw)) throw new Error(`${itemContext} must be an object`);
+  return {
+    ...parseAttackProfile(raw, itemContext),
+    triggerMaxDistance: requireInteger(raw, 'triggerMaxDistance', itemContext, 0, 10000),
+  };
 }
 
 function parseAttributes(record: Record<string, unknown>, context: string): readonly Attribute[] {
@@ -291,7 +372,7 @@ function parseDamageBonuses(record: Record<string, unknown>, context: string): r
     return { targetKind, target: requireEnum(bonus, 'target', itemContext, COMBAT_TAGS), multiplierPermille };
   });
   const keys = bonuses.map((bonus) => `${bonus.targetKind}:${bonus.target}`);
-  if (new Set(keys).size !== keys.length) throw new Error(`${context}.damageBonuses targets must be unique`);
+  if (new Set(keys).size !== bonuses.length) throw new Error(`${context}.damageBonuses targets must be unique`);
   return bonuses;
 }
 
@@ -303,12 +384,16 @@ function parseCombat(value: unknown, context: string): CombatContent {
   const standingRange = requireInteger(value, 'standingRange', context, 0, 10000);
   if (attackMinRange > attackMaxRange) throw new Error(`${context}.attackMinRange must be <= attackMaxRange`);
   const attackPattern = parseAttackPattern(value, context);
+  const closeRangeAttack = parseCloseRangeAttack(value, context);
+  const onHitSlow = parseSlow(value.onHitSlow, `${context}.onHitSlow`);
+  const onHitPush = parsePush(value.onHitPush, `${context}.onHitPush`);
+  const reviveOnce = parseRevive(value.reviveOnce, `${context}.reviveOnce`);
   return {
     id: requireString(value, 'id', context),
     displayName: requireString(value, 'displayName', context),
     maxHp: requireInteger(value, 'maxHp', context, 1, 10000000),
     attackDamage: requireInteger(value, 'attackDamage', context, 0, 10000000),
-    moveSpeed: requireInteger(value, 'moveSpeed', context, 0, 1000),
+    moveSpeed: requireFiniteNumber(value, 'moveSpeed', context, 0, 1000),
     standingRange,
     attackMinRange,
     attackMaxRange,
@@ -321,6 +406,10 @@ function parseCombat(value: unknown, context: string): CombatContent {
     combatTags: parseCombatTags(value, context),
     damageBonuses: parseDamageBonuses(value, context),
     ...(attackPattern === undefined ? {} : { attackPattern }),
+    ...(closeRangeAttack === undefined ? {} : { closeRangeAttack }),
+    ...(onHitSlow === undefined ? {} : { onHitSlow }),
+    ...(onHitPush === undefined ? {} : { onHitPush }),
+    ...(reviveOnce === undefined ? {} : { reviveOnce }),
   };
 }
 
