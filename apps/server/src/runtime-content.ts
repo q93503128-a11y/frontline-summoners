@@ -11,6 +11,7 @@ import enemiesOneTwoJson from '../../../content/enemies/main-01-02.json' with { 
 import enemiesThreeJson from '../../../content/enemies/main-03.json' with { type: 'json' };
 import enemiesFourJson from '../../../content/enemies/main-04.json' with { type: 'json' };
 import permanentSpecialBossesJson from '../../../content/enemies/special-permanent-bosses.json' with { type: 'json' };
+import eventSpecialEnemiesJson from '../../../content/enemies/special-event-enemies.json' with { type: 'json' };
 import chapterOneStagesJson from '../../../content/stages/chapter-01.json' with { type: 'json' };
 import chapterTwoStagesAJson from '../../../content/stages/chapter-02-01-05.json' with { type: 'json' };
 import chapterTwoStagesBJson from '../../../content/stages/chapter-02-06-10.json' with { type: 'json' };
@@ -26,6 +27,7 @@ import chapterFourStagesCJson from '../../../content/stages/chapter-04-11-15.jso
 import chapterFourStagesDJson from '../../../content/stages/chapter-04-16-20.json' with { type: 'json' };
 import challengeSpecialStagesJson from '../../../content/stages/special-01.json' with { type: 'json' };
 import resourceSpecialStagesJson from '../../../content/stages/special-resource-01.json' with { type: 'json' };
+import eventSpecialStagesJson from '../../../content/stages/special-event-01.json' with { type: 'json' };
 import permanentGluttonStagesJson from '../../../content/stages/special-permanent-glutton.json' with { type: 'json' };
 import permanentUndeadStagesJson from '../../../content/stages/special-permanent-undead.json' with { type: 'json' };
 import permanentGlassStagesJson from '../../../content/stages/special-permanent-glass.json' with { type: 'json' };
@@ -43,7 +45,7 @@ import type { CoopPlayerLoadout } from './coop-room.ts';
 import { SERVER_CHARACTER_LEVEL_CURVE, SERVER_EVOLUTION_FORMS, SERVER_PERMANENT_REWARDS, SERVER_REWARD_SCOPES_BY_CHARACTER } from './meta-content-v2.ts';
 
 const STARTER_SLOT_ID = 'militia';
-const ENEMY_CONTENT = [...parseEnemies(enemiesOneTwoJson), ...parseEnemies(enemiesThreeJson), ...parseEnemies(enemiesFourJson), ...parseEnemies(permanentSpecialBossesJson)];
+const ENEMY_CONTENT = [...parseEnemies(enemiesOneTwoJson), ...parseEnemies(enemiesThreeJson), ...parseEnemies(enemiesFourJson), ...parseEnemies(permanentSpecialBossesJson), ...parseEnemies(eventSpecialEnemiesJson)];
 if (new Set(ENEMY_CONTENT.map((enemy) => enemy.id)).size !== ENEMY_CONTENT.length) throw new Error('server enemy ids must be globally unique');
 const ENEMY_IDS = new Set(ENEMY_CONTENT.map((enemy) => enemy.id));
 const CHAPTER_ONE = parseCampaignBundle({ playerUnits: playerUnitsJson, enemies: enemiesOneTwoJson, stages: chapterOneStagesJson, starterUnitId: STARTER_SLOT_ID, expectedStageCount: 20, requiredThemeCount: 7 });
@@ -61,7 +63,8 @@ const CHAPTER_TWO_STAGES = parseProgressionChapter([...chapterTwoStagesAJson, ..
 const CHAPTER_THREE_STAGES = parseProgressionChapter([...chapterThreeStagesAJson, ...chapterThreeStagesBJson, ...chapterThreeStagesCJson, ...chapterThreeStagesDJson]);
 const CHAPTER_FOUR_STAGES = parseProgressionChapter([...chapterFourStagesAJson, ...chapterFourStagesBJson, ...chapterFourStagesCJson, ...chapterFourStagesDJson]);
 const CHALLENGE_SPECIAL_STAGES = parseSpecialStages(challengeSpecialStagesJson, 9);
-const RESOURCE_SPECIAL_STAGES = parseSpecialStages(resourceSpecialStagesJson, 29);
+const RESOURCE_SPECIAL_STAGES = parseSpecialStages(resourceSpecialStagesJson, 18);
+const EVENT_SPECIAL_STAGES = parseSpecialStages(eventSpecialStagesJson, 11);
 const PERMANENT_SPECIAL_STAGES = parseSpecialStages([
   ...permanentGluttonStagesJson,
   ...permanentUndeadStagesJson,
@@ -70,7 +73,7 @@ const PERMANENT_SPECIAL_STAGES = parseSpecialStages([
   ...permanentAnomalyStagesJson,
   ...permanentEchoStagesJson,
 ], 23);
-const SPECIAL_STAGES: readonly CampaignStageContent[] = [...CHALLENGE_SPECIAL_STAGES, ...RESOURCE_SPECIAL_STAGES, ...PERMANENT_SPECIAL_STAGES];
+const SPECIAL_STAGES: readonly CampaignStageContent[] = [...CHALLENGE_SPECIAL_STAGES, ...RESOURCE_SPECIAL_STAGES, ...PERMANENT_SPECIAL_STAGES, ...EVENT_SPECIAL_STAGES];
 const ALL_STAGES: readonly CampaignStageContent[] = [...CHAPTER_ONE.stages, ...CHAPTER_TWO_STAGES, ...CHAPTER_THREE_STAGES, ...CHAPTER_FOUR_STAGES, ...SPECIAL_STAGES];
 if (new Set(ALL_STAGES.map((stage) => stage.id)).size !== ALL_STAGES.length) throw new Error('server stage ids must be globally unique');
 const STAGE_BY_ID = new Map(ALL_STAGES.map((stage) => [stage.id, stage] as const));
