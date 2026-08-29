@@ -7,13 +7,12 @@ const implementedStoryAndEnemyIds = [
   ...PLAYER_SLOTS.map((slot) => slot.definition.id),
   ...ENEMIES.map((enemy) => enemy.definition.id),
 ];
-
 const ATTACK_FX_STYLES = new Set(['SLASH', 'PIERCE', 'BLUNT', 'MAGIC', 'FIRE', 'VOID']);
 
 test('every implemented story player and enemy has a registered art family and attack FX style', () => {
   assert.equal(PLAYER_SLOTS.length, 10);
-  assert.equal(ENEMIES.length, 46, 'four main chapters plus the permanent SPECIAL execution roster expose forty-six enemy definitions');
-  assert.equal(implementedStoryAndEnemyIds.length, 56);
+  assert.equal(ENEMIES.length, 56, 'main, permanent SPECIAL and initial event execution rosters expose fifty-six enemy definitions');
+  assert.equal(implementedStoryAndEnemyIds.length, 66);
   for (const id of implementedStoryAndEnemyIds) {
     const variant = UNIT_ART[id];
     assert.ok(variant, `missing UNIT_ART mapping for ${id}`);
@@ -31,10 +30,7 @@ test('all thirty-three recruitment characters have explicit temporary art mappin
     assert.ok(ART_BY_ID[variant.familyId], `unknown art family ${variant.familyId} for ${id}`);
     assert.ok(ATTACK_FX_STYLES.has(variant.attackFx), `unknown attack FX ${variant.attackFx} for ${id}`);
   }
-  assert.ok(
-    new Set(RECRUITMENT_PLAYER_SLOTS.map((slot) => UNIT_ART[slot.definition.id]?.familyId)).size >= 7,
-    'the structural recruitment slice should exercise every baseline visual family until production character art replaces it',
-  );
+  assert.ok(new Set(RECRUITMENT_PLAYER_SLOTS.map((slot) => UNIT_ART[slot.definition.id]?.familyId)).size >= 7);
 });
 
 test('canonical recruitment ids no longer fall back to legacy prototype ids', () => {
@@ -43,20 +39,18 @@ test('canonical recruitment ids no longer fall back to legacy prototype ids', ()
   assert.ok(ids.has('char_s01_arselia'));
   assert.ok(ids.has('char_s02_gormu'));
   assert.ok(ids.has('char_s03_overlay_astra'));
-  for (const legacyId of ['turnip-rider', 'clockwork-duck', 'mirror-exorcist', 'moon-eater', 'castle-crab']) {
-    assert.equal(ids.has(legacyId), false, `legacy recruitment id remained executable: ${legacyId}`);
-  }
+  for (const legacyId of ['turnip-rider', 'clockwork-duck', 'mirror-exorcist', 'moon-eater', 'castle-crab']) assert.equal(ids.has(legacyId), false);
 });
 
 test('all sprite strips are local deploy assets with coherent frame metadata', () => {
   assert.equal(ART_FAMILIES.length, 7);
   for (const family of ART_FAMILIES) {
     for (const strip of [family.idle, family.run, family.attack]) {
-      assert.match(strip.url, /^\/assets\/characters\//, `${family.id} must not load a runtime remote URL`);
+      assert.match(strip.url, /^\/assets\/characters\//);
       assert.ok(strip.frameWidth > 0 && strip.frameHeight > 0 && strip.frames > 0);
     }
-    assert.ok(Number.isInteger(family.attackContactFrame), `${family.id} contact frame must be an integer`);
-    assert.ok(family.attackContactFrame >= 0 && family.attackContactFrame < family.attack.frames, `${family.id} contact frame must be inside its attack strip`);
+    assert.ok(Number.isInteger(family.attackContactFrame));
+    assert.ok(family.attackContactFrame >= 0 && family.attackContactFrame < family.attack.frames);
   }
   const hero = ART_BY_ID['hero-knight'];
   assert.ok(hero);
@@ -65,8 +59,7 @@ test('all sprite strips are local deploy assets with coherent frame metadata', (
 });
 
 test('chapter one avoids a single repeated visual family for all player units', () => {
-  const families = new Set(PLAYER_SLOTS.map((slot) => UNIT_ART[slot.definition.id]?.familyId));
-  assert.ok(families.size >= 7, `expected all seven baseline families across player roster, got ${families.size}`);
+  assert.ok(new Set(PLAYER_SLOTS.map((slot) => UNIT_ART[slot.definition.id]?.familyId)).size >= 7);
 });
 
 test('chapter one exposes multiple readable attack languages', () => {
@@ -76,5 +69,5 @@ test('chapter one exposes multiple readable attack languages', () => {
   assert.ok(playerStyles.has('MAGIC'));
   assert.ok(playerStyles.has('FIRE'));
   assert.ok(playerStyles.has('VOID'));
-  assert.ok(playerStyles.size >= 6, `expected six player attack FX styles, got ${playerStyles.size}`);
+  assert.ok(playerStyles.size >= 6);
 });
