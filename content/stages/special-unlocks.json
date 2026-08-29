@@ -3,40 +3,42 @@
   {"stageId":"resource_gold_03","previousSpecialStageId":"resource_gold_02","requiredProgressionStageId":"main_02_010"},
   {"stageId":"resource_gold_04","previousSpecialStageId":"resource_gold_03","requiredProgressionStageId":"main_03_010"},
   {"stageId":"resource_gold_05","previousSpecialStageId":"resource_gold_04","requiredProgressionStageId":"main_04_010"},
-
   {"stageId":"resource_soul_02","previousSpecialStageId":"resource_soul_01"},
   {"stageId":"resource_soul_03","previousSpecialStageId":"resource_soul_02","requiredProgressionStageId":"main_02_020"},
   {"stageId":"resource_soul_04","previousSpecialStageId":"resource_soul_03","requiredProgressionStageId":"main_03_020"},
-
   {"stageId":"resource_evolution_02","previousSpecialStageId":"resource_evolution_01"},
   {"stageId":"resource_evolution_03","previousSpecialStageId":"resource_evolution_02","requiredProgressionStageId":"main_02_010"},
   {"stageId":"resource_evolution_04","previousSpecialStageId":"resource_evolution_03","requiredProgressionStageId":"main_03_010"},
   {"stageId":"resource_evolution_05","previousSpecialStageId":"resource_evolution_04","requiredProgressionStageId":"main_04_010"},
-
   {"stageId":"resource_starlight_02","previousSpecialStageId":"resource_starlight_01"},
   {"stageId":"resource_starlight_03","previousSpecialStageId":"resource_starlight_02","requiredProgressionStageId":"main_02_020"},
   {"stageId":"resource_starlight_04","previousSpecialStageId":"resource_starlight_03","requiredProgressionStageId":"main_03_020"},
-
   {"stageId":"special_glutton_02","previousSpecialStageId":"special_glutton_01"},
   {"stageId":"special_glutton_03","previousSpecialStageId":"special_glutton_02"},
   {"stageId":"special_glutton_04","previousSpecialStageId":"special_glutton_03"},
-
   {"stageId":"special_undead_02","previousSpecialStageId":"special_undead_01"},
   {"stageId":"special_undead_03","previousSpecialStageId":"special_undead_02"},
   {"stageId":"special_undead_04","previousSpecialStageId":"special_undead_03"},
-
   {"stageId":"special_glass_02","previousSpecialStageId":"special_glass_01"},
   {"stageId":"special_glass_03","previousSpecialStageId":"special_glass_02"},
   {"stageId":"special_glass_04","previousSpecialStageId":"special_glass_03"},
-
   {"stageId":"special_mechcastle_02","previousSpecialStageId":"special_mechcastle_01"},
   {"stageId":"special_mechcastle_03","previousSpecialStageId":"special_mechcastle_02"},
   {"stageId":"special_mechcastle_04","previousSpecialStageId":"special_mechcastle_03"},
-
   {"stageId":"special_anomaly_02","previousSpecialStageId":"special_anomaly_01"},
   {"stageId":"special_anomaly_03","previousSpecialStageId":"special_anomaly_02"},
   {"stageId":"special_anomaly_04","previousSpecialStageId":"special_anomaly_03"},
-
   {"stageId":"special_echoes_02","previousSpecialStageId":"special_echoes_01"},
-  {"stageId":"special_echoes_03","previousSpecialStageId":"special_echoes_02"}
+  {"stageId":"special_echoes_03","previousSpecialStageId":"special_echoes_02"},
+  {"stageId":"special_five_banners_02","previousSpecialStageId":"special_five_banners_01"},
+  {"stageId":"special_light_purse_02","previousSpecialStageId":"special_light_purse_01"},
+  {"stageId":"event_summer_01_02","previousSpecialStageId":"event_summer_01_01"},
+  {"stageId":"event_summer_01_03","previousSpecialStageId":"event_summer_01_02"},
+  {"stageId":"event_summer_01_04","previousSpecialStageId":"event_summer_01_03"},
+  {"stageId":"event_summer_01_05","previousSpecialStageId":"event_summer_01_04"},
+  {"stageId":"event_summer_01_06","previousSpecialStageId":"event_summer_01_05"},
+  {"stageId":"event_zero_edge_01_02","previousSpecialStageId":"event_zero_edge_01_01"},
+  {"stageId":"event_zero_edge_01_03","previousSpecialStageId":"event_zero_edge_01_02"},
+  {"stageId":"event_zero_edge_01_04","previousSpecialStageId":"event_zero_edge_01_03"},
+  {"stageId":"event_zero_edge_01_05","previousSpecialStageId":"event_zero_edge_01_04"}
 ]
