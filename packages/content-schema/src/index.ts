@@ -169,6 +169,7 @@ export interface FormationRestrictionContent {
   readonly requiredUnitTags: readonly string[];
   readonly forbiddenUnitTags: readonly string[];
   readonly maxDistinctUnits?: number;
+  readonly maxCoopDistinctUnitsPerPlayer?: number;
   readonly sameFactionOnly: boolean;
 }
 
@@ -575,6 +576,7 @@ function parseFormationRestrictions(value: unknown, context: string): FormationR
   const maxRarity = optionalEnum(value, 'maxRarity', context, RARITIES);
   const maxUnitCost = optionalInteger(value, 'maxUnitCost', context, 0, 1000000);
   const maxDistinctUnits = optionalInteger(value, 'maxDistinctUnits', context, 1, 10);
+  const maxCoopDistinctUnitsPerPlayer = optionalInteger(value, 'maxCoopDistinctUnitsPerPlayer', context, 1, 5);
   return {
     allowedRarities: parseEnumArray(value, 'allowedRarities', context, RARITIES),
     ...(maxRarity === undefined ? {} : { maxRarity }),
@@ -584,6 +586,7 @@ function parseFormationRestrictions(value: unknown, context: string): FormationR
     requiredUnitTags: parseStringArray(value, 'requiredUnitTags', context),
     forbiddenUnitTags: parseStringArray(value, 'forbiddenUnitTags', context),
     ...(maxDistinctUnits === undefined ? {} : { maxDistinctUnits }),
+    ...(maxCoopDistinctUnitsPerPlayer === undefined ? {} : { maxCoopDistinctUnitsPerPlayer }),
     sameFactionOnly: optionalBoolean(value, 'sameFactionOnly', context, false),
   };
 }
