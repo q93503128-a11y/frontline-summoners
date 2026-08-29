@@ -48,5 +48,47 @@
       {"id":"W5","trigger":{"type":"ANY_OF","conditions":[{"type":"AFTER_WAVE_CLEARED","waveId":"W3","delayFrames":180},{"type":"ENEMY_BASE_HP_BELOW","percent":45}]},"spawn":{"enemyId":"enemy-boss-iron","count":1,"intervalFrames":1}},
       {"id":"W6","trigger":{"type":"AFTER_WAVE_TRIGGERED","waveId":"W5","delayFrames":100},"spawn":{"enemyId":"enemy-sniper","count":2,"intervalFrames":260}}
     ],"formationRestrictions":{},"specialRules":[]
+  },
+  {
+    "id":"special_five_banners_01","chapter":"제한전 · 다섯 깃발","name":"압축 전선","subtitle":"다섯 자리 안에서 전열·범위·후열을 압축한다","stageType":"SPECIAL","difficulty":5,
+    "playerBaseHp":4600,"enemyBaseHp":6200,"startingSupply":350,"mapLength":2200,"theme":"ruins","decorSeed":1201,"playerUnitCap":18,"enemyUnitCap":24,
+    "waves":[
+      {"id":"W1","trigger":{"type":"TIME","frame":120},"spawn":{"enemyId":"enemy_ch2_bonewheel","count":4,"intervalFrames":70,"magnificationPermille":900}},
+      {"id":"W2","trigger":{"type":"TIME","frame":420},"spawn":{"enemyId":"enemy_ch2_mossboar","count":1,"intervalFrames":1,"magnificationPermille":900}},
+      {"id":"W3","trigger":{"type":"TIME","frame":720},"spawn":{"enemyId":"enemy_ch2_gravebell","count":2,"intervalFrames":170,"magnificationPermille":900}},
+      {"id":"W4","trigger":{"type":"TIME","frame":1050},"spawn":{"enemyId":"enemy_ch2_revivedarmor","count":2,"intervalFrames":220,"magnificationPermille":850}}
+    ],"formationRestrictions":{"maxDistinctUnits":5,"maxCoopDistinctUnitsPerPlayer":3},"specialRules":["솔로 편성 최대 5종","협동은 플레이어당 최대 3종"]
+  },
+  {
+    "id":"special_five_banners_02","chapter":"제한전 · 다섯 깃발","name":"다섯 개의 선택","subtitle":"러시·장거리·고HP 전열을 다섯 선택으로 모두 버틴다","stageType":"SPECIAL","difficulty":6,
+    "playerBaseHp":5600,"enemyBaseHp":7900,"startingSupply":420,"mapLength":2450,"theme":"moon","decorSeed":1219,"playerUnitCap":18,"enemyUnitCap":26,
+    "waves":[
+      {"id":"W1","trigger":{"type":"TIME","frame":90},"spawn":{"enemyId":"enemy_ch2_bonewheel","count":6,"intervalFrames":55,"magnificationPermille":1050}},
+      {"id":"W2","trigger":{"type":"TIME","frame":450},"spawn":{"enemyId":"enemy_ch2_seedbattery","count":1,"intervalFrames":1,"magnificationPermille":900}},
+      {"id":"W3","trigger":{"type":"TIME","frame":720},"spawn":{"enemyId":"enemy_ch2_umbrella","count":3,"intervalFrames":150,"magnificationPermille":1000}},
+      {"id":"W4","trigger":{"type":"TIME","frame":1080},"spawn":{"enemyId":"enemy_ch2_mossboar","count":2,"intervalFrames":220,"magnificationPermille":1050}},
+      {"id":"W5","trigger":{"type":"TIME","frame":1380},"spawn":{"enemyId":"enemy_ch2_revivedarmor","count":2,"intervalFrames":240,"magnificationPermille":1050}}
+    ],"formationRestrictions":{"maxDistinctUnits":5,"maxCoopDistinctUnitsPerPlayer":3},"specialRules":["솔로 편성 최대 5종","협동은 플레이어당 최대 3종"]
+  },
+  {
+    "id":"special_light_purse_01","chapter":"제한전 · 가벼운 주머니","name":"동전 세어가기","subtitle":"생산비 400 이하의 빠른 순환으로 전선을 끊지 않는다","stageType":"SPECIAL","difficulty":5,
+    "playerBaseHp":5200,"enemyBaseHp":7100,"startingSupply":300,"mapLength":2320,"theme":"canyon","decorSeed":1307,"playerUnitCap":22,"enemyUnitCap":25,
+    "waves":[
+      {"id":"W1","trigger":{"type":"TIME","frame":120},"spawn":{"enemyId":"enemy_ch3_spellbug","count":5,"intervalFrames":65,"magnificationPermille":850}},
+      {"id":"W2","trigger":{"type":"TIME","frame":420},"spawn":{"enemyId":"enemy_ch3_glasseye","count":2,"intervalFrames":190,"magnificationPermille":800}},
+      {"id":"W3","trigger":{"type":"TIME","frame":750},"spawn":{"enemyId":"enemy_ch3_inkdemon","count":3,"intervalFrames":150,"magnificationPermille":850}},
+      {"id":"W4","trigger":{"type":"TIME","frame":1080},"spawn":{"enemyId":"enemy_ch3_chain_demon","count":2,"intervalFrames":230,"magnificationPermille":800}}
+    ],"formationRestrictions":{"maxUnitCost":400},"specialRules":["현재 선택 형태의 생산비 400 이하만 출전 가능"]
+  },
+  {
+    "id":"special_light_purse_02","chapter":"제한전 · 가벼운 주머니","name":"빈 주머니의 전선","subtitle":"저비용 덱의 순환과 위치 운영을 후반 압박에서 시험한다","stageType":"SPECIAL","difficulty":6,
+    "playerBaseHp":6500,"enemyBaseHp":9100,"startingSupply":340,"mapLength":2580,"theme":"fortress","decorSeed":1321,"playerUnitCap":24,"enemyUnitCap":28,
+    "waves":[
+      {"id":"W1","trigger":{"type":"TIME","frame":90},"spawn":{"enemyId":"enemy_ch3_spellbug","count":6,"intervalFrames":55,"magnificationPermille":1050}},
+      {"id":"W2","trigger":{"type":"TIME","frame":390},"spawn":{"enemyId":"enemy_ch3_torn_mirror","count":1,"intervalFrames":1,"magnificationPermille":900}},
+      {"id":"W3","trigger":{"type":"TIME","frame":690},"spawn":{"enemyId":"enemy_ch3_glasseye","count":3,"intervalFrames":170,"magnificationPermille":950}},
+      {"id":"W4","trigger":{"type":"TIME","frame":1020},"spawn":{"enemyId":"enemy_ch3_contract_enforcer","count":1,"intervalFrames":1,"magnificationPermille":850}},
+      {"id":"W5","trigger":{"type":"TIME","frame":1320},"spawn":{"enemyId":"enemy_ch3_chain_demon","count":3,"intervalFrames":190,"magnificationPermille":950}}
+    ],"formationRestrictions":{"maxUnitCost":400},"specialRules":["현재 선택 형태의 생산비 400 이하만 출전 가능"]
   }
 ]
