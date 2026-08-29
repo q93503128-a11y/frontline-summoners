@@ -7,6 +7,7 @@ export interface FormationRestrictionRule {
   readonly requiredUnitTags?: readonly string[];
   readonly forbiddenUnitTags?: readonly string[];
   readonly maxDistinctUnits?: number;
+  readonly maxCoopDistinctUnitsPerPlayer?: number;
   readonly sameFactionOnly?: boolean;
 }
 
