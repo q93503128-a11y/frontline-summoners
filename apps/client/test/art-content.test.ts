@@ -3,16 +3,18 @@ import test from 'node:test';
 import { ART_BY_ID, ART_FAMILIES, UNIT_ART } from '../src/assets.ts';
 import { ENEMIES, PLAYER_SLOTS, RECRUITMENT_PLAYER_SLOTS } from '../src/prototype.ts';
 
-const chapterOneCombatantIds = [
+const implementedStoryAndEnemyIds = [
   ...PLAYER_SLOTS.map((slot) => slot.definition.id),
   ...ENEMIES.map((enemy) => enemy.definition.id),
 ];
 
 const ATTACK_FX_STYLES = new Set(['SLASH', 'PIERCE', 'BLUNT', 'MAGIC', 'FIRE', 'VOID']);
 
-test('every chapter one player and enemy has a registered art family and attack FX style', () => {
-  assert.equal(chapterOneCombatantIds.length, 20);
-  for (const id of chapterOneCombatantIds) {
+test('every implemented story player and enemy has a registered art family and attack FX style', () => {
+  assert.equal(PLAYER_SLOTS.length, 10);
+  assert.equal(ENEMIES.length, 20, 'chapter two adds ten enemies to the chapter-one enemy line');
+  assert.equal(implementedStoryAndEnemyIds.length, 30);
+  for (const id of implementedStoryAndEnemyIds) {
     const variant = UNIT_ART[id];
     assert.ok(variant, `missing UNIT_ART mapping for ${id}`);
     assert.ok(ART_BY_ID[variant.familyId], `unknown art family ${variant.familyId} for ${id}`);
