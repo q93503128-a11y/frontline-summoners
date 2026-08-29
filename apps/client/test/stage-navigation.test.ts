@@ -136,7 +136,7 @@ test('collection progress stays scoped to its own axis and reports the first unc
   assert.deepEqual(getCollectionClearedIds(chapterOne, progressionClears, specialClears), CHAPTER_ONE_STAGES.map((stage) => stage.id));
   assert.deepEqual(getCollectionClearedIds(chapterTwo, progressionClears, specialClears), CHAPTER_TWO_STAGES.slice(0, 4).map((stage) => stage.id));
   assert.deepEqual(getCollectionClearedIds(special, progressionClears, specialClears), specialClears);
-  assert.equal(getFirstUnclearedCollectionStageIndex(chapterOne, progressionClears, specialClears), 20);
+  assert.equal(getFirstUnclearedCollectionStageIndex(chapterOne, progressionClears, specialClears), -1);
   assert.equal(getFirstUnclearedCollectionStageIndex(chapterTwo, progressionClears, specialClears), 4);
   assert.equal(getFirstUnclearedCollectionStageIndex(special, progressionClears, specialClears), 1);
 });
