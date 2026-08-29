@@ -11,10 +11,7 @@ import {
   type PlayerUnitContent,
   type Rarity,
 } from '@frontline/content-schema';
-import {
-  parseStagePolicies,
-  type StagePolicyContent,
-} from '@frontline/content-schema/stage-policy';
+import { parseStagePolicies, type StagePolicyContent } from '@frontline/content-schema/stage-policy';
 import type { BattleUnitDefinition } from '@frontline/sim';
 import {
   createPlayableBattle,
@@ -24,14 +21,20 @@ import {
 } from '@frontline/sim/playable';
 import playerUnitsJson from '../../../content/units/chapter-01.json' with { type: 'json' };
 import recruitmentUnitsJson from '../../../content/units/recruitment-01.json' with { type: 'json' };
-import enemiesJson from '../../../content/enemies/main-01-02.json' with { type: 'json' };
+import enemiesOneTwoJson from '../../../content/enemies/main-01-02.json' with { type: 'json' };
+import enemiesThreeJson from '../../../content/enemies/main-03.json' with { type: 'json' };
 import chapterOneStagesJson from '../../../content/stages/chapter-01.json' with { type: 'json' };
 import chapterTwoStagesAJson from '../../../content/stages/chapter-02-01-05.json' with { type: 'json' };
 import chapterTwoStagesBJson from '../../../content/stages/chapter-02-06-10.json' with { type: 'json' };
 import chapterTwoStagesCJson from '../../../content/stages/chapter-02-11-15.json' with { type: 'json' };
 import chapterTwoStagesDJson from '../../../content/stages/chapter-02-16-20.json' with { type: 'json' };
+import chapterThreeStagesAJson from '../../../content/stages/chapter-03-01-05.json' with { type: 'json' };
+import chapterThreeStagesBJson from '../../../content/stages/chapter-03-06-10.json' with { type: 'json' };
+import chapterThreeStagesCJson from '../../../content/stages/chapter-03-11-15.json' with { type: 'json' };
+import chapterThreeStagesDJson from '../../../content/stages/chapter-03-16-20.json' with { type: 'json' };
 import specialStagesJson from '../../../content/stages/special-01.json' with { type: 'json' };
-import stagePoliciesJson from '../../../content/stages/policies-01-02.json' with { type: 'json' };
+import stagePoliciesOneTwoJson from '../../../content/stages/policies-01-02.json' with { type: 'json' };
+import stagePoliciesThreeJson from '../../../content/stages/policies-03.json' with { type: 'json' };
 import rewardScopesJson from '../../../content/permanent-rewards/reward-scopes.json' with { type: 'json' };
 import {
   REWARD_SCOPES,
@@ -51,42 +54,52 @@ export interface PrototypeRosterSlot extends PlayerRosterSlot {
   readonly description: string;
   readonly rewardScopes: readonly RewardScope[];
 }
-
 export type PrototypeStage = CampaignStageContent & Omit<StagePolicyContent, 'stageId'>;
 export const STARTER_SLOT_ID = 'militia';
 export const SPECIAL_HUB_UNLOCK_STAGE_ID = 'main_01_020';
 
-const ENEMY_CONTENT = parseEnemies(enemiesJson);
+const ENEMY_CONTENT = [...parseEnemies(enemiesOneTwoJson), ...parseEnemies(enemiesThreeJson)];
+if (new Set(ENEMY_CONTENT.map((enemy) => enemy.id)).size !== ENEMY_CONTENT.length) throw new Error('enemy ids must be globally unique');
 const ENEMY_IDS = new Set(ENEMY_CONTENT.map((enemy) => enemy.id));
 
 const CHAPTER_ONE = parseCampaignBundle({
   playerUnits: playerUnitsJson,
-  enemies: enemiesJson,
+  enemies: enemiesOneTwoJson,
   stages: chapterOneStagesJson,
   starterUnitId: STARTER_SLOT_ID,
   expectedStageCount: 20,
   requiredThemeCount: 7,
 });
-
 const RECRUITMENT_UNIT_CONTENT = parsePlayerUnits(recruitmentUnitsJson);
 const campaignUnitIds = new Set(CHAPTER_ONE.playerUnits.map((unit) => unit.id));
 for (const unit of RECRUITMENT_UNIT_CONTENT) {
   if (campaignUnitIds.has(unit.id)) throw new Error(`recruitment unit duplicates story unit id: ${unit.id}`);
   if (unit.acquisitionClass !== 'RECRUITMENT') throw new Error(`recruitment file contains non-recruitment unit: ${unit.id}`);
 }
-
 const ALL_PLAYER_UNIT_IDS = new Set([...CHAPTER_ONE.playerUnits, ...RECRUITMENT_UNIT_CONTENT].map((unit) => unit.id));
-const CHAPTER_TWO_STAGE_CONTENT = parseCampaignStages([...chapterTwoStagesAJson, ...chapterTwoStagesBJson, ...chapterTwoStagesCJson, ...chapterTwoStagesDJson], {
-  playerUnitIds: ALL_PLAYER_UNIT_IDS,
-  enemyIds: ENEMY_IDS,
-  starterUnitId: STARTER_SLOT_ID,
-  expectedStageCount: 20,
-});
-for (const stage of CHAPTER_TWO_STAGE_CONTENT) {
-  if (stage.stageType !== 'PROGRESSION') throw new Error(`chapter-two stage must be PROGRESSION: ${stage.id}`);
-  if (stage.unlockUnitId) throw new Error(`chapter-two stage must not unlock another chapter-one story unit: ${stage.id}`);
+
+function parseProgressionChapter(raw: unknown, chapterLabel: string): readonly CampaignStageContent[] {
+  const stages = parseCampaignStages(raw, {
+    playerUnitIds: ALL_PLAYER_UNIT_IDS,
+    enemyIds: ENEMY_IDS,
+    starterUnitId: STARTER_SLOT_ID,
+    expectedStageCount: 20,
+  });
+  for (const stage of stages) {
+    if (stage.stageType !== 'PROGRESSION') throw new Error(`${chapterLabel} stage must be PROGRESSION: ${stage.id}`);
+    if (stage.unlockUnitId) throw new Error(`${chapterLabel} stage must not unlock chapter-one story units: ${stage.id}`);
+  }
+  return stages;
 }
 
+const CHAPTER_TWO_STAGE_CONTENT = parseProgressionChapter(
+  [...chapterTwoStagesAJson, ...chapterTwoStagesBJson, ...chapterTwoStagesCJson, ...chapterTwoStagesDJson],
+  'chapter-two',
+);
+const CHAPTER_THREE_STAGE_CONTENT = parseProgressionChapter(
+  [...chapterThreeStagesAJson, ...chapterThreeStagesBJson, ...chapterThreeStagesCJson, ...chapterThreeStagesDJson],
+  'chapter-three',
+);
 const SPECIAL_STAGE_CONTENT = parseCampaignStages(specialStagesJson, {
   playerUnitIds: ALL_PLAYER_UNIT_IDS,
   enemyIds: ENEMY_IDS,
@@ -101,18 +114,16 @@ for (const stage of SPECIAL_STAGE_CONTENT) {
 const PROGRESSION_STAGE_CONTENT: readonly CampaignStageContent[] = [
   ...CHAPTER_ONE.stages,
   ...CHAPTER_TWO_STAGE_CONTENT,
+  ...CHAPTER_THREE_STAGE_CONTENT,
 ];
-const BASE_STAGE_CONTENT: readonly CampaignStageContent[] = [
-  ...PROGRESSION_STAGE_CONTENT,
-  ...SPECIAL_STAGE_CONTENT,
-];
-if (new Set(BASE_STAGE_CONTENT.map((stage) => stage.id)).size !== BASE_STAGE_CONTENT.length) {
-  throw new Error('playable stage ids must be globally unique');
-}
+const BASE_STAGE_CONTENT: readonly CampaignStageContent[] = [...PROGRESSION_STAGE_CONTENT, ...SPECIAL_STAGE_CONTENT];
+if (new Set(BASE_STAGE_CONTENT.map((stage) => stage.id)).size !== BASE_STAGE_CONTENT.length) throw new Error('playable stage ids must be globally unique');
 
-const STAGE_POLICIES = parseStagePolicies(stagePoliciesJson, new Set(BASE_STAGE_CONTENT.map((stage) => stage.id)));
+const STAGE_POLICIES = parseStagePolicies(
+  [...stagePoliciesOneTwoJson, ...stagePoliciesThreeJson],
+  new Set(BASE_STAGE_CONTENT.map((stage) => stage.id)),
+);
 const STAGE_POLICY_BY_ID = new Map(STAGE_POLICIES.map((policy) => [policy.stageId, policy] as const));
-
 function withStagePolicy(stage: CampaignStageContent): PrototypeStage {
   const policy = STAGE_POLICY_BY_ID.get(stage.id);
   if (!policy) throw new Error(`missing stage policy at runtime: ${stage.id}`);
@@ -165,14 +176,9 @@ function fighter(content: CombatContent): BattleUnitDefinition {
     naturalKnockbackFrames: 12,
     naturalKnockbackDistance: 34,
     deathFrames: 12,
-    attackTiming: {
-      cycleFrames: content.cycleFrames,
-      hitFrames: content.hitFrames,
-      backswingFrames: content.backswingFrames,
-    },
+    attackTiming: { cycleFrames: content.cycleFrames, hitFrames: content.hitFrames, backswingFrames: content.backswingFrames },
   };
 }
-
 function rosterSlot(unit: PlayerUnitContent): PrototypeRosterSlot {
   const rewardScopes = REWARD_SCOPE_BY_UNIT_ID.get(unit.id);
   if (!rewardScopes) throw new Error(`missing explicit permanent reward scopes for unit: ${unit.id}`);
@@ -194,13 +200,8 @@ function rosterSlot(unit: PlayerUnitContent): PrototypeRosterSlot {
 export const PLAYER_SLOTS: readonly PrototypeRosterSlot[] = CHAPTER_ONE.playerUnits.map(rosterSlot);
 export const RECRUITMENT_PLAYER_SLOTS: readonly PrototypeRosterSlot[] = RECRUITMENT_UNIT_CONTENT.map(rosterSlot);
 export const ALL_PLAYER_SLOTS: readonly PrototypeRosterSlot[] = [...PLAYER_SLOTS, ...RECRUITMENT_PLAYER_SLOTS];
-
-if (new Set(ALL_PLAYER_SLOTS.map((slot) => slot.slotId)).size !== ALL_PLAYER_SLOTS.length) {
-  throw new Error('story and recruitment player slot ids must be globally unique');
-}
-for (const unitId of REWARD_SCOPE_BY_UNIT_ID.keys()) {
-  if (!ALL_PLAYER_SLOTS.some((slot) => slot.slotId === unitId)) throw new Error(`reward scope registry references unknown unit: ${unitId}`);
-}
+if (new Set(ALL_PLAYER_SLOTS.map((slot) => slot.slotId)).size !== ALL_PLAYER_SLOTS.length) throw new Error('story and recruitment player slot ids must be globally unique');
+for (const unitId of REWARD_SCOPE_BY_UNIT_ID.keys()) if (!ALL_PLAYER_SLOTS.some((slot) => slot.slotId === unitId)) throw new Error(`reward scope registry references unknown unit: ${unitId}`);
 
 export const ENEMIES: readonly EnemyArchetype[] = ENEMY_CONTENT.map((enemy) => ({
   enemyId: enemy.id,
@@ -208,7 +209,6 @@ export const ENEMIES: readonly EnemyArchetype[] = ENEMY_CONTENT.map((enemy) => (
   definition: fighter(enemy),
   rewardSupply: enemy.rewardSupply,
 }));
-
 export const STAGES: readonly PrototypeStage[] = PROGRESSION_STAGE_CONTENT.map(withStagePolicy);
 export const SPECIAL_STAGES: readonly PrototypeStage[] = SPECIAL_STAGE_CONTENT.map(withStagePolicy);
 export const ALL_STAGES: readonly PrototypeStage[] = [...STAGES, ...SPECIAL_STAGES];
@@ -228,9 +228,7 @@ export function getSpecialStageNumber(stageId: string): number {
   if (index < 0) throw new Error(`Unknown special stage: ${stageId}`);
   return index + 1;
 }
-export function getSlotById(slotId: string): PrototypeRosterSlot | undefined {
-  return ALL_PLAYER_SLOTS.find((slot) => slot.slotId === slotId);
-}
+export function getSlotById(slotId: string): PrototypeRosterSlot | undefined { return ALL_PLAYER_SLOTS.find((slot) => slot.slotId === slotId); }
 export function getUnlockStageForSlot(slotId: string): PrototypeStage | undefined {
   if (slotId === STARTER_SLOT_ID) return undefined;
   return STAGES.find((stage) => stage.unlockUnitId === slotId);
@@ -302,7 +300,6 @@ export function createPrototypeBattleWithPlayerSlots(
     supplyLevels: progression.supplyLevels,
   });
 }
-
 export function createPrototypeBattle(
   stageId = STAGES[0]!.id,
   unlockedSlotIds: readonly string[] = [STARTER_SLOT_ID],

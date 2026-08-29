@@ -4,6 +4,7 @@ import {
   type PermanentRewardTargetScope,
 } from '@frontline/sim/meta-progression';
 import chapterTwoRewardsJson from '../../../content/permanent-rewards/chapter-02.json' with { type: 'json' };
+import chapterThreeRewardsJson from '../../../content/permanent-rewards/chapter-03.json' with { type: 'json' };
 import {
   SERVER_CHARACTER_LEVEL_CURVE,
   SERVER_EVOLUTION_FORMS,
@@ -33,19 +34,14 @@ function record(value: unknown, context: string): Record<string, unknown> {
   if (typeof value !== 'object' || value === null || Array.isArray(value)) throw new Error(`${context} must be an object`);
   return value as Record<string, unknown>;
 }
-
 function nonEmptyString(value: unknown, context: string): string {
   if (typeof value !== 'string' || value.trim().length === 0) throw new Error(`${context} must be a non-empty string`);
   return value;
 }
-
 function percent(value: unknown, context: string): number {
-  if (!Number.isInteger(value) || (value as number) < 0 || (value as number) > 100) {
-    throw new Error(`${context} must be an integer in 0..100`);
-  }
+  if (!Number.isInteger(value) || (value as number) < 0 || (value as number) > 100) throw new Error(`${context} must be an integer in 0..100`);
   return value as number;
 }
-
 function parseModifier(value: unknown, context: string): PermanentRewardModifier {
   const raw = record(value, context);
   const kind = nonEmptyString(raw.kind, `${context}.kind`);
@@ -63,31 +59,21 @@ function parseModifier(value: unknown, context: string): PermanentRewardModifier
   if (kind === 'WORKER_COST_REDUCTION_PERCENT') return { kind, percent: parsedPercent };
   return { kind: 'RECHARGE_REDUCTION_PERCENT', percent: parsedPercent };
 }
-
-function parseDefinitions(value: unknown): readonly PermanentRewardDefinition[] {
-  if (!Array.isArray(value)) throw new Error('chapter-two server permanent rewards must be an array');
+function parseDefinitions(value: unknown, label: string): readonly PermanentRewardDefinition[] {
+  if (!Array.isArray(value)) throw new Error(`${label} server permanent rewards must be an array`);
   const ids = new Set<string>();
   return value.map((entry, index) => {
-    const raw = record(entry, `chapterTwoRewards[${index}]`);
-    const id = nonEmptyString(raw.id, `chapterTwoRewards[${index}].id`);
-    if (ids.has(id)) throw new Error(`duplicate chapter-two permanent reward id:${id}`);
+    const raw = record(entry, `${label}Rewards[${index}]`);
+    const id = nonEmptyString(raw.id, `${label}Rewards[${index}].id`);
+    if (ids.has(id)) throw new Error(`duplicate ${label} permanent reward id:${id}`);
     ids.add(id);
     if (!Array.isArray(raw.modifiers) || raw.modifiers.length === 0) throw new Error(`${id}.modifiers must be non-empty`);
-    return {
-      id,
-      modifiers: raw.modifiers.map((modifier, modifierIndex) => parseModifier(modifier, `${id}.modifiers[${modifierIndex}]`)),
-    };
+    return { id, modifiers: raw.modifiers.map((modifier, modifierIndex) => parseModifier(modifier, `${id}.modifiers[${modifierIndex}]`)) };
   });
 }
 
-const chapterTwoRewards = parseDefinitions(chapterTwoRewardsJson);
-const allIds = new Set(SERVER_CHAPTER_ONE_PERMANENT_REWARDS.map((reward) => reward.id));
-for (const reward of chapterTwoRewards) {
-  if (allIds.has(reward.id)) throw new Error(`chapter-two reward duplicates existing server reward:${reward.id}`);
-  allIds.add(reward.id);
-}
-
-export const SERVER_PERMANENT_REWARDS: readonly PermanentRewardDefinition[] = [
-  ...SERVER_CHAPTER_ONE_PERMANENT_REWARDS,
-  ...chapterTwoRewards,
-];
+const chapterTwoRewards = parseDefinitions(chapterTwoRewardsJson, 'chapterTwo');
+const chapterThreeRewards = parseDefinitions(chapterThreeRewardsJson, 'chapterThree');
+const allRewards = [...SERVER_CHAPTER_ONE_PERMANENT_REWARDS, ...chapterTwoRewards, ...chapterThreeRewards];
+if (new Set(allRewards.map((reward) => reward.id)).size !== allRewards.length) throw new Error('server permanent reward ids must be globally unique');
+export const SERVER_PERMANENT_REWARDS: readonly PermanentRewardDefinition[] = allRewards;
