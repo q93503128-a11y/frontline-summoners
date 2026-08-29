@@ -135,6 +135,18 @@ export const UNIT_ART: Readonly<Record<string, UnitArtVariant>> = {
   'enemy-berserker': { familyId: 'fantasy-warrior', tint: 0xff6767, displayScale: 1.08, attackFx: 'BLUNT' },
   'enemy-boss': { familyId: 'evil-wizard', tint: 0xffd36e, displayScale: 1.28, attackFx: 'VOID' },
   'enemy-boss-iron': { familyId: 'hero-knight', tint: 0xb5c6d8, displayScale: 1.38, attackFx: 'BLUNT' },
+
+  // Chapter 2 uses explicit temporary mappings until its production enemy sheets are authored.
+  enemy_ch2_mossboar: { familyId: 'fantasy-warrior', tint: 0x6f9861, displayScale: 1.22, attackFx: 'BLUNT' },
+  enemy_ch2_umbrella: { familyId: 'wizard', tint: 0x91b86e, displayScale: 0.92, attackFx: 'MAGIC' },
+  enemy_ch2_vinerider: { familyId: 'huntress', tint: 0x72a866, displayScale: 1.02, attackFx: 'PIERCE' },
+  enemy_ch2_seedbattery: { familyId: 'wizard', tint: 0x657b4e, displayScale: 1.08, attackFx: 'MAGIC' },
+  enemy_ch2_bonewheel: { familyId: 'fantasy-warrior', tint: 0xd8cfb5, displayScale: 0.86, attackFx: 'SLASH' },
+  enemy_ch2_coffinbug: { familyId: 'hero-knight-2', tint: 0x80796f, displayScale: 1.18, attackFx: 'BLUNT' },
+  enemy_ch2_gravebell: { familyId: 'evil-wizard', tint: 0xa99e91, displayScale: 1.05, attackFx: 'MAGIC' },
+  enemy_ch2_revivedarmor: { familyId: 'hero-knight', tint: 0x79808a, displayScale: 1.16, attackFx: 'BLUNT' },
+  boss_ch2_rootwidow: { familyId: 'evil-wizard', tint: 0x638d5a, displayScale: 1.42, attackFx: 'VOID' },
+  boss_ch2_funeral_king: { familyId: 'hero-knight', tint: 0x655f69, displayScale: 1.48, attackFx: 'VOID' },
 };
 
 export const ART_BY_ID: Readonly<Record<string, ArtFamily>> = Object.fromEntries(ART_FAMILIES.map((art) => [art.id, art]));
