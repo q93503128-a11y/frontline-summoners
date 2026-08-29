@@ -15,5 +15,28 @@
 
   {"stageId":"resource_starlight_02","previousSpecialStageId":"resource_starlight_01"},
   {"stageId":"resource_starlight_03","previousSpecialStageId":"resource_starlight_02","requiredProgressionStageId":"main_02_020"},
-  {"stageId":"resource_starlight_04","previousSpecialStageId":"resource_starlight_03","requiredProgressionStageId":"main_03_020"}
+  {"stageId":"resource_starlight_04","previousSpecialStageId":"resource_starlight_03","requiredProgressionStageId":"main_03_020"},
+
+  {"stageId":"special_glutton_02","previousSpecialStageId":"special_glutton_01"},
+  {"stageId":"special_glutton_03","previousSpecialStageId":"special_glutton_02"},
+  {"stageId":"special_glutton_04","previousSpecialStageId":"special_glutton_03"},
+
+  {"stageId":"special_undead_02","previousSpecialStageId":"special_undead_01"},
+  {"stageId":"special_undead_03","previousSpecialStageId":"special_undead_02"},
+  {"stageId":"special_undead_04","previousSpecialStageId":"special_undead_03"},
+
+  {"stageId":"special_glass_02","previousSpecialStageId":"special_glass_01"},
+  {"stageId":"special_glass_03","previousSpecialStageId":"special_glass_02"},
+  {"stageId":"special_glass_04","previousSpecialStageId":"special_glass_03"},
+
+  {"stageId":"special_mechcastle_02","previousSpecialStageId":"special_mechcastle_01"},
+  {"stageId":"special_mechcastle_03","previousSpecialStageId":"special_mechcastle_02"},
+  {"stageId":"special_mechcastle_04","previousSpecialStageId":"special_mechcastle_03"},
+
+  {"stageId":"special_anomaly_02","previousSpecialStageId":"special_anomaly_01"},
+  {"stageId":"special_anomaly_03","previousSpecialStageId":"special_anomaly_02"},
+  {"stageId":"special_anomaly_04","previousSpecialStageId":"special_anomaly_03"},
+
+  {"stageId":"special_echoes_02","previousSpecialStageId":"special_echoes_01"},
+  {"stageId":"special_echoes_03","previousSpecialStageId":"special_echoes_02"}
 ]

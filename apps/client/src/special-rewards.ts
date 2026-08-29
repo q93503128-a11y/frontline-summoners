@@ -28,6 +28,35 @@ const REWARDS: readonly SpecialResourceRewardDefinition[] = [
   { stageId: 'resource_starlight_02', repeatReward: { summon_crystal: 35 }, firstClearBonus: { summon_crystal: 45 } },
   { stageId: 'resource_starlight_03', repeatReward: { summon_crystal: 60 }, firstClearBonus: { summon_crystal: 75 } },
   { stageId: 'resource_starlight_04', repeatReward: { summon_crystal: 95 }, firstClearBonus: { summon_crystal: 120 } },
+
+  { stageId: 'special_glutton_01', repeatReward: { gold: 250 }, firstClearBonus: { gold: 750, evo_fragment: 2 } },
+  { stageId: 'special_glutton_02', repeatReward: { gold: 400 }, firstClearBonus: { gold: 1200, evo_fragment: 4, evo_core: 1 } },
+  { stageId: 'special_glutton_03', repeatReward: { gold: 650 }, firstClearBonus: { gold: 2200, evo_fragment: 8, evo_core: 2 } },
+  { stageId: 'special_glutton_04', repeatReward: { gold: 900 }, firstClearBonus: { gold: 4500, evo_core: 3, evo_crown: 1, summon_crystal: 80 } },
+
+  { stageId: 'special_undead_01', repeatReward: { gold: 250 }, firstClearBonus: { gold: 700, evo_fragment: 3 } },
+  { stageId: 'special_undead_02', repeatReward: { gold: 400 }, firstClearBonus: { gold: 1100, evo_fragment: 5, evo_core: 1 } },
+  { stageId: 'special_undead_03', repeatReward: { gold: 650 }, firstClearBonus: { gold: 1800, soul_essence: 120, evo_core: 2 } },
+  { stageId: 'special_undead_04', repeatReward: { gold: 900 }, firstClearBonus: { gold: 3200, soul_essence: 250, evo_core: 3, evo_crown: 1 } },
+
+  { stageId: 'special_glass_01', repeatReward: { gold: 300 }, firstClearBonus: { gold: 900, evo_fragment: 4 } },
+  { stageId: 'special_glass_02', repeatReward: { gold: 450 }, firstClearBonus: { gold: 1300, evo_core: 1, summon_crystal: 25 } },
+  { stageId: 'special_glass_03', repeatReward: { gold: 700 }, firstClearBonus: { gold: 2100, evo_core: 2, summon_crystal: 50 } },
+  { stageId: 'special_glass_04', repeatReward: { gold: 950 }, firstClearBonus: { gold: 3600, evo_core: 3, evo_crown: 1, summon_crystal: 90 } },
+
+  { stageId: 'special_mechcastle_01', repeatReward: { gold: 350 }, firstClearBonus: { gold: 1200, evo_core: 1 } },
+  { stageId: 'special_mechcastle_02', repeatReward: { gold: 500 }, firstClearBonus: { gold: 1800, evo_core: 2 } },
+  { stageId: 'special_mechcastle_03', repeatReward: { gold: 750 }, firstClearBonus: { gold: 2600, evo_core: 3 } },
+  { stageId: 'special_mechcastle_04', repeatReward: { gold: 1000 }, firstClearBonus: { gold: 4500, evo_core: 4, evo_crown: 1 } },
+
+  { stageId: 'special_anomaly_01', repeatReward: { gold: 350 }, firstClearBonus: { gold: 1000, summon_crystal: 30 } },
+  { stageId: 'special_anomaly_02', repeatReward: { gold: 550 }, firstClearBonus: { gold: 1600, evo_core: 1, summon_crystal: 45 } },
+  { stageId: 'special_anomaly_03', repeatReward: { gold: 800 }, firstClearBonus: { gold: 2400, evo_core: 2, summon_crystal: 70 } },
+  { stageId: 'special_anomaly_04', repeatReward: { gold: 1050 }, firstClearBonus: { gold: 4000, evo_core: 3, evo_crown: 1, summon_crystal: 120 } },
+
+  { stageId: 'special_echoes_01', repeatReward: { gold: 600 }, firstClearBonus: { gold: 3000, evo_core: 2, summon_crystal: 30 } },
+  { stageId: 'special_echoes_02', repeatReward: { gold: 800 }, firstClearBonus: { gold: 4500, evo_core: 3, evo_crown: 1, summon_crystal: 60 } },
+  { stageId: 'special_echoes_03', repeatReward: { gold: 1100 }, firstClearBonus: { gold: 8000, evo_core: 5, evo_crown: 2, summon_crystal: 150 } },
 ];
 
 if (new Set(REWARDS.map((reward) => reward.stageId)).size !== REWARDS.length) {
