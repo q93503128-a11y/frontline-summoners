@@ -8,9 +8,9 @@ import {
   getPermanentRewardIdsForClearedStages,
   getStage,
   getUnlockedSlotIds,
-  isSpecialStageUnlocked,
   isStageUnlocked,
 } from './prototype.ts';
+import { isSortieStageUnlocked } from './stage-navigation.ts';
 import {
   FIRST_RECRUITMENT_BANNER,
   RECRUITMENT_UNITS,
@@ -380,7 +380,7 @@ export async function recordNormalStageClear(stageId: string, source: NormalClea
 export async function recordSpecialStageClear(stageId: string): Promise<SpecialStageClearResult> {
   const before = normalizeGuestProgress(await loadGuestProgress()); const stage = getStage(stageId);
   if (stage.stageType !== 'SPECIAL') throw new Error(`Not a special stage: ${stage.id}`);
-  if (!isSpecialStageUnlocked(stage.id, before.clearedStageIds)) throw new Error(`Special stage is not unlocked: ${stage.id}`);
+  if (!isSortieStageUnlocked(stage.id, before.clearedStageIds, before.specialClearedStageIds)) throw new Error(`Special stage is not unlocked: ${stage.id}`);
   const specialClears = new Set(before.specialClearedStageIds); const firstClear = !specialClears.has(stage.id); specialClears.add(stage.id);
   const resourceReward = getSpecialResourceReward(stage.id, firstClear);
   const resourceLedgerById = grantResources(before.resourceLedgerById ?? {}, resourceReward);

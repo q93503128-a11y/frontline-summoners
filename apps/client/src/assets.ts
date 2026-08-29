@@ -171,7 +171,8 @@ export const UNIT_ART: Readonly<Record<string, UnitArtVariant>> = {
   boss_ch4_moving_throne: { familyId: 'hero-knight', tint: 0x7b8191, displayScale: 1.52, attackFx: 'BLUNT' },
   boss_ch4_zero_engine: { familyId: 'evil-wizard', tint: 0x65759e, displayScale: 1.58, attackFx: 'VOID' },
 
-  // Permanent SPECIAL bosses remain temporary silhouettes until dedicated production sheets are authored.
+  // Permanent SPECIAL enemies/bosses remain temporary silhouettes until dedicated production sheets are authored.
+  enemy_sp_glutton_juvenile: { familyId: 'fantasy-warrior', tint: 0xb6845d, displayScale: 1.18, attackFx: 'BLUNT' },
   boss_sp_glutton_drake: { familyId: 'fantasy-warrior', tint: 0x9a684c, displayScale: 1.58, attackFx: 'BLUNT' },
   boss_sp_undying_night: { familyId: 'evil-wizard', tint: 0x77708b, displayScale: 1.44, attackFx: 'VOID' },
   boss_sp_glass_castle: { familyId: 'wizard', tint: 0xc7e6f4, displayScale: 1.58, attackFx: 'MAGIC' },

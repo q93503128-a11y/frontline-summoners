@@ -54,9 +54,21 @@ export interface OnHitPushContent {
   readonly frames: number;
 }
 
+export interface OnHitWeakenContent {
+  readonly chancePermille: number;
+  readonly durationFrames: number;
+  readonly attackPermille: number;
+}
+
 export interface ReviveOnceContent {
   readonly delayFrames: number;
   readonly hpPermille: number;
+}
+
+export interface HpThresholdAdvanceContent {
+  readonly thresholdsPermille: readonly number[];
+  readonly distance: number;
+  readonly nextAttackStartupReductionFrames: number;
 }
 
 export const BATTLEFIELD_THEME_IDS = ['meadow', 'canyon', 'burning', 'ruins', 'moon', 'fortress', 'golden'] as const;
@@ -70,6 +82,7 @@ export interface AttackPatternStepContent {
   readonly hitFrames: readonly number[];
   readonly onHitSlow?: OnHitSlowContent;
   readonly onHitPush?: OnHitPushContent;
+  readonly onHitWeaken?: OnHitWeakenContent;
 }
 
 export interface CloseRangeAttackContent extends AttackPatternStepContent {
@@ -97,7 +110,9 @@ export interface CombatContent {
   readonly closeRangeAttack?: CloseRangeAttackContent;
   readonly onHitSlow?: OnHitSlowContent;
   readonly onHitPush?: OnHitPushContent;
+  readonly onHitWeaken?: OnHitWeakenContent;
   readonly reviveOnce?: ReviveOnceContent;
+  readonly hpThresholdAdvance?: HpThresholdAdvanceContent;
 }
 
 export interface PlayerUnitContent extends CombatContent {
@@ -299,12 +314,38 @@ function parsePush(value: unknown, context: string): OnHitPushContent | undefine
   };
 }
 
+function parseWeaken(value: unknown, context: string): OnHitWeakenContent | undefined {
+  if (value === undefined) return undefined;
+  if (!isRecord(value)) throw new Error(`${context} must be an object`);
+  return {
+    chancePermille: requireInteger(value, 'chancePermille', context, 1, 1000),
+    durationFrames: requireInteger(value, 'durationFrames', context, 1, 3600),
+    attackPermille: requireInteger(value, 'attackPermille', context, 1, 999),
+  };
+}
+
 function parseRevive(value: unknown, context: string): ReviveOnceContent | undefined {
   if (value === undefined) return undefined;
   if (!isRecord(value)) throw new Error(`${context} must be an object`);
   return {
     delayFrames: requireInteger(value, 'delayFrames', context, 1, 36000),
     hpPermille: requireInteger(value, 'hpPermille', context, 1, 1000),
+  };
+}
+
+function parseHpThresholdAdvance(value: unknown, context: string): HpThresholdAdvanceContent | undefined {
+  if (value === undefined) return undefined;
+  if (!isRecord(value)) throw new Error(`${context} must be an object`);
+  if (!Array.isArray(value.thresholdsPermille) || value.thresholdsPermille.length === 0) throw new Error(`${context}.thresholdsPermille must be a non-empty array`);
+  const thresholdsPermille = value.thresholdsPermille.map((threshold, index) => {
+    if (!Number.isInteger(threshold) || (threshold as number) < 1 || (threshold as number) > 999) throw new Error(`${context}.thresholdsPermille[${index}] must be in 1..999`);
+    return threshold as number;
+  });
+  if (thresholdsPermille.some((threshold, index) => index > 0 && threshold >= thresholdsPermille[index - 1]!)) throw new Error(`${context}.thresholdsPermille must be strictly descending`);
+  return {
+    thresholdsPermille,
+    distance: requireInteger(value, 'distance', context, 1, 10000),
+    nextAttackStartupReductionFrames: requireInteger(value, 'nextAttackStartupReductionFrames', context, 0, 3600),
   };
 }
 
@@ -315,6 +356,7 @@ function parseAttackProfile(record: Record<string, unknown>, context: string): A
   if (attackMinRange > attackMaxRange) throw new Error(`${context}.attackMinRange must be <= attackMaxRange`);
   const onHitSlow = parseSlow(record.onHitSlow, `${context}.onHitSlow`);
   const onHitPush = parsePush(record.onHitPush, `${context}.onHitPush`);
+  const onHitWeaken = parseWeaken(record.onHitWeaken, `${context}.onHitWeaken`);
   return {
     attackDamage: requireInteger(record, 'attackDamage', context, 0, 10000000),
     attackMinRange,
@@ -323,6 +365,7 @@ function parseAttackProfile(record: Record<string, unknown>, context: string): A
     hitFrames: requireHitFrames(record, context, cycleFrames),
     ...(onHitSlow === undefined ? {} : { onHitSlow }),
     ...(onHitPush === undefined ? {} : { onHitPush }),
+    ...(onHitWeaken === undefined ? {} : { onHitWeaken }),
   };
 }
 
@@ -387,7 +430,9 @@ function parseCombat(value: unknown, context: string): CombatContent {
   const closeRangeAttack = parseCloseRangeAttack(value, context);
   const onHitSlow = parseSlow(value.onHitSlow, `${context}.onHitSlow`);
   const onHitPush = parsePush(value.onHitPush, `${context}.onHitPush`);
+  const onHitWeaken = parseWeaken(value.onHitWeaken, `${context}.onHitWeaken`);
   const reviveOnce = parseRevive(value.reviveOnce, `${context}.reviveOnce`);
+  const hpThresholdAdvance = parseHpThresholdAdvance(value.hpThresholdAdvance, `${context}.hpThresholdAdvance`);
   return {
     id: requireString(value, 'id', context),
     displayName: requireString(value, 'displayName', context),
@@ -409,7 +454,9 @@ function parseCombat(value: unknown, context: string): CombatContent {
     ...(closeRangeAttack === undefined ? {} : { closeRangeAttack }),
     ...(onHitSlow === undefined ? {} : { onHitSlow }),
     ...(onHitPush === undefined ? {} : { onHitPush }),
+    ...(onHitWeaken === undefined ? {} : { onHitWeaken }),
     ...(reviveOnce === undefined ? {} : { reviveOnce }),
+    ...(hpThresholdAdvance === undefined ? {} : { hpThresholdAdvance }),
   };
 }
 

@@ -82,7 +82,9 @@ function fighter(content: CombatContent): BattleUnitDefinition {
     ...(content.closeRangeAttack === undefined ? {} : { closeRangeAttack: content.closeRangeAttack }),
     ...(content.onHitSlow === undefined ? {} : { onHitSlow: content.onHitSlow }),
     ...(content.onHitPush === undefined ? {} : { onHitPush: content.onHitPush }),
+    ...(content.onHitWeaken === undefined ? {} : { onHitWeaken: content.onHitWeaken }),
     ...(content.reviveOnce === undefined ? {} : { reviveOnce: content.reviveOnce }),
+    ...(content.hpThresholdAdvance === undefined ? {} : { hpThresholdAdvance: content.hpThresholdAdvance }),
     naturalKnockbackCount: content.naturalKnockbackCount, naturalKnockbackFrames: 12, naturalKnockbackDistance: 34, deathFrames: 12,
     attackTiming: { cycleFrames: content.cycleFrames, hitFrames: content.hitFrames, backswingFrames: content.backswingFrames },
   };
