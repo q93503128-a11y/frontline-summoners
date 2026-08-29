@@ -15,6 +15,21 @@ import { addButton, addText, COLORS, drawBackdrop } from './scene-ui';
 import { getStageCollectionForStage } from './stage-navigation';
 import { isCompactMobileViewport } from './viewport';
 
+function formatSpecialResourceReward(reward: Readonly<Record<string, number | undefined>>): string {
+  const labels: Readonly<Record<string, string>> = {
+    gold: '골드',
+    evo_fragment: '진화 조각',
+    evo_core: '진화 핵심',
+    evo_crown: '진화 왕관',
+    soul_essence: '혼의 정수',
+    summon_crystal: '모집 결정',
+  };
+  const parts = Object.entries(reward)
+    .filter(([, amount]) => typeof amount === 'number' && amount > 0)
+    .map(([id, amount]) => `${labels[id] ?? id} +${amount!.toLocaleString('ko-KR')}`);
+  return parts.length > 0 ? parts.join(' · ') : '기록형 SPECIAL · 반복 재화 보상 없음';
+}
+
 export class ResultScene extends Phaser.Scene {
   private stage!: PrototypeStage;
   private winner: string | null = null;
@@ -41,21 +56,28 @@ export class ResultScene extends Phaser.Scene {
 
     this.add.rectangle(INTERNAL_WIDTH / 2, compact ? 345 : 355, compact ? 820 : 760, compact ? 360 : 320, 0x242b38, 0.98).setStrokeStyle(3, victory ? 0xb99449 : 0x805151);
     if (victory && special) {
-      addText(this, INTERNAL_WIDTH / 2, compact ? 210 : 238, '특수전 클리어 기록', compact ? 28 : 23, '#d8b4ef', 'center').setOrigin(0.5);
+      addText(this, INTERNAL_WIDTH / 2, compact ? 210 : 238, 'SPECIAL 클리어', compact ? 28 : 23, '#d8b4ef', 'center').setOrigin(0.5);
       addText(this, INTERNAL_WIDTH / 2, compact ? 264 : 290, this.stage.name, compact ? 38 : 35, '#f1ceff', 'center').setOrigin(0.5);
       addText(this, INTERNAL_WIDTH / 2, compact ? 322 : 342, this.stage.subtitle, compact ? 24 : 18, '#c8d0dc', 'center').setOrigin(0.5).setWordWrapWidth(compact ? 720 : 680);
-      addText(this, INTERNAL_WIDTH / 2, compact ? 390 : 395, '메인 NORMAL_CLEAR와 별도 기록 · 전투 능력치 보상 없음', compact ? 24 : 20, '#b9a5c8', 'center').setOrigin(0.5);
-      const status = addText(this, INTERNAL_WIDTH / 2, compact ? 446 : 447, compact ? '특수전 기록 저장 중…' : '특수전 클리어 기록 저장 중…', compact ? 21 : 16, '#8f9aac', 'center').setOrigin(0.5);
+      const rewardText = addText(this, INTERNAL_WIDTH / 2, compact ? 390 : 395, '보상 계산 중…', compact ? 22 : 18, '#f2d37c', 'center').setOrigin(0.5).setWordWrapWidth(compact ? 720 : 680);
+      const status = addText(this, INTERNAL_WIDTH / 2, compact ? 446 : 447, compact ? 'SPECIAL 결과 저장 중…' : 'SPECIAL 클리어·재화 결과 저장 중…', compact ? 21 : 16, '#8f9aac', 'center').setOrigin(0.5);
       void recordSpecialStageClear(this.stage.id).then((result) => {
         this.resultRecorded = true;
         if (!this.scene.isActive()) return;
+        rewardText.setText(`${result.firstClear ? '첫 클리어 포함 · ' : ''}${formatSpecialResourceReward(result.resourceReward)}`);
         if (result.persisted) {
-          status.setText(result.firstClear ? '특수전 첫 클리어 저장 완료' : '특수전 재클리어 기록 완료');
+          status.setText(result.firstClear ? 'SPECIAL 첫 클리어 저장 완료' : 'SPECIAL 재클리어 보상 저장 완료');
           status.setColor('#8ee3aa');
         } else {
-          status.setText(compact ? '영구 저장 실패 · 현재 탭 기록 유지' : '브라우저 영구 저장 실패 · 현재 탭에서는 특수전 기록 유지');
+          status.setText(compact ? '영구 저장 실패 · 현재 탭 기록 유지' : '브라우저 영구 저장 실패 · 현재 탭에서는 결과 유지');
           status.setColor('#ffb37c');
         }
+      }).catch((error: unknown) => {
+        this.resultRecorded = true;
+        if (!this.scene.isActive()) return;
+        rewardText.setText('보상 저장 실패');
+        status.setText(error instanceof Error ? error.message : 'SPECIAL 결과 처리에 실패했습니다.');
+        status.setColor('#ff9a91');
       });
     } else if (victory) {
       addText(this, INTERNAL_WIDTH / 2, compact ? 210 : 238, '영구 보상 획득', compact ? 28 : 23, '#8ee3aa', 'center').setOrigin(0.5);
@@ -84,10 +106,7 @@ export class ResultScene extends Phaser.Scene {
       addText(this, INTERNAL_WIDTH / 2, compact ? 420 : 425, compact ? `전장 ${BATTLEFIELD_THEME_LABELS[this.stage.theme]} · ${this.stage.mapLength}m` : `현재 전장 · ${BATTLEFIELD_THEME_LABELS[this.stage.theme]} / ${this.stage.mapLength}m`, compact ? 21 : 17, '#8796aa', 'center').setOrigin(0.5);
     }
 
-    const guarded = (action: () => void): void => {
-      if (!this.resultRecorded) return;
-      action();
-    };
+    const guarded = (action: () => void): void => { if (!this.resultRecorded) return; action(); };
     const resultButtonHeight = compact ? 84 : 68;
     addButton(this, 380, compact ? 600 : 590, 260, resultButtonHeight, '다시 도전', () => guarded(() => this.scene.start('battle', { stageId: this.stage.id })), 0x6d88a7);
     addButton(this, 640, compact ? 600 : 590, 220, resultButtonHeight, '스테이지', () => guarded(() => this.scene.start('stage-select', { collectionId: collection.id })), special ? 0x80659b : 0x667185);
