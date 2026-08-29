@@ -1,6 +1,6 @@
 # 이벤트·기록 SPECIAL — 상세 제작 사양
 
-상태: `DESIGN_TARGET`
+상태: `DESIGN_TARGET / EVENT_BATTLE_RUNTIME_IMPLEMENTED`
 
 기록형은 1차 완성에서 **끝없는 전선 / 보스 러시 두 개만** 운영한다. 이벤트는 복각을 전제로 하며 대부분 SOLO_OR_COOP.
 
@@ -14,13 +14,13 @@ collectionId: `event_summer_kaiju_01`
 정책: SOLO_OR_COOP  
 복각: 가능, 이벤트 성능 보상 재획득 경로 보장
 
-전용 적:
+전용 적 실행 ID:
 
-- `event_summer_sandcrab` — 모래성게: BEAST, 낮은 HP/빠른 물량
-- `event_summer_foodcart` — 야시장 수레괴물: ANOMALY 후보, 느린 광역
-- `event_summer_tailbeast` — 파도꼬리수: BEAST, 중거리 꼬리휩쓸기
-- `event_summer_firework_jelly` — 불꽃해파리: ARCANE+FLOATING, 긴 선딜 범위
-- `boss_event_summer_kaiju` — 여름 포식괴수: BEAST+GIANT+BOSS
+- `enemy_ev_sand_crab` — 모래성게: BEAST, 낮은 HP/빠른 물량
+- `enemy_ev_foodcart` — 야시장 수레괴물: ANOMALY, 느린 광역
+- `enemy_ev_tailbeast` — 파도꼬리수: BEAST, 중거리 꼬리휩쓸기
+- `enemy_ev_firework_jelly` — 불꽃해파리: ARCANE+FLOATING, 긴 선딜 범위
+- `boss_ev_summer_kaiju` — 여름 포식괴수: BEAST+ANOMALY, GIANT+BOSS
 
 ## 1 해변의 큰 발자국
 
@@ -115,6 +115,12 @@ map2850 / 7000:10200 / supply490 / 110~160초
 - 낮은 골드/이벤트 장식 조각
 - 주기 재화전보다 효율 낮음
 
+현재 구현 메모:
+
+- 6개 전장은 실행 데이터와 기간 availability까지 연결되어 있다.
+- 현재 첫/반복 보상은 골드·진화재료·모집결정 등 공용 재화만 실행된다.
+- 소탕권/프로필 장식/누적 이벤트 보상은 아직 후속 메타 구현 대상이다.
+
 ---
 
 # D2 제로 엣지 시험운용
@@ -130,13 +136,13 @@ collectionId: `event_zero_edge_trial_01`
 - 같은 세계관의 시험기/드론/폐기 병기로 시리즈 분위기를 체험.
 - 픽업 캐릭터가 없으면 이벤트를 못 깨는 구조 금지.
 
-전용 적:
+전용 적 실행 ID:
 
-- `event_ze_target_drone` — 표적드론
-- `event_ze_scrap_blade` — 폐기 절단기
-- `event_ze_test_wall` — 시험 방벽기
-- `event_ze_rail_dummy` — 실험 레일포
-- `boss_event_ze_prototype` — 프로토콜-0 무인프레임
+- `enemy_ev_ze_drone` — 표적드론
+- `enemy_ev_ze_scrap_blade` — 폐기 절단기
+- `enemy_ev_ze_shield` — 시험 방벽기
+- `enemy_ev_ze_railpod` — 실험 레일포
+- `boss_ev_ze_testframe` — 프로토콜-0 무인프레임
 
 ## 1 표적드론 실험장
 
@@ -179,6 +185,12 @@ collectionId: `event_zero_edge_trial_01`
 - 소탕권
 
 배너 S/SS 확률을 이벤트에서 올려주는 숨은 보너스는 사용하지 않는다.
+
+현재 구현 메모:
+
+- 5개 전장은 실행 데이터와 기간 availability까지 연결되어 있다.
+- 이벤트 기간 밖에는 클라이언트 출정/보상 기록과 서버 협동 stage open을 모두 막는다.
+- 프로필 문장/소탕권 등 비재화 메타 보상은 아직 후속 구현 대상이다.
 
 ---
 
