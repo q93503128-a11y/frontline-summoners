@@ -2,6 +2,7 @@ import { parseCampaignBundle, parseCampaignStages, parseEnemies, parsePlayerUnit
 import { parseStagePolicies, type StagePolicyContent } from '@frontline/content-schema/stage-policy';
 import type { BattleUnitDefinition } from '@frontline/sim';
 import { createCoopPlayableBattle, type CoopPlayableBattleState } from '@frontline/sim/coop-playable';
+import { getFormationRestrictionViolation } from '@frontline/sim/formation-restrictions';
 import { applyPermanentRewardBattleEffects, buildCharacterCombatSlot, getEvolutionForm, normalizeCharacterLevel, normalizeCharacterPlusLevel, type PermanentRewardApplicableSlot } from '@frontline/sim/meta-progression';
 import type { EnemyArchetype, PlayerRosterSlot } from '@frontline/sim/playable';
 import playerUnitsJson from '../../../content/units/chapter-01.json' with { type: 'json' };
@@ -36,6 +37,8 @@ import stagePoliciesThreeJson from '../../../content/stages/policies-03.json' wi
 import stagePoliciesFourJson from '../../../content/stages/policies-04.json' with { type: 'json' };
 import stagePoliciesResourceJson from '../../../content/stages/policies-special-resource.json' with { type: 'json' };
 import stagePoliciesPermanentSpecialJson from '../../../content/stages/policies-special-permanent.json' with { type: 'json' };
+import stageCollectionsJson from '../../../content/stage-collections.json' with { type: 'json' };
+import eventAvailabilityJson from '../../../content/stages/event-availability.json' with { type: 'json' };
 import type { CoopPlayerLoadout } from './coop-room.ts';
 import { SERVER_CHARACTER_LEVEL_CURVE, SERVER_EVOLUTION_FORMS, SERVER_PERMANENT_REWARDS, SERVER_REWARD_SCOPES_BY_CHARACTER } from './meta-content-v2.ts';
 
@@ -47,6 +50,7 @@ const CHAPTER_ONE = parseCampaignBundle({ playerUnits: playerUnitsJson, enemies:
 const RECRUITMENT_UNITS = parsePlayerUnits(recruitmentUnitsJson);
 const ALL_PLAYER_UNIT_CONTENT: readonly PlayerUnitContent[] = [...CHAPTER_ONE.playerUnits, ...RECRUITMENT_UNITS];
 const ALL_PLAYER_UNIT_IDS = new Set(ALL_PLAYER_UNIT_CONTENT.map((unit) => unit.id));
+const PLAYER_CONTENT_BY_ID = new Map(ALL_PLAYER_UNIT_CONTENT.map((unit) => [unit.id, unit] as const));
 function parseProgressionChapter(raw: unknown): readonly CampaignStageContent[] {
   return parseCampaignStages(raw, { playerUnitIds: ALL_PLAYER_UNIT_IDS, enemyIds: ENEMY_IDS, starterUnitId: STARTER_SLOT_ID, expectedStageCount: 20 });
 }
@@ -56,8 +60,8 @@ function parseSpecialStages(raw: unknown, expectedStageCount: number): readonly 
 const CHAPTER_TWO_STAGES = parseProgressionChapter([...chapterTwoStagesAJson, ...chapterTwoStagesBJson, ...chapterTwoStagesCJson, ...chapterTwoStagesDJson]);
 const CHAPTER_THREE_STAGES = parseProgressionChapter([...chapterThreeStagesAJson, ...chapterThreeStagesBJson, ...chapterThreeStagesCJson, ...chapterThreeStagesDJson]);
 const CHAPTER_FOUR_STAGES = parseProgressionChapter([...chapterFourStagesAJson, ...chapterFourStagesBJson, ...chapterFourStagesCJson, ...chapterFourStagesDJson]);
-const CHALLENGE_SPECIAL_STAGES = parseSpecialStages(challengeSpecialStagesJson, 5);
-const RESOURCE_SPECIAL_STAGES = parseSpecialStages(resourceSpecialStagesJson, 18);
+const CHALLENGE_SPECIAL_STAGES = parseSpecialStages(challengeSpecialStagesJson, 9);
+const RESOURCE_SPECIAL_STAGES = parseSpecialStages(resourceSpecialStagesJson, 29);
 const PERMANENT_SPECIAL_STAGES = parseSpecialStages([
   ...permanentGluttonStagesJson,
   ...permanentUndeadStagesJson,
@@ -72,6 +76,25 @@ if (new Set(ALL_STAGES.map((stage) => stage.id)).size !== ALL_STAGES.length) thr
 const STAGE_BY_ID = new Map(ALL_STAGES.map((stage) => [stage.id, stage] as const));
 const STAGE_POLICIES = parseStagePolicies([...stagePoliciesOneTwoJson, ...stagePoliciesThreeJson, ...stagePoliciesFourJson, ...stagePoliciesResourceJson, ...stagePoliciesPermanentSpecialJson], new Set(ALL_STAGES.map((stage) => stage.id)));
 const STAGE_POLICY_BY_ID = new Map(STAGE_POLICIES.map((policy) => [policy.stageId, policy] as const));
+
+interface CollectionAvailabilityContent { readonly collectionId: string; readonly windows: readonly { readonly start: string; readonly end: string }[]; }
+interface StageCollectionRuntimeContent { readonly id: string; readonly stageIds: readonly string[]; }
+const COLLECTION_STAGE_IDS = new Map((stageCollectionsJson as readonly StageCollectionRuntimeContent[]).map((collection) => [collection.id, collection.stageIds] as const));
+const EVENT_WINDOWS_BY_STAGE_ID = new Map<string, readonly { readonly startMs: number; readonly endMs: number }[]>();
+for (const availability of eventAvailabilityJson as readonly CollectionAvailabilityContent[]) {
+  const stageIds = COLLECTION_STAGE_IDS.get(availability.collectionId);
+  if (!stageIds) throw new Error(`server event availability references unknown collection:${availability.collectionId}`);
+  const windows = availability.windows.map((window) => {
+    const startMs = Date.parse(window.start); const endMs = Date.parse(window.end);
+    if (!Number.isFinite(startMs) || !Number.isFinite(endMs) || endMs < startMs) throw new Error(`invalid_server_event_window:${availability.collectionId}`);
+    return { startMs, endMs };
+  });
+  for (const stageId of stageIds) EVENT_WINDOWS_BY_STAGE_ID.set(stageId, windows);
+}
+export function isServerStageAvailable(stageId: string, nowMs = Date.now()): boolean {
+  const windows = EVENT_WINDOWS_BY_STAGE_ID.get(stageId);
+  return !windows || windows.some((window) => nowMs >= window.startMs && nowMs <= window.endMs);
+}
 
 function fighter(content: CombatContent): BattleUnitDefinition {
   return {
@@ -103,6 +126,7 @@ export function getServerCoopStage(stageId: string): ServerCoopStageRuntime {
   const stage = STAGE_BY_ID.get(stageId); if (!stage) throw new Error(`unknown_server_stage:${stageId}`);
   const policy = STAGE_POLICY_BY_ID.get(stageId); if (!policy) throw new Error(`missing_server_stage_policy:${stageId}`);
   if (policy.multiplayerPolicy === 'SOLO_ONLY') throw new Error(`stage_not_coop_eligible:${stageId}`);
+  if (!isServerStageAvailable(stageId)) throw new Error(`stage_not_available:${stageId}`);
   return { stage, policy };
 }
 export function getServerCoopDeck(deckSlotIds: readonly string[]): readonly PlayerRosterSlot[] {
@@ -132,6 +156,18 @@ export function getServerCoopLoadout(loadout: CoopPlayerLoadout): ServerCoopReso
   return { playerSlots, permanentRewardIds: [...loadout.permanentRewardIds] };
 }
 
+function validateStageFormation(stage: CampaignStageContent, loadout: CoopPlayerLoadout, resolved: ServerCoopResolvedLoadout): void {
+  const slots = resolved.playerSlots.map((slot, index) => {
+    const characterId = loadout.characters[index]!.characterId;
+    const content = PLAYER_CONTENT_BY_ID.get(characterId);
+    if (!content) throw new Error(`unknown_coop_character:${characterId}`);
+    return { slotId: characterId, cost: slot.cost, rarity: content.rarity, acquisitionClass: content.acquisitionClass, role: content.role, unitTags: slot.definition.combatTags };
+  });
+  const maxDistinctUnitsOverride = stage.id.startsWith('special_five_banners_') ? 3 : undefined;
+  const violation = getFormationRestrictionViolation(stage.formationRestrictions, slots, maxDistinctUnitsOverride === undefined ? {} : { maxDistinctUnitsOverride });
+  if (violation) throw new Error(`stage_formation_restricted:${stage.id}:${violation}`);
+}
+
 function scaleInteger(value: number, permille: number, minimum: number): number { return Math.max(minimum, Math.round(value * permille / 1000)); }
 function scaleEnemy(enemy: EnemyArchetype, hpPermille: number, attackPermille: number): EnemyArchetype {
   return {
@@ -151,6 +187,7 @@ function sharedRewardIds(a: readonly string[], b: readonly string[]): readonly s
 export function createServerCoopBattle(stageId: string, loadoutA: CoopPlayerLoadout, loadoutB: CoopPlayerLoadout): CoopPlayableBattleState {
   const { stage, policy } = getServerCoopStage(stageId);
   const resolvedA = getServerCoopLoadout(loadoutA); const resolvedB = getServerCoopLoadout(loadoutB);
+  validateStageFormation(stage, loadoutA, resolvedA); validateStageFormation(stage, loadoutB, resolvedB);
   const commonRewardIds = sharedRewardIds(resolvedA.permanentRewardIds, resolvedB.permanentRewardIds);
   const progressionA = applyPermanentRewardBattleEffects({ ownedRewardIds: resolvedA.permanentRewardIds, startingSupply: stage.startingSupply, playerBaseHp: stage.playerBaseHp, playerUnitCap: stage.playerUnitCap, playerSlots: resolvedA.playerSlots, enemies: BASE_ENEMIES }, SERVER_PERMANENT_REWARDS);
   const progressionB = applyPermanentRewardBattleEffects({ ownedRewardIds: resolvedB.permanentRewardIds, startingSupply: stage.startingSupply, playerBaseHp: stage.playerBaseHp, playerUnitCap: stage.playerUnitCap, playerSlots: resolvedB.playerSlots, enemies: BASE_ENEMIES }, SERVER_PERMANENT_REWARDS);
@@ -173,4 +210,4 @@ export function createServerCoopBattle(stageId: string, loadoutA: CoopPlayerLoad
   });
 }
 export function getServerRuntimeCharacterIds(): readonly string[] { return [...PLAYER_SLOT_BY_ID.keys()]; }
-export function getServerRuntimeCoopStageIds(): readonly string[] { return ALL_STAGES.filter((stage) => STAGE_POLICY_BY_ID.get(stage.id)?.multiplayerPolicy !== 'SOLO_ONLY').map((stage) => stage.id); }
+export function getServerRuntimeCoopStageIds(): readonly string[] { return ALL_STAGES.filter((stage) => STAGE_POLICY_BY_ID.get(stage.id)?.multiplayerPolicy !== 'SOLO_ONLY' && isServerStageAvailable(stage.id)).map((stage) => stage.id); }
