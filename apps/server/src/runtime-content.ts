@@ -163,8 +163,8 @@ function validateStageFormation(stage: CampaignStageContent, loadout: CoopPlayer
     if (!content) throw new Error(`unknown_coop_character:${characterId}`);
     return { slotId: characterId, cost: slot.cost, rarity: content.rarity, acquisitionClass: content.acquisitionClass, role: content.role, unitTags: slot.definition.combatTags };
   });
-  const maxDistinctUnitsOverride = stage.id.startsWith('special_five_banners_') ? 3 : undefined;
-  const violation = getFormationRestrictionViolation(stage.formationRestrictions, slots, maxDistinctUnitsOverride === undefined ? {} : { maxDistinctUnitsOverride });
+  const coopDistinctLimit = stage.formationRestrictions.maxCoopDistinctUnitsPerPlayer;
+  const violation = getFormationRestrictionViolation(stage.formationRestrictions, slots, coopDistinctLimit === undefined ? {} : { maxDistinctUnitsOverride: coopDistinctLimit });
   if (violation) throw new Error(`stage_formation_restricted:${stage.id}:${violation}`);
 }
 
