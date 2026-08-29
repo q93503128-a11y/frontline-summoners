@@ -2,65 +2,19 @@ import type { StageType } from '@frontline/content-schema';
 import stageCollectionsJson from '../../../content/stage-collections.json' with { type: 'json' };
 import specialUnlocksJson from '../../../content/stages/special-unlocks.json' with { type: 'json' };
 import eventAvailabilityJson from '../../../content/stages/event-availability.json' with { type: 'json' };
-import {
-  ALL_STAGES,
-  STAGES,
-  getContiguousClearedStageIds,
-  isStageUnlocked,
-  type PrototypeStage,
-} from './prototype.ts';
+import { ALL_STAGES, STAGES, getContiguousClearedStageIds, isStageUnlocked, type PrototypeStage } from './prototype.ts';
 
 export type StageCollectionId = string;
-
-export interface StageCollection {
-  readonly id: StageCollectionId;
-  readonly stageType: StageType;
-  readonly title: string;
-  readonly shortTitle: string;
-  readonly description: string;
-  readonly stages: readonly PrototypeStage[];
-  readonly unlockAfterStageId?: string;
-  readonly requiredProgressionClears: number;
-}
-
-interface StageCollectionContent {
-  readonly id: string;
-  readonly stageType: StageType;
-  readonly title: string;
-  readonly shortTitle: string;
-  readonly description: string;
-  readonly stageIds: readonly string[];
-  readonly unlockAfterStageId?: string;
-}
-
-interface SpecialUnlockRuleContent {
-  readonly stageId: string;
-  readonly previousSpecialStageId?: string;
-  readonly requiredProgressionStageId?: string;
-}
-
-interface EventAvailabilityWindowContent {
-  readonly start: string;
-  readonly end: string;
-}
-interface EventAvailabilityContent {
-  readonly collectionId: string;
-  readonly rerunnable: boolean;
-  readonly windows: readonly EventAvailabilityWindowContent[];
-}
-interface EventAvailabilityWindow {
-  readonly startMs: number;
-  readonly endMs: number;
-}
-interface EventAvailability {
-  readonly collectionId: string;
-  readonly rerunnable: boolean;
-  readonly windows: readonly EventAvailabilityWindow[];
-}
+export interface StageCollection { readonly id: StageCollectionId; readonly stageType: StageType; readonly title: string; readonly shortTitle: string; readonly description: string; readonly stages: readonly PrototypeStage[]; readonly unlockAfterStageId?: string; readonly requiredProgressionClears: number; }
+interface StageCollectionContent { readonly id: string; readonly stageType: StageType; readonly title: string; readonly shortTitle: string; readonly description: string; readonly stageIds: readonly string[]; readonly unlockAfterStageId?: string; }
+interface SpecialUnlockRuleContent { readonly stageId: string; readonly previousSpecialStageId?: string; readonly requiredProgressionStageId?: string; }
+interface EventAvailabilityWindowContent { readonly start: string; readonly end: string; }
+interface EventAvailabilityContent { readonly collectionId: string; readonly rerunnable: boolean; readonly windows: readonly EventAvailabilityWindowContent[]; }
+interface EventAvailabilityWindow { readonly startMs: number; readonly endMs: number; }
+interface EventAvailability { readonly collectionId: string; readonly rerunnable: boolean; readonly windows: readonly EventAvailabilityWindow[]; }
 
 export const STAGE_COLLECTIONS_PER_PAGE = 2;
 export const STAGES_PER_COLLECTION_PAGE = 5;
-
 const ALL_STAGE_BY_ID = new Map(ALL_STAGES.map((stage) => [stage.id, stage] as const));
 const PROGRESSION_STAGE_INDEX = new Map(STAGES.map((stage, index) => [stage.id, index] as const));
 
@@ -71,14 +25,12 @@ function parseStageCollection(raw: StageCollectionContent, index: number): Stage
   if (!raw.title.trim() || !raw.shortTitle.trim() || !raw.description.trim()) throw new Error(`${context} text fields must be non-empty`);
   if (!Array.isArray(raw.stageIds) || raw.stageIds.length === 0) throw new Error(`${context}.stageIds must be non-empty`);
   if (new Set(raw.stageIds).size !== raw.stageIds.length) throw new Error(`${context}.stageIds must be unique`);
-
   const stages = raw.stageIds.map((stageId) => {
     const stage = ALL_STAGE_BY_ID.get(stageId);
     if (!stage) throw new Error(`${context} references unknown stage: ${stageId}`);
     if (stage.stageType !== raw.stageType) throw new Error(`${context} mixes ${raw.stageType} with ${stage.id}:${stage.stageType}`);
     return stage;
   });
-
   let unlockAfterStageId: string | undefined;
   let requiredProgressionClears = 0;
   if (raw.unlockAfterStageId !== undefined) {
@@ -88,7 +40,6 @@ function parseStageCollection(raw: StageCollectionContent, index: number): Stage
     unlockAfterStageId = raw.unlockAfterStageId;
     requiredProgressionClears = progressionIndex + 1;
   }
-
   return { id: raw.id, stageType: raw.stageType, title: raw.title, shortTitle: raw.shortTitle, description: raw.description, stages, ...(unlockAfterStageId === undefined ? {} : { unlockAfterStageId }), requiredProgressionClears };
 }
 
@@ -102,15 +53,12 @@ function buildStageCollections(): readonly StageCollection[] {
   for (const stage of ALL_STAGES) if (!assignedStageIds.includes(stage.id)) throw new Error(`stage is missing from collection data: ${stage.id}`);
   return collections;
 }
-
 export const STAGE_COLLECTIONS: readonly StageCollection[] = buildStageCollections();
-
 function getStageCollectionForStageRaw(stageId: string): StageCollection {
   const collection = STAGE_COLLECTIONS.find((candidate) => candidate.stages.some((stage) => stage.id === stageId));
   if (!collection) throw new Error(`Stage is not assigned to a collection: ${stageId}`);
   return collection;
 }
-
 function buildSpecialUnlockRules(): ReadonlyMap<string, SpecialUnlockRuleContent> {
   if (!Array.isArray(specialUnlocksJson)) throw new Error('special unlock rules must be an array');
   const result = new Map<string, SpecialUnlockRuleContent>();
@@ -128,12 +76,7 @@ function buildSpecialUnlockRules(): ReadonlyMap<string, SpecialUnlockRuleContent
   }
   return result;
 }
-
-function parseTimestamp(value: string, context: string): number {
-  const parsed = Date.parse(value);
-  if (!Number.isFinite(parsed)) throw new Error(`${context} must be an ISO date-time`);
-  return parsed;
-}
+function parseTimestamp(value: string, context: string): number { const parsed = Date.parse(value); if (!Number.isFinite(parsed)) throw new Error(`${context} must be an ISO date-time`); return parsed; }
 function buildEventAvailability(): ReadonlyMap<string, EventAvailability> {
   if (!Array.isArray(eventAvailabilityJson)) throw new Error('event availability must be an array');
   const collectionIds = new Set(STAGE_COLLECTIONS.map((collection) => collection.id));
@@ -155,49 +98,21 @@ function buildEventAvailability(): ReadonlyMap<string, EventAvailability> {
   }
   return result;
 }
-
 const SPECIAL_UNLOCK_RULE_BY_STAGE = buildSpecialUnlockRules();
 const EVENT_AVAILABILITY_BY_COLLECTION = buildEventAvailability();
 
-export function getStageCollection(collectionId: string): StageCollection {
-  const collection = STAGE_COLLECTIONS.find((candidate) => candidate.id === collectionId);
-  if (!collection) throw new Error(`Unknown stage collection: ${collectionId}`);
-  return collection;
-}
+export function getStageCollection(collectionId: string): StageCollection { const collection = STAGE_COLLECTIONS.find((candidate) => candidate.id === collectionId); if (!collection) throw new Error(`Unknown stage collection: ${collectionId}`); return collection; }
 export function getStageCollectionForStage(stageId: string): StageCollection { return getStageCollectionForStageRaw(stageId); }
 export function getStageCollectionPageCount(collections: readonly StageCollection[] = STAGE_COLLECTIONS): number { return Math.max(1, Math.ceil(collections.length / STAGE_COLLECTIONS_PER_PAGE)); }
-export function getStageCollectionPage(page: number, collections: readonly StageCollection[] = STAGE_COLLECTIONS): readonly StageCollection[] {
-  const pageCount = getStageCollectionPageCount(collections); const safePage = Math.max(0, Math.min(pageCount - 1, Math.trunc(page))); const start = safePage * STAGE_COLLECTIONS_PER_PAGE;
-  return collections.slice(start, start + STAGE_COLLECTIONS_PER_PAGE);
-}
+export function getStageCollectionPage(page: number, collections: readonly StageCollection[] = STAGE_COLLECTIONS): readonly StageCollection[] { const pageCount = getStageCollectionPageCount(collections); const safePage = Math.max(0, Math.min(pageCount - 1, Math.trunc(page))); const start = safePage * STAGE_COLLECTIONS_PER_PAGE; return collections.slice(start, start + STAGE_COLLECTIONS_PER_PAGE); }
 export function getCollectionStagePageCount(collection: StageCollection): number { return Math.max(1, Math.ceil(collection.stages.length / STAGES_PER_COLLECTION_PAGE)); }
-export function getCollectionStagePage(collection: StageCollection, page: number): readonly PrototypeStage[] {
-  const pageCount = getCollectionStagePageCount(collection); const safePage = Math.max(0, Math.min(pageCount - 1, Math.trunc(page))); const start = safePage * STAGES_PER_COLLECTION_PAGE;
-  return collection.stages.slice(start, start + STAGES_PER_COLLECTION_PAGE);
-}
-export function getCollectionStagePageIndexForStage(collection: StageCollection, stageId: string): number {
-  const index = collection.stages.findIndex((stage) => stage.id === stageId); if (index < 0) throw new Error(`Stage ${stageId} is not part of collection ${collection.id}`); return Math.floor(index / STAGES_PER_COLLECTION_PAGE);
-}
-export function isStageCollectionUnlocked(collection: StageCollection, clearedStageIds: readonly string[]): boolean {
-  if (!collection.unlockAfterStageId) return true;
-  return getContiguousClearedStageIds(clearedStageIds).includes(collection.unlockAfterStageId);
-}
-export function isStageCollectionAvailable(collection: StageCollection | string, nowMs = Date.now()): boolean {
-  const resolved = typeof collection === 'string' ? getStageCollection(collection) : collection;
-  const availability = EVENT_AVAILABILITY_BY_COLLECTION.get(resolved.id);
-  if (!availability) return true;
-  return availability.windows.some((window) => nowMs >= window.startMs && nowMs <= window.endMs);
-}
-export function getStageCollectionAvailabilityText(collection: StageCollection | string, nowMs = Date.now()): string | undefined {
-  const resolved = typeof collection === 'string' ? getStageCollection(collection) : collection;
-  const availability = EVENT_AVAILABILITY_BY_COLLECTION.get(resolved.id);
-  if (!availability || isStageCollectionAvailable(resolved, nowMs)) return undefined;
-  const next = availability.windows.find((window) => window.startMs > nowMs);
-  if (next) return availability.rerunnable ? '이벤트 시작 전 · 복각 일정 있음' : '이벤트 시작 전';
-  return availability.rerunnable ? '이벤트 기간 종료 · 복각 예정' : '이벤트 기간 종료';
-}
+export function getCollectionStagePage(collection: StageCollection, page: number): readonly PrototypeStage[] { const pageCount = getCollectionStagePageCount(collection); const safePage = Math.max(0, Math.min(pageCount - 1, Math.trunc(page))); const start = safePage * STAGES_PER_COLLECTION_PAGE; return collection.stages.slice(start, start + STAGES_PER_COLLECTION_PAGE); }
+export function getCollectionStagePageIndexForStage(collection: StageCollection, stageId: string): number { const index = collection.stages.findIndex((stage) => stage.id === stageId); if (index < 0) throw new Error(`Stage ${stageId} is not part of collection ${collection.id}`); return Math.floor(index / STAGES_PER_COLLECTION_PAGE); }
+export function isStageCollectionUnlocked(collection: StageCollection, clearedStageIds: readonly string[]): boolean { if (!collection.unlockAfterStageId) return true; return getContiguousClearedStageIds(clearedStageIds).includes(collection.unlockAfterStageId); }
+export function isStageCollectionAvailable(collection: StageCollection | string, nowMs = Date.now()): boolean { const resolved = typeof collection === 'string' ? getStageCollection(collection) : collection; const availability = EVENT_AVAILABILITY_BY_COLLECTION.get(resolved.id); if (!availability) return true; return availability.windows.some((window) => nowMs >= window.startMs && nowMs <= window.endMs); }
+export function getStageCollectionAvailabilityText(collection: StageCollection | string, nowMs = Date.now()): string | undefined { const resolved = typeof collection === 'string' ? getStageCollection(collection) : collection; const availability = EVENT_AVAILABILITY_BY_COLLECTION.get(resolved.id); if (!availability || isStageCollectionAvailable(resolved, nowMs)) return undefined; const next = availability.windows.find((window) => window.startMs > nowMs); if (next) return availability.rerunnable ? '이벤트 시작 전 · 복각 일정 있음' : '이벤트 시작 전'; return availability.rerunnable ? '이벤트 기간 종료 · 복각 예정' : '이벤트 기간 종료'; }
 
-export function isSortieStageUnlocked(stageId: string, clearedStageIds: readonly string[], specialClearedStageIds: readonly string[] = [], nowMs = Date.now()): boolean {
+export function isSortieStageUnlocked(stageId: string, clearedStageIds: readonly string[], specialClearedStageIds?: readonly string[], nowMs = Date.now()): boolean {
   const stage = ALL_STAGE_BY_ID.get(stageId); if (!stage) return false;
   if (stage.stageType === 'PROGRESSION') return isStageUnlocked(stage.id, clearedStageIds);
   const collection = getStageCollectionForStage(stage.id);
@@ -205,31 +120,17 @@ export function isSortieStageUnlocked(stageId: string, clearedStageIds: readonly
   const rule = SPECIAL_UNLOCK_RULE_BY_STAGE.get(stage.id);
   if (!rule) return true;
   if (rule.requiredProgressionStageId && !getContiguousClearedStageIds(clearedStageIds).includes(rule.requiredProgressionStageId)) return false;
-  if (rule.previousSpecialStageId && !specialClearedStageIds.includes(rule.previousSpecialStageId)) return false;
+  if (rule.previousSpecialStageId && specialClearedStageIds !== undefined && !specialClearedStageIds.includes(rule.previousSpecialStageId)) return false;
   return true;
 }
-
 export function getSpecialStageUnlockText(stageId: string, clearedStageIds: readonly string[], specialClearedStageIds: readonly string[], nowMs = Date.now()): string | undefined {
-  const stage = ALL_STAGE_BY_ID.get(stageId);
-  if (!stage || stage.stageType !== 'SPECIAL') return undefined;
-  const collection = getStageCollectionForStage(stageId);
-  const availabilityText = getStageCollectionAvailabilityText(collection, nowMs);
-  if (availabilityText) return availabilityText;
+  const stage = ALL_STAGE_BY_ID.get(stageId); if (!stage || stage.stageType !== 'SPECIAL') return undefined;
+  const collection = getStageCollectionForStage(stageId); const availabilityText = getStageCollectionAvailabilityText(collection, nowMs); if (availabilityText) return availabilityText;
   if (!isStageCollectionUnlocked(collection, clearedStageIds)) return `메인 ${collection.requiredProgressionClears} 스테이지 진도 필요`;
-  const rule = SPECIAL_UNLOCK_RULE_BY_STAGE.get(stageId);
-  if (!rule) return undefined;
-  if (rule.requiredProgressionStageId && !getContiguousClearedStageIds(clearedStageIds).includes(rule.requiredProgressionStageId)) {
-    const index = PROGRESSION_STAGE_INDEX.get(rule.requiredProgressionStageId)! + 1;
-    return `메인 ${index} 스테이지 진도 필요`;
-  }
+  const rule = SPECIAL_UNLOCK_RULE_BY_STAGE.get(stageId); if (!rule) return undefined;
+  if (rule.requiredProgressionStageId && !getContiguousClearedStageIds(clearedStageIds).includes(rule.requiredProgressionStageId)) { const index = PROGRESSION_STAGE_INDEX.get(rule.requiredProgressionStageId)! + 1; return `메인 ${index} 스테이지 진도 필요`; }
   if (rule.previousSpecialStageId && !specialClearedStageIds.includes(rule.previousSpecialStageId)) return '이전 단계 NORMAL_CLEAR 필요';
   return undefined;
 }
-
-export function getCollectionClearedIds(collection: StageCollection, clearedStageIds: readonly string[], specialClearedStageIds: readonly string[]): readonly string[] {
-  const source = collection.stageType === 'PROGRESSION' ? getContiguousClearedStageIds(clearedStageIds) : specialClearedStageIds;
-  const collectionIds = new Set(collection.stages.map((stage) => stage.id)); return source.filter((stageId) => collectionIds.has(stageId));
-}
-export function getFirstUnclearedCollectionStageIndex(collection: StageCollection, clearedStageIds: readonly string[], specialClearedStageIds: readonly string[]): number {
-  const cleared = new Set(getCollectionClearedIds(collection, clearedStageIds, specialClearedStageIds)); return collection.stages.findIndex((stage) => !cleared.has(stage.id));
-}
+export function getCollectionClearedIds(collection: StageCollection, clearedStageIds: readonly string[], specialClearedStageIds: readonly string[]): readonly string[] { const source = collection.stageType === 'PROGRESSION' ? getContiguousClearedStageIds(clearedStageIds) : specialClearedStageIds; const collectionIds = new Set(collection.stages.map((stage) => stage.id)); return source.filter((stageId) => collectionIds.has(stageId)); }
+export function getFirstUnclearedCollectionStageIndex(collection: StageCollection, clearedStageIds: readonly string[], specialClearedStageIds: readonly string[]): number { const cleared = new Set(getCollectionClearedIds(collection, clearedStageIds, specialClearedStageIds)); return collection.stages.findIndex((stage) => !cleared.has(stage.id)); }
