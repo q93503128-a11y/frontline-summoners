@@ -19,16 +19,19 @@ const EMPTY_PROGRESS: GuestProgress = {
 const PAGE_SIZE = 6;
 const CHAPTER_ONE_FINAL_STAGE_ID = 'main_01_020';
 const CHAPTER_TWO_FINAL_STAGE_ID = 'main_02_020';
+const CHAPTER_THREE_FINAL_STAGE_ID = 'main_03_020';
 
 export function getImplementedBaseLevelCap(progress: GuestProgress): number {
   const cleared = new Set(progress.clearedStageIds);
+  if (cleared.has(CHAPTER_THREE_FINAL_STAGE_ID)) return 40;
   if (cleared.has(CHAPTER_TWO_FINAL_STAGE_ID)) return 30;
   if (cleared.has(CHAPTER_ONE_FINAL_STAGE_ID)) return 20;
   return 10;
 }
 
 function getNextCapMessage(levelCap: number): string {
-  if (levelCap >= 30) return '제2장 완료 · 기본 레벨 상한 Lv30';
+  if (levelCap >= 40) return '제3장 완료 · 기본 레벨 상한 Lv40';
+  if (levelCap >= 30) return '제3장 완료 시 기본 레벨 상한 Lv40';
   if (levelCap >= 20) return '제2장 완료 시 기본 레벨 상한 Lv30';
   return '제1장 완료 시 기본 레벨 상한 Lv20';
 }
@@ -72,14 +75,8 @@ export class GrowthScene extends Phaser.Scene {
     });
   }
 
-  private get ownedCharacterIds(): readonly string[] {
-    return getOwnedCharacterIds(this.progress);
-  }
-
-  private get pageCount(): number {
-    return Math.max(1, Math.ceil(this.ownedCharacterIds.length / PAGE_SIZE));
-  }
-
+  private get ownedCharacterIds(): readonly string[] { return getOwnedCharacterIds(this.progress); }
+  private get pageCount(): number { return Math.max(1, Math.ceil(this.ownedCharacterIds.length / PAGE_SIZE)); }
   private changePage(delta: number): void {
     this.page = Math.max(0, Math.min(this.pageCount - 1, this.page + delta));
     this.renderList();
@@ -93,7 +90,6 @@ export class GrowthScene extends Phaser.Scene {
     this.page = Math.min(this.page, this.pageCount - 1);
     this.pageText?.setText(`${this.page + 1} / ${this.pageCount} · 보유 ${owned.length}명`);
     const visible = owned.slice(this.page * PAGE_SIZE, this.page * PAGE_SIZE + PAGE_SIZE);
-
     visible.forEach((characterId, index) => {
       const slot = getSlotById(characterId);
       if (!slot) return;
@@ -102,20 +98,11 @@ export class GrowthScene extends Phaser.Scene {
       const y = 165 + index * 72;
       const badge = slot.rarity ?? (slot.acquisitionClass === 'STORY' ? '스토리' : '특수');
       const color = slot.rarity ? rarityColor[slot.rarity] ?? '#ffffff' : '#d7c79f';
-      const button = addButton(
-        this,
-        250,
-        y,
-        350,
-        compact ? 64 : 58,
-        `${slot.displayName} · Lv${meta?.level ?? 1} +${meta?.plusLevel ?? 0}`,
-        () => {
-          this.selectedCharacterId = characterId;
-          this.renderList();
-          this.renderDetail();
-        },
-        selected ? 0xc5a04c : 0x59677f,
-      );
+      const button = addButton(this, 250, y, 350, compact ? 64 : 58, `${slot.displayName} · Lv${meta?.level ?? 1} +${meta?.plusLevel ?? 0}`, () => {
+        this.selectedCharacterId = characterId;
+        this.renderList();
+        this.renderDetail();
+      }, selected ? 0xc5a04c : 0x59677f);
       this.listLayer!.add(button);
       this.listLayer!.add(addText(this, 88, y - 24, badge, compact ? 16 : 13, color));
     });
@@ -133,13 +120,11 @@ export class GrowthScene extends Phaser.Scene {
     const slot = getSlotById(characterId);
     const meta = this.progress.characterProgressById?.[characterId];
     if (!slot || !meta) return;
-
     const combat = buildCharacterCombatSlot(slot, meta.level, meta.selectedFormId, meta.plusLevel);
     const art = familyForUnit(slot.definition.id);
     const portrait = this.add.sprite(610, 245, art.family.idle.key, 0).setTint(art.tint);
     portrait.setScale((116 / art.family.idle.frameHeight) * art.displayScale);
     this.detailLayer.add(portrait);
-
     const badge = slot.rarity ?? (slot.acquisitionClass === 'STORY' ? '스토리' : '특수');
     const badgeColor = slot.rarity ? rarityColor[slot.rarity] ?? '#ffffff' : '#d7c79f';
     const levelCap = getImplementedBaseLevelCap(this.progress);
@@ -147,7 +132,6 @@ export class GrowthScene extends Phaser.Scene {
     addText(this, 712, 196, badge, compact ? 18 : 16, badgeColor);
     addText(this, 712, 230, `Lv${meta.level} / 현재 상한 Lv${levelCap} · +${meta.plusLevel}`, compact ? 20 : 17, '#f2d37c');
     addText(this, 712, 266, slot.description, compact ? 17 : 15, '#b8c0ce').setWordWrapWidth(470);
-
     const rechargeSeconds = (combat.rechargeFrames / 30).toFixed(1);
     const stats = [
       `HP ${combat.definition.maxHp}`,
@@ -159,7 +143,6 @@ export class GrowthScene extends Phaser.Scene {
       `공격 범위 ${combat.definition.attackMinRange}~${combat.definition.attackMaxRange}`,
     ];
     addText(this, 555, 350, stats.join('\n'), compact ? 19 : 17, '#dce4ef').setLineSpacing(8);
-
     const forms = getEvolutionForms(characterId);
     addText(this, 930, 338, '형태', compact ? 23 : 21, '#e5c7ff');
     if (forms.length === 0) {
@@ -168,35 +151,15 @@ export class GrowthScene extends Phaser.Scene {
       forms.forEach((form, index) => {
         const unlocked = meta.unlockedFormIds.includes(form.formId);
         const selected = meta.selectedFormId === form.formId;
-        const label = unlocked
-          ? `${form.formOrder}형태 · ${form.name}${selected ? ' · 선택 중' : ''}`
-          : `${form.formOrder}형태 · 미해금`;
-        const formButton = addButton(
-          this,
-          1070,
-          398 + index * 76,
-          285,
-          compact ? 66 : 58,
-          label,
-          () => {
-            if (unlocked && !selected && !this.saving) void this.selectForm(characterId, form.formId);
-          },
-          selected ? 0xc5a04c : unlocked ? 0x7b6990 : 0x46505e,
-        );
+        const label = unlocked ? `${form.formOrder}형태 · ${form.name}${selected ? ' · 선택 중' : ''}` : `${form.formOrder}형태 · 미해금`;
+        const formButton = addButton(this, 1070, 398 + index * 76, 285, compact ? 66 : 58, label, () => {
+          if (unlocked && !selected && !this.saving) void this.selectForm(characterId, form.formId);
+        }, selected ? 0xc5a04c : unlocked ? 0x7b6990 : 0x46505e);
         if (!unlocked) formButton.setAlpha(0.55);
         this.detailLayer!.add(formButton);
       });
     }
-
-    this.detailLayer.add(addText(
-      this,
-      830,
-      603,
-      getNextCapMessage(levelCap),
-      compact ? 17 : 14,
-      levelCap >= 30 ? '#8ee3aa' : '#9ca9bb',
-      'center',
-    ).setOrigin(0.5));
+    this.detailLayer.add(addText(this, 830, 603, getNextCapMessage(levelCap), compact ? 17 : 14, levelCap >= 40 ? '#8ee3aa' : '#9ca9bb', 'center').setOrigin(0.5));
   }
 
   private async selectForm(characterId: string, formId: string): Promise<void> {
