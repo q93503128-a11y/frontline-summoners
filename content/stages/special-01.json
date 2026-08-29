@@ -2,93 +2,46 @@
   {
     "id":"special-01","chapter":"특수전 · 뒤집힌 국경","name":"세 자리 전선","subtitle":"동시에 세 명만 세울 수 있는 작은 정예전","stageType":"SPECIAL","difficulty":6,
     "playerBaseHp":2500,"enemyBaseHp":3200,"startingSupply":420,"mapLength":900,"theme":"meadow","decorSeed":211,"playerUnitCap":3,"enemyUnitCap":18,
-    "waves":[
-      {"id":"W1","trigger":{"type":"TIME","frame":240},"spawn":{"enemyId":"enemy-shield","count":2,"intervalFrames":210}},
-      {"id":"W2","trigger":{"type":"TIME","frame":600},"spawn":{"enemyId":"enemy-sprinter","count":8,"intervalFrames":90},"repeat":{"delayFrames":900}},
-      {"id":"W3","trigger":{"type":"TIME","frame":1200},"spawn":{"enemyId":"enemy-knight","count":1,"intervalFrames":320}}
-    ],"formationRestrictions":{},"specialRules":[]
+    "waves":[{"id":"W1","trigger":{"type":"TIME","frame":240},"spawn":{"enemyId":"enemy-shield","count":2,"intervalFrames":210}},{"id":"W2","trigger":{"type":"TIME","frame":600},"spawn":{"enemyId":"enemy-sprinter","count":8,"intervalFrames":90},"repeat":{"delayFrames":900}},{"id":"W3","trigger":{"type":"TIME","frame":1200},"spawn":{"enemyId":"enemy-knight","count":1,"intervalFrames":320}}],"formationRestrictions":{},"specialRules":[]
   },
   {
     "id":"special-02","chapter":"특수전 · 뒤집힌 국경","name":"광란의 짧은 길","subtitle":"짧은 전장에 돌격병이 끊임없이 밀려든다","stageType":"SPECIAL","difficulty":7,
     "playerBaseHp":2800,"enemyBaseHp":3800,"startingSupply":500,"mapLength":650,"theme":"burning","decorSeed":223,"playerUnitCap":10,"enemyUnitCap":25,
-    "waves":[
-      {"id":"W1","trigger":{"type":"TIME","frame":90},"spawn":{"enemyId":"enemy-sprinter","count":18,"intervalFrames":45},"repeat":{"delayFrames":360}},
-      {"id":"W2","trigger":{"type":"TIME","frame":500},"spawn":{"enemyId":"enemy-raider","count":12,"intervalFrames":60},"repeat":{"delayFrames":540}},
-      {"id":"W3","trigger":{"type":"TIME","frame":1100},"spawn":{"enemyId":"enemy-berserker","count":2,"intervalFrames":240}}
-    ],"formationRestrictions":{},"specialRules":[]
+    "waves":[{"id":"W1","trigger":{"type":"TIME","frame":90},"spawn":{"enemyId":"enemy-sprinter","count":18,"intervalFrames":45},"repeat":{"delayFrames":360}},{"id":"W2","trigger":{"type":"TIME","frame":500},"spawn":{"enemyId":"enemy-raider","count":12,"intervalFrames":60},"repeat":{"delayFrames":540}},{"id":"W3","trigger":{"type":"TIME","frame":1100},"spawn":{"enemyId":"enemy-berserker","count":2,"intervalFrames":240}}],"formationRestrictions":{},"specialRules":[]
   },
   {
     "id":"special-03","chapter":"특수전 · 뒤집힌 국경","name":"유리봉 저격선","subtitle":"긴 전장을 방패와 저격수가 층층이 잠근다","stageType":"SPECIAL","difficulty":8,
     "playerBaseHp":3000,"enemyBaseHp":4600,"startingSupply":600,"mapLength":1500,"theme":"ruins","decorSeed":239,"playerUnitCap":8,"enemyUnitCap":20,
-    "waves":[
-      {"id":"W1","trigger":{"type":"TIME","frame":180},"spawn":{"enemyId":"enemy-shield","count":3,"intervalFrames":180},"repeat":{"delayFrames":1200}},
-      {"id":"W2","trigger":{"type":"TIME","frame":480},"spawn":{"enemyId":"enemy-sniper","count":6,"intervalFrames":210},"repeat":{"delayFrames":1500}},
-      {"id":"W3","trigger":{"type":"TIME","frame":1200},"spawn":{"enemyId":"enemy-knight","count":2,"intervalFrames":320}},
-      {"id":"W4","trigger":{"type":"TIME","frame":1800},"spawn":{"enemyId":"enemy-cultist","count":3,"intervalFrames":250}}
-    ],"formationRestrictions":{},"specialRules":[]
+    "waves":[{"id":"W1","trigger":{"type":"TIME","frame":180},"spawn":{"enemyId":"enemy-shield","count":3,"intervalFrames":180},"repeat":{"delayFrames":1200}},{"id":"W2","trigger":{"type":"TIME","frame":480},"spawn":{"enemyId":"enemy-sniper","count":6,"intervalFrames":210},"repeat":{"delayFrames":1500}},{"id":"W3","trigger":{"type":"TIME","frame":1200},"spawn":{"enemyId":"enemy-knight","count":2,"intervalFrames":320}},{"id":"W4","trigger":{"type":"TIME","frame":1800},"spawn":{"enemyId":"enemy-cultist","count":3,"intervalFrames":250}}],"formationRestrictions":{},"specialRules":[]
   },
   {
-    "id":"special-04","chapter":"특수전 · 뒤집힌 국경","name":"삼인 결사대","subtitle":"세 자리만으로 중장갑 전열과 철문장군을 돌파한다","stageType":"SPECIAL","difficulty":9,
+    "id":"special-04","chapter":"특수전 · 뒤집힌 국경","name":"삼인 결사대","subtitle":"세 자리만으로 중장갑 전열과 철문장군을 돌파한다","stageType":"SPECIAL","difficulty":8,
     "playerBaseHp":3200,"enemyBaseHp":5200,"startingSupply":750,"mapLength":1000,"theme":"fortress","decorSeed":251,"playerUnitCap":3,"enemyUnitCap":15,
-    "waves":[
-      {"id":"W1","trigger":{"type":"TIME","frame":300},"spawn":{"enemyId":"enemy-knight","count":2,"intervalFrames":300},"repeat":{"delayFrames":1500}},
-      {"id":"W2","trigger":{"type":"TIME","frame":900},"spawn":{"enemyId":"enemy-berserker","count":3,"intervalFrames":260}},
-      {"id":"W3","trigger":{"type":"TIME","frame":1500},"spawn":{"enemyId":"enemy-boss-iron","count":1,"intervalFrames":1}},
-      {"id":"W4","trigger":{"type":"TIME","frame":1600},"spawn":{"enemyId":"enemy-sniper","count":2,"intervalFrames":260}}
-    ],"formationRestrictions":{},"specialRules":[]
+    "waves":[{"id":"W1","trigger":{"type":"TIME","frame":300},"spawn":{"enemyId":"enemy-knight","count":2,"intervalFrames":300},"repeat":{"delayFrames":1500}},{"id":"W2","trigger":{"type":"TIME","frame":900},"spawn":{"enemyId":"enemy-berserker","count":3,"intervalFrames":260}},{"id":"W3","trigger":{"type":"TIME","frame":1500},"spawn":{"enemyId":"enemy-boss-iron","count":1,"intervalFrames":1}},{"id":"W4","trigger":{"type":"TIME","frame":1600},"spawn":{"enemyId":"enemy-sniper","count":2,"intervalFrames":260}}],"formationRestrictions":{},"specialRules":[]
   },
   {
-    "id":"special-05","chapter":"특수전 · 뒤집힌 국경","name":"가면과 철문","subtitle":"황금가면과 철문장군을 한 전장에서 연달아 상대한다","stageType":"SPECIAL","difficulty":10,
+    "id":"special-05","chapter":"특수전 · 뒤집힌 국경","name":"가면과 철문","subtitle":"황금가면과 철문장군을 한 전장에서 연달아 상대한다","stageType":"SPECIAL","difficulty":8,
     "playerBaseHp":3600,"enemyBaseHp":6800,"startingSupply":900,"mapLength":1280,"theme":"golden","decorSeed":269,"playerUnitCap":8,"enemyUnitCap":20,
-    "waves":[
-      {"id":"W1","trigger":{"type":"TIME","frame":240},"spawn":{"enemyId":"enemy-cultist","count":3,"intervalFrames":210},"repeat":{"delayFrames":1500}},
-      {"id":"W2","trigger":{"type":"TIME","frame":600},"spawn":{"enemyId":"enemy-shield","count":3,"intervalFrames":240},"repeat":{"delayFrames":1800}},
-      {"id":"W3","trigger":{"type":"ANY_OF","conditions":[{"type":"TIME","frame":1050},{"type":"ENEMY_BASE_HP_BELOW","percent":80}]},"spawn":{"enemyId":"enemy-boss","count":1,"intervalFrames":1}},
-      {"id":"W4","trigger":{"type":"AFTER_WAVE_TRIGGERED","waveId":"W3","delayFrames":750},"spawn":{"enemyId":"enemy-berserker","count":2,"intervalFrames":240}},
-      {"id":"W5","trigger":{"type":"ANY_OF","conditions":[{"type":"AFTER_WAVE_CLEARED","waveId":"W3","delayFrames":180},{"type":"ENEMY_BASE_HP_BELOW","percent":45}]},"spawn":{"enemyId":"enemy-boss-iron","count":1,"intervalFrames":1}},
-      {"id":"W6","trigger":{"type":"AFTER_WAVE_TRIGGERED","waveId":"W5","delayFrames":100},"spawn":{"enemyId":"enemy-sniper","count":2,"intervalFrames":260}}
-    ],"formationRestrictions":{},"specialRules":[]
+    "waves":[{"id":"W1","trigger":{"type":"TIME","frame":240},"spawn":{"enemyId":"enemy-cultist","count":3,"intervalFrames":210},"repeat":{"delayFrames":1500}},{"id":"W2","trigger":{"type":"TIME","frame":600},"spawn":{"enemyId":"enemy-shield","count":3,"intervalFrames":240},"repeat":{"delayFrames":1800}},{"id":"W3","trigger":{"type":"ANY_OF","conditions":[{"type":"TIME","frame":1050},{"type":"ENEMY_BASE_HP_BELOW","percent":80}]},"spawn":{"enemyId":"enemy-boss","count":1,"intervalFrames":1}},{"id":"W4","trigger":{"type":"AFTER_WAVE_TRIGGERED","waveId":"W3","delayFrames":750},"spawn":{"enemyId":"enemy-berserker","count":2,"intervalFrames":240}},{"id":"W5","trigger":{"type":"ANY_OF","conditions":[{"type":"AFTER_WAVE_CLEARED","waveId":"W3","delayFrames":180},{"type":"ENEMY_BASE_HP_BELOW","percent":45}]},"spawn":{"enemyId":"enemy-boss-iron","count":1,"intervalFrames":1}},{"id":"W6","trigger":{"type":"AFTER_WAVE_TRIGGERED","waveId":"W5","delayFrames":100},"spawn":{"enemyId":"enemy-sniper","count":2,"intervalFrames":260}}],"formationRestrictions":{},"specialRules":[]
   },
   {
     "id":"special_five_banners_01","chapter":"제한전 · 다섯 깃발","name":"압축 전선","subtitle":"다섯 자리 안에서 전열·범위·후열을 압축한다","stageType":"SPECIAL","difficulty":5,
     "playerBaseHp":4600,"enemyBaseHp":6200,"startingSupply":350,"mapLength":2200,"theme":"ruins","decorSeed":1201,"playerUnitCap":18,"enemyUnitCap":24,
-    "waves":[
-      {"id":"W1","trigger":{"type":"TIME","frame":120},"spawn":{"enemyId":"enemy_ch2_bonewheel","count":4,"intervalFrames":70,"magnificationPermille":900}},
-      {"id":"W2","trigger":{"type":"TIME","frame":420},"spawn":{"enemyId":"enemy_ch2_mossboar","count":1,"intervalFrames":1,"magnificationPermille":900}},
-      {"id":"W3","trigger":{"type":"TIME","frame":720},"spawn":{"enemyId":"enemy_ch2_gravebell","count":2,"intervalFrames":170,"magnificationPermille":900}},
-      {"id":"W4","trigger":{"type":"TIME","frame":1050},"spawn":{"enemyId":"enemy_ch2_revivedarmor","count":2,"intervalFrames":220,"magnificationPermille":850}}
-    ],"formationRestrictions":{"maxDistinctUnits":5,"maxCoopDistinctUnitsPerPlayer":3},"specialRules":["솔로 편성 최대 5종","협동은 플레이어당 최대 3종"]
+    "waves":[{"id":"W1","trigger":{"type":"TIME","frame":120},"spawn":{"enemyId":"enemy_ch2_bonewheel","count":4,"intervalFrames":70,"magnificationPermille":900}},{"id":"W2","trigger":{"type":"TIME","frame":420},"spawn":{"enemyId":"enemy_ch2_mossboar","count":1,"intervalFrames":1,"magnificationPermille":900}},{"id":"W3","trigger":{"type":"TIME","frame":720},"spawn":{"enemyId":"enemy_ch2_gravebell","count":2,"intervalFrames":170,"magnificationPermille":900}},{"id":"W4","trigger":{"type":"TIME","frame":1050},"spawn":{"enemyId":"enemy_ch2_revivedarmor","count":2,"intervalFrames":220,"magnificationPermille":850}}],"formationRestrictions":{"maxDistinctUnits":5},"specialRules":["솔로 편성 최대 5종","협동은 플레이어당 최대 3종"]
   },
   {
     "id":"special_five_banners_02","chapter":"제한전 · 다섯 깃발","name":"다섯 개의 선택","subtitle":"러시·장거리·고HP 전열을 다섯 선택으로 모두 버틴다","stageType":"SPECIAL","difficulty":6,
     "playerBaseHp":5600,"enemyBaseHp":7900,"startingSupply":420,"mapLength":2450,"theme":"moon","decorSeed":1219,"playerUnitCap":18,"enemyUnitCap":26,
-    "waves":[
-      {"id":"W1","trigger":{"type":"TIME","frame":90},"spawn":{"enemyId":"enemy_ch2_bonewheel","count":6,"intervalFrames":55,"magnificationPermille":1050}},
-      {"id":"W2","trigger":{"type":"TIME","frame":450},"spawn":{"enemyId":"enemy_ch2_seedbattery","count":1,"intervalFrames":1,"magnificationPermille":900}},
-      {"id":"W3","trigger":{"type":"TIME","frame":720},"spawn":{"enemyId":"enemy_ch2_umbrella","count":3,"intervalFrames":150,"magnificationPermille":1000}},
-      {"id":"W4","trigger":{"type":"TIME","frame":1080},"spawn":{"enemyId":"enemy_ch2_mossboar","count":2,"intervalFrames":220,"magnificationPermille":1050}},
-      {"id":"W5","trigger":{"type":"TIME","frame":1380},"spawn":{"enemyId":"enemy_ch2_revivedarmor","count":2,"intervalFrames":240,"magnificationPermille":1050}}
-    ],"formationRestrictions":{"maxDistinctUnits":5,"maxCoopDistinctUnitsPerPlayer":3},"specialRules":["솔로 편성 최대 5종","협동은 플레이어당 최대 3종"]
+    "waves":[{"id":"W1","trigger":{"type":"TIME","frame":90},"spawn":{"enemyId":"enemy_ch2_bonewheel","count":6,"intervalFrames":55,"magnificationPermille":1050}},{"id":"W2","trigger":{"type":"TIME","frame":450},"spawn":{"enemyId":"enemy_ch2_seedbattery","count":1,"intervalFrames":1,"magnificationPermille":900}},{"id":"W3","trigger":{"type":"TIME","frame":720},"spawn":{"enemyId":"enemy_ch2_umbrella","count":3,"intervalFrames":150,"magnificationPermille":1000}},{"id":"W4","trigger":{"type":"TIME","frame":1080},"spawn":{"enemyId":"enemy_ch2_mossboar","count":2,"intervalFrames":220,"magnificationPermille":1050}},{"id":"W5","trigger":{"type":"TIME","frame":1380},"spawn":{"enemyId":"enemy_ch2_revivedarmor","count":2,"intervalFrames":240,"magnificationPermille":1050}}],"formationRestrictions":{"maxDistinctUnits":5},"specialRules":["솔로 편성 최대 5종","협동은 플레이어당 최대 3종"]
   },
   {
     "id":"special_light_purse_01","chapter":"제한전 · 가벼운 주머니","name":"동전 세어가기","subtitle":"생산비 400 이하의 빠른 순환으로 전선을 끊지 않는다","stageType":"SPECIAL","difficulty":5,
     "playerBaseHp":5200,"enemyBaseHp":7100,"startingSupply":300,"mapLength":2320,"theme":"canyon","decorSeed":1307,"playerUnitCap":22,"enemyUnitCap":25,
-    "waves":[
-      {"id":"W1","trigger":{"type":"TIME","frame":120},"spawn":{"enemyId":"enemy_ch3_spellbug","count":5,"intervalFrames":65,"magnificationPermille":850}},
-      {"id":"W2","trigger":{"type":"TIME","frame":420},"spawn":{"enemyId":"enemy_ch3_glasseye","count":2,"intervalFrames":190,"magnificationPermille":800}},
-      {"id":"W3","trigger":{"type":"TIME","frame":750},"spawn":{"enemyId":"enemy_ch3_inkdemon","count":3,"intervalFrames":150,"magnificationPermille":850}},
-      {"id":"W4","trigger":{"type":"TIME","frame":1080},"spawn":{"enemyId":"enemy_ch3_chain_demon","count":2,"intervalFrames":230,"magnificationPermille":800}}
-    ],"formationRestrictions":{"maxUnitCost":400},"specialRules":["현재 선택 형태의 생산비 400 이하만 출전 가능"]
+    "waves":[{"id":"W1","trigger":{"type":"TIME","frame":120},"spawn":{"enemyId":"enemy_ch3_spellbug","count":5,"intervalFrames":65,"magnificationPermille":850}},{"id":"W2","trigger":{"type":"TIME","frame":420},"spawn":{"enemyId":"enemy_ch3_glasseye","count":2,"intervalFrames":190,"magnificationPermille":800}},{"id":"W3","trigger":{"type":"TIME","frame":750},"spawn":{"enemyId":"enemy_ch3_inkdemon","count":3,"intervalFrames":150,"magnificationPermille":850}},{"id":"W4","trigger":{"type":"TIME","frame":1080},"spawn":{"enemyId":"enemy_ch3_chain_demon","count":2,"intervalFrames":230,"magnificationPermille":800}}],"formationRestrictions":{"maxUnitCost":400},"specialRules":["현재 선택 형태의 생산비 400 이하만 출전 가능"]
   },
   {
     "id":"special_light_purse_02","chapter":"제한전 · 가벼운 주머니","name":"빈 주머니의 전선","subtitle":"저비용 덱의 순환과 위치 운영을 후반 압박에서 시험한다","stageType":"SPECIAL","difficulty":6,
     "playerBaseHp":6500,"enemyBaseHp":9100,"startingSupply":340,"mapLength":2580,"theme":"fortress","decorSeed":1321,"playerUnitCap":24,"enemyUnitCap":28,
-    "waves":[
-      {"id":"W1","trigger":{"type":"TIME","frame":90},"spawn":{"enemyId":"enemy_ch3_spellbug","count":6,"intervalFrames":55,"magnificationPermille":1050}},
-      {"id":"W2","trigger":{"type":"TIME","frame":390},"spawn":{"enemyId":"enemy_ch3_torn_mirror","count":1,"intervalFrames":1,"magnificationPermille":900}},
-      {"id":"W3","trigger":{"type":"TIME","frame":690},"spawn":{"enemyId":"enemy_ch3_glasseye","count":3,"intervalFrames":170,"magnificationPermille":950}},
-      {"id":"W4","trigger":{"type":"TIME","frame":1020},"spawn":{"enemyId":"enemy_ch3_contract_enforcer","count":1,"intervalFrames":1,"magnificationPermille":850}},
-      {"id":"W5","trigger":{"type":"TIME","frame":1320},"spawn":{"enemyId":"enemy_ch3_chain_demon","count":3,"intervalFrames":190,"magnificationPermille":950}}
-    ],"formationRestrictions":{"maxUnitCost":400},"specialRules":["현재 선택 형태의 생산비 400 이하만 출전 가능"]
+    "waves":[{"id":"W1","trigger":{"type":"TIME","frame":90},"spawn":{"enemyId":"enemy_ch3_spellbug","count":6,"intervalFrames":55,"magnificationPermille":1050}},{"id":"W2","trigger":{"type":"TIME","frame":390},"spawn":{"enemyId":"enemy_ch3_torn_mirror","count":1,"intervalFrames":1,"magnificationPermille":900}},{"id":"W3","trigger":{"type":"TIME","frame":690},"spawn":{"enemyId":"enemy_ch3_glasseye","count":3,"intervalFrames":170,"magnificationPermille":950}},{"id":"W4","trigger":{"type":"TIME","frame":1020},"spawn":{"enemyId":"enemy_ch3_contract_enforcer","count":1,"intervalFrames":1,"magnificationPermille":850}},{"id":"W5","trigger":{"type":"TIME","frame":1320},"spawn":{"enemyId":"enemy_ch3_chain_demon","count":3,"intervalFrames":190,"magnificationPermille":950}}],"formationRestrictions":{"maxUnitCost":400},"specialRules":["현재 선택 형태의 생산비 400 이하만 출전 가능"]
   }
 ]
