@@ -15,10 +15,10 @@ import {
 
 const CHAPTER_ONE_STAGES = STAGES.slice(0, 20);
 
-test('v1 runtime contains the complete 80-stage main spine plus the first 23 SPECIAL stages', () => {
+test('v1 runtime contains the complete 80-stage main spine plus forty-six executable SPECIAL stages', () => {
   assert.equal(STAGES.length, 80);
-  assert.equal(SPECIAL_STAGES.length, 23);
-  assert.equal(ALL_STAGES.length, 103);
+  assert.equal(SPECIAL_STAGES.length, 46);
+  assert.equal(ALL_STAGES.length, 126);
   assert.ok(SPECIAL_STAGES.every((stage) => stage.stageType === 'SPECIAL'));
   assert.ok(SPECIAL_STAGES.every((stage) => stage.unlockUnitId === undefined));
   assert.ok(SPECIAL_STAGES.every((stage) => stage.permanentRewardId === undefined));
@@ -43,6 +43,14 @@ test('resource SPECIAL families are present with canonical stage counts', () => 
   for (let i = 1; i <= 4; i += 1) assert.ok(ids.has(`resource_soul_0${i}`));
   for (let i = 1; i <= 5; i += 1) assert.ok(ids.has(`resource_evolution_0${i}`));
   for (let i = 1; i <= 4; i += 1) assert.ok(ids.has(`resource_starlight_0${i}`));
+});
+
+test('permanent challenge SPECIAL families contain the authored twenty-three battles', () => {
+  const ids = new Set(SPECIAL_STAGES.map((stage) => stage.id));
+  for (const prefix of ['glutton', 'undead', 'glass', 'mechcastle', 'anomaly']) {
+    for (let i = 1; i <= 4; i += 1) assert.ok(ids.has(`special_${prefix}_0${i}`));
+  }
+  for (let i = 1; i <= 3; i += 1) assert.ok(ids.has(`special_echoes_0${i}`));
 });
 
 test('special stages use valid challenge data', () => {

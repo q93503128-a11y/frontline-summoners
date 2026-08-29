@@ -14,10 +14,10 @@ function assertScaling(
   for (const stage of stages) assert.deepEqual(stage.coopStatScaling, expected, `unexpected co-op scaling for ${stage.id}`);
 }
 
-test('typed stage policy metadata is merged into all eighty main stages and twenty-three SPECIAL stages', () => {
+test('typed stage policy metadata is merged into all eighty main stages and forty-six SPECIAL stages', () => {
   assert.equal(STAGES.length, 80);
-  assert.equal(SPECIAL_STAGES.length, 23);
-  assert.equal(ALL_STAGES.length, 103);
+  assert.equal(SPECIAL_STAGES.length, 46);
+  assert.equal(ALL_STAGES.length, 126);
   assert.equal(ALL_STAGES.length, STAGES.length + SPECIAL_STAGES.length);
   for (const stage of ALL_STAGES) {
     assert.ok(['SOLO_ONLY', 'SOLO_OR_COOP', 'COOP_ONLY'].includes(stage.multiplayerPolicy));
@@ -56,6 +56,8 @@ test('main chapters and SPECIAL collections retain their authored co-op scaling 
   assert.deepEqual(getStage('resource_gold_05').coopStatScaling, { enemyHpPermille: 1220, enemyAttackPermille: 1100, enemyBaseHpPermille: 1120 });
   assert.deepEqual(getStage('resource_evolution_05').coopStatScaling, { enemyHpPermille: 1240, enemyAttackPermille: 1100, enemyBaseHpPermille: 1120 });
   assert.deepEqual(getStage('resource_starlight_04').coopStatScaling, { enemyHpPermille: 1220, enemyAttackPermille: 1100, enemyBaseHpPermille: 1120 });
+  assert.deepEqual(getStage('special_glutton_01').coopStatScaling, { enemyHpPermille: 1180, enemyAttackPermille: 1080, enemyBaseHpPermille: 1100 });
+  assert.deepEqual(getStage('special_anomaly_04').coopStatScaling, { enemyHpPermille: 1240, enemyAttackPermille: 1100, enemyBaseHpPermille: 1120 });
 });
 
 test('current non-record stages expose replay convenience only after NORMAL_CLEAR and do not fake reward charges', () => {

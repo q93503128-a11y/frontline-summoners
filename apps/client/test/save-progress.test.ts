@@ -130,11 +130,11 @@ test('progression writer records only explicit actual-battle NORMAL_CLEAR and de
   assert.doesNotMatch(resultSource, /recordStageClear\(/);
 });
 
-test('SPECIAL writer still gates against the NORMAL_CLEAR progression axis and grants canonical resources', async () => {
+test('SPECIAL writer enforces collection, previous-stage and main-progression gates before granting canonical resources', async () => {
   const source = await readFile(new URL('../src/save.ts', import.meta.url), 'utf8');
   assert.match(source, /export async function recordSpecialStageClear/);
   assert.match(source, /if \(stage\.stageType !== 'SPECIAL'\)/);
-  assert.match(source, /if \(!isSpecialStageUnlocked\(stage\.id, before\.clearedStageIds\)\)/);
+  assert.match(source, /if \(!isSortieStageUnlocked\(stage\.id, before\.clearedStageIds, before\.specialClearedStageIds\)\)/);
   assert.match(source, /specialClears\.add\(stage\.id\)/);
   assert.match(source, /getSpecialResourceReward\(stage\.id, firstClear\)/);
   assert.match(source, /grantResources\(before\.resourceLedgerById \?\? \{\}, resourceReward\)/);
