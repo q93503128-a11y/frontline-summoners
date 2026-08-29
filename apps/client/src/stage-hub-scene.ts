@@ -4,8 +4,10 @@ import { loadGuestProgress, type GuestProgress } from './save';
 import {
   STAGE_COLLECTIONS,
   getCollectionClearedIds,
+  getStageCollectionAvailabilityText,
   getStageCollectionPage,
   getStageCollectionPageCount,
+  isStageCollectionAvailable,
   isStageCollectionUnlocked,
 } from './stage-navigation';
 import { addButton, addText, COLORS, drawBackdrop } from './scene-ui';
@@ -57,7 +59,7 @@ export class StageHubScene extends Phaser.Scene {
     for (let page = 0; page < pageCount; page += 1) {
       const collections = getStageCollectionPage(page);
       if (collections.some((collection) => {
-        if (!isStageCollectionUnlocked(collection, this.progress.clearedStageIds)) return false;
+        if (!isStageCollectionUnlocked(collection, this.progress.clearedStageIds) || !isStageCollectionAvailable(collection)) return false;
         const cleared = getCollectionClearedIds(
           collection,
           this.progress.clearedStageIds,
@@ -87,7 +89,10 @@ export class StageHubScene extends Phaser.Scene {
 
     collections.forEach((collection, index) => {
       const x = positions[index] ?? INTERNAL_WIDTH / 2;
-      const unlocked = isStageCollectionUnlocked(collection, this.progress.clearedStageIds);
+      const progressionUnlocked = isStageCollectionUnlocked(collection, this.progress.clearedStageIds);
+      const available = isStageCollectionAvailable(collection);
+      const unlocked = progressionUnlocked && available;
+      const availabilityText = getStageCollectionAvailabilityText(collection);
       const cleared = getCollectionClearedIds(
         collection,
         this.progress.clearedStageIds,
@@ -104,7 +109,7 @@ export class StageHubScene extends Phaser.Scene {
         0.98,
       ).setStrokeStyle(4, unlocked ? accent : 0x3c4554, 1);
       this.collectionLayer!.add(card);
-      this.collectionLayer!.add(addText(this, x, 205, special ? 'SPECIAL' : 'PROGRESSION', compact ? 21 : 17, unlocked ? (special ? '#d6b5e8' : '#a9caee') : '#69727e', 'center').setOrigin(0.5));
+      this.collectionLayer!.add(addText(this, x, 205, availabilityText ? 'EVENT' : special ? 'SPECIAL' : 'PROGRESSION', compact ? 21 : 17, unlocked ? (special ? '#d6b5e8' : '#a9caee') : '#69727e', 'center').setOrigin(0.5));
       this.collectionLayer!.add(addText(this, x, 252, collection.title, compact ? 31 : 30, unlocked ? '#ffffff' : '#747d89', 'center').setOrigin(0.5).setWordWrapWidth(380));
       this.collectionLayer!.add(addText(this, x, 315, collection.description, compact ? 22 : 18, unlocked ? '#c5cedb' : '#656e7a', 'center').setOrigin(0.5).setWordWrapWidth(380));
       this.collectionLayer!.add(addText(this, x, 382, `${cleared} / ${collection.stages.length} 클리어`, compact ? 24 : 21, unlocked ? '#8ee3aa' : '#6c7580', 'center').setOrigin(0.5));
@@ -112,9 +117,10 @@ export class StageHubScene extends Phaser.Scene {
       this.collectionLayer!.add(addText(this, x, 425, `난이도 ${Math.min(...difficulties)}~${Math.max(...difficulties)} / 12`, compact ? 21 : 17, unlocked ? COLORS.gold : '#6b6658', 'center').setOrigin(0.5));
       if (!unlocked) {
         const remaining = Math.max(0, collection.requiredProgressionClears - this.progress.clearedStageIds.length);
-        this.collectionLayer!.add(addText(this, x, 470, `메인 진도 ${remaining}개 더 필요`, compact ? 20 : 16, '#8b8290', 'center').setOrigin(0.5));
+        const reason = !available && availabilityText ? availabilityText : `메인 진도 ${remaining}개 더 필요`;
+        this.collectionLayer!.add(addText(this, x, 470, reason, compact ? 20 : 16, '#8b8290', 'center').setOrigin(0.5));
       }
-      const button = addButton(this, x, compact ? 535 : 532, 250, compact ? 84 : 60, unlocked ? '스테이지 선택' : '잠김', () => {
+      const button = addButton(this, x, compact ? 535 : 532, 250, compact ? 84 : 60, unlocked ? '스테이지 선택' : availabilityText ? '기간 외' : '잠김', () => {
         if (unlocked) this.scene.start('stage-select', { collectionId: collection.id });
       }, unlocked ? accent : 0x3f4855);
       if (!unlocked) button.setAlpha(0.62);
@@ -126,7 +132,7 @@ export class StageHubScene extends Phaser.Scene {
         this,
         INTERNAL_WIDTH / 2,
         605,
-        `전선 묶음 ${STAGE_COLLECTIONS.length}개 · 메인 진행에 따라 새 장과 특수전이 열린다.`,
+        `전선 묶음 ${STAGE_COLLECTIONS.length}개 · 메인 진행과 이벤트 기간에 따라 새 전선이 열린다.`,
         16,
         '#8995a7',
         'center',
