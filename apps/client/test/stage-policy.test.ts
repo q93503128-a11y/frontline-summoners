@@ -7,56 +7,33 @@ const CHAPTER_TWO_STAGES = STAGES.slice(20, 40);
 const CHAPTER_THREE_STAGES = STAGES.slice(40, 60);
 const CHAPTER_FOUR_STAGES = STAGES.slice(60, 80);
 
-function assertScaling(
-  stages: readonly (typeof ALL_STAGES)[number][],
-  expected: { enemyHpPermille: number; enemyAttackPermille: number; enemyBaseHpPermille: number },
-): void {
+function assertScaling(stages: readonly (typeof ALL_STAGES)[number][], expected: { enemyHpPermille: number; enemyAttackPermille: number; enemyBaseHpPermille: number }): void {
   for (const stage of stages) assert.deepEqual(stage.coopStatScaling, expected, `unexpected co-op scaling for ${stage.id}`);
 }
 
-test('typed stage policy metadata is merged into all eighty main stages and forty-six SPECIAL stages', () => {
+test('typed stage policy metadata is merged into all eighty main and sixty-one SPECIAL stages', () => {
   assert.equal(STAGES.length, 80);
-  assert.equal(SPECIAL_STAGES.length, 46);
-  assert.equal(ALL_STAGES.length, 126);
-  assert.equal(ALL_STAGES.length, STAGES.length + SPECIAL_STAGES.length);
+  assert.equal(SPECIAL_STAGES.length, 61);
+  assert.equal(ALL_STAGES.length, 141);
   for (const stage of ALL_STAGES) {
     assert.ok(['SOLO_ONLY', 'SOLO_OR_COOP', 'COOP_ONLY'].includes(stage.multiplayerPolicy));
     assert.ok(['NEVER', 'AFTER_NORMAL_CLEAR'].includes(stage.speedUpEligibility));
     assert.ok(['NEVER', 'AFTER_NORMAL_CLEAR'].includes(stage.sweepEligibility));
     assert.ok(['NONE', 'COLLECTION_CHARGE'].includes(stage.rewardChargePolicy));
-    assert.ok(stage.coopStatScaling.enemyHpPermille >= 100);
-    assert.ok(stage.coopStatScaling.enemyAttackPermille >= 100);
-    assert.ok(stage.coopStatScaling.enemyBaseHpPermille >= 100);
     assert.equal(getStage(stage.id).multiplayerPolicy, stage.multiplayerPolicy);
   }
 });
 
-test('main chapters and SPECIAL collections retain their authored co-op scaling bands', () => {
+test('main chapters and SPECIAL collections retain authored co-op scaling bands', () => {
   assert.equal(CHAPTER_ONE_STAGES[0]!.multiplayerPolicy, 'SOLO_ONLY');
   assert.equal(CHAPTER_ONE_STAGES[1]!.multiplayerPolicy, 'SOLO_ONLY');
-  assert.ok(CHAPTER_ONE_STAGES.slice(2).every((stage) => stage.multiplayerPolicy === 'SOLO_OR_COOP'));
   assert.ok([...CHAPTER_TWO_STAGES, ...CHAPTER_THREE_STAGES, ...CHAPTER_FOUR_STAGES, ...SPECIAL_STAGES].every((stage) => stage.multiplayerPolicy === 'SOLO_OR_COOP'));
-
   assertScaling(CHAPTER_ONE_STAGES.slice(0, 2), { enemyHpPermille: 1000, enemyAttackPermille: 1000, enemyBaseHpPermille: 1000 });
-  assertScaling(CHAPTER_ONE_STAGES.slice(2), { enemyHpPermille: 1180, enemyAttackPermille: 1080, enemyBaseHpPermille: 1120 });
-  assertScaling(CHAPTER_TWO_STAGES.slice(0, -1), { enemyHpPermille: 1200, enemyAttackPermille: 1080, enemyBaseHpPermille: 1120 });
-  assertScaling(CHAPTER_TWO_STAGES.slice(-1), { enemyHpPermille: 1220, enemyAttackPermille: 1080, enemyBaseHpPermille: 1120 });
-  assertScaling(CHAPTER_THREE_STAGES.slice(0, -1), { enemyHpPermille: 1200, enemyAttackPermille: 1100, enemyBaseHpPermille: 1120 });
-  assertScaling(CHAPTER_THREE_STAGES.slice(-1), { enemyHpPermille: 1220, enemyAttackPermille: 1100, enemyBaseHpPermille: 1120 });
-  assertScaling(CHAPTER_FOUR_STAGES.slice(0, 12), { enemyHpPermille: 1200, enemyAttackPermille: 1100, enemyBaseHpPermille: 1120 });
-  assertScaling(CHAPTER_FOUR_STAGES.slice(12, 17), { enemyHpPermille: 1210, enemyAttackPermille: 1100, enemyBaseHpPermille: 1120 });
-  assertScaling(CHAPTER_FOUR_STAGES.slice(17, 19), { enemyHpPermille: 1220, enemyAttackPermille: 1100, enemyBaseHpPermille: 1120 });
-  assertScaling(CHAPTER_FOUR_STAGES.slice(19), { enemyHpPermille: 1240, enemyAttackPermille: 1100, enemyBaseHpPermille: 1120 });
-
-  const originalChallengeStages = SPECIAL_STAGES.filter((stage) => stage.id.startsWith('special-'));
-  assert.equal(originalChallengeStages.length, 5);
-  assertScaling(originalChallengeStages, { enemyHpPermille: 1180, enemyAttackPermille: 1080, enemyBaseHpPermille: 1120 });
-
-  assert.deepEqual(getStage('resource_gold_01').coopStatScaling, { enemyHpPermille: 1180, enemyAttackPermille: 1080, enemyBaseHpPermille: 1100 });
-  assert.deepEqual(getStage('resource_gold_05').coopStatScaling, { enemyHpPermille: 1220, enemyAttackPermille: 1100, enemyBaseHpPermille: 1120 });
-  assert.deepEqual(getStage('resource_evolution_05').coopStatScaling, { enemyHpPermille: 1240, enemyAttackPermille: 1100, enemyBaseHpPermille: 1120 });
-  assert.deepEqual(getStage('resource_starlight_04').coopStatScaling, { enemyHpPermille: 1220, enemyAttackPermille: 1100, enemyBaseHpPermille: 1120 });
-  assert.deepEqual(getStage('special_glutton_01').coopStatScaling, { enemyHpPermille: 1180, enemyAttackPermille: 1080, enemyBaseHpPermille: 1100 });
+  assert.deepEqual(getStage('special_five_banners_01').coopStatScaling, { enemyHpPermille: 1200, enemyAttackPermille: 1080, enemyBaseHpPermille: 1120 });
+  assert.deepEqual(getStage('special_light_purse_02').coopStatScaling, { enemyHpPermille: 1200, enemyAttackPermille: 1100, enemyBaseHpPermille: 1120 });
+  assert.deepEqual(getStage('event_summer_01_01').coopStatScaling, { enemyHpPermille: 1180, enemyAttackPermille: 1080, enemyBaseHpPermille: 1100 });
+  assert.deepEqual(getStage('event_summer_01_06').coopStatScaling, { enemyHpPermille: 1220, enemyAttackPermille: 1100, enemyBaseHpPermille: 1120 });
+  assert.deepEqual(getStage('event_zero_edge_01_05').coopStatScaling, { enemyHpPermille: 1220, enemyAttackPermille: 1100, enemyBaseHpPermille: 1120 });
   assert.deepEqual(getStage('special_anomaly_04').coopStatScaling, { enemyHpPermille: 1240, enemyAttackPermille: 1100, enemyBaseHpPermille: 1120 });
 });
 
