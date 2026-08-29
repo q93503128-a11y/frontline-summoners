@@ -9,7 +9,8 @@
     "./coop-playable": "./src/coop-playable.ts",
     "./meta-progression": "./src/meta-progression.ts",
     "./evolution-catalog": "./src/evolution-catalog.ts",
-    "./resource-ledger": "./src/resource-ledger.ts"
+    "./resource-ledger": "./src/resource-ledger.ts",
+    "./formation-restrictions": "./src/formation-restrictions.ts"
   },
   "scripts": {
     "typecheck": "tsc --noEmit",
