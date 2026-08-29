@@ -1,0 +1,18 @@
+[
+  {
+    "collectionId":"event_summer_kaiju_01",
+    "rerunnable":true,
+    "windows":[
+      {"start":"2026-08-01T00:00:00+09:00","end":"2026-09-15T23:59:59+09:00"},
+      {"start":"2027-08-01T00:00:00+09:00","end":"2027-09-15T23:59:59+09:00"}
+    ]
+  },
+  {
+    "collectionId":"event_zero_edge_trial_01",
+    "rerunnable":true,
+    "windows":[
+      {"start":"2026-08-29T00:00:00+09:00","end":"2026-10-31T23:59:59+09:00"},
+      {"start":"2027-08-29T00:00:00+09:00","end":"2027-10-31T23:59:59+09:00"}
+    ]
+  }
+]
