@@ -2,6 +2,7 @@ import Phaser from 'phaser';
 import { INTERNAL_HEIGHT, INTERNAL_WIDTH } from '@frontline/shared';
 import { BATTLEFIELD_THEME_LABELS } from './battlefield';
 import { getPermanentRewardEffectText } from './permanent-reward-ui';
+import { getGuestStageFormationViolation } from './player-loadout';
 import { ENEMIES, createPrototypeBattle, getSlotById, getUnlockedSlotIds, type PrototypeStage } from './prototype';
 import { loadGuestProgress, type GuestProgress } from './save';
 import {
@@ -118,6 +119,8 @@ export class StageSelectScene extends Phaser.Scene {
       const lockedReason = special
         ? getSpecialStageUnlockText(stage.id, this.progress.clearedStageIds, this.progress.specialClearedStageIds)
         : undefined;
+      const formationViolation = unlocked ? getGuestStageFormationViolation(stage.id, this.progress) : undefined;
+      const canSortie = unlocked && formationViolation === undefined;
       const cleared = special
         ? this.progress.specialClearedStageIds.includes(stage.id)
         : this.progress.clearedStageIds.includes(stage.id);
@@ -157,7 +160,8 @@ export class StageSelectScene extends Phaser.Scene {
           const effectiveCap = unlocked
             ? createPrototypeBattle(stage.id, getUnlockedSlotIds(this.progress.clearedStageIds), this.progress.permanentRewardIds).playerUnitCap
             : stage.playerUnitCap;
-          this.stageLayer!.add(addText(this, x, 350, unlocked ? `동시 출격 ${effectiveCap}기` : lockedReason ?? 'SPECIAL 해금 조건 필요', 18, unlocked ? '#ffd493' : '#8b8290', 'center').setOrigin(0.5).setWordWrapWidth(196));
+          const specialStatus = !unlocked ? (lockedReason ?? 'SPECIAL 해금 조건 필요') : formationViolation ?? `동시 출격 ${effectiveCap}기`;
+          this.stageLayer!.add(addText(this, x, 350, specialStatus, 18, canSortie ? '#ffd493' : '#d9a6a6', 'center').setOrigin(0.5).setWordWrapWidth(196));
           this.stageLayer!.add(addText(this, x, 402, cleared ? '✓ 클리어 기록 완료' : '반복 클리어 보상 가능', 18, cleared ? '#9fe4b5' : unlocked ? '#e2ca8d' : '#6d6858', 'center').setOrigin(0.5));
         } else {
           this.stageLayer!.add(addText(this, x, 350, '첫 NORMAL_CLEAR 영구 보상', 18, unlocked ? '#8dd9a8' : '#596a60', 'center').setOrigin(0.5));
@@ -171,7 +175,8 @@ export class StageSelectScene extends Phaser.Scene {
           const effectiveCap = unlocked
             ? createPrototypeBattle(stage.id, getUnlockedSlotIds(this.progress.clearedStageIds), this.progress.permanentRewardIds).playerUnitCap
             : stage.playerUnitCap;
-          this.stageLayer!.add(addText(this, x, 432, unlocked ? `동시 출격 ${effectiveCap}기 · 적 최대 ${stage.enemyUnitCap}기` : lockedReason ?? 'SPECIAL 해금 조건 필요', 13, unlocked ? '#ffd493' : '#8b8290', 'center').setOrigin(0.5).setWordWrapWidth(196));
+          const specialStatus = !unlocked ? (lockedReason ?? 'SPECIAL 해금 조건 필요') : formationViolation ?? `동시 출격 ${effectiveCap}기 · 적 최대 ${stage.enemyUnitCap}기`;
+          this.stageLayer!.add(addText(this, x, 432, specialStatus, 13, canSortie ? '#ffd493' : '#d9a6a6', 'center').setOrigin(0.5).setWordWrapWidth(196));
           this.stageLayer!.add(addText(this, x, 474, cleared ? '✓ 클리어 기록 완료 · 반복 가능' : '메인 진도와 별도 클리어 기록', 13, cleared ? '#9fe4b5' : unlocked ? '#e2ca8d' : '#6d6858', 'center').setOrigin(0.5).setWordWrapWidth(196));
         } else {
           this.stageLayer!.add(addText(this, x, 434, '첫 NORMAL_CLEAR 영구 보상', 13, unlocked ? '#8dd9a8' : '#596a60', 'center').setOrigin(0.5));
@@ -201,11 +206,15 @@ export class StageSelectScene extends Phaser.Scene {
         compact ? 535 : 548,
         174,
         compact ? 84 : 52,
-        unlocked ? (special ? '도전 시작' : '전투 시작') : compact ? '잠김' : lockedLabel,
-        () => { if (unlocked) this.scene.start('battle', { stageId: stage.id }); },
-        unlocked ? border : 0x3f4855,
+        !unlocked ? (compact ? '잠김' : lockedLabel) : formationViolation ? '편성 조정' : (special ? '도전 시작' : '전투 시작'),
+        () => {
+          if (!unlocked) return;
+          if (formationViolation) this.scene.start('deck');
+          else this.scene.start('battle', { stageId: stage.id });
+        },
+        canSortie ? border : formationViolation ? 0x8b5d5d : 0x3f4855,
       );
-      if (!unlocked) stageButton.setAlpha(0.62);
+      if (!canSortie) stageButton.setAlpha(0.72);
       this.stageLayer!.add(stageButton);
     });
   }
