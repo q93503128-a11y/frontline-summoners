@@ -7,7 +7,8 @@
     ".": "./src/index.ts",
     "./playable": "./src/playable.ts",
     "./coop-playable": "./src/coop-playable.ts",
-    "./meta-progression": "./src/meta-progression.ts"
+    "./meta-progression": "./src/meta-progression.ts",
+    "./evolution-catalog": "./src/evolution-catalog.ts"
   },
   "scripts": {
     "typecheck": "tsc --noEmit",

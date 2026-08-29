@@ -1,11 +1,3 @@
-import {
-  ATTRIBUTES,
-  COMBAT_TAGS,
-  DAMAGE_BONUS_TARGET_KINDS,
-  TARGET_MODES,
-  type DamageBonusContent,
-  type TargetMode,
-} from '@frontline/content-schema';
 import type { PlayerRosterSlot } from '@frontline/sim/playable';
 import {
   applyCharacterLevel as applyCharacterLevelShared,
@@ -21,8 +13,14 @@ import {
   type EvolutionFormDefinition,
   type EvolutionFormModifiers,
 } from '@frontline/sim/meta-progression';
+import {
+  buildEvolutionCatalog,
+  getEvolutionRecipe as getEvolutionRecipeShared,
+  type EvolutionRecipeDefinition,
+  type EvolutionResourceId,
+} from '@frontline/sim/evolution-catalog';
 import levelCurveJson from '../../../content/growth/level-curve-01.json' with { type: 'json' };
-import evolutionJson from '../../../content/evolution/recruitment-01.json' with { type: 'json' };
+import evolutionCatalogJson from '../../../content/evolution/catalog-01.json' with { type: 'json' };
 import { ALL_PLAYER_SLOTS } from './prototype.ts';
 
 export type {
@@ -30,6 +28,8 @@ export type {
   CharacterLevelCurve,
   EvolutionFormDefinition,
   EvolutionFormModifiers,
+  EvolutionRecipeDefinition,
+  EvolutionResourceId,
 };
 
 function record(value: unknown, context: string): Record<string, unknown> {
@@ -44,23 +44,17 @@ function integer(value: unknown, context: string, min: number, max = Number.MAX_
   if (!Number.isInteger(value) || (value as number) < min || (value as number) > max) throw new Error(`${context} must be an integer in ${min}..${max}`);
   return value as number;
 }
-function signedInteger(value: unknown, context: string, fallback = 0): number {
-  if (value === undefined) return fallback;
-  if (!Number.isInteger(value)) throw new Error(`${context} must be an integer`);
-  return value as number;
-}
-
 function parseLevelCurve(value: unknown): CharacterLevelCurve {
   const raw = record(value, 'level curve');
   if (raw.status !== 'DESIGN_TARGET') throw new Error('level curve status must be DESIGN_TARGET');
   const levelCap = integer(raw.levelCap, 'levelCap', 1, 100);
   const plusLevelCap = integer(raw.plusLevelCap, 'plusLevelCap', 0, 200);
   if (!Array.isArray(raw.anchors) || raw.anchors.length < 2) throw new Error('level curve anchors must contain at least two entries');
-  const anchors = raw.anchors.map((value, index) => {
-    const item = record(value, `anchors[${index}]`);
+  const anchors = raw.anchors.map((entry, index) => {
+    const anchor = record(entry, `anchors[${index}]`);
     return {
-      level: integer(item.level, `anchors[${index}].level`, 1, levelCap),
-      multiplierPermille: integer(item.multiplierPermille, `anchors[${index}].multiplierPermille`, 1, 100000),
+      level: integer(anchor.level, `anchors[${index}].level`, 1, levelCap),
+      multiplierPermille: integer(anchor.multiplierPermille, `anchors[${index}].multiplierPermille`, 1, 100000),
     };
   });
   if (anchors[0]!.level !== 1 || anchors[anchors.length - 1]!.level !== levelCap) throw new Error('level curve anchors must start at 1 and end at levelCap');
@@ -79,110 +73,19 @@ function parseLevelCurve(value: unknown): CharacterLevelCurve {
 }
 
 export const CHARACTER_LEVEL_CURVE = parseLevelCurve(levelCurveJson);
+const EVOLUTION_CATALOG = buildEvolutionCatalog(evolutionCatalogJson, new Set(ALL_PLAYER_SLOTS.map((slot) => slot.slotId)));
+export const EVOLUTION_FORMS: readonly EvolutionFormDefinition[] = EVOLUTION_CATALOG.forms;
+export const EVOLUTION_RECIPES: readonly EvolutionRecipeDefinition[] = EVOLUTION_CATALOG.recipes;
 
-function parseDamageBonuses(value: unknown, context: string): readonly DamageBonusContent[] | undefined {
-  if (value === undefined) return undefined;
-  if (!Array.isArray(value)) throw new Error(`${context} must be an array`);
-  const bonuses = value.map((item, index): DamageBonusContent => {
-    const raw = record(item, `${context}[${index}]`);
-    const targetKind = nonEmptyString(raw.targetKind, `${context}[${index}].targetKind`);
-    if (!(DAMAGE_BONUS_TARGET_KINDS as readonly string[]).includes(targetKind)) throw new Error(`${context}[${index}].targetKind is unknown`);
-    const target = nonEmptyString(raw.target, `${context}[${index}].target`);
-    const multiplierPermille = integer(raw.multiplierPermille, `${context}[${index}].multiplierPermille`, 1000, 3000);
-    if (targetKind === 'ATTRIBUTE') {
-      if (!(ATTRIBUTES as readonly string[]).includes(target)) throw new Error(`${context}[${index}].target attribute is unknown`);
-      return { targetKind, target: target as (typeof ATTRIBUTES)[number], multiplierPermille };
-    }
-    if (!(COMBAT_TAGS as readonly string[]).includes(target)) throw new Error(`${context}[${index}].target tag is unknown`);
-    return { targetKind: 'TAG', target: target as (typeof COMBAT_TAGS)[number], multiplierPermille };
-  });
-  const keys = bonuses.map((bonus) => `${bonus.targetKind}:${bonus.target}`);
-  if (new Set(keys).size !== keys.length) throw new Error(`${context} targets must be unique`);
-  return bonuses;
-}
-
-function parseModifiers(value: unknown, context: string): EvolutionFormModifiers {
-  const raw = record(value, context);
-  const targetModeRaw = raw.targetMode;
-  let targetMode: TargetMode | undefined;
-  if (targetModeRaw !== undefined) {
-    if (typeof targetModeRaw !== 'string' || !(TARGET_MODES as readonly string[]).includes(targetModeRaw)) throw new Error(`${context}.targetMode is unknown`);
-    targetMode = targetModeRaw as TargetMode;
-  }
-  const damageBonuses = parseDamageBonuses(raw.damageBonuses, `${context}.damageBonuses`);
-  return {
-    maxHpPermille: raw.maxHpPermille === undefined ? 1000 : integer(raw.maxHpPermille, `${context}.maxHpPermille`, 1, 5000),
-    attackDamagePermille: raw.attackDamagePermille === undefined ? 1000 : integer(raw.attackDamagePermille, `${context}.attackDamagePermille`, 0, 5000),
-    costPermille: raw.costPermille === undefined ? 1000 : integer(raw.costPermille, `${context}.costPermille`, 0, 5000),
-    rechargePermille: raw.rechargePermille === undefined ? 1000 : integer(raw.rechargePermille, `${context}.rechargePermille`, 1, 5000),
-    moveSpeedDelta: signedInteger(raw.moveSpeedDelta, `${context}.moveSpeedDelta`),
-    standingRangeDelta: signedInteger(raw.standingRangeDelta, `${context}.standingRangeDelta`),
-    attackMinRangeDelta: signedInteger(raw.attackMinRangeDelta, `${context}.attackMinRangeDelta`),
-    attackMaxRangeDelta: signedInteger(raw.attackMaxRangeDelta, `${context}.attackMaxRangeDelta`),
-    ...(targetMode === undefined ? {} : { targetMode }),
-    ...(damageBonuses === undefined ? {} : { damageBonuses }),
-  };
-}
-
-function buildEvolutionForms(): readonly EvolutionFormDefinition[] {
-  if (!Array.isArray(evolutionJson)) throw new Error('evolution content must be an array');
-  const knownCharacters = new Set(ALL_PLAYER_SLOTS.map((slot) => slot.slotId));
-  const characterIds = new Set<string>();
-  const formIds = new Set<string>();
-  const result: EvolutionFormDefinition[] = [];
-  evolutionJson.forEach((entry, entryIndex) => {
-    const raw = record(entry, `evolution[${entryIndex}]`);
-    const characterId = nonEmptyString(raw.characterId, `evolution[${entryIndex}].characterId`);
-    if (!knownCharacters.has(characterId)) throw new Error(`evolution references unknown character: ${characterId}`);
-    if (characterIds.has(characterId)) throw new Error(`duplicate evolution character: ${characterId}`);
-    characterIds.add(characterId);
-    if (!Array.isArray(raw.forms) || raw.forms.length !== 3) throw new Error(`${characterId} must define exactly three forms`);
-    raw.forms.forEach((formValue, formIndex) => {
-      const form = record(formValue, `${characterId}.forms[${formIndex}]`);
-      const formId = nonEmptyString(form.formId, `${characterId}.forms[${formIndex}].formId`);
-      if (formIds.has(formId)) throw new Error(`duplicate evolution form id: ${formId}`);
-      formIds.add(formId);
-      const formOrder = integer(form.formOrder, `${formId}.formOrder`, 1, 3) as 1 | 2 | 3;
-      if (formOrder !== formIndex + 1) throw new Error(`${characterId} forms must be ordered 1,2,3`);
-      result.push({
-        characterId,
-        formId,
-        formOrder,
-        name: nonEmptyString(form.name, `${formId}.name`),
-        description: nonEmptyString(form.description, `${formId}.description`),
-        modifiers: parseModifiers(form.modifiers ?? {}, `${formId}.modifiers`),
-      });
-    });
-  });
-  return result;
-}
-
-export const EVOLUTION_FORMS: readonly EvolutionFormDefinition[] = buildEvolutionForms();
-
-export function normalizeCharacterLevel(level: number): number {
-  return normalizeCharacterLevelShared(CHARACTER_LEVEL_CURVE, level);
-}
-export function normalizeCharacterPlusLevel(plusLevel: number): number {
-  return normalizeCharacterPlusLevelShared(CHARACTER_LEVEL_CURVE, plusLevel);
-}
-export function getCharacterLevelMultiplierPermille(level: number): number {
-  return getCharacterLevelMultiplierPermilleShared(CHARACTER_LEVEL_CURVE, level);
-}
-export function getCharacterTotalMultiplierPermille(level: number, plusLevel = 0): number {
-  return getCharacterTotalMultiplierPermilleShared(CHARACTER_LEVEL_CURVE, level, plusLevel);
-}
-export function applyCharacterLevel(slot: PlayerRosterSlot, level: number, plusLevel = 0): PlayerRosterSlot {
-  return applyCharacterLevelShared(slot, CHARACTER_LEVEL_CURVE, level, plusLevel);
-}
-export function getEvolutionForms(characterId: string): readonly EvolutionFormDefinition[] {
-  return EVOLUTION_FORMS.filter((form) => form.characterId === characterId);
-}
-export function getEvolutionForm(formId: string): EvolutionFormDefinition {
-  return getEvolutionFormShared(EVOLUTION_FORMS, formId);
-}
-export function applyEvolutionForm(slot: PlayerRosterSlot, formId: string): PlayerRosterSlot {
-  return applyEvolutionFormShared(slot, EVOLUTION_FORMS, formId);
-}
+export function normalizeCharacterLevel(level: number): number { return normalizeCharacterLevelShared(CHARACTER_LEVEL_CURVE, level); }
+export function normalizeCharacterPlusLevel(plusLevel: number): number { return normalizeCharacterPlusLevelShared(CHARACTER_LEVEL_CURVE, plusLevel); }
+export function getCharacterLevelMultiplierPermille(level: number): number { return getCharacterLevelMultiplierPermilleShared(CHARACTER_LEVEL_CURVE, level); }
+export function getCharacterTotalMultiplierPermille(level: number, plusLevel = 0): number { return getCharacterTotalMultiplierPermilleShared(CHARACTER_LEVEL_CURVE, level, plusLevel); }
+export function applyCharacterLevel(slot: PlayerRosterSlot, level: number, plusLevel = 0): PlayerRosterSlot { return applyCharacterLevelShared(slot, CHARACTER_LEVEL_CURVE, level, plusLevel); }
+export function getEvolutionForms(characterId: string): readonly EvolutionFormDefinition[] { return EVOLUTION_FORMS.filter((form) => form.characterId === characterId); }
+export function getEvolutionForm(formId: string): EvolutionFormDefinition { return getEvolutionFormShared(EVOLUTION_FORMS, formId); }
+export function getEvolutionRecipe(formId: string): EvolutionRecipeDefinition { return getEvolutionRecipeShared(EVOLUTION_RECIPES, formId); }
+export function applyEvolutionForm(slot: PlayerRosterSlot, formId: string): PlayerRosterSlot { return applyEvolutionFormShared(slot, EVOLUTION_FORMS, formId); }
 export function buildCharacterCombatSlot(slot: PlayerRosterSlot, level: number, formId?: string, plusLevel = 0): PlayerRosterSlot {
   return buildCharacterCombatSlotShared(slot, CHARACTER_LEVEL_CURVE, EVOLUTION_FORMS, level, formId, plusLevel);
 }
