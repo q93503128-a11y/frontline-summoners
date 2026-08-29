@@ -49,6 +49,12 @@ export interface CharacterMetaProgress {
   readonly selectedFormId?: string;
 }
 
+export interface RecordModeProgress {
+  readonly endlessBestTimeMs: number;
+  readonly endlessBestReachedMinute: number;
+  readonly bossRushBestDefeated: number;
+}
+
 export interface GuestProgress {
   readonly clearedStageIds: readonly string[];
   readonly normalClearSourceByStage?: Readonly<Record<string, NormalClearSource>>;
@@ -61,6 +67,8 @@ export interface GuestProgress {
   readonly deckSlotIds?: readonly string[];
   /** Spendable meta resources use monotonic earned/spent counters so save merges never resurrect spent currency. */
   readonly resourceLedgerById?: ResourceLedger;
+  /** Record scores merge by maximum so stale browser/account saves cannot roll back a personal best. */
+  readonly recordModeProgress?: RecordModeProgress;
 }
 
 export interface NormalStageClearResult {
@@ -98,9 +106,15 @@ export interface GuestEnemyDiscoveryResult {
   readonly persisted: boolean;
   readonly guestProgress: GuestProgress;
 }
+export interface GuestRecordResult {
+  readonly improved: boolean;
+  readonly recordModeProgress: RecordModeProgress;
+  readonly persisted: boolean;
+  readonly guestProgress: GuestProgress;
+}
 
-interface StoredGuestProgressV11 {
-  readonly schemaVersion: 11;
+interface StoredGuestProgressV12 {
+  readonly schemaVersion: 12;
   readonly clearedStageIds: readonly string[];
   readonly normalClearSourceByStage: Readonly<Record<string, NormalClearSource>>;
   readonly specialClearedStageIds: readonly string[];
@@ -110,13 +124,15 @@ interface StoredGuestProgressV11 {
   readonly recruitmentProgressByBanner: Readonly<Record<string, RecruitmentProgress>>;
   readonly characterProgressById: Readonly<Record<string, CharacterMetaProgress>>;
   readonly resourceLedgerById: ResourceLedger;
+  readonly recordModeProgress: RecordModeProgress;
   readonly deckSlotIds?: readonly string[];
 }
 
 const DB_NAME = 'frontline-summoners';
 const STORE_NAME = 'guest-progress';
 const KEY = 'progress';
-const SCHEMA_VERSION = 11;
+const SCHEMA_VERSION = 12;
+const EMPTY_RECORD_PROGRESS: RecordModeProgress = { endlessBestTimeMs: 0, endlessBestReachedMinute: 0, bossRushBestDefeated: 0 };
 const EMPTY_PROGRESS: GuestProgress = {
   clearedStageIds: [],
   normalClearSourceByStage: {},
@@ -127,6 +143,7 @@ const EMPTY_PROGRESS: GuestProgress = {
   recruitmentProgressByBanner: {},
   characterProgressById: {},
   resourceLedgerById: {},
+  recordModeProgress: EMPTY_RECORD_PROGRESS,
 };
 const STAGE_PERMANENT_REWARD_IDS = new Set(STAGES.flatMap((stage) => stage.permanentRewardId ? [stage.permanentRewardId] : []));
 const SPECIAL_STAGE_IDS = new Set(SPECIAL_STAGES.map((stage) => stage.id));
@@ -146,6 +163,26 @@ function stringArray(value: unknown): readonly string[] {
 }
 function canonicalStageId(stageId: string): string { return LEGACY_MAIN_STAGE_ID_MAP.get(stageId) ?? stageId; }
 function canonicalStageIds(value: unknown): readonly string[] { return stringArray(value).map(canonicalStageId); }
+function nonNegativeInteger(value: unknown): number { return Number.isInteger(value) && (value as number) >= 0 ? value as number : 0; }
+
+function normalizeRecordModeProgress(value: unknown): RecordModeProgress {
+  if (typeof value !== 'object' || value === null || Array.isArray(value)) return EMPTY_RECORD_PROGRESS;
+  const raw = value as Record<string, unknown>;
+  const endlessBestTimeMs = nonNegativeInteger(raw.endlessBestTimeMs);
+  return {
+    endlessBestTimeMs,
+    endlessBestReachedMinute: Math.min(nonNegativeInteger(raw.endlessBestReachedMinute), Math.floor(endlessBestTimeMs / 60000)),
+    bossRushBestDefeated: nonNegativeInteger(raw.bossRushBestDefeated),
+  };
+}
+function mergeRecordModeProgress(a: RecordModeProgress, b: RecordModeProgress): RecordModeProgress {
+  const endlessBestTimeMs = Math.max(a.endlessBestTimeMs, b.endlessBestTimeMs);
+  return {
+    endlessBestTimeMs,
+    endlessBestReachedMinute: Math.max(a.endlessBestReachedMinute, b.endlessBestReachedMinute, Math.floor(endlessBestTimeMs / 60000)),
+    bossRushBestDefeated: Math.max(a.bossRushBestDefeated, b.bossRushBestDefeated),
+  };
+}
 
 function normalizeNormalClearSourceMap(value: unknown, clearedStageIds: readonly string[]): Readonly<Record<string, NormalClearSource>> {
   const raw = typeof value === 'object' && value !== null && !Array.isArray(value) ? value as Record<string, unknown> : {};
@@ -245,6 +282,9 @@ export function getEffectiveDeckSlotIds(progress: GuestProgress): readonly strin
 export function getGuestResourceBalance(progress: GuestProgress, resourceId: MetaResourceId): number {
   return getResourceBalance(normalizeGuestProgress(progress).resourceLedgerById ?? {}, resourceId);
 }
+export function getGuestRecordModeProgress(progress: GuestProgress): RecordModeProgress {
+  return normalizeRecordModeProgress(normalizeGuestProgress(progress).recordModeProgress);
+}
 
 export function mergeGuestProgress(a: GuestProgress, b: GuestProgress): GuestProgress {
   return {
@@ -257,6 +297,7 @@ export function mergeGuestProgress(a: GuestProgress, b: GuestProgress): GuestPro
     recruitmentProgressByBanner: mergeRecruitmentMaps(a.recruitmentProgressByBanner ?? {}, b.recruitmentProgressByBanner ?? {}),
     characterProgressById: mergeCharacterProgressMaps(a.characterProgressById ?? {}, b.characterProgressById ?? {}),
     resourceLedgerById: mergeResourceLedgers(a.resourceLedgerById ?? {}, b.resourceLedgerById ?? {}),
+    recordModeProgress: mergeRecordModeProgress(normalizeRecordModeProgress(a.recordModeProgress), normalizeRecordModeProgress(b.recordModeProgress)),
     ...(b.deckSlotIds !== undefined ? { deckSlotIds: b.deckSlotIds } : a.deckSlotIds !== undefined ? { deckSlotIds: a.deckSlotIds } : {}),
   };
 }
@@ -281,6 +322,7 @@ export function normalizeGuestProgress(progress: GuestProgress): GuestProgress {
     recruitmentProgressByBanner: normalizeRecruitmentMap(progress.recruitmentProgressByBanner ?? {}),
     characterProgressById: normalizeCharacterProgressMap(progress.characterProgressById ?? {}, ownedCharacterIds),
     resourceLedgerById: normalizeResourceLedger(progress.resourceLedgerById ?? {}),
+    recordModeProgress: normalizeRecordModeProgress(progress.recordModeProgress),
     ...(deckSlotIds === undefined ? {} : { deckSlotIds }),
   };
 }
@@ -310,6 +352,7 @@ function readStoredProgress(db: IDBDatabase): Promise<GuestProgress> {
         recruitmentProgressByBanner: versionNumber >= 4 ? normalizeRecruitmentMap(value?.recruitmentProgressByBanner) : {},
         characterProgressById: versionNumber >= 5 && typeof value?.characterProgressById === 'object' && value.characterProgressById !== null ? value.characterProgressById as Readonly<Record<string, CharacterMetaProgress>> : {},
         resourceLedgerById: versionNumber >= 11 ? normalizeResourceLedger(value?.resourceLedgerById) : {},
+        recordModeProgress: versionNumber >= 12 ? normalizeRecordModeProgress(value?.recordModeProgress) : EMPTY_RECORD_PROGRESS,
         ...(versionNumber >= 6 && value?.deckSlotIds !== undefined ? { deckSlotIds: stringArray(value.deckSlotIds) } : {}),
       });
     };
@@ -319,7 +362,7 @@ function readStoredProgress(db: IDBDatabase): Promise<GuestProgress> {
 }
 async function persistProgress(progress: GuestProgress): Promise<boolean> {
   const normalized = normalizeGuestProgress(progress);
-  const stored: StoredGuestProgressV11 = {
+  const stored: StoredGuestProgressV12 = {
     schemaVersion: SCHEMA_VERSION,
     clearedStageIds: normalized.clearedStageIds,
     normalClearSourceByStage: normalized.normalClearSourceByStage ?? {},
@@ -330,6 +373,7 @@ async function persistProgress(progress: GuestProgress): Promise<boolean> {
     recruitmentProgressByBanner: normalized.recruitmentProgressByBanner ?? {},
     characterProgressById: normalized.characterProgressById ?? {},
     resourceLedgerById: normalized.resourceLedgerById ?? {},
+    recordModeProgress: normalizeRecordModeProgress(normalized.recordModeProgress),
     ...(normalized.deckSlotIds === undefined ? {} : { deckSlotIds: normalized.deckSlotIds }),
   };
   try {
@@ -386,6 +430,32 @@ export async function recordSpecialStageClear(stageId: string): Promise<SpecialS
   const resourceLedgerById = grantResources(before.resourceLedgerById ?? {}, resourceReward);
   const progress = normalizeGuestProgress({ ...before, specialClearedStageIds: [...specialClears], resourceLedgerById }); sessionProgress = progress;
   return { firstClear, resourceReward, progress, persisted: await persistProgress(progress) };
+}
+
+export async function recordGuestEndlessResult(survivalMs: number): Promise<GuestRecordResult> {
+  const normalizedMs = nonNegativeInteger(Math.floor(survivalMs));
+  const before = normalizeGuestProgress(await loadGuestProgress());
+  const current = normalizeRecordModeProgress(before.recordModeProgress);
+  const improved = normalizedMs > current.endlessBestTimeMs;
+  if (!improved) return { improved: false, recordModeProgress: current, persisted: true, guestProgress: before };
+  const recordModeProgress: RecordModeProgress = {
+    ...current,
+    endlessBestTimeMs: normalizedMs,
+    endlessBestReachedMinute: Math.floor(normalizedMs / 60000),
+  };
+  const progress = normalizeGuestProgress({ ...before, recordModeProgress }); sessionProgress = progress;
+  return { improved: true, recordModeProgress: progress.recordModeProgress!, persisted: await persistProgress(progress), guestProgress: progress };
+}
+
+export async function recordGuestBossRushResult(defeatedBosses: number): Promise<GuestRecordResult> {
+  const normalizedDefeated = nonNegativeInteger(Math.floor(defeatedBosses));
+  const before = normalizeGuestProgress(await loadGuestProgress());
+  const current = normalizeRecordModeProgress(before.recordModeProgress);
+  const improved = normalizedDefeated > current.bossRushBestDefeated;
+  if (!improved) return { improved: false, recordModeProgress: current, persisted: true, guestProgress: before };
+  const recordModeProgress: RecordModeProgress = { ...current, bossRushBestDefeated: normalizedDefeated };
+  const progress = normalizeGuestProgress({ ...before, recordModeProgress }); sessionProgress = progress;
+  return { improved: true, recordModeProgress: progress.recordModeProgress!, persisted: await persistProgress(progress), guestProgress: progress };
 }
 
 export async function performGuestRecruitment(count: number, rng: RecruitmentRandomSource, banner = FIRST_RECRUITMENT_BANNER): Promise<GuestRecruitmentResult> {
