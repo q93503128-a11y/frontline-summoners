@@ -5,9 +5,10 @@
 세부 정합 감사: `docs/content-wiki/systems/IMPLEMENTATION_WIKI_AUDIT_2026-08-30.md`  
 주기 SPECIAL 이행 기록: `docs/content-wiki/systems/PERIODIC_RESOURCE_SPECIAL_IMPLEMENTATION_2026-08-30.md`  
 전투 grammar / 거점 병기 이행 기록: `docs/content-wiki/systems/COMBAT_GRAMMAR_BASE_WEAPON_IMPLEMENTATION_2026-08-30.md`  
+계정 save v2 이행 기록: `docs/content-wiki/systems/ACCOUNT_SAVE_V2_IMPLEMENTATION_2026-08-30.md`  
 소탕 이행 기록: `docs/content-wiki/systems/SWEEP_SAVE_V14_IMPLEMENTATION_2026-08-30.md`
 
-이 문서는 현재 실행 코드/콘텐츠의 구현 사실과 남은 큰 공백을 기록한다. 기획 정본을 대체하지 않는다. 과거 이행 문서의 `Save v14` 표기는 당시 단계 기록이며 현재 실행 save schema는 **v15**다.
+이 문서는 현재 실행 코드/콘텐츠의 구현 사실과 남은 큰 공백을 기록한다. 기획 정본을 대체하지 않는다. 과거 이행 문서의 `Save v14` 표기는 당시 단계 기록이며 현재 실행 게스트 save schema는 **v15**다.
 
 ## 현재 실행 콘텐츠
 
@@ -55,6 +56,24 @@
   - `bossRushBestDefeated`
   - `bossRushRewardedDefeated`
 - 선택 거점 병기 `selectedBaseWeaponId`를 durable guest progress에 저장한다.
+
+### 서버 계정 save v2 foundation
+
+- `account_saves` D1 table에 account당 revisioned canonical snapshot 1개를 둘 수 있다.
+- 서버 계정 save schema는 **v2**이며 기존 `account_progression_saves` v1은 별도 legacy migration source로 유지한다.
+- v2 snapshot은 진행/소유/성장/덱과 함께 다음을 같은 revision 경계에 포함한다.
+  - `mainRewardedStageIds`
+  - `selectedBaseWeaponId`
+  - `resourceLedgerById`
+  - `periodicRewardChargeByCollection`
+  - `recordModeProgress`
+- 서버 snapshot은 unknown currency, `spent > earned`, periodic collection 누락/charge cap 위반, record high-water 불일치, runtime 9보스 초과 기록, 잠긴 거점 병기 선택을 거부한다.
+- periodic charge는 서버 시각 기준으로 refresh한다.
+- v1→v2 migration은 진행/소유/성장을 보존하고 새 경제 필드는 보수적 기본값으로 초기화한다.
+- v1에는 first-clear 재화 수령 ledger가 없으므로 기존 cleared MAIN은 migrated `mainRewardedStageIds`에도 넣어 retroactive 중복 first-clear 지급을 막는다.
+- `replaceAccountSave`는 `expectedRevision` 불일치 시 `revision_conflict`를 반환한다.
+
+이 단계는 **server storage/migration/revision foundation**이다. 실제 인증 session, client 계정 상태 머신, battleId/requestId idempotent mutation, 게스트 이전 transaction까지 완료된 것은 아니다.
 
 ### MAIN 일반 재화
 
@@ -115,7 +134,9 @@
 
 메타경제에서 남은 큰 작업:
 
-- authenticated account/server authoritative wallet + periodic charge sync.
+- authenticated account session에서 server save v2를 실제 정본으로 사용하는 mutation/API 연결.
+- battleId/requestId idempotency와 협동/기록/모집/성장 결과의 server-authoritative 지급.
+- 게스트→계정 이전/충돌 UX.
 - 전체 경제 사람 플레이테스트 및 공급량 조정.
 
 ## 캐릭터 / 적 전투사양 정합
@@ -207,7 +228,7 @@
 주기 SPECIAL 잔여:
 
 - production art/motion.
-- charge의 authenticated account/server save 병합.
+- charge의 authenticated account mutation/API 연결.
 - 경제/난이도 사람 플레이테스트 후 TESTED/LOCKED 승격.
 
 ## 기록 SPECIAL
@@ -237,6 +258,7 @@
 
 - 사람 플레이 장기전 난이도 곡선/가독성/피로도 조정.
 - 현재 milestone 정확한 수량은 **DESIGN_TARGET**. 전체 경제 플레이테스트 뒤 TESTED/LOCKED 승격 필요.
+- authenticated 계정에서는 서버가 기록/result/reward를 authoritative mutation으로 확정하는 경로가 아직 필요.
 - production art/motion/audio polish.
 
 ## 재클리어 / 거점 병기
@@ -298,23 +320,35 @@
 - release 수준 공개 매칭/재접속/AI 인계 polish.
 - 친구 목록/초대/최근 플레이어/차단.
 - 빠른 통신 최종 UX.
-- 협동 결과의 server-authoritative 계정 wallet/periodic charge 지급.
-- authenticated account progression을 기준으로 한 최종 production authority 경계.
+- 협동 결과를 server save v2 wallet/periodic charge/progression에 battleId idempotent mutation으로 실제 지급.
+- authenticated account snapshot을 기준으로 한 최종 production authority 경계.
 
 ## PvP / 계정
 
-현재 큰 공백:
+서버 계정 save foundation:
 
+- legacy `account_progression_saves` v1 progression authority 존재.
+- canonical `account_saves` v2 storage foundation 추가.
+- v2는 progression + first-clear receipt + wallet + periodic charge + record + selected base weapon을 하나의 revisioned snapshot으로 보관 가능.
+- v1→v2 migration과 미래 schema write-protect.
+- 경제/charge/record/병기 unlock strict validation.
+- optimistic revision conflict foundation.
+
+아직 큰 공백:
+
+- 실제 Google/email 인증과 `AUTHENTICATED_ONLINE` session.
+- client account state machine / offline cache.
+- guest→account migration 및 기존 서버 진행 충돌 UX.
+- battleId 전투 결과 idempotency / requestId 모집 idempotency.
+- 성장/모집/클리어/기록의 server-authoritative mutation API.
+- account transfer/delete/reset release UX.
+- 친구/차단 및 실시간 세션 계정 권위.
 - 1v1 일반/랭킹/친선.
 - 2v2 일반/친선.
 - Lv50/+0/영구보너스0 PvP standardization.
 - MMR/Elo/티어/시즌/순위표/보상.
-- authenticated server-authoritative account save.
-- guest→account migration.
-- account transfer/delete/reset release UX.
-- server wallet/record persistence.
 
-게스트 IndexedDB/local persistence만으로 계정 시스템 완료라고 하지 않는다.
+게스트 IndexedDB/local persistence나 server storage table 존재만으로 계정 시스템 완료라고 하지 않는다.
 
 ## 도감 / UI / 아트 / 오디오
 
@@ -355,14 +389,16 @@ SPECIAL/event 문서의 프로필 보상은 현재 자원 보상으로 대체해
 - 기록 SPECIAL 플레이 flow: `a5afb5305e104602928ce20e1033a202dd74db91`.
 - record scene exact optional type fix: `68b74dc328c6bd6e028f75db7cb285b0cd1b3ae5`.
 - 12분 장기 record entity regression: `10f5d556a10684be4bc6dfd2cc3b637c7a64e277`, CI #689 전체 green.
-- 협동 shared base weapon / supply-drop seat ownership closure: `155a511c272eb2cc70438cbf9ce2278c7bdd6a70`까지 구현, stale server fixture 교정 후 `8ab44ae47c6a82d23fa114d4221133eae8fa8dcc`, **CI #705 전체 green(typecheck/schema/sim/server/client/build)**.
+- 협동 shared base weapon / supply-drop seat ownership closure: `155a511c272eb2cc70438cbf9ce2278c7bdd6a70`까지 구현, stale server fixture 교정 후 `8ab44ae47c6a82d23fa114d4221133eae8fa8dcc`, CI #705 전체 green.
+- authoritative account save v2 storage/migration/strict validation: `194b785a6fb9e4dcb08b05007597c8282abf4b54`, **CI #710 전체 green(typecheck/schema/sim/server/client/build)**.
 
 ## 다음 개발 우선순위
 
-1. **기록 SPECIAL 사람 QA / 경제 튜닝**: 장기전 난이도, boss-rush 체감, milestone 수량 TESTED/LOCKED 후보화.
-2. **계정 / 친구 / 협동 release closure**: authoritative wallet/periodic charge/record persistence, 친구·초대·재접속/AI 인계 polish.
-3. **PvP foundation**: 표준화 규칙, 1v1/2v2, MMR/시즌.
-4. 마지막 production art/motion/audio/accessibility/release QA.
+1. **계정 authoritative mutation closure**: battleId/requestId idempotency, stage/record/recruitment/growth mutation, guest→account 이전 경계.
+2. **기록 SPECIAL 사람 QA / 경제 튜닝**: 장기전 난이도, boss-rush 체감, milestone 수량 TESTED/LOCKED 후보화.
+3. **친구 / 협동 release closure**: 친구·초대·재접속/AI 인계/빠른통신 polish.
+4. **PvP foundation**: 표준화 규칙, 1v1/2v2, MMR/시즌.
+5. 마지막 production art/motion/audio/accessibility/release QA.
 
 ## 검증 원칙
 
