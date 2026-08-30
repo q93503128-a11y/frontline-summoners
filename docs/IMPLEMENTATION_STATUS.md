@@ -588,7 +588,7 @@ session/API foundation이 존재한다는 이유만으로 provider proof와 batt
 - verified identity/session storage + Bearer account HTTP route: `5972fe8bcfeac8c0c9ac9ee48fbb9222f95fe428`, CI #755 green.
 - client account three-state/read-cache/online-mutation foundation: `71653a5df696a38010cb2235fbe24b087c7c2730`, CI #757 전체 green.
 - 43종/129 form authored evolution closure: `ab0b152755a216526b76b8e496615cfb80829c18`, CI #799 전체 green.
-- achievement/profile 50개 + guest profile cosmetic runtime foundation: `30374313e1372a0da5a8370f08648775079dc140`, CI #801 최종 검증 대상.
+- achievement/profile 50개 + guest profile cosmetic runtime foundation: `30374313e1372a0da5a8370f08648775079dc140`, **CI #801 전체 green(typecheck/schema/sim/server/client/build)**.
 
 ## 다음 개발 우선순위
 
