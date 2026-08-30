@@ -307,7 +307,7 @@ export function buildAuthoritativeCoopLoadout(
       ...(progress.selectedFormId === undefined ? {} : { selectedFormId: progress.selectedFormId }),
     };
   });
-  return { characters, permanentRewardIds: snapshot.permanentRewardIds };
+  return { characters, permanentRewardIds: snapshot.permanentRewardIds, clearedStageIds: snapshot.clearedStageIds };
 }
 
 interface AccountProgressionRow {
