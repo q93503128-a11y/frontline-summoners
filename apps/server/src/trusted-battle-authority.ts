@@ -7,11 +7,14 @@ import {
 } from '@frontline/sim/playable';
 import {
   initializeAccountSave,
-  loadAccountSave,
   normalizeAccountSaveSnapshot,
   type AccountSaveRecord,
   type AccountSaveSnapshotV2,
 } from './account-save-authority.ts';
+import {
+  applyAccountEnemyDiscoveries,
+  normalizeServerEnemyDiscoveries,
+} from './account-enemy-discovery-authority.ts';
 import { ACCOUNT_MAIN_STAGE_INDEX, ACCOUNT_SPECIAL_STAGE_IDS } from './account-content.ts';
 import { applyAccountMainBattleResult, type AccountMainBattleMutationResult } from './account-mutation-authority.ts';
 import { applyAccountSpecialBattleResult, type AccountSpecialBattleMutationResult } from './account-special-mutation-authority.ts';
@@ -48,6 +51,7 @@ export interface TrustedBattleCompletionResult {
   readonly finalStateHash: string;
   readonly playerBaseHp: number;
   readonly enemyBaseHp: number;
+  readonly discoveredEnemyIds: readonly string[];
   readonly completedAtMs: number;
 }
 
@@ -102,8 +106,17 @@ function parseStoredSnapshot(row: TrustedBattleRow): AccountSaveSnapshotV2 {
 
 function parseStoredCompletion(row: TrustedBattleRow): TrustedBattleCompletionResult {
   if (!row.result_json || row.completed_at === null) throw new Error(`trusted battle completion is missing:${row.battle_id}`);
-  try { return JSON.parse(row.result_json) as TrustedBattleCompletionResult; }
+  let decoded: unknown;
+  try { decoded = JSON.parse(row.result_json); }
   catch { throw new Error(`trusted battle result JSON is invalid:${row.battle_id}`); }
+  if (typeof decoded !== 'object' || decoded === null || Array.isArray(decoded)) {
+    throw new Error(`trusted battle result shape is invalid:${row.battle_id}`);
+  }
+  const raw = decoded as Record<string, unknown>;
+  const discoveredEnemyIds = normalizeServerEnemyDiscoveries(
+    Array.isArray(raw.discoveredEnemyIds) ? raw.discoveredEnemyIds.filter((id): id is string => typeof id === 'string') : [],
+  );
+  return { ...(raw as unknown as Omit<TrustedBattleCompletionResult, 'discoveredEnemyIds'>), discoveredEnemyIds };
 }
 
 async function loadRun(db: D1Database, accountId: string, battleId: string): Promise<TrustedBattleRow | null> {
@@ -207,10 +220,18 @@ function applyCommand(state: PlayableBattleState, command: TrustedBattleCommand)
   if (!result.ok) throw new Error(`trusted battle logged FIRE_BASE_WEAPON was rejected:${result.reason}`);
 }
 
+function collectEnemyDiscoveries(state: PlayableBattleState, discovered: Set<string>): void {
+  for (const unit of state.battle.units) {
+    if (unit.team === 'ENEMY') discovered.add(unit.definition.id);
+  }
+}
+
 function replayTrustedBattle(row: TrustedBattleRow, commands: readonly TrustedBattleCommand[], completedAtMs: number): TrustedBattleCompletionResult {
   const snapshot = parseStoredSnapshot(row);
   const state = createAccountTrustedBattle(row.target_id, snapshot);
   if (state.stateHash !== row.initial_state_hash) throw new Error(`trusted battle initial state hash drift:${row.battle_id}`);
+  const discoveredEnemyIds = new Set<string>();
+  collectEnemyDiscoveries(state, discoveredEnemyIds);
   let commandIndex = 0;
   while (state.battle.winner === null && state.battle.tick < TRUSTED_BATTLE_MAX_REPLAY_FRAMES) {
     while (commandIndex < commands.length && commands[commandIndex]!.tick === state.battle.tick) {
@@ -218,6 +239,7 @@ function replayTrustedBattle(row: TrustedBattleRow, commands: readonly TrustedBa
       commandIndex += 1;
     }
     stepPlayableBattle(state);
+    collectEnemyDiscoveries(state, discoveredEnemyIds);
   }
   if (state.battle.winner === null) throw new Error('trusted battle exceeded replay frame limit');
   if (commandIndex !== commands.length) throw new Error('trusted battle command log contains actions after terminal result');
@@ -230,6 +252,7 @@ function replayTrustedBattle(row: TrustedBattleRow, commands: readonly TrustedBa
     finalStateHash: state.stateHash,
     playerBaseHp: state.battle.bases.PLAYER.hp,
     enemyBaseHp: state.battle.bases.ENEMY.hp,
+    discoveredEnemyIds: normalizeServerEnemyDiscoveries([...discoveredEnemyIds]),
     completedAtMs,
   };
 }
@@ -284,12 +307,12 @@ export async function claimTrustedBattle(
   const completion = parseStoredCompletion(row);
 
   if (completion.winner !== 'PLAYER') {
-    const record = await loadAccountSave(db, accountId, nowMs);
-    if (!record) throw new Error(`account save missing while claiming trusted battle:${accountId}`);
+    const discovery = await applyAccountEnemyDiscoveries(db, accountId, expected, completion.discoveredEnemyIds, nowMs);
+    if (!discovery.ok) return discovery;
     await db.prepare(
       'UPDATE trusted_battle_runs SET claimed_at = COALESCE(claimed_at, unixepoch()) WHERE battle_id = ?1 AND user_id = ?2',
     ).bind(battleId, accountId).run();
-    return { ok: true, replayed: row.claimed_at !== null, awarded: false, record, completion, result: null };
+    return { ok: true, replayed: row.claimed_at !== null, awarded: false, record: discovery.record, completion, result: null };
   }
 
   const mutationTime = completion.completedAtMs;
@@ -299,11 +322,13 @@ export async function claimTrustedBattle(
         expectedRevision: expected,
         stageId: row.target_id,
         source: 'SOLO_BATTLE',
+        discoveredEnemyIds: completion.discoveredEnemyIds,
       }, mutationTime)
     : await applyAccountSpecialBattleResult(db, accountId, {
         battleId,
         expectedRevision: expected,
         stageId: row.target_id,
+        discoveredEnemyIds: completion.discoveredEnemyIds,
       }, mutationTime, row.started_at * 1000);
   if (!mutation.ok) return mutation;
 
@@ -323,4 +348,6 @@ export async function claimTrustedBattle(
 export const __trustedBattleTestOnly = {
   normalizeCommands,
   replayTrustedBattle,
+  collectEnemyDiscoveries,
+  parseStoredCompletion,
 };
