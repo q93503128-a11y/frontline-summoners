@@ -186,18 +186,51 @@ PvP:
 
 - 방 생성/준비 단계에서 두 플레이어가 병기 하나를 합의 선택.
 - 기본은 방장 선택이 아니라 양쪽 UI에 선택 상태를 보여주고 ready 전에 변경 가능.
+- 양쪽이 같은 병기를 선택해야 최종 ready가 성립한다.
+- 각 플레이어가 실제로 해금한 병기만 제안할 수 있으며 서버도 전투 생성 전에 양쪽 진행도를 다시 검증한다.
 - 전투 중 charge/cooldown 공유.
 
 사용 권한:
 
 - 두 플레이어 모두 사용 버튼 접근 가능.
 - 한 명이 사용하면 즉시 shared cooldown 시작.
-- 동일 frame 두 명 입력 시 서버가 하나만 적용하고 중복 소모 없음.
+- 동일 frame 두 명 입력 시 서버가 결정론적 command 순서로 하나만 승인하고 중복 소모 없음.
+- 승인된 command의 `playerId/seatId`를 해당 사용의 activator로 기록한다.
+
+## 7.1 보급투하기의 개인 보급 귀속
+
+상위 `CANONICAL`의 협동 규칙에서 보급/보급소/생산 cooldown은 플레이어별 독립 경제다. 따라서 팀 공유 병기라고 해서 별도의 shared supply wallet을 만들지 않는다.
+
+보급투하기는 다음처럼 처리한다.
+
+- 슬롯과 cooldown은 팀 공유.
+- **효과 owner는 실제로 사용이 승인된 seat**.
+- 30F hit frame에서 activator seat의 그 시점 `maxSupply`를 기준으로 18%를 계산한다.
+- min 120 / max 900 clamp도 activator의 개인 경제에 적용한다.
+- 지급은 activator의 `currentSupply`에만 들어간다.
+- 상대 플레이어 보급은 0 증가.
+- 공용 기지 상태에 존재하는 내부 shared/dummy supply에는 지급하지 않는다.
+- 같은 frame에 A/B가 동시에 사용해도 서버가 승인한 한 seat만 owner가 된다.
+
+예시:
+
+```text
+A maxSupply = 1000
+B maxSupply = 2500
+A의 USE_BASE_WEAPON이 먼저 승인
+
+30F hit:
+A supplyGain = clamp(round(1000 × 0.18), 120, 900) = 180
+B supplyGain = 0
+```
+
+이 규칙은 공유 병기를 개인 경제 복제로 바꾸는 것이 아니다. **사용권/쿨다운은 공유하고, 개인 경제를 수정하는 효과만 승인된 사용자에게 귀속**한다.
 
 오사용 방지:
 
 - 사용 직후 빠른 통신에 `병기 사용!` 자동 표시 후보.
 - 누가 사용했는지 작게 표시 가능.
+- 보급투하기 HUD에는 `사용한 플레이어의 개인 보급`임을 표시한다.
 - 매 사용마다 상대 확인을 요구하는 2단 입력은 전투 리듬을 끊으므로 기본 미사용.
 
 과거 `1.5초 안에 두 명 확인하면 강화` 아이디어는 1차 기본 규칙으로 사용하지 않는다. 필요 시 후속 협동 전용 병기로 재검토.
@@ -252,6 +285,8 @@ PvP:
 - ready 강조
 - 사용 불가 이유
 - 협동이면 shared 표시
+- 협동에서는 실제 합의된 병기명과 최근 사용 seat를 표시 가능
+- 보급투하기는 `사용한 플레이어 개인 보급` 귀속을 숨기지 않는다.
 
 모바일:
 
@@ -292,6 +327,7 @@ USE_BASE_WEAPON(playerId, weaponId, inputFrame)
 - cooldown 0인지
 - 전투 종료 전인지
 - 협동 shared cooldown 경쟁에서 먼저 확정된 command인지
+- 개인 경제 효과라면 어떤 seat가 승인된 activator인지
 
 효과 계산은 클라이언트가 보내지 않는다.
 
@@ -343,11 +379,15 @@ AI 사용 후보 조건:
 
 - min/max clamp
 - maxSupply 초과 없음
-- 협동에서 상대 보급에 영향 없음
+- 협동에서 승인된 activator seat만 보급 증가
+- 협동에서 상대 보급 증가 0
+- 협동 내부 shared/dummy supply 증가 0
+- hit frame 이전 선지급 없음
 
 공통:
 
 - shared cooldown 중복 사용 없음
+- 동일 frame A/B 동시 입력 시 1회만 승인되고 activator가 결정론적으로 고정
 - 2배속 결과 동일
 - 일시정지 cooldown 정지
 - PvP 표준화
@@ -362,6 +402,6 @@ AI 사용 후보 조건:
 - 결계가 신규 소환에도 적용될지 최종 확정
 - PvP 시작 전 상대 병기 공개 여부
 - 병기 성장 시스템을 1차에 넣을지 여부
-- 협동 방 준비에서 병기 선택 충돌 UX
+- 협동 방 준비에서 병기 선택 충돌 UX의 최종 문구/시각 피드백
 
 이 결정 전까지 3종 base stat은 DESIGN_TARGET으로 유지한다.
