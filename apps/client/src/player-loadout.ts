@@ -1,14 +1,17 @@
-import type { PlayableBattleState } from '@frontline/sim/playable';
+import { createPlayableBattle, getBaseWeaponDefinition, type PlayableBattleState } from '@frontline/sim/playable';
 import { getFormationRestrictionViolation } from '@frontline/sim/formation-restrictions';
 import { buildCharacterCombatSlot } from './character-growth.ts';
 import {
-  createPrototypeBattleWithPlayerSlots,
+  ENEMIES,
   getSlotById,
   getStage,
+  getStageKillSupplyMultiplierPermille,
   type PrototypeRosterSlot,
 } from './prototype.ts';
+import { applyPermanentRewardBattleEffects } from './permanent-rewards.ts';
 import {
   getEffectiveDeckSlotIds,
+  getGuestSelectedBaseWeaponId,
   normalizeGuestProgress,
   type GuestProgress,
 } from './save.ts';
@@ -60,12 +63,30 @@ export function createGuestPrototypeBattle(
   progress: GuestProgress,
 ): PlayableBattleState {
   const normalized = normalizeGuestProgress(progress);
+  const stage = getStage(stageId);
   const playerSlots = buildGuestDeckSlots(normalized);
   const violation = getGuestStageFormationViolation(stageId, normalized);
   if (violation) throw new Error(`formation_restricted:${stageId}:${violation}`);
-  return createPrototypeBattleWithPlayerSlots(
-    stageId,
+  const progression = applyPermanentRewardBattleEffects({
+    ownedRewardIds: normalized.permanentRewardIds,
+    startingSupply: stage.startingSupply,
+    playerBaseHp: stage.playerBaseHp,
+    playerUnitCap: stage.playerUnitCap,
     playerSlots,
-    normalized.permanentRewardIds,
-  );
+    enemies: ENEMIES,
+  });
+  return createPlayableBattle({
+    mapLength: stage.mapLength,
+    playerBaseHp: progression.playerBaseHp,
+    enemyBaseHp: stage.enemyBaseHp,
+    startingSupply: progression.startingSupply,
+    playerSlots: progression.playerSlots,
+    enemies: progression.enemies,
+    enemyWaves: stage.waves,
+    playerUnitCap: progression.playerUnitCap,
+    enemyUnitCap: stage.enemyUnitCap,
+    supplyLevels: progression.supplyLevels,
+    killSupplyMultiplierPermille: getStageKillSupplyMultiplierPermille(stage),
+    baseWeapon: getBaseWeaponDefinition(getGuestSelectedBaseWeaponId(normalized)),
+  });
 }
