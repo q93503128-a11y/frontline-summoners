@@ -5,15 +5,19 @@ import {
 } from '@frontline/sim/meta-progression';
 import playerUnitsJson from '../../../content/units/chapter-01.json' with { type: 'json' };
 import recruitmentUnitsJson from '../../../content/units/recruitment-01.json' with { type: 'json' };
-import enemiesJson from '../../../content/enemies/chapter-01.json' with { type: 'json' };
-import stagesJson from '../../../content/stages/chapter-01.json' with { type: 'json' };
-import specialStagesJson from '../../../content/stages/special-01.json' with { type: 'json' };
 import type { CoopPlayerLoadout } from './coop-room.ts';
 import {
   SERVER_CHARACTER_LEVEL_CURVE,
   SERVER_EVOLUTION_FORMS,
   SERVER_PERMANENT_REWARDS,
 } from './meta-content.ts';
+import {
+  ACCOUNT_ENEMY_IDS,
+  ACCOUNT_MAIN_STAGE_IDS,
+  ACCOUNT_MAIN_STAGE_INDEX,
+  ACCOUNT_MAIN_STAGES,
+  ACCOUNT_SPECIAL_STAGE_IDS,
+} from './account-content.ts';
 
 export const ACCOUNT_PROGRESSION_SCHEMA_VERSION = 1;
 export const ACCOUNT_MAX_DECK_SLOTS = 10;
@@ -50,27 +54,20 @@ export type ReplaceAccountProgressionResult =
   | { readonly ok: true; readonly record: AccountProgressionRecord }
   | { readonly ok: false; readonly reason: 'revision_conflict'; readonly currentRevision: number };
 
-type MainStageSeed = {
-  readonly id: string;
-  readonly permanentRewardId?: string;
-  readonly unlockUnitId?: string;
-};
 type SimpleIdSeed = { readonly id: string };
 
-const MAIN_STAGES = stagesJson as unknown as readonly MainStageSeed[];
-const SPECIAL_STAGES = specialStagesJson as unknown as readonly SimpleIdSeed[];
+const MAIN_STAGES = ACCOUNT_MAIN_STAGES;
+const MAIN_STAGE_IDS = ACCOUNT_MAIN_STAGE_IDS;
+const MAIN_STAGE_INDEX = ACCOUNT_MAIN_STAGE_INDEX;
+const SPECIAL_STAGE_IDS = ACCOUNT_SPECIAL_STAGE_IDS;
 const STORY_UNITS = playerUnitsJson as unknown as readonly SimpleIdSeed[];
 const RECRUITMENT_UNITS = recruitmentUnitsJson as unknown as readonly SimpleIdSeed[];
-const ENEMIES = enemiesJson as unknown as readonly SimpleIdSeed[];
 
 const STARTER_CHARACTER_ID = 'militia';
-const MAIN_STAGE_IDS = MAIN_STAGES.map((stage) => stage.id);
-const MAIN_STAGE_INDEX = new Map(MAIN_STAGE_IDS.map((id, index) => [id, index] as const));
-const SPECIAL_STAGE_IDS = new Set(SPECIAL_STAGES.map((stage) => stage.id));
 const STORY_CHARACTER_IDS = new Set(STORY_UNITS.map((unit) => unit.id));
 const RECRUITMENT_CHARACTER_IDS = new Set(RECRUITMENT_UNITS.map((unit) => unit.id));
 const ALL_CHARACTER_IDS = new Set([...STORY_CHARACTER_IDS, ...RECRUITMENT_CHARACTER_IDS]);
-const ENEMY_IDS = new Set(ENEMIES.map((enemy) => enemy.id));
+const ENEMY_IDS = ACCOUNT_ENEMY_IDS;
 const PERMANENT_REWARD_IDS = new Set(SERVER_PERMANENT_REWARDS.map((reward) => reward.id));
 const NORMAL_CLEAR_SOURCE_IDS = new Set<string>(ACCOUNT_NORMAL_CLEAR_SOURCES);
 const PERMANENT_REWARD_STAGE_INDEX = new Map<string, number>();
