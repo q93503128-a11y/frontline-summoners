@@ -1,12 +1,15 @@
 # 계정 Save v2 구현 메모 — 2026-08-30
 
-상태: `IMPLEMENTED_SERVER_STORAGE_FOUNDATION`
+상태: `IMPLEMENTED_SERVER_STORAGE_AND_MUTATION_FOUNDATION`
 
 상위 정본:
 - `docs/CANONICAL.md`
 - `docs/content-wiki/systems/ACCOUNT_SAVE_SYNC_SPEC.md`
 
-이 문서는 현재 서버 코드에 실제로 들어간 저장 foundation만 기록한다. 로그인/OAuth, 게스트 이전 UX, 전투결과 지급 API까지 완료됐다는 뜻이 아니다.
+후속 이행 기록:
+- `docs/content-wiki/systems/ACCOUNT_MUTATION_IDEMPOTENCY_IMPLEMENTATION_2026-08-30.md`
+
+이 문서는 현재 서버 코드에 실제로 들어간 저장 foundation을 기록한다. 로그인/OAuth, 게스트 이전 UX, 공개 계정 API까지 완료됐다는 뜻이 아니다.
 
 ## 구현된 범위
 
@@ -65,7 +68,7 @@
 
 현재 runtime 9보스보다 큰 best를 거부하고 reward high-water가 best보다 앞설 수 없게 한다.
 
-이 검증은 snapshot consistency foundation이다. 실제 신기록 결과를 서버에서 계산하고 battleId idempotency로 지급하는 mutation API는 별도 후속이다.
+이 snapshot consistency foundation 위에 현재 `applyAccountRecordResult`가 trusted battle result를 받아 best/high-water를 서버에서 비교하고 신규 milestone만 지급하는 mutation foundation까지 추가됐다.
 
 ### 4. 선택 거점 병기 서버 검증
 
@@ -110,9 +113,34 @@ canonical table:
 
 `replaceAccountSave`는 `expectedRevision`이 현재 revision과 다르면 `revision_conflict`를 반환한다.
 
+### 7. authoritative mutation / idempotency foundation
+
+추가 구현:
+
+- MAIN battle result transaction.
+- 기록 SPECIAL result transaction.
+- 모집 server roll + wallet transaction.
+- `battleId` / `requestId` receipt.
+- 동일 key 재전송 시 exact result replay.
+- 동일 key를 다른 input에 재사용 시 거부.
+- save CAS와 receipt를 D1 batch로 함께 확정.
+- CAS race에서 batch rollback을 강제해 save/receipt 반쪽 commit 방지.
+
+상세는 `ACCOUNT_MUTATION_IDEMPOTENCY_IMPLEMENTATION_2026-08-30.md`를 따른다.
+
+또 account progression content authority를 현재 실행 범위에 맞춰:
+
+- MAIN80
+- SPECIAL61
+- 전체 실행 enemy discovery catalog
+- 전체 v2 permanent reward/evolution catalog
+
+로 정합화했다.
+
 ## 자동검증
 
 `apps/server/test/account-save-authority.test.ts`
+`apps/server/test/account-mutation-authority.test.ts`
 
 검사 항목:
 
@@ -126,6 +154,11 @@ canonical table:
 - 잠긴 거점 병기 거부.
 - 미래 schema write-protect.
 - D1 canonical table/revision/schema 제약.
+- MAIN80 / SPECIAL61 authority catalog.
+- MAIN first/repeat reward 및 장 경계.
+- record milestone high-water.
+- server recruitment 신규/중복 +Lv/분해.
+- mutation receipt schema와 rollback-safe CAS guard.
 
 ## 아직 완료하지 않은 것
 
@@ -135,10 +168,11 @@ canonical table:
 - 클라이언트 계정 상태 머신 (`GUEST_LOCAL`, `AUTHENTICATED_ONLINE`, `AUTHENTICATED_OFFLINE_CACHE`).
 - 게스트→빈 서버 계정 이전 transaction/UX.
 - 기존 서버 진행과 게스트 진행 충돌 선택 UX.
-- battleId 기반 전투 결과 idempotency.
-- requestId 기반 모집 idempotency.
-- server-authoritative stage/recruitment/growth/record mutation API.
-- 협동 결과를 canonical account wallet/periodic charge/record에 실제 지급.
+- authenticated 공개 account mutation route.
+- trusted solo/record battle completion registry와 내부 mutation 연결.
+- 일반/주기/이벤트 SPECIAL + sweep server-authoritative mutation.
+- server-authoritative growth/evolution/deck/base-weapon mutation.
+- 협동 결과를 canonical account wallet/periodic charge에 실제 지급.
 - 계정 초기화/삭제/친구/차단/PvP 계정 데이터.
 
-따라서 현재 단계는 `계정 기능 완료`가 아니라 **서버 정본 save 구조와 migration/revision foundation 완료**로만 센다.
+따라서 현재 단계는 `계정 기능 완료`가 아니라 **서버 정본 save 구조 + migration/revision + MAIN/record/recruitment mutation/idempotency foundation 완료**로만 센다.
