@@ -6,7 +6,7 @@ import { createCoopPlayableBattle, type CoopPlayableBattleState } from '@frontli
 import { getFormationRestrictionViolation } from '@frontline/sim/formation-restrictions';
 import { applyPermanentRewardBattleEffects, buildCharacterCombatSlot, getEvolutionForm, normalizeCharacterLevel, normalizeCharacterPlusLevel, type PermanentRewardApplicableSlot } from '@frontline/sim/meta-progression';
 import { getPeriodicCollectionWindowState, PERIODIC_REWARD_COLLECTION_IDS, type PeriodicCollectionSchedule, type PeriodicRewardCollectionId } from '@frontline/sim/periodic-special';
-import type { EnemyArchetype, PlayerRosterSlot } from '@frontline/sim/playable';
+import { getBaseWeaponDefinition, type BaseWeaponId, type EnemyArchetype, type PlayerRosterSlot } from '@frontline/sim/playable';
 import playerUnitsJson from '../../../content/units/chapter-01.json' with { type: 'json' };
 import recruitmentUnitsJson from '../../../content/units/recruitment-01.json' with { type: 'json' };
 import enemiesOneTwoJson from '../../../content/enemies/main-01-02.json' with { type: 'json' };
@@ -74,6 +74,7 @@ const SPECIAL_STAGES: readonly CampaignStageContent[] = [...CHALLENGE_SPECIAL_ST
 const ALL_STAGES: readonly CampaignStageContent[] = [...CHAPTER_ONE.stages, ...CHAPTER_TWO_STAGES, ...CHAPTER_THREE_STAGES, ...CHAPTER_FOUR_STAGES, ...SPECIAL_STAGES];
 if (new Set(ALL_STAGES.map((stage) => stage.id)).size !== ALL_STAGES.length) throw new Error('server stage ids must be globally unique');
 const STAGE_BY_ID = new Map(ALL_STAGES.map((stage) => [stage.id, stage] as const));
+const MAIN_STAGE_IDS = ALL_STAGES.filter((stage) => stage.id.startsWith('main_')).map((stage) => stage.id);
 const STAGE_POLICIES = parseStagePolicies([...stagePoliciesOneTwoJson, ...stagePoliciesThreeJson, ...stagePoliciesFourJson, ...stagePoliciesResourceJson, ...stagePoliciesPermanentSpecialJson, ...stagePoliciesRestrictionSpecialJson, ...stagePoliciesEventSpecialJson], new Set(ALL_STAGES.map((stage) => stage.id)));
 const STAGE_POLICY_BY_ID = new Map(STAGE_POLICIES.map((policy) => [policy.stageId, policy] as const));
 
@@ -141,6 +142,21 @@ export function getServerCoopStage(stageId: string): ServerCoopStageRuntime {
   if (!isServerStageAvailable(stageId)) throw new Error(`stage_not_available:${stageId}`);
   return { stage, policy };
 }
+function hasContiguousMainClear(clearedStageIds: readonly string[], targetStageId: string): boolean {
+  const targetIndex = MAIN_STAGE_IDS.indexOf(targetStageId);
+  if (targetIndex < 0) throw new Error(`unknown_base_weapon_unlock_stage:${targetStageId}`);
+  const cleared = new Set(clearedStageIds);
+  return MAIN_STAGE_IDS.slice(0, targetIndex + 1).every((stageId) => cleared.has(stageId));
+}
+export function isServerCoopBaseWeaponUnlocked(baseWeaponId: BaseWeaponId, clearedStageIds: readonly string[]): boolean {
+  if (baseWeaponId === 'base_weapon_front_cannon') return true;
+  if (baseWeaponId === 'base_weapon_aegis_emitter') return hasContiguousMainClear(clearedStageIds, 'main_02_010');
+  if (baseWeaponId === 'base_weapon_supply_drop') return hasContiguousMainClear(clearedStageIds, 'main_03_010');
+  return false;
+}
+export function assertServerCoopBaseWeaponUnlocked(baseWeaponId: BaseWeaponId, clearedStageIds: readonly string[]): void {
+  if (!isServerCoopBaseWeaponUnlocked(baseWeaponId, clearedStageIds)) throw new Error(`coop_base_weapon_locked:${baseWeaponId}`);
+}
 export function getServerCoopDeck(deckSlotIds: readonly string[]): readonly PlayerRosterSlot[] {
   if (deckSlotIds.length < 1 || deckSlotIds.length > 5) throw new Error('co-op deck must contain 1..5 characters');
   if (new Set(deckSlotIds).size !== deckSlotIds.length) throw new Error('co-op deck must not contain duplicates');
@@ -150,6 +166,8 @@ export function getServerCoopLoadout(loadout: CoopPlayerLoadout): ServerCoopReso
   if (loadout.characters.length < 1 || loadout.characters.length > 5) throw new Error('co-op loadout must contain 1..5 characters');
   const ids = loadout.characters.map((character) => character.characterId); if (new Set(ids).size !== ids.length) throw new Error('co-op loadout must not contain duplicate characters');
   if (new Set(loadout.permanentRewardIds).size !== loadout.permanentRewardIds.length) throw new Error('co-op permanent rewards must not contain duplicates');
+  if (new Set(loadout.clearedStageIds).size !== loadout.clearedStageIds.length) throw new Error('co-op cleared stages must not contain duplicates');
+  for (const stageId of loadout.clearedStageIds) if (!STAGE_BY_ID.has(stageId) || !stageId.startsWith('main_')) throw new Error(`unknown_coop_cleared_stage:${stageId}`);
   for (const rewardId of loadout.permanentRewardIds) if (!PERMANENT_REWARD_IDS.has(rewardId)) throw new Error(`unknown_coop_permanent_reward:${rewardId}`);
   const playerSlots = loadout.characters.map((character): PermanentRewardApplicableSlot => {
     const baseSlot = PLAYER_SLOT_BY_ID.get(character.characterId); if (!baseSlot) throw new Error(`unknown_coop_character:${character.characterId}`);
@@ -196,8 +214,10 @@ function getStageKillSupplyMultiplierPermille(stage: CampaignStageContent): numb
 function rewardSupplyMap(enemies: readonly EnemyArchetype[], multiplierPermille = 1000): Readonly<Record<string, number>> { return Object.fromEntries(enemies.map((enemy) => [enemy.enemyId, Math.max(0, Math.round(enemy.rewardSupply * multiplierPermille / 1000))])); }
 function sharedRewardIds(a: readonly string[], b: readonly string[]): readonly string[] { const right = new Set(b); return a.filter((rewardId) => right.has(rewardId)); }
 
-export function createServerCoopBattle(stageId: string, loadoutA: CoopPlayerLoadout, loadoutB: CoopPlayerLoadout): CoopPlayableBattleState {
+export function createServerCoopBattle(stageId: string, loadoutA: CoopPlayerLoadout, loadoutB: CoopPlayerLoadout, baseWeaponId: BaseWeaponId): CoopPlayableBattleState {
   const { stage, policy } = getServerCoopStage(stageId);
+  assertServerCoopBaseWeaponUnlocked(baseWeaponId, loadoutA.clearedStageIds);
+  assertServerCoopBaseWeaponUnlocked(baseWeaponId, loadoutB.clearedStageIds);
   const resolvedA = getServerCoopLoadout(loadoutA); const resolvedB = getServerCoopLoadout(loadoutB);
   validateStageFormation(stage, loadoutA, resolvedA); validateStageFormation(stage, loadoutB, resolvedB);
   const commonRewardIds = sharedRewardIds(resolvedA.permanentRewardIds, resolvedB.permanentRewardIds);
@@ -211,6 +231,7 @@ export function createServerCoopBattle(stageId: string, loadoutA: CoopPlayerLoad
     mapLength: stage.mapLength,
     playerBaseHp: sharedProgression.playerBaseHp,
     enemyBaseHp: scaleInteger(stage.enemyBaseHp, scaling.enemyBaseHpPermille, 1),
+    baseWeapon: getBaseWeaponDefinition(baseWeaponId),
     players: { A: progressionA.playerSlots, B: progressionB.playerSlots },
     playerEconomies: {
       A: { startingSupply: progressionA.startingSupply, supplyLevels: progressionA.supplyLevels, enemyRewardSupplyById: rewardSupplyMap(progressionA.enemies, killSupplyMultiplierPermille) },
