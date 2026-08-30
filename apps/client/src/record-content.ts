@@ -5,11 +5,11 @@ import {
   type BossRushRecordState,
   type EndlessRecordState,
 } from '@frontline/sim/record-playable';
-import type { EnemyWaveDefinition } from '@frontline/sim/playable';
+import { getBaseWeaponDefinition, type EnemyWaveDefinition } from '@frontline/sim/playable';
 import { buildGuestDeckSlots } from './player-loadout.ts';
 import { applyPermanentRewardBattleEffects } from './permanent-rewards.ts';
 import { ENEMIES, getContiguousClearedStageIds } from './prototype.ts';
-import { normalizeGuestProgress, type GuestProgress } from './save.ts';
+import { getGuestSelectedBaseWeaponId, normalizeGuestProgress, type GuestProgress } from './save.ts';
 
 export const RECORD_MODE_IDS = ['record_endless_front', 'record_boss_rush'] as const;
 export type RecordModeId = (typeof RECORD_MODE_IDS)[number];
@@ -123,6 +123,7 @@ export function createGuestEndlessRecordBattle(progress: GuestProgress): Endless
     playerUnitCap: progression.playerUnitCap,
     enemyUnitCap: 42,
     supplyLevels: progression.supplyLevels,
+    baseWeapon: getBaseWeaponDefinition(getGuestSelectedBaseWeaponId(normalized)),
   });
 }
 
@@ -141,5 +142,6 @@ export function createGuestBossRushRecordBattle(progress: GuestProgress): BossRu
     playerUnitCap: progression.playerUnitCap,
     enemyUnitCap: 24,
     supplyLevels: progression.supplyLevels,
+    baseWeapon: getBaseWeaponDefinition(getGuestSelectedBaseWeaponId(normalized)),
   });
 }
