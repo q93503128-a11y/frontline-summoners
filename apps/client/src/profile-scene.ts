@@ -154,7 +154,7 @@ export class ProfileScene extends Phaser.Scene {
       const portrait = this.add.sprite(x - 120, y - 60, art.family.idle.key, 0).setTint(art.tint).setScale(1.05 * art.displayScale);
       portrait.setDisplaySize(Math.min(160, portrait.displayWidth), Math.min(160, portrait.displayHeight));
       this.layer!.add(portrait);
-      this.layer!.add(addText(this, x - 120, y + 35, getSlotById(portraitId).name, 18, '#ffffff', 'center').setOrigin(0.5));
+      this.layer!.add(addText(this, x - 120, y + 35, getSlotById(portraitId)?.displayName ?? portraitId, 18, '#ffffff', 'center').setOrigin(0.5));
     }
 
     const emblemName = getProfileCosmetic(state.profileLoadout.emblemId).name;
