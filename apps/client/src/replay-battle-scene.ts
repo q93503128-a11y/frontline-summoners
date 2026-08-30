@@ -1,8 +1,8 @@
 import Phaser from 'phaser';
+import { loadActiveProgress } from './active-progress';
 import { BattleScene } from './battle-scene';
 import { getReplayConvenienceState, resolveBattleSpeed, scaleReplayDeltaMs, type BattleSpeedMultiplier } from './replay-convenience';
 import { STAGES, getStage, type PrototypeStage } from './prototype';
-import { loadGuestProgress } from './save';
 import { isSortieStageUnlocked } from './stage-navigation';
 import { addButton } from './scene-ui';
 import { isCompactMobileViewport } from './viewport';
@@ -28,8 +28,13 @@ export class ReplayBattleScene extends BattleScene {
   }
 
   override create(): void {
-    void loadGuestProgress().then((progress) => {
+    void loadActiveProgress().then((view) => {
       if (!this.scene.isActive()) return;
+      if (view.authority === 'ACCOUNT_OFFLINE_CACHE') {
+        this.scene.start('stage-hub');
+        return;
+      }
+      const progress = view.progress;
       if (!isSortieStageUnlocked(this.replayStage.id, progress.clearedStageIds, progress.specialClearedStageIds)) {
         this.scene.start('stage-hub');
         return;
@@ -40,6 +45,8 @@ export class ReplayBattleScene extends BattleScene {
       this.speedUpUnlocked = convenience.speedUpUnlocked;
       this.replaySpeed = resolveBattleSpeed(this.replaySpeed, convenience);
       this.renderSpeedButton();
+    }).catch(() => {
+      if (this.scene.isActive()) this.scene.start('stage-hub');
     });
   }
 
