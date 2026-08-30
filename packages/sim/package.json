@@ -9,6 +9,7 @@
     "./coop-playable": "./src/coop-playable.ts",
     "./meta-progression": "./src/meta-progression.ts",
     "./evolution-catalog": "./src/evolution-catalog.ts",
+    "./evolution-form-overrides": "./src/evolution-form-overrides.ts",
     "./resource-ledger": "./src/resource-ledger.ts",
     "./meta-economy": "./src/meta-economy.ts",
     "./main-stage-rewards": "./src/main-stage-rewards.ts",
