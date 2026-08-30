@@ -6,6 +6,7 @@ import {
   type CoopPlayableBattleState,
   type CoopPlayableCommand,
 } from '@frontline/sim/coop-playable';
+import { resolveAuthenticatedAccountHttp } from './account-http.ts';
 import { drainCoopFramesAfterAiHandoff } from './coop-ai-handoff.ts';
 import {
   connectCoopSeat,
@@ -48,7 +49,7 @@ const ROOM_STORAGE_KEY = 'coop-room-v4';
 
 const CORS_HEADERS = {
   'access-control-allow-origin': '*',
-  'access-control-allow-headers': 'content-type',
+  'access-control-allow-headers': 'authorization,content-type',
   'access-control-allow-methods': 'GET,POST,OPTIONS',
 } as const;
 
@@ -103,6 +104,14 @@ export default {
     if (request.method === 'GET' && url.pathname === '/api/db-health') {
       const row = await env.DB.prepare('SELECT 1 AS ok').first<{ ok: number }>();
       return json({ ok: row?.ok === 1 });
+    }
+
+    const accountHttpResult = await resolveAuthenticatedAccountHttp(request, env.DB);
+    if (accountHttpResult) {
+      return json(accountHttpResult.body, {
+        status: accountHttpResult.status,
+        ...(accountHttpResult.headers === undefined ? {} : { headers: accountHttpResult.headers }),
+      });
     }
 
     if (request.method === 'POST' && url.pathname === '/api/matches') {
