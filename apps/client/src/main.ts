@@ -16,6 +16,7 @@ import { RecordResultScene } from './record-result-scene';
 import { StageHubScene } from './stage-hub-scene';
 import { StageSelectScene } from './stage-select-scene';
 import { ResultScene } from './result-scene';
+import { TrustedBattleResultScene } from './trusted-battle-result-scene';
 import { addButton } from './scene-ui';
 import { isCompactMobileViewport } from './viewport';
 
@@ -59,4 +60,5 @@ game.scene.add('coop-battle', CoopBattleScene, false);
 game.scene.add('record-hub', RecordHubScene, false);
 game.scene.add('record-battle', RecordBattleScene, false);
 game.scene.add('record-result', RecordResultScene, false);
+game.scene.add('trusted-result', TrustedBattleResultScene, false);
 game.scene.add('account', AccountScene, false);
