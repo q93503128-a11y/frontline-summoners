@@ -12,7 +12,14 @@ import {
   tryUpgradeSupply,
   type PlayableBattleState,
 } from '@frontline/sim/playable';
+import { accountSnapshotToGuestProgress, loadActiveProgress } from './active-progress';
+import {
+  getAccountClientState,
+  startAuthenticatedTrustedBattle,
+  type AccountTrustedBattleStart,
+} from './account-network';
 import { type ArtFamily, type AttackFxStyle, type SpriteStrip } from './assets';
+import { BASE_WEAPON_UNLOCKS } from './base-weapon-progression';
 import { BATTLEFIELD_THEME_LABELS, drawBattlefield, getBattlefieldBasePalette } from './battlefield';
 import { showBossArrival } from './boss-warning';
 import { classifyImpact, getAttackSpriteFrame, getLoopingSpriteFrame } from './combat-visuals';
@@ -20,7 +27,7 @@ import { formatCompactTraits } from './combat-trait-labels';
 import { buildGuestDeckSlots, createGuestPrototypeBattle } from './player-loadout';
 import { getProjectileArcOffsetY, getProjectileTravelPlan, usesTravelProjectile } from './projectile-visuals';
 import { STAGES, getStage, type PrototypeRosterSlot, type PrototypeStage } from './prototype';
-import { loadGuestProgress, recordGuestEnemyDiscoveries } from './save';
+import { recordGuestEnemyDiscoveries } from './save';
 import {
   BATTLE_UNIT_HOTKEY_CODES,
   COLORS,
@@ -33,6 +40,8 @@ import {
 } from './scene-ui';
 import { isSortieStageUnlocked } from './stage-navigation';
 import { selectVisibleTraitLabelIds } from './trait-label-visibility';
+import { TrustedBattleCommandRecorder } from './trusted-battle-command-recorder';
+import type { TrustedBattleTerminalProof } from './trusted-battle-result';
 import { isCompactMobileViewport, isPortraitMobileViewport } from './viewport';
 
 interface UnitView {
@@ -67,11 +76,19 @@ interface UnitButtonView {
 const STORY_BADGE_COLOR = '#d7c79f';
 const SPECIAL_BADGE_COLOR = '#9fd7d0';
 
+type BattleAuthority = 'GUEST_LOCAL' | 'ACCOUNT_TRUSTED';
+
 function getSlotBadge(slot: PrototypeRosterSlot): { readonly label: string; readonly color: string } {
   if (slot.rarity) return { label: slot.rarity, color: rarityColor[slot.rarity] ?? '#ffffff' };
   if (slot.acquisitionClass === 'STORY') return { label: '스토리', color: STORY_BADGE_COLOR };
   if (slot.acquisitionClass === 'SPECIAL') return { label: '특수', color: SPECIAL_BADGE_COLOR };
   return { label: '동료', color: '#ffffff' };
+}
+
+function getBaseWeaponDisplayName(state: PlayableBattleState): string {
+  const id = state.baseWeapon.id;
+  return BASE_WEAPON_UNLOCKS.find((weapon) => weapon.id === id)?.displayName
+    ?? (state.baseWeapon.kind === 'AEGIS_EMITTER' ? '결계발진기' : state.baseWeapon.kind === 'SUPPLY_DROP' ? '보급낙하기' : '전선포격기');
 }
 
 export class BattleScene extends Phaser.Scene {
@@ -102,6 +119,9 @@ export class BattleScene extends Phaser.Scene {
   private resolved = false;
   private manuallyPaused = false;
   private pauseOverlay: Phaser.GameObjects.Container | undefined;
+  private battleAuthority: BattleAuthority = 'GUEST_LOCAL';
+  private trustedStart: AccountTrustedBattleStart | undefined;
+  private trustedRecorder: TrustedBattleCommandRecorder | undefined;
 
   constructor() { super('battle'); }
 
@@ -121,31 +141,63 @@ export class BattleScene extends Phaser.Scene {
     this.discoveredEnemyIds.clear();
     this.enemyDiscoveryWrite = Promise.resolve();
     this.activeSlots = [];
+    this.battleAuthority = 'GUEST_LOCAL';
+    this.trustedStart = undefined;
+    this.trustedRecorder = undefined;
   }
 
   create(): void {
     drawBattlefield(this, this.stage);
     const loading = addText(this, INTERNAL_WIDTH / 2, 330, '편성과 전장 불러오는 중…', 25, '#ffffff', 'center').setOrigin(0.5);
     this.input.keyboard?.on('keydown', (event: KeyboardEvent) => this.handleBattleHotkey(event));
-    void loadGuestProgress().then((progress) => {
+    void this.initializeBattle(loading).catch((error: unknown) => {
       if (!this.scene.isActive()) return;
-      if (!isSortieStageUnlocked(this.stage.id, progress.clearedStageIds)) {
-        this.scene.start('stage-hub');
-        return;
-      }
-      this.discoveredEnemyIds = new Set(progress.discoveredEnemyIds ?? []);
-      this.activeSlots = buildGuestDeckSlots(progress);
-      this.state = createGuestPrototypeBattle(this.stage.id, progress);
-      this.lastPlayerBaseHp = this.state.battle.bases.PLAYER.hp;
-      this.lastEnemyBaseHp = this.state.battle.bases.ENEMY.hp;
-      loading.destroy();
-      this.drawHud();
-      this.drawBases();
-      this.drawUnitButtons();
-      this.ready = true;
-      this.syncEnemyDiscoveries();
-      this.syncHud();
+      loading.setText(error instanceof Error ? `출정 실패 · ${error.message}` : '출정 준비에 실패했습니다.').setColor('#ff9a91');
+      this.time.delayedCall(900, () => { if (this.scene.isActive()) this.scene.start('stage-hub'); });
     });
+  }
+
+  private async initializeBattle(loading: Phaser.GameObjects.Text): Promise<void> {
+    const view = await loadActiveProgress();
+    if (!this.scene.isActive()) return;
+    if (view.authority === 'ACCOUNT_OFFLINE_CACHE') throw new Error('로그인 계정은 온라인 상태에서만 전투를 시작할 수 있습니다.');
+
+    let progress = view.progress;
+    if (!isSortieStageUnlocked(this.stage.id, progress.clearedStageIds, progress.specialClearedStageIds)) {
+      this.scene.start('stage-hub');
+      return;
+    }
+
+    if (view.authority === 'ACCOUNT_ONLINE') {
+      loading.setText('서버 전투 ticket 발급 중…');
+      const kind = this.stage.stageType === 'SPECIAL' ? 'SPECIAL' : 'MAIN';
+      const start = await startAuthenticatedTrustedBattle(kind, this.stage.id);
+      if (!this.scene.isActive()) return;
+      const accountState = getAccountClientState();
+      if (accountState.kind !== 'AUTHENTICATED_ONLINE' || accountState.remote.revision !== start.startRevision) {
+        throw new Error('전투 ticket과 현재 계정 revision이 일치하지 않습니다.');
+      }
+      progress = accountSnapshotToGuestProgress(accountState.remote.snapshot);
+      this.battleAuthority = 'ACCOUNT_TRUSTED';
+      this.trustedStart = start;
+      this.trustedRecorder = new TrustedBattleCommandRecorder();
+    }
+
+    this.discoveredEnemyIds = new Set(progress.discoveredEnemyIds ?? []);
+    this.activeSlots = buildGuestDeckSlots(progress);
+    this.state = createGuestPrototypeBattle(this.stage.id, progress);
+    if (this.trustedStart && this.state.stateHash !== this.trustedStart.initialStateHash) {
+      throw new Error('서버와 로컬의 초기 전투 state hash가 일치하지 않습니다.');
+    }
+    this.lastPlayerBaseHp = this.state.battle.bases.PLAYER.hp;
+    this.lastEnemyBaseHp = this.state.battle.bases.ENEMY.hp;
+    loading.destroy();
+    this.drawHud();
+    this.drawBases();
+    this.drawUnitButtons();
+    this.ready = true;
+    this.syncEnemyDiscoveries();
+    this.syncHud();
   }
 
   update(_: number, delta: number): void {
@@ -163,7 +215,26 @@ export class BattleScene extends Phaser.Scene {
     this.syncHud();
     if (this.state.battle.winner !== null) {
       this.resolved = true;
-      this.time.delayedCall(700, () => this.scene.start('result', { stageId: this.stage.id, winner: this.state.battle.winner }));
+      const winner = this.state.battle.winner;
+      if (this.battleAuthority === 'ACCOUNT_TRUSTED') {
+        const start = this.trustedStart;
+        const recorder = this.trustedRecorder;
+        if (!start || !recorder) throw new Error('trusted battle terminal state is missing ticket or recorder');
+        const proof: TrustedBattleTerminalProof = {
+          battleId: start.battleId,
+          kind: start.kind,
+          targetId: start.targetId,
+          commands: recorder.seal(),
+          localWinner: winner,
+          localClearFrames: this.state.battle.tick,
+          localFinalStateHash: this.state.stateHash,
+          localPlayerBaseHp: this.state.battle.bases.PLAYER.hp,
+          localEnemyBaseHp: this.state.battle.bases.ENEMY.hp,
+        };
+        this.time.delayedCall(700, () => this.scene.start('trusted-result', { proof }));
+      } else {
+        this.time.delayedCall(700, () => this.scene.start('result', { stageId: this.stage.id, winner }));
+      }
     }
   }
 
@@ -193,17 +264,23 @@ export class BattleScene extends Phaser.Scene {
 
   private trySpawnSlot(slotId: string): void {
     if (!this.canAcceptBattleAction()) return;
-    trySpawnPlayerUnit(this.state, slotId);
+    const tick = this.state.battle.tick;
+    const result = trySpawnPlayerUnit(this.state, slotId);
+    this.trustedRecorder?.recordSpawn(tick, slotId, result.ok);
   }
 
   private tryUpgradeSupplyInput(): void {
     if (!this.canAcceptBattleAction()) return;
-    tryUpgradeSupply(this.state);
+    const tick = this.state.battle.tick;
+    const result = tryUpgradeSupply(this.state);
+    this.trustedRecorder?.recordSupplyUpgrade(tick, result.ok);
   }
 
   private tryFireBaseWeaponInput(): void {
     if (!this.canAcceptBattleAction()) return;
+    const tick = this.state.battle.tick;
     const result = tryFireBaseWeapon(this.state);
+    this.trustedRecorder?.recordBaseWeapon(tick, result.ok);
     if (result.ok) this.playBaseWeaponFx();
   }
 
@@ -239,6 +316,7 @@ export class BattleScene extends Phaser.Scene {
       .filter((enemyId) => !this.discoveredEnemyIds.has(enemyId)))];
     if (newlySeen.length === 0) return;
     for (const enemyId of newlySeen) this.discoveredEnemyIds.add(enemyId);
+    if (this.battleAuthority !== 'GUEST_LOCAL') return;
     this.enemyDiscoveryWrite = this.enemyDiscoveryWrite
       .then(async () => {
         const result = await recordGuestEnemyDiscoveries(newlySeen);
@@ -335,12 +413,48 @@ export class BattleScene extends Phaser.Scene {
     addText(this, 1145, compact ? 598 : 594, compact ? '보급소 강화' : 'Q · 보급소 강화', battleUiFontSize(16, 21), '#ffffff', 'center').setOrigin(0.5);
     upgradeBg.on('pointerdown', () => this.tryUpgradeSupplyInput());
 
+    const weaponName = getBaseWeaponDisplayName(this.state);
     this.baseWeaponBg = this.add.rectangle(1145, weaponY, 220, controlHeight, 0x26394a).setStrokeStyle(3, 0x72b7db).setInteractive({ useHandCursor: true });
-    this.baseWeaponText = addText(this, 1145, weaponY, compact ? '전선포 · 발사 가능' : 'E · 전선포 · 발사 가능', battleUiFontSize(17, 20), '#bfe8ff', 'center').setOrigin(0.5);
+    this.baseWeaponText = addText(this, 1145, weaponY, compact ? `${weaponName} · 사용 가능` : `E · ${weaponName} · 사용 가능`, battleUiFontSize(17, 20), '#bfe8ff', 'center').setOrigin(0.5);
     this.baseWeaponBg.on('pointerdown', () => this.tryFireBaseWeaponInput());
   }
 
   private playBaseWeaponFx(): void {
+    if (this.state.baseWeapon.kind === 'AEGIS_EMITTER') {
+      const field = this.add.ellipse(635, 488, 1020, 118, 0x74cfff, 0.14).setStrokeStyle(4, 0xbdeaff, 0.9).setDepth(18);
+      const core = this.add.ellipse(635, 488, 880, 84, 0xcdf4ff, 0.08).setDepth(17);
+      this.tweens.add({
+        targets: [field, core],
+        alpha: 0,
+        scaleX: 1.08,
+        scaleY: 1.18,
+        duration: 420,
+        ease: 'Quad.easeOut',
+        onComplete: () => { field.destroy(); core.destroy(); },
+      });
+      return;
+    }
+    if (this.state.baseWeapon.kind === 'SUPPLY_DROP') {
+      const crate = this.add.rectangle(195, 250, 48, 42, 0xd4aa62, 0.98).setStrokeStyle(3, 0xffe3a6).setDepth(20);
+      const canopy = this.add.arc(195, 220, 42, 180, 360, false, 0xe7edf5, 0.9).setDepth(19);
+      const lineA = this.add.line(0, 0, 160, 222, 178, 250, 0xf3f5f8, 0.78).setOrigin(0).setDepth(19);
+      const lineB = this.add.line(0, 0, 230, 222, 212, 250, 0xf3f5f8, 0.78).setOrigin(0).setDepth(19);
+      this.tweens.add({
+        targets: [crate, canopy, lineA, lineB],
+        y: '+=175',
+        duration: 320,
+        ease: 'Cubic.easeIn',
+        onComplete: () => {
+          this.tweens.add({
+            targets: [crate, canopy, lineA, lineB],
+            alpha: 0,
+            duration: 160,
+            onComplete: () => { crate.destroy(); canopy.destroy(); lineA.destroy(); lineB.destroy(); },
+          });
+        },
+      });
+      return;
+    }
     const muzzle = this.add.circle(130, 452, 24, 0xffe69a, 0.9).setDepth(20);
     const beam = this.add.rectangle(650, 452, 1010, 16, 0xffe69a, 0.88).setDepth(19);
     const core = this.add.rectangle(650, 452, 1010, 5, 0xffffff, 0.95).setDepth(20);
@@ -679,13 +793,14 @@ export class BattleScene extends Phaser.Scene {
     this.timerText.setText(this.formatTime(this.state.battle.tick));
 
     const weaponCooldown = getBaseWeaponCooldownRemaining(this.state);
-    const weaponPrefix = isCompactMobileViewport() ? '전선포' : 'E · 전선포';
+    const weaponName = getBaseWeaponDisplayName(this.state);
+    const weaponPrefix = isCompactMobileViewport() ? weaponName : `E · ${weaponName}`;
     if (weaponCooldown > 0) {
       this.baseWeaponText.setText(`${weaponPrefix} · ${(weaponCooldown / 30).toFixed(1)}초`);
       this.baseWeaponText.setColor('#9aa9b8');
       this.baseWeaponBg.setFillStyle(0x25303a, 1);
     } else {
-      this.baseWeaponText.setText(`${weaponPrefix} · 발사 가능`);
+      this.baseWeaponText.setText(`${weaponPrefix} · 사용 가능`);
       this.baseWeaponText.setColor('#bfe8ff');
       this.baseWeaponBg.setFillStyle(0x26394a, 1);
     }
