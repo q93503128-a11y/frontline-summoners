@@ -15,19 +15,20 @@ import { addButton, addText, COLORS, drawBackdrop } from './scene-ui';
 import { getStageCollectionForStage } from './stage-navigation';
 import { isCompactMobileViewport } from './viewport';
 
-function formatSpecialResourceReward(reward: Readonly<Record<string, number | undefined>>): string {
+function formatResourceReward(reward: Readonly<Record<string, number | undefined>>): string {
   const labels: Readonly<Record<string, string>> = {
     gold: '골드',
     evo_fragment: '진화 조각',
     evo_core: '진화 핵심',
     evo_crown: '진화 왕관',
-    soul_essence: '혼의 정수',
+    soul_essence: '혼의 파편',
     summon_crystal: '모집 결정',
+    sweep_ticket: '소탕권',
   };
   const parts = Object.entries(reward)
     .filter(([, amount]) => typeof amount === 'number' && amount > 0)
     .map(([id, amount]) => `${labels[id] ?? id} +${amount!.toLocaleString('ko-KR')}`);
-  return parts.length > 0 ? parts.join(' · ') : '기록형 SPECIAL · 반복 재화 보상 없음';
+  return parts.length > 0 ? parts.join(' · ') : '추가 재화 보상 없음';
 }
 
 export class ResultScene extends Phaser.Scene {
@@ -64,7 +65,7 @@ export class ResultScene extends Phaser.Scene {
       void recordSpecialStageClear(this.stage.id).then((result) => {
         this.resultRecorded = true;
         if (!this.scene.isActive()) return;
-        rewardText.setText(`${result.firstClear ? '첫 클리어 포함 · ' : ''}${formatSpecialResourceReward(result.resourceReward)}`);
+        rewardText.setText(`${result.firstClear ? '첫 클리어 · ' : '재클리어 · '}${formatResourceReward(result.resourceReward)}`);
         if (result.persisted) {
           status.setText(result.firstClear ? 'SPECIAL 첫 클리어 저장 완료' : 'SPECIAL 재클리어 보상 저장 완료');
           status.setColor('#8ee3aa');
@@ -80,25 +81,32 @@ export class ResultScene extends Phaser.Scene {
         status.setColor('#ff9a91');
       });
     } else if (victory) {
-      addText(this, INTERNAL_WIDTH / 2, compact ? 210 : 238, '영구 보상 획득', compact ? 28 : 23, '#8ee3aa', 'center').setOrigin(0.5);
-      addText(this, INTERNAL_WIDTH / 2, compact ? 264 : 290, `STAGE ${getStageNumber(this.stage.id)} 영구 성장`, compact ? 38 : 35, '#ffe18a', 'center').setOrigin(0.5);
-      addText(this, INTERNAL_WIDTH / 2, compact ? 322 : 342, getPermanentRewardEffectText(this.stage.permanentRewardId), compact ? 24 : 18, '#c8d0dc', 'center').setOrigin(0.5).setWordWrapWidth(compact ? 720 : 680);
+      addText(this, INTERNAL_WIDTH / 2, compact ? 202 : 224, 'NORMAL_CLEAR 보상', compact ? 28 : 23, '#8ee3aa', 'center').setOrigin(0.5);
+      addText(this, INTERNAL_WIDTH / 2, compact ? 250 : 270, getPermanentRewardEffectText(this.stage.permanentRewardId), compact ? 23 : 18, '#ffe18a', 'center').setOrigin(0.5).setWordWrapWidth(compact ? 720 : 680);
       const unlockSlot = this.stage.unlockUnitId ? getSlotById(this.stage.unlockUnitId) : undefined;
-      const unlockText = addText(this, INTERNAL_WIDTH / 2, compact ? 390 : 395, unlockSlot ? (compact ? `동료 · ${unlockSlot.displayName}` : `첫 클리어 동료 보상 · ${unlockSlot.displayName}`) : compact ? '동료 해금 없음' : '이번 스테이지는 동료 해금 없음', compact ? 24 : 20, unlockSlot ? '#9ccfff' : '#8f9aac', 'center').setOrigin(0.5);
-      const status = addText(this, INTERNAL_WIDTH / 2, compact ? 446 : 447, compact ? '진행 저장 중…' : 'NORMAL_CLEAR 진행 저장 중…', compact ? 21 : 16, '#8f9aac', 'center').setOrigin(0.5);
+      const unlockText = addText(this, INTERNAL_WIDTH / 2, compact ? 326 : 330, unlockSlot ? `동료 · ${unlockSlot.displayName}` : '동료 해금 없음', compact ? 22 : 18, unlockSlot ? '#9ccfff' : '#8f9aac', 'center').setOrigin(0.5);
+      const rewardText = addText(this, INTERNAL_WIDTH / 2, compact ? 386 : 390, '일반 재화 계산 중…', compact ? 21 : 17, '#f2d37c', 'center').setOrigin(0.5).setWordWrapWidth(compact ? 720 : 680);
+      const status = addText(this, INTERNAL_WIDTH / 2, compact ? 450 : 448, compact ? '진행 저장 중…' : 'NORMAL_CLEAR 진행·재화 저장 중…', compact ? 20 : 16, '#8f9aac', 'center').setOrigin(0.5);
       void recordNormalStageClear(this.stage.id, 'SOLO_BATTLE').then((result) => {
         this.resultRecorded = true;
         if (!this.scene.isActive()) return;
+        rewardText.setText(`${result.firstClear ? '첫 클리어 · ' : '재클리어 · '}${formatResourceReward(result.resourceReward)}`);
         if (result.persisted) {
           status.setText(compact
-            ? result.firstClear ? 'NORMAL_CLEAR · 다음 스테이지 개방' : '재클리어 저장 완료'
-            : result.firstClear ? 'NORMAL_CLEAR 저장 완료 · 다음 스테이지 개방' : '재클리어 저장 완료 · 영구 보상 반복 획득 없음');
+            ? result.firstClear ? 'NORMAL_CLEAR · 다음 스테이지 개방' : '재클리어 보상 저장 완료'
+            : result.firstClear ? 'NORMAL_CLEAR 저장 완료 · 다음 스테이지 개방' : '재클리어 보상 저장 완료 · 영구 보상 반복 획득 없음');
           status.setColor('#8ee3aa');
         } else {
           status.setText(compact ? '영구 저장 실패 · 현재 탭 진행 유지' : '브라우저 영구 저장 실패 · 현재 탭에서는 진행 유지');
           status.setColor('#ffb37c');
         }
         if (unlockSlot) unlockText.setText(result.firstClear ? `신규 동료 · ${unlockSlot.displayName}` : `보유 동료 · ${unlockSlot.displayName}`);
+      }).catch((error: unknown) => {
+        this.resultRecorded = true;
+        if (!this.scene.isActive()) return;
+        rewardText.setText('보상 저장 실패');
+        status.setText(error instanceof Error ? error.message : 'NORMAL_CLEAR 결과 처리에 실패했습니다.');
+        status.setColor('#ff9a91');
       });
     } else {
       addText(this, INTERNAL_WIDTH / 2, compact ? 286 : 310, compact ? '소환 타이밍과 편성을 바꿔 다시 도전해 보자.' : '편성과 소환 타이밍을 바꿔 다시 도전해 보자.', compact ? 28 : 24, '#dce2ec', 'center').setOrigin(0.5);

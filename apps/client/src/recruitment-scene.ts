@@ -12,9 +12,12 @@ import {
   performGuestRecruitmentWithDuplicateGrowth as performGuestRecruitment,
   type RecruitmentPullGrowthResult,
 } from './recruitment-growth';
+import { getRecruitmentCost } from './meta-economy';
 import { getSlotById } from './prototype';
 import {
+  getGuestResourceBalance,
   loadGuestProgress,
+  type DuplicatePolicy,
   type GuestProgress,
 } from './save';
 import { addButton, addText, COLORS, drawBackdrop, familyForUnit, rarityColor } from './scene-ui';
@@ -31,6 +34,7 @@ const SERIES_TAB_LABELS = ['성휘', '거수', '제로'] as const;
 export class RecruitmentScene extends Phaser.Scene {
   private progress: GuestProgress = EMPTY_PROGRESS;
   private banner: RecruitmentBanner = FIRST_RECRUITMENT_BANNER;
+  private duplicatePolicy: DuplicatePolicy = 'APPLY_PLUS';
   private statusText?: Phaser.GameObjects.Text;
   private progressText?: Phaser.GameObjects.Text;
   private resultsLayer: Phaser.GameObjects.Container | undefined;
@@ -38,8 +42,9 @@ export class RecruitmentScene extends Phaser.Scene {
 
   constructor() { super('recruitment'); }
 
-  init(data: { bannerId?: string }): void {
+  init(data: { bannerId?: string; duplicatePolicy?: DuplicatePolicy }): void {
     this.banner = data.bannerId ? getRecruitmentBanner(data.bannerId) : FIRST_RECRUITMENT_BANNER;
+    this.duplicatePolicy = data.duplicatePolicy === 'DISMANTLE' ? 'DISMANTLE' : 'APPLY_PLUS';
     this.resultsLayer = undefined;
     this.busy = false;
   }
@@ -65,7 +70,7 @@ export class RecruitmentScene extends Phaser.Scene {
       addText(this, 305, probabilityY, `${this.banner.poolByRarity[rarity].length}종`, compact ? 18 : 15, '#9eabbc');
       probabilityY += compact ? 43 : 40;
     }
-    addText(this, 74, 457, '세 시리즈 모두 같은 희귀도 확률을 사용합니다.', compact ? 17 : 15, '#9eabbc');
+    addText(this, 74, 457, '10회 할인·최소 희귀 보장 없이 각 모집은 독립 추첨입니다.', compact ? 16 : 14, '#9eabbc').setWordWrapWidth(360);
 
     this.add.rectangle(720, 320, 430, 304, 0x222936, 0.97).setStrokeStyle(3, 0x7b6990);
     addText(this, 535, 183, '시리즈 구성', compact ? 23 : 21, '#e5c7ff');
@@ -78,12 +83,17 @@ export class RecruitmentScene extends Phaser.Scene {
     addText(this, 550, 448, `시리즈 SS · ${ssName}`, compact ? 18 : 16, '#ffd873');
 
     this.add.rectangle(1080, 320, 260, 304, 0x222936, 0.97).setStrokeStyle(3, 0x8b7045);
-    this.progressText = addText(this, 970, 202, '기록 불러오는 중…', compact ? 19 : 16, '#ffffff');
-    addText(this, 970, 330, '중복 1장은 해당 캐릭터 +레벨 1로 바로 적용됩니다.', compact ? 17 : 14, '#b7a98c').setWordWrapWidth(220);
-    addText(this, 970, 395, '획득한 캐릭터는 편성·성장·도감에서 확인할 수 있습니다.', compact ? 17 : 14, '#9eabbc').setWordWrapWidth(220);
+    this.progressText = addText(this, 970, 195, '기록 불러오는 중…', compact ? 18 : 15, '#ffffff');
+    addText(this, 970, 350, '중복 처리', compact ? 18 : 15, '#f2d37c');
+    addText(this, 970, 382, this.duplicatePolicy === 'APPLY_PLUS'
+      ? '+1 우선 · +50 초과분은 자동 분해'
+      : '분해 우선 · 혼의 파편으로 전환', compact ? 15 : 13, '#b7a98c').setWordWrapWidth(220);
+    addText(this, 970, 440, '분해 재화는 성장 화면에서 원하는 동료의 +레벨에 사용할 수 있습니다.', compact ? 14 : 12, '#9eabbc').setWordWrapWidth(220);
 
-    addButton(this, 972, compact ? 525 : 520, 210, compact ? 84 : 64, '1회 모집', () => { void this.performRecruitment(1); }, 0xc5a04c);
-    addButton(this, 1182, compact ? 525 : 520, 210, compact ? 84 : 64, '10회 모집', () => { void this.performRecruitment(10); }, 0x8b6fb5);
+    addButton(this, 530, compact ? 526 : 520, 190, compact ? 76 : 60, '+1 우선', () => this.switchDuplicatePolicy('APPLY_PLUS'), this.duplicatePolicy === 'APPLY_PLUS' ? 0xc5a04c : 0x59677f);
+    addButton(this, 740, compact ? 526 : 520, 190, compact ? 76 : 60, '분해 우선', () => this.switchDuplicatePolicy('DISMANTLE'), this.duplicatePolicy === 'DISMANTLE' ? 0xc5a04c : 0x59677f);
+    addButton(this, 980, compact ? 526 : 520, 190, compact ? 76 : 60, `1회 · ${getRecruitmentCost(1)}`, () => { void this.performRecruitment(1); }, 0xc5a04c);
+    addButton(this, 1180, compact ? 526 : 520, 190, compact ? 76 : 60, `10회 · ${getRecruitmentCost(10)}`, () => { void this.performRecruitment(10); }, 0x8b6fb5);
     this.statusText = addText(this, 640, compact ? 660 : 650, '모집 기록을 불러오는 중…', compact ? 18 : 15, '#9eabbc', 'center').setOrigin(0.5);
 
     void loadGuestProgress().then((progress) => {
@@ -106,11 +116,16 @@ export class RecruitmentScene extends Phaser.Scene {
         compact ? 58 : 44,
         SERIES_TAB_LABELS[index] ?? `S${index + 1}`,
         () => {
-          if (!active && !this.busy && !this.resultsLayer) this.scene.restart({ bannerId: banner.id });
+          if (!active && !this.busy && !this.resultsLayer) this.scene.restart({ bannerId: banner.id, duplicatePolicy: this.duplicatePolicy });
         },
         active ? 0x9a79c5 : 0x4f5968,
       );
     });
+  }
+
+  private switchDuplicatePolicy(duplicatePolicy: DuplicatePolicy): void {
+    if (this.busy || this.resultsLayer || duplicatePolicy === this.duplicatePolicy) return;
+    this.scene.restart({ bannerId: this.banner.id, duplicatePolicy });
   }
 
   private refreshProgress(): void {
@@ -118,29 +133,35 @@ export class RecruitmentScene extends Phaser.Scene {
     const owned = new Set(this.progress.ownedRecruitmentCharacterIds ?? []);
     const bannerCharacterIds = getBannerCharacterIds(this.banner);
     const ownedInBanner = bannerCharacterIds.filter((characterId) => owned.has(characterId)).length;
+    const crystal = getGuestResourceBalance(this.progress, 'summon_crystal');
+    const soul = getGuestResourceBalance(this.progress, 'soul_essence');
     this.progressText?.setText([
-      `이 시리즈 모집 ${bannerProgress.totalPulls}회`,
-      `획득 ${ownedInBanner}/${bannerCharacterIds.length}종`,
+      `모집 결정 ${crystal.toLocaleString('ko-KR')}`,
+      `혼의 파편 ${soul.toLocaleString('ko-KR')}`,
       '',
+      `이 시리즈 ${bannerProgress.totalPulls}회`,
+      `획득 ${ownedInBanner}/${bannerCharacterIds.length}종`,
       '보장 횟수 없음',
-      '각 모집은 독립 추첨',
     ].join('\n'));
   }
 
   private async performRecruitment(count: number): Promise<void> {
     if (this.busy || this.resultsLayer) return;
     this.busy = true;
-    this.statusText?.setText(`${count}회 모집 중…`);
+    this.statusText?.setText(`${count}회 모집 · 결정 ${getRecruitmentCost(count)} 확인 중…`);
     this.statusText?.setColor('#c7d0dd');
     try {
-      const result = await performGuestRecruitment(count, CRYPTO_RECRUITMENT_RANDOM_SOURCE, this.banner);
+      const result = await performGuestRecruitment(count, CRYPTO_RECRUITMENT_RANDOM_SOURCE, this.banner, this.duplicatePolicy);
       this.progress = result.guestProgress;
       if (!this.scene.isActive()) return;
       this.refreshProgress();
       this.showResults(result.results);
       const newCount = result.results.filter((pull) => !pull.duplicate).length;
-      const duplicateCount = result.results.length - newCount;
-      this.statusText?.setText(`${result.persisted ? '저장 완료' : '저장에 실패했습니다'} · 신규 ${newCount} · 중복 ${duplicateCount} +레벨 적용`);
+      const plusCount = result.results.filter((pull) => pull.duplicateResolution === 'PLUS').length;
+      const dismantleCount = result.results.filter((pull) => pull.duplicateResolution === 'DISMANTLE').length;
+      const summary = [`${result.persisted ? '저장 완료' : '저장 실패'}`, `신규 ${newCount}`, `+1 ${plusCount}`];
+      if (dismantleCount > 0) summary.push(`분해 ${dismantleCount} · 혼 +${result.dismantledSoulEssence}`);
+      this.statusText?.setText(summary.join(' · '));
       this.statusText?.setColor(result.persisted ? '#8ee3aa' : '#ffb37c');
     } catch (error) {
       if (!this.scene.isActive()) return;
@@ -185,9 +206,13 @@ export class RecruitmentScene extends Phaser.Scene {
       this.resultsLayer!.add(portrait);
       this.resultsLayer!.add(addText(this, x, y - cardHeight / 2 + 10, pull.rarity, compact ? 20 : 17, rarityColor[pull.rarity] ?? '#ffffff', 'center').setOrigin(0.5, 0));
       this.resultsLayer!.add(addText(this, x, y + 37, slot.displayName, results.length === 1 ? 25 : 18, '#ffffff', 'center').setOrigin(0.5));
-      const duplicateLabel = pull.duplicate ? '중복' : 'NEW';
-      this.resultsLayer!.add(addText(this, x, y + 67, duplicateLabel, results.length === 1 ? 20 : 15, pull.duplicate ? '#b7bdc9' : '#8ee3aa', 'center').setOrigin(0.5));
-      if (pull.duplicate && pull.plusLevelAfter !== undefined) {
+      const duplicateLabel = !pull.duplicate
+        ? 'NEW'
+        : pull.duplicateResolution === 'DISMANTLE'
+          ? `분해 · 혼 +${pull.dismantledSoulEssence ?? 0}`
+          : '중복 · +1 적용';
+      this.resultsLayer!.add(addText(this, x, y + 67, duplicateLabel, results.length === 1 ? 20 : 15, pull.duplicate ? '#f2d37c' : '#8ee3aa', 'center').setOrigin(0.5));
+      if (pull.duplicateResolution === 'PLUS' && pull.plusLevelAfter !== undefined) {
         this.resultsLayer!.add(addText(this, x, y + 88, `현재 +${pull.plusLevelAfter}`, results.length === 1 ? 17 : 13, '#f2d37c', 'center').setOrigin(0.5));
       }
     });

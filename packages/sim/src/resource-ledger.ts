@@ -1,4 +1,4 @@
-export const META_RESOURCE_IDS = ['gold', 'evo_fragment', 'evo_core', 'evo_crown', 'soul_essence', 'summon_crystal'] as const;
+export const META_RESOURCE_IDS = ['gold', 'evo_fragment', 'evo_core', 'evo_crown', 'soul_essence', 'summon_crystal', 'sweep_ticket'] as const;
 export type MetaResourceId = (typeof META_RESOURCE_IDS)[number];
 
 export interface ResourceLedgerEntry {

@@ -27,19 +27,10 @@ const duplicatePull = (pullNumber: number): RecruitmentPullResult => ({
   duplicate: true,
 });
 
-test('every duplicate in one recruitment batch advances the same character by one plus level in order', () => {
-  const plan = planDuplicatePlusLevelApplications(baseProgress(4), [
-    duplicatePull(1),
-    duplicatePull(2),
-    duplicatePull(3),
-  ]);
-  assert.deepEqual(plan.map((step) => step.targetPlusLevel), [5, 6, 7]);
+test('duplicate plus planning remains deterministic for tooling and stops at the canonical +50 cap', () => {
+  const plan = planDuplicatePlusLevelApplications(baseProgress(48), [duplicatePull(1), duplicatePull(2), duplicatePull(3)]);
+  assert.deepEqual(plan.map((step) => step.targetPlusLevel), [49, 50, 50]);
   assert.deepEqual(plan.map((step) => step.pullIndex), [0, 1, 2]);
-});
-
-test('duplicate plus growth respects the canonical +50 cap', () => {
-  const plan = planDuplicatePlusLevelApplications(baseProgress(49), [duplicatePull(1), duplicatePull(2)]);
-  assert.deepEqual(plan.map((step) => step.targetPlusLevel), [50, 50]);
 });
 
 test('new pulls do not fabricate plus-level applications', () => {
@@ -47,15 +38,20 @@ test('new pulls do not fabricate plus-level applications', () => {
   assert.deepEqual(planDuplicatePlusLevelApplications(baseProgress(0), [fresh]), []);
 });
 
-test('recruitment UI routes through duplicate-growth authority and exposes the resulting plus level', async () => {
+test('recruitment UI exposes paid pulls and explicit duplicate handling instead of forced auto-plus', async () => {
   const source = await readFile(new URL('../src/recruitment-scene.ts', import.meta.url), 'utf8');
   assert.match(source, /performGuestRecruitmentWithDuplicateGrowth as performGuestRecruitment/);
-  assert.match(source, /중복 1장은 해당 캐릭터 \+레벨 1로 바로 적용됩니다/);
-  assert.match(source, /pull\.plusLevelAfter/);
-  assert.match(source, /현재 \+\$\{pull\.plusLevelAfter\}/);
+  assert.match(source, /getRecruitmentCost\(1\)/);
+  assert.match(source, /getRecruitmentCost\(10\)/);
+  assert.match(source, /'APPLY_PLUS'/);
+  assert.match(source, /'DISMANTLE'/);
+  assert.match(source, /\+1 우선/);
+  assert.match(source, /분해 우선/);
+  assert.match(source, /pull\.duplicateResolution === 'PLUS'/);
+  assert.match(source, /pull\.duplicateResolution === 'DISMANTLE'/);
 });
 
-test('growth scene is registered and exposes paid evolution unlock plus already-unlocked form selection', async () => {
+test('growth scene exposes paid base level, shared plus growth, evolution unlock, and form selection', async () => {
   const [main, growth] = await Promise.all([
     readFile(new URL('../src/main.ts', import.meta.url), 'utf8'),
     readFile(new URL('../src/growth-scene.ts', import.meta.url), 'utf8'),
@@ -64,27 +60,25 @@ test('growth scene is registered and exposes paid evolution unlock plus already-
   assert.match(main, /game\.scene\.add\('growth', GrowthScene, false\);/);
   assert.match(growth, /getOwnedCharacterIds\(this\.progress\)/);
   assert.match(growth, /buildCharacterCombatSlot\(slot, meta\.level, meta\.selectedFormId, meta\.plusLevel\)/);
-  assert.match(growth, /meta\.unlockedFormIds\.includes\(form\.formId\)/);
+  assert.match(growth, /getLevelUpgradeGoldCost/);
+  assert.match(growth, /getPlusLevelSoulEssenceCost/);
+  assert.match(growth, /recordGuestCharacterLevel\(characterId, targetLevel\)/);
+  assert.match(growth, /recordGuestCharacterPlusLevel\(characterId, current\.plusLevel \+ 1\)/);
   assert.match(growth, /getEvolutionRecipe\(form\.formId\)/);
-  assert.match(growth, /getGuestResourceBalance\(this\.progress, 'evo_fragment'\)/);
   assert.match(growth, /recordGuestEvolutionUnlock\(characterId, formId\)/);
   assert.match(growth, /selectGuestEvolutionForm\(characterId, formId\)/);
-  assert.doesNotMatch(growth, /recordGuestCharacterLevel/);
 });
 
-test('implemented level-cap display follows the four chapter completion 10 to 20 to 30 to 40 to 50 contract', async () => {
+test('implemented level cap delegates to the save authority and still communicates the four chapter cap chain', async () => {
   const growth = await readFile(new URL('../src/growth-scene.ts', import.meta.url), 'utf8');
-  assert.match(growth, /CHAPTER_ONE_FINAL_STAGE_ID = 'main_01_020'/);
-  assert.match(growth, /CHAPTER_TWO_FINAL_STAGE_ID = 'main_02_020'/);
-  assert.match(growth, /CHAPTER_THREE_FINAL_STAGE_ID = 'main_03_020'/);
-  assert.match(growth, /CHAPTER_FOUR_FINAL_STAGE_ID = 'main_04_020'/);
-  assert.match(growth, /if \(cleared\.has\(CHAPTER_FOUR_FINAL_STAGE_ID\)\) return 50/);
-  assert.match(growth, /if \(cleared\.has\(CHAPTER_THREE_FINAL_STAGE_ID\)\) return 40/);
-  assert.match(growth, /if \(cleared\.has\(CHAPTER_TWO_FINAL_STAGE_ID\)\) return 30/);
-  assert.match(growth, /if \(cleared\.has\(CHAPTER_ONE_FINAL_STAGE_ID\)\) return 20/);
+  const save = await readFile(new URL('../src/save.ts', import.meta.url), 'utf8');
+  assert.match(growth, /getImplementedBaseLevelCap\(progress: GuestProgress\): number \{ return getGuestBaseLevelCap\(progress\); \}/);
+  assert.match(save, /if \(cleared\.has\('main_04_020'\)\) return 50/);
+  assert.match(save, /if \(cleared\.has\('main_03_020'\)\) return 40/);
+  assert.match(save, /if \(cleared\.has\('main_02_020'\)\) return 30/);
+  assert.match(save, /if \(cleared\.has\('main_01_020'\)\) return 20/);
   assert.match(growth, /제1장 완료 시 기본 레벨 상한 Lv20/);
   assert.match(growth, /제2장 완료 시 기본 레벨 상한 Lv30/);
   assert.match(growth, /제3장 완료 시 기본 레벨 상한 Lv40/);
   assert.match(growth, /제4장 완료 시 기본 레벨 상한 Lv50/);
-  assert.match(growth, /제4장 완료 · 기본 레벨 상한 Lv50 · 1차 메인 엔딩 달성/);
 });

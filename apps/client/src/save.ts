@@ -17,6 +17,7 @@ import {
   recruit,
   type RecruitmentBatchResult,
   type RecruitmentProgress,
+  type RecruitmentPullResult,
   type RecruitmentRandomSource,
 } from './recruitment.ts';
 import {
@@ -37,10 +38,19 @@ import {
   type ResourceLedger,
 } from '@frontline/sim/resource-ledger';
 import { getSpecialResourceReward } from './special-rewards.ts';
+import { getMainStageResourceReward } from './main-stage-rewards.ts';
+import {
+  getDuplicateDismantleSoulEssence,
+  getLevelUpgradeGoldCost,
+  getPlusLevelSoulEssenceCost,
+  getRecruitmentCost,
+} from './meta-economy.ts';
 
 export const MAX_DECK_SLOTS = 10;
 export const NORMAL_CLEAR_SOURCES = ['SOLO_BATTLE', 'COOP_BATTLE'] as const;
 export type NormalClearSource = (typeof NORMAL_CLEAR_SOURCES)[number];
+export const DUPLICATE_POLICIES = ['APPLY_PLUS', 'DISMANTLE'] as const;
+export type DuplicatePolicy = (typeof DUPLICATE_POLICIES)[number];
 
 export interface CharacterMetaProgress {
   readonly level: number;
@@ -58,6 +68,7 @@ export interface RecordModeProgress {
 export interface GuestProgress {
   readonly clearedStageIds: readonly string[];
   readonly normalClearSourceByStage?: Readonly<Record<string, NormalClearSource>>;
+  readonly mainRewardedStageIds?: readonly string[];
   readonly specialClearedStageIds: readonly string[];
   readonly permanentRewardIds: readonly string[];
   readonly discoveredEnemyIds?: readonly string[];
@@ -75,6 +86,7 @@ export interface NormalStageClearResult {
   readonly firstClear: boolean;
   readonly permanentRewardNew: boolean;
   readonly normalClearSource: NormalClearSource;
+  readonly resourceReward: ResourceAmounts;
   readonly progress: GuestProgress;
   readonly persisted: boolean;
 }
@@ -84,7 +96,16 @@ export interface SpecialStageClearResult {
   readonly progress: GuestProgress;
   readonly persisted: boolean;
 }
-export interface GuestRecruitmentResult extends RecruitmentBatchResult {
+export interface GuestRecruitmentPullResult extends RecruitmentPullResult {
+  readonly duplicateResolution?: 'PLUS' | 'DISMANTLE';
+  readonly plusLevelAfter?: number;
+  readonly dismantledSoulEssence?: number;
+}
+export interface GuestRecruitmentResult extends Omit<RecruitmentBatchResult, 'results'> {
+  readonly results: readonly GuestRecruitmentPullResult[];
+  readonly duplicatePolicy: DuplicatePolicy;
+  readonly spentResources: ResourceAmounts;
+  readonly dismantledSoulEssence: number;
   readonly persisted: boolean;
   readonly guestProgress: GuestProgress;
 }
@@ -113,10 +134,11 @@ export interface GuestRecordResult {
   readonly guestProgress: GuestProgress;
 }
 
-interface StoredGuestProgressV12 {
-  readonly schemaVersion: 12;
+interface StoredGuestProgressV13 {
+  readonly schemaVersion: 13;
   readonly clearedStageIds: readonly string[];
   readonly normalClearSourceByStage: Readonly<Record<string, NormalClearSource>>;
+  readonly mainRewardedStageIds: readonly string[];
   readonly specialClearedStageIds: readonly string[];
   readonly permanentRewardIds: readonly string[];
   readonly discoveredEnemyIds: readonly string[];
@@ -131,11 +153,12 @@ interface StoredGuestProgressV12 {
 const DB_NAME = 'frontline-summoners';
 const STORE_NAME = 'guest-progress';
 const KEY = 'progress';
-const SCHEMA_VERSION = 12;
+const SCHEMA_VERSION = 13;
 const EMPTY_RECORD_PROGRESS: RecordModeProgress = { endlessBestTimeMs: 0, endlessBestReachedMinute: 0, bossRushBestDefeated: 0 };
 const EMPTY_PROGRESS: GuestProgress = {
   clearedStageIds: [],
   normalClearSourceByStage: {},
+  mainRewardedStageIds: [],
   specialClearedStageIds: [],
   permanentRewardIds: [],
   discoveredEnemyIds: [],
@@ -146,11 +169,13 @@ const EMPTY_PROGRESS: GuestProgress = {
   recordModeProgress: EMPTY_RECORD_PROGRESS,
 };
 const STAGE_PERMANENT_REWARD_IDS = new Set(STAGES.flatMap((stage) => stage.permanentRewardId ? [stage.permanentRewardId] : []));
+const MAIN_STAGE_IDS = new Set(STAGES.map((stage) => stage.id));
 const SPECIAL_STAGE_IDS = new Set(SPECIAL_STAGES.map((stage) => stage.id));
 const RECRUITMENT_CHARACTER_IDS = new Set(RECRUITMENT_UNITS.map((unit) => unit.id));
 const ALL_CHARACTER_IDS = new Set(ALL_PLAYER_SLOTS.map((slot) => slot.slotId));
 const ALL_ENEMY_IDS = new Set(ENEMIES.map((enemy) => enemy.enemyId));
 const NORMAL_CLEAR_SOURCE_SET = new Set<string>(NORMAL_CLEAR_SOURCES);
+const DUPLICATE_POLICY_SET = new Set<string>(DUPLICATE_POLICIES);
 const LEGACY_MAIN_STAGE_ID_MAP = new Map<string, string>(
   STAGES
     .filter((stage) => stage.id.startsWith('main_01_'))
@@ -285,11 +310,20 @@ export function getGuestResourceBalance(progress: GuestProgress, resourceId: Met
 export function getGuestRecordModeProgress(progress: GuestProgress): RecordModeProgress {
   return normalizeRecordModeProgress(normalizeGuestProgress(progress).recordModeProgress);
 }
+export function getGuestBaseLevelCap(progress: GuestProgress): number {
+  const cleared = new Set(getContiguousClearedStageIds(progress.clearedStageIds.map(canonicalStageId)));
+  if (cleared.has('main_04_020')) return 50;
+  if (cleared.has('main_03_020')) return 40;
+  if (cleared.has('main_02_020')) return 30;
+  if (cleared.has('main_01_020')) return 20;
+  return 10;
+}
 
 export function mergeGuestProgress(a: GuestProgress, b: GuestProgress): GuestProgress {
   return {
     clearedStageIds: [...new Set([...a.clearedStageIds, ...b.clearedStageIds].map(canonicalStageId))],
     normalClearSourceByStage: { ...(b.normalClearSourceByStage ?? {}), ...(a.normalClearSourceByStage ?? {}) },
+    mainRewardedStageIds: [...new Set([...(a.mainRewardedStageIds ?? []), ...(b.mainRewardedStageIds ?? [])].map(canonicalStageId))],
     specialClearedStageIds: [...new Set([...a.specialClearedStageIds, ...b.specialClearedStageIds])],
     permanentRewardIds: [...new Set([...a.permanentRewardIds, ...b.permanentRewardIds])],
     discoveredEnemyIds: [...new Set([...(a.discoveredEnemyIds ?? []), ...(b.discoveredEnemyIds ?? [])])],
@@ -304,7 +338,9 @@ export function mergeGuestProgress(a: GuestProgress, b: GuestProgress): GuestPro
 
 export function normalizeGuestProgress(progress: GuestProgress): GuestProgress {
   const clearedStageIds = getContiguousClearedStageIds(progress.clearedStageIds.map(canonicalStageId));
+  const clearedStageSet = new Set(clearedStageIds);
   const normalClearSourceByStage = normalizeNormalClearSourceMap(progress.normalClearSourceByStage, clearedStageIds);
+  const mainRewardedStageIds = [...new Set((progress.mainRewardedStageIds ?? []).map(canonicalStageId).filter((stageId) => MAIN_STAGE_IDS.has(stageId) && clearedStageSet.has(stageId)))];
   const specialClearedStageIds = [...new Set(progress.specialClearedStageIds.filter((stageId) => SPECIAL_STAGE_IDS.has(stageId)))];
   const guaranteedPermanentRewardIds = getPermanentRewardIdsForClearedStages(clearedStageIds);
   const nonStagePermanentRewardIds = progress.permanentRewardIds.filter((rewardId) => !STAGE_PERMANENT_REWARD_IDS.has(rewardId));
@@ -315,6 +351,7 @@ export function normalizeGuestProgress(progress: GuestProgress): GuestProgress {
   return {
     clearedStageIds,
     normalClearSourceByStage,
+    mainRewardedStageIds,
     specialClearedStageIds,
     permanentRewardIds: [...new Set([...guaranteedPermanentRewardIds, ...nonStagePermanentRewardIds])],
     discoveredEnemyIds,
@@ -342,16 +379,24 @@ function readStoredProgress(db: IDBDatabase): Promise<GuestProgress> {
       const value = request.result as Record<string, unknown> | undefined; const version = value?.schemaVersion;
       if (!Number.isInteger(version) || (version as number) < 2 || (version as number) > SCHEMA_VERSION) { resolve(EMPTY_PROGRESS); return; }
       const versionNumber = version as number; const clearedStageIds = canonicalStageIds(value?.clearedStageIds);
+      let resourceLedgerById = versionNumber >= 11 ? normalizeResourceLedger(value?.resourceLedgerById) : {};
+      let mainRewardedStageIds = versionNumber >= 13 ? canonicalStageIds(value?.mainRewardedStageIds) : [];
+      if (versionNumber < 13) {
+        const migratedClears = getContiguousClearedStageIds(clearedStageIds);
+        for (const migratedStageId of migratedClears) resourceLedgerById = grantResources(resourceLedgerById, getMainStageResourceReward(migratedStageId, true));
+        mainRewardedStageIds = migratedClears;
+      }
       resolve({
         clearedStageIds,
         normalClearSourceByStage: versionNumber >= 8 ? normalizeNormalClearSourceMap(value?.normalClearSourceByStage, clearedStageIds) : normalizeNormalClearSourceMap({}, clearedStageIds),
+        mainRewardedStageIds,
         specialClearedStageIds: versionNumber >= 3 ? stringArray(value?.specialClearedStageIds) : [],
         permanentRewardIds: versionNumber >= 9 ? stringArray(value?.permanentRewardIds) : stringArray(value?.treasureIds),
         discoveredEnemyIds: versionNumber >= 10 ? stringArray(value?.discoveredEnemyIds) : [],
         ownedRecruitmentCharacterIds: versionNumber >= 4 ? stringArray(value?.ownedRecruitmentCharacterIds) : [],
         recruitmentProgressByBanner: versionNumber >= 4 ? normalizeRecruitmentMap(value?.recruitmentProgressByBanner) : {},
         characterProgressById: versionNumber >= 5 && typeof value?.characterProgressById === 'object' && value.characterProgressById !== null ? value.characterProgressById as Readonly<Record<string, CharacterMetaProgress>> : {},
-        resourceLedgerById: versionNumber >= 11 ? normalizeResourceLedger(value?.resourceLedgerById) : {},
+        resourceLedgerById,
         recordModeProgress: versionNumber >= 12 ? normalizeRecordModeProgress(value?.recordModeProgress) : EMPTY_RECORD_PROGRESS,
         ...(versionNumber >= 6 && value?.deckSlotIds !== undefined ? { deckSlotIds: stringArray(value.deckSlotIds) } : {}),
       });
@@ -362,10 +407,11 @@ function readStoredProgress(db: IDBDatabase): Promise<GuestProgress> {
 }
 async function persistProgress(progress: GuestProgress): Promise<boolean> {
   const normalized = normalizeGuestProgress(progress);
-  const stored: StoredGuestProgressV12 = {
+  const stored: StoredGuestProgressV13 = {
     schemaVersion: SCHEMA_VERSION,
     clearedStageIds: normalized.clearedStageIds,
     normalClearSourceByStage: normalized.normalClearSourceByStage ?? {},
+    mainRewardedStageIds: normalized.mainRewardedStageIds ?? [],
     specialClearedStageIds: normalized.specialClearedStageIds,
     permanentRewardIds: normalized.permanentRewardIds,
     discoveredEnemyIds: normalized.discoveredEnemyIds ?? [],
@@ -409,16 +455,18 @@ export async function recordGuestEnemyDiscoveries(enemyIds: readonly string[]): 
 
 export async function recordNormalStageClear(stageId: string, source: NormalClearSource): Promise<NormalStageClearResult> {
   if (!NORMAL_CLEAR_SOURCE_SET.has(source)) throw new Error(`Unknown NORMAL_CLEAR source: ${source}`);
-  const before = await loadGuestProgress(); const stage = getStage(canonicalStageId(stageId));
+  const before = normalizeGuestProgress(await loadGuestProgress()); const stage = getStage(canonicalStageId(stageId));
   if (stage.stageType !== 'PROGRESSION') throw new Error(`Not a progression stage: ${stage.id}`);
   if (!stage.permanentRewardId) throw new Error(`Progression stage has no permanent reward: ${stage.id}`);
   if (!isStageUnlocked(stage.id, before.clearedStageIds)) throw new Error(`Campaign stage is not unlocked: ${stage.id}`);
-  const cleared = new Set(before.clearedStageIds); const rewards = new Set(before.permanentRewardIds);
-  const firstClear = !cleared.has(stage.id); const permanentRewardNew = !rewards.has(stage.permanentRewardId);
-  const normalClearSourceByStage = { ...(before.normalClearSourceByStage ?? {}) }; cleared.add(stage.id); rewards.add(stage.permanentRewardId);
+  const cleared = new Set(before.clearedStageIds); const rewards = new Set(before.permanentRewardIds); const rewardedStages = new Set(before.mainRewardedStageIds ?? []);
+  const firstClear = !cleared.has(stage.id); const permanentRewardNew = !rewards.has(stage.permanentRewardId); const firstResourceReward = !rewardedStages.has(stage.id);
+  const normalClearSourceByStage = { ...(before.normalClearSourceByStage ?? {}) }; cleared.add(stage.id); rewards.add(stage.permanentRewardId); rewardedStages.add(stage.id);
   if (firstClear) normalClearSourceByStage[stage.id] = source;
-  const progress = normalizeGuestProgress({ ...before, clearedStageIds: [...cleared], normalClearSourceByStage, permanentRewardIds: [...rewards] }); sessionProgress = progress;
-  return { firstClear, permanentRewardNew, normalClearSource: progress.normalClearSourceByStage![stage.id]!, progress, persisted: await persistProgress(progress) };
+  const resourceReward = getMainStageResourceReward(stage.id, firstResourceReward);
+  const resourceLedgerById = grantResources(before.resourceLedgerById ?? {}, resourceReward);
+  const progress = normalizeGuestProgress({ ...before, clearedStageIds: [...cleared], normalClearSourceByStage, mainRewardedStageIds: [...rewardedStages], permanentRewardIds: [...rewards], resourceLedgerById }); sessionProgress = progress;
+  return { firstClear, permanentRewardNew, normalClearSource: progress.normalClearSourceByStage![stage.id]!, resourceReward, progress, persisted: await persistProgress(progress) };
 }
 
 export async function recordSpecialStageClear(stageId: string): Promise<SpecialStageClearResult> {
@@ -458,11 +506,46 @@ export async function recordGuestBossRushResult(defeatedBosses: number): Promise
   return { improved: true, recordModeProgress: progress.recordModeProgress!, persisted: await persistProgress(progress), guestProgress: progress };
 }
 
-export async function performGuestRecruitment(count: number, rng: RecruitmentRandomSource, banner = FIRST_RECRUITMENT_BANNER): Promise<GuestRecruitmentResult> {
-  const before = normalizeGuestProgress(await loadGuestProgress()); const previousBannerProgress = before.recruitmentProgressByBanner?.[banner.id] ?? { totalPulls: 0 };
+export async function performGuestRecruitment(
+  count: number,
+  rng: RecruitmentRandomSource,
+  banner = FIRST_RECRUITMENT_BANNER,
+  duplicatePolicy: DuplicatePolicy = 'APPLY_PLUS',
+): Promise<GuestRecruitmentResult> {
+  if (!DUPLICATE_POLICY_SET.has(duplicatePolicy)) throw new Error(`Unknown duplicate policy: ${duplicatePolicy}`);
+  const before = normalizeGuestProgress(await loadGuestProgress());
+  const previousBannerProgress = before.recruitmentProgressByBanner?.[banner.id] ?? { totalPulls: 0 };
+  const spentResources: ResourceAmounts = { summon_crystal: getRecruitmentCost(count) };
+  let resourceLedgerById = spendResources(before.resourceLedgerById ?? {}, spentResources);
   const batch = recruit(previousBannerProgress, before.ownedRecruitmentCharacterIds ?? [], count, rng, banner);
-  const progress = normalizeGuestProgress({ ...before, ownedRecruitmentCharacterIds: batch.ownedCharacterIds, recruitmentProgressByBanner: { ...(before.recruitmentProgressByBanner ?? {}), [banner.id]: batch.progress } }); sessionProgress = progress;
-  return { ...batch, persisted: await persistProgress(progress), guestProgress: progress };
+  const interim = normalizeGuestProgress({
+    ...before,
+    ownedRecruitmentCharacterIds: batch.ownedCharacterIds,
+    recruitmentProgressByBanner: { ...(before.recruitmentProgressByBanner ?? {}), [banner.id]: batch.progress },
+    resourceLedgerById,
+  });
+  const characterProgressById = { ...(interim.characterProgressById ?? {}) };
+  const results: GuestRecruitmentPullResult[] = [];
+  let dismantledSoulEssence = 0;
+  for (const pull of batch.results) {
+    if (!pull.duplicate) { results.push(pull); continue; }
+    if (duplicatePolicy === 'APPLY_PLUS') {
+      const current = characterProgressById[pull.characterId];
+      if (!current) throw new Error(`Duplicate recruitment character has no growth record: ${pull.characterId}`);
+      const nextPlusLevel = normalizeCharacterPlusLevel(current.plusLevel + 1);
+      if (nextPlusLevel > current.plusLevel) {
+        characterProgressById[pull.characterId] = { ...current, plusLevel: nextPlusLevel };
+        results.push({ ...pull, duplicateResolution: 'PLUS', plusLevelAfter: nextPlusLevel });
+        continue;
+      }
+    }
+    const dismantled = getDuplicateDismantleSoulEssence(pull.rarity);
+    dismantledSoulEssence += dismantled;
+    results.push({ ...pull, duplicateResolution: 'DISMANTLE', dismantledSoulEssence: dismantled });
+  }
+  if (dismantledSoulEssence > 0) resourceLedgerById = grantResources(resourceLedgerById, { soul_essence: dismantledSoulEssence });
+  const progress = normalizeGuestProgress({ ...interim, characterProgressById, resourceLedgerById }); sessionProgress = progress;
+  return { ...batch, results, duplicatePolicy, spentResources, dismantledSoulEssence, persisted: await persistProgress(progress), guestProgress: progress };
 }
 
 function requireOwnedCharacter(progress: GuestProgress, characterId: string): CharacterMetaProgress {
@@ -472,14 +555,23 @@ function requireOwnedCharacter(progress: GuestProgress, characterId: string): Ch
 export async function recordGuestCharacterLevel(characterId: string, level: number): Promise<GuestCharacterProgressResult> {
   const before = normalizeGuestProgress(await loadGuestProgress()); const current = requireOwnedCharacter(before, characterId); const nextLevel = normalizeCharacterLevel(level);
   if (nextLevel < current.level) throw new Error('character level cannot decrease');
-  const progress = normalizeGuestProgress({ ...before, characterProgressById: { ...(before.characterProgressById ?? {}), [characterId]: { ...current, level: nextLevel } } }); sessionProgress = progress;
-  return { characterId, characterProgress: progress.characterProgressById![characterId]!, persisted: await persistProgress(progress), guestProgress: progress };
+  const levelCap = getGuestBaseLevelCap(before);
+  if (nextLevel > levelCap) throw new Error(`Base level cap is Lv${levelCap}`);
+  const spentResources: ResourceAmounts = { gold: getLevelUpgradeGoldCost(current.level, nextLevel) };
+  const resourceLedgerById = spendResources(before.resourceLedgerById ?? {}, spentResources);
+  const progress = normalizeGuestProgress({ ...before, resourceLedgerById, characterProgressById: { ...(before.characterProgressById ?? {}), [characterId]: { ...current, level: nextLevel } } }); sessionProgress = progress;
+  return { characterId, characterProgress: progress.characterProgressById![characterId]!, spentResources, persisted: await persistProgress(progress), guestProgress: progress };
 }
 export async function recordGuestCharacterPlusLevel(characterId: string, plusLevel: number): Promise<GuestCharacterProgressResult> {
   const before = normalizeGuestProgress(await loadGuestProgress()); const current = requireOwnedCharacter(before, characterId); const nextPlusLevel = normalizeCharacterPlusLevel(plusLevel);
   if (nextPlusLevel < current.plusLevel) throw new Error('character plus level cannot decrease');
-  const progress = normalizeGuestProgress({ ...before, characterProgressById: { ...(before.characterProgressById ?? {}), [characterId]: { ...current, plusLevel: nextPlusLevel } } }); sessionProgress = progress;
-  return { characterId, characterProgress: progress.characterProgressById![characterId]!, persisted: await persistProgress(progress), guestProgress: progress };
+  const slot = ALL_PLAYER_SLOTS.find((candidate) => candidate.slotId === characterId);
+  if (!slot) throw new Error(`Unknown character: ${characterId}`);
+  const perLevelCost = getPlusLevelSoulEssenceCost(slot.acquisitionClass, slot.rarity);
+  const spentResources: ResourceAmounts = { soul_essence: perLevelCost * (nextPlusLevel - current.plusLevel) };
+  const resourceLedgerById = spendResources(before.resourceLedgerById ?? {}, spentResources);
+  const progress = normalizeGuestProgress({ ...before, resourceLedgerById, characterProgressById: { ...(before.characterProgressById ?? {}), [characterId]: { ...current, plusLevel: nextPlusLevel } } }); sessionProgress = progress;
+  return { characterId, characterProgress: progress.characterProgressById![characterId]!, spentResources, persisted: await persistProgress(progress), guestProgress: progress };
 }
 
 export async function recordGuestEvolutionUnlock(characterId: string, formId: string): Promise<GuestCharacterProgressResult> {

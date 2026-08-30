@@ -15,19 +15,22 @@ test('main menu exposes recruitment and the scene is registered without replacin
   assert.match(main, /scene: \[BootScene, MainMenuScene, StageHubScene, StageSelectScene, DeckScene, CatalogScene, BattleScene, ResultScene\]/);
 });
 
-test('recruitment UI consumes the selected banner and save authority without duplicating roll rules', async () => {
+test('recruitment UI consumes banner odds and delegates the paid transaction to save authority', async () => {
   const source = await readSource('../src/recruitment-scene.ts');
   assert.match(source, /this\.banner\.ratesPermille\[rarity\] \/ 10/);
   assert.match(source, /this\.banner\.poolByRarity\[rarity\]\.length/);
-  assert.match(source, /performGuestRecruitment\(count, CRYPTO_RECRUITMENT_RANDOM_SOURCE, this\.banner\)/);
+  assert.match(source, /performGuestRecruitment\(count, CRYPTO_RECRUITMENT_RANDOM_SOURCE, this\.banner, this\.duplicatePolicy\)/);
+  assert.match(source, /getGuestResourceBalance\(this\.progress, 'summon_crystal'\)/);
+  assert.match(source, /getRecruitmentCost\(1\)/);
+  assert.match(source, /getRecruitmentCost\(10\)/);
   assert.doesNotMatch(source, /Math\.random\(/);
 });
 
-test('all three initial series are selectable and scene restart preserves the selected banner id', async () => {
+test('all three initial series are selectable and restart preserves banner and duplicate policy', async () => {
   const source = await readSource('../src/recruitment-scene.ts');
   assert.match(source, /RECRUITMENT_BANNERS\.forEach/);
   assert.match(source, /getRecruitmentBanner\(data\.bannerId\)/);
-  assert.match(source, /this\.scene\.restart\(\{ bannerId: banner\.id \}\)/);
+  assert.match(source, /this\.scene\.restart\(\{ bannerId: banner\.id, duplicatePolicy: this\.duplicatePolicy \}\)/);
   assert.match(source, /SERIES_TAB_LABELS = \['성휘', '거수', '제로'\]/);
 });
 
@@ -39,18 +42,23 @@ test('active-banner collection count is derived from that banner pool rather tha
   assert.doesNotMatch(source, /RECRUITMENT_UNITS\.filter/);
 });
 
-test('recruitment UI explicitly communicates independent pulls and contains no pity, milestone guarantee, or selector flow', async () => {
+test('recruitment UI communicates independent pulls and explicit duplicate conversion without pity or selector state', async () => {
   const source = await readSource('../src/recruitment-scene.ts');
   assert.match(source, /보장 횟수 없음/);
   assert.match(source, /각 모집은 독립 추첨/);
+  assert.match(source, /\+1 우선/);
+  assert.match(source, /분해 우선/);
+  assert.match(source, /혼의 파편/);
   assert.doesNotMatch(source, /tenPullMinimumRarity|thirtyPullMinimumRarity|pickupSsGuaranteeEvery|selectionCreditEvery/);
   assert.doesNotMatch(source, /guaranteedBy|selectionCreditGranted|redeemGuestBannerSelection|selectionCredits/);
 });
 
-test('recruitment result screen exposes new, duplicate, and persistence outcomes only', async () => {
+test('recruitment result screen distinguishes new, direct plus, dismantle, and persistence outcomes', async () => {
   const source = await readSource('../src/recruitment-scene.ts');
-  assert.match(source, /pull\.duplicate \? '중복' : 'NEW'/);
+  assert.match(source, /pull\.duplicateResolution === 'DISMANTLE'/);
+  assert.match(source, /pull\.duplicateResolution === 'PLUS'/);
   assert.match(source, /result\.results\.filter\(\(pull\) => !pull\.duplicate\)\.length/);
-  assert.match(source, /result\.persisted \? '저장 완료' : '저장에 실패했습니다'/);
+  assert.match(source, /result\.persisted \? '저장 완료' : '저장 실패'/);
+  assert.match(source, /result\.dismantledSoulEssence/);
   assert.doesNotMatch(source, /GUARANTEE_LABELS|guaranteedBy|selectionCreditGranted/);
 });

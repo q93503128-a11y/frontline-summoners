@@ -1,4 +1,3 @@
-import { normalizeCharacterPlusLevel } from './character-growth.ts';
 import type {
   RecruitmentBanner,
   RecruitmentPullResult,
@@ -6,10 +5,12 @@ import type {
 } from './recruitment.ts';
 import {
   performGuestRecruitment,
-  recordGuestCharacterPlusLevel,
+  type DuplicatePolicy,
   type GuestProgress,
+  type GuestRecruitmentPullResult,
   type GuestRecruitmentResult,
 } from './save.ts';
+import { normalizeCharacterPlusLevel } from './character-growth.ts';
 
 export interface DuplicatePlusLevelApplication {
   readonly pullIndex: number;
@@ -17,14 +18,13 @@ export interface DuplicatePlusLevelApplication {
   readonly targetPlusLevel: number;
 }
 
-export interface RecruitmentPullGrowthResult extends RecruitmentPullResult {
-  readonly plusLevelAfter?: number;
-}
+export type RecruitmentPullGrowthResult = GuestRecruitmentPullResult;
+export type GuestRecruitmentGrowthResult = GuestRecruitmentResult;
 
-export interface GuestRecruitmentGrowthResult extends Omit<GuestRecruitmentResult, 'results'> {
-  readonly results: readonly RecruitmentPullGrowthResult[];
-}
-
+/**
+ * Retained as a pure planning helper for tests/tools. Runtime recruitment now resolves
+ * duplicate policy atomically inside save.ts together with summon-crystal spending.
+ */
 export function planDuplicatePlusLevelApplications(
   progress: GuestProgress,
   results: readonly RecruitmentPullResult[],
@@ -45,37 +45,11 @@ export function planDuplicatePlusLevelApplications(
   return applications;
 }
 
-export async function performGuestRecruitmentWithDuplicateGrowth(
+export function performGuestRecruitmentWithDuplicateGrowth(
   count: number,
   rng: RecruitmentRandomSource,
   banner: RecruitmentBanner,
+  duplicatePolicy: DuplicatePolicy = 'APPLY_PLUS',
 ): Promise<GuestRecruitmentGrowthResult> {
-  const recruited = await performGuestRecruitment(count, rng, banner);
-  const applications = planDuplicatePlusLevelApplications(recruited.guestProgress, recruited.results);
-  let progress = recruited.guestProgress;
-  let persisted = recruited.persisted;
-  const plusLevelAfterByPull = new Map<number, number>();
-
-  for (const application of applications) {
-    const current = progress.characterProgressById?.[application.characterId];
-    if (!current) throw new Error(`Recruitment growth record disappeared: ${application.characterId}`);
-    if (application.targetPlusLevel > current.plusLevel) {
-      const growth = await recordGuestCharacterPlusLevel(application.characterId, application.targetPlusLevel);
-      progress = growth.guestProgress;
-      persisted = persisted && growth.persisted;
-    }
-    plusLevelAfterByPull.set(application.pullIndex, application.targetPlusLevel);
-  }
-
-  const results: RecruitmentPullGrowthResult[] = recruited.results.map((pull, pullIndex) => {
-    const plusLevelAfter = plusLevelAfterByPull.get(pullIndex);
-    return plusLevelAfter === undefined ? pull : { ...pull, plusLevelAfter };
-  });
-
-  return {
-    ...recruited,
-    results,
-    persisted,
-    guestProgress: progress,
-  };
+  return performGuestRecruitment(count, rng, banner, duplicatePolicy);
 }

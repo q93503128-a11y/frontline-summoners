@@ -1,11 +1,15 @@
 import Phaser from 'phaser';
 import { INTERNAL_WIDTH } from '@frontline/shared';
 import { buildCharacterCombatSlot, getEvolutionForms, getEvolutionRecipe } from './character-growth';
+import { getLevelUpgradeGoldCost, getPlusLevelSoulEssenceCost } from './meta-economy';
 import { getSlotById } from './prototype';
 import {
+  getGuestBaseLevelCap,
   getGuestResourceBalance,
   getOwnedCharacterIds,
   loadGuestProgress,
+  recordGuestCharacterLevel,
+  recordGuestCharacterPlusLevel,
   recordGuestEvolutionUnlock,
   selectGuestEvolutionForm,
   type GuestProgress,
@@ -15,19 +19,8 @@ import { isCompactMobileViewport } from './viewport';
 
 const EMPTY_PROGRESS: GuestProgress = { clearedStageIds: [], specialClearedStageIds: [], permanentRewardIds: [] };
 const PAGE_SIZE = 6;
-const CHAPTER_ONE_FINAL_STAGE_ID = 'main_01_020';
-const CHAPTER_TWO_FINAL_STAGE_ID = 'main_02_020';
-const CHAPTER_THREE_FINAL_STAGE_ID = 'main_03_020';
-const CHAPTER_FOUR_FINAL_STAGE_ID = 'main_04_020';
 
-export function getImplementedBaseLevelCap(progress: GuestProgress): number {
-  const cleared = new Set(progress.clearedStageIds);
-  if (cleared.has(CHAPTER_FOUR_FINAL_STAGE_ID)) return 50;
-  if (cleared.has(CHAPTER_THREE_FINAL_STAGE_ID)) return 40;
-  if (cleared.has(CHAPTER_TWO_FINAL_STAGE_ID)) return 30;
-  if (cleared.has(CHAPTER_ONE_FINAL_STAGE_ID)) return 20;
-  return 10;
-}
+export function getImplementedBaseLevelCap(progress: GuestProgress): number { return getGuestBaseLevelCap(progress); }
 function getNextCapMessage(levelCap: number): string {
   if (levelCap >= 50) return '제4장 완료 · 기본 레벨 상한 Lv50 · 1차 메인 엔딩 달성';
   if (levelCap >= 40) return '제4장 완료 시 기본 레벨 상한 Lv50';
@@ -57,13 +50,13 @@ export class GrowthScene extends Phaser.Scene {
     drawBackdrop(this, 'menu');
     const compact = isCompactMobileViewport();
     addText(this, 52, 30, '성 장', compact ? 44 : 48, COLORS.cream);
-    addText(this, 54, 90, '보유 동료의 레벨·+레벨·진화 형태를 관리한다.', compact ? 20 : 17, COLORS.muted);
+    addText(this, 54, 90, '보유 동료의 기본 레벨·+레벨·진화 형태를 관리한다.', compact ? 20 : 17, COLORS.muted);
     addButton(this, 1010, compact ? 62 : 58, 150, compact ? 84 : 50, '모집', () => this.scene.start('recruitment'), 0x8b6fb5);
     addButton(this, 1170, compact ? 62 : 58, 150, compact ? 84 : 50, '메인', () => this.scene.start('main-menu'), 0x586275);
     this.add.rectangle(250, 370, 420, 500, 0x222936, 0.97).setStrokeStyle(3, 0x59677f);
     this.add.rectangle(830, 370, 700, 500, 0x222936, 0.97).setStrokeStyle(3, 0x7b6990);
     this.pageText = addText(this, 250, 626, '', compact ? 19 : 16, '#9ca9bb', 'center').setOrigin(0.5);
-    this.statusText = addText(this, 830, 642, '성장 정보를 불러오는 중…', compact ? 18 : 15, '#9ca9bb', 'center').setOrigin(0.5);
+    this.statusText = addText(this, 830, 684, '성장 정보를 불러오는 중…', compact ? 18 : 15, '#9ca9bb', 'center').setOrigin(0.5);
     addButton(this, 150, 650, 150, compact ? 76 : 50, '◀ 이전', () => this.changePage(-1), 0x586275);
     addButton(this, 350, 650, 150, compact ? 76 : 50, '다음 ▶', () => this.changePage(1), 0x586275);
     void loadGuestProgress().then((progress) => {
@@ -112,13 +105,14 @@ export class GrowthScene extends Phaser.Scene {
 
     const rechargeSeconds = (combat.rechargeFrames / 30).toFixed(1);
     const stats = [`HP ${combat.definition.maxHp}`,`공격 ${combat.definition.attackDamage}`,`생산비 ${combat.cost}`,`재생산 ${rechargeSeconds}초`,`이동 ${combat.definition.moveSpeed}`,`대기 사거리 ${combat.definition.standingRange}`,`공격 범위 ${combat.definition.attackMinRange}~${combat.definition.attackMaxRange}`];
-    addText(this, 555, 335, stats.join('\n'), compact ? 18 : 16, '#dce4ef').setLineSpacing(7);
+    addText(this, 555, 330, stats.join('\n'), compact ? 18 : 15, '#dce4ef').setLineSpacing(compact ? 6 : 5);
 
     const gold = getGuestResourceBalance(this.progress, 'gold');
+    const soul = getGuestResourceBalance(this.progress, 'soul_essence');
     const fragment = getGuestResourceBalance(this.progress, 'evo_fragment');
     const core = getGuestResourceBalance(this.progress, 'evo_core');
     const crown = getGuestResourceBalance(this.progress, 'evo_crown');
-    addText(this, 930, 305, `보유 G${gold.toLocaleString('ko-KR')} · 조각${fragment} · 핵심${core} · 왕관${crown}`, compact ? 16 : 13, '#f2d37c').setWordWrapWidth(330);
+    addText(this, 930, 305, `보유 G${gold.toLocaleString('ko-KR')} · 혼${soul} · 조각${fragment} · 핵심${core} · 왕관${crown}`, compact ? 15 : 12, '#f2d37c').setWordWrapWidth(330);
 
     const forms = getEvolutionForms(characterId); addText(this, 930, 334, '형태 · 잠긴 형태를 눌러 진화', compact ? 20 : 18, '#e5c7ff');
     forms.forEach((form, index) => {
@@ -137,7 +131,51 @@ export class GrowthScene extends Phaser.Scene {
       if (!unlocked) formButton.setAlpha(0.88);
       this.detailLayer!.add(formButton);
     });
-    this.detailLayer.add(addText(this, INTERNAL_WIDTH / 2 + 190, 603, getNextCapMessage(levelCap), compact ? 16 : 13, levelCap >= 50 ? '#8ee3aa' : '#9ca9bb', 'center').setOrigin(0.5));
+
+    const nextOne = Math.min(levelCap, meta.level + 1);
+    const nextFive = Math.min(levelCap, meta.level + 5);
+    const oneCost = getLevelUpgradeGoldCost(meta.level, nextOne);
+    const fiveCost = getLevelUpgradeGoldCost(meta.level, nextFive);
+    const plusCost = getPlusLevelSoulEssenceCost(slot.acquisitionClass, slot.rarity);
+    const atLevelCap = meta.level >= levelCap;
+    const atPlusCap = meta.plusLevel >= 50;
+    this.detailLayer.add(addButton(this, 640, 558, 165, compact ? 66 : 56, atLevelCap ? 'Lv 상한' : `Lv +1\nG${oneCost.toLocaleString('ko-KR')}`, () => {
+      if (!this.saving && !atLevelCap) void this.upgradeLevel(characterId, nextOne);
+    }, atLevelCap ? 0x4d5562 : 0x6b7f68));
+    this.detailLayer.add(addButton(this, 820, 558, 165, compact ? 66 : 56, atLevelCap ? '상한 해금 필요' : `Lv +${nextFive - meta.level}\nG${fiveCost.toLocaleString('ko-KR')}`, () => {
+      if (!this.saving && !atLevelCap) void this.upgradeLevel(characterId, nextFive);
+    }, atLevelCap ? 0x4d5562 : 0x6b7f68));
+    this.detailLayer.add(addButton(this, 730, 618, 250, compact ? 66 : 54, atPlusCap ? '+50 상한' : `+레벨 +1 · 혼 ${plusCost}`, () => {
+      if (!this.saving && !atPlusCap) void this.upgradePlus(characterId);
+    }, atPlusCap ? 0x4d5562 : 0x76628c));
+    this.detailLayer.add(addText(this, INTERNAL_WIDTH / 2 + 190, 646, getNextCapMessage(levelCap), compact ? 15 : 12, levelCap >= 50 ? '#8ee3aa' : '#9ca9bb', 'center').setOrigin(0.5));
+  }
+
+  private async upgradeLevel(characterId: string, targetLevel: number): Promise<void> {
+    this.saving = true; this.statusText?.setText(`Lv${targetLevel} 강화 비용 확인 중…`); this.statusText?.setColor('#c7d0dd');
+    try {
+      const result = await recordGuestCharacterLevel(characterId, targetLevel); this.progress = result.guestProgress;
+      if (!this.scene.isActive()) return;
+      const spent = result.spentResources?.gold ?? 0;
+      this.statusText?.setText(result.persisted ? `Lv${result.characterProgress.level} 강화 완료 · G${spent.toLocaleString('ko-KR')} 사용` : '강화는 적용됐지만 영구 저장에 실패했습니다.');
+      this.statusText?.setColor(result.persisted ? '#8ee3aa' : '#ffb37c'); this.renderList(); this.renderDetail();
+    } catch (error) {
+      if (!this.scene.isActive()) return; this.statusText?.setText(error instanceof Error ? error.message : '레벨 강화에 실패했습니다.'); this.statusText?.setColor('#ff9a91');
+    } finally { this.saving = false; }
+  }
+
+  private async upgradePlus(characterId: string): Promise<void> {
+    const current = this.progress.characterProgressById?.[characterId]; if (!current) return;
+    this.saving = true; this.statusText?.setText('+레벨 재화 확인 중…'); this.statusText?.setColor('#c7d0dd');
+    try {
+      const result = await recordGuestCharacterPlusLevel(characterId, current.plusLevel + 1); this.progress = result.guestProgress;
+      if (!this.scene.isActive()) return;
+      const spent = result.spentResources?.soul_essence ?? 0;
+      this.statusText?.setText(result.persisted ? `+${result.characterProgress.plusLevel} 강화 완료 · 혼 ${spent} 사용` : '+레벨은 적용됐지만 영구 저장에 실패했습니다.');
+      this.statusText?.setColor(result.persisted ? '#8ee3aa' : '#ffb37c'); this.renderList(); this.renderDetail();
+    } catch (error) {
+      if (!this.scene.isActive()) return; this.statusText?.setText(error instanceof Error ? error.message : '+레벨 강화에 실패했습니다.'); this.statusText?.setColor('#ff9a91');
+    } finally { this.saving = false; }
   }
 
   private async unlockForm(characterId: string, formId: string): Promise<void> {
