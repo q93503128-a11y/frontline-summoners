@@ -62,6 +62,19 @@ test('saved level, plus level, and selected evolution form alter the battle-read
   assert.ok(battleMireille.definition.maxHp > baseBattleMireille.definition.maxHp);
 });
 
+test('durable selected base weapon becomes the actual solo simulation weapon', () => {
+  const supplyDrop = createGuestPrototypeBattle(firstStageId, progress({ selectedBaseWeaponId: 'base_weapon_supply_drop' }));
+  assert.equal(supplyDrop.baseWeapon.id, 'base_weapon_supply_drop');
+  assert.equal(supplyDrop.baseWeapon.kind, 'SUPPLY_DROP');
+});
+
+test('locked selected base weapon is normalized back to the front cannon before battle creation', () => {
+  const onlyChapterOne = STAGES.slice(0, 20).map((stage) => stage.id);
+  const guest = progress({ clearedStageIds: onlyChapterOne, selectedBaseWeaponId: 'base_weapon_supply_drop' });
+  const battle = createGuestPrototypeBattle(firstStageId, guest);
+  assert.equal(battle.baseWeapon.id, 'base_weapon_front_cannon');
+});
+
 test('automatic formation still selects the first ten owned definitions in canonical roster order', () => {
   const guest = progress();
   const slots = buildGuestDeckSlots(guest);
