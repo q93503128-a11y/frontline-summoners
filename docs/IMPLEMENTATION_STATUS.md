@@ -114,6 +114,12 @@ client/server가 `@frontline/sim`에서 다음을 공유한다.
 - 기록 SPECIAL result.
 - 모집 1/10회 server RNG + wallet + ownership/duplicate 처리.
 - MAIN/SPECIAL sweep.
+- Base Lv.
+- +Lv.
+- evolution unlock.
+- evolution form select.
+- deck set.
+- base weapon select.
 
 ### MAIN
 
@@ -162,6 +168,42 @@ client/server가 `@frontline/sim`에서 다음을 공유한다.
 - 기간 밖 이벤트/주기전은 account authority에서 거부.
 - first clear, permanent reward, character unlock, progression, record를 만들지 않는다.
 
+### 성장 / 진화 / 덱 / 병기
+
+`META_PROGRESSION` action으로 서버 snapshot을 직접 변경한다.
+
+Base Lv:
+- 시작 cap Lv10.
+- `main_01_020` / `main_02_020` / `main_03_020` / `main_04_020`으로 Lv20/30/40/50 해금.
+- 보유 캐릭터만 가능.
+- 감소 금지.
+- canonical Gold curve를 서버가 계산/차감.
+
++Lv:
+- +50 cap.
+- 보유 캐릭터만 가능.
+- 감소 금지.
+- STORY/C/B/A/S/SS authored acquisition/rarity를 서버가 읽고 canonical soul essence 비용 계산.
+
+진화:
+- 해당 character의 form인지 확인.
+- previous form unlock 필요.
+- required Base Lv 필요.
+- exact canonical recipe cost 차감.
+- unlock과 form select는 별도 action.
+- 실제 unlocked form만 선택 가능.
+
+덱:
+- 1..10.
+- unique.
+- owned-only.
+- exact order 저장.
+
+거점 병기:
+- canonical 3종만 허용.
+- account MAIN 진행으로 unlock 재검증.
+- 잠긴 병기 선택 거부.
+
 ### idempotency / transaction
 
 `account_mutation_receipts` 현재 kind:
@@ -171,6 +213,7 @@ client/server가 `@frontline/sim`에서 다음을 공유한다.
 - `RECORD_RESULT`
 - `RECRUITMENT`
 - `SWEEP`
+- `META_PROGRESSION`
 
 - 같은 key + 같은 business input 재전송은 exact result replay.
 - 재지급/재차감/재추첨/periodic charge 재소비 없음.
@@ -179,7 +222,7 @@ client/server가 `@frontline/sim`에서 다음을 공유한다.
 - save revision CAS + receipt insert는 D1 batch 안에서 함께 처리한다.
 - revision mismatch는 CHECK 실패로 batch rollback시켜 save/receipt 반쪽 commit을 막는다.
 
-현재 단계는 **server storage/migration/revision + MAIN/SPECIAL/record/recruitment/sweep mutation/idempotency foundation**이다. 실제 인증 session, 공개 account API, trusted battle completion registry가 연결된 production 계정 시스템 완료는 아니다.
+현재 단계는 **server storage/migration/revision + MAIN/SPECIAL/record/recruitment/sweep/meta-progression mutation/idempotency foundation**이다. 실제 인증 session, 공개 account API, trusted battle completion registry가 연결된 production 계정 시스템 완료는 아니다.
 
 ## 성장 / 모집 / 진화
 
@@ -191,7 +234,8 @@ client/server가 `@frontline/sim`에서 다음을 공유한다.
 - +레벨 상한 +50, +1당 HP/ATK +2% foundation.
 - 공용 `soul_essence`로 원하는 보유 캐릭터 +1.
 - 공용 +1 비용: STORY 80 / C16 / B32 / A80 / S280 / SS880.
-- authenticated server growth mutation은 아직 미연결.
+- account server 내부 mutation도 동일 cap/비용/소유 authority로 구현.
+- 실제 authenticated client Growth 화면과 공개 mutation route 연결은 남음.
 
 ### 모집 / 중복
 
@@ -209,7 +253,8 @@ client/server가 `@frontline/sim`에서 다음을 공유한다.
 - 이전 해금 form 재선택 가능.
 - 재생산 최종 하한 60F.
 - 스토리 10종 F2/F3 20개 explicit combat form 실행.
-- authenticated server evolution/form/deck mutation은 남음.
+- account server 내부 evolution unlock/form select/deck mutation 구현.
+- 실제 authenticated client route 연결은 남음.
 
 ## 전투 코어
 
@@ -325,6 +370,7 @@ client/server가 `@frontline/sim`에서 다음을 공유한다.
 - Save v15 durable selection.
 - 출정 허브 실제 선택 UI.
 - 일반 solo/record에서 선택 병기 사용.
+- account server 내부 병기 선택 mutation도 unlock authority로 구현.
 
 ### 협동 base weapon closure
 
@@ -342,7 +388,7 @@ client/server가 `@frontline/sim`에서 다음을 공유한다.
 
 잔여:
 
-- authenticated account 병기 선택 mutation.
+- authenticated client 병기 선택 route wiring.
 - production VFX/SFX QA.
 - 사람 플레이 사용률/cooldown/effect 조정.
 
@@ -379,7 +425,7 @@ client/server가 `@frontline/sim`에서 다음을 공유한다.
 - guest→account migration 및 existing server progress 충돌 UX.
 - public authenticated mutation route.
 - trusted solo/SPECIAL/record battle completion registry/result proof.
-- authenticated growth/evolution/deck/base-weapon mutation.
+- authenticated client의 recruitment/growth/evolution/deck/base-weapon mutation wiring.
 - account transfer/delete/reset UX.
 - 친구/차단 및 실시간 세션 계정 권위.
 - 1v1 일반/랭킹/친선.
@@ -429,13 +475,14 @@ SPECIAL/event 문서의 profile reward를 현재 resource reward로 대체했다
 - coop shared base weapon / supply-drop seat ownership closure: `8ab44ae47c6a82d23fa114d4221133eae8fa8dcc`, CI #705 green.
 - account save v2 storage/migration/strict validation: `194b785a6fb9e4dcb08b05007597c8282abf4b54`, CI #710 green.
 - MAIN/record/recruitment account mutation/idempotency + full account catalog: `cf91e4e3963347b73a57749b9b79d1cbfcb4c8a1`, CI #730 green.
-- battleId cross-result uniqueness 보강까지: `1d8a96c8676f96ba965640e826106c3fdb56dc35`, CI #735 green.
-- SPECIAL/sweep account authority + shared SPECIAL reward + authored SPECIAL history gate: `456bc39e9d4b4bda687f583923277f396d622970`, **CI #738 전체 green(typecheck/schema/sim/server/client/build)**.
+- battleId cross-result uniqueness 보강: `1d8a96c8676f96ba965640e826106c3fdb56dc35`, CI #735 green.
+- SPECIAL/sweep account authority + shared SPECIAL reward + authored history gate: `456bc39e9d4b4bda687f583923277f396d622970`, CI #738 green.
+- account Base Lv/+Lv/evolution/form/deck/base-weapon mutation + `META_PROGRESSION` receipt: `2232d4b92a16b49f9bb78efcaf1051d9560902d2`, **CI #746 전체 green(typecheck/schema/sim/server/client/build)**.
 
 ## 다음 개발 우선순위
 
 1. **authenticated account wiring**: auth/session, client account state, public mutation route, trusted battle completion registry.
-2. **authenticated growth/meta mutation**: Base Lv/+Lv/evolution/form/deck/base-weapon, guest→account migration/conflict.
+2. **guest→account / authenticated client closure**: guest migration/conflict UX, recruitment/growth/evolution/deck/base-weapon server mutation 실제 연결.
 3. **협동 release/account result closure**: authenticated reward/progression 연결, 친구/초대/reconnect/AI takeover/빠른통신 polish.
 4. **기록/SPECIAL 사람 QA 및 경제 튜닝**: 장기전 난이도, periodic/SPECIAL reward 공급량 TESTED/LOCKED 후보화.
 5. **PvP foundation**: standardization, 1v1/2v2, MMR/season.
