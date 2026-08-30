@@ -118,10 +118,9 @@ function rollRarity(banner: ServerRecruitmentBanner, rng: ServerRecruitmentRando
 export const SERVER_CRYPTO_RECRUITMENT_RANDOM_SOURCE: ServerRecruitmentRandomSource = {
   nextInt(maxExclusive: number): number {
     if (!Number.isInteger(maxExclusive) || maxExclusive <= 0) throw new Error('maxExclusive must be positive integer');
-    if (!globalThis.crypto?.getRandomValues) throw new Error('secure random source is unavailable');
     const limit = Math.floor(0x1_0000_0000 / maxExclusive) * maxExclusive;
     const buffer = new Uint32Array(1);
-    do globalThis.crypto.getRandomValues(buffer); while (buffer[0]! >= limit);
+    do crypto.getRandomValues(buffer); while (buffer[0]! >= limit);
     return buffer[0]! % maxExclusive;
   },
 };
