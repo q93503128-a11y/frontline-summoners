@@ -3,7 +3,9 @@
 기준: 2026-08-30  
 최상위 기획 정본: `docs/CANONICAL.md`  
 세부 정합 감사: `docs/content-wiki/systems/IMPLEMENTATION_WIKI_AUDIT_2026-08-30.md`  
-주기 SPECIAL 이행 기록: `docs/content-wiki/systems/PERIODIC_RESOURCE_SPECIAL_IMPLEMENTATION_2026-08-30.md`
+주기 SPECIAL 이행 기록: `docs/content-wiki/systems/PERIODIC_RESOURCE_SPECIAL_IMPLEMENTATION_2026-08-30.md`  
+전투 grammar / 거점 병기 이행 기록: `docs/content-wiki/systems/COMBAT_GRAMMAR_BASE_WEAPON_IMPLEMENTATION_2026-08-30.md`  
+소탕 / Save v14 이행 기록: `docs/content-wiki/systems/SWEEP_SAVE_V14_IMPLEMENTATION_2026-08-30.md`
 
 이 문서는 현재 실행 코드/콘텐츠의 구현 사실과 남은 큰 공백을 기록한다. 기획 정본을 대체하지 않는다.
 
@@ -31,12 +33,14 @@
 
 ## 저장/메타경제
 
-- 게스트 메인 진행 저장 schema **v13**.
+- 게스트 진행 저장 schema **v14**.
 - resource ledger: `gold`, `evo_fragment`, `evo_core`, `evo_crown`, `soul_essence`, `summon_crystal`, `sweep_ticket`.
 - earned/spent monotonic ledger로 stale save가 소비한 재화를 되살리지 못하게 한다.
 - v2~v12 세이브는 기존 contiguous MAIN NORMAL_CLEAR를 기준으로 MAIN first-clear 일반 재화를 v13 migration에서 한 번 소급 지급하고 `mainRewardedStageIds`로 재지급을 막는다.
+- v13 이하에서 별도 localStorage에 저장되던 주기 SPECIAL charge는 v14 로드시 `GuestProgress.periodicRewardChargeByCollection`으로 한 번 가져오고 durable save 성공 뒤 legacy 키를 제거한다.
+- periodic charge merge는 소비된 charge가 stale save 때문에 부활하지 않도록 보수적으로 더 낮은 charge 상태를 우선한다.
 - 기록 최고점은 max-merge로 stale save가 개인 기록을 낮추지 못한다.
-- 주기 재화 charge는 메인 progress schema와 분리된 guest local persistence `frontline-summoners:periodic-reward-charge:v1`로 저장한다.
+- 주기 재화 charge:
   - collection별 max 4.
   - 12시간마다 +1.
   - 닫힌 동안도 회복.
@@ -82,10 +86,21 @@
 - 재생산 최종 하한 60F 유지.
 - 스토리 10종 F2/F3 20개는 role-template가 아니라 explicit combat form으로 실행한다.
 
+### 소탕
+
+- prior NORMAL_CLEAR가 있어야 사용 가능.
+- 1회당 `sweep_ticket` 정확히 1장을 소비한다.
+- MAIN은 repeat reward만 지급한다.
+- 일반 SPECIAL/이벤트도 repeat reward만 지급한다.
+- 주기 SPECIAL은 charged/depleted 반복 보상을 동일 resolver로 처리하며 charged면 charge 1칸을 함께 소비한다.
+- charge 0에서도 depleted reward 소탕 가능.
+- 기간 밖 이벤트/주기전은 save authority에서 거부한다.
+- 소탕은 first clear, 영구보상, 캐릭터 해금, 진행도, 기록을 만들지 않는다.
+- stage-select에 실제 소탕 버튼, 티켓/charge 표시, 중복 클릭 방지, 즉시 결과 표시가 연결돼 있다.
+
 아직 메타경제에서 남은 것:
 
-- 실제 sweep action의 소탕권 1장 소비 + repeat reward transaction.
-- periodic charge의 authenticated account/server authoritative sync.
+- periodic charge와 wallet의 authenticated account/server authoritative sync.
 - 전체 경제 사람 플레이테스트 및 공급량 조정.
 
 ## 캐릭터/적 전투사양 정합
@@ -106,13 +121,14 @@
 아직 TESTED/LOCKED 아님:
 
 - 스토리/제1장 수치는 사람 플레이테스트 전 `DESIGN_TARGET`.
-- 공허현자 F3의 3-hit 20/20/60 분할은 per-hit damage split grammar 전까지 후보 상태.
+- generic per-hit damage/effect grammar는 구현됐지만 각 진화 form의 최종 수치와 체감은 사람 플레이테스트 전 DESIGN_TARGET이다.
 - 일부 문서의 후보 specialty/tag는 확정값처럼 확대하지 않음.
 - 새 주기 SPECIAL 전용 적 24종은 production art/motion 전 generic visual fallback을 사용한다.
 
 상세 기록:
 - `docs/content-wiki/systems/STORY_CH1_CANONICAL_MIGRATION_2026-08-30.md`
 - `docs/content-wiki/systems/PERIODIC_RESOURCE_SPECIAL_IMPLEMENTATION_2026-08-30.md`
+- `docs/content-wiki/systems/COMBAT_GRAMMAR_BASE_WEAPON_IMPLEMENTATION_2026-08-30.md`
 
 ## 전투 코어
 
@@ -123,18 +139,18 @@
 - `BOSS_HP_BELOW`, `ANY_OF`, wave dependency trigger.
 - 폭식룡 HP 60%/30% threshold advance + 다음 공격 startup 감소.
 - deterministic attackPattern으로 상시/주기 SPECIAL 보스 루프 실행.
+- generic `attackPhases`로 HP 구간별 공격 pattern/cycle을 결정론적으로 전환한다.
+- `hitDamages` / `hitEffects`로 다단히트의 타격별 피해와 특정 hit 상태효과를 실행한다.
+- 대마도장 HP 50% phase, 벨자르 25/25/50 3hit + 마지막 hit Push, 공허엔진 제로 3단계 HP phase가 실행 데이터에 연결돼 있다.
+- `main_01_009`의 `killSupplyMultiplier: 1.05`가 실제 처치 보급에 적용된다.
 - evolution explicit form이 공격주기/접촉 프레임/backswing/KB/target mode를 generic data로 교체 가능.
 - 상태/정의가 simulation hash/signature에 포함됨.
+- 위 phase/per-hit/kill-supply grammar는 client solo와 server authoritative co-op이 같은 공용 grammar를 사용한다.
 
-아직 근사인 위키 세부사양:
+남은 전투 코어 작업:
 
-- 대마도장 HP phase attack pattern.
-- 벨자르 특정 hit만 Push하는 per-hit effect.
-- 공허엔진 제로 HP 구간별 pattern loop.
-- 일부 stage의 `killSupplyMultiplier`처럼 현재 문자열 specialRule로만 남은 규칙.
-- per-hit damage split grammar.
-
-권장 후속: boss-ID 하드코딩이 아니라 generic deterministic HP-phase / per-hit grammar.
+- 사람 플레이테스트를 통한 수치/예고 가독성/보스 체감 조정.
+- production art/motion의 실제 contact frame과 판정 일치 QA.
 
 ## SPECIAL
 
@@ -180,12 +196,12 @@
   - 한 주기 내 항상 1~2 collection open.
 - progression + previous NORMAL_CLEAR 단계 해금.
 - first clear charge 미소모 / repeat charge 소비 / depleted 반복 가능.
+- sweep도 같은 charged/depleted resolver와 Save v14 charge transaction을 사용한다.
 
 아직 남은 것:
 
 - production art/motion.
 - charge의 authenticated account/server save 병합.
-- 실제 sweep action.
 - 경제/난이도 사람 플레이테스트 후 TESTED/LOCKED 승격.
 
 ## 기록 SPECIAL
@@ -194,7 +210,7 @@
 
 - `record_endless_front`: 플레이어 기지 파괴까지 tick 기반 생존 기록.
 - `record_boss_rush`: 9보스 순차, 보스 사이 600F 정비, 보급/쿨타임 유지, 최고 격파 기록.
-- Save v13에 `endlessBestTimeMs`, `endlessBestReachedMinute`, `bossRushBestDefeated` 저장.
+- Save v14에 `endlessBestTimeMs`, `endlessBestReachedMinute`, `bossRushBestDefeated` 저장.
 
 아직 미완료:
 
@@ -205,10 +221,19 @@
 ## 재클리어/거점 병기
 
 - NORMAL_CLEAR 후 무료 2× foundation 구현.
-- `sweep_ticket`은 획득/저장되지만 sweep 실행 및 1장 소비 transaction 미완료.
-- 주기 SPECIAL charged/depleted repeat reward는 구현.
-- 거점 병기는 generic damage+push foundation만 있음.
-- 위키의 전선포/결계발진기/보급투하기 catalog/equip/progression/shared-coop rules는 미완료.
+- 실제 소탕 transaction/UI/Save v14 연결 완료.
+- 주기 SPECIAL charged/depleted repeat reward와 sweep charge 소비 연결.
+- 거점 병기 3종 deterministic runtime 구현:
+  - 전선포격기: 피해 + 비구조 적 Push.
+  - 결계발진기: 사용 시점 생존 아군 snapshot 피해감소.
+  - 보급낙하기: 지연 후 maxSupply 비례 보급.
+- 해금 milestone foundation: 전선포격기 기본 / 결계발진기 `main_02_010` / 보급낙하기 `main_03_010`.
+
+아직 거점 병기에서 남은 것:
+
+- 계정/게스트 save의 선택 병기 필드와 실제 병기 교체 UI.
+- 협동 보급낙하기의 개인 보급 귀속을 명시하는 seat ownership UX/command.
+- 강화 단계는 v1 필수 아님.
 
 ## 협동
 
@@ -222,13 +247,14 @@
 - formation restriction enforcement.
 - event availability enforcement.
 - periodic recurring availability enforcement.
+- combat HP phase/per-hit/kill-supply grammar는 solo와 동일 공용 정의 사용.
 
 미완료:
 
 - release 수준 공개 매칭/재접속/AI 인계.
 - 친구 목록/초대/최근 플레이어/차단.
 - 빠른 통신 최종 UX.
-- full shared base weapon semantics.
+- 선택 거점 병기 저장/교체와 보급낙하기 seat ownership까지 포함한 최종 shared-base-weapon UX.
 - 협동 결과의 server-authoritative 계정 wallet/periodic charge 지급.
 
 ## PvP / 계정
@@ -275,10 +301,16 @@
 위키에는 초기 약 45~55 achievement와 title/frame/banner/emblem/badge 구조가 설계돼 있으나 현재 runtime은 미구현이다.
 SPECIAL/event 문서의 프로필 보상은 현재 자원 보상으로 대체해 완료 처리하지 않는다.
 
+## 최근 자동검증 기준점
+
+- 전투 grammar / 거점 병기 runtime 묶음: `8fbd6389a52951007254bdd175cbc2c8b11ac835`, CI #671 green.
+- 소탕 / Save v14: `88947a6a0381a69c9d08def810fe576223e9e645`; 기능 테스트는 통과했으나 구형 reward API를 import한 낡은 테스트 1개 때문에 CI #672가 red.
+- 구형 테스트를 새 pure resolver로 교체한 `86067322062fde59e15e20b85801fb7450ca7220`에서 CI #673 전체 green.
+
 ## 다음 개발 우선순위
 
-1. **전투/재클리어 grammar 확장**: 실제 sweep transaction, HP phase pattern, per-hit effect/damage split, killSupplyMultiplier, base weapon 3종.
-2. **기록전 사용자 flow**: hub/battle/result/reward + long-run QA.
+1. **거점 병기 사용자 연결 마무리**: 선택 병기 save/equip UI + 협동 보급낙하기 seat ownership.
+2. **기록전 사용자 flow**: hub/battle/result/구간 first reward transaction + long-run QA.
 3. **계정/친구/PvP**: authoritative wallet/periodic charge sync 포함.
 4. 마지막 production art/motion/audio/accessibility/release QA.
 
