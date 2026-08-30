@@ -18,7 +18,8 @@
     "./formation-restrictions": "./src/formation-restrictions.ts",
     "./record-playable": "./src/record-playable.ts",
     "./periodic-special": "./src/periodic-special.ts",
-    "./combat-grammar": "./src/combat-grammar.ts"
+    "./combat-grammar": "./src/combat-grammar.ts",
+    "./achievement-profile": "./src/achievement-profile.ts"
   },
   "scripts": {
     "typecheck": "tsc --noEmit",
