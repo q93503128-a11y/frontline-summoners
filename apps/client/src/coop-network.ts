@@ -1,3 +1,5 @@
+import type { BaseWeaponId } from '@frontline/sim/playable';
+
 export type CoopSeatId = 'A' | 'B';
 export type CoopRoomPhase = 'LOBBY' | 'BATTLE' | 'FINISHED';
 
@@ -11,6 +13,7 @@ export interface CoopCharacterLoadout {
 export interface CoopPlayerLoadout {
   readonly characters: readonly CoopCharacterLoadout[];
   readonly permanentRewardIds: readonly string[];
+  readonly clearedStageIds: readonly string[];
 }
 
 export type CoopCommand =
@@ -23,6 +26,7 @@ export interface CoopRoomSnapshot {
   readonly stageId: string;
   readonly phase: CoopRoomPhase;
   readonly committedTick: number;
+  readonly agreedBaseWeaponId: BaseWeaponId | null;
   readonly seats: readonly {
     readonly seatId: CoopSeatId;
     readonly clientId: string | null;
@@ -30,6 +34,7 @@ export interface CoopRoomSnapshot {
     readonly ready: boolean;
     readonly control: 'PLAYER' | 'AI';
     readonly deckSize: number;
+    readonly selectedBaseWeaponId: BaseWeaponId;
   }[];
 }
 
@@ -43,7 +48,9 @@ export interface CoopBattleSnapshot {
     readonly enemyHp: number;
     readonly enemyMaxHp: number;
   };
+  readonly baseWeaponId: BaseWeaponId | null;
   readonly baseWeaponCooldownFrames: number;
+  readonly baseWeaponLastActivatedSeatId: CoopSeatId | null;
   readonly players: readonly {
     readonly seatId: CoopSeatId;
     readonly supply: number;
@@ -240,6 +247,10 @@ export class CoopSession {
       if (message.type === 'BATTLE_FINISHED') this.stopInputPump();
     }
     for (const subscriber of this.subscribers) subscriber(message);
+  }
+
+  sendBaseWeaponSelection(baseWeaponId: BaseWeaponId): void {
+    this.send({ type: 'SELECT_BASE_WEAPON', baseWeaponId });
   }
 
   sendReady(loadout: CoopPlayerLoadout): void {
