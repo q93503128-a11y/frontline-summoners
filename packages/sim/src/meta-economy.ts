@@ -43,7 +43,7 @@ export function getDuplicateDismantleSoulEssence(rarity: keyof typeof DUPLICATE_
   return DUPLICATE_DISMANTLE_SOUL_ESSENCE[rarity];
 }
 
-export function getPlusLevelSoulEssenceCost(acquisitionClass: 'STORY' | 'RECRUITMENT', rarity: keyof typeof DUPLICATE_DISMANTLE_SOUL_ESSENCE | null): number {
+export function getPlusLevelSoulEssenceCost(acquisitionClass: 'STORY' | 'RECRUITMENT' | 'SPECIAL', rarity: keyof typeof DUPLICATE_DISMANTLE_SOUL_ESSENCE | null): number {
   if (acquisitionClass === 'STORY' || rarity === null) return PLUS_LEVEL_SOUL_ESSENCE_COST.STORY;
   return PLUS_LEVEL_SOUL_ESSENCE_COST[rarity];
 }
