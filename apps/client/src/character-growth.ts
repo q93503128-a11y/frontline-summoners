@@ -25,6 +25,9 @@ import levelCurveJson from '../../../content/growth/level-curve-01.json' with { 
 import evolutionCatalogJson from '../../../content/evolution/catalog-01.json' with { type: 'json' };
 import storyEvolutionOverridesJson from '../../../content/evolution/story-01-overrides.json' with { type: 'json' };
 import commonRecruitmentEvolutionOverridesJson from '../../../content/evolution/recruitment-common-explicit-01.json' with { type: 'json' };
+import seriesOneEvolutionOverridesJson from '../../../content/evolution/recruitment-series-01-explicit.json' with { type: 'json' };
+import seriesTwoEvolutionOverridesJson from '../../../content/evolution/recruitment-series-02-explicit.json' with { type: 'json' };
+import seriesThreeEvolutionOverridesJson from '../../../content/evolution/recruitment-series-03-explicit.json' with { type: 'json' };
 import { ALL_PLAYER_SLOTS } from './prototype.ts';
 
 export type {
@@ -78,7 +81,10 @@ function parseLevelCurve(value: unknown): CharacterLevelCurve {
 
 export const CHARACTER_LEVEL_CURVE = parseLevelCurve(levelCurveJson);
 const STORY_EVOLUTION_SOURCE = applyEvolutionCatalogOverrides(evolutionCatalogJson, storyEvolutionOverridesJson);
-const EVOLUTION_SOURCE = applyExplicitEvolutionFormOverrides(STORY_EVOLUTION_SOURCE, commonRecruitmentEvolutionOverridesJson);
+const COMMON_EVOLUTION_SOURCE = applyExplicitEvolutionFormOverrides(STORY_EVOLUTION_SOURCE, commonRecruitmentEvolutionOverridesJson);
+const SERIES_ONE_EVOLUTION_SOURCE = applyExplicitEvolutionFormOverrides(COMMON_EVOLUTION_SOURCE, seriesOneEvolutionOverridesJson);
+const SERIES_TWO_EVOLUTION_SOURCE = applyExplicitEvolutionFormOverrides(SERIES_ONE_EVOLUTION_SOURCE, seriesTwoEvolutionOverridesJson);
+const EVOLUTION_SOURCE = applyExplicitEvolutionFormOverrides(SERIES_TWO_EVOLUTION_SOURCE, seriesThreeEvolutionOverridesJson);
 const EVOLUTION_CATALOG = buildEvolutionCatalog(EVOLUTION_SOURCE, new Set(ALL_PLAYER_SLOTS.map((slot) => slot.slotId)));
 export const EVOLUTION_FORMS: readonly EvolutionFormDefinition[] = EVOLUTION_CATALOG.forms;
 export const EVOLUTION_RECIPES: readonly EvolutionRecipeDefinition[] = EVOLUTION_CATALOG.recipes;
