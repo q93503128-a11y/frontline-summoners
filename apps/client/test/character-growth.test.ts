@@ -124,6 +124,71 @@ test('all fifteen common recruitment characters use their authored C/B/A evoluti
   assert.equal(mirror.definition.attackTiming.cycleFrames, 115);
 });
 
+test('all eighteen initial S and SS recruits now use authored three-form identities', () => {
+  const expectedNames = new Map<string, readonly string[]>([
+    ['char_s01_elsia', ['백은의 창', '은빛 기병창', '성창의 선봉']],
+    ['char_s01_riena', ['불량 성녀', '금간 성물의 리에나', '파계의 성녀']],
+    ['char_s01_mireille', ['유리궁 사수', '수정궁 귀족', '천정의 궁수']],
+    ['char_s01_neria', ['흑장미 기사', '흑갑의 네리아', '장미를 밟는 자']],
+    ['char_s01_totoria', ['마도인형사', '대형인형사', '극장주 토토리아']],
+    ['char_s01_arselia', ['별의 왕녀', '별을 두른 여왕', '천체왕 아르셀리아']],
+    ['char_s02_barga', ['바르가', '암산 바르가', '걸어오는 능선']],
+    ['char_s02_zirka', ['지르카', '칼꼬리 지르카', '절단질주 지르카']],
+    ['char_s02_mogu', ['모구', '포자군락 모구', '떠도는 균해']],
+    ['char_s02_gardo', ['가르도', '포식턱 가르도', '하늘삼킴 가르도']],
+    ['char_s02_kreik', ['크리크', '수정군체 크리크', '결정포식충']],
+    ['char_s02_gormu', ['고대등짐 고르무', '세계등짐 고르무', '걸어가는 대륙']],
+    ['char_s03_k17', ['K-17', 'K-17B', 'K-17 OVERCUT']],
+    ['char_s03_arc_railer', ['아크 레일러', '중궤도 레일러', '수평선 절단포']],
+    ['char_s03_nana04', ['NANA-04', 'NANA-04 QUAD', 'NANA-04 SWARM']],
+    ['char_s03_rxomega', ['RX-Ω', 'RX-Ω BULWARK', 'RX-Ω RUSHWALL']],
+    ['char_s03_blade_hound', ['블레이드 하운드', '크로노 하운드', '시간절단 사냥개']],
+    ['char_s03_overlay_astra', ['아스트라 프레임', '오버레이・아스트라', '아스트라 // ZERO ARRAY']],
+  ]);
+  assert.equal(expectedNames.size, 18);
+  for (const [characterId, names] of expectedNames) {
+    assert.deepEqual(getEvolutionForms(characterId).map((form) => form.name), names, characterId);
+  }
+});
+
+test('authored S and SS forms preserve total multihit damage and status identities', () => {
+  const arselia = applyEvolutionForm(getSlotById('char_s01_arselia')!, 'char_s01_arselia_f1');
+  assert.equal(arselia.definition.attackDamage, 720);
+  assert.deepEqual(arselia.definition.attackTiming.hitFrames, [40, 50, 60]);
+  assert.deepEqual(arselia.definition.hitDamages, [144, 180, 396]);
+  assert.equal(arselia.definition.hitDamages?.reduce((sum, damage) => sum + damage, 0), 720);
+
+  const celestialKing = applyEvolutionForm(getSlotById('char_s01_arselia')!, 'char_s01_arselia_f3');
+  assert.equal(celestialKing.definition.attackDamage, 1180);
+  assert.deepEqual(celestialKing.definition.hitDamages, [177, 177, 236, 590]);
+  assert.equal(celestialKing.definition.attackMaxRange, 600);
+
+  const mogu = applyEvolutionForm(getSlotById('char_s02_mogu')!, 'char_s02_mogu_f2');
+  assert.deepEqual(mogu.definition.onHitSlow, { chancePermille: 1000, durationFrames: 60, speedPermille: 700 });
+  assert.deepEqual(mogu.definition.onHitWeaken, { chancePermille: 1000, durationFrames: 45, attackPermille: 800 });
+
+  const kreik = applyEvolutionForm(getSlotById('char_s02_kreik')!, 'char_s02_kreik_f2');
+  assert.equal(kreik.definition.attackDamage, 285);
+  assert.deepEqual(kreik.definition.hitDamages, [95, 95, 95]);
+  assert.equal(kreik.definition.hitDamages?.reduce((sum, damage) => sum + damage, 0), 285);
+
+  const nana = applyEvolutionForm(getSlotById('char_s03_nana04')!, 'char_s03_nana04_f3');
+  assert.equal(nana.definition.attackDamage, 390);
+  assert.deepEqual(nana.definition.hitDamages, [98, 98, 97, 97]);
+  assert.equal(nana.definition.hitDamages?.reduce((sum, damage) => sum + damage, 0), 390);
+
+  const hound = applyEvolutionForm(getSlotById('char_s03_blade_hound')!, 'char_s03_blade_hound_f3');
+  assert.equal(hound.definition.attackDamage, 300);
+  assert.deepEqual(hound.definition.hitDamages, [60, 60, 60, 60, 60]);
+
+  const astra = applyEvolutionForm(getSlotById('char_s03_overlay_astra')!, 'char_s03_overlay_astra_f3');
+  assert.equal(astra.definition.attackDamage, 1500);
+  assert.deepEqual(astra.definition.attackTiming.hitFrames, [34, 42, 50, 58, 66, 74, 86, 102]);
+  assert.deepEqual(astra.definition.hitDamages, [120, 120, 120, 120, 120, 120, 180, 600]);
+  assert.equal(astra.definition.hitDamages?.reduce((sum, damage) => sum + damage, 0), 1500);
+  assert.equal(astra.definition.attackMaxRange, 560);
+});
+
 test('turnip explicit forms remain sidegrades and never breach the two-second recharge floor', () => {
   const base = getSlotById('char_common_c_turnip_rider')!;
   const sturdy = applyEvolutionForm(base, 'char_common_c_turnip_rider_f2');
