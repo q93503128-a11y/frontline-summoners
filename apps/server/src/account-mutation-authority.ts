@@ -21,6 +21,7 @@ import {
   type AccountSaveRecord,
   type AccountSaveSnapshotV2,
 } from './account-save-authority.ts';
+import { mergeAccountEnemyDiscoveries, normalizeServerEnemyDiscoveries } from './account-enemy-discovery-authority.ts';
 import { ACCOUNT_MAIN_STAGE_INDEX, ACCOUNT_MAIN_STAGES } from './account-content.ts';
 import {
   SERVER_CHARACTER_LEVEL_CURVE,
@@ -44,6 +45,7 @@ export interface AccountMainBattleMutationInput {
   readonly expectedRevision: number;
   readonly stageId: string;
   readonly source: AccountNormalClearSource;
+  readonly discoveredEnemyIds?: readonly string[];
 }
 
 export interface AccountMainBattleMutationResult {
@@ -247,6 +249,7 @@ function buildMainBattleResult(
   snapshot: AccountSaveSnapshotV2,
   stageId: string,
   source: AccountNormalClearSource,
+  discoveredEnemyIds: readonly string[] = [],
 ): BuiltMutation<AccountMainBattleMutationResult> {
   if (!NORMAL_CLEAR_SOURCES.has(source)) throw new Error(`invalid NORMAL_CLEAR source:${source}`);
   const stage = MAIN_STAGE_BY_ID.get(stageId);
@@ -271,9 +274,10 @@ function buildMainBattleResult(
   rewards.add(stage.permanentRewardId);
   const resourceReward = getMainStageResourceReward(stageId, firstResourceReward);
   const resourceLedgerById = grantResources(snapshot.resourceLedgerById, resourceReward);
+  const discovery = mergeAccountEnemyDiscoveries(snapshot, discoveredEnemyIds);
 
   const next = normalizeAccountSaveSnapshot({
-    ...snapshot,
+    ...discovery.snapshot,
     clearedStageIds: [...cleared],
     normalClearSourceByStage,
     mainRewardedStageIds: [...rewardedStages],
@@ -410,9 +414,10 @@ export async function applyAccountMainBattleResult(
   nowMs = Date.now(),
 ): Promise<AccountMutationApplyResult<AccountMainBattleMutationResult>> {
   const battleId = nonEmptyId(input.battleId, 'battleId');
-  const inputFingerprint = fingerprint({ stageId: input.stageId, source: input.source });
+  const discoveredEnemyIds = normalizeServerEnemyDiscoveries(input.discoveredEnemyIds ?? []);
+  const inputFingerprint = fingerprint({ stageId: input.stageId, source: input.source, discoveredEnemyIds });
   return commitMutation(db, accountId, input.expectedRevision, 'MAIN_BATTLE_RESULT', battleId, inputFingerprint,
-    (snapshot) => buildMainBattleResult(snapshot, input.stageId, input.source), nowMs);
+    (snapshot) => buildMainBattleResult(snapshot, input.stageId, input.source, discoveredEnemyIds), nowMs);
 }
 
 export async function applyAccountRecordResult(
