@@ -20,6 +20,12 @@ export interface PeriodicSpecialRewardDefinition {
   readonly chargedReward: ResourceAmounts;
   readonly depletedReward: ResourceAmounts;
 }
+export interface SpecialResourceRewardResolution {
+  readonly resourceReward: ResourceAmounts;
+  readonly periodicChargeMap: PeriodicRewardChargeMap;
+  readonly chargeConsumed: boolean;
+  readonly periodicCollectionId?: PeriodicRewardCollectionId;
+}
 
 const PERIODIC_REWARDS: readonly PeriodicSpecialRewardDefinition[] = [
   { stageId: 'special_gold_convoy_01', collectionId: 'special_gold_convoy', firstClearReward: { gold: 600, sweep_ticket: 1 }, chargedReward: { gold: 450 }, depletedReward: { gold: 90 } },
@@ -87,28 +93,13 @@ const ALL_REWARD_IDS = [...PERIODIC_REWARDS.map((reward) => reward.stageId), ...
 if (new Set(ALL_REWARD_IDS).size !== ALL_REWARD_IDS.length) throw new Error('special resource reward stage ids must be unique');
 const BY_STAGE = new Map(REWARDS.map((reward) => [reward.stageId, reward] as const));
 const PERIODIC_BY_STAGE = new Map(PERIODIC_REWARDS.map((reward) => [reward.stageId, reward] as const));
-const STORAGE_KEY = 'frontline-summoners:periodic-reward-charge:v1';
-let sessionChargeMap: PeriodicRewardChargeMap = createFullPeriodicRewardChargeMap();
+const LEGACY_STORAGE_KEY = 'frontline-summoners:periodic-reward-charge:v1';
 
 function addAmounts(a: ResourceAmounts, b: ResourceAmounts): ResourceAmounts {
   const result: Record<string, number> = {};
   for (const [id, amount] of Object.entries(a)) result[id] = (result[id] ?? 0) + (amount ?? 0);
   for (const [id, amount] of Object.entries(b)) result[id] = (result[id] ?? 0) + (amount ?? 0);
   return result as ResourceAmounts;
-}
-function readChargeMap(nowMs: number): PeriodicRewardChargeMap {
-  try {
-    const storage = globalThis.localStorage;
-    const raw = storage?.getItem(STORAGE_KEY);
-    sessionChargeMap = normalizePeriodicRewardChargeMap(raw ? JSON.parse(raw) : sessionChargeMap, nowMs);
-  } catch {
-    sessionChargeMap = normalizePeriodicRewardChargeMap(sessionChargeMap, nowMs);
-  }
-  return sessionChargeMap;
-}
-function writeChargeMap(map: PeriodicRewardChargeMap): void {
-  sessionChargeMap = map;
-  try { globalThis.localStorage?.setItem(STORAGE_KEY, JSON.stringify(map)); } catch { /* session fallback remains authoritative */ }
 }
 
 export const SPECIAL_RESOURCE_REWARDS = REWARDS;
@@ -117,27 +108,60 @@ export const PERIODIC_SPECIAL_REWARDS = PERIODIC_REWARDS;
 export function getPeriodicRewardCollectionIdForStage(stageId: string): PeriodicRewardCollectionId | undefined {
   return PERIODIC_BY_STAGE.get(stageId)?.collectionId;
 }
-export function getPeriodicSpecialChargeMap(nowMs = Date.now()): PeriodicRewardChargeMap {
-  return readChargeMap(nowMs);
-}
-export function resetPeriodicSpecialChargeStateForTests(): void {
-  sessionChargeMap = createFullPeriodicRewardChargeMap();
-  try { globalThis.localStorage?.removeItem(STORAGE_KEY); } catch { /* no-op */ }
-}
 
-export function getSpecialResourceReward(stageId: string, firstClear: boolean, nowMs = Date.now()): ResourceAmounts {
+/** Pure reward resolution. The caller persists the returned charge map together with the resource ledger. */
+export function resolveSpecialResourceReward(
+  stageId: string,
+  firstClear: boolean,
+  chargeMap: PeriodicRewardChargeMap,
+  nowMs = Date.now(),
+): SpecialResourceRewardResolution {
+  const normalizedCharges = normalizePeriodicRewardChargeMap(chargeMap, nowMs);
   const periodic = PERIODIC_BY_STAGE.get(stageId);
   if (periodic) {
-    if (firstClear) return periodic.firstClearReward;
-    const chargeMap = readChargeMap(nowMs);
-    const consumed = consumePeriodicRewardCharge(chargeMap[periodic.collectionId], nowMs);
-    const nextMap = { ...chargeMap, [periodic.collectionId]: consumed.state } as PeriodicRewardChargeMap;
-    writeChargeMap(nextMap);
-    return consumed.consumed ? periodic.chargedReward : periodic.depletedReward;
+    if (firstClear) {
+      return {
+        resourceReward: periodic.firstClearReward,
+        periodicChargeMap: normalizedCharges,
+        chargeConsumed: false,
+        periodicCollectionId: periodic.collectionId,
+      };
+    }
+    const consumed = consumePeriodicRewardCharge(normalizedCharges[periodic.collectionId], nowMs);
+    return {
+      resourceReward: consumed.consumed ? periodic.chargedReward : periodic.depletedReward,
+      periodicChargeMap: { ...normalizedCharges, [periodic.collectionId]: consumed.state } as PeriodicRewardChargeMap,
+      chargeConsumed: consumed.consumed,
+      periodicCollectionId: periodic.collectionId,
+    };
   }
   const reward = BY_STAGE.get(stageId);
-  if (!reward) return {};
-  return firstClear ? addAmounts(reward.repeatReward, reward.firstClearBonus) : reward.repeatReward;
+  return {
+    resourceReward: reward ? (firstClear ? addAmounts(reward.repeatReward, reward.firstClearBonus) : reward.repeatReward) : {},
+    periodicChargeMap: normalizedCharges,
+    chargeConsumed: false,
+  };
+}
+
+/** v13 and earlier stored periodic charges separately. Save v14 imports this once, then removes it after durable persistence. */
+export function readLegacyPeriodicSpecialChargeMap(nowMs = Date.now()): PeriodicRewardChargeMap | undefined {
+  try {
+    const raw = globalThis.localStorage?.getItem(LEGACY_STORAGE_KEY);
+    return raw ? normalizePeriodicRewardChargeMap(JSON.parse(raw), nowMs) : undefined;
+  } catch {
+    return undefined;
+  }
+}
+export function clearLegacyPeriodicSpecialChargeState(): void {
+  try { globalThis.localStorage?.removeItem(LEGACY_STORAGE_KEY); } catch { /* durable save remains authoritative */ }
+}
+export function resetPeriodicSpecialChargeStateForTests(): void {
+  clearLegacyPeriodicSpecialChargeState();
+}
+
+/** Used when no historical v13 charge state exists. */
+export function createDefaultPeriodicSpecialChargeMap(): PeriodicRewardChargeMap {
+  return createFullPeriodicRewardChargeMap();
 }
 
 for (const collectionId of PERIODIC_REWARD_COLLECTION_IDS) {

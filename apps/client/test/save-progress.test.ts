@@ -42,16 +42,11 @@ test('session and durable guest progress merge NORMAL_CLEAR and rewarded-stage s
 test('NORMAL_CLEAR normalization canonicalizes legacy stage ids, repairs guaranteed permanent rewards, and drops orphan clear sources', () => {
   const normalized = normalizeGuestProgress({
     clearedStageIds: ['border-01', 'border-03', 'border-16'],
-    normalClearSourceByStage: {
-      'border-01': 'COOP_BATTLE',
-      'border-03': 'SOLO_BATTLE',
-      'border-04': 'COOP_BATTLE',
-    },
+    normalClearSourceByStage: { 'border-01': 'COOP_BATTLE', 'border-03': 'SOLO_BATTLE', 'border-04': 'COOP_BATTLE' },
     mainRewardedStageIds: ['border-01', 'border-03'],
     specialClearedStageIds: ['special-01', 'missing-special'],
     permanentRewardIds: ['pot-token', 'wall-shadow', 'future-special-relic'],
   });
-
   assert.deepEqual(normalized.clearedStageIds, [STAGE_1]);
   assert.deepEqual(normalized.normalClearSourceByStage, { [STAGE_1]: 'COOP_BATTLE' });
   assert.deepEqual(normalized.mainRewardedStageIds, [STAGE_1]);
@@ -65,23 +60,13 @@ test('NORMAL_CLEAR normalization canonicalizes legacy stage ids, repairs guarant
 });
 
 test('legacy progress without provenance migrates stage ids and defaults historical actual-battle source without inventing extra clears', () => {
-  const normalized = normalizeGuestProgress({
-    clearedStageIds: ['border-01', 'border-02'],
-    specialClearedStageIds: [],
-    permanentRewardIds: [],
-  });
+  const normalized = normalizeGuestProgress({ clearedStageIds: ['border-01', 'border-02'], specialClearedStageIds: [], permanentRewardIds: [] });
   assert.deepEqual(normalized.clearedStageIds, [STAGE_1, STAGE_2]);
-  assert.deepEqual(normalized.normalClearSourceByStage, {
-    [STAGE_1]: 'SOLO_BATTLE',
-    [STAGE_2]: 'SOLO_BATTLE',
-  });
+  assert.deepEqual(normalized.normalClearSourceByStage, { [STAGE_1]: 'SOLO_BATTLE', [STAGE_2]: 'SOLO_BATTLE' });
   assert.deepEqual(normalized.permanentRewardIds, ['wind-badge', 'barefoot-ribbon']);
 
   const provenanceOnly = normalizeGuestProgress({
-    clearedStageIds: [],
-    normalClearSourceByStage: { 'border-01': 'COOP_BATTLE' },
-    specialClearedStageIds: [],
-    permanentRewardIds: [],
+    clearedStageIds: [], normalClearSourceByStage: { 'border-01': 'COOP_BATTLE' }, specialClearedStageIds: [], permanentRewardIds: [],
   });
   assert.deepEqual(provenanceOnly.clearedStageIds, []);
   assert.deepEqual(provenanceOnly.normalClearSourceByStage, {});
@@ -89,11 +74,7 @@ test('legacy progress without provenance migrates stage ids and defaults histori
 
 test('legacy border migration is bounded to the original twenty-stage chapter and never fabricates chapter-two clears', () => {
   const legacyChapterOne = Array.from({ length: 20 }, (_, index) => `border-${String(index + 1).padStart(2, '0')}`);
-  const normalized = normalizeGuestProgress({
-    clearedStageIds: [...legacyChapterOne, 'border-21'],
-    specialClearedStageIds: [],
-    permanentRewardIds: [],
-  });
+  const normalized = normalizeGuestProgress({ clearedStageIds: [...legacyChapterOne, 'border-21'], specialClearedStageIds: [], permanentRewardIds: [] });
   assert.equal(normalized.clearedStageIds.length, 20);
   assert.equal(normalized.clearedStageIds[0], 'main_01_001');
   assert.equal(normalized.clearedStageIds.at(-1), 'main_01_020');
@@ -101,20 +82,23 @@ test('legacy border migration is bounded to the original twenty-stage chapter an
   assert.equal(hasNormalClear(normalized, 'border-21'), false);
 });
 
-test('save schema v13 persists record state, resource ledger, and one-time main reward provenance while migrating v2-v12', async () => {
+test('save schema v14 persists periodic charge with ledger/record state while migrating v2-v13', async () => {
   const source = await readFile(new URL('../src/save.ts', import.meta.url), 'utf8');
-  assert.match(source, /const SCHEMA_VERSION = 13/);
-  assert.match(source, /interface StoredGuestProgressV13/);
+  assert.match(source, /const SCHEMA_VERSION = 14/);
+  assert.match(source, /interface StoredGuestProgressV14/);
   assert.match(source, /mainRewardedStageIds: readonly string\[\]/);
   assert.match(source, /resourceLedgerById: ResourceLedger/);
+  assert.match(source, /periodicRewardChargeByCollection: PeriodicRewardChargeMap/);
   assert.match(source, /recordModeProgress: RecordModeProgress/);
   assert.match(source, /\(version as number\) < 2 \|\| \(version as number\) > SCHEMA_VERSION/);
   assert.match(source, /versionNumber >= 11 \? normalizeResourceLedger\(value\?\.resourceLedgerById\) : \{\}/);
   assert.match(source, /versionNumber >= 12 \? normalizeRecordModeProgress\(value\?\.recordModeProgress\) : EMPTY_RECORD_PROGRESS/);
   assert.match(source, /versionNumber >= 13 \? canonicalStageIds\(value\?\.mainRewardedStageIds\) : \[\]/);
+  assert.match(source, /versionNumber >= 14 \? normalizePeriodicRewardChargeMap\(value\?\.periodicRewardChargeByCollection\) : createFullPeriodicRewardChargeMap\(\)/);
   assert.match(source, /if \(versionNumber < 13\)/);
   assert.match(source, /getMainStageResourceReward\(migratedStageId, true\)/);
-  assert.match(source, /mainRewardedStageIds = migratedClears/);
+  assert.match(source, /readLegacyPeriodicSpecialChargeMap/);
+  assert.match(source, /clearLegacyPeriodicSpecialChargeState/);
 });
 
 test('progression writer grants canonical first/repeat resources and preserves one-time permanent reward semantics', async () => {
@@ -132,14 +116,28 @@ test('progression writer grants canonical first/repeat resources and preserves o
   assert.match(resultSource, /formatResourceReward\(result\.resourceReward\)/);
 });
 
-test('SPECIAL writer enforces collection, previous-stage and main-progression gates before granting canonical resources', async () => {
+test('SPECIAL writer enforces sortie gates and persists reward charge with the resource grant', async () => {
   const source = await readFile(new URL('../src/save.ts', import.meta.url), 'utf8');
   assert.match(source, /export async function recordSpecialStageClear/);
   assert.match(source, /if \(stage\.stageType !== 'SPECIAL'\)/);
-  assert.match(source, /if \(!isSortieStageUnlocked\(stage\.id, before\.clearedStageIds, before\.specialClearedStageIds\)\)/);
+  assert.match(source, /if \(!isSortieStageUnlocked\(stage\.id, before\.clearedStageIds, before\.specialClearedStageIds, nowMs\)\)/);
   assert.match(source, /specialClears\.add\(stage\.id\)/);
-  assert.match(source, /getSpecialResourceReward\(stage\.id, firstClear\)/);
-  assert.match(source, /grantResources\(before\.resourceLedgerById \?\? \{\}, resourceReward\)/);
+  assert.match(source, /resolveSpecialResourceReward\(stage\.id, firstClear/);
+  assert.match(source, /periodicRewardChargeByCollection: resolution\.periodicChargeMap/);
+  assert.match(source, /grantResources\(before\.resourceLedgerById \?\? \{\}, resolution\.resourceReward\)/);
+});
+
+test('sweep authority requires a prior NORMAL_CLEAR, spends exactly one ticket, never creates first-clear state, and uses repeat rewards', async () => {
+  const source = await readFile(new URL('../src/save.ts', import.meta.url), 'utf8');
+  assert.match(source, /export async function recordGuestStageSweep/);
+  assert.match(source, /stage\.sweepEligibility !== 'AFTER_NORMAL_CLEAR'/);
+  assert.match(source, /if \(!previouslyCleared\) throw new Error\(`Sweep requires prior NORMAL_CLEAR/);
+  assert.match(source, /spentResources: ResourceAmounts = \{ sweep_ticket: 1 \}/);
+  assert.match(source, /spendResources\(before\.resourceLedgerById \?\? \{\}, spentResources\)/);
+  assert.match(source, /getMainStageResourceReward\(stage\.id, false\)/);
+  assert.match(source, /resolveSpecialResourceReward\(stage\.id, false/);
+  assert.match(source, /periodicRewardChargeByCollection/);
+  assert.doesNotMatch(source, /recordGuestStageSweep[\s\S]*?cleared\.add\(stage\.id\)/);
 });
 
 test('durable IndexedDB persistence remains distinct from in-tab session progress', async () => {

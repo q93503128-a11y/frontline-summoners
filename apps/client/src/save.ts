@@ -37,7 +37,18 @@ import {
   type ResourceAmounts,
   type ResourceLedger,
 } from '@frontline/sim/resource-ledger';
-import { getSpecialResourceReward } from './special-rewards.ts';
+import {
+  createFullPeriodicRewardChargeMap,
+  mergePeriodicRewardChargeMaps,
+  normalizePeriodicRewardChargeMap,
+  type PeriodicRewardChargeMap,
+  type PeriodicRewardCollectionId,
+} from '@frontline/sim/periodic-special';
+import {
+  clearLegacyPeriodicSpecialChargeState,
+  readLegacyPeriodicSpecialChargeMap,
+  resolveSpecialResourceReward,
+} from './special-rewards.ts';
 import { getMainStageResourceReward } from './main-stage-rewards.ts';
 import {
   getDuplicateDismantleSoulEssence,
@@ -78,6 +89,8 @@ export interface GuestProgress {
   readonly deckSlotIds?: readonly string[];
   /** Spendable meta resources use monotonic earned/spent counters so save merges never resurrect spent currency. */
   readonly resourceLedgerById?: ResourceLedger;
+  /** Periodic SPECIAL reward charges live in the same durable save transaction as ticket spend/reward grants. */
+  readonly periodicRewardChargeByCollection?: PeriodicRewardChargeMap;
   /** Record scores merge by maximum so stale browser/account saves cannot roll back a personal best. */
   readonly recordModeProgress?: RecordModeProgress;
 }
@@ -93,6 +106,17 @@ export interface NormalStageClearResult {
 export interface SpecialStageClearResult {
   readonly firstClear: boolean;
   readonly resourceReward: ResourceAmounts;
+  readonly chargeConsumed: boolean;
+  readonly periodicCollectionId?: PeriodicRewardCollectionId;
+  readonly progress: GuestProgress;
+  readonly persisted: boolean;
+}
+export interface GuestStageSweepResult {
+  readonly stageId: string;
+  readonly spentResources: ResourceAmounts;
+  readonly resourceReward: ResourceAmounts;
+  readonly chargeConsumed: boolean;
+  readonly periodicCollectionId?: PeriodicRewardCollectionId;
   readonly progress: GuestProgress;
   readonly persisted: boolean;
 }
@@ -134,8 +158,8 @@ export interface GuestRecordResult {
   readonly guestProgress: GuestProgress;
 }
 
-interface StoredGuestProgressV13 {
-  readonly schemaVersion: 13;
+interface StoredGuestProgressV14 {
+  readonly schemaVersion: 14;
   readonly clearedStageIds: readonly string[];
   readonly normalClearSourceByStage: Readonly<Record<string, NormalClearSource>>;
   readonly mainRewardedStageIds: readonly string[];
@@ -146,6 +170,7 @@ interface StoredGuestProgressV13 {
   readonly recruitmentProgressByBanner: Readonly<Record<string, RecruitmentProgress>>;
   readonly characterProgressById: Readonly<Record<string, CharacterMetaProgress>>;
   readonly resourceLedgerById: ResourceLedger;
+  readonly periodicRewardChargeByCollection: PeriodicRewardChargeMap;
   readonly recordModeProgress: RecordModeProgress;
   readonly deckSlotIds?: readonly string[];
 }
@@ -153,7 +178,7 @@ interface StoredGuestProgressV13 {
 const DB_NAME = 'frontline-summoners';
 const STORE_NAME = 'guest-progress';
 const KEY = 'progress';
-const SCHEMA_VERSION = 13;
+const SCHEMA_VERSION = 14;
 const EMPTY_RECORD_PROGRESS: RecordModeProgress = { endlessBestTimeMs: 0, endlessBestReachedMinute: 0, bossRushBestDefeated: 0 };
 const EMPTY_PROGRESS: GuestProgress = {
   clearedStageIds: [],
@@ -166,6 +191,7 @@ const EMPTY_PROGRESS: GuestProgress = {
   recruitmentProgressByBanner: {},
   characterProgressById: {},
   resourceLedgerById: {},
+  periodicRewardChargeByCollection: createFullPeriodicRewardChargeMap(),
   recordModeProgress: EMPTY_RECORD_PROGRESS,
 };
 const STAGE_PERMANENT_REWARD_IDS = new Set(STAGES.flatMap((stage) => stage.permanentRewardId ? [stage.permanentRewardId] : []));
@@ -313,6 +339,9 @@ export function getEffectiveDeckSlotIds(progress: GuestProgress): readonly strin
 export function getGuestResourceBalance(progress: GuestProgress, resourceId: MetaResourceId): number {
   return getResourceBalance(normalizeGuestProgress(progress).resourceLedgerById ?? {}, resourceId);
 }
+export function getGuestPeriodicRewardChargeMap(progress: GuestProgress, nowMs = Date.now()): PeriodicRewardChargeMap {
+  return normalizePeriodicRewardChargeMap(progress.periodicRewardChargeByCollection ?? createFullPeriodicRewardChargeMap(), nowMs);
+}
 export function getGuestRecordModeProgress(progress: GuestProgress): RecordModeProgress {
   return normalizeRecordModeProgress(normalizeGuestProgress(progress).recordModeProgress);
 }
@@ -337,6 +366,7 @@ export function mergeGuestProgress(a: GuestProgress, b: GuestProgress): GuestPro
     recruitmentProgressByBanner: mergeRecruitmentMaps(a.recruitmentProgressByBanner ?? {}, b.recruitmentProgressByBanner ?? {}),
     characterProgressById: mergeCharacterProgressMaps(a.characterProgressById ?? {}, b.characterProgressById ?? {}),
     resourceLedgerById: mergeResourceLedgers(a.resourceLedgerById ?? {}, b.resourceLedgerById ?? {}),
+    periodicRewardChargeByCollection: mergePeriodicRewardChargeMaps(a.periodicRewardChargeByCollection, b.periodicRewardChargeByCollection),
     recordModeProgress: mergeRecordModeProgress(normalizeRecordModeProgress(a.recordModeProgress), normalizeRecordModeProgress(b.recordModeProgress)),
     ...(b.deckSlotIds !== undefined ? { deckSlotIds: b.deckSlotIds } : a.deckSlotIds !== undefined ? { deckSlotIds: a.deckSlotIds } : {}),
   };
@@ -365,6 +395,7 @@ export function normalizeGuestProgress(progress: GuestProgress): GuestProgress {
     recruitmentProgressByBanner: normalizeRecruitmentMap(progress.recruitmentProgressByBanner ?? {}),
     characterProgressById: normalizeCharacterProgressMap(progress.characterProgressById ?? {}, ownedCharacterIds),
     resourceLedgerById: normalizeResourceLedger(progress.resourceLedgerById ?? {}),
+    periodicRewardChargeByCollection: normalizePeriodicRewardChargeMap(progress.periodicRewardChargeByCollection ?? createFullPeriodicRewardChargeMap()),
     recordModeProgress: normalizeRecordModeProgress(progress.recordModeProgress),
     ...(deckSlotIds === undefined ? {} : { deckSlotIds }),
   };
@@ -403,6 +434,7 @@ function readStoredProgress(db: IDBDatabase): Promise<GuestProgress> {
         recruitmentProgressByBanner: versionNumber >= 4 ? normalizeRecruitmentMap(value?.recruitmentProgressByBanner) : {},
         characterProgressById: versionNumber >= 5 && typeof value?.characterProgressById === 'object' && value.characterProgressById !== null ? value.characterProgressById as Readonly<Record<string, CharacterMetaProgress>> : {},
         resourceLedgerById,
+        periodicRewardChargeByCollection: versionNumber >= 14 ? normalizePeriodicRewardChargeMap(value?.periodicRewardChargeByCollection) : createFullPeriodicRewardChargeMap(),
         recordModeProgress: versionNumber >= 12 ? normalizeRecordModeProgress(value?.recordModeProgress) : EMPTY_RECORD_PROGRESS,
         ...(versionNumber >= 6 && value?.deckSlotIds !== undefined ? { deckSlotIds: stringArray(value.deckSlotIds) } : {}),
       });
@@ -413,7 +445,7 @@ function readStoredProgress(db: IDBDatabase): Promise<GuestProgress> {
 }
 async function persistProgress(progress: GuestProgress): Promise<boolean> {
   const normalized = normalizeGuestProgress(progress);
-  const stored: StoredGuestProgressV13 = {
+  const stored: StoredGuestProgressV14 = {
     schemaVersion: SCHEMA_VERSION,
     clearedStageIds: normalized.clearedStageIds,
     normalClearSourceByStage: normalized.normalClearSourceByStage ?? {},
@@ -425,6 +457,7 @@ async function persistProgress(progress: GuestProgress): Promise<boolean> {
     recruitmentProgressByBanner: normalized.recruitmentProgressByBanner ?? {},
     characterProgressById: normalized.characterProgressById ?? {},
     resourceLedgerById: normalized.resourceLedgerById ?? {},
+    periodicRewardChargeByCollection: normalized.periodicRewardChargeByCollection ?? createFullPeriodicRewardChargeMap(),
     recordModeProgress: normalizeRecordModeProgress(normalized.recordModeProgress),
     ...(normalized.deckSlotIds === undefined ? {} : { deckSlotIds: normalized.deckSlotIds }),
   };
@@ -444,6 +477,14 @@ export async function loadGuestProgress(): Promise<GuestProgress> {
   try {
     const db = await openDb(); const stored = normalizeGuestProgress(await readStoredProgress(db));
     sessionProgress = normalizeGuestProgress(mergeGuestProgress(stored, normalizeGuestProgress(sessionProgress)));
+    const legacyPeriodicChargeMap = readLegacyPeriodicSpecialChargeMap();
+    if (legacyPeriodicChargeMap) {
+      sessionProgress = normalizeGuestProgress({
+        ...sessionProgress,
+        periodicRewardChargeByCollection: mergePeriodicRewardChargeMaps(sessionProgress.periodicRewardChargeByCollection, legacyPeriodicChargeMap),
+      });
+      if (await persistProgress(sessionProgress)) clearLegacyPeriodicSpecialChargeState();
+    }
   } catch { sessionProgress = normalizeGuestProgress(sessionProgress); }
   return sessionProgress;
 }
@@ -475,15 +516,68 @@ export async function recordNormalStageClear(stageId: string, source: NormalClea
   return { firstClear, permanentRewardNew, normalClearSource: progress.normalClearSourceByStage![stage.id]!, resourceReward, progress, persisted: await persistProgress(progress) };
 }
 
-export async function recordSpecialStageClear(stageId: string): Promise<SpecialStageClearResult> {
+export async function recordSpecialStageClear(stageId: string, nowMs = Date.now()): Promise<SpecialStageClearResult> {
   const before = normalizeGuestProgress(await loadGuestProgress()); const stage = getStage(canonicalStageId(stageId));
   if (stage.stageType !== 'SPECIAL') throw new Error(`Not a special stage: ${stage.id}`);
-  if (!isSortieStageUnlocked(stage.id, before.clearedStageIds, before.specialClearedStageIds)) throw new Error(`Special stage is not unlocked: ${stage.id}`);
+  if (!isSortieStageUnlocked(stage.id, before.clearedStageIds, before.specialClearedStageIds, nowMs)) throw new Error(`Special stage is not unlocked: ${stage.id}`);
   const specialClears = new Set(before.specialClearedStageIds); const firstClear = !specialClears.has(stage.id); specialClears.add(stage.id);
-  const resourceReward = getSpecialResourceReward(stage.id, firstClear);
-  const resourceLedgerById = grantResources(before.resourceLedgerById ?? {}, resourceReward);
-  const progress = normalizeGuestProgress({ ...before, specialClearedStageIds: [...specialClears], resourceLedgerById }); sessionProgress = progress;
-  return { firstClear, resourceReward, progress, persisted: await persistProgress(progress) };
+  const resolution = resolveSpecialResourceReward(stage.id, firstClear, getGuestPeriodicRewardChargeMap(before, nowMs), nowMs);
+  const resourceLedgerById = grantResources(before.resourceLedgerById ?? {}, resolution.resourceReward);
+  const progress = normalizeGuestProgress({
+    ...before,
+    specialClearedStageIds: [...specialClears],
+    resourceLedgerById,
+    periodicRewardChargeByCollection: resolution.periodicChargeMap,
+  });
+  sessionProgress = progress;
+  return {
+    firstClear,
+    resourceReward: resolution.resourceReward,
+    chargeConsumed: resolution.chargeConsumed,
+    ...(resolution.periodicCollectionId === undefined ? {} : { periodicCollectionId: resolution.periodicCollectionId }),
+    progress,
+    persisted: await persistProgress(progress),
+  };
+}
+
+export async function recordGuestStageSweep(stageId: string, nowMs = Date.now()): Promise<GuestStageSweepResult> {
+  const before = normalizeGuestProgress(await loadGuestProgress());
+  const stage = getStage(canonicalStageId(stageId));
+  if (stage.sweepEligibility !== 'AFTER_NORMAL_CLEAR') throw new Error(`Stage does not allow sweep: ${stage.id}`);
+  const previouslyCleared = stage.stageType === 'SPECIAL'
+    ? before.specialClearedStageIds.includes(stage.id)
+    : before.clearedStageIds.includes(stage.id);
+  if (!previouslyCleared) throw new Error(`Sweep requires prior NORMAL_CLEAR: ${stage.id}`);
+  if (stage.stageType === 'SPECIAL' && !isSortieStageUnlocked(stage.id, before.clearedStageIds, before.specialClearedStageIds, nowMs)) {
+    throw new Error(`Special stage is not currently available for sweep: ${stage.id}`);
+  }
+  const spentResources: ResourceAmounts = { sweep_ticket: 1 };
+  let resourceLedgerById = spendResources(before.resourceLedgerById ?? {}, spentResources);
+  let resourceReward: ResourceAmounts;
+  let periodicRewardChargeByCollection = getGuestPeriodicRewardChargeMap(before, nowMs);
+  let chargeConsumed = false;
+  let periodicCollectionId: PeriodicRewardCollectionId | undefined;
+  if (stage.stageType === 'SPECIAL') {
+    const resolution = resolveSpecialResourceReward(stage.id, false, periodicRewardChargeByCollection, nowMs);
+    resourceReward = resolution.resourceReward;
+    periodicRewardChargeByCollection = resolution.periodicChargeMap;
+    chargeConsumed = resolution.chargeConsumed;
+    periodicCollectionId = resolution.periodicCollectionId;
+  } else {
+    resourceReward = getMainStageResourceReward(stage.id, false);
+  }
+  resourceLedgerById = grantResources(resourceLedgerById, resourceReward);
+  const progress = normalizeGuestProgress({ ...before, resourceLedgerById, periodicRewardChargeByCollection });
+  sessionProgress = progress;
+  return {
+    stageId: stage.id,
+    spentResources,
+    resourceReward,
+    chargeConsumed,
+    ...(periodicCollectionId === undefined ? {} : { periodicCollectionId }),
+    progress,
+    persisted: await persistProgress(progress),
+  };
 }
 
 export async function recordGuestEndlessResult(survivalMs: number): Promise<GuestRecordResult> {
