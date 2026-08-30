@@ -13,7 +13,6 @@ import {
   spendResources,
   type ResourceAmounts,
 } from '@frontline/sim/resource-ledger';
-import stagesJson from '../../../content/stages/chapter-01.json' with { type: 'json' };
 import {
   initializeAccountSave,
   loadAccountSave,
@@ -22,6 +21,7 @@ import {
   type AccountSaveRecord,
   type AccountSaveSnapshotV2,
 } from './account-save-authority.ts';
+import { ACCOUNT_MAIN_STAGE_INDEX, ACCOUNT_MAIN_STAGES } from './account-content.ts';
 import {
   SERVER_CHARACTER_LEVEL_CURVE,
   SERVER_EVOLUTION_FORMS,
@@ -111,11 +111,6 @@ export type AccountMutationApplyResult<T> =
       readonly currentRevision: number;
     };
 
-type MainStageSeed = {
-  readonly id: string;
-  readonly permanentRewardId?: string;
-};
-
 type AccountMutationReceiptRow = {
   readonly input_fingerprint: string;
   readonly resulting_revision: number;
@@ -127,8 +122,8 @@ type BuiltMutation<T> = {
   readonly result: T;
 };
 
-const MAIN_STAGES = stagesJson as unknown as readonly MainStageSeed[];
-const MAIN_STAGE_INDEX = new Map(MAIN_STAGES.map((stage, index) => [stage.id, index] as const));
+const MAIN_STAGES = ACCOUNT_MAIN_STAGES;
+const MAIN_STAGE_INDEX = ACCOUNT_MAIN_STAGE_INDEX;
 const MAIN_STAGE_BY_ID = new Map(MAIN_STAGES.map((stage) => [stage.id, stage] as const));
 const NORMAL_CLEAR_SOURCES = new Set<AccountNormalClearSource>(['SOLO_BATTLE', 'COOP_BATTLE']);
 const DUPLICATE_POLICIES = new Set<AccountDuplicatePolicy>(ACCOUNT_DUPLICATE_POLICIES);
@@ -214,30 +209,32 @@ async function commitMutation<T>(
   const nextRevision = expected + 1;
 
   try {
-    const [saveWrite, receiptWrite] = await db.batch([
+    const writes = await db.batch([
       db.prepare(
-        'UPDATE account_saves SET schema_version = 2, revision = revision + 1, snapshot_json = ?1, updated_at = unixepoch() WHERE user_id = ?2 AND revision = ?3',
+        `UPDATE account_saves
+         SET schema_version = 2,
+             revision = CASE WHEN revision = ?3 THEN revision + 1 ELSE -1 END,
+             snapshot_json = ?1,
+             updated_at = unixepoch()
+         WHERE user_id = ?2`,
       ).bind(snapshotJson, accountId, expected),
       db.prepare(
-        `INSERT INTO account_mutation_receipts (user_id, mutation_kind, mutation_id, input_fingerprint, resulting_revision, result_json)
-         SELECT ?1, ?2, ?3, ?4, ?5, ?6
-         WHERE EXISTS (
-           SELECT 1 FROM account_saves WHERE user_id = ?1 AND revision = ?5 AND snapshot_json = ?7
-         )`,
-      ).bind(accountId, kind, mutationId, inputFingerprint, nextRevision, resultJson, snapshotJson),
+        `INSERT INTO account_mutation_receipts
+         (user_id, mutation_kind, mutation_id, input_fingerprint, resulting_revision, result_json)
+         VALUES (?1, ?2, ?3, ?4, ?5, ?6)`,
+      ).bind(accountId, kind, mutationId, inputFingerprint, nextRevision, resultJson),
     ]);
-
-    if ((saveWrite.meta.changes ?? 0) !== 1) {
-      const racedReplay = await resolveReplay<T>(db, accountId, kind, mutationId, inputFingerprint, nowMs);
-      if (racedReplay) return racedReplay;
-      const latest = await loadAccountSave(db, accountId, nowMs);
-      if (!latest) throw new Error(`account save disappeared during mutation:${accountId}`);
-      return { ok: false, reason: 'revision_conflict', currentRevision: latest.revision };
+    const saveWrite = writes[0];
+    const receiptWrite = writes[1];
+    if (!saveWrite || !receiptWrite) throw new Error('account mutation batch returned incomplete results');
+    if ((saveWrite.meta.changes ?? 0) !== 1 || (receiptWrite.meta.changes ?? 0) !== 1) {
+      throw new Error(`account mutation batch did not commit both rows:${kind}:${mutationId}`);
     }
-    if ((receiptWrite.meta.changes ?? 0) !== 1) throw new Error(`account mutation receipt was not committed:${kind}:${mutationId}`);
   } catch (error) {
     const racedReplay = await resolveReplay<T>(db, accountId, kind, mutationId, inputFingerprint, nowMs);
     if (racedReplay) return racedReplay;
+    const latest = await loadAccountSave(db, accountId, nowMs);
+    if (latest && latest.revision !== expected) return { ok: false, reason: 'revision_conflict', currentRevision: latest.revision };
     throw error;
   }
 
