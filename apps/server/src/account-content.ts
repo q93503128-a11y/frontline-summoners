@@ -84,6 +84,7 @@ if (ACCOUNT_MAIN_STAGES.length !== 80) throw new Error(`account authority must c
 if (new Set(ACCOUNT_MAIN_STAGES.map((stage) => stage.id)).size !== ACCOUNT_MAIN_STAGES.length) throw new Error('account MAIN stage ids must be unique');
 if (SPECIAL_STAGE_SEEDS.length !== 61) throw new Error(`account authority must contain SPECIAL61, got ${SPECIAL_STAGE_SEEDS.length}`);
 if (new Set(SPECIAL_STAGE_SEEDS.map((stage) => stage.id)).size !== SPECIAL_STAGE_SEEDS.length) throw new Error('account SPECIAL stage ids must be unique');
+if (ENEMY_SEEDS.length !== 80) throw new Error(`account authority must contain 80 runtime enemies, got ${ENEMY_SEEDS.length}`);
 if (new Set(ENEMY_SEEDS.map((enemy) => enemy.id)).size !== ENEMY_SEEDS.length) throw new Error('account enemy ids must be unique');
 
 export const ACCOUNT_MAIN_STAGE_IDS = ACCOUNT_MAIN_STAGES.map((stage) => stage.id);
