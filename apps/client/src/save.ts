@@ -44,6 +44,7 @@ import {
   type PeriodicRewardChargeMap,
   type PeriodicRewardCollectionId,
 } from '@frontline/sim/periodic-special';
+import type { BaseWeaponId } from '@frontline/sim/playable';
 import {
   clearLegacyPeriodicSpecialChargeState,
   readLegacyPeriodicSpecialChargeMap,
@@ -56,6 +57,12 @@ import {
   getPlusLevelSoulEssenceCost,
   getRecruitmentCost,
 } from './meta-economy.ts';
+import { normalizeSelectedBaseWeaponId } from './base-weapon-progression.ts';
+import {
+  BOSS_RUSH_REWARD_CAP_DEFEATED,
+  getBossRushMilestoneReward,
+  getEndlessRecordMilestoneReward,
+} from './record-rewards.ts';
 
 export const MAX_DECK_SLOTS = 10;
 export const NORMAL_CLEAR_SOURCES = ['SOLO_BATTLE', 'COOP_BATTLE'] as const;
@@ -73,7 +80,9 @@ export interface CharacterMetaProgress {
 export interface RecordModeProgress {
   readonly endlessBestTimeMs: number;
   readonly endlessBestReachedMinute: number;
+  readonly endlessRewardedMinute: number;
   readonly bossRushBestDefeated: number;
+  readonly bossRushRewardedDefeated: number;
 }
 
 export interface GuestProgress {
@@ -87,11 +96,13 @@ export interface GuestProgress {
   readonly recruitmentProgressByBanner?: Readonly<Record<string, RecruitmentProgress>>;
   readonly characterProgressById?: Readonly<Record<string, CharacterMetaProgress>>;
   readonly deckSlotIds?: readonly string[];
+  /** The selected base weapon is durable loadout state; unlock authority is still derived from NORMAL_CLEAR progression. */
+  readonly selectedBaseWeaponId?: BaseWeaponId;
   /** Spendable meta resources use monotonic earned/spent counters so save merges never resurrect spent currency. */
   readonly resourceLedgerById?: ResourceLedger;
   /** Periodic SPECIAL reward charges live in the same durable save transaction as ticket spend/reward grants. */
   readonly periodicRewardChargeByCollection?: PeriodicRewardChargeMap;
-  /** Record scores merge by maximum so stale browser/account saves cannot roll back a personal best. */
+  /** Record scores and claimed milestone high-water marks merge by maximum. */
   readonly recordModeProgress?: RecordModeProgress;
 }
 
@@ -145,6 +156,11 @@ export interface GuestDeckResult {
   readonly persisted: boolean;
   readonly guestProgress: GuestProgress;
 }
+export interface GuestBaseWeaponResult {
+  readonly selectedBaseWeaponId: BaseWeaponId;
+  readonly persisted: boolean;
+  readonly guestProgress: GuestProgress;
+}
 export interface GuestEnemyDiscoveryResult {
   readonly discoveredEnemyIds: readonly string[];
   readonly newlyDiscoveredEnemyIds: readonly string[];
@@ -153,13 +169,14 @@ export interface GuestEnemyDiscoveryResult {
 }
 export interface GuestRecordResult {
   readonly improved: boolean;
+  readonly resourceReward: ResourceAmounts;
   readonly recordModeProgress: RecordModeProgress;
   readonly persisted: boolean;
   readonly guestProgress: GuestProgress;
 }
 
-interface StoredGuestProgressV14 {
-  readonly schemaVersion: 14;
+interface StoredGuestProgressV15 {
+  readonly schemaVersion: 15;
   readonly clearedStageIds: readonly string[];
   readonly normalClearSourceByStage: Readonly<Record<string, NormalClearSource>>;
   readonly mainRewardedStageIds: readonly string[];
@@ -172,14 +189,21 @@ interface StoredGuestProgressV14 {
   readonly resourceLedgerById: ResourceLedger;
   readonly periodicRewardChargeByCollection: PeriodicRewardChargeMap;
   readonly recordModeProgress: RecordModeProgress;
+  readonly selectedBaseWeaponId: BaseWeaponId;
   readonly deckSlotIds?: readonly string[];
 }
 
 const DB_NAME = 'frontline-summoners';
 const STORE_NAME = 'guest-progress';
 const KEY = 'progress';
-const SCHEMA_VERSION = 14;
-const EMPTY_RECORD_PROGRESS: RecordModeProgress = { endlessBestTimeMs: 0, endlessBestReachedMinute: 0, bossRushBestDefeated: 0 };
+const SCHEMA_VERSION = 15;
+const EMPTY_RECORD_PROGRESS: RecordModeProgress = {
+  endlessBestTimeMs: 0,
+  endlessBestReachedMinute: 0,
+  endlessRewardedMinute: 0,
+  bossRushBestDefeated: 0,
+  bossRushRewardedDefeated: 0,
+};
 const EMPTY_PROGRESS: GuestProgress = {
   clearedStageIds: [],
   normalClearSourceByStage: {},
@@ -190,6 +214,7 @@ const EMPTY_PROGRESS: GuestProgress = {
   ownedRecruitmentCharacterIds: [],
   recruitmentProgressByBanner: {},
   characterProgressById: {},
+  selectedBaseWeaponId: 'base_weapon_front_cannon',
   resourceLedgerById: {},
   periodicRewardChargeByCollection: createFullPeriodicRewardChargeMap(),
   recordModeProgress: EMPTY_RECORD_PROGRESS,
@@ -226,18 +251,26 @@ function normalizeRecordModeProgress(value: unknown): RecordModeProgress {
   if (typeof value !== 'object' || value === null || Array.isArray(value)) return EMPTY_RECORD_PROGRESS;
   const raw = value as Record<string, unknown>;
   const endlessBestTimeMs = nonNegativeInteger(raw.endlessBestTimeMs);
+  const endlessBestReachedMinute = Math.min(nonNegativeInteger(raw.endlessBestReachedMinute), Math.floor(endlessBestTimeMs / 60000));
+  const bossRushBestDefeated = Math.min(nonNegativeInteger(raw.bossRushBestDefeated), BOSS_RUSH_REWARD_CAP_DEFEATED);
   return {
     endlessBestTimeMs,
-    endlessBestReachedMinute: Math.min(nonNegativeInteger(raw.endlessBestReachedMinute), Math.floor(endlessBestTimeMs / 60000)),
-    bossRushBestDefeated: nonNegativeInteger(raw.bossRushBestDefeated),
+    endlessBestReachedMinute,
+    endlessRewardedMinute: Math.min(nonNegativeInteger(raw.endlessRewardedMinute), endlessBestReachedMinute),
+    bossRushBestDefeated,
+    bossRushRewardedDefeated: Math.min(nonNegativeInteger(raw.bossRushRewardedDefeated), bossRushBestDefeated),
   };
 }
 function mergeRecordModeProgress(a: RecordModeProgress, b: RecordModeProgress): RecordModeProgress {
   const endlessBestTimeMs = Math.max(a.endlessBestTimeMs, b.endlessBestTimeMs);
+  const endlessBestReachedMinute = Math.max(a.endlessBestReachedMinute, b.endlessBestReachedMinute, Math.floor(endlessBestTimeMs / 60000));
+  const bossRushBestDefeated = Math.min(BOSS_RUSH_REWARD_CAP_DEFEATED, Math.max(a.bossRushBestDefeated, b.bossRushBestDefeated));
   return {
     endlessBestTimeMs,
-    endlessBestReachedMinute: Math.max(a.endlessBestReachedMinute, b.endlessBestReachedMinute, Math.floor(endlessBestTimeMs / 60000)),
-    bossRushBestDefeated: Math.max(a.bossRushBestDefeated, b.bossRushBestDefeated),
+    endlessBestReachedMinute,
+    endlessRewardedMinute: Math.min(Math.max(a.endlessRewardedMinute, b.endlessRewardedMinute), endlessBestReachedMinute),
+    bossRushBestDefeated,
+    bossRushRewardedDefeated: Math.min(Math.max(a.bossRushRewardedDefeated, b.bossRushRewardedDefeated), bossRushBestDefeated),
   };
 }
 
@@ -336,6 +369,10 @@ export function getDiscoveredEnemyIds(progress: GuestProgress): readonly string[
 export function getEffectiveDeckSlotIds(progress: GuestProgress): readonly string[] {
   const normalized = normalizeGuestProgress(progress); return normalized.deckSlotIds?.length ? normalized.deckSlotIds : getOwnedCharacterIds(normalized).slice(0, MAX_DECK_SLOTS);
 }
+export function getGuestSelectedBaseWeaponId(progress: GuestProgress): BaseWeaponId {
+  const normalized = normalizeGuestProgress(progress);
+  return normalizeSelectedBaseWeaponId(normalized.selectedBaseWeaponId, normalized.clearedStageIds);
+}
 export function getGuestResourceBalance(progress: GuestProgress, resourceId: MetaResourceId): number {
   return getResourceBalance(normalizeGuestProgress(progress).resourceLedgerById ?? {}, resourceId);
 }
@@ -369,6 +406,7 @@ export function mergeGuestProgress(a: GuestProgress, b: GuestProgress): GuestPro
     periodicRewardChargeByCollection: mergePeriodicRewardChargeMaps(a.periodicRewardChargeByCollection, b.periodicRewardChargeByCollection),
     recordModeProgress: mergeRecordModeProgress(normalizeRecordModeProgress(a.recordModeProgress), normalizeRecordModeProgress(b.recordModeProgress)),
     ...(b.deckSlotIds !== undefined ? { deckSlotIds: b.deckSlotIds } : a.deckSlotIds !== undefined ? { deckSlotIds: a.deckSlotIds } : {}),
+    ...(b.selectedBaseWeaponId !== undefined ? { selectedBaseWeaponId: b.selectedBaseWeaponId } : a.selectedBaseWeaponId !== undefined ? { selectedBaseWeaponId: a.selectedBaseWeaponId } : {}),
   };
 }
 
@@ -384,6 +422,7 @@ export function normalizeGuestProgress(progress: GuestProgress): GuestProgress {
   const ownedRecruitmentCharacterIds = [...new Set((progress.ownedRecruitmentCharacterIds ?? []).filter((id) => RECRUITMENT_CHARACTER_IDS.has(id)))];
   const ownedCharacterIds = ownedCharacterIdsForProgress(clearedStageIds, ownedRecruitmentCharacterIds);
   const deckSlotIds = normalizeExplicitDeckSlotIds(progress.deckSlotIds, ownedCharacterIds);
+  const selectedBaseWeaponId = normalizeSelectedBaseWeaponId(progress.selectedBaseWeaponId, clearedStageIds);
   return {
     clearedStageIds,
     normalClearSourceByStage,
@@ -394,6 +433,7 @@ export function normalizeGuestProgress(progress: GuestProgress): GuestProgress {
     ownedRecruitmentCharacterIds,
     recruitmentProgressByBanner: normalizeRecruitmentMap(progress.recruitmentProgressByBanner ?? {}),
     characterProgressById: normalizeCharacterProgressMap(progress.characterProgressById ?? {}, ownedCharacterIds),
+    selectedBaseWeaponId,
     resourceLedgerById: normalizeResourceLedger(progress.resourceLedgerById ?? {}),
     periodicRewardChargeByCollection: normalizePeriodicRewardChargeMap(progress.periodicRewardChargeByCollection ?? createFullPeriodicRewardChargeMap()),
     recordModeProgress: normalizeRecordModeProgress(progress.recordModeProgress),
@@ -436,6 +476,7 @@ function readStoredProgress(db: IDBDatabase): Promise<GuestProgress> {
         resourceLedgerById,
         periodicRewardChargeByCollection: versionNumber >= 14 ? normalizePeriodicRewardChargeMap(value?.periodicRewardChargeByCollection) : createFullPeriodicRewardChargeMap(),
         recordModeProgress: versionNumber >= 12 ? normalizeRecordModeProgress(value?.recordModeProgress) : EMPTY_RECORD_PROGRESS,
+        selectedBaseWeaponId: versionNumber >= 15 && typeof value?.selectedBaseWeaponId === 'string' ? normalizeSelectedBaseWeaponId(value.selectedBaseWeaponId, clearedStageIds) : 'base_weapon_front_cannon',
         ...(versionNumber >= 6 && value?.deckSlotIds !== undefined ? { deckSlotIds: stringArray(value.deckSlotIds) } : {}),
       });
     };
@@ -445,7 +486,7 @@ function readStoredProgress(db: IDBDatabase): Promise<GuestProgress> {
 }
 async function persistProgress(progress: GuestProgress): Promise<boolean> {
   const normalized = normalizeGuestProgress(progress);
-  const stored: StoredGuestProgressV14 = {
+  const stored: StoredGuestProgressV15 = {
     schemaVersion: SCHEMA_VERSION,
     clearedStageIds: normalized.clearedStageIds,
     normalClearSourceByStage: normalized.normalClearSourceByStage ?? {},
@@ -459,6 +500,7 @@ async function persistProgress(progress: GuestProgress): Promise<boolean> {
     resourceLedgerById: normalized.resourceLedgerById ?? {},
     periodicRewardChargeByCollection: normalized.periodicRewardChargeByCollection ?? createFullPeriodicRewardChargeMap(),
     recordModeProgress: normalizeRecordModeProgress(normalized.recordModeProgress),
+    selectedBaseWeaponId: getGuestSelectedBaseWeaponId(normalized),
     ...(normalized.deckSlotIds === undefined ? {} : { deckSlotIds: normalized.deckSlotIds }),
   };
   try {
@@ -582,28 +624,47 @@ export async function recordGuestStageSweep(stageId: string, nowMs = Date.now())
 
 export async function recordGuestEndlessResult(survivalMs: number): Promise<GuestRecordResult> {
   const normalizedMs = nonNegativeInteger(Math.floor(survivalMs));
+  const reachedMinute = Math.floor(normalizedMs / 60000);
   const before = normalizeGuestProgress(await loadGuestProgress());
   const current = normalizeRecordModeProgress(before.recordModeProgress);
   const improved = normalizedMs > current.endlessBestTimeMs;
-  if (!improved) return { improved: false, recordModeProgress: current, persisted: true, guestProgress: before };
+  const bestTimeMs = Math.max(current.endlessBestTimeMs, normalizedMs);
+  const bestReachedMinute = Math.max(current.endlessBestReachedMinute, reachedMinute, Math.floor(bestTimeMs / 60000));
+  const rewardedMinute = Math.max(current.endlessRewardedMinute, bestReachedMinute);
+  const resourceReward = getEndlessRecordMilestoneReward(current.endlessRewardedMinute, rewardedMinute);
+  if (!improved && rewardedMinute === current.endlessRewardedMinute) {
+    return { improved: false, resourceReward: {}, recordModeProgress: current, persisted: true, guestProgress: before };
+  }
   const recordModeProgress: RecordModeProgress = {
     ...current,
-    endlessBestTimeMs: normalizedMs,
-    endlessBestReachedMinute: Math.floor(normalizedMs / 60000),
+    endlessBestTimeMs: bestTimeMs,
+    endlessBestReachedMinute: bestReachedMinute,
+    endlessRewardedMinute: rewardedMinute,
   };
-  const progress = normalizeGuestProgress({ ...before, recordModeProgress }); sessionProgress = progress;
-  return { improved: true, recordModeProgress: progress.recordModeProgress!, persisted: await persistProgress(progress), guestProgress: progress };
+  const resourceLedgerById = grantResources(before.resourceLedgerById ?? {}, resourceReward);
+  const progress = normalizeGuestProgress({ ...before, recordModeProgress, resourceLedgerById }); sessionProgress = progress;
+  return { improved, resourceReward, recordModeProgress: progress.recordModeProgress!, persisted: await persistProgress(progress), guestProgress: progress };
 }
 
 export async function recordGuestBossRushResult(defeatedBosses: number): Promise<GuestRecordResult> {
-  const normalizedDefeated = nonNegativeInteger(Math.floor(defeatedBosses));
+  const normalizedDefeated = Math.min(BOSS_RUSH_REWARD_CAP_DEFEATED, nonNegativeInteger(Math.floor(defeatedBosses)));
   const before = normalizeGuestProgress(await loadGuestProgress());
   const current = normalizeRecordModeProgress(before.recordModeProgress);
   const improved = normalizedDefeated > current.bossRushBestDefeated;
-  if (!improved) return { improved: false, recordModeProgress: current, persisted: true, guestProgress: before };
-  const recordModeProgress: RecordModeProgress = { ...current, bossRushBestDefeated: normalizedDefeated };
-  const progress = normalizeGuestProgress({ ...before, recordModeProgress }); sessionProgress = progress;
-  return { improved: true, recordModeProgress: progress.recordModeProgress!, persisted: await persistProgress(progress), guestProgress: progress };
+  const bestDefeated = Math.max(current.bossRushBestDefeated, normalizedDefeated);
+  const rewardedDefeated = Math.max(current.bossRushRewardedDefeated, bestDefeated);
+  const resourceReward = getBossRushMilestoneReward(current.bossRushRewardedDefeated, rewardedDefeated);
+  if (!improved && rewardedDefeated === current.bossRushRewardedDefeated) {
+    return { improved: false, resourceReward: {}, recordModeProgress: current, persisted: true, guestProgress: before };
+  }
+  const recordModeProgress: RecordModeProgress = {
+    ...current,
+    bossRushBestDefeated: bestDefeated,
+    bossRushRewardedDefeated: rewardedDefeated,
+  };
+  const resourceLedgerById = grantResources(before.resourceLedgerById ?? {}, resourceReward);
+  const progress = normalizeGuestProgress({ ...before, recordModeProgress, resourceLedgerById }); sessionProgress = progress;
+  return { improved, resourceReward, recordModeProgress: progress.recordModeProgress!, persisted: await persistProgress(progress), guestProgress: progress };
 }
 
 export async function performGuestRecruitment(
@@ -700,6 +761,17 @@ export async function selectGuestEvolutionForm(characterId: string, formId: stri
   if (!current.unlockedFormIds.includes(formId)) throw new Error(`Evolution form is not unlocked: ${formId}`);
   const progress = normalizeGuestProgress({ ...before, characterProgressById: { ...(before.characterProgressById ?? {}), [characterId]: { ...current, selectedFormId: formId } } }); sessionProgress = progress;
   return { characterId, characterProgress: progress.characterProgressById![characterId]!, persisted: await persistProgress(progress), guestProgress: progress };
+}
+
+export async function selectGuestBaseWeapon(baseWeaponId: BaseWeaponId): Promise<GuestBaseWeaponResult> {
+  const before = normalizeGuestProgress(await loadGuestProgress());
+  const selectedBaseWeaponId = normalizeSelectedBaseWeaponId(baseWeaponId, before.clearedStageIds);
+  if (selectedBaseWeaponId !== baseWeaponId) throw new Error(`Base weapon is not unlocked: ${baseWeaponId}`);
+  if (before.selectedBaseWeaponId === selectedBaseWeaponId) {
+    return { selectedBaseWeaponId, persisted: true, guestProgress: before };
+  }
+  const progress = normalizeGuestProgress({ ...before, selectedBaseWeaponId }); sessionProgress = progress;
+  return { selectedBaseWeaponId: progress.selectedBaseWeaponId!, persisted: await persistProgress(progress), guestProgress: progress };
 }
 
 export async function recordGuestDeck(slotIds: readonly string[]): Promise<GuestDeckResult> {
