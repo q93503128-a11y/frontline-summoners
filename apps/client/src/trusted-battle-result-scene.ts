@@ -60,10 +60,10 @@ export class TrustedBattleResultScene extends Phaser.Scene {
   private proof!: TrustedBattleTerminalProof;
   private finalized = false;
   private finalizing = false;
-  private statusText?: Phaser.GameObjects.Text;
-  private rewardText?: Phaser.GameObjects.Text;
-  private resultTitleText?: Phaser.GameObjects.Text;
-  private retryButton?: Phaser.GameObjects.Container;
+  private statusText: Phaser.GameObjects.Text | undefined;
+  private rewardText: Phaser.GameObjects.Text | undefined;
+  private resultTitleText: Phaser.GameObjects.Text | undefined;
+  private retryButton: Phaser.GameObjects.Container | undefined;
 
   constructor() { super('trusted-result'); }
 
