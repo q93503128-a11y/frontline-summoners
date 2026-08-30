@@ -43,7 +43,7 @@ export interface TrustedBattleCompletionResult {
   readonly battleId: string;
   readonly kind: TrustedBattleKind;
   readonly targetId: string;
-  readonly winner: 'PLAYER' | 'ENEMY';
+  readonly winner: 'PLAYER' | 'ENEMY' | 'DRAW';
   readonly clearFrames: number;
   readonly finalStateHash: string;
   readonly playerBaseHp: number;
