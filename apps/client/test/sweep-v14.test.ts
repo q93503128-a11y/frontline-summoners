@@ -8,7 +8,8 @@ const baseProgress = (charges = createFullPeriodicRewardChargeMap()): GuestProgr
   clearedStageIds: [], specialClearedStageIds: [], permanentRewardIds: [], periodicRewardChargeByCollection: charges,
 });
 
-test('stale save merge cannot resurrect consumed periodic reward charges', () => {
+test('stale save merge cannot resurrect consumed periodic reward charges', (t) => {
+  t.mock.method(Date, 'now', () => NOW);
   const full = createFullPeriodicRewardChargeMap();
   const depleted = {
     ...full,
