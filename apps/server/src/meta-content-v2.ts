@@ -4,11 +4,13 @@ import {
   type PermanentRewardTargetScope,
 } from '@frontline/sim/meta-progression';
 import { applyEvolutionCatalogOverrides, buildEvolutionCatalog } from '@frontline/sim/evolution-catalog';
+import { applyExplicitEvolutionFormOverrides } from '@frontline/sim/evolution-form-overrides';
 import chapterTwoRewardsJson from '../../../content/permanent-rewards/chapter-02.json' with { type: 'json' };
 import chapterThreeRewardsJson from '../../../content/permanent-rewards/chapter-03.json' with { type: 'json' };
 import chapterFourRewardsJson from '../../../content/permanent-rewards/chapter-04.json' with { type: 'json' };
 import evolutionCatalogJson from '../../../content/evolution/catalog-01.json' with { type: 'json' };
 import storyEvolutionOverridesJson from '../../../content/evolution/story-01-overrides.json' with { type: 'json' };
+import commonRecruitmentEvolutionOverridesJson from '../../../content/evolution/recruitment-common-explicit-01.json' with { type: 'json' };
 import {
   SERVER_CHARACTER_LEVEL_CURVE,
   SERVER_PERMANENT_REWARDS as SERVER_CHAPTER_ONE_PERMANENT_REWARDS,
@@ -16,7 +18,8 @@ import {
 } from './meta-content.ts';
 
 export { SERVER_CHARACTER_LEVEL_CURVE, SERVER_REWARD_SCOPES_BY_CHARACTER };
-const evolutionSource = applyEvolutionCatalogOverrides(evolutionCatalogJson, storyEvolutionOverridesJson);
+const storyEvolutionSource = applyEvolutionCatalogOverrides(evolutionCatalogJson, storyEvolutionOverridesJson);
+const evolutionSource = applyExplicitEvolutionFormOverrides(storyEvolutionSource, commonRecruitmentEvolutionOverridesJson);
 const evolutionIds = new Set(evolutionSource.map((entry) => (entry as { readonly id: string }).id));
 const SERVER_EVOLUTION_CATALOG = buildEvolutionCatalog(evolutionSource, evolutionIds);
 export const SERVER_EVOLUTION_FORMS = SERVER_EVOLUTION_CATALOG.forms;

@@ -20,9 +20,11 @@ import {
   type EvolutionRecipeDefinition,
   type EvolutionResourceId,
 } from '@frontline/sim/evolution-catalog';
+import { applyExplicitEvolutionFormOverrides } from '@frontline/sim/evolution-form-overrides';
 import levelCurveJson from '../../../content/growth/level-curve-01.json' with { type: 'json' };
 import evolutionCatalogJson from '../../../content/evolution/catalog-01.json' with { type: 'json' };
 import storyEvolutionOverridesJson from '../../../content/evolution/story-01-overrides.json' with { type: 'json' };
+import commonRecruitmentEvolutionOverridesJson from '../../../content/evolution/recruitment-common-explicit-01.json' with { type: 'json' };
 import { ALL_PLAYER_SLOTS } from './prototype.ts';
 
 export type {
@@ -75,7 +77,8 @@ function parseLevelCurve(value: unknown): CharacterLevelCurve {
 }
 
 export const CHARACTER_LEVEL_CURVE = parseLevelCurve(levelCurveJson);
-const EVOLUTION_SOURCE = applyEvolutionCatalogOverrides(evolutionCatalogJson, storyEvolutionOverridesJson);
+const STORY_EVOLUTION_SOURCE = applyEvolutionCatalogOverrides(evolutionCatalogJson, storyEvolutionOverridesJson);
+const EVOLUTION_SOURCE = applyExplicitEvolutionFormOverrides(STORY_EVOLUTION_SOURCE, commonRecruitmentEvolutionOverridesJson);
 const EVOLUTION_CATALOG = buildEvolutionCatalog(EVOLUTION_SOURCE, new Set(ALL_PLAYER_SLOTS.map((slot) => slot.slotId)));
 export const EVOLUTION_FORMS: readonly EvolutionFormDefinition[] = EVOLUTION_CATALOG.forms;
 export const EVOLUTION_RECIPES: readonly EvolutionRecipeDefinition[] = EVOLUTION_CATALOG.recipes;
