@@ -12,7 +12,7 @@ test('main menu exposes recruitment and the scene is registered without replacin
   assert.match(navigation, /'모 집', \(\) => this\.scene\.start\('recruitment'\)/);
   assert.match(main, /import \{ RecruitmentScene \} from '\.\/recruitment-scene';/);
   assert.match(main, /game\.scene\.add\('recruitment', RecruitmentScene, false\);/);
-  assert.match(main, /scene: \[BootScene, MainMenuScene, StageHubScene, StageSelectScene, DeckScene, CatalogScene, BattleScene, ResultScene\]/);
+  assert.match(main, /scene: \[BootScene, MainMenuScene, StageHubScene, StageSelectScene, BaseWeaponScene, DeckScene, CatalogScene, BattleScene, ResultScene\]/);
 });
 
 test('recruitment UI consumes banner odds and delegates the paid transaction to save authority', async () => {

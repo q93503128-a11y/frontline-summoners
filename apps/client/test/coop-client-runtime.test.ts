@@ -16,7 +16,7 @@ test('main menu registers the real co-op lobby and authoritative battle scenes',
   assert.match(main, /'2인 협동', \(\) => this\.scene\.start\('coop-lobby'\)/);
   assert.match(main, /game\.scene\.add\('coop-lobby', CoopLobbyScene, false\)/);
   assert.match(main, /game\.scene\.add\('coop-battle', CoopBattleScene, false\)/);
-  assert.match(main, /scene: \[BootScene, MainMenuScene, StageHubScene, StageSelectScene, DeckScene, CatalogScene, BattleScene, ResultScene\]/);
+  assert.match(main, /scene: \[BootScene, MainMenuScene, StageHubScene, StageSelectScene, BaseWeaponScene, DeckScene, CatalogScene, BattleScene, ResultScene\]/);
 });
 
 test('co-op lobby exposes only unlocked SOLO_OR_COOP stages and reads scaling from stage policy metadata', async () => {

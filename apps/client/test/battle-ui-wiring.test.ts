@@ -110,7 +110,7 @@ test('sortie flow uses the shared collection hub and canonical normal/special cl
   assert.match(result, /recordSpecialStageClear\(this\.stage\.id\)/);
   assert.match(result, /recordNormalStageClear\(this\.stage\.id, 'SOLO_BATTLE'\)/);
   assert.match(result, /getStageCollectionForStage\(this\.stage\.id\)/);
-  assert.match(main, /scene: \[BootScene, MainMenuScene, StageHubScene, StageSelectScene, DeckScene, CatalogScene, BattleScene, ResultScene\]/);
+  assert.match(main, /scene: \[BootScene, MainMenuScene, StageHubScene, StageSelectScene, BaseWeaponScene, DeckScene, CatalogScene, BattleScene, ResultScene\]/);
   assert.match(main, /game\.scene\.add\('recruitment', RecruitmentScene, false\)/);
   assert.doesNotMatch(`${navigation}\n${result}\n${main}`, /SpecialStageSelectScene|special-select|협동 권장/);
 });
