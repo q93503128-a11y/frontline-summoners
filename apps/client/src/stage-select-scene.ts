@@ -1,5 +1,7 @@
 import Phaser from 'phaser';
 import { INTERNAL_HEIGHT, INTERNAL_WIDTH } from '@frontline/shared';
+import { accountSnapshotToGuestProgress, loadActiveProgress, type ActiveProgressAuthority } from './active-progress';
+import { mutateAuthenticatedAccountSweep } from './account-network';
 import { BATTLEFIELD_THEME_LABELS } from './battlefield';
 import { getPermanentRewardEffectText } from './permanent-reward-ui';
 import { getGuestStageFormationViolation } from './player-loadout';
@@ -7,7 +9,6 @@ import { ENEMIES, createPrototypeBattle, getSlotById, getUnlockedSlotIds, type P
 import {
   getGuestPeriodicRewardChargeMap,
   getGuestResourceBalance,
-  loadGuestProgress,
   recordGuestStageSweep,
   type GuestProgress,
 } from './save';
@@ -48,9 +49,21 @@ function formatReward(amounts: Readonly<Record<string, number | undefined>>): st
   const entries = Object.entries(amounts).filter((entry): entry is [string, number] => Number.isInteger(entry[1]) && (entry[1] ?? 0) > 0);
   return entries.length === 0 ? '보상 없음' : entries.map(([id, amount]) => `${RESOURCE_LABELS[id] ?? id} +${amount}`).join(' · ');
 }
+function resourceRewardFromUnknown(value: unknown): Readonly<Record<string, number | undefined>> {
+  if (typeof value !== 'object' || value === null || Array.isArray(value)) return {};
+  const reward = (value as Record<string, unknown>).resourceReward;
+  if (typeof reward !== 'object' || reward === null || Array.isArray(reward)) return {};
+  const result: Record<string, number> = {};
+  for (const [id, amount] of Object.entries(reward as Record<string, unknown>)) {
+    if (Number.isInteger(amount) && (amount as number) > 0) result[id] = amount as number;
+  }
+  return result;
+}
 
 export class StageSelectScene extends Phaser.Scene {
   private progress: GuestProgress = EMPTY_PROGRESS;
+  private authority: ActiveProgressAuthority = 'GUEST_LOCAL';
+  private progressLoaded = false;
   private collection: StageCollection = STAGE_COLLECTIONS[0]!;
   private page = 0;
   private requestedPage: number | undefined;
@@ -68,6 +81,7 @@ export class StageSelectScene extends Phaser.Scene {
     this.page = this.requestedPage ?? 0;
     this.enemyOverlay = undefined;
     this.sweepInFlight = false;
+    this.progressLoaded = false;
   }
 
   create(): void {
@@ -79,7 +93,7 @@ export class StageSelectScene extends Phaser.Scene {
       compact ? `${this.collection.stages.length}개 전장` : `${this.collection.stages.length}개 전장 · 5개씩 보기 · ${this.collection.stageType === 'SPECIAL' ? '단계/메인 진도 조건 적용' : '순차 진도'}`,
       compact ? 22 : 19, COLORS.muted,
     );
-    this.sweepStatus = addText(this, INTERNAL_WIDTH / 2, 126, '', compact ? 18 : 15, '#9fe4b5', 'center').setOrigin(0.5);
+    this.sweepStatus = addText(this, INTERNAL_WIDTH / 2, 126, '진행 정보를 불러오는 중…', compact ? 18 : 15, '#9fe4b5', 'center').setOrigin(0.5);
     addButton(this, 995, compact ? 70 : 65, 150, compact ? 84 : 50, '출정', () => this.scene.start('stage-hub'), 0x6a7790);
     addButton(this, 1165, compact ? 70 : 65, 160, compact ? 84 : 50, '메인', () => this.scene.start('main-menu'), 0x586275);
     addButton(this, 72, 655, 115, compact ? 84 : 52, '◀ 이전', () => { this.page = Math.max(0, this.page - 1); this.renderPage(); }, 0x586275);
@@ -87,14 +101,23 @@ export class StageSelectScene extends Phaser.Scene {
     this.pageText = addText(this, INTERNAL_WIDTH / 2, 640, '', compact ? 22 : 18, '#9ca9bb', 'center').setOrigin(0.5);
     this.renderPage();
 
-    void loadGuestProgress().then((progress) => {
+    void loadActiveProgress().then((view) => {
       if (!this.scene.isActive()) return;
-      this.progress = progress;
+      this.authority = view.authority;
+      this.progress = view.progress;
+      this.progressLoaded = true;
+      this.sweepStatus?.setText(view.authority === 'ACCOUNT_OFFLINE_CACHE'
+        ? '오프라인 계정 캐시 · 전투/소탕은 서버 연결 후 가능'
+        : view.authority === 'ACCOUNT_ONLINE' ? '로그인 계정 · 서버 진행 사용' : '게스트 로컬 진행 사용');
+      this.sweepStatus?.setColor(view.authority === 'ACCOUNT_OFFLINE_CACHE' ? '#f2d37c' : view.authority === 'ACCOUNT_ONLINE' ? '#8ee3aa' : '#9ca9bb');
       if (this.requestedPage === undefined) {
-        const firstUncleared = getFirstUnclearedCollectionStageIndex(this.collection, progress.clearedStageIds, progress.specialClearedStageIds);
+        const firstUncleared = getFirstUnclearedCollectionStageIndex(this.collection, view.progress.clearedStageIds, view.progress.specialClearedStageIds);
         if (firstUncleared >= 0) this.page = Math.floor(firstUncleared / 5);
       } else this.page = Math.min(this.pageCount() - 1, this.requestedPage);
       this.renderPage();
+    }).catch((error: unknown) => {
+      if (!this.scene.isActive()) return;
+      this.sweepStatus?.setText(error instanceof Error ? error.message : '진행 정보를 읽지 못했습니다.').setColor('#ff9f9f');
     });
   }
 
@@ -110,18 +133,19 @@ export class StageSelectScene extends Phaser.Scene {
     const discoveredEnemyIds = new Set(this.progress.discoveredEnemyIds ?? []);
     const sweepTickets = getGuestResourceBalance(this.progress, 'sweep_ticket');
     const chargeMap = getGuestPeriodicRewardChargeMap(this.progress);
+    const onlineWritable = this.authority !== 'ACCOUNT_OFFLINE_CACHE';
     this.pageText?.setText(`${this.page + 1} / ${this.pageCount()}`);
 
     visible.forEach((stage, localIndex) => {
       const index = start + localIndex;
       const x = 145 + localIndex * 247;
-      const unlocked = isSortieStageUnlocked(stage.id, this.progress.clearedStageIds, this.progress.specialClearedStageIds);
+      const unlocked = this.progressLoaded && isSortieStageUnlocked(stage.id, this.progress.clearedStageIds, this.progress.specialClearedStageIds);
       const lockedReason = special ? getSpecialStageUnlockText(stage.id, this.progress.clearedStageIds, this.progress.specialClearedStageIds) : undefined;
       const formationViolation = unlocked ? getGuestStageFormationViolation(stage.id, this.progress) : undefined;
-      const canSortie = unlocked && formationViolation === undefined;
+      const canSortie = unlocked && formationViolation === undefined && onlineWritable;
       const cleared = special ? this.progress.specialClearedStageIds.includes(stage.id) : this.progress.clearedStageIds.includes(stage.id);
       const sweepEligible = cleared && stage.sweepEligibility === 'AFTER_NORMAL_CLEAR';
-      const canSweep = unlocked && sweepEligible && sweepTickets > 0 && !this.sweepInFlight;
+      const canSweep = unlocked && sweepEligible && sweepTickets > 0 && !this.sweepInFlight && onlineWritable;
       const periodicCollectionId = getPeriodicRewardCollectionIdForStage(stage.id);
       const periodicCharges = periodicCollectionId ? chargeMap[periodicCollectionId].charges : undefined;
       const rewardOwned = !special && stage.permanentRewardId !== undefined && this.progress.permanentRewardIds.includes(stage.permanentRewardId);
@@ -142,7 +166,7 @@ export class StageSelectScene extends Phaser.Scene {
       if (compact) {
         if (special) {
           const effectiveCap = unlocked ? createPrototypeBattle(stage.id, getUnlockedSlotIds(this.progress.clearedStageIds), this.progress.permanentRewardIds).playerUnitCap : stage.playerUnitCap;
-          const specialStatus = !unlocked ? (lockedReason ?? 'SPECIAL 해금 조건 필요') : formationViolation ?? `동시 출격 ${effectiveCap}기`;
+          const specialStatus = !onlineWritable && unlocked ? '서버 연결 필요' : !unlocked ? (lockedReason ?? 'SPECIAL 해금 조건 필요') : formationViolation ?? `동시 출격 ${effectiveCap}기`;
           this.stageLayer!.add(addText(this, x, 350, specialStatus, 18, canSortie ? '#ffd493' : '#d9a6a6', 'center').setOrigin(0.5).setWordWrapWidth(196));
           const repeatText = periodicCharges === undefined ? (cleared ? '✓ 클리어 기록 완료' : '반복 클리어 보상 가능') : `보상 충전 ${periodicCharges}/4 · ${cleared ? '소탕 가능' : '첫 클리어 우선'}`;
           this.stageLayer!.add(addText(this, x, 402, repeatText, 18, cleared ? '#9fe4b5' : unlocked ? '#e2ca8d' : '#6d6858', 'center').setOrigin(0.5));
@@ -156,7 +180,7 @@ export class StageSelectScene extends Phaser.Scene {
         this.stageLayer!.add(addText(this, x, 346, stage.subtitle, 14, unlocked ? (special ? '#d0c6da' : '#c4cbd7') : '#626a76', 'center').setOrigin(0.5).setWordWrapWidth(194));
         if (special) {
           const effectiveCap = unlocked ? createPrototypeBattle(stage.id, getUnlockedSlotIds(this.progress.clearedStageIds), this.progress.permanentRewardIds).playerUnitCap : stage.playerUnitCap;
-          const specialStatus = !unlocked ? (lockedReason ?? 'SPECIAL 해금 조건 필요') : formationViolation ?? `동시 출격 ${effectiveCap}기 · 적 최대 ${stage.enemyUnitCap}기`;
+          const specialStatus = !onlineWritable && unlocked ? '오프라인 캐시 · 서버 연결 필요' : !unlocked ? (lockedReason ?? 'SPECIAL 해금 조건 필요') : formationViolation ?? `동시 출격 ${effectiveCap}기 · 적 최대 ${stage.enemyUnitCap}기`;
           this.stageLayer!.add(addText(this, x, 432, specialStatus, 13, canSortie ? '#ffd493' : '#d9a6a6', 'center').setOrigin(0.5).setWordWrapWidth(196));
           const repeatText = periodicCharges === undefined ? (cleared ? '✓ 클리어 기록 완료 · 반복 가능' : '메인 진도와 별도 클리어 기록') : `보상 충전 ${periodicCharges}/4 · ${cleared ? '반복/소탕 가능' : '첫 클리어 우선'}`;
           this.stageLayer!.add(addText(this, x, 474, repeatText, 13, cleared ? '#9fe4b5' : unlocked ? '#e2ca8d' : '#6d6858', 'center').setOrigin(0.5).setWordWrapWidth(196));
@@ -171,14 +195,18 @@ export class StageSelectScene extends Phaser.Scene {
         if (slot) this.stageLayer!.add(addText(this, x, compact ? 445 : 503, compact ? `동료 · ${slot.displayName}` : `첫 클리어 동료 · ${slot.displayName}`, compact ? 19 : 14, cleared ? '#8ee3aa' : unlocked ? '#a8cfff' : '#59616d', 'center').setOrigin(0.5));
       }
 
-      const lockedLabel = special ? (lockedReason ?? '해금 조건 필요') : '이전 스테이지 필요';
+      const lockedLabel = !onlineWritable && unlocked ? '서버 연결 필요' : special ? (lockedReason ?? '해금 조건 필요') : '이전 스테이지 필요';
       const splitButtons = sweepEligible;
       const battleX = splitButtons ? x - 48 : x;
       const battleWidth = splitButtons ? 82 : 174;
       const stageButton = addButton(
         this, battleX, compact ? 535 : 548, battleWidth, compact ? 84 : 52,
-        !unlocked ? (compact ? '잠김' : lockedLabel) : formationViolation ? '편성' : (special ? '도전' : '전투'),
-        () => { if (!unlocked) return; if (formationViolation) this.scene.start('deck'); else this.scene.start('battle', { stageId: stage.id }); },
+        !unlocked ? (compact ? '잠김' : lockedLabel) : !onlineWritable ? '온라인' : formationViolation ? '편성' : (special ? '도전' : '전투'),
+        () => {
+          if (!unlocked) return;
+          if (!onlineWritable) { this.scene.start('account'); return; }
+          if (formationViolation) this.scene.start('deck'); else this.scene.start('battle', { stageId: stage.id });
+        },
         canSortie ? border : formationViolation ? 0x8b5d5d : 0x3f4855,
       );
       if (!canSortie) stageButton.setAlpha(0.72);
@@ -188,6 +216,7 @@ export class StageSelectScene extends Phaser.Scene {
         const chargeSuffix = periodicCharges === undefined ? '' : `\n충 ${periodicCharges}`;
         const sweepButton = addButton(this, x + 53, compact ? 535 : 548, 96, compact ? 84 : 52, `소탕\n권 ${sweepTickets}${chargeSuffix}`, () => {
           if (canSweep) void this.executeSweep(stage);
+          else if (!onlineWritable) this.scene.start('account');
         }, canSweep ? 0x8e7544 : 0x3f4855);
         if (!canSweep) sweepButton.setAlpha(0.62);
         this.stageLayer!.add(sweepButton);
@@ -200,11 +229,19 @@ export class StageSelectScene extends Phaser.Scene {
     this.sweepInFlight = true;
     this.sweepStatus?.setColor('#e8d89c').setText(`${stage.name} · 소탕 처리 중...`);
     try {
-      const result = await recordGuestStageSweep(stage.id);
-      this.progress = result.progress;
-      const remaining = getGuestResourceBalance(this.progress, 'sweep_ticket');
-      const persistence = result.persisted ? '' : ' · 영구 저장 실패(현재 탭 유지)';
-      this.sweepStatus?.setColor(result.persisted ? '#9fe4b5' : '#ffb37c').setText(`소탕 완료 · ${formatReward(result.resourceReward)} · 소탕권 ${remaining}${persistence}`);
+      if (this.authority === 'ACCOUNT_OFFLINE_CACHE') throw new Error('로그인 계정 소탕은 서버 연결이 필요합니다.');
+      if (this.authority === 'ACCOUNT_ONLINE') {
+        const response = await mutateAuthenticatedAccountSweep({ requestId: crypto.randomUUID(), stageId: stage.id });
+        this.progress = accountSnapshotToGuestProgress(response.snapshot);
+        const remaining = getGuestResourceBalance(this.progress, 'sweep_ticket');
+        this.sweepStatus?.setColor('#9fe4b5').setText(`서버 소탕 완료 · ${formatReward(resourceRewardFromUnknown(response.result))} · 소탕권 ${remaining}`);
+      } else {
+        const result = await recordGuestStageSweep(stage.id);
+        this.progress = result.progress;
+        const remaining = getGuestResourceBalance(this.progress, 'sweep_ticket');
+        const persistence = result.persisted ? '' : ' · 영구 저장 실패(현재 탭 유지)';
+        this.sweepStatus?.setColor(result.persisted ? '#9fe4b5' : '#ffb37c').setText(`소탕 완료 · ${formatReward(result.resourceReward)} · 소탕권 ${remaining}${persistence}`);
+      }
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error);
       this.sweepStatus?.setColor('#ff9f9f').setText(message.includes('Insufficient meta resource: sweep_ticket') ? '소탕권이 부족하다.' : `소탕 실패 · ${message}`);
