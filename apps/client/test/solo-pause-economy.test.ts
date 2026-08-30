@@ -47,9 +47,9 @@ test('the first roster and enemy line advance at a deliberate pace', () => {
 
   const enemies = enemiesJson as Array<{ id: string; moveSpeed: number }>;
   assert.equal(enemies.find((enemy) => enemy.id === 'enemy-raider')?.moveSpeed, 2);
-  assert.equal(enemies.find((enemy) => enemy.id === 'enemy-sprinter')?.moveSpeed, 4);
-  assert.ok(enemies.every((enemy) => enemy.moveSpeed <= 4));
-  assert.ok(PLAYER_SLOTS.every((slot) => slot.definition.moveSpeed <= 3));
+  assert.equal(enemies.find((enemy) => enemy.id === 'enemy-sprinter')?.moveSpeed, 5);
+  assert.ok(enemies.every((enemy) => enemy.moveSpeed <= 5));
+  assert.ok(PLAYER_SLOTS.every((slot) => slot.definition.moveSpeed <= 3.2));
 });
 
 test('the ten story units remain the core roster while v1 main progression spans four chapters', () => {

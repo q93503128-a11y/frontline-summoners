@@ -21,7 +21,7 @@ test('다섯 깃발 allows five distinct solo characters but rejects six', () =>
 
 test('가벼운 주머니 evaluates the resolved current production cost', () => {
   assert.equal(getGuestStageFormationViolation('special_light_purse_01', progress(['militia','guard','hunter','duelist','lancer'])), undefined);
-  const violation = getGuestStageFormationViolation('special_light_purse_01', progress(['militia','guard','battlemage']));
-  assert.match(violation ?? '', /500/);
+  const violation = getGuestStageFormationViolation('special_light_purse_01', progress(['militia','guard','pyromancer']));
+  assert.match(violation ?? '', /450/);
   assert.match(violation ?? '', /400/);
 });

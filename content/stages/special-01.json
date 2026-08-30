@@ -17,7 +17,7 @@
   {
     "id":"special-04","chapter":"특수전 · 뒤집힌 국경","name":"삼인 결사대","subtitle":"세 자리만으로 중장갑 전열과 철문장군을 돌파한다","stageType":"SPECIAL","difficulty":8,
     "playerBaseHp":3200,"enemyBaseHp":5200,"startingSupply":750,"mapLength":1000,"theme":"fortress","decorSeed":251,"playerUnitCap":3,"enemyUnitCap":15,
-    "waves":[{"id":"W1","trigger":{"type":"TIME","frame":300},"spawn":{"enemyId":"enemy-knight","count":2,"intervalFrames":300},"repeat":{"delayFrames":1500}},{"id":"W2","trigger":{"type":"TIME","frame":900},"spawn":{"enemyId":"enemy-berserker","count":3,"intervalFrames":260}},{"id":"W3","trigger":{"type":"TIME","frame":1500},"spawn":{"enemyId":"enemy-boss-iron","count":1,"intervalFrames":1}},{"id":"W4","trigger":{"type":"TIME","frame":1600},"spawn":{"enemyId":"enemy-sniper","count":2,"intervalFrames":260}}],"formationRestrictions":{},"specialRules":[]
+    "waves":[{"id":"W1","trigger":{"type":"TIME","frame":300},"spawn":{"enemyId":"enemy-knight","count":2,"intervalFrames":300},"repeat":{"delayFrames":1500}},{"id":"W2","trigger":{"type":"TIME","frame":900},"spawn":{"enemyId":"enemy-berserker","count":3,"intervalFrames":260}},{"id":"W3","trigger":{"type":"ANY_OF","conditions":[{"type":"TIME","frame":1500},{"type":"ENEMY_BASE_HP_BELOW","percent":80}]},"spawn":{"enemyId":"enemy-boss-iron","count":1,"intervalFrames":1}},{"id":"W4","trigger":{"type":"TIME","frame":1600},"spawn":{"enemyId":"enemy-sniper","count":2,"intervalFrames":260}}],"formationRestrictions":{},"specialRules":[]
   },
   {
     "id":"special-05","chapter":"특수전 · 뒤집힌 국경","name":"가면과 철문","subtitle":"황금가면과 철문장군을 한 전장에서 연달아 상대한다","stageType":"SPECIAL","difficulty":8,

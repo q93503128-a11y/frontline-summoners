@@ -20,7 +20,7 @@ test('authoritative co-op enforces three characters per player in 다섯 깃발'
 test('authoritative co-op enforces resolved production cost 400 in 가벼운 주머니', () => {
   assert.doesNotThrow(() => createServerCoopBattle('special_light_purse_01', loadout(['militia','lancer']), one));
   assert.throws(
-    () => createServerCoopBattle('special_light_purse_01', loadout(['militia','battlemage']), one),
+    () => createServerCoopBattle('special_light_purse_01', loadout(['militia','pyromancer']), one),
     /stage_formation_restricted:special_light_purse_01/,
   );
 });
