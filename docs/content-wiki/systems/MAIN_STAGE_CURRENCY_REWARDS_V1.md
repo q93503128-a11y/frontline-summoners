@@ -211,7 +211,7 @@ FIRST_CLEAR 기본 통화 합계:
 milestone 진화재료 합계:
 
 - evo_fragment: 154
-- evo_core: 22
+- evo_core: 25
 - evo_crown: 4
 - 소탕권: 44
 

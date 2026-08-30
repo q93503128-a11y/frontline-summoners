@@ -7,21 +7,56 @@ async function readJson(relative: string): Promise<unknown> {
   return JSON.parse(await readFile(new URL(relative, import.meta.url), 'utf8')) as unknown;
 }
 
-test('current stage policy registry covers every implemented main and SPECIAL stage exactly once', async () => {
-  const [mainRaw, specialRaw, policiesRaw] = await Promise.all([
-    readJson('../../../content/stages/chapter-01.json'),
-    readJson('../../../content/stages/special-01.json'),
-    readJson('../../../content/stages/policies-01.json'),
-  ]);
-  assert.ok(Array.isArray(mainRaw));
-  assert.ok(Array.isArray(specialRaw));
-  const stageIds = new Set(
-    [...mainRaw, ...specialRaw].map((stage) => (stage as Record<string, unknown>).id as string),
-  );
-  const policies = parseStagePolicies(policiesRaw, stageIds);
+async function readJsonArray(relative: string): Promise<readonly unknown[]> {
+  const value = await readJson(relative);
+  assert.ok(Array.isArray(value), `${relative} must contain a JSON array`);
+  return value;
+}
 
-  assert.equal(stageIds.size, 25);
-  assert.equal(policies.length, 25);
+test('current stage policy registry covers every implemented main and SPECIAL stage exactly once', async () => {
+  const stageFiles = [
+    '../../../content/stages/chapter-01.json',
+    '../../../content/stages/chapter-02-01-05.json',
+    '../../../content/stages/chapter-02-06-10.json',
+    '../../../content/stages/chapter-02-11-15.json',
+    '../../../content/stages/chapter-02-16-20.json',
+    '../../../content/stages/chapter-03-01-05.json',
+    '../../../content/stages/chapter-03-06-10.json',
+    '../../../content/stages/chapter-03-11-15.json',
+    '../../../content/stages/chapter-03-16-20.json',
+    '../../../content/stages/chapter-04-01-05.json',
+    '../../../content/stages/chapter-04-06-10.json',
+    '../../../content/stages/chapter-04-11-15.json',
+    '../../../content/stages/chapter-04-16-20.json',
+    '../../../content/stages/special-01.json',
+    '../../../content/stages/special-resource-01.json',
+    '../../../content/stages/special-permanent-glutton.json',
+    '../../../content/stages/special-permanent-undead.json',
+    '../../../content/stages/special-permanent-glass.json',
+    '../../../content/stages/special-permanent-mech.json',
+    '../../../content/stages/special-permanent-anomaly.json',
+    '../../../content/stages/special-permanent-echoes.json',
+    '../../../content/stages/special-event-01.json',
+  ] as const;
+  const policyFiles = [
+    '../../../content/stages/policies-01-02.json',
+    '../../../content/stages/policies-03.json',
+    '../../../content/stages/policies-04.json',
+    '../../../content/stages/policies-special-resource.json',
+    '../../../content/stages/policies-special-permanent.json',
+    '../../../content/stages/policies-special-restriction.json',
+    '../../../content/stages/policies-special-event.json',
+  ] as const;
+
+  const stageGroups = await Promise.all(stageFiles.map(readJsonArray));
+  const policyGroups = await Promise.all(policyFiles.map(readJsonArray));
+  const stageIds = new Set(
+    stageGroups.flat().map((stage) => (stage as Record<string, unknown>).id as string),
+  );
+  const policies = parseStagePolicies(policyGroups.flat(), stageIds);
+
+  assert.equal(stageIds.size, 141);
+  assert.equal(policies.length, 141);
   assert.equal(new Set(policies.map((policy) => policy.stageId)).size, policies.length);
 });
 

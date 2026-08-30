@@ -46,7 +46,7 @@ test('main 80 currency table matches the detailed canonical campaign entries and
   assert.equal(totals.gold, 249160);
   assert.equal(totals.summon_crystal, 8470);
   assert.equal(totals.evo_fragment, 154);
-  assert.equal(totals.evo_core, 22);
+  assert.equal(totals.evo_core, 25);
   assert.equal(totals.evo_crown, 4);
   assert.equal(totals.sweep_ticket, 44);
 

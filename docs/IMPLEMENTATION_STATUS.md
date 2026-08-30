@@ -41,10 +41,10 @@
   - Gold 249,160
   - 모집 결정 8,470
   - evo_fragment 154
-  - evo_core 22
+  - evo_core 25
   - evo_crown 4
   - 소탕권 44
-- 기존 위키 하단 합계에 있던 evo_fragment 104 / 소탕권 43 산술 오기는 stage별 상세 합계인 154 / 44로 정정했다.
+- 초기 위키 하단 요약의 산술 오기는 stage별 상세 milestone을 직접 합산한 위 수치로 정정했다.
 
 ### Base Lv / +Lv
 
@@ -178,7 +178,7 @@ Save v13에 `endlessBestTimeMs`, `endlessBestReachedMinute`, `bossRushBestDefeat
 ## 재클리어/거점 병기
 
 - NORMAL_CLEAR 후 무료 2× foundation은 구현.
-- `sweep_ticket`은 이제 실제 획득/저장되지만 sweep 실행 및 1장 소비 transaction은 미완료.
+- `sweep_ticket`은 실제 획득/저장되지만 sweep 실행 및 1장 소비 transaction은 미완료.
 - periodic reward charge 미완료.
 - 거점 병기는 generic damage+push foundation만 있음.
 - 위키의 전선포/결계발진기/보급투하기 catalog/equip/progression/shared-coop rules는 미완료.
