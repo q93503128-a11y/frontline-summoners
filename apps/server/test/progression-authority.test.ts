@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
 import test from 'node:test';
+import { ACCOUNT_MAIN_STAGES } from '../src/account-content.ts';
 import { getServerCoopLoadout } from '../src/runtime-content.ts';
 import {
   ACCOUNT_PROGRESSION_SCHEMA_VERSION,
@@ -23,6 +24,15 @@ function snapshot(overrides: Record<string, unknown> = {}) {
     deckSlotIds: ['militia'],
     ...overrides,
   };
+}
+
+function mainPrefixSnapshot(count: number, overrides: Record<string, unknown> = {}) {
+  const stages = ACCOUNT_MAIN_STAGES.slice(0, count);
+  return snapshot({
+    clearedStageIds: stages.map((stage) => stage.id),
+    permanentRewardIds: stages.flatMap((stage) => stage.permanentRewardId ? [stage.permanentRewardId] : []),
+    ...overrides,
+  });
 }
 
 test('new server account progression starts from the canonical starter only', () => {
@@ -63,10 +73,24 @@ test('server progression cannot claim a later guaranteed permanent reward before
   })), /missing guaranteed permanent reward/);
 });
 
-test('SPECIAL clear authority remains locked behind main_01_020 NORMAL_CLEAR', () => {
-  assert.throws(() => normalizeAccountProgressionSnapshot(snapshot({
+test('SPECIAL clear history follows authored collection and tier gates instead of a blanket chapter-one gate', () => {
+  const earlyPeriodic = normalizeAccountProgressionSnapshot(mainPrefixSnapshot(3, {
+    specialClearedStageIds: ['special_gold_convoy_01'],
+  }));
+  assert.deepEqual(earlyPeriodic.specialClearedStageIds, ['special_gold_convoy_01']);
+
+  assert.throws(() => normalizeAccountProgressionSnapshot(mainPrefixSnapshot(3, {
+    specialClearedStageIds: ['special_gold_convoy_01', 'special_gold_convoy_02'],
+  })), /historical SPECIAL progression gate/);
+
+  assert.throws(() => normalizeAccountProgressionSnapshot(mainPrefixSnapshot(3, {
     specialClearedStageIds: ['special-01'],
-  })), /require main_01_020/);
+  })), /historical SPECIAL collection gate/);
+
+  const historicalClosedEvent = normalizeAccountProgressionSnapshot(mainPrefixSnapshot(20, {
+    specialClearedStageIds: ['event_summer_01_01'],
+  }));
+  assert.deepEqual(historicalClosedEvent.specialClearedStageIds, ['event_summer_01_01']);
 });
 
 test('server progression rejects unknown discovery, unowned deck slots and future schemas', () => {

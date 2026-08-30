@@ -32,11 +32,12 @@ test('server SPECIAL access enforces collection progression, sequential unlock a
   assert.throws(() => __accountSpecialMutationTestOnly.buildSpecialBattleResult(initial, 'special_gold_convoy_01', OPEN_NOW), /collection is locked/);
 
   const mainThree = clearThrough(3);
+  const baseGold = getResourceBalance(mainThree.resourceLedgerById, 'gold');
   const first = __accountSpecialMutationTestOnly.buildSpecialBattleResult(mainThree, 'special_gold_convoy_01', OPEN_NOW);
   assert.equal(first.result.firstClear, true);
   assert.equal(first.result.chargeConsumed, false);
   assert.deepEqual(first.result.resourceReward, { gold: 600, sweep_ticket: 1 });
-  assert.equal(getResourceBalance(first.snapshot.resourceLedgerById, 'gold'), 600);
+  assert.equal(getResourceBalance(first.snapshot.resourceLedgerById, 'gold'), baseGold + 600);
   assert.equal(getResourceBalance(first.snapshot.resourceLedgerById, 'sweep_ticket'), 1);
   assert.throws(() => __accountSpecialMutationTestOnly.buildSpecialBattleResult(first.snapshot, 'special_gold_convoy_02', OPEN_NOW), /progression gate is locked/);
 
@@ -53,6 +54,7 @@ test('server SPECIAL access enforces collection progression, sequential unlock a
 
 test('periodic SPECIAL repeat consumes exactly one charge and uses charged reward', () => {
   const mainThree = clearThrough(3);
+  const baseGold = getResourceBalance(mainThree.resourceLedgerById, 'gold');
   const first = __accountSpecialMutationTestOnly.buildSpecialBattleResult(mainThree, 'special_gold_convoy_01', OPEN_NOW);
   const repeat = __accountSpecialMutationTestOnly.buildSpecialBattleResult(first.snapshot, 'special_gold_convoy_01', OPEN_NOW);
   assert.equal(repeat.result.firstClear, false);
@@ -60,7 +62,7 @@ test('periodic SPECIAL repeat consumes exactly one charge and uses charged rewar
   assert.equal(repeat.result.periodicCollectionId, 'special_gold_convoy');
   assert.deepEqual(repeat.result.resourceReward, { gold: 450 });
   assert.equal(repeat.snapshot.periodicRewardChargeByCollection.special_gold_convoy.charges, 3);
-  assert.equal(getResourceBalance(repeat.snapshot.resourceLedgerById, 'gold'), 1050);
+  assert.equal(getResourceBalance(repeat.snapshot.resourceLedgerById, 'gold'), baseGold + 1050);
 });
 
 test('server sweep requires NORMAL_CLEAR, spends one ticket and never creates progression', () => {
@@ -87,7 +89,7 @@ test('server sweep requires NORMAL_CLEAR, spends one ticket and never creates pr
   assert.equal(specialSweep.snapshot.periodicRewardChargeByCollection.special_gold_convoy.charges, 3);
   assert.deepEqual(specialSweep.snapshot.specialClearedStageIds, ['special_gold_convoy_01']);
 
-  assert.throws(() => __accountSpecialMutationTestOnly.buildSweepResult(specialSweep.snapshot, 'special_gold_convoy_01', OPEN_NOW), /insufficient resource/);
+  assert.throws(() => __accountSpecialMutationTestOnly.buildSweepResult(specialSweep.snapshot, 'special_gold_convoy_01', OPEN_NOW), /Insufficient meta resource/);
 });
 
 test('server stage policy is authoritative for sweep eligibility', () => {

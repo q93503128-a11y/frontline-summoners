@@ -18,6 +18,7 @@ import {
   ACCOUNT_MAIN_STAGES,
   ACCOUNT_SPECIAL_STAGE_IDS,
 } from './account-content.ts';
+import { assertAccountSpecialClearHistory } from './account-stage-authority.ts';
 
 export const ACCOUNT_PROGRESSION_SCHEMA_VERSION = 1;
 export const ACCOUNT_MAX_DECK_SLOTS = 10;
@@ -134,9 +135,7 @@ function normalizeSpecialClears(value: unknown, clearedStageIds: readonly string
   for (const id of ids) {
     if (!SPECIAL_STAGE_IDS.has(id)) throw new Error(`unknown account special stage:${id}`);
   }
-  if (ids.length > 0 && !clearedStageIds.includes('main_01_020')) {
-    throw new Error('account special clears require main_01_020 NORMAL_CLEAR');
-  }
+  assertAccountSpecialClearHistory(ids, clearedStageIds);
   return ids;
 }
 

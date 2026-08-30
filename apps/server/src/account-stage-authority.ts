@@ -135,6 +135,28 @@ export function isAccountStageAvailable(stageId: string, nowMs = Date.now()): bo
   return !schedule || getPeriodicCollectionWindowState(schedule, nowMs).available;
 }
 
+export function assertAccountSpecialClearHistory(
+  specialClearedStageIds: readonly string[],
+  clearedStageIds: readonly string[],
+): void {
+  const specialClears = new Set(specialClearedStageIds);
+  for (const stageId of specialClearedStageIds) {
+    if (!ACCOUNT_SPECIAL_STAGE_IDS.has(stageId)) throw new Error(`unknown account SPECIAL stage:${stageId}`);
+    const collection = COLLECTION_BY_STAGE_ID.get(stageId);
+    if (!collection || collection.stageType !== 'SPECIAL') throw new Error(`account SPECIAL collection missing:${stageId}`);
+    if (collection.unlockAfterStageId && !clearedStageIds.includes(collection.unlockAfterStageId)) {
+      throw new Error(`historical SPECIAL collection gate is not satisfied:${stageId}`);
+    }
+    const rule = SPECIAL_UNLOCK_BY_STAGE_ID.get(stageId);
+    if (rule?.requiredProgressionStageId && !clearedStageIds.includes(rule.requiredProgressionStageId)) {
+      throw new Error(`historical SPECIAL progression gate is not satisfied:${stageId}`);
+    }
+    if (rule?.previousSpecialStageId && !specialClears.has(rule.previousSpecialStageId)) {
+      throw new Error(`historical SPECIAL previous clear is missing:${stageId}`);
+    }
+  }
+}
+
 export function assertAccountSpecialStagePlayable(
   stageId: string,
   clearedStageIds: readonly string[],
