@@ -4,10 +4,12 @@ import test from 'node:test';
 import { grantResources, getResourceBalance } from '@frontline/sim/resource-ledger';
 import { MAIN_STAGE_RESOURCE_REWARDS } from '@frontline/sim/main-stage-rewards';
 import { createInitialAccountSave, normalizeAccountSaveSnapshot } from '../src/account-save-authority.ts';
+import { ACCOUNT_MAIN_STAGES, ACCOUNT_SPECIAL_STAGE_IDS } from '../src/account-content.ts';
 import { __accountMutationTestOnly } from '../src/account-mutation-authority.ts';
-import type { ServerRecruitmentRandomSource } from '../src/recruitment-authority.ts';
+import { SERVER_RECRUITMENT_BANNERS, type ServerRecruitmentRandomSource } from '../src/recruitment-authority.ts';
 
 const NOW = Date.parse('2026-08-30T09:30:00Z');
+const BANNER_ID = SERVER_RECRUITMENT_BANNERS[0]!.id;
 
 function fixedRng(values: readonly number[]): ServerRecruitmentRandomSource {
   let index = 0;
@@ -28,6 +30,17 @@ function clearThrough(count: number) {
   return snapshot;
 }
 
+test('account authority catalog covers canonical MAIN80 and SPECIAL61', () => {
+  assert.equal(ACCOUNT_MAIN_STAGES.length, 80);
+  assert.equal(ACCOUNT_MAIN_STAGES[19]?.id, 'main_01_020');
+  assert.equal(ACCOUNT_MAIN_STAGES[20]?.id, 'main_02_001');
+  assert.equal(ACCOUNT_MAIN_STAGES[59]?.id, 'main_03_020');
+  assert.equal(ACCOUNT_MAIN_STAGES[79]?.id, 'main_04_020');
+  assert.equal(ACCOUNT_SPECIAL_STAGE_IDS.size, 61);
+  assert.equal(SERVER_RECRUITMENT_BANNERS.length, 3);
+  assert.equal(BANNER_ID, 'starlight-order-01');
+});
+
 test('authoritative MAIN result grants first-clear once and repeat reward thereafter', () => {
   const initial = createInitialAccountSave();
   assert.throws(() => __accountMutationTestOnly.buildMainBattleResult(initial, 'main_01_002', 'SOLO_BATTLE'), /not unlocked/);
@@ -46,6 +59,14 @@ test('authoritative MAIN result grants first-clear once and repeat reward therea
   assert.deepEqual(repeat.result.resourceReward, { gold: 30 });
   assert.equal(repeat.result.normalClearSource, 'COOP_BATTLE');
   assert.equal(getResourceBalance(repeat.snapshot.resourceLedgerById, 'gold'), 180);
+});
+
+test('authoritative MAIN result crosses chapter boundaries without losing contiguous authority', () => {
+  const chapterOneClear = clearThrough(20);
+  const next = __accountMutationTestOnly.buildMainBattleResult(chapterOneClear, 'main_02_001', 'SOLO_BATTLE');
+  assert.equal(next.result.firstClear, true);
+  assert.equal(next.snapshot.clearedStageIds.length, 21);
+  assert.equal(next.snapshot.clearedStageIds[20], 'main_02_001');
 });
 
 test('authoritative record mutation uses server frames and only grants newly crossed high-water', () => {
@@ -82,7 +103,7 @@ test('server recruitment spends crystal and resolves duplicate plus or dismantle
   }, NOW);
 
   const first = __accountMutationTestOnly.buildRecruitmentResult(funded, {
-    requestId: 'pull-1', expectedRevision: 0, bannerId: 'banner-01', count: 1, duplicatePolicy: 'APPLY_PLUS',
+    requestId: 'pull-1', expectedRevision: 0, bannerId: BANNER_ID, count: 1, duplicatePolicy: 'APPLY_PLUS',
   }, fixedRng([0, 0]));
   const characterId = first.result.results[0]!.characterId;
   assert.equal(first.result.results[0]!.duplicate, false);
@@ -90,14 +111,14 @@ test('server recruitment spends crystal and resolves duplicate plus or dismantle
   assert.ok(first.snapshot.ownedRecruitmentCharacterIds.includes(characterId));
 
   const duplicatePlus = __accountMutationTestOnly.buildRecruitmentResult(first.snapshot, {
-    requestId: 'pull-2', expectedRevision: 0, bannerId: 'banner-01', count: 1, duplicatePolicy: 'APPLY_PLUS',
+    requestId: 'pull-2', expectedRevision: 0, bannerId: BANNER_ID, count: 1, duplicatePolicy: 'APPLY_PLUS',
   }, fixedRng([0, 0]));
   assert.equal(duplicatePlus.result.results[0]!.duplicateResolution, 'PLUS');
   assert.equal(duplicatePlus.result.results[0]!.plusLevelAfter, 1);
   assert.equal(duplicatePlus.snapshot.characterProgressById[characterId]!.plusLevel, 1);
 
   const duplicateDismantle = __accountMutationTestOnly.buildRecruitmentResult(duplicatePlus.snapshot, {
-    requestId: 'pull-3', expectedRevision: 0, bannerId: 'banner-01', count: 1, duplicatePolicy: 'DISMANTLE',
+    requestId: 'pull-3', expectedRevision: 0, bannerId: BANNER_ID, count: 1, duplicatePolicy: 'DISMANTLE',
   }, fixedRng([0, 0]));
   assert.equal(duplicateDismantle.result.results[0]!.duplicateResolution, 'DISMANTLE');
   assert.equal(duplicateDismantle.result.dismantledSoulEssence, 4);
@@ -111,7 +132,7 @@ test('recruitment rejects unsupported batch sizes before any authoritative resul
     resourceLedgerById: grantResources({}, { summon_crystal: 5000 }),
   }, NOW);
   assert.throws(() => __accountMutationTestOnly.buildRecruitmentResult(funded, {
-    requestId: 'bad-count', expectedRevision: 0, bannerId: 'banner-01', count: 5 as 1, duplicatePolicy: 'APPLY_PLUS',
+    requestId: 'bad-count', expectedRevision: 0, bannerId: BANNER_ID, count: 5 as 1, duplicatePolicy: 'APPLY_PLUS',
   }, fixedRng([])), /count must be 1 or 10/);
 });
 
@@ -124,4 +145,11 @@ test('D1 mutation receipt migration makes battle/request ids unique per account 
   assert.match(sql, /PRIMARY KEY \(user_id, mutation_kind, mutation_id\)/);
   assert.match(sql, /input_fingerprint TEXT NOT NULL/);
   assert.match(sql, /result_json TEXT NOT NULL/);
+});
+
+test('mutation source uses rollback-safe CAS before inserting idempotency receipt', async () => {
+  const source = await readFile(new URL('../src/account-mutation-authority.ts', import.meta.url), 'utf8');
+  assert.match(source, /revision = CASE WHEN revision = \?3 THEN revision \+ 1 ELSE -1 END/);
+  assert.match(source, /INSERT INTO account_mutation_receipts/);
+  assert.match(source, /idempotency key reused with different input/);
 });
