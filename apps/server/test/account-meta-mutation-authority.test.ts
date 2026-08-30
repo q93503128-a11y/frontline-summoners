@@ -36,7 +36,7 @@ test('account character Base Lv mutation spends canonical Gold and enforces chap
   const upgraded = __accountMetaMutationTestOnly.buildMetaProgressionResult(funded, {
     requestId: 'level-1', expectedRevision: 0, action: 'CHARACTER_LEVEL', characterId: 'militia', targetLevel: 5,
   }, NOW);
-  assert.equal(upgraded.result.action, 'CHARACTER_LEVEL');
+  if (upgraded.result.action !== 'CHARACTER_LEVEL') assert.fail('expected CHARACTER_LEVEL result');
   assert.equal(upgraded.snapshot.characterProgressById.militia?.level, 5);
   assert.deepEqual(upgraded.result.spentResources, { gold: 580 });
   assert.equal(getResourceBalance(upgraded.snapshot.resourceLedgerById, 'gold'), 999_420);
@@ -60,7 +60,7 @@ test('account +Lv mutation spends rarity-aware soul essence and cannot decrease'
   const storyPlus = __accountMetaMutationTestOnly.buildMetaProgressionResult(story, {
     requestId: 'plus-story', expectedRevision: 0, action: 'CHARACTER_PLUS_LEVEL', characterId: 'militia', targetPlusLevel: 3,
   }, NOW);
-  assert.equal(storyPlus.result.action, 'CHARACTER_PLUS_LEVEL');
+  if (storyPlus.result.action !== 'CHARACTER_PLUS_LEVEL') assert.fail('expected CHARACTER_PLUS_LEVEL result');
   assert.deepEqual(storyPlus.result.spentResources, { soul_essence: 240 });
   assert.equal(storyPlus.snapshot.characterProgressById.militia?.plusLevel, 3);
 
@@ -71,7 +71,7 @@ test('account +Lv mutation spends rarity-aware soul essence and cannot decrease'
   const recruitmentPlus = __accountMetaMutationTestOnly.buildMetaProgressionResult(recruitment, {
     requestId: 'plus-c', expectedRevision: 0, action: 'CHARACTER_PLUS_LEVEL', characterId: 'char_common_c_turnip_rider', targetPlusLevel: 3,
   }, NOW);
-  assert.equal(recruitmentPlus.result.action, 'CHARACTER_PLUS_LEVEL');
+  if (recruitmentPlus.result.action !== 'CHARACTER_PLUS_LEVEL') assert.fail('expected CHARACTER_PLUS_LEVEL result');
   assert.deepEqual(recruitmentPlus.result.spentResources, { soul_essence: 48 });
   assert.equal(recruitmentPlus.snapshot.characterProgressById.char_common_c_turnip_rider?.plusLevel, 3);
   assert.throws(() => __accountMetaMutationTestOnly.buildMetaProgressionResult(recruitmentPlus.snapshot, {
@@ -98,7 +98,7 @@ test('account evolution unlock checks previous form, Base Lv and canonical recip
   const unlocked = __accountMetaMutationTestOnly.buildMetaProgressionResult(snapshot, {
     requestId: 'evo-unlock', expectedRevision: 0, action: 'EVOLUTION_UNLOCK', characterId: 'militia', formId: f2.formId,
   }, NOW);
-  assert.equal(unlocked.result.action, 'EVOLUTION_UNLOCK');
+  if (unlocked.result.action !== 'EVOLUTION_UNLOCK') assert.fail('expected EVOLUTION_UNLOCK result');
   assert.deepEqual(unlocked.result.spentResources, recipe.cost);
   assert.ok(unlocked.snapshot.characterProgressById.militia?.unlockedFormIds.includes(f2.formId));
 
