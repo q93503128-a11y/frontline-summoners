@@ -1,5 +1,6 @@
 import Phaser from 'phaser';
 import { INTERNAL_HEIGHT, INTERNAL_WIDTH } from '@frontline/shared';
+import { restoreAuthenticatedAccountSession } from './account-network';
 import { AccountScene } from './account-scene';
 import { ReplayBattleScene as BattleScene } from './replay-battle-scene';
 import { BaseWeaponScene } from './base-weapon-scene';
@@ -8,7 +9,7 @@ import { CoopBattleScene, CoopLobbyScene } from './coop-scenes';
 import { DeckScene } from './deck-scene';
 import { GrowthScene } from './growth-scene';
 import { RecruitmentScene } from './recruitment-scene';
-import { BootScene, MainMenuScene as BaseMainMenuScene } from './navigation-scenes';
+import { BootScene as BaseBootScene, MainMenuScene as BaseMainMenuScene } from './navigation-scenes';
 import { RecordBattleScene } from './record-battle-scene';
 import { RecordHubScene } from './record-hub-scene';
 import { RecordResultScene } from './record-result-scene';
@@ -17,6 +18,14 @@ import { StageSelectScene } from './stage-select-scene';
 import { ResultScene } from './result-scene';
 import { addButton } from './scene-ui';
 import { isCompactMobileViewport } from './viewport';
+
+class BootScene extends BaseBootScene {
+  override create(): void {
+    void restoreAuthenticatedAccountSession().finally(() => {
+      if (this.scene.isActive()) this.scene.start('main-menu');
+    });
+  }
+}
 
 class MainMenuScene extends BaseMainMenuScene {
   create(): void {
