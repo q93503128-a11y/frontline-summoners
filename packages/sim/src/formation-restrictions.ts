@@ -17,7 +17,8 @@ export interface FormationRestrictionSlot {
   readonly rarity?: string | null;
   readonly acquisitionClass?: string;
   readonly role?: string;
-  readonly unitTags?: readonly string[];
+  /** Runtime combat metadata may explicitly resolve to undefined before tag-based restrictions are applied. */
+  readonly unitTags?: readonly string[] | undefined;
   readonly factionId?: string;
 }
 

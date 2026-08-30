@@ -24,27 +24,59 @@
 
 주의: 위 숫자는 실행 데이터 규모이며 각 콘텐츠가 상세 위키의 모든 DESIGN_TARGET을 충족한다는 의미가 아니다.
 
-## 저장/성장/재화
+## 저장/메타경제
 
-- 게스트 저장 schema **v12**.
-- resource ledger: `gold`, `evo_fragment`, `evo_core`, `evo_crown`, `soul_essence`, `summon_crystal`.
+- 게스트 저장 schema **v13**.
+- resource ledger: `gold`, `evo_fragment`, `evo_core`, `evo_crown`, `soul_essence`, `summon_crystal`, `sweep_ticket`.
 - earned/spent monotonic ledger로 stale save가 소비한 재화를 되살리지 못하게 한다.
+- v2~v12 세이브는 기존 contiguous MAIN NORMAL_CLEAR를 기준으로 MAIN first-clear 일반 재화를 v13 migration에서 한 번 소급 지급하고 `mainRewardedStageIds`로 재지급을 막는다.
 - 기록 최고점은 max-merge로 stale save가 개인 기록을 낮추지 못한다.
+
+### MAIN 일반 재화
+
+- MAIN80 first-clear Gold/모집 결정/milestone 진화재료/소탕권 지급 연결.
+- 재클리어는 각 stage의 repeatGold만 지급.
+- 모집 결정/영구 보상/milestone extra는 재클리어에서 반복 지급하지 않는다.
+- 상세 milestone 합산 기준 MAIN80 first-clear 총량:
+  - Gold 249,160
+  - 모집 결정 8,470
+  - evo_fragment 154
+  - evo_core 22
+  - evo_crown 4
+  - 소탕권 44
+- 기존 위키 하단 합계에 있던 evo_fragment 104 / 소탕권 43 산술 오기는 stage별 상세 합계인 154 / 44로 정정했다.
+
+### Base Lv / +Lv
+
 - 메인 1/2/3/4장 완료로 Base Lv 상한 20/30/40/50이 열린다.
-- Lv/+Lv combat multiplier foundation은 있다.
+- Growth 화면에서 Base Lv +1/+5를 실제 Gold로 구매한다.
+- Lv1→50 Gold 총비용 222,230의 위키 곡선을 실행한다.
+- +레벨 상한 +50, +1당 HP/ATK +2% foundation 유지.
+- 공용 `soul_essence`를 사용해 원하는 보유 캐릭터를 +1 할 수 있다.
+- 공용 +1 비용: STORY 80 / C16 / B32 / A80 / S280 / SS880.
+
+### 모집/중복
+
+- 모집 1회 100, 10회 1,000 `summon_crystal`을 transaction 안에서 먼저 검증·차감한다.
+- 10회 할인/최소 희귀 보장/천장/선택권 없음.
+- 중복 처리 정책을 모집 화면에서 선택 가능:
+  - `+1 우선`: 동일 캐릭터에 직접 +1, +50 초과분은 자동 분해.
+  - `분해 우선`: C4 / B8 / A20 / S70 / SS220 `soul_essence` 획득.
+- 분해→동일 희귀도 교차 +1 효율은 25% 출발값을 유지한다.
+- 신규 획득/중복 처리/모집 결정 소비/혼 재화 지급은 하나의 save transaction 결과로 저장한다.
+
+### 진화
+
 - F2/F3 진화는 레벨/이전 form/재화 조건을 검사하고 재화를 차감해 해금한다.
 - 이전 해금 형태 재선택 가능.
 - 재생산 최종 하한 60F 유지.
 
-아직 미완료:
+아직 메타경제에서 남은 것:
 
-- Base Lv를 플레이어가 골드로 직접 올리는 Growth UI/transaction.
-- MAIN80 일반 first/repeat currency reward 지급.
-- 모집 시 `summon_crystal` 100/1000 소비.
-- 중복 직접 +1 vs 공용 +성장 재화 분해 선택.
-- `soul_essence`를 사용한 교차 +레벨 성장.
-
-따라서 현재 메타경제는 데이터와 일부 transaction은 존재하지만 전체 루프가 아직 닫히지 않았다.
+- 실제 sweep action의 소탕권 1장 소비 + repeat reward transaction.
+- periodic reward charge max4 / 12h recovery / charged-depleted 경제.
+- authenticated account/server resource ledger와 guest→account authoritative sync.
+- 전체 경제 사람 플레이테스트 및 공급량 조정.
 
 ## 캐릭터/적 전투사양 정합
 
@@ -132,24 +164,10 @@ DESIGN_TARGET 수치는 사람 플레이테스트 전이므로 단순 덮어쓰�
 
 별도 deterministic runtime foundation 구현:
 
-- `record_endless_front`
-  - 적 기지 파괴로 승리 종료하지 않음.
-  - 플레이어 기지 파괴 시 종료.
-  - tick 기반 생존 기록.
-  - 결정론적 시간 스케줄.
-- `record_boss_rush`
-  - 9보스 순차.
-  - 보스 사이 600F 정비.
-  - 보급/쿨타임 상태 유지.
-  - 최고 격파 보스 기록.
+- `record_endless_front`: 적 기지 파괴로 종료하지 않고 플레이어 기지 파괴 시 종료, tick 기반 생존 기록.
+- `record_boss_rush`: 9보스 순차, 보스 사이 600F 정비, 보급/쿨타임 상태 유지, 최고 격파 보스 기록.
 
-Save v12에:
-
-- endlessBestTimeMs
-- endlessBestReachedMinute
-- bossRushBestDefeated
-
-저장.
+Save v13에 `endlessBestTimeMs`, `endlessBestReachedMinute`, `bossRushBestDefeated` 저장.
 
 아직 미완료:
 
@@ -160,7 +178,7 @@ Save v12에:
 ## 재클리어/거점 병기
 
 - NORMAL_CLEAR 후 무료 2× foundation은 구현.
-- sweep ticket inventory/consumption 전체 loop는 미완료.
+- `sweep_ticket`은 이제 실제 획득/저장되지만 sweep 실행 및 1장 소비 transaction은 미완료.
 - periodic reward charge 미완료.
 - 거점 병기는 generic damage+push foundation만 있음.
 - 위키의 전선포/결계발진기/보급투하기 catalog/equip/progression/shared-coop rules는 미완료.
@@ -185,6 +203,7 @@ Save v12에:
 - 친구 목록/초대/최근 플레이어/차단.
 - 빠른 통신 최종 UX.
 - full shared base weapon semantics.
+- 협동 결과의 server-authoritative 계정 wallet 지급.
 
 ## PvP / 계정
 
@@ -228,18 +247,16 @@ Save v12에:
 ## 업적/프로필
 
 위키에는 초기 약 45~55 achievement와 title/frame/banner/emblem/badge 구조가 설계돼 있으나 현재 runtime은 미구현이다.
-
-따라서 SPECIAL/event 문서에 적힌 프로필 보상은 현재 자원 보상으로 대체해 완료 처리하지 않는다.
+SPECIAL/event 문서의 프로필 보상은 현재 자원 보상으로 대체해 완료 처리하지 않는다.
 
 ## 다음 개발 우선순위
 
-1. **메타경제 닫기**: MAIN 일반 재화 → Base Lv 골드 강화 → 모집 100/1000 차감 → duplicate 분해/교차 +성장.
-2. **Ch1/story canonical migration**: 스토리 10종 + 1장 적/보스 + 속성 학습을 위키 목표와 대조해 이행하고 플레이테스트.
-3. **주기 재화 SPECIAL 정식화**: dedicated enemies + rotation + reward charge + charged/depleted + canonical ID migration.
-4. **전투 grammar 확장**: HP phase pattern, per-hit effect, killSupplyMultiplier, full sweep semantics, base weapon 3종.
-5. **기록전 사용자 flow**: hub/battle/result/reward + long-run QA.
-6. **계정/친구/PvP**.
-7. 마지막 production art/motion/audio/accessibility/release QA.
+1. **Ch1/story canonical migration**: 스토리 10종 + 1장 적/보스 + 속성 학습을 위키 목표와 대조해 이행하고 플레이테스트.
+2. **주기 재화 SPECIAL 정식화**: dedicated enemies + rotation + reward charge + charged/depleted + canonical ID migration.
+3. **전투 grammar 확장**: HP phase pattern, per-hit effect, killSupplyMultiplier, full sweep semantics, base weapon 3종.
+4. **기록전 사용자 flow**: hub/battle/result/reward + long-run QA.
+5. **계정/친구/PvP**.
+6. 마지막 production art/motion/audio/accessibility/release QA.
 
 ## 검증 원칙
 
@@ -247,4 +264,4 @@ Save v12에:
 - 위키 DESIGN_TARGET과 다르면 실행된다는 이유만으로 코드를 새 정본으로 취급하지 않는다.
 - DESIGN_TARGET→TESTED/LOCKED 승격은 deterministic regression + 사람 플레이테스트를 요구한다.
 - client/save/server가 필요한 기능은 전체 경로가 연결돼야 구현으로 센다.
-- 현재 HEAD의 최종 자동검증은 대형 배치 마지막 CI 한 번으로 확인한다.
+- 대형 배치 중 반복 CI를 돌리지 않고 마지막 통합 검증에서 회귀를 모아 수정한다.

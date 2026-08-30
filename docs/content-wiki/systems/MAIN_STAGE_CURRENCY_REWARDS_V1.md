@@ -210,11 +210,12 @@ FIRST_CLEAR 기본 통화 합계:
 
 milestone 진화재료 합계:
 
-- evo_fragment: 104
+- evo_fragment: 154
 - evo_core: 22
 - evo_crown: 4
-- 소탕권: 43
+- 소탕권: 44
 
+이 합계는 위의 stage별 milestone extras를 직접 합산한 값이다.
 이 합계는 메인 영구보상, SPECIAL 첫/반복 보상, 이벤트/PvP 보상을 제외한 값이다.
 
 의도:
@@ -272,6 +273,6 @@ LOCKED 전 반드시 측정:
 - 메인 repeatGold가 황금 수송대 효율을 침범하지 않는지.
 - evo_fragment/core/crown이 진화의 문을 무의미하게 만들지 않는지.
 - 반대로 3형태 한 명 만들기 위해 과도한 반복 파밍이 필요한지.
-- 소탕권 43장 + SPECIAL/이벤트 공급이 편의 기능으로 충분한지.
+- 소탕권 44장 + SPECIAL/이벤트 공급이 편의 기능으로 충분한지.
 
 이 문서의 숫자는 경제 시뮬레이션/사람 플레이를 통과한 뒤에만 TESTED/LOCKED로 올린다.

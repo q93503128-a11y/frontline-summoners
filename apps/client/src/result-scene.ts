@@ -81,7 +81,7 @@ export class ResultScene extends Phaser.Scene {
         status.setColor('#ff9a91');
       });
     } else if (victory) {
-      addText(this, INTERNAL_WIDTH / 2, compact ? 202 : 224, 'NORMAL_CLEAR 보상', compact ? 28 : 23, '#8ee3aa', 'center').setOrigin(0.5);
+      const rewardTitle = addText(this, INTERNAL_WIDTH / 2, compact ? 202 : 224, 'NORMAL_CLEAR 보상', compact ? 28 : 23, '#8ee3aa', 'center').setOrigin(0.5);
       addText(this, INTERNAL_WIDTH / 2, compact ? 250 : 270, getPermanentRewardEffectText(this.stage.permanentRewardId), compact ? 23 : 18, '#ffe18a', 'center').setOrigin(0.5).setWordWrapWidth(compact ? 720 : 680);
       const unlockSlot = this.stage.unlockUnitId ? getSlotById(this.stage.unlockUnitId) : undefined;
       const unlockText = addText(this, INTERNAL_WIDTH / 2, compact ? 326 : 330, unlockSlot ? `동료 · ${unlockSlot.displayName}` : '동료 해금 없음', compact ? 22 : 18, unlockSlot ? '#9ccfff' : '#8f9aac', 'center').setOrigin(0.5);
@@ -90,6 +90,7 @@ export class ResultScene extends Phaser.Scene {
       void recordNormalStageClear(this.stage.id, 'SOLO_BATTLE').then((result) => {
         this.resultRecorded = true;
         if (!this.scene.isActive()) return;
+        rewardTitle.setText(result.firstClear ? '영구 보상 획득' : 'NORMAL_CLEAR 재클리어 보상');
         rewardText.setText(`${result.firstClear ? '첫 클리어 · ' : '재클리어 · '}${formatResourceReward(result.resourceReward)}`);
         if (result.persisted) {
           status.setText(compact

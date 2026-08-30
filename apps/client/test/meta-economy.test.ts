@@ -35,7 +35,7 @@ test('duplicate dismantle and cross-character plus costs preserve the canonical 
   assert.equal(getPlusLevelSoulEssenceCost('STORY', null), 80);
 });
 
-test('main 80 currency table matches the canonical campaign totals and milestone resources', () => {
+test('main 80 currency table matches the detailed canonical campaign entries and milestone resources', () => {
   assert.equal(MAIN_STAGE_RESOURCE_REWARDS.length, 80);
   const totals = MAIN_STAGE_RESOURCE_REWARDS.reduce((sum, reward) => {
     for (const [id, amount] of Object.entries(reward.firstClearReward)) {
@@ -45,10 +45,10 @@ test('main 80 currency table matches the canonical campaign totals and milestone
   }, {} as Record<string, number>);
   assert.equal(totals.gold, 249160);
   assert.equal(totals.summon_crystal, 8470);
-  assert.equal(totals.evo_fragment, 104);
+  assert.equal(totals.evo_fragment, 154);
   assert.equal(totals.evo_core, 22);
   assert.equal(totals.evo_crown, 4);
-  assert.equal(totals.sweep_ticket, 43);
+  assert.equal(totals.sweep_ticket, 44);
 
   const repeatGold = MAIN_STAGE_RESOURCE_REWARDS.reduce((sum, reward) => sum + (reward.repeatReward.gold ?? 0), 0);
   assert.ok(repeatGold > 0);
