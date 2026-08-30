@@ -34,6 +34,10 @@ export interface EvolutionFormModifiers {
   readonly damageBonuses?: BattleUnitDefinition['damageBonuses'];
   readonly naturalKnockbackCount?: number;
   readonly attackTiming?: BattleUnitDefinition['attackTiming'];
+  /** When present, attackDamage is the total attack budget and these weights split it across authored hits. */
+  readonly hitDamagePermilles?: readonly number[];
+  readonly onHitSlow?: BattleUnitDefinition['onHitSlow'];
+  readonly onHitWeaken?: BattleUnitDefinition['onHitWeaken'];
 }
 
 export interface EvolutionFormDefinition {
@@ -86,6 +90,20 @@ function scaleFinalStat(value: number, permille: number, minimum = 0): number {
   return Math.max(minimum, Math.round((value * permille) / 1000));
 }
 
+function splitDamageByPermille(totalDamage: number, weights: readonly number[]): readonly number[] {
+  if (weights.length === 0 || weights.some((weight) => !Number.isInteger(weight) || weight < 0) || weights.reduce((sum, weight) => sum + weight, 0) !== 1000) {
+    throw new Error('Evolution hit damage weights must be non-negative integer permille values totaling 1000');
+  }
+  const numerators = weights.map((weight) => totalDamage * weight);
+  const damages = numerators.map((numerator) => Math.floor(numerator / 1000));
+  let remainder = totalDamage - damages.reduce((sum, damage) => sum + damage, 0);
+  const remainderOrder = numerators
+    .map((numerator, index) => ({ index, remainder: numerator % 1000 }))
+    .sort((left, right) => right.remainder - left.remainder || left.index - right.index);
+  for (let index = 0; index < remainder; index += 1) damages[remainderOrder[index]!.index] += 1;
+  return damages;
+}
+
 export function applyCharacterLevel(
   slot: PlayerRosterSlot,
   curve: CharacterLevelCurve,
@@ -99,6 +117,9 @@ export function applyCharacterLevel(
       ...slot.definition,
       maxHp: scaleFinalStat(slot.definition.maxHp, multiplier, 1),
       attackDamage: scaleFinalStat(slot.definition.attackDamage, multiplier, 0),
+      ...(slot.definition.hitDamages === undefined ? {} : {
+        hitDamages: slot.definition.hitDamages.map((damage) => scaleFinalStat(damage, multiplier, 0)),
+      }),
     },
   };
 }
@@ -121,10 +142,18 @@ export function applyEvolutionForm(
   const attackMinRange = slot.definition.attackMinRange + modifiers.attackMinRangeDelta;
   const attackMaxRange = slot.definition.attackMaxRange + modifiers.attackMaxRangeDelta;
   const moveSpeed = slot.definition.moveSpeed + modifiers.moveSpeedDelta;
+  const attackDamage = scale(slot.definition.attackDamage, modifiers.attackDamagePermille, 0);
+  const attackTiming = modifiers.attackTiming ?? slot.definition.attackTiming;
   if (standingRange < 0 || attackMinRange < 0 || attackMaxRange < 0 || attackMinRange > attackMaxRange) {
     throw new Error(`Evolution form produces invalid ranges: ${formId}`);
   }
   if (moveSpeed < 0) throw new Error(`Evolution form produces negative move speed: ${formId}`);
+  if (modifiers.hitDamagePermilles !== undefined && modifiers.hitDamagePermilles.length !== attackTiming.hitFrames.length) {
+    throw new Error(`Evolution hit damage weights must match attack hit frames: ${formId}`);
+  }
+  const hitDamages = modifiers.hitDamagePermilles === undefined
+    ? slot.definition.hitDamages
+    : splitDamageByPermille(attackDamage, modifiers.hitDamagePermilles);
   return {
     ...slot,
     cost: scale(slot.cost, modifiers.costPermille, 0),
@@ -132,15 +161,18 @@ export function applyEvolutionForm(
     definition: {
       ...slot.definition,
       maxHp: scale(slot.definition.maxHp, modifiers.maxHpPermille, 1),
-      attackDamage: scale(slot.definition.attackDamage, modifiers.attackDamagePermille, 0),
+      attackDamage,
       moveSpeed,
       standingRange,
       attackMinRange,
       attackMaxRange,
       targetMode: modifiers.targetMode ?? slot.definition.targetMode,
       naturalKnockbackCount: modifiers.naturalKnockbackCount ?? slot.definition.naturalKnockbackCount,
-      attackTiming: modifiers.attackTiming ?? slot.definition.attackTiming,
+      attackTiming,
+      ...(hitDamages === undefined ? {} : { hitDamages }),
       ...(modifiers.damageBonuses === undefined ? {} : { damageBonuses: modifiers.damageBonuses }),
+      ...(modifiers.onHitSlow === undefined ? {} : { onHitSlow: modifiers.onHitSlow }),
+      ...(modifiers.onHitWeaken === undefined ? {} : { onHitWeaken: modifiers.onHitWeaken }),
     },
   };
 }
@@ -271,6 +303,9 @@ export function applyPermanentRewardBattleEffects<TSlot extends PermanentRewardA
         ...slot.definition,
         maxHp: applyPercent(slot.definition.maxHp, hpPercent),
         attackDamage: applyPercent(slot.definition.attackDamage, attackPercent, 0),
+        ...(slot.definition.hitDamages === undefined ? {} : {
+          hitDamages: slot.definition.hitDamages.map((damage) => applyPercent(damage, attackPercent, 0)),
+        }),
       },
     } as TSlot;
   });
