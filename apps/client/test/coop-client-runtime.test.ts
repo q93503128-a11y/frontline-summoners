@@ -39,7 +39,7 @@ test('browser transport creates a stage-bound room and reconnects by the same to
   assert.match(network, /setTimeout\(\(\) =>/);
 });
 
-test('co-op READY carries saved level plus form and permanent rewards but never raw combat stats', async () => {
+test('co-op READY carries saved level plus form rewards and main clears but never raw combat stats', async () => {
   const [network, scenes] = await Promise.all([
     readSource('../src/coop-network.ts'),
     readSource('../src/coop-scenes.ts'),
@@ -49,6 +49,7 @@ test('co-op READY carries saved level plus form and permanent rewards but never 
   assert.match(network, /readonly plusLevel: number;/);
   assert.match(network, /readonly selectedFormId\?: string;/);
   assert.match(network, /readonly permanentRewardIds: readonly string\[\];/);
+  assert.match(network, /readonly clearedStageIds: readonly string\[\];/);
   assert.match(network, /this\.send\(\{ type: 'READY', loadout \}\)/);
   assert.doesNotMatch(network, /maxHp.*READY|attackDamage.*READY|standingRange.*READY/);
   assert.match(scenes, /const characterProgress = progress\.characterProgressById \?\? \{\};/);
@@ -56,7 +57,26 @@ test('co-op READY carries saved level plus form and permanent rewards but never 
   assert.match(scenes, /plusLevel: meta\?\.plusLevel \?\? 0/);
   assert.match(scenes, /selectedFormId: meta\.selectedFormId/);
   assert.match(scenes, /permanentRewardIds: \[\.\.\.progress\.permanentRewardIds\]/);
+  assert.match(scenes, /clearedStageIds: \[\.\.\.progress\.clearedStageIds\]/);
   assert.match(scenes, /this\.session\.sendReady\(coopLoadout\(this\.progress\)\)/);
+});
+
+test('co-op lobby negotiates one shared unlocked base weapon and battle HUD uses the authoritative weapon snapshot', async () => {
+  const [network, scenes] = await Promise.all([
+    readSource('../src/coop-network.ts'),
+    readSource('../src/coop-scenes.ts'),
+  ]);
+  assert.match(network, /agreedBaseWeaponId: BaseWeaponId \| null/);
+  assert.match(network, /selectedBaseWeaponId: BaseWeaponId/);
+  assert.match(network, /sendBaseWeaponSelection\(baseWeaponId: BaseWeaponId\)/);
+  assert.match(network, /type: 'SELECT_BASE_WEAPON'/);
+  assert.match(network, /baseWeaponLastActivatedSeatId: CoopSeatId \| null/);
+  assert.match(scenes, /getUnlockedBaseWeaponIds\(this\.progress\.clearedStageIds\)/);
+  assert.match(scenes, /공유 병기 합의/);
+  assert.match(scenes, /공유 병기 선택 불일치/);
+  assert.match(scenes, /snapshot\.baseWeaponId === 'base_weapon_supply_drop'/);
+  assert.match(scenes, /사용자 개인 보급/);
+  assert.doesNotMatch(scenes, /frame \$\{snapshot\.tick\} · 전선포/);
 });
 
 test('co-op input pump submits at most one command packet per authoritative simulation tick', async () => {
