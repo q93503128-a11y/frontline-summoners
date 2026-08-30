@@ -96,11 +96,14 @@ function splitDamageByPermille(totalDamage: number, weights: readonly number[]):
   }
   const numerators = weights.map((weight) => totalDamage * weight);
   const damages = numerators.map((numerator) => Math.floor(numerator / 1000));
-  let remainder = totalDamage - damages.reduce((sum, damage) => sum + damage, 0);
+  const remainder = totalDamage - damages.reduce((sum, damage) => sum + damage, 0);
   const remainderOrder = numerators
     .map((numerator, index) => ({ index, remainder: numerator % 1000 }))
     .sort((left, right) => right.remainder - left.remainder || left.index - right.index);
-  for (let index = 0; index < remainder; index += 1) damages[remainderOrder[index]!.index] += 1;
+  for (let index = 0; index < remainder; index += 1) {
+    const targetIndex = remainderOrder[index]!.index;
+    damages[targetIndex] = (damages[targetIndex] ?? 0) + 1;
+  }
   return damages;
 }
 
