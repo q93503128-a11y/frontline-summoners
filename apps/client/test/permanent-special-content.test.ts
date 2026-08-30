@@ -1,12 +1,24 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
 import { ENEMIES, getStage } from '../src/prototype.ts';
-import { getSpecialResourceReward } from '../src/special-rewards.ts';
+import {
+  createDefaultPeriodicSpecialChargeMap,
+  resolveSpecialResourceReward,
+} from '../src/special-rewards.ts';
 
 function enemy(id: string) {
   const found = ENEMIES.find((candidate) => candidate.enemyId === id);
   assert.ok(found, `missing runtime enemy ${id}`);
   return found;
+}
+
+function specialReward(stageId: string, firstClear: boolean) {
+  return resolveSpecialResourceReward(
+    stageId,
+    firstClear,
+    createDefaultPeriodicSpecialChargeMap(),
+    0,
+  ).resourceReward;
 }
 
 test('permanent SPECIAL boss mechanics survive content-to-simulation runtime wiring', () => {
@@ -35,13 +47,13 @@ test('young glutton is an explicit non-boss execution enemy rather than a scaled
 });
 
 test('permanent challenge repeat rewards stay low while first clears carry evolution and summon value', () => {
-  assert.deepEqual(getSpecialResourceReward('special_glutton_04', false), { gold: 900 });
-  const first = getSpecialResourceReward('special_glutton_04', true);
+  assert.deepEqual(specialReward('special_glutton_04', false), { gold: 900 });
+  const first = specialReward('special_glutton_04', true);
   assert.equal(first.gold, 5400);
   assert.equal(first.evo_core, 3);
   assert.equal(first.evo_crown, 1);
   assert.equal(first.summon_crystal, 80);
 
-  assert.deepEqual(getSpecialResourceReward('special_anomaly_04', false), { gold: 1050 });
-  assert.equal(getSpecialResourceReward('special_anomaly_04', true).summon_crystal, 120);
+  assert.deepEqual(specialReward('special_anomaly_04', false), { gold: 1050 });
+  assert.equal(specialReward('special_anomaly_04', true).summon_crystal, 120);
 });
