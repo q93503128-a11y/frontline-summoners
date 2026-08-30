@@ -73,6 +73,11 @@ function integer(value: unknown, context: string, min = 0): number {
   if (!Number.isInteger(value) || (value as number) < min) throw new Error(`${context} must be an integer >= ${min}`);
   return value as number;
 }
+function permille(value: unknown, context: string): number {
+  const parsed = integer(value, context, 0);
+  if (parsed > 1000) throw new Error(`${context} must be <= 1000`);
+  return parsed;
+}
 function finiteNumber(value: unknown, context: string): number {
   if (typeof value !== 'number' || !Number.isFinite(value)) throw new Error(`${context} must be a finite number`);
   return value;
@@ -104,6 +109,32 @@ function parseAttackTiming(value: unknown): EvolutionFormModifiers['attackTiming
     backswingFrames: integer(raw.backswingFrames, 'explicit evolution attackTiming.backswingFrames', 0),
   };
 }
+function parseHitDamagePermilles(value: unknown, attackTiming: EvolutionFormModifiers['attackTiming'] | undefined): readonly number[] | undefined {
+  if (value === undefined) return undefined;
+  if (!Array.isArray(value) || value.length === 0) throw new Error('explicit evolution hitDamagePermilles must be non-empty');
+  const weights = value.map((entry, index) => permille(entry, `explicit evolution hitDamagePermilles[${index}]`));
+  if (weights.reduce((sum, weight) => sum + weight, 0) !== 1000) throw new Error('explicit evolution hitDamagePermilles must total 1000');
+  if (!attackTiming || weights.length !== attackTiming.hitFrames.length) throw new Error('explicit evolution hitDamagePermilles must match attackTiming.hitFrames');
+  return weights;
+}
+function parseOnHitSlow(value: unknown): EvolutionFormModifiers['onHitSlow'] | undefined {
+  if (value === undefined) return undefined;
+  const raw = record(value, 'explicit evolution onHitSlow');
+  return {
+    chancePermille: permille(raw.chancePermille, 'explicit evolution onHitSlow.chancePermille'),
+    durationFrames: integer(raw.durationFrames, 'explicit evolution onHitSlow.durationFrames', 1),
+    speedPermille: permille(raw.speedPermille, 'explicit evolution onHitSlow.speedPermille'),
+  };
+}
+function parseOnHitWeaken(value: unknown): EvolutionFormModifiers['onHitWeaken'] | undefined {
+  if (value === undefined) return undefined;
+  const raw = record(value, 'explicit evolution onHitWeaken');
+  return {
+    chancePermille: permille(raw.chancePermille, 'explicit evolution onHitWeaken.chancePermille'),
+    durationFrames: integer(raw.durationFrames, 'explicit evolution onHitWeaken.durationFrames', 1),
+    attackPermille: permille(raw.attackPermille, 'explicit evolution onHitWeaken.attackPermille'),
+  };
+}
 function parseExplicitModifiers(value: unknown): EvolutionFormModifiers {
   const raw = record(value, 'explicit evolution modifiers');
   const targetMode = raw.targetMode;
@@ -112,6 +143,9 @@ function parseExplicitModifiers(value: unknown): EvolutionFormModifiers {
     ? undefined
     : integer(raw.naturalKnockbackCount, 'evolution modifier naturalKnockbackCount', 0);
   const attackTiming = parseAttackTiming(raw.attackTiming);
+  const hitDamagePermilles = parseHitDamagePermilles(raw.hitDamagePermilles, attackTiming);
+  const onHitSlow = parseOnHitSlow(raw.onHitSlow);
+  const onHitWeaken = parseOnHitWeaken(raw.onHitWeaken);
   return {
     maxHpPermille: modifierInteger(raw, 'maxHpPermille', 1000),
     attackDamagePermille: modifierInteger(raw, 'attackDamagePermille', 1000),
@@ -124,6 +158,9 @@ function parseExplicitModifiers(value: unknown): EvolutionFormModifiers {
     ...(targetMode === undefined ? {} : { targetMode }),
     ...(naturalKnockbackCount === undefined ? {} : { naturalKnockbackCount }),
     ...(attackTiming === undefined ? {} : { attackTiming }),
+    ...(hitDamagePermilles === undefined ? {} : { hitDamagePermilles }),
+    ...(onHitSlow === undefined ? {} : { onHitSlow }),
+    ...(onHitWeaken === undefined ? {} : { onHitWeaken }),
   };
 }
 function parseRecipeTuple(value: unknown, context: string): readonly [number, number, number, number, number] {
