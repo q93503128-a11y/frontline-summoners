@@ -70,6 +70,8 @@
 - F2/F3 진화는 레벨/이전 form/재화 조건을 검사하고 재화를 차감해 해금한다.
 - 이전 해금 형태 재선택 가능.
 - 재생산 최종 하한 60F 유지.
+- explicit form grammar가 형태별 fractional move, 자연 KB 수, target mode, cycle/hit/backswing을 데이터로 변경할 수 있다.
+- 스토리 10종 F2/F3 20개는 role-template가 아니라 explicit combat form으로 실행한다.
 
 아직 메타경제에서 남은 것:
 
@@ -80,21 +82,29 @@
 
 ## 캐릭터/적 전투사양 정합
 
-정합도가 높은 층:
+현재 이행됨:
 
+- 스토리 10종 F1을 `STORY_ROSTER_V1_COMBAT_SPECS.md`의 Lv1 DESIGN_TARGET으로 이행.
+- 스토리 10종 F2/F3를 explicit form으로 이행.
+- 수렵창병 BEAST 특효, 화염술사 NATURE 특효, 전투마도사 NEUTRAL, 공허현자 ANOMALY 정체성 반영.
+- 제1장 적/보스 10종을 상세 전투사양으로 이행.
+- 제1장 적 속성군은 `NEUTRAL / BEAST`만 사용.
+- 황금가면 사령술사는 `NEUTRAL + BOSS`, 철문장군은 `NEUTRAL + ARMORED + BOSS`.
+- 기존 story/enemy runtime ID는 기존 게스트 세이브·도감·편성 호환성을 위해 유지한다. 이는 전투사양의 legacy 유지가 아니라 식별자 compatibility layer다.
 - 공통 C/B/A 모집 캐릭터 F1.
 - 초기 3시리즈 S/SS F1.
 - 메인 2~4장 일반 적/스테이지.
 - 진화 recipe.
 - 메인 영구 보상.
 
-큰 migration 부채:
+아직 TESTED/LOCKED 아님:
 
-- 스토리 10종의 현재 F1 및 role-template F2/F3가 후대 `STORY_ROSTER_V1_COMBAT_SPECS.md` DESIGN_TARGET과 크게 다름.
-- 메인 1장 적/보스는 legacy roster를 유지해 위키의 NEUTRAL/BEAST 학습 구조와 어긋남.
-- 1장 stage geometry/trigger 자체는 후대 canonicalization으로 상세 위키와 상당히 가까움.
+- 이번 스토리/제1장 수치는 사람 플레이테스트 전 `DESIGN_TARGET`.
+- 공허현자 F3의 3-hit 20/20/60 분할은 후보안이며 per-hit damage split grammar 전까지 억지 구현하지 않음.
+- 일부 문서의 후보 specialty/tag는 확정값처럼 확대하지 않음.
+- 제1장 stage geometry/trigger는 기존 canonicalization을 유지했으나 새 유닛/적 수치 기준 사람 난이도 검증이 필요.
 
-DESIGN_TARGET 수치는 사람 플레이테스트 전이므로 단순 덮어쓰지 않고 별도 Ch1/story migration batch에서 검증한다.
+상세 기록: `docs/content-wiki/systems/STORY_CH1_CANONICAL_MIGRATION_2026-08-30.md`.
 
 ## 전투 코어
 
@@ -103,6 +113,7 @@ DESIGN_TARGET 수치는 사람 플레이테스트 전이므로 단순 덮어쓰�
 - Slow / Push / Weaken / one-time Revive.
 - conditional close-range attack.
 - 폭식룡 HP 60%/30% threshold advance + 다음 공격 startup 감소.
+- evolution explicit form이 공격주기/접촉 프레임/backswing/KB/target mode를 generic data로 교체 가능.
 - 상태/정의가 simulation hash/signature에 포함됨.
 
 아직 근사인 위키 세부사양:
@@ -111,6 +122,7 @@ DESIGN_TARGET 수치는 사람 플레이테스트 전이므로 단순 덮어쓰�
 - 벨자르 특정 hit만 Push하는 per-hit effect.
 - 공허엔진 제로 HP 구간별 pattern loop.
 - 일부 stage의 `killSupplyMultiplier`처럼 현재 문자열 specialRule로만 남은 규칙.
+- per-hit damage split grammar.
 
 권장 후속: boss-ID 하드코딩이 아니라 generic deterministic HP-phase / per-hit grammar.
 
@@ -251,12 +263,11 @@ SPECIAL/event 문서의 프로필 보상은 현재 자원 보상으로 대체해
 
 ## 다음 개발 우선순위
 
-1. **Ch1/story canonical migration**: 스토리 10종 + 1장 적/보스 + 속성 학습을 위키 목표와 대조해 이행하고 플레이테스트.
-2. **주기 재화 SPECIAL 정식화**: dedicated enemies + rotation + reward charge + charged/depleted + canonical ID migration.
-3. **전투 grammar 확장**: HP phase pattern, per-hit effect, killSupplyMultiplier, full sweep semantics, base weapon 3종.
-4. **기록전 사용자 flow**: hub/battle/result/reward + long-run QA.
-5. **계정/친구/PvP**.
-6. 마지막 production art/motion/audio/accessibility/release QA.
+1. **주기 재화 SPECIAL 정식화**: dedicated enemies + rotation + reward charge + charged/depleted + canonical ID migration.
+2. **전투 grammar 확장**: HP phase pattern, per-hit effect/damage split, killSupplyMultiplier, full sweep semantics, base weapon 3종.
+3. **기록전 사용자 flow**: hub/battle/result/reward + long-run QA.
+4. **계정/친구/PvP**.
+5. 마지막 production art/motion/audio/accessibility/release QA.
 
 ## 검증 원칙
 

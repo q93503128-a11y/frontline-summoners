@@ -73,28 +73,81 @@ function integer(value: unknown, context: string, min = 0): number {
   if (!Number.isInteger(value) || (value as number) < min) throw new Error(`${context} must be an integer >= ${min}`);
   return value as number;
 }
+function finiteNumber(value: unknown, context: string): number {
+  if (typeof value !== 'number' || !Number.isFinite(value)) throw new Error(`${context} must be a finite number`);
+  return value;
+}
 function modifierInteger(raw: Record<string, unknown>, key: keyof EvolutionFormModifiers, fallback: number): number {
   const value = raw[key];
   if (value === undefined) return fallback;
   if (!Number.isInteger(value)) throw new Error(`evolution modifier ${String(key)} must be an integer`);
   return value as number;
 }
+function modifierNumber(raw: Record<string, unknown>, key: keyof EvolutionFormModifiers, fallback: number): number {
+  const value = raw[key];
+  return value === undefined ? fallback : finiteNumber(value, `evolution modifier ${String(key)}`);
+}
+function parseAttackTiming(value: unknown): EvolutionFormModifiers['attackTiming'] | undefined {
+  if (value === undefined) return undefined;
+  const raw = record(value, 'explicit evolution attackTiming');
+  const cycleFrames = integer(raw.cycleFrames, 'explicit evolution attackTiming.cycleFrames', 1);
+  if (!Array.isArray(raw.hitFrames) || raw.hitFrames.length === 0) throw new Error('explicit evolution attackTiming.hitFrames must be non-empty');
+  const hitFrames = raw.hitFrames.map((frame, index) => {
+    const parsed = integer(frame, `explicit evolution attackTiming.hitFrames[${index}]`, 0);
+    if (parsed >= cycleFrames) throw new Error('explicit evolution attackTiming hit frame must be inside cycleFrames');
+    return parsed;
+  });
+  if (hitFrames.some((frame, index) => index > 0 && frame <= hitFrames[index - 1]!)) throw new Error('explicit evolution attackTiming.hitFrames must strictly increase');
+  return {
+    cycleFrames,
+    hitFrames,
+    backswingFrames: integer(raw.backswingFrames, 'explicit evolution attackTiming.backswingFrames', 0),
+  };
+}
 function parseExplicitModifiers(value: unknown): EvolutionFormModifiers {
   const raw = record(value, 'explicit evolution modifiers');
+  const targetMode = raw.targetMode;
+  if (targetMode !== undefined && targetMode !== 'SINGLE' && targetMode !== 'AREA') throw new Error(`evolution modifier targetMode is unknown: ${String(targetMode)}`);
+  const naturalKnockbackCount = raw.naturalKnockbackCount === undefined
+    ? undefined
+    : integer(raw.naturalKnockbackCount, 'evolution modifier naturalKnockbackCount', 0);
+  const attackTiming = parseAttackTiming(raw.attackTiming);
   return {
     maxHpPermille: modifierInteger(raw, 'maxHpPermille', 1000),
     attackDamagePermille: modifierInteger(raw, 'attackDamagePermille', 1000),
     costPermille: modifierInteger(raw, 'costPermille', 1000),
     rechargePermille: modifierInteger(raw, 'rechargePermille', 1000),
-    moveSpeedDelta: modifierInteger(raw, 'moveSpeedDelta', 0),
+    moveSpeedDelta: modifierNumber(raw, 'moveSpeedDelta', 0),
     standingRangeDelta: modifierInteger(raw, 'standingRangeDelta', 0),
     attackMinRangeDelta: modifierInteger(raw, 'attackMinRangeDelta', 0),
     attackMaxRangeDelta: modifierInteger(raw, 'attackMaxRangeDelta', 0),
+    ...(targetMode === undefined ? {} : { targetMode }),
+    ...(naturalKnockbackCount === undefined ? {} : { naturalKnockbackCount }),
+    ...(attackTiming === undefined ? {} : { attackTiming }),
   };
 }
 function parseRecipeTuple(value: unknown, context: string): readonly [number, number, number, number, number] {
   if (!Array.isArray(value) || value.length !== 5) throw new Error(`${context} must be [level,fragment,core,crown,gold]`);
   return [integer(value[0], `${context}.level`, 1), integer(value[1], `${context}.fragment`), integer(value[2], `${context}.core`), integer(value[3], `${context}.crown`), integer(value[4], `${context}.gold`)];
+}
+
+export function applyEvolutionCatalogOverrides(baseValue: unknown, overridesValue: unknown): readonly unknown[] {
+  if (!Array.isArray(baseValue)) throw new Error('base evolution catalog must be an array');
+  if (!Array.isArray(overridesValue)) throw new Error('evolution catalog overrides must be an array');
+  const baseIds = new Set(baseValue.map((entry, index) => string(record(entry, `baseEvolutionCatalog[${index}]`).id, `baseEvolutionCatalog[${index}].id`)));
+  const overrides = new Map<string, unknown>();
+  for (let index = 0; index < overridesValue.length; index += 1) {
+    const raw = record(overridesValue[index], `evolutionCatalogOverrides[${index}]`);
+    const id = string(raw.id, `evolutionCatalogOverrides[${index}].id`);
+    if (!baseIds.has(id)) throw new Error(`evolution catalog override references unknown character: ${id}`);
+    if (overrides.has(id)) throw new Error(`duplicate evolution catalog override: ${id}`);
+    overrides.set(id, overridesValue[index]);
+  }
+  return baseValue.map((entry, index) => {
+    const raw = record(entry, `baseEvolutionCatalog[${index}]`);
+    const id = string(raw.id, `baseEvolutionCatalog[${index}].id`);
+    return overrides.get(id) ?? entry;
+  });
 }
 
 export function buildEvolutionCatalog(value: unknown, knownCharacterIds: ReadonlySet<string>): EvolutionCatalog {

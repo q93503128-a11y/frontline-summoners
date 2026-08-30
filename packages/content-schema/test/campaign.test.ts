@@ -142,13 +142,18 @@ test('chapter one keeps exactly nine deterministic STORY character unlock milest
   ]);
 });
 
-test('chapter one uses canonical attributes, combat tags, and damage-bonus targets', async () => {
+test('chapter one uses the canonical NEUTRAL/BEAST teaching layer and story specialist identities', async () => {
   const bundle = await loadBundle();
+  const hunter = bundle.playerUnits.find((unit) => unit.id === 'hunter');
+  const battlemage = bundle.playerUnits.find((unit) => unit.id === 'battlemage');
   const voidsage = bundle.playerUnits.find((unit) => unit.id === 'voidsage');
   const ironBoss = bundle.enemies.find((candidate) => candidate.id === 'enemy-boss-iron');
-  assert.deepEqual(voidsage?.attributes, ['ARCANE', 'ANOMALY']);
+  assert.deepEqual(new Set(bundle.enemies.flatMap((enemy) => enemy.attributes)), new Set(['NEUTRAL', 'BEAST']));
+  assert.deepEqual(hunter?.damageBonuses, [{ targetKind: 'ATTRIBUTE', target: 'BEAST', multiplierPermille: 1500 }]);
+  assert.deepEqual(battlemage?.attributes, ['NEUTRAL']);
+  assert.deepEqual(voidsage?.attributes, ['ANOMALY']);
   assert.deepEqual(voidsage?.combatTags, []);
-  assert.deepEqual(voidsage?.damageBonuses, [{ targetKind: 'TAG', target: 'BOSS', multiplierPermille: 1500 }]);
+  assert.deepEqual(voidsage?.damageBonuses, []);
   assert.deepEqual(ironBoss?.attributes, ['NEUTRAL']);
   assert.deepEqual(ironBoss?.combatTags, ['ARMORED', 'BOSS']);
 });

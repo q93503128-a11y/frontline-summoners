@@ -32,6 +32,8 @@ export interface EvolutionFormModifiers {
   readonly attackMaxRangeDelta: number;
   readonly targetMode?: BattleUnitDefinition['targetMode'];
   readonly damageBonuses?: BattleUnitDefinition['damageBonuses'];
+  readonly naturalKnockbackCount?: number;
+  readonly attackTiming?: BattleUnitDefinition['attackTiming'];
 }
 
 export interface EvolutionFormDefinition {
@@ -136,6 +138,8 @@ export function applyEvolutionForm(
       attackMinRange,
       attackMaxRange,
       targetMode: modifiers.targetMode ?? slot.definition.targetMode,
+      naturalKnockbackCount: modifiers.naturalKnockbackCount ?? slot.definition.naturalKnockbackCount,
+      attackTiming: modifiers.attackTiming ?? slot.definition.attackTiming,
       ...(modifiers.damageBonuses === undefined ? {} : { damageBonuses: modifiers.damageBonuses }),
     },
   };
