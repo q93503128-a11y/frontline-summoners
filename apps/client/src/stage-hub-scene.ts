@@ -35,6 +35,7 @@ export class StageHubScene extends Phaser.Scene {
     const compact = isCompactMobileViewport();
     addText(this, 54, 38, '출 정', 46, COLORS.cream);
     addText(this, 56, 94, compact ? '전선을 고르고 출격한다.' : '장과 특수전 중 진행할 전선 묶음을 고른다.', compact ? 22 : 19, COLORS.muted);
+    addButton(this, 985, compact ? 70 : 65, 160, compact ? 84 : 50, '병기', () => this.scene.start('base-weapon'), 0x6d6b8e);
     addButton(this, 1165, compact ? 70 : 65, 160, compact ? 84 : 50, '메인', () => this.scene.start('main-menu'), 0x586275);
 
     addButton(this, 130, 655, 150, compact ? 82 : 52, '◀ 이전', () => this.changePage(-1), 0x586275);
