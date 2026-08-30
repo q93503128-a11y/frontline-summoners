@@ -1,6 +1,6 @@
 # Frontline Summoners 구현 상태
 
-기준: 2026-08-30  
+기준: 2026-08-31  
 최상위 기획 정본: `docs/CANONICAL.md`  
 세부 정합 감사: `docs/content-wiki/systems/IMPLEMENTATION_WIKI_AUDIT_2026-08-30.md`  
 주기 SPECIAL 이행 기록: `docs/content-wiki/systems/PERIODIC_RESOURCE_SPECIAL_IMPLEMENTATION_2026-08-30.md`  
@@ -8,7 +8,8 @@
 계정 save v2 이행 기록: `docs/content-wiki/systems/ACCOUNT_SAVE_V2_IMPLEMENTATION_2026-08-30.md`  
 계정 mutation/idempotency 이행 기록: `docs/content-wiki/systems/ACCOUNT_MUTATION_IDEMPOTENCY_IMPLEMENTATION_2026-08-30.md`  
 계정 인증/session 이행 기록: `docs/content-wiki/systems/ACCOUNT_AUTH_SESSION_IMPLEMENTATION_2026-08-30.md`  
-소탕 이행 기록: `docs/content-wiki/systems/SWEEP_SAVE_V14_IMPLEMENTATION_2026-08-30.md`
+소탕 이행 기록: `docs/content-wiki/systems/SWEEP_SAVE_V14_IMPLEMENTATION_2026-08-30.md`  
+업적/프로필 이행 기록: `docs/content-wiki/systems/ACHIEVEMENT_PROFILE_IMPLEMENTATION_2026-08-31.md`
 
 이 문서는 현재 실행 코드/콘텐츠의 구현 사실과 남은 큰 공백을 기록한다. 기획 정본을 대체하지 않는다. 과거 이행 문서의 Save v14 표기는 당시 단계 기록이며 현재 실행 게스트 save schema는 **v15**다.
 
@@ -31,6 +32,8 @@
   - 이벤트 10.
   - 주기 재화 SPECIAL 전용 24.
 - stage collection: **19**.
+- 초기 achievement runtime catalog: **50개**.
+- profile cosmetic runtime: TITLE / FRAME / BANNER / EMBLEM / BADGE.
 
 위 숫자는 실행 데이터 규모다. 상세 위키의 DESIGN_TARGET이 모두 사람 플레이까지 거쳐 LOCKED됐다는 뜻은 아니다.
 
@@ -305,6 +308,7 @@ Base Lv:
 - 이전 해금 form 재선택 가능.
 - 재생산 최종 하한 60F.
 - 스토리 10종 F2/F3 20개 explicit combat form 실행.
+- 공통 C/B/A 15종과 초기 3시리즈 S/SS 18종도 F1/F2/F3 authored form으로 실행되어 현재 43종 × 3 = **129 form**이 explicit 경로를 사용한다.
 - account server evolution unlock/form select/deck mutation과 authenticated meta route 구현.
 - 기존 growth/deck Phaser 화면의 account-state 분기는 남음.
 
@@ -339,8 +343,8 @@ Base Lv:
 - 스토리 10종 F1 Lv1 DESIGN_TARGET.
 - 스토리 10종 F2/F3 explicit form.
 - 제1장 적/보스 10종 상세 사양.
-- 공통 C/B/A 모집 캐릭터 F1.
-- 초기 3시리즈 S/SS F1.
+- 공통 C/B/A 모집 캐릭터 F1/F2/F3 authored form.
+- 초기 3시리즈 S/SS 18종 F1/F2/F3 authored form.
 - 메인 2~4장 일반 적/스테이지.
 - 상시 SPECIAL 보스 mechanics.
 - 이벤트 적/보스 10종.
@@ -364,7 +368,7 @@ Base Lv:
 - 기간 이벤트 11전장 실행.
 - 이벤트 availability + rerun windows 실행.
 - 기간 밖 client sortie/result 및 server battle/sweep authority 차단.
-- cosmetic/profile/cumulative event reward layer는 후속.
+- event 전용 누적/profile reward는 후속이며, 일반 업적/프로필 cosmetic runtime foundation과는 분리한다.
 
 ### 주기 재화
 
@@ -511,6 +515,7 @@ session/API foundation이 존재한다는 이유만으로 provider proof와 batt
 - 실제 조우 적 discovery 저장. 기록전 조우 포함.
 - stage/deck/growth/recruitment/codex/base-weapon/record 기본 UI.
 - 협동 shared weapon 선택/표시 UI.
+- 프로필/업적 기본 UI.
 - 일부 compact mobile 대응.
 
 후반 production:
@@ -529,8 +534,44 @@ session/API foundation이 존재한다는 이유만으로 provider proof와 batt
 
 ## 업적 / 프로필
 
-위키에는 초기 약 45~55 achievement와 title/frame/banner/emblem/badge 구조가 설계돼 있으나 현재 runtime 미구현이다.
-SPECIAL/event 문서의 profile reward를 현재 resource reward로 대체했다고 해서 완료 처리하지 않는다.
+구현 foundation:
+
+- 공용 `@frontline/sim/achievement-profile`에 초기 **50 achievement** 등록.
+  - MAIN 8.
+  - SPECIAL 8.
+  - GROWTH 10.
+  - CODEX 4.
+  - COOP 4.
+  - PVP 6.
+  - RECORD 6.
+  - QUIRK 4.
+- typed requirement + 공용 evaluator로 UI hardcoded 조건 사슬을 피한다.
+- MAIN/SPECIAL/캐릭터 성장/F2·F3/소유/적 discovery/협동 clear provenance/record best를 실제 guest progress에서 계산한다.
+- PvP tier와 친구/재접속/기묘 조건은 future authoritative signal을 받을 typed hook만 먼저 등록했다.
+- 완료 업적은 수령 버튼 없이 즉시 claimed set에 넣고 cosmetic ownership을 idempotent하게 합친다.
+- TITLE / FRAME / BANNER / EMBLEM / BADGE 장식 catalog 실행.
+- 대표 캐릭터 1 / 칭호 0..1 / 프레임 1 / 배너 1 / 문장 1 / 대표 배지 0..3 장착.
+- `ProfileScene` + 메인 메뉴 `프로필·업적` 진입.
+- 미완료 QUIRK achievement는 `??? / 조건 비공개` 처리.
+- guest profile meta state는 `frontline-summoners:achievement-profile:v1` 별도 local store에 저장하여 전투/경제 guest save v15와 분리한다.
+- 미확정 Gold/모집재화/소탕권 achievement 보상 수치는 임의 생성하지 않고 `designRewardNote`로만 남긴다. 현재 achievement completion은 resource ledger를 직접 변경하지 않는다.
+- authenticated account에서는 server snapshot 기반 진행 업적을 읽기 전용 derived view로 표시한다.
+
+잔여:
+
+- server authoritative achievement claimed/cosmetic ownership/profile loadout 저장.
+- revisioned account profile mutation/idempotency.
+- guest profile → account migration/conflict UX.
+- 친구/재접속 event fact wiring.
+- 실제 PvP match/tier source wiring.
+- QUIRK battle event fact wiring.
+- exact resource reward 경제 검증 및 server mutation.
+- completion toast/card 연출.
+- cosmetic production art.
+- 프로필 공유/친구/랭킹 화면 연계.
+- 모바일/PC 실제 터치/viewport 사람 QA.
+
+현재 단계는 **guest runtime/profile cosmetic foundation**이며 account 제품화 및 사람 UX/경제 검증 전이므로 전체 업적 시스템을 TESTED/LOCKED로 세지 않는다.
 
 ## 최근 자동검증 기준점
 
@@ -545,17 +586,18 @@ SPECIAL/event 문서의 profile reward를 현재 resource reward로 대체했다
 - SPECIAL/sweep account authority + shared SPECIAL reward + authored history gate: `456bc39e9d4b4bda687f583923277f396d622970`, CI #738 green.
 - account Base Lv/+Lv/evolution/form/deck/base-weapon mutation + `META_PROGRESSION` receipt: `2232d4b92a16b49f9bb78efcaf1051d9560902d2`, CI #746 green.
 - verified identity/session storage + Bearer account HTTP route: `5972fe8bcfeac8c0c9ac9ee48fbb9222f95fe428`, CI #755 green.
-- client account three-state/read-cache/online-mutation foundation: `71653a5df696a38010cb2235fbe24b087c7c2730`, **CI #757 전체 green(typecheck/schema/sim/server/client/build)**.
+- client account three-state/read-cache/online-mutation foundation: `71653a5df696a38010cb2235fbe24b087c7c2730`, CI #757 전체 green.
+- 43종/129 form authored evolution closure: `ab0b152755a216526b76b8e496615cfb80829c18`, CI #799 전체 green.
+- achievement/profile 50개 + guest profile cosmetic runtime foundation: `30374313e1372a0da5a8370f08648775079dc140`, CI #801 최종 검증 대상.
 
 ## 다음 개발 우선순위
 
-1. **provider proof + 로그인 UX**: Google OAuth/OIDC 또는 이메일 proof 실제 검증, session 발급/갱신, 계정전환 UI, 기존 Phaser 화면 account-state 분기.
-2. **trusted battle completion registry**: solo/SPECIAL/record battleId 발급·서버 결과 proof·authenticated reward mutation 연결.
-3. **guest→account closure**: 빈 계정 이전 transaction, 기존 서버 진행 충돌 선택 UX, read cache/guest 보존 검증.
-4. **협동 release/account result closure**: authenticated seat/result 연결, 친구/초대/reconnect/AI takeover/빠른통신 polish.
-5. **기록/SPECIAL 사람 QA 및 경제 튜닝**: 장기전 난이도, periodic/SPECIAL reward 공급량 TESTED/LOCKED 후보화.
-6. **PvP foundation**: standardization, 1v1/2v2, MMR/season.
-7. 마지막 production art/motion/audio/accessibility/release QA.
+1. **achievement/profile account authority**: claimed/cosmetic/loadout를 server save/revision/idempotency에 연결하고 guest→account 충돌 UX를 닫는다.
+2. **친구/협동 release closure**: 친구/초대/최근 플레이어/차단, authenticated seat/result, reconnect/AI takeover/빠른통신 polish와 achievement fact 연결.
+3. **PvP foundation**: standardization, 1v1/2v2, MMR/season, PvP achievement tier/event source.
+4. **기록/SPECIAL 사람 QA 및 경제 튜닝**: 장기전 난이도, periodic/SPECIAL/achievement reward 공급량 TESTED/LOCKED 후보화.
+5. **achievement production UX**: 완료 toast/card, cosmetic art, 공유/친구/랭킹 profile surface.
+6. 마지막 production art/motion/audio/accessibility/release QA.
 
 ## 검증 원칙
 
