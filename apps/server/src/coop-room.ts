@@ -1,3 +1,5 @@
+import { BASE_WEAPON_IDS, type BaseWeaponId } from '@frontline/sim/playable';
+
 export const COOP_SEATS = ['A', 'B'] as const;
 export type CoopSeatId = (typeof COOP_SEATS)[number];
 export type CoopControl = 'PLAYER' | 'AI';
@@ -17,6 +19,7 @@ export interface CoopCharacterLoadout {
 export interface CoopPlayerLoadout {
   readonly characters: readonly CoopCharacterLoadout[];
   readonly permanentRewardIds: readonly string[];
+  readonly clearedStageIds: readonly string[];
 }
 
 export type CoopBattleCommand =
@@ -38,6 +41,7 @@ export interface CoopSeatState {
   control: CoopControl;
   deckSlotIds: string[];
   loadout: CoopPlayerLoadout | null;
+  selectedBaseWeaponId: BaseWeaponId;
   lastSequence: number;
 }
 
@@ -60,6 +64,7 @@ export interface CoopRoomSnapshot {
   readonly stageId: string;
   readonly phase: CoopRoomPhase;
   readonly committedTick: number;
+  readonly agreedBaseWeaponId: BaseWeaponId | null;
   readonly seats: readonly {
     readonly seatId: CoopSeatId;
     readonly clientId: string | null;
@@ -67,11 +72,13 @@ export interface CoopRoomSnapshot {
     readonly ready: boolean;
     readonly control: CoopControl;
     readonly deckSize: number;
+    readonly selectedBaseWeaponId: BaseWeaponId;
   }[];
 }
 
 export type CoopClientMessage =
   | { readonly type: 'PING' }
+  | { readonly type: 'SELECT_BASE_WEAPON'; readonly baseWeaponId: BaseWeaponId }
   | { readonly type: 'READY'; readonly loadout: CoopPlayerLoadout }
   | { readonly type: 'UNREADY' }
   | { readonly type: 'FRAME_INPUT'; readonly input: CoopFrameInput };
@@ -87,6 +94,10 @@ function isRecord(value: unknown): value is Record<string, unknown> {
 
 function isNonEmptyString(value: unknown): value is string {
   return typeof value === 'string' && value.trim().length > 0;
+}
+
+function isBaseWeaponId(value: unknown): value is BaseWeaponId {
+  return typeof value === 'string' && BASE_WEAPON_IDS.includes(value as BaseWeaponId);
 }
 
 function assertNonNegativeInteger(value: number, context: string): void {
@@ -165,9 +176,16 @@ export function validateCoopPlayerLoadout(value: unknown, context = 'co-op loado
   if (new Set(value.permanentRewardIds).size !== value.permanentRewardIds.length) {
     throw new Error(`${context}.permanentRewardIds must not contain duplicates`);
   }
+  if (!Array.isArray(value.clearedStageIds) || !value.clearedStageIds.every(isNonEmptyString)) {
+    throw new Error(`${context}.clearedStageIds must be a string array`);
+  }
+  if (new Set(value.clearedStageIds).size !== value.clearedStageIds.length) {
+    throw new Error(`${context}.clearedStageIds must not contain duplicates`);
+  }
   return {
     characters,
     permanentRewardIds: [...value.permanentRewardIds],
+    clearedStageIds: [...value.clearedStageIds],
   };
 }
 
@@ -175,6 +193,10 @@ export function parseCoopClientMessage(value: unknown): CoopClientMessage {
   if (!isRecord(value) || !isNonEmptyString(value.type)) throw new Error('message must be an object with type');
   if (value.type === 'PING') return { type: 'PING' };
   if (value.type === 'UNREADY') return { type: 'UNREADY' };
+  if (value.type === 'SELECT_BASE_WEAPON') {
+    if (!isBaseWeaponId(value.baseWeaponId)) throw new Error('SELECT_BASE_WEAPON.baseWeaponId is invalid');
+    return { type: 'SELECT_BASE_WEAPON', baseWeaponId: value.baseWeaponId };
+  }
   if (value.type === 'READY') return { type: 'READY', loadout: validateCoopPlayerLoadout(value.loadout, 'READY.loadout') };
   if (value.type === 'FRAME_INPUT') return { type: 'FRAME_INPUT', input: parseFrameInput(value.input) };
   throw new Error('unsupported_message');
@@ -191,6 +213,7 @@ export function createCoopRoom(matchId: string, stageId: string): CoopRoomState 
     control: 'PLAYER',
     deckSlotIds: [],
     loadout: null,
+    selectedBaseWeaponId: 'base_weapon_front_cannon',
     lastSequence: -1,
   });
   return {
@@ -204,11 +227,15 @@ export function createCoopRoom(matchId: string, stageId: string): CoopRoomState 
 }
 
 export function getCoopRoomSnapshot(state: CoopRoomState): CoopRoomSnapshot {
+  const agreedBaseWeaponId = state.seats.A.selectedBaseWeaponId === state.seats.B.selectedBaseWeaponId
+    ? state.seats.A.selectedBaseWeaponId
+    : null;
   return {
     matchId: state.matchId,
     stageId: state.stageId,
     phase: state.phase,
     committedTick: state.committedTick,
+    agreedBaseWeaponId,
     seats: COOP_SEATS.map((seatId) => {
       const seat = state.seats[seatId];
       return {
@@ -218,6 +245,7 @@ export function getCoopRoomSnapshot(state: CoopRoomState): CoopRoomSnapshot {
         ready: seat.ready,
         control: seat.control,
         deckSize: seat.deckSlotIds.length,
+        selectedBaseWeaponId: seat.selectedBaseWeaponId,
       };
     }),
   };
@@ -245,6 +273,18 @@ export function disconnectCoopSeat(state: CoopRoomState, seatId: CoopSeatId, cli
   }
 }
 
+export function setCoopSeatBaseWeapon(
+  state: CoopRoomState,
+  seatId: CoopSeatId,
+  clientId: string,
+  baseWeaponId: BaseWeaponId,
+): void {
+  if (state.phase !== 'LOBBY') throw new Error('room is not in lobby');
+  const seat = requireSeat(state, seatId, clientId);
+  if (seat.ready) throw new Error('ready seat cannot change base weapon');
+  seat.selectedBaseWeaponId = baseWeaponId;
+}
+
 export function setCoopSeatReady(
   state: CoopRoomState,
   seatId: CoopSeatId,
@@ -253,6 +293,11 @@ export function setCoopSeatReady(
 ): { readonly battleStarted: boolean } {
   if (state.phase !== 'LOBBY') throw new Error('room is not in lobby');
   const seat = requireSeat(state, seatId, clientId);
+  const otherSeatId: CoopSeatId = seatId === 'A' ? 'B' : 'A';
+  const other = state.seats[otherSeatId];
+  if (other.ready && other.selectedBaseWeaponId !== seat.selectedBaseWeaponId) {
+    throw new Error(`base_weapon_mismatch:${seat.selectedBaseWeaponId}:${other.selectedBaseWeaponId}`);
+  }
   const validated = validateCoopPlayerLoadout(loadout);
   seat.deckSlotIds = validated.characters.map((character) => character.characterId);
   seat.loadout = validated;
