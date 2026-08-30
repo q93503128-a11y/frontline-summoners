@@ -53,7 +53,7 @@ test('player specialties reflect selected level, form, and plus level while enem
   assert.match(battle, /unit\.team === 'ENEMY' && unit\.state !== UnitState\.Dying/);
 });
 
-test('PC battle hotkeys map 1 through 0 to saved deck order, Q to supply upgrade, and E to the base weapon', async () => {
+test('PC battle hotkeys map 1 through 0 to saved deck order, Q to supply upgrade, and E to the selected base weapon', async () => {
   const { battle, ui } = await readRuntime();
   assert.match(ui, /'Digit1', 'Digit2', 'Digit3', 'Digit4', 'Digit5', 'Digit6', 'Digit7', 'Digit8', 'Digit9', 'Digit0'/);
   assert.match(battle, /BATTLE_UNIT_HOTKEY_CODES\.indexOf\(event\.code\)/);
@@ -63,7 +63,10 @@ test('PC battle hotkeys map 1 through 0 to saved deck order, Q to supply upgrade
   assert.match(battle, /event\.code === 'KeyE'/);
   assert.match(battle, /event\.code === 'KeyP' \|\| event\.code === 'Escape'/);
   assert.match(battle, /compact \? '보급소 강화' : 'Q · 보급소 강화'/);
-  assert.match(battle, /const weaponPrefix = isCompactMobileViewport\(\) \? '전선포' : 'E · 전선포'/);
+  assert.match(battle, /const weaponName = getBaseWeaponDisplayName\(this\.state\);/);
+  assert.match(battle, /const weaponPrefix = isCompactMobileViewport\(\) \? weaponName : `E · \$\{weaponName\}`;/);
+  assert.match(battle, /state\.baseWeapon\.kind === 'AEGIS_EMITTER'/);
+  assert.match(battle, /state\.baseWeapon\.kind === 'SUPPLY_DROP'/);
   assert.match(battle, /const hotkeyLabel = getUnitHotkeyLabel\(index\);/);
 });
 
