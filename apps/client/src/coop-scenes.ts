@@ -1,5 +1,7 @@
 import Phaser from 'phaser';
 import { INTERNAL_HEIGHT, INTERNAL_WIDTH } from '@frontline/shared';
+import type { BaseWeaponId } from '@frontline/sim/playable';
+import { BASE_WEAPON_UNLOCKS, getUnlockedBaseWeaponIds } from './base-weapon-progression';
 import {
   ALL_STAGES,
   ENEMIES,
@@ -9,6 +11,7 @@ import {
 } from './prototype';
 import {
   getEffectiveDeckSlotIds,
+  getGuestSelectedBaseWeaponId,
   loadGuestProgress,
   recordGuestEnemyDiscoveries,
   recordNormalStageClear,
@@ -57,7 +60,12 @@ function coopLoadout(progress: GuestProgress): CoopPlayerLoadout {
       };
     }),
     permanentRewardIds: [...progress.permanentRewardIds],
+    clearedStageIds: [...progress.clearedStageIds],
   };
+}
+
+function baseWeaponName(baseWeaponId: BaseWeaponId | null | undefined): string {
+  return BASE_WEAPON_UNLOCKS.find((weapon) => weapon.id === baseWeaponId)?.displayName ?? '전선포격기';
 }
 
 function eligibleCoopStages(progress: GuestProgress): readonly PrototypeStage[] {
@@ -89,6 +97,7 @@ function stageReturnData(stage: PrototypeStage): { scene: string; data: { collec
 
 export class CoopLobbyScene extends Phaser.Scene {
   private progress: GuestProgress = EMPTY_PROGRESS;
+  private selectedBaseWeaponId: BaseWeaponId = 'base_weapon_front_cannon';
   private page = 0;
   private contentLayer?: Phaser.GameObjects.Container;
   private session: CoopSession | null = null;
@@ -121,7 +130,9 @@ export class CoopLobbyScene extends Phaser.Scene {
     void loadGuestProgress().then((progress) => {
       if (!this.scene.isActive()) return;
       this.progress = progress;
+      this.selectedBaseWeaponId = getGuestSelectedBaseWeaponId(progress);
       this.statusText?.setText(`협동 덱: ${coopDeck(progress).map((id) => getSlotById(id)?.displayName ?? id).join(' · ')}`);
+      this.syncBaseWeaponSelection();
       this.render();
     });
   }
@@ -220,10 +231,23 @@ export class CoopLobbyScene extends Phaser.Scene {
     });
   }
 
+  private syncBaseWeaponSelection(): void {
+    if (!this.session?.room || this.session.connectionState !== 'OPEN') return;
+    const mine = this.session.room.seats.find((seat) => seat.seatId === this.session!.seatId);
+    if (!mine || mine.ready || mine.selectedBaseWeaponId === this.selectedBaseWeaponId) return;
+    try { this.session.sendBaseWeaponSelection(this.selectedBaseWeaponId); } catch { /* next room update/reconnect can retry */ }
+  }
+
   private onServerMessage(message: CoopServerMessage): void {
     if (!this.scene.isActive() || !this.session) return;
     if (message.type === 'ERROR') {
-      this.statusText?.setText(message.message ?? message.code);
+      const detail = message.message ?? message.code;
+      const friendly = detail.startsWith('base_weapon_mismatch:')
+        ? '상대와 공유 거점 병기를 같은 것으로 맞춘 뒤 준비하세요.'
+        : detail.startsWith('coop_base_weapon_locked:')
+          ? '현재 진행도에서 해금되지 않은 거점 병기입니다.'
+          : detail;
+      this.statusText?.setText(friendly);
       this.statusText?.setColor('#ff9a91');
       return;
     }
@@ -235,9 +259,13 @@ export class CoopLobbyScene extends Phaser.Scene {
         this.session.close();
         return;
       }
+      this.syncBaseWeaponSelection();
       this.render();
     }
-    if (message.type === 'ROOM_STATE') this.render();
+    if (message.type === 'ROOM_STATE') {
+      this.syncBaseWeaponSelection();
+      this.render();
+    }
     if (message.type === 'BATTLE_STARTED' || message.type === 'BATTLE_RESUME' || message.type === 'BATTLE_FINISHED') {
       const session = this.session;
       this.unsubscribeMessage?.();
@@ -259,23 +287,52 @@ export class CoopLobbyScene extends Phaser.Scene {
     room.seats.forEach((seat, index) => {
       const x = index === 0 ? 405 : 875;
       const mine = this.session!.seatId === seat.seatId;
-      const panel = this.add.rectangle(x, 340, 360, 250, mine ? 0x29364a : 0x272d38, 0.98).setStrokeStyle(3, mine ? 0x6fa2d0 : 0x566171, 1);
+      const panel = this.add.rectangle(x, 335, 360, 280, mine ? 0x29364a : 0x272d38, 0.98).setStrokeStyle(3, mine ? 0x6fa2d0 : 0x566171, 1);
       this.contentLayer!.add(panel);
-      this.contentLayer!.add(addText(this, x, 260, `${seat.seatId} 지휘관${mine ? ' · 나' : ''}`, compact ? 27 : 23, '#ffffff', 'center').setOrigin(0.5));
-      this.contentLayer!.add(addText(this, x, 315, seat.connected ? '접속됨' : '접속 대기', compact ? 22 : 18, seat.connected ? '#8ee3aa' : '#9aa3b0', 'center').setOrigin(0.5));
-      this.contentLayer!.add(addText(this, x, 365, `편성 ${seat.deckSize}/5 · ${seat.ready ? '준비 완료' : '준비 전'}`, compact ? 21 : 17, seat.ready ? '#f0d67d' : '#aab2bf', 'center').setOrigin(0.5));
-      this.contentLayer!.add(addText(this, x, 410, seat.control === 'AI' ? '연결 이탈 · 임시 지휘' : '플레이어 제어', compact ? 18 : 15, seat.control === 'AI' ? '#ffd493' : '#9fcfff', 'center').setOrigin(0.5));
+      this.contentLayer!.add(addText(this, x, 245, `${seat.seatId} 지휘관${mine ? ' · 나' : ''}`, compact ? 27 : 23, '#ffffff', 'center').setOrigin(0.5));
+      this.contentLayer!.add(addText(this, x, 293, seat.connected ? '접속됨' : '접속 대기', compact ? 22 : 18, seat.connected ? '#8ee3aa' : '#9aa3b0', 'center').setOrigin(0.5));
+      this.contentLayer!.add(addText(this, x, 338, `편성 ${seat.deckSize}/5 · ${seat.ready ? '준비 완료' : '준비 전'}`, compact ? 21 : 17, seat.ready ? '#f0d67d' : '#aab2bf', 'center').setOrigin(0.5));
+      this.contentLayer!.add(addText(this, x, 382, `공유 병기 제안 · ${baseWeaponName(seat.selectedBaseWeaponId)}`, compact ? 19 : 16, '#bfe8ff', 'center').setOrigin(0.5));
+      this.contentLayer!.add(addText(this, x, 426, seat.control === 'AI' ? '연결 이탈 · 임시 지휘' : '플레이어 제어', compact ? 18 : 15, seat.control === 'AI' ? '#ffd493' : '#9fcfff', 'center').setOrigin(0.5));
     });
 
+    const agreementLabel = room.agreedBaseWeaponId
+      ? `공유 병기 합의 · ${baseWeaponName(room.agreedBaseWeaponId)}`
+      : '공유 병기 선택 불일치 · 같은 병기로 맞춰야 준비 가능';
+    this.contentLayer.add(addText(this, INTERNAL_WIDTH / 2, 478, agreementLabel, compact ? 20 : 17, room.agreedBaseWeaponId ? '#8ee3aa' : '#ffd493', 'center').setOrigin(0.5));
+
     if (this.inviteCode) {
-      this.contentLayer.add(addText(this, INTERNAL_WIDTH / 2, 505, `친구 참가 코드\n${this.inviteCode}`, compact ? 18 : 15, '#cbd4e1', 'center').setOrigin(0.5).setWordWrapWidth(760));
-      this.contentLayer.add(addButton(this, 930, 530, 190, compact ? 84 : 54, '코드 복사', () => { void this.copyInvite(); }, 0x6b628f));
+      this.contentLayer.add(addText(this, INTERNAL_WIDTH / 2, 510, `친구 참가 코드 · ${this.inviteCode}`, compact ? 17 : 14, '#cbd4e1', 'center').setOrigin(0.5).setWordWrapWidth(760));
+      this.contentLayer.add(addButton(this, 1080, 510, 150, compact ? 72 : 46, '코드 복사', () => { void this.copyInvite(); }, 0x6b628f));
     }
 
     const mine = room.seats.find((seat) => seat.seatId === this.session!.seatId);
     const readyLabel = mine?.ready ? '준비 취소' : '준비';
-    this.contentLayer.add(addButton(this, 520, compact ? 550 : 545, 210, compact ? 84 : 60, readyLabel, () => this.toggleReady(), mine?.ready ? 0x766854 : 0x5f8f75));
-    this.contentLayer.add(addButton(this, 750, compact ? 550 : 545, 210, compact ? 84 : 60, '방 나가기', () => this.leaveRoom(), 0x8d5f64));
+    const weaponActionLabel = mine?.ready ? '준비 취소 후 병기 변경' : `병기 변경\n${baseWeaponName(mine?.selectedBaseWeaponId)}`;
+    this.contentLayer.add(addButton(this, 355, compact ? 565 : 558, 270, compact ? 84 : 60, weaponActionLabel, () => this.cycleBaseWeapon(), mine?.ready ? 0x4d535d : 0x4f7894));
+    this.contentLayer.add(addButton(this, 650, compact ? 565 : 558, 210, compact ? 84 : 60, readyLabel, () => this.toggleReady(), mine?.ready ? 0x766854 : 0x5f8f75));
+    this.contentLayer.add(addButton(this, 900, compact ? 565 : 558, 210, compact ? 84 : 60, '방 나가기', () => this.leaveRoom(), 0x8d5f64));
+  }
+
+  private cycleBaseWeapon(): void {
+    if (!this.session?.room) return;
+    const mine = this.session.room.seats.find((seat) => seat.seatId === this.session!.seatId);
+    if (!mine || mine.ready) {
+      this.statusText?.setText('준비를 취소한 뒤 공유 병기를 변경할 수 있습니다.');
+      this.statusText?.setColor('#ffd493');
+      return;
+    }
+    const unlocked = getUnlockedBaseWeaponIds(this.progress.clearedStageIds);
+    const currentIndex = Math.max(0, unlocked.indexOf(mine.selectedBaseWeaponId));
+    this.selectedBaseWeaponId = unlocked[(currentIndex + 1) % unlocked.length] ?? 'base_weapon_front_cannon';
+    try {
+      this.session.sendBaseWeaponSelection(this.selectedBaseWeaponId);
+      this.statusText?.setText(`공유 병기 제안: ${baseWeaponName(this.selectedBaseWeaponId)}`);
+      this.statusText?.setColor('#bfe8ff');
+    } catch (error) {
+      this.statusText?.setText(error instanceof Error ? error.message : '거점 병기 선택을 보내지 못했습니다.');
+      this.statusText?.setColor('#ff9a91');
+    }
   }
 
   private toggleReady(): void {
@@ -442,7 +499,10 @@ export class CoopBattleScene extends Phaser.Scene {
     const partner = snapshot.players.find((player) => player.seatId !== this.session.seatId);
     if (mine) this.battlefieldLayer.add(addText(this, 80, 520, `내 보급 ${mine.supply}/${mine.maxSupply} · 보급소 Lv${mine.supplyLevel}`, compact ? 22 : 18, '#f0d67d'));
     if (partner) this.battlefieldLayer.add(addText(this, 1200, 520, `동료 보급 ${partner.supply}/${partner.maxSupply} · Lv${partner.supplyLevel}`, compact ? 20 : 16, '#b8c8d9', 'right').setOrigin(1, 0));
-    this.battlefieldLayer.add(addText(this, INTERNAL_WIDTH / 2, 555, `30Hz 서버 전투 · frame ${snapshot.tick} · 전선포 ${snapshot.baseWeaponCooldownFrames > 0 ? `${snapshot.baseWeaponCooldownFrames}F` : 'READY'}`, compact ? 17 : 14, '#8f9cad', 'center').setOrigin(0.5));
+    const weaponName = baseWeaponName(snapshot.baseWeaponId);
+    const lastUser = snapshot.baseWeaponLastActivatedSeatId ? ` · 최근 사용 ${snapshot.baseWeaponLastActivatedSeatId}` : '';
+    const personalSupply = snapshot.baseWeaponId === 'base_weapon_supply_drop' ? ' · 사용자 개인 보급' : '';
+    this.battlefieldLayer.add(addText(this, INTERNAL_WIDTH / 2, 555, `30Hz 서버 전투 · frame ${snapshot.tick} · 공유 ${weaponName} ${snapshot.baseWeaponCooldownFrames > 0 ? `${snapshot.baseWeaponCooldownFrames}F` : 'READY'}${lastUser}${personalSupply}`, compact ? 17 : 14, '#8f9cad', 'center').setOrigin(0.5));
   }
 
   private renderControls(): void {
@@ -466,7 +526,10 @@ export class CoopBattleScene extends Phaser.Scene {
       ? mine.nextSupplyUpgradeCost === null ? '보급소 MAX' : `보급소 강화\n${mine.nextSupplyUpgradeCost} 보급`
       : '보급소 강화';
     this.controlsLayer.add(addButton(this, 1085, 650, 170, compact ? 84 : 62, upgradeLabel, () => this.session.queueCommand({ type: 'UPGRADE_SUPPLY' }), 0x7a6e4f));
-    this.controlsLayer.add(addButton(this, 1245, 650, 130, compact ? 84 : 62, '전선포', () => this.session.queueCommand({ type: 'FIRE_BASE_WEAPON' }), snapshot && snapshot.baseWeaponCooldownFrames === 0 ? 0x8a665a : 0x4d535d));
+    const weaponLabel = snapshot?.baseWeaponId === 'base_weapon_supply_drop'
+      ? `공유 ${baseWeaponName(snapshot.baseWeaponId)}\n누른 사람 보급`
+      : `공유 ${baseWeaponName(snapshot?.baseWeaponId)}`;
+    this.controlsLayer.add(addButton(this, 1245, 650, 130, compact ? 84 : 62, weaponLabel, () => this.session.queueCommand({ type: 'FIRE_BASE_WEAPON' }), snapshot && snapshot.baseWeaponCooldownFrames === 0 ? 0x8a665a : 0x4d535d));
   }
 
   private async recordVisibleEnemies(snapshot: CoopBattleSnapshot): Promise<void> {
