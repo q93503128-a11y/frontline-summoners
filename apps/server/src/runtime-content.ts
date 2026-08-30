@@ -39,6 +39,8 @@ import stagePoliciesThreeJson from '../../../content/stages/policies-03.json' wi
 import stagePoliciesFourJson from '../../../content/stages/policies-04.json' with { type: 'json' };
 import stagePoliciesResourceJson from '../../../content/stages/policies-special-resource.json' with { type: 'json' };
 import stagePoliciesPermanentSpecialJson from '../../../content/stages/policies-special-permanent.json' with { type: 'json' };
+import stagePoliciesRestrictionSpecialJson from '../../../content/stages/policies-special-restriction.json' with { type: 'json' };
+import stagePoliciesEventSpecialJson from '../../../content/stages/policies-special-event.json' with { type: 'json' };
 import stageCollectionsJson from '../../../content/stage-collections.json' with { type: 'json' };
 import eventAvailabilityJson from '../../../content/stages/event-availability.json' with { type: 'json' };
 import type { CoopPlayerLoadout } from './coop-room.ts';
@@ -77,7 +79,15 @@ const SPECIAL_STAGES: readonly CampaignStageContent[] = [...CHALLENGE_SPECIAL_ST
 const ALL_STAGES: readonly CampaignStageContent[] = [...CHAPTER_ONE.stages, ...CHAPTER_TWO_STAGES, ...CHAPTER_THREE_STAGES, ...CHAPTER_FOUR_STAGES, ...SPECIAL_STAGES];
 if (new Set(ALL_STAGES.map((stage) => stage.id)).size !== ALL_STAGES.length) throw new Error('server stage ids must be globally unique');
 const STAGE_BY_ID = new Map(ALL_STAGES.map((stage) => [stage.id, stage] as const));
-const STAGE_POLICIES = parseStagePolicies([...stagePoliciesOneTwoJson, ...stagePoliciesThreeJson, ...stagePoliciesFourJson, ...stagePoliciesResourceJson, ...stagePoliciesPermanentSpecialJson], new Set(ALL_STAGES.map((stage) => stage.id)));
+const STAGE_POLICIES = parseStagePolicies([
+  ...stagePoliciesOneTwoJson,
+  ...stagePoliciesThreeJson,
+  ...stagePoliciesFourJson,
+  ...stagePoliciesResourceJson,
+  ...stagePoliciesPermanentSpecialJson,
+  ...stagePoliciesRestrictionSpecialJson,
+  ...stagePoliciesEventSpecialJson,
+], new Set(ALL_STAGES.map((stage) => stage.id)));
 const STAGE_POLICY_BY_ID = new Map(STAGE_POLICIES.map((policy) => [policy.stageId, policy] as const));
 
 interface CollectionAvailabilityContent { readonly collectionId: string; readonly windows: readonly { readonly start: string; readonly end: string }[]; }
