@@ -81,6 +81,49 @@ test('endless minute score is derived only from deterministic simulation ticks',
   assert.equal(getEndlessRecordReachedMinute(state), 1);
 });
 
+test('endless repeating runtime stays entity-bounded through twelve simulated minutes', () => {
+  const longRunSlot: PlayerRosterSlot = {
+    ...playerSlot,
+    definition: fighter('record-test-player-long-run', 1_000_000, 5000, 12),
+  };
+  const state = createEndlessRecordBattle({
+    mapLength: 500,
+    playerBaseHp: 1_000_000,
+    enemyBaseHp: 50,
+    startingSupply: 0,
+    playerUnitCap: 4,
+    enemyUnitCap: 12,
+    playerSlots: [longRunSlot],
+    enemies,
+    enemyWaves: [{
+      id: 'record-test-endless-loop',
+      trigger: { type: 'TIME', frame: 1 },
+      spawn: { enemyId: 'record-test-enemy', count: 3, intervalFrames: 2, magnificationPermille: 1000 },
+      repeat: { delayFrames: 15 },
+    }],
+  });
+  assert.equal(trySpawnPlayerUnit(state.battle, longRunSlot.slotId).ok, true);
+
+  let maxObservedUnits = 0;
+  let maxObservedEnemies = 0;
+  for (let i = 0; i < 21_600; i += 1) {
+    stepEndlessRecordBattle(state);
+    const enemyCount = state.battle.battle.units.filter((unit) => unit.team === 'ENEMY').length;
+    maxObservedUnits = Math.max(maxObservedUnits, state.battle.battle.units.length);
+    maxObservedEnemies = Math.max(maxObservedEnemies, enemyCount);
+    assert.equal(Number.isFinite(state.battle.supply), true);
+    assert.equal(Number.isFinite(state.battle.battle.bases.PLAYER.hp), true);
+    assert.equal(Number.isFinite(state.battle.battle.bases.ENEMY.hp), true);
+  }
+
+  assert.equal(state.ended, false);
+  assert.equal(getEndlessRecordReachedMinute(state), 12);
+  assert.ok(maxObservedEnemies <= state.battle.enemyUnitCap + 1, `enemy runtime leaked past cap: ${maxObservedEnemies}`);
+  assert.ok(maxObservedUnits <= state.battle.enemyUnitCap + state.battle.playerUnitCap + 2, `unit runtime grew without bound: ${maxObservedUnits}`);
+  assert.equal(typeof state.battle.stateHash, 'string');
+  assert.ok(state.battle.stateHash.length > 0);
+});
+
 test('boss rush wave builder preserves sequential clear gates and authored rest time', () => {
   const waves = buildBossRushWaves([
     { enemyId: 'record-test-boss-a', magnificationPermille: 650, restFramesAfterDefeat: 450 },
