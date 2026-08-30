@@ -77,7 +77,7 @@ export class RecordBattleScene extends Phaser.Scene {
   private ready = false;
   private resolved = false;
   private manuallyPaused = false;
-  private pauseOverlay?: Phaser.GameObjects.Container;
+  private pauseOverlay: Phaser.GameObjects.Container | undefined;
   private views = new Map<number, RecordUnitView>();
   private buttons = new Map<string, RecordUnitButtonView>();
   private seenBossSimulationIds = new Set<number>();
@@ -258,6 +258,7 @@ export class RecordBattleScene extends Phaser.Scene {
     addText(this, 42, 286, '아군 거점', battleUiFontSize(18, 23), '#cfe5ff');
     addText(this, 1238, 286, '기록전 생성원', battleUiFontSize(18, 23), '#ffd3cc', 'right').setOrigin(1, 0);
     this.add.rectangle(88, 328, 156, 16, 0x161b23).setStrokeStyle(2, 0x7990aa);
+    this.playerBaseBar = this.add.rectangle(12, 328, 152, 16, 0x161b23).setOrigin(0, 0.5);
     this.playerBaseBar = this.add.rectangle(12, 328, 152, 10, 0x74c7ff).setOrigin(0, 0.5);
     this.playerBaseText = addText(this, 88, 340, '', battleUiFontSize(18, 22), '#e8f5ff', 'center').setOrigin(0.5, 0);
     addText(this, 1192, 325, '파괴 불가', battleUiFontSize(18, 22), '#ffd8d1', 'center').setOrigin(0.5, 0);
