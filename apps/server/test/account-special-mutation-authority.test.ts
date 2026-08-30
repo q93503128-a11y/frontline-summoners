@@ -10,6 +10,8 @@ import { __accountSpecialMutationTestOnly } from '../src/account-special-mutatio
 
 const OPEN_NOW = Date.parse('2026-08-30T09:30:00+09:00');
 const CLOSED_EVENT_TIME = Date.parse('2026-07-01T12:00:00+09:00');
+const SUMMER_EVENT_LAST_SECOND = Date.parse('2026-09-15T23:59:59+09:00');
+const SUMMER_EVENT_AFTER_CLOSE = Date.parse('2026-09-16T00:05:00+09:00');
 
 function clearThrough(count: number) {
   let snapshot = createInitialAccountSave();
@@ -50,6 +52,24 @@ test('server SPECIAL access enforces collection progression, sequential unlock a
   assert.equal(isAccountStageAvailable('event_summer_01_01', CLOSED_EVENT_TIME), false);
   const mainTwenty = clearThrough(20);
   assert.throws(() => __accountSpecialMutationTestOnly.buildSpecialBattleResult(mainTwenty, 'event_summer_01_01', CLOSED_EVENT_TIME), /not currently available/);
+});
+
+test('timed SPECIAL keeps sortie-start availability when completion crosses the event close boundary', () => {
+  const mainTwenty = clearThrough(20);
+  assert.equal(isAccountStageAvailable('event_summer_01_01', SUMMER_EVENT_LAST_SECOND), true);
+  assert.equal(isAccountStageAvailable('event_summer_01_01', SUMMER_EVENT_AFTER_CLOSE), false);
+  assert.throws(
+    () => __accountSpecialMutationTestOnly.buildSpecialBattleResult(mainTwenty, 'event_summer_01_01', SUMMER_EVENT_AFTER_CLOSE),
+    /not currently available/,
+  );
+  const completed = __accountSpecialMutationTestOnly.buildSpecialBattleResult(
+    mainTwenty,
+    'event_summer_01_01',
+    SUMMER_EVENT_AFTER_CLOSE,
+    SUMMER_EVENT_LAST_SECOND,
+  );
+  assert.equal(completed.result.firstClear, true);
+  assert.ok(completed.snapshot.specialClearedStageIds.includes('event_summer_01_01'));
 });
 
 test('periodic SPECIAL repeat consumes exactly one charge and uses charged reward', () => {
