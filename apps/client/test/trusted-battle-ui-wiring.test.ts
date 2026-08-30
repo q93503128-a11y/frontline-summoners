@@ -9,8 +9,8 @@ test('authenticated solo battle requires online active progress and a matching t
   assert.match(battle, /loadActiveProgress\(\)/);
   assert.match(battle, /view\.authority === 'ACCOUNT_OFFLINE_CACHE'/);
   assert.match(battle, /startAuthenticatedTrustedBattle\(kind, this\.stage\.id\)/);
-  assert.match(battle, /account\.remote\.revision !== trustedStart\.startRevision/);
-  assert.match(battle, /this\.state\.stateHash !== trustedStart\.initialStateHash/);
+  assert.match(battle, /accountState\.remote\.revision !== start\.startRevision/);
+  assert.match(battle, /this\.state\.stateHash !== this\.trustedStart\.initialStateHash/);
   assert.match(battle, /this\.battleAuthority = 'ACCOUNT_TRUSTED'/);
 });
 
