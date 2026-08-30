@@ -8,6 +8,7 @@ import {
   type AccountSaveRecord,
   type AccountSaveSnapshotV2,
 } from './account-save-authority.ts';
+import { mergeAccountEnemyDiscoveries, normalizeServerEnemyDiscoveries } from './account-enemy-discovery-authority.ts';
 import { ACCOUNT_MAIN_STAGE_INDEX, ACCOUNT_SPECIAL_STAGE_IDS } from './account-content.ts';
 import { assertAccountSpecialStagePlayable, getAccountStagePolicy } from './account-stage-authority.ts';
 
@@ -18,6 +19,7 @@ export interface AccountSpecialBattleMutationInput {
   readonly battleId: string;
   readonly expectedRevision: number;
   readonly stageId: string;
+  readonly discoveredEnemyIds?: readonly string[];
 }
 
 export interface AccountSpecialBattleMutationResult {
@@ -169,14 +171,16 @@ function buildSpecialBattleResult(
   stageId: string,
   nowMs: number,
   availabilityAtMs = nowMs,
+  discoveredEnemyIds: readonly string[] = [],
 ): BuiltMutation<AccountSpecialBattleMutationResult> {
   assertAccountSpecialStagePlayable(stageId, snapshot.clearedStageIds, snapshot.specialClearedStageIds, availabilityAtMs);
   const specialClearedStageIds = new Set(snapshot.specialClearedStageIds);
   const firstClear = !specialClearedStageIds.has(stageId);
   specialClearedStageIds.add(stageId);
   const resolution = resolveSpecialResourceReward(stageId, firstClear, snapshot.periodicRewardChargeByCollection, nowMs);
+  const discovery = mergeAccountEnemyDiscoveries(snapshot, discoveredEnemyIds);
   const snapshotAfter = {
-    ...snapshot,
+    ...discovery.snapshot,
     specialClearedStageIds: [...specialClearedStageIds],
     resourceLedgerById: grantResources(snapshot.resourceLedgerById, resolution.resourceReward),
     periodicRewardChargeByCollection: resolution.periodicChargeMap,
@@ -249,14 +253,15 @@ export async function applyAccountSpecialBattleResult(
   availabilityAtMs = nowMs,
 ): Promise<AccountSpecialMutationApplyResult<AccountSpecialBattleMutationResult>> {
   const battleId = nonEmptyId(input.battleId, 'battleId');
+  const discoveredEnemyIds = normalizeServerEnemyDiscoveries(input.discoveredEnemyIds ?? []);
   return commitMutation(
     db,
     accountId,
     input.expectedRevision,
     'SPECIAL_BATTLE_RESULT',
     battleId,
-    fingerprint({ stageId: input.stageId }),
-    (snapshot) => buildSpecialBattleResult(snapshot, input.stageId, nowMs, availabilityAtMs),
+    fingerprint({ stageId: input.stageId, discoveredEnemyIds }),
+    (snapshot) => buildSpecialBattleResult(snapshot, input.stageId, nowMs, availabilityAtMs, discoveredEnemyIds),
     nowMs,
   );
 }
