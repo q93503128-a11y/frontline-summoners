@@ -14,11 +14,13 @@ import {
   getServerCoopLoadout,
   getServerCoopStage,
   getServerRuntimeCoopStageIds,
+  isServerCoopBaseWeaponUnlocked,
 } from '../src/runtime-content.ts';
 
 function loadout(
   characters: readonly { readonly characterId: string; readonly level?: number; readonly plusLevel?: number; readonly selectedFormId?: string }[],
   permanentRewardIds: readonly string[] = [],
+  clearedStageIds: readonly string[] = [],
 ): CoopPlayerLoadout {
   return {
     characters: characters.map((character) => ({
@@ -28,10 +30,23 @@ function loadout(
       ...(character.selectedFormId === undefined ? {} : { selectedFormId: character.selectedFormId }),
     })),
     permanentRewardIds,
+    clearedStageIds,
   };
 }
 
-const militiaLoadout = (): CoopPlayerLoadout => loadout([{ characterId: 'militia' }]);
+function mainClearsThrough(chapter: number, stage: number): readonly string[] {
+  const ids: string[] = [];
+  for (let chapterIndex = 1; chapterIndex <= chapter; chapterIndex += 1) {
+    const lastStage = chapterIndex === chapter ? stage : 20;
+    for (let stageIndex = 1; stageIndex <= lastStage; stageIndex += 1) {
+      ids.push(`main_${String(chapterIndex).padStart(2, '0')}_${String(stageIndex).padStart(3, '0')}`);
+    }
+  }
+  return ids;
+}
+
+const militiaLoadout = (clearedStageIds: readonly string[] = []): CoopPlayerLoadout => loadout([{ characterId: 'militia' }], [], clearedStageIds);
+const frontCannon = 'base_weapon_front_cannon' as const;
 
 test('server runtime refuses SOLO_ONLY stages and exposes only current executable co-op stages', () => {
   assert.throws(() => getServerCoopStage('main_01_001'), /stage_not_coop_eligible/);
@@ -53,6 +68,27 @@ test('server validates canonical character ids and meta bounds before a co-op ba
   assert.throws(() => getServerCoopLoadout(loadout([{ characterId: 'militia', plusLevel: 51 }])), /invalid_coop_plus_level/);
   assert.throws(() => getServerCoopLoadout(loadout([{ characterId: 'militia', selectedFormId: 'char_s01_mireille_f3' }])), /invalid_coop_form_owner/);
   assert.throws(() => getServerCoopLoadout(loadout([{ characterId: 'militia' }], ['not-a-reward'])), /unknown_coop_permanent_reward/);
+  assert.throws(() => getServerCoopLoadout(loadout([{ characterId: 'militia' }], [], ['not-a-stage'])), /unknown_coop_cleared_stage/);
+});
+
+test('server validates shared base weapon unlocks for both declared progressions', () => {
+  const through210 = mainClearsThrough(2, 10);
+  const through310 = mainClearsThrough(3, 10);
+  assert.equal(isServerCoopBaseWeaponUnlocked('base_weapon_front_cannon', []), true);
+  assert.equal(isServerCoopBaseWeaponUnlocked('base_weapon_aegis_emitter', through210), true);
+  assert.equal(isServerCoopBaseWeaponUnlocked('base_weapon_supply_drop', through210), false);
+  assert.equal(isServerCoopBaseWeaponUnlocked('base_weapon_supply_drop', through310), true);
+
+  assert.throws(
+    () => createServerCoopBattle('main_01_003', militiaLoadout(through210), militiaLoadout(through210), 'base_weapon_supply_drop'),
+    /coop_base_weapon_locked:base_weapon_supply_drop/,
+  );
+  assert.throws(
+    () => createServerCoopBattle('main_01_003', militiaLoadout(through310), militiaLoadout(through210), 'base_weapon_supply_drop'),
+    /coop_base_weapon_locked:base_weapon_supply_drop/,
+  );
+  const battle = createServerCoopBattle('main_01_003', militiaLoadout(through310), militiaLoadout(through310), 'base_weapon_supply_drop');
+  assert.equal(battle.shared.baseWeapon.id, 'base_weapon_supply_drop');
 });
 
 test('server computes level plus and evolution stats from canonical content instead of accepting raw combat stats', () => {
@@ -71,13 +107,14 @@ test('server computes level plus and evolution stats from canonical content inst
 });
 
 test('server co-op battle applies canonical stage scaling to the shared battlefield', () => {
-  const battle = createServerCoopBattle('main_01_003', militiaLoadout(), militiaLoadout());
+  const battle = createServerCoopBattle('main_01_003', militiaLoadout(), militiaLoadout(), frontCannon);
   assert.equal(battle.shared.battle.bases.PLAYER.maxHp, 1050);
   assert.equal(battle.shared.battle.bases.ENEMY.maxHp, 1176, '1050 enemy base HP × 1.12 co-op policy');
   assert.equal(battle.players.A.slots[0]?.slotId, 'militia');
   assert.equal(battle.players.B.slots[0]?.slotId, 'militia');
   assert.equal(battle.shared.playerSlots.some((slot) => slot.slotId === 'A:militia'), true);
   assert.equal(battle.shared.playerSlots.some((slot) => slot.slotId === 'B:militia'), true);
+  assert.equal(battle.shared.baseWeapon.id, frontCannon);
 });
 
 test('each co-op seat retains its own growth and permanent economy modifiers', () => {
@@ -88,7 +125,7 @@ test('each co-op seat retains its own growth and permanent economy modifiers', (
     selectedFormId: 'char_s01_mireille_f3',
   }], ['wind-badge', 'black-banner', 'charred-grain']);
   const b = loadout([{ characterId: 'char_s01_mireille' }]);
-  const battle = createServerCoopBattle('main_01_003', a, b);
+  const battle = createServerCoopBattle('main_01_003', a, b, frontCannon);
 
   assert.ok(battle.players.A.slots[0]!.definition.maxHp > battle.players.B.slots[0]!.definition.maxHp);
   assert.ok(battle.players.A.slots[0]!.definition.attackDamage > battle.players.B.slots[0]!.definition.attackDamage);
@@ -99,16 +136,18 @@ test('each co-op seat retains its own growth and permanent economy modifiers', (
 });
 
 test('shared base HP uses only permanent base rewards held by both players', () => {
-  const none = createServerCoopBattle('main_01_003', militiaLoadout(), militiaLoadout());
+  const none = createServerCoopBattle('main_01_003', militiaLoadout(), militiaLoadout(), frontCannon);
   const oneSided = createServerCoopBattle(
     'main_01_003',
     loadout([{ characterId: 'militia' }], ['rust-nail']),
     militiaLoadout(),
+    frontCannon,
   );
   const shared = createServerCoopBattle(
     'main_01_003',
     loadout([{ characterId: 'militia' }], ['rust-nail']),
     loadout([{ characterId: 'militia' }], ['rust-nail']),
+    frontCannon,
   );
 
   assert.equal(oneSided.shared.battle.bases.PLAYER.maxHp, none.shared.battle.bases.PLAYER.maxHp);
@@ -123,7 +162,7 @@ test('room lockstep frames drive the actual shared simulation one frame at a tim
   assert.equal(setCoopSeatReady(room, 'B', 'client-b', militiaLoadout()).battleStarted, true);
   const loadoutA = room.seats.A.loadout!;
   const loadoutB = room.seats.B.loadout!;
-  const battle = createServerCoopBattle(room.stageId, loadoutA, loadoutB);
+  const battle = createServerCoopBattle(room.stageId, loadoutA, loadoutB, room.seats.A.selectedBaseWeaponId);
 
   const first = submitCoopFrameInput(room, 'A', 'client-a', {
     tick: 0,
