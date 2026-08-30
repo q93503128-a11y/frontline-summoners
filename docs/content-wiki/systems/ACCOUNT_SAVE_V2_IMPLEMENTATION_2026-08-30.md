@@ -118,8 +118,10 @@ canonical table:
 추가 구현:
 
 - MAIN battle result transaction.
+- 일반/주기/이벤트 SPECIAL battle result transaction.
 - 기록 SPECIAL result transaction.
 - 모집 server roll + wallet transaction.
+- MAIN/SPECIAL sweep transaction.
 - `battleId` / `requestId` receipt.
 - 동일 key 재전송 시 exact result replay.
 - 동일 key를 다른 input에 재사용 시 거부.
@@ -128,7 +130,9 @@ canonical table:
 
 상세는 `ACCOUNT_MUTATION_IDEMPOTENCY_IMPLEMENTATION_2026-08-30.md`를 따른다.
 
-또 account progression content authority를 현재 실행 범위에 맞춰:
+### 8. SPECIAL progression / availability authority
+
+account progression content authority를 현재 실행 범위에 맞춰:
 
 - MAIN80
 - SPECIAL61
@@ -137,10 +141,52 @@ canonical table:
 
 로 정합화했다.
 
+SPECIAL save/history와 새 mutation은 authored collection/unlock data를 사용한다.
+
+- collection `unlockAfterStageId`
+- `requiredProgressionStageId`
+- `previousSpecialStageId`
+- event availability window
+- periodic availability schedule
+- stage sweep policy
+
+과거의 `SPECIAL clear 하나라도 있으면 main_01_020 필요` blanket gate는 제거했다. 주기 재화 SPECIAL 첫 단계가 `main_01_003`부터 열리는 현재 정본과 맞지 않았기 때문이다.
+
+저장된 과거 SPECIAL clear history는 당시 해금 조건의 구조적 정합만 검사하고 현재 event/periodic 시각 availability는 요구하지 않는다. 반대로 새 battle/sweep mutation은 서버 현재 시각 availability를 다시 확인한다.
+
+### 9. server-authoritative SPECIAL reward / sweep
+
+SPECIAL reward 수치는 client 복사본이 아니라 `@frontline/sim/special-rewards` 공용 resolver를 사용한다.
+
+- 주기 SPECIAL 18전장: first / charged / depleted reward.
+- 일반/상시/제한/이벤트 SPECIAL 38전장: first-clear bonus + repeat reward.
+- resource reward가 없는 현재 challenge SPECIAL 5개는 `{}`.
+
+주기 SPECIAL:
+
+- first clear는 charge 미소모.
+- repeat charged는 charge 정확히 1칸 소비.
+- charge 0은 depleted reward.
+- wallet + charge + SPECIAL clear가 한 revision에 저장된다.
+
+소탕:
+
+- prior NORMAL_CLEAR 필요.
+- `sweepEligibility = AFTER_NORMAL_CLEAR` server policy 재검증.
+- ticket 1장 정확히 차감.
+- MAIN/일반 SPECIAL/이벤트는 repeat reward만 지급.
+- 주기 SPECIAL은 동일 charged/depleted resolver를 쓰며 필요 시 charge 1칸 소비.
+- 소탕은 first clear/progression/permanent reward/record를 만들지 않는다.
+
 ## 자동검증
 
-`apps/server/test/account-save-authority.test.ts`
-`apps/server/test/account-mutation-authority.test.ts`
+관련 테스트:
+
+- `apps/server/test/account-save-authority.test.ts`
+- `apps/server/test/account-mutation-authority.test.ts`
+- `apps/server/test/account-special-mutation-authority.test.ts`
+- `apps/server/test/progression-authority.test.ts`
+- `packages/sim/test/special-rewards.test.ts`
 
 검사 항목:
 
@@ -156,9 +202,16 @@ canonical table:
 - D1 canonical table/revision/schema 제약.
 - MAIN80 / SPECIAL61 authority catalog.
 - MAIN first/repeat reward 및 장 경계.
+- authored SPECIAL collection/tier/previous-clear history.
+- `main_01_003` early periodic SPECIAL history 저장.
+- 종료된 이벤트 clear history 보존.
+- 새 event/periodic mutation의 server-time availability.
+- periodic first/repeat charge semantics.
+- MAIN/SPECIAL sweep ticket/repeat reward/progression 불변.
 - record milestone high-water.
 - server recruitment 신규/중복 +Lv/분해.
-- mutation receipt schema와 rollback-safe CAS guard.
+- mutation receipt schema, cross-result battleId unique, rollback-safe CAS guard.
+- **CI #738 전체 green: typecheck/schema/sim/server/client/build.**
 
 ## 아직 완료하지 않은 것
 
@@ -169,10 +222,10 @@ canonical table:
 - 게스트→빈 서버 계정 이전 transaction/UX.
 - 기존 서버 진행과 게스트 진행 충돌 선택 UX.
 - authenticated 공개 account mutation route.
-- trusted solo/record battle completion registry와 내부 mutation 연결.
-- 일반/주기/이벤트 SPECIAL + sweep server-authoritative mutation.
+- trusted solo/SPECIAL/record battle completion registry와 내부 mutation 연결.
 - server-authoritative growth/evolution/deck/base-weapon mutation.
-- 협동 결과를 canonical account wallet/periodic charge에 실제 지급.
+- 모집 result를 실제 authenticated client flow에 연결.
+- 협동 결과를 canonical account wallet/periodic charge/progression에 실제 지급.
 - 계정 초기화/삭제/친구/차단/PvP 계정 데이터.
 
-따라서 현재 단계는 `계정 기능 완료`가 아니라 **서버 정본 save 구조 + migration/revision + MAIN/record/recruitment mutation/idempotency foundation 완료**로만 센다.
+따라서 현재 단계는 `계정 기능 완료`가 아니라 **서버 정본 save 구조 + migration/revision + MAIN/SPECIAL/record/recruitment/sweep mutation/idempotency foundation 완료**로만 센다.
