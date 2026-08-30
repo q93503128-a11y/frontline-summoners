@@ -21,12 +21,12 @@ test('periodic first clear does not consume charge and repeat does', () => {
   const first = resolveSpecialResourceReward('special_gold_convoy_01', true, full, NOW);
   assert.deepEqual(first.resourceReward, { gold: 600, sweep_ticket: 1 });
   assert.equal(first.chargeConsumed, false);
-  assert.equal(first.periodicChargeMap.special_gold_convoy.charge, 4);
+  assert.equal(first.periodicChargeMap.special_gold_convoy.charges, 4);
 
   const repeat = resolveSpecialResourceReward('special_gold_convoy_01', false, first.periodicChargeMap, NOW);
   assert.deepEqual(repeat.resourceReward, { gold: 450 });
   assert.equal(repeat.chargeConsumed, true);
-  assert.equal(repeat.periodicChargeMap.special_gold_convoy.charge, 3);
+  assert.equal(repeat.periodicChargeMap.special_gold_convoy.charges, 3);
 });
 
 test('ordinary SPECIAL first clear combines repeat reward and first-clear bonus', () => {

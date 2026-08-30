@@ -59,7 +59,7 @@ test('periodic SPECIAL repeat consumes exactly one charge and uses charged rewar
   assert.equal(repeat.result.chargeConsumed, true);
   assert.equal(repeat.result.periodicCollectionId, 'special_gold_convoy');
   assert.deepEqual(repeat.result.resourceReward, { gold: 450 });
-  assert.equal(repeat.snapshot.periodicRewardChargeByCollection.special_gold_convoy.charge, 3);
+  assert.equal(repeat.snapshot.periodicRewardChargeByCollection.special_gold_convoy.charges, 3);
   assert.equal(getResourceBalance(repeat.snapshot.resourceLedgerById, 'gold'), 1050);
 });
 
@@ -84,7 +84,7 @@ test('server sweep requires NORMAL_CLEAR, spends one ticket and never creates pr
   assert.equal(specialSweep.result.chargeConsumed, true);
   assert.deepEqual(specialSweep.result.resourceReward, { gold: 450 });
   assert.equal(getResourceBalance(specialSweep.snapshot.resourceLedgerById, 'sweep_ticket'), 0);
-  assert.equal(specialSweep.snapshot.periodicRewardChargeByCollection.special_gold_convoy.charge, 3);
+  assert.equal(specialSweep.snapshot.periodicRewardChargeByCollection.special_gold_convoy.charges, 3);
   assert.deepEqual(specialSweep.snapshot.specialClearedStageIds, ['special_gold_convoy_01']);
 
   assert.throws(() => __accountSpecialMutationTestOnly.buildSweepResult(specialSweep.snapshot, 'special_gold_convoy_01', OPEN_NOW), /insufficient resource/);
