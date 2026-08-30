@@ -82,19 +82,23 @@ test('legacy border migration is bounded to the original twenty-stage chapter an
   assert.equal(hasNormalClear(normalized, 'border-21'), false);
 });
 
-test('save schema v14 persists periodic charge with ledger/record state while migrating v2-v13', async () => {
+test('save schema v15 persists weapon selection and record reward high-water while migrating v2-v14', async () => {
   const source = await readFile(new URL('../src/save.ts', import.meta.url), 'utf8');
-  assert.match(source, /const SCHEMA_VERSION = 14/);
-  assert.match(source, /interface StoredGuestProgressV14/);
+  assert.match(source, /const SCHEMA_VERSION = 15/);
+  assert.match(source, /interface StoredGuestProgressV15/);
   assert.match(source, /mainRewardedStageIds: readonly string\[\]/);
   assert.match(source, /resourceLedgerById: ResourceLedger/);
   assert.match(source, /periodicRewardChargeByCollection: PeriodicRewardChargeMap/);
   assert.match(source, /recordModeProgress: RecordModeProgress/);
+  assert.match(source, /selectedBaseWeaponId: BaseWeaponId/);
+  assert.match(source, /endlessRewardedMinute: number/);
+  assert.match(source, /bossRushRewardedDefeated: number/);
   assert.match(source, /\(version as number\) < 2 \|\| \(version as number\) > SCHEMA_VERSION/);
   assert.match(source, /versionNumber >= 11 \? normalizeResourceLedger\(value\?\.resourceLedgerById\) : \{\}/);
   assert.match(source, /versionNumber >= 12 \? normalizeRecordModeProgress\(value\?\.recordModeProgress\) : EMPTY_RECORD_PROGRESS/);
   assert.match(source, /versionNumber >= 13 \? canonicalStageIds\(value\?\.mainRewardedStageIds\) : \[\]/);
   assert.match(source, /versionNumber >= 14 \? normalizePeriodicRewardChargeMap\(value\?\.periodicRewardChargeByCollection\) : createFullPeriodicRewardChargeMap\(\)/);
+  assert.match(source, /versionNumber >= 15 && typeof value\?\.selectedBaseWeaponId === 'string'/);
   assert.match(source, /if \(versionNumber < 13\)/);
   assert.match(source, /getMainStageResourceReward\(migratedStageId, true\)/);
   assert.match(source, /readLegacyPeriodicSpecialChargeMap/);
