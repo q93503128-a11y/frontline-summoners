@@ -84,13 +84,50 @@ test('supply upgrades are private to each player', () => {
   assert.equal(state.players.B.supply, 1000);
 });
 
-test('shared base weapon has one cooldown authority across both players', () => {
+test('shared base weapon has one cooldown authority across both players and records the activating seat', () => {
   const state = createCoopPlayableBattle({
     ...config(),
     baseWeapon: { damage: 10, cooldownFrames: 90, pushDistance: 30, pushFrames: 5 },
   });
-  assert.deepEqual(tryFireCoopBaseWeapon(state), { ok: true, readyTick: 90 });
-  assert.deepEqual(tryFireCoopBaseWeapon(state), { ok: false, reason: 'already_pending' });
+  assert.deepEqual(tryFireCoopBaseWeapon(state, 'A'), { ok: true, readyTick: 90 });
+  assert.deepEqual(tryFireCoopBaseWeapon(state, 'B'), { ok: false, reason: 'already_pending' });
+  assert.equal(state.baseWeaponLastActivatedSeatId, 'A');
+});
+
+test('supply drop resolves only into the activating seat private economy at its authored hit frame', () => {
+  const state = createCoopPlayableBattle({
+    ...config(),
+    baseWeapon: {
+      id: 'base_weapon_supply_drop',
+      kind: 'SUPPLY_DROP',
+      damage: 0,
+      cooldownFrames: 120,
+      pushDistance: 0,
+      pushFrames: 1,
+      initialCooldownFrames: 0,
+      hitDelayFrames: 2,
+      supplyGainPermille: 180,
+      supplyGainMin: 120,
+      supplyGainMax: 900,
+    },
+  });
+  const beforeA = state.players.A.supply;
+  const beforeB = state.players.B.supply;
+  const fired = applyCoopPlayableFrame(state, 0, {
+    A: [{ type: 'FIRE_BASE_WEAPON' }],
+    B: [{ type: 'FIRE_BASE_WEAPON' }],
+  });
+  assert.equal(fired.outcomes[0]?.ok, true);
+  assert.equal(fired.outcomes[1]?.ok, false);
+  assert.equal(state.baseWeaponPendingSupplySeatId, 'A');
+  assert.equal(state.shared.supply, 0);
+  applyCoopPlayableFrame(state, 1, { A: [], B: [] });
+  assert.equal(state.players.A.supply - state.players.B.supply, beforeA - beforeB);
+  applyCoopPlayableFrame(state, 2, { A: [], B: [] });
+  assert.equal(state.players.A.supply - state.players.B.supply, 180);
+  assert.equal(state.baseWeaponPendingSupplySeatId, null);
+  assert.equal(state.shared.supply, 0, 'co-op supply drop must never write into the inert shared wallet');
+  assert.equal(getCoopPlayableSnapshot(state).baseWeaponLastActivatedSeatId, 'A');
 });
 
 test('a committed frame applies A then B commands and advances the shared deterministic simulation exactly once', () => {
