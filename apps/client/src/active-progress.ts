@@ -18,6 +18,22 @@ function stringArray(value: unknown, field: string): readonly string[] {
   return value;
 }
 
+function nonNegativeInteger(value: unknown, field: string): number {
+  if (!Number.isInteger(value) || (value as number) < 0) throw new Error(`account snapshot ${field} must be a non-negative integer`);
+  return value as number;
+}
+
+function parseRecordModeProgress(value: unknown): NonNullable<GuestProgress['recordModeProgress']> {
+  if (!isRecord(value)) throw new Error('account snapshot recordModeProgress must be an object');
+  return {
+    endlessBestTimeMs: nonNegativeInteger(value.endlessBestTimeMs, 'recordModeProgress.endlessBestTimeMs'),
+    endlessBestReachedMinute: nonNegativeInteger(value.endlessBestReachedMinute, 'recordModeProgress.endlessBestReachedMinute'),
+    endlessRewardedMinute: nonNegativeInteger(value.endlessRewardedMinute, 'recordModeProgress.endlessRewardedMinute'),
+    bossRushBestDefeated: nonNegativeInteger(value.bossRushBestDefeated, 'recordModeProgress.bossRushBestDefeated'),
+    bossRushRewardedDefeated: nonNegativeInteger(value.bossRushRewardedDefeated, 'recordModeProgress.bossRushRewardedDefeated'),
+  };
+}
+
 export function accountSnapshotToGuestProgress(snapshot: Readonly<Record<string, unknown>>): GuestProgress {
   const clearedStageIds = stringArray(snapshot.clearedStageIds, 'clearedStageIds');
   const specialClearedStageIds = stringArray(snapshot.specialClearedStageIds, 'specialClearedStageIds');
@@ -28,25 +44,24 @@ export function accountSnapshotToGuestProgress(snapshot: Readonly<Record<string,
   if (!isRecord(snapshot.characterProgressById)) throw new Error('account snapshot characterProgressById must be an object');
   if (!isRecord(snapshot.resourceLedgerById)) throw new Error('account snapshot resourceLedgerById must be an object');
   if (!isRecord(snapshot.periodicRewardChargeByCollection)) throw new Error('account snapshot periodicRewardChargeByCollection must be an object');
-  if (!isRecord(snapshot.recordModeProgress)) throw new Error('account snapshot recordModeProgress must be an object');
   if (!isRecord(snapshot.normalClearSourceByStage)) throw new Error('account snapshot normalClearSourceByStage must be an object');
   if (!Array.isArray(snapshot.mainRewardedStageIds)) throw new Error('account snapshot mainRewardedStageIds must be an array');
   if (typeof snapshot.selectedBaseWeaponId !== 'string') throw new Error('account snapshot selectedBaseWeaponId must be a string');
 
   return {
     clearedStageIds,
-    normalClearSourceByStage: snapshot.normalClearSourceByStage as GuestProgress['normalClearSourceByStage'],
+    normalClearSourceByStage: snapshot.normalClearSourceByStage as NonNullable<GuestProgress['normalClearSourceByStage']>,
     mainRewardedStageIds: stringArray(snapshot.mainRewardedStageIds, 'mainRewardedStageIds'),
     specialClearedStageIds,
     permanentRewardIds,
     discoveredEnemyIds,
     ownedRecruitmentCharacterIds,
-    characterProgressById: snapshot.characterProgressById as GuestProgress['characterProgressById'],
+    characterProgressById: snapshot.characterProgressById as NonNullable<GuestProgress['characterProgressById']>,
     deckSlotIds,
-    selectedBaseWeaponId: snapshot.selectedBaseWeaponId as GuestProgress['selectedBaseWeaponId'],
-    resourceLedgerById: snapshot.resourceLedgerById as GuestProgress['resourceLedgerById'],
-    periodicRewardChargeByCollection: snapshot.periodicRewardChargeByCollection as GuestProgress['periodicRewardChargeByCollection'],
-    recordModeProgress: snapshot.recordModeProgress as GuestProgress['recordModeProgress'],
+    selectedBaseWeaponId: snapshot.selectedBaseWeaponId as NonNullable<GuestProgress['selectedBaseWeaponId']>,
+    resourceLedgerById: snapshot.resourceLedgerById as NonNullable<GuestProgress['resourceLedgerById']>,
+    periodicRewardChargeByCollection: snapshot.periodicRewardChargeByCollection as NonNullable<GuestProgress['periodicRewardChargeByCollection']>,
+    recordModeProgress: parseRecordModeProgress(snapshot.recordModeProgress),
   };
 }
 
