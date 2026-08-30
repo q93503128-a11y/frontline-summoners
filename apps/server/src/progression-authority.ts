@@ -10,7 +10,7 @@ import {
   SERVER_CHARACTER_LEVEL_CURVE,
   SERVER_EVOLUTION_FORMS,
   SERVER_PERMANENT_REWARDS,
-} from './meta-content.ts';
+} from './meta-content-v2.ts';
 import {
   ACCOUNT_ENEMY_IDS,
   ACCOUNT_MAIN_STAGE_IDS,
