@@ -151,13 +151,17 @@ type UnitEconomySeed = {
   readonly rarity: CharacterRarity | null;
 };
 
+type EvolutionForm = (typeof SERVER_EVOLUTION_FORMS)[number];
+
 const BASE_WEAPON_ID_SET = new Set<string>(BASE_WEAPON_IDS);
 const CHARACTER_RARITIES = new Set<string>(['C', 'B', 'A', 'S', 'SS']);
 const CHARACTER_ACQUISITION_CLASSES = new Set<string>(['STORY', 'RECRUITMENT', 'SPECIAL']);
 const CHARACTER_ECONOMY_BY_ID = new Map<string, CharacterEconomyProfile>();
 const FORM_BY_ID = new Map(SERVER_EVOLUTION_FORMS.map((form) => [form.formId, form] as const));
 const RECIPE_BY_FORM_ID = new Map(SERVER_EVOLUTION_RECIPES.map((recipe) => [recipe.formId, recipe] as const));
-const FORM_BY_CHARACTER_ORDER = new Map(SERVER_EVOLUTION_FORMS.map((form) => [`${form.characterId}:${form.formOrder}`, form] as const));
+const FORM_BY_CHARACTER_ORDER = new Map<string, EvolutionForm>(
+  SERVER_EVOLUTION_FORMS.map((form) => [`${form.characterId}:${form.formOrder}`, form]),
+);
 
 for (const raw of [...playerUnitsJson, ...recruitmentUnitsJson] as unknown as readonly UnitEconomySeed[]) {
   if (typeof raw.id !== 'string' || raw.id.length === 0) throw new Error('account meta unit id must be non-empty');
