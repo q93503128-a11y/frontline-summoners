@@ -75,7 +75,7 @@ test('snapshot damage reduction protects only listed current units and expires d
   const battle = createBattle({ mapLength: 1000, playerBaseHp: 1000, enemyBaseHp: 1000 });
   const protectedUnit = spawnUnit(battle, base({ id: 'protected', attackDamage: 0 }), 'PLAYER', 500);
   const laterUnit = spawnUnit(battle, base({ id: 'later', attackDamage: 0 }), 'PLAYER', 510);
-  const enemy = spawnUnit(battle, base({ id: 'enemy', attackDamage: 100, targetMode: 'AREA' }), 'ENEMY', 500);
+  const enemy = spawnUnit(battle, base({ id: 'enemy', attackDamage: 100, targetMode: 'AREA' }), 'ENEMY', 600);
   applyDamageTakenModifierToUnitIds(battle, 'PLAYER', [protectedUnit.simulationId], 2, 750);
   stepBattle(battle);
   assert.equal(protectedUnit.hp, 925);

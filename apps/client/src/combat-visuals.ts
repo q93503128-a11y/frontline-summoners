@@ -1,9 +1,9 @@
-import { UnitState, type AttackTiming, type UnitState as BattleUnitState } from '@frontline/sim';
+import { UnitState, type BattleUnitDefinition, type UnitState as BattleUnitState } from '@frontline/sim';
 
 export interface AttackFrameMappingInput {
   readonly frameCount: number;
   readonly contactFrame: number;
-  readonly timing: AttackTiming;
+  readonly timing: BattleUnitDefinition['attackTiming'];
   readonly state: BattleUnitState;
   readonly stateFrame: number;
 }

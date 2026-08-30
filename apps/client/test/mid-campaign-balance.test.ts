@@ -21,6 +21,7 @@ test('stages six through ten remain beatable in the real sequential unlock and p
     const { state, unlockedSlotIds, ownedPermanentRewardIds, targetSupplyLevel } = autoPlayCampaignStage(stageIndex, clearedStageIds, {
       maxSeconds: limit.maxSeconds,
       cannonBaseRatio: 0.70,
+      ...(stageIndex === 5 ? { cannonEnemyCount: 2 } : {}),
     });
 
     assert.equal(ownedPermanentRewardIds.length, clearedStageIds.length, 'mid baseline must not use future permanent rewards');
