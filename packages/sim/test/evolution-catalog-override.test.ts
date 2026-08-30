@@ -29,7 +29,10 @@ const explicitOverride = [{
         attackMaxRangeDelta: 10,
         naturalKnockbackCount: 4,
         targetMode: 'AREA',
-        attackTiming: { cycleFrames: 45, hitFrames: [9], backswingFrames: 7 },
+        attackTiming: { cycleFrames: 45, hitFrames: [9, 15], backswingFrames: 7 },
+        hitDamagePermilles: [300, 700],
+        onHitSlow: { chancePermille: 1000, durationFrames: 45, speedPermille: 750 },
+        onHitWeaken: { chancePermille: 1000, durationFrames: 30, attackPermille: 800 },
       },
     },
     { formId: 'unit_f3', formOrder: 3, name: 'C2', description: 'third', modifiers: {} },
@@ -67,12 +70,13 @@ test('catalog override replaces complete entries before normal evolution validat
   assert.throws(() => applyEvolutionCatalogOverrides(baseCatalog, [{ ...explicitOverride[0]!, id: 'missing' }]), /unknown character/);
 });
 
-test('explicit evolution grammar can change fractional movement, KB, target mode and attack timing generically', () => {
+test('explicit evolution grammar can change timing, hit split, statuses and battlefield geometry generically', () => {
   const source = applyEvolutionCatalogOverrides(baseCatalog, explicitOverride);
   const catalog = buildEvolutionCatalog(source, new Set(['unit']));
   const evolved = applyEvolutionForm(slot, catalog.forms, 'unit_f2');
   assert.equal(evolved.definition.maxHp, 120);
   assert.equal(evolved.definition.attackDamage, 30);
+  assert.deepEqual(evolved.definition.hitDamages, [9, 21]);
   assert.equal(evolved.cost, 125);
   assert.equal(evolved.rechargeFrames, 110);
   assert.equal(evolved.definition.moveSpeed, 1.75);
@@ -80,5 +84,17 @@ test('explicit evolution grammar can change fractional movement, KB, target mode
   assert.equal(evolved.definition.attackMaxRange, 70);
   assert.equal(evolved.definition.naturalKnockbackCount, 4);
   assert.equal(evolved.definition.targetMode, 'AREA');
-  assert.deepEqual(evolved.definition.attackTiming, { cycleFrames: 45, hitFrames: [9], backswingFrames: 7 });
+  assert.deepEqual(evolved.definition.attackTiming, { cycleFrames: 45, hitFrames: [9, 15], backswingFrames: 7 });
+  assert.deepEqual(evolved.definition.onHitSlow, { chancePermille: 1000, durationFrames: 45, speedPermille: 750 });
+  assert.deepEqual(evolved.definition.onHitWeaken, { chancePermille: 1000, durationFrames: 30, attackPermille: 800 });
+});
+
+test('explicit hit split must total one thousand permille and match authored hit frames', () => {
+  const brokenTotal = structuredClone(explicitOverride);
+  (brokenTotal[0]!.forms[1]!.modifiers as Record<string, unknown>).hitDamagePermilles = [300, 600];
+  assert.throws(() => buildEvolutionCatalog(applyEvolutionCatalogOverrides(baseCatalog, brokenTotal), new Set(['unit'])), /total 1000/);
+
+  const brokenLength = structuredClone(explicitOverride);
+  (brokenLength[0]!.forms[1]!.modifiers as Record<string, unknown>).hitDamagePermilles = [1000];
+  assert.throws(() => buildEvolutionCatalog(applyEvolutionCatalogOverrides(baseCatalog, brokenLength), new Set(['unit'])), /must match attackTiming/);
 });
