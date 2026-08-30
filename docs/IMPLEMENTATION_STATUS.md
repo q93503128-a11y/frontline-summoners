@@ -7,6 +7,7 @@
 전투 grammar / 거점 병기 이행 기록: `docs/content-wiki/systems/COMBAT_GRAMMAR_BASE_WEAPON_IMPLEMENTATION_2026-08-30.md`  
 계정 save v2 이행 기록: `docs/content-wiki/systems/ACCOUNT_SAVE_V2_IMPLEMENTATION_2026-08-30.md`  
 계정 mutation/idempotency 이행 기록: `docs/content-wiki/systems/ACCOUNT_MUTATION_IDEMPOTENCY_IMPLEMENTATION_2026-08-30.md`  
+계정 인증/session 이행 기록: `docs/content-wiki/systems/ACCOUNT_AUTH_SESSION_IMPLEMENTATION_2026-08-30.md`  
 소탕 이행 기록: `docs/content-wiki/systems/SWEEP_SAVE_V14_IMPLEMENTATION_2026-08-30.md`
 
 이 문서는 현재 실행 코드/콘텐츠의 구현 사실과 남은 큰 공백을 기록한다. 기획 정본을 대체하지 않는다. 과거 이행 문서의 Save v14 표기는 당시 단계 기록이며 현재 실행 게스트 save schema는 **v15**다.
@@ -222,7 +223,56 @@ Base Lv:
 - save revision CAS + receipt insert는 D1 batch 안에서 함께 처리한다.
 - revision mismatch는 CHECK 실패로 batch rollback시켜 save/receipt 반쪽 commit을 막는다.
 
-현재 단계는 **server storage/migration/revision + MAIN/SPECIAL/record/recruitment/sweep/meta-progression mutation/idempotency foundation**이다. 실제 인증 session, 공개 account API, trusted battle completion registry가 연결된 production 계정 시스템 완료는 아니다.
+현재 단계는 **server storage/migration/revision + MAIN/SPECIAL/record/recruitment/sweep/meta-progression mutation/idempotency + session-authenticated account read/meta/recruitment/sweep HTTP foundation**이다. MAIN/SPECIAL/record battle result는 trusted completion proof가 아직 없으므로 public route로 노출하지 않는다.
+
+## 인증 / account client state
+
+### server identity / session
+
+- 초기 `users` / `auth_identities` 구조를 유지.
+- verified provider 경계: `google` / `email`.
+- provider proof 검증이 끝난 identity만 받는 `resolveOrCreateUserForVerifiedIdentity` / `issueAuthSessionForVerifiedIdentity` 내부 함수 구현.
+- public request가 provider/subject만 자기신고해 계정을 만드는 route는 없음.
+- `auth_sessions` D1 table 추가.
+- session token은 256-bit random 64자리 hex.
+- DB에는 원문 token 대신 SHA-256 `token_hash`만 저장.
+- expiry/revoke 검사.
+- authenticated request의 account ownership은 body/query accountId가 아니라 Bearer session의 `principal.userId`로만 결정.
+
+### public authenticated account route
+
+- `GET /api/account`.
+- `POST /api/account/meta`.
+- `POST /api/account/recruitment`.
+- `POST /api/account/sweep`.
+- `POST /api/account/logout`.
+- `401 authentication_required` / `409 revision_conflict` / `409 idempotency_conflict` 경계.
+- CORS `Authorization` 허용.
+- MAIN/SPECIAL/record battle result route는 아직 공개하지 않음.
+
+### client state foundation
+
+`apps/client/src/account-network.ts`:
+
+- `GUEST_LOCAL`.
+- `AUTHENTICATED_ONLINE`.
+- `AUTHENTICATED_OFFLINE_CACHE`.
+- Bearer token은 현재 `sessionStorage` foundation.
+- server snapshot 읽기 cache는 token 원문이 아닌 session fingerprint와 함께 localStorage에 저장.
+- 서버 접속 성공 시 server revision/snapshot 우선.
+- 네트워크 실패 시 같은 fingerprint cache만 읽기용으로 사용.
+- `401`이면 local credential/cache를 지우고 guest 상태로 복귀.
+- authenticated mutation은 ONLINE에서만 가능.
+- expectedRevision은 current remote revision에서 파생.
+- revision conflict 시 최신 snapshot을 다시 읽지만 원래 재화 mutation을 자동 재실행하지 않음.
+- offline mutation journal/queue 없음.
+
+아직 인증 완료로 세지 않는 것:
+
+- Google OAuth/OIDC proof 실제 검증/callback.
+- 이메일 magic link/인증코드 발송·검증.
+- 실제 로그인/계정 전환 Phaser UI.
+- session renewal/rotation/revoke-all-devices 및 최종 credential transport 정책.
 
 ## 성장 / 모집 / 진화
 
@@ -234,8 +284,9 @@ Base Lv:
 - +레벨 상한 +50, +1당 HP/ATK +2% foundation.
 - 공용 `soul_essence`로 원하는 보유 캐릭터 +1.
 - 공용 +1 비용: STORY 80 / C16 / B32 / A80 / S280 / SS880.
-- account server 내부 mutation도 동일 cap/비용/소유 authority로 구현.
-- 실제 authenticated client Growth 화면과 공개 mutation route 연결은 남음.
+- account server mutation과 `/api/account/meta` route가 동일 cap/비용/소유 authority 사용.
+- client account-network에 authenticated meta mutation transport 구현.
+- 기존 Growth Phaser 화면을 account state에 따라 guest/server authority로 분기하는 UI wiring은 남음.
 
 ### 모집 / 중복
 
@@ -245,7 +296,8 @@ Base Lv:
 - 중복:
   - `+1 우선`.
   - `분해 우선`: C4 / B8 / A20 / S70 / SS220 soul essence.
-- 실제 authenticated client 모집 flow와 server mutation route 연결은 남음.
+- `/api/account/recruitment` + client authenticated transport 구현.
+- 기존 모집 Phaser 화면의 account-state 분기/로그인 UX는 남음.
 
 ### 진화
 
@@ -253,8 +305,8 @@ Base Lv:
 - 이전 해금 form 재선택 가능.
 - 재생산 최종 하한 60F.
 - 스토리 10종 F2/F3 20개 explicit combat form 실행.
-- account server 내부 evolution unlock/form select/deck mutation 구현.
-- 실제 authenticated client route 연결은 남음.
+- account server evolution unlock/form select/deck mutation과 authenticated meta route 구현.
+- 기존 growth/deck Phaser 화면의 account-state 분기는 남음.
 
 ## 전투 코어
 
@@ -325,10 +377,11 @@ Base Lv:
 - closed 96h = 4일.
 - progression + previous SPECIAL 단계 해금.
 - guest battle/sweep와 server account mutation foundation 모두 동일 shared resolver 사용.
+- authenticated sweep route/client transport도 동일 resolver의 server mutation을 사용.
 
 주기 SPECIAL 잔여:
 
-- authenticated session/API wiring.
+- authenticated actual-battle completion registry/result proof.
 - production art/motion.
 - 경제/난이도 사람 플레이 후 TESTED/LOCKED 승격.
 
@@ -371,6 +424,7 @@ Base Lv:
 - 출정 허브 실제 선택 UI.
 - 일반 solo/record에서 선택 병기 사용.
 - account server 내부 병기 선택 mutation도 unlock authority로 구현.
+- authenticated meta route/client transport에서 병기 선택 mutation 사용 가능.
 
 ### 협동 base weapon closure
 
@@ -388,7 +442,7 @@ Base Lv:
 
 잔여:
 
-- authenticated client 병기 선택 route wiring.
+- 기존 BaseWeaponScene의 account-state 분기.
 - production VFX/SFX QA.
 - 사람 플레이 사용률/cooldown/effect 조정.
 
@@ -411,21 +465,33 @@ Base Lv:
 - 공개 매칭/reconnect/AI takeover release polish.
 - 친구/초대/최근 플레이어/차단.
 - 빠른 통신 최종 UX.
+- 협동 seat을 authenticated session/account에 bind.
 - 협동 completion을 authenticated account progression/wallet/charge mutation에 연결.
-- production account snapshot authority 경계.
 
 ## PvP / 계정 제품화
 
-구현된 것은 server save/mutation **foundation**까지다.
+현재 계정 foundation:
+
+- revisioned server account save v2.
+- server-authoritative economy/progression/meta mutations.
+- idempotency receipts + atomic CAS.
+- `users` / `auth_identities` verified identity binding boundary.
+- hashed Bearer `auth_sessions`.
+- session→accountId binding.
+- public authenticated account read/meta/recruitment/sweep/logout API.
+- client `GUEST_LOCAL` / `AUTHENTICATED_ONLINE` / `AUTHENTICATED_OFFLINE_CACHE` state foundation.
+- fingerprinted read-only account cache.
+- online-only authenticated mutation / revision conflict refresh without automatic replay.
 
 남은 큰 공백:
 
-- 실제 Google/email 인증과 `AUTHENTICATED_ONLINE` session.
-- client account state machine / offline cache.
+- 실제 Google OAuth/OIDC verification/callback.
+- 이메일 magic link/인증코드 발송·검증.
+- 로그인/계정전환 UI와 session renewal/rotation/revoke-all 정책.
 - guest→account migration 및 existing server progress 충돌 UX.
-- public authenticated mutation route.
 - trusted solo/SPECIAL/record battle completion registry/result proof.
-- authenticated client의 recruitment/growth/evolution/deck/base-weapon mutation wiring.
+- 기존 recruitment/growth/evolution/deck/base-weapon Phaser 화면을 account state에 실제 연결.
+- 협동 authenticated seat/result binding.
 - account transfer/delete/reset UX.
 - 친구/차단 및 실시간 세션 계정 권위.
 - 1v1 일반/랭킹/친선.
@@ -433,7 +499,7 @@ Base Lv:
 - Lv50/+0/permanent bonus 0 PvP standardization.
 - MMR/Elo/티어/시즌/순위표/보상.
 
-게스트 local persistence나 D1 table 존재만으로 계정 시스템 완료라고 하지 않는다.
+session/API foundation이 존재한다는 이유만으로 provider proof와 battle proof까지 포함한 production 계정 시스템 완료라고 하지 않는다.
 
 ## 도감 / UI / 아트 / 오디오
 
@@ -477,16 +543,19 @@ SPECIAL/event 문서의 profile reward를 현재 resource reward로 대체했다
 - MAIN/record/recruitment account mutation/idempotency + full account catalog: `cf91e4e3963347b73a57749b9b79d1cbfcb4c8a1`, CI #730 green.
 - battleId cross-result uniqueness 보강: `1d8a96c8676f96ba965640e826106c3fdb56dc35`, CI #735 green.
 - SPECIAL/sweep account authority + shared SPECIAL reward + authored history gate: `456bc39e9d4b4bda687f583923277f396d622970`, CI #738 green.
-- account Base Lv/+Lv/evolution/form/deck/base-weapon mutation + `META_PROGRESSION` receipt: `2232d4b92a16b49f9bb78efcaf1051d9560902d2`, **CI #746 전체 green(typecheck/schema/sim/server/client/build)**.
+- account Base Lv/+Lv/evolution/form/deck/base-weapon mutation + `META_PROGRESSION` receipt: `2232d4b92a16b49f9bb78efcaf1051d9560902d2`, CI #746 green.
+- verified identity/session storage + Bearer account HTTP route: `5972fe8bcfeac8c0c9ac9ee48fbb9222f95fe428`, CI #755 green.
+- client account three-state/read-cache/online-mutation foundation: `71653a5df696a38010cb2235fbe24b087c7c2730`, **CI #757 전체 green(typecheck/schema/sim/server/client/build)**.
 
 ## 다음 개발 우선순위
 
-1. **authenticated account wiring**: auth/session, client account state, public mutation route, trusted battle completion registry.
-2. **guest→account / authenticated client closure**: guest migration/conflict UX, recruitment/growth/evolution/deck/base-weapon server mutation 실제 연결.
-3. **협동 release/account result closure**: authenticated reward/progression 연결, 친구/초대/reconnect/AI takeover/빠른통신 polish.
-4. **기록/SPECIAL 사람 QA 및 경제 튜닝**: 장기전 난이도, periodic/SPECIAL reward 공급량 TESTED/LOCKED 후보화.
-5. **PvP foundation**: standardization, 1v1/2v2, MMR/season.
-6. 마지막 production art/motion/audio/accessibility/release QA.
+1. **provider proof + 로그인 UX**: Google OAuth/OIDC 또는 이메일 proof 실제 검증, session 발급/갱신, 계정전환 UI, 기존 Phaser 화면 account-state 분기.
+2. **trusted battle completion registry**: solo/SPECIAL/record battleId 발급·서버 결과 proof·authenticated reward mutation 연결.
+3. **guest→account closure**: 빈 계정 이전 transaction, 기존 서버 진행 충돌 선택 UX, read cache/guest 보존 검증.
+4. **협동 release/account result closure**: authenticated seat/result 연결, 친구/초대/reconnect/AI takeover/빠른통신 polish.
+5. **기록/SPECIAL 사람 QA 및 경제 튜닝**: 장기전 난이도, periodic/SPECIAL reward 공급량 TESTED/LOCKED 후보화.
+6. **PvP foundation**: standardization, 1v1/2v2, MMR/season.
+7. 마지막 production art/motion/audio/accessibility/release QA.
 
 ## 검증 원칙
 
@@ -494,5 +563,6 @@ SPECIAL/event 문서의 profile reward를 현재 resource reward로 대체했다
 - DESIGN_TARGET과 다르면 실행된다는 이유만으로 코드를 새 정본으로 취급하지 않는다.
 - DESIGN_TARGET→TESTED/LOCKED 승격은 deterministic regression + 사람 플레이테스트를 요구한다.
 - client/save/server가 모두 필요한 기능은 전체 경로가 연결돼야 구현 완료로 센다.
-- 인증/session이 없는 internal server mutation을 production account API 완료로 세지 않는다.
+- verified provider proof가 없는 내부 identity/session 함수만으로 로그인 완료라고 세지 않는다.
+- trusted battle result proof가 없는 공개 client 자기신고 경로를 만들지 않는다.
 - 대형 배치 중 불필요하게 CI를 반복하지 않고 마지막 통합 검증에서 회귀를 모아 수정한다.
