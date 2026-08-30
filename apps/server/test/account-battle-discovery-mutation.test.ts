@@ -25,7 +25,7 @@ test('MAIN battle result merges server-derived enemy discovery in the same mutat
   );
   assert.deepEqual(result.snapshot.discoveredEnemyIds, ['enemy-raider']);
   assert.equal(result.result.firstClear, true);
-  assert.deepEqual(result.result.resourceReward, { gold: 30 });
+  assert.deepEqual(result.result.resourceReward, { gold: 150, summon_crystal: 40 });
 });
 
 test('SPECIAL battle result merges server-derived enemy discovery without changing sortie-start availability semantics', () => {
