@@ -11,6 +11,9 @@ import chapterFourRewardsJson from '../../../content/permanent-rewards/chapter-0
 import evolutionCatalogJson from '../../../content/evolution/catalog-01.json' with { type: 'json' };
 import storyEvolutionOverridesJson from '../../../content/evolution/story-01-overrides.json' with { type: 'json' };
 import commonRecruitmentEvolutionOverridesJson from '../../../content/evolution/recruitment-common-explicit-01.json' with { type: 'json' };
+import seriesOneEvolutionOverridesJson from '../../../content/evolution/recruitment-series-01-explicit.json' with { type: 'json' };
+import seriesTwoEvolutionOverridesJson from '../../../content/evolution/recruitment-series-02-explicit.json' with { type: 'json' };
+import seriesThreeEvolutionOverridesJson from '../../../content/evolution/recruitment-series-03-explicit.json' with { type: 'json' };
 import {
   SERVER_CHARACTER_LEVEL_CURVE,
   SERVER_PERMANENT_REWARDS as SERVER_CHAPTER_ONE_PERMANENT_REWARDS,
@@ -19,7 +22,10 @@ import {
 
 export { SERVER_CHARACTER_LEVEL_CURVE, SERVER_REWARD_SCOPES_BY_CHARACTER };
 const storyEvolutionSource = applyEvolutionCatalogOverrides(evolutionCatalogJson, storyEvolutionOverridesJson);
-const evolutionSource = applyExplicitEvolutionFormOverrides(storyEvolutionSource, commonRecruitmentEvolutionOverridesJson);
+const commonEvolutionSource = applyExplicitEvolutionFormOverrides(storyEvolutionSource, commonRecruitmentEvolutionOverridesJson);
+const seriesOneEvolutionSource = applyExplicitEvolutionFormOverrides(commonEvolutionSource, seriesOneEvolutionOverridesJson);
+const seriesTwoEvolutionSource = applyExplicitEvolutionFormOverrides(seriesOneEvolutionSource, seriesTwoEvolutionOverridesJson);
+const evolutionSource = applyExplicitEvolutionFormOverrides(seriesTwoEvolutionSource, seriesThreeEvolutionOverridesJson);
 const evolutionIds = new Set(evolutionSource.map((entry) => (entry as { readonly id: string }).id));
 const SERVER_EVOLUTION_CATALOG = buildEvolutionCatalog(evolutionSource, evolutionIds);
 export const SERVER_EVOLUTION_FORMS = SERVER_EVOLUTION_CATALOG.forms;
