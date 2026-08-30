@@ -1,5 +1,6 @@
 import Phaser from 'phaser';
 import { INTERNAL_HEIGHT, INTERNAL_WIDTH } from '@frontline/shared';
+import { AccountScene } from './account-scene';
 import { ReplayBattleScene as BattleScene } from './replay-battle-scene';
 import { BaseWeaponScene } from './base-weapon-scene';
 import { CatalogScene } from './catalog-scene';
@@ -22,6 +23,7 @@ class MainMenuScene extends BaseMainMenuScene {
     super.create();
     const compact = isCompactMobileViewport();
     addButton(this, INTERNAL_WIDTH / 2, compact ? 540 : 542, 300, compact ? 84 : 60, '2인 협동', () => this.scene.start('coop-lobby'), 0x5f7897);
+    addButton(this, 1110, compact ? 540 : 542, 220, compact ? 84 : 60, '계 정', () => this.scene.start('account'), 0x6f7f96);
   }
 }
 
@@ -48,3 +50,4 @@ game.scene.add('coop-battle', CoopBattleScene, false);
 game.scene.add('record-hub', RecordHubScene, false);
 game.scene.add('record-battle', RecordBattleScene, false);
 game.scene.add('record-result', RecordResultScene, false);
+game.scene.add('account', AccountScene, false);

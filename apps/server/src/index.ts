@@ -7,6 +7,7 @@ import {
   type CoopPlayableCommand,
 } from '@frontline/sim/coop-playable';
 import { resolveAuthenticatedAccountHttp } from './account-http.ts';
+import { resolveAuthHttp, type AuthHttpResult } from './auth-http.ts';
 import { drainCoopFramesAfterAiHandoff } from './coop-ai-handoff.ts';
 import {
   connectCoopSeat,
@@ -32,6 +33,8 @@ import {
 export interface Env {
   DB: D1Database;
   BATTLE_ROOM: DurableObjectNamespace<BattleRoom>;
+  GOOGLE_CLIENT_ID?: string;
+  AUTH_ALLOWED_ORIGINS?: string;
 }
 
 type SocketAttachment = {
@@ -56,9 +59,18 @@ const CORS_HEADERS = {
 const json = (data: unknown, init: ResponseInit = {}): Response => {
   const headers = new Headers(init.headers);
   headers.set('content-type', 'application/json; charset=utf-8');
-  for (const [key, value] of Object.entries(CORS_HEADERS)) headers.set(key, value);
+  for (const [key, value] of Object.entries(CORS_HEADERS)) {
+    if (!headers.has(key)) headers.set(key, value);
+  }
   return new Response(JSON.stringify(data), { ...init, headers });
 };
+
+function authResponse(result: AuthHttpResult): Response {
+  const headers = new Headers(result.headers);
+  if (result.status === 204) return new Response(null, { status: 204, headers });
+  headers.set('content-type', 'application/json; charset=utf-8');
+  return new Response(JSON.stringify(result.body), { status: result.status, headers });
+}
 
 const matchSocketPattern = /^\/api\/matches\/([A-Za-z0-9_-]{1,128})\/websocket$/;
 
@@ -94,6 +106,13 @@ function coopStageRequestError(stageId: string): string | null {
 export default {
   async fetch(request: Request, env: Env): Promise<Response> {
     const url = new URL(request.url);
+
+    const authHttpResult = await resolveAuthHttp(request, {
+      DB: env.DB,
+      ...(env.GOOGLE_CLIENT_ID === undefined ? {} : { GOOGLE_CLIENT_ID: env.GOOGLE_CLIENT_ID }),
+      ...(env.AUTH_ALLOWED_ORIGINS === undefined ? {} : { AUTH_ALLOWED_ORIGINS: env.AUTH_ALLOWED_ORIGINS }),
+    });
+    if (authHttpResult) return authResponse(authHttpResult);
 
     if (request.method === 'OPTIONS') return new Response(null, { status: 204, headers: CORS_HEADERS });
 
