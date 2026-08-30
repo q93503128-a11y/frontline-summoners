@@ -10,6 +10,7 @@ import { DeckScene } from './deck-scene';
 import { GrowthScene } from './growth-scene';
 import { RecruitmentScene } from './recruitment-scene';
 import { BootScene as BaseBootScene, MainMenuScene as BaseMainMenuScene } from './navigation-scenes';
+import { ProfileScene } from './profile-scene';
 import { RecordBattleScene } from './record-battle-scene';
 import { RecordHubScene } from './record-hub-scene';
 import { RecordResultScene } from './record-result-scene';
@@ -32,6 +33,7 @@ class MainMenuScene extends BaseMainMenuScene {
   create(): void {
     super.create();
     const compact = isCompactMobileViewport();
+    addButton(this, 250, compact ? 540 : 542, 260, compact ? 84 : 60, '프로필·업적', () => this.scene.start('profile'), 0x7b6a91);
     addButton(this, INTERNAL_WIDTH / 2, compact ? 540 : 542, 300, compact ? 84 : 60, '2인 협동', () => this.scene.start('coop-lobby'), 0x5f7897);
     addButton(this, 1110, compact ? 540 : 542, 220, compact ? 84 : 60, '계 정', () => this.scene.start('account'), 0x6f7f96);
   }
@@ -62,3 +64,4 @@ game.scene.add('record-battle', RecordBattleScene, false);
 game.scene.add('record-result', RecordResultScene, false);
 game.scene.add('trusted-result', TrustedBattleResultScene, false);
 game.scene.add('account', AccountScene, false);
+game.scene.add('profile', ProfileScene, false);
