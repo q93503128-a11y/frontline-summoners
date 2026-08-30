@@ -304,7 +304,7 @@ export async function claimTrustedBattle(
         battleId,
         expectedRevision: expected,
         stageId: row.target_id,
-      }, mutationTime);
+      }, mutationTime, row.started_at * 1000);
   if (!mutation.ok) return mutation;
 
   await db.prepare(
