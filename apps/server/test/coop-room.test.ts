@@ -7,7 +7,9 @@ import {
   disconnectCoopSeat,
   getCoopRoomSnapshot,
   parseCoopClientMessage,
+  setCoopSeatBaseWeapon,
   setCoopSeatReady,
+  setCoopSeatUnready,
   submitCoopFrameInput,
   type CoopPlayerLoadout,
 } from '../src/coop-room.ts';
@@ -16,6 +18,7 @@ function loadout(ids: readonly string[], permanentRewardIds: readonly string[] =
   return {
     characters: ids.map((characterId) => ({ characterId, level: 1, plusLevel: 0 })),
     permanentRewardIds,
+    clearedStageIds: [],
   };
 }
 
@@ -44,6 +47,33 @@ test('co-op room is exactly two seats and only starts after both connected seats
 
   const snapshot = getCoopRoomSnapshot(room);
   assert.deepEqual(snapshot.seats.map((seat) => [seat.seatId, seat.deckSize]), [['A', 3], ['B', 2]]);
+  assert.equal(snapshot.agreedBaseWeaponId, 'base_weapon_front_cannon');
+});
+
+test('co-op shared weapon is negotiated before ready and cannot be changed while ready', () => {
+  const room = createCoopRoom('match-weapon', 'main_03_010');
+  connectCoopSeat(room, 'A', 'client-a');
+  connectCoopSeat(room, 'B', 'client-b');
+  setCoopSeatBaseWeapon(room, 'A', 'client-a', 'base_weapon_supply_drop');
+  assert.equal(getCoopRoomSnapshot(room).agreedBaseWeaponId, null);
+  setCoopSeatBaseWeapon(room, 'B', 'client-b', 'base_weapon_supply_drop');
+  assert.equal(getCoopRoomSnapshot(room).agreedBaseWeaponId, 'base_weapon_supply_drop');
+  assert.equal(setCoopSeatReady(room, 'A', 'client-a', loadout(['a1'])).battleStarted, false);
+  assert.throws(() => setCoopSeatBaseWeapon(room, 'A', 'client-a', 'base_weapon_front_cannon'), /ready seat cannot change/);
+  setCoopSeatUnready(room, 'A', 'client-a');
+  setCoopSeatBaseWeapon(room, 'A', 'client-a', 'base_weapon_front_cannon');
+  assert.equal(getCoopRoomSnapshot(room).agreedBaseWeaponId, null);
+});
+
+test('second ready is rejected until both seats select the same shared weapon', () => {
+  const room = createCoopRoom('match-mismatch', 'main_02_010');
+  connectCoopSeat(room, 'A', 'client-a');
+  connectCoopSeat(room, 'B', 'client-b');
+  setCoopSeatBaseWeapon(room, 'A', 'client-a', 'base_weapon_aegis_emitter');
+  assert.equal(setCoopSeatReady(room, 'A', 'client-a', loadout(['a1'])).battleStarted, false);
+  assert.throws(() => setCoopSeatReady(room, 'B', 'client-b', loadout(['b1'])), /base_weapon_mismatch/);
+  setCoopSeatBaseWeapon(room, 'B', 'client-b', 'base_weapon_aegis_emitter');
+  assert.equal(setCoopSeatReady(room, 'B', 'client-b', loadout(['b1'])).battleStarted, true);
 });
 
 test('co-op ready enforces one-to-five unique characters and a bounded metadata shape', () => {
@@ -52,9 +82,9 @@ test('co-op ready enforces one-to-five unique characters and a bounded metadata 
   assert.throws(() => setCoopSeatReady(room, 'A', 'client-a', loadout([])), /1\.\.5/);
   assert.throws(() => setCoopSeatReady(room, 'A', 'client-a', loadout(['a1', 'a2', 'a3', 'a4', 'a5', 'a6'])), /1\.\.5/);
   assert.throws(() => setCoopSeatReady(room, 'A', 'client-a', loadout(['a1', 'a1'])), /duplicates/);
-  assert.throws(() => parseCoopClientMessage({ type: 'READY', loadout: { characters: [{ characterId: 'a1', level: 0, plusLevel: 0 }], permanentRewardIds: [] } }), /positive integer/);
-  assert.throws(() => parseCoopClientMessage({ type: 'READY', loadout: { characters: [{ characterId: 'a1', level: 1, plusLevel: -1 }], permanentRewardIds: [] } }), /non-negative integer/);
-  assert.throws(() => parseCoopClientMessage({ type: 'READY', loadout: { characters: [{ characterId: 'a1', level: 1, plusLevel: 0 }], permanentRewardIds: ['r1', 'r1'] } }), /duplicates/);
+  assert.throws(() => parseCoopClientMessage({ type: 'READY', loadout: { characters: [{ characterId: 'a1', level: 0, plusLevel: 0 }], permanentRewardIds: [], clearedStageIds: [] } }), /positive integer/);
+  assert.throws(() => parseCoopClientMessage({ type: 'READY', loadout: { characters: [{ characterId: 'a1', level: 1, plusLevel: -1 }], permanentRewardIds: [], clearedStageIds: [] } }), /non-negative integer/);
+  assert.throws(() => parseCoopClientMessage({ type: 'READY', loadout: { characters: [{ characterId: 'a1', level: 1, plusLevel: 0 }], permanentRewardIds: ['r1', 'r1'], clearedStageIds: [] } }), /duplicates/);
 });
 
 test('lockstep commits a frame only when both player inputs for that exact tick exist', () => {
@@ -131,9 +161,12 @@ test('reconnecting the same seat restores player control without rewinding commi
 
 test('client message parser accepts only the explicit co-op protocol surface', () => {
   assert.deepEqual(parseCoopClientMessage({ type: 'PING' }), { type: 'PING' });
+  assert.deepEqual(parseCoopClientMessage({ type: 'SELECT_BASE_WEAPON', baseWeaponId: 'base_weapon_aegis_emitter' }), { type: 'SELECT_BASE_WEAPON', baseWeaponId: 'base_weapon_aegis_emitter' });
+  assert.throws(() => parseCoopClientMessage({ type: 'SELECT_BASE_WEAPON', baseWeaponId: 'base_weapon_cheat' }), /baseWeaponId is invalid/);
   const ready = {
     characters: [{ characterId: 'a1', level: 20, plusLevel: 3, selectedFormId: 'a1_f2' }],
     permanentRewardIds: ['reward-1'],
+    clearedStageIds: ['main_01_001'],
   };
   assert.deepEqual(parseCoopClientMessage({ type: 'READY', loadout: ready }), { type: 'READY', loadout: ready });
   assert.deepEqual(parseCoopClientMessage({
@@ -143,7 +176,7 @@ test('client message parser accepts only the explicit co-op protocol surface', (
     type: 'FRAME_INPUT',
     input: { tick: 0, sequence: 0, commands: [{ type: 'FIRE_BASE_WEAPON' }] },
   });
-  assert.throws(() => parseCoopClientMessage({ type: 'READY', loadout: { characters: 'a1', permanentRewardIds: [] } }), /characters/);
+  assert.throws(() => parseCoopClientMessage({ type: 'READY', loadout: { characters: 'a1', permanentRewardIds: [], clearedStageIds: [] } }), /characters/);
   assert.throws(() => parseCoopClientMessage({ type: 'READY', deckSlotIds: ['a1'] }), /loadout/);
   assert.throws(() => parseCoopClientMessage({ type: 'CHEAT', value: 999 }), /unsupported_message/);
 });
