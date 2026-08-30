@@ -7,18 +7,30 @@ const implementedStoryAndEnemyIds = [
   ...PLAYER_SLOTS.map((slot) => slot.definition.id),
   ...ENEMIES.map((enemy) => enemy.definition.id),
 ];
+const PERIODIC_PLACEHOLDER_ENEMY_IDS = new Set([
+  'enemy_sp_gold_porter','enemy_sp_gold_cart','enemy_sp_gold_guard','enemy_sp_gold_train','enemy_sp_gold_vault_golem','boss_sp_gold_carrier',
+  'enemy_sp_soul_wisp','enemy_sp_soul_armor','enemy_sp_soul_hammer','enemy_sp_soul_chorus','enemy_sp_soul_furnace','boss_sp_soul_grand_forge',
+  'enemy_sp_evo_fragment','enemy_sp_evo_seal_guard','enemy_sp_evo_keyeater','enemy_sp_evo_chain_seal','enemy_sp_evo_mirror_seal','enemy_sp_evo_glyph_turret','enemy_sp_evo_mid_guardian','boss_sp_evo_gatekeeper',
+  'enemy_sp_rift_shardling','enemy_sp_rift_mirror_orb','enemy_sp_rift_observer','boss_sp_rift_nightfall',
+]);
 const ATTACK_FX_STYLES = new Set(['SLASH', 'PIERCE', 'BLUNT', 'MAGIC', 'FIRE', 'VOID']);
 
-test('every implemented story player and enemy has a registered art family and attack FX style', () => {
+test('implemented story and enemy roster has explicit art except the intentionally deferred periodic SPECIAL set', () => {
   assert.equal(PLAYER_SLOTS.length, 10);
-  assert.equal(ENEMIES.length, 56, 'main, permanent SPECIAL and initial event execution rosters expose fifty-six enemy definitions');
-  assert.equal(implementedStoryAndEnemyIds.length, 66);
+  assert.equal(ENEMIES.length, 80, 'main, permanent, event and periodic SPECIAL rosters expose eighty enemy definitions');
+  assert.equal(implementedStoryAndEnemyIds.length, 90);
+  assert.equal(PERIODIC_PLACEHOLDER_ENEMY_IDS.size, 24);
   for (const id of implementedStoryAndEnemyIds) {
     const variant = UNIT_ART[id];
+    if (PERIODIC_PLACEHOLDER_ENEMY_IDS.has(id)) {
+      assert.equal(variant, undefined, `${id} should remain on the generic runtime fallback until the production-art pass`);
+      continue;
+    }
     assert.ok(variant, `missing UNIT_ART mapping for ${id}`);
     assert.ok(ART_BY_ID[variant.familyId], `unknown art family ${variant.familyId} for ${id}`);
     assert.ok(ATTACK_FX_STYLES.has(variant.attackFx), `unknown attack FX ${variant.attackFx} for ${id}`);
   }
+  assert.deepEqual(ENEMIES.filter((enemy) => !UNIT_ART[enemy.definition.id]).map((enemy) => enemy.definition.id).sort(), [...PERIODIC_PLACEHOLDER_ENEMY_IDS].sort());
 });
 
 test('all thirty-three recruitment characters have explicit temporary art mappings', () => {

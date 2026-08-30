@@ -1,7 +1,9 @@
 import type { StageType } from '@frontline/content-schema';
+import { getPeriodicCollectionWindowState, PERIODIC_REWARD_COLLECTION_IDS, type PeriodicCollectionSchedule } from '@frontline/sim/periodic-special';
 import stageCollectionsJson from '../../../content/stage-collections.json' with { type: 'json' };
 import specialUnlocksJson from '../../../content/stages/special-unlocks.json' with { type: 'json' };
 import eventAvailabilityJson from '../../../content/stages/event-availability.json' with { type: 'json' };
+import periodicAvailabilityJson from '../../../content/stages/periodic-availability.json' with { type: 'json' };
 import { ALL_STAGES, STAGES, getContiguousClearedStageIds, isStageUnlocked, type PrototypeStage } from './prototype.ts';
 
 export type StageCollectionId = string;
@@ -12,6 +14,7 @@ interface EventAvailabilityWindowContent { readonly start: string; readonly end:
 interface EventAvailabilityContent { readonly collectionId: string; readonly rerunnable: boolean; readonly windows: readonly EventAvailabilityWindowContent[]; }
 interface EventAvailabilityWindow { readonly startMs: number; readonly endMs: number; }
 interface EventAvailability { readonly collectionId: string; readonly rerunnable: boolean; readonly windows: readonly EventAvailabilityWindow[]; }
+interface PeriodicAvailabilityContent { readonly collectionId: string; readonly epoch: string; readonly cycleHours: number; readonly openHours: number; readonly offsetHours: number; }
 
 export const STAGE_COLLECTIONS_PER_PAGE = 2;
 export const STAGES_PER_COLLECTION_PAGE = 5;
@@ -98,8 +101,28 @@ function buildEventAvailability(): ReadonlyMap<string, EventAvailability> {
   }
   return result;
 }
+function buildPeriodicAvailability(): ReadonlyMap<string, PeriodicCollectionSchedule> {
+  if (!Array.isArray(periodicAvailabilityJson)) throw new Error('periodic availability must be an array');
+  const knownPeriodicIds = new Set<string>(PERIODIC_REWARD_COLLECTION_IDS);
+  const collectionIds = new Set(STAGE_COLLECTIONS.map((collection) => collection.id));
+  const result = new Map<string, PeriodicCollectionSchedule>();
+  for (const [index, raw] of (periodicAvailabilityJson as readonly PeriodicAvailabilityContent[]).entries()) {
+    const context = `periodicAvailability[${index}]`;
+    if (!knownPeriodicIds.has(raw.collectionId) || !collectionIds.has(raw.collectionId)) throw new Error(`${context}.collectionId is not a canonical periodic collection: ${raw.collectionId}`);
+    if (result.has(raw.collectionId)) throw new Error(`duplicate periodic availability collection: ${raw.collectionId}`);
+    const epochMs = parseTimestamp(raw.epoch, `${context}.epoch`);
+    for (const [key, value] of [['cycleHours', raw.cycleHours], ['openHours', raw.openHours], ['offsetHours', raw.offsetHours]] as const) {
+      if (!Number.isInteger(value) || value < 0) throw new Error(`${context}.${key} must be a non-negative integer`);
+    }
+    if (raw.cycleHours <= 0 || raw.openHours <= 0 || raw.openHours > raw.cycleHours) throw new Error(`${context} has invalid cycle/open duration`);
+    result.set(raw.collectionId, { collectionId: raw.collectionId as PeriodicCollectionSchedule['collectionId'], epochMs, cycleMs: raw.cycleHours * 3600000, openMs: raw.openHours * 3600000, offsetMs: raw.offsetHours * 3600000 });
+  }
+  for (const id of PERIODIC_REWARD_COLLECTION_IDS) if (!result.has(id)) throw new Error(`periodic availability missing collection: ${id}`);
+  return result;
+}
 const SPECIAL_UNLOCK_RULE_BY_STAGE = buildSpecialUnlockRules();
 const EVENT_AVAILABILITY_BY_COLLECTION = buildEventAvailability();
+const PERIODIC_AVAILABILITY_BY_COLLECTION = buildPeriodicAvailability();
 
 export function getStageCollection(collectionId: string): StageCollection { const collection = STAGE_COLLECTIONS.find((candidate) => candidate.id === collectionId); if (!collection) throw new Error(`Unknown stage collection: ${collectionId}`); return collection; }
 export function getStageCollectionForStage(stageId: string): StageCollection { return getStageCollectionForStageRaw(stageId); }
@@ -109,8 +132,28 @@ export function getCollectionStagePageCount(collection: StageCollection): number
 export function getCollectionStagePage(collection: StageCollection, page: number): readonly PrototypeStage[] { const pageCount = getCollectionStagePageCount(collection); const safePage = Math.max(0, Math.min(pageCount - 1, Math.trunc(page))); const start = safePage * STAGES_PER_COLLECTION_PAGE; return collection.stages.slice(start, start + STAGES_PER_COLLECTION_PAGE); }
 export function getCollectionStagePageIndexForStage(collection: StageCollection, stageId: string): number { const index = collection.stages.findIndex((stage) => stage.id === stageId); if (index < 0) throw new Error(`Stage ${stageId} is not part of collection ${collection.id}`); return Math.floor(index / STAGES_PER_COLLECTION_PAGE); }
 export function isStageCollectionUnlocked(collection: StageCollection, clearedStageIds: readonly string[]): boolean { if (!collection.unlockAfterStageId) return true; return getContiguousClearedStageIds(clearedStageIds).includes(collection.unlockAfterStageId); }
-export function isStageCollectionAvailable(collection: StageCollection | string, nowMs = Date.now()): boolean { const resolved = typeof collection === 'string' ? getStageCollection(collection) : collection; const availability = EVENT_AVAILABILITY_BY_COLLECTION.get(resolved.id); if (!availability) return true; return availability.windows.some((window) => nowMs >= window.startMs && nowMs <= window.endMs); }
-export function getStageCollectionAvailabilityText(collection: StageCollection | string, nowMs = Date.now()): string | undefined { const resolved = typeof collection === 'string' ? getStageCollection(collection) : collection; const availability = EVENT_AVAILABILITY_BY_COLLECTION.get(resolved.id); if (!availability || isStageCollectionAvailable(resolved, nowMs)) return undefined; const next = availability.windows.find((window) => window.startMs > nowMs); if (next) return availability.rerunnable ? '이벤트 시작 전 · 복각 일정 있음' : '이벤트 시작 전'; return availability.rerunnable ? '이벤트 기간 종료 · 복각 예정' : '이벤트 기간 종료'; }
+export function isStageCollectionAvailable(collection: StageCollection | string, nowMs = Date.now()): boolean {
+  const resolved = typeof collection === 'string' ? getStageCollection(collection) : collection;
+  const eventAvailability = EVENT_AVAILABILITY_BY_COLLECTION.get(resolved.id);
+  if (eventAvailability && !eventAvailability.windows.some((window) => nowMs >= window.startMs && nowMs <= window.endMs)) return false;
+  const periodicSchedule = PERIODIC_AVAILABILITY_BY_COLLECTION.get(resolved.id);
+  return !periodicSchedule || getPeriodicCollectionWindowState(periodicSchedule, nowMs).available;
+}
+export function getStageCollectionAvailabilityText(collection: StageCollection | string, nowMs = Date.now()): string | undefined {
+  const resolved = typeof collection === 'string' ? getStageCollection(collection) : collection;
+  const eventAvailability = EVENT_AVAILABILITY_BY_COLLECTION.get(resolved.id);
+  if (eventAvailability && !eventAvailability.windows.some((window) => nowMs >= window.startMs && nowMs <= window.endMs)) {
+    const next = eventAvailability.windows.find((window) => window.startMs > nowMs);
+    if (next) return eventAvailability.rerunnable ? '이벤트 시작 전 · 복각 일정 있음' : '이벤트 시작 전';
+    return eventAvailability.rerunnable ? '이벤트 기간 종료 · 복각 예정' : '이벤트 기간 종료';
+  }
+  const periodicSchedule = PERIODIC_AVAILABILITY_BY_COLLECTION.get(resolved.id);
+  if (!periodicSchedule) return undefined;
+  const state = getPeriodicCollectionWindowState(periodicSchedule, nowMs);
+  if (state.available) return undefined;
+  const hours = Math.max(1, Math.ceil((state.opensAtMs - nowMs) / 3600000));
+  return `주기 종료 · 약 ${hours}시간 후 재개방`;
+}
 
 export function isSortieStageUnlocked(stageId: string, clearedStageIds: readonly string[], specialClearedStageIds?: readonly string[], nowMs = Date.now()): boolean {
   const stage = ALL_STAGE_BY_ID.get(stageId); if (!stage) return false;

@@ -1,0 +1,6 @@
+[
+  {"collectionId":"special_gold_convoy","epoch":"2026-08-30T00:00:00+09:00","cycleHours":168,"openHours":72,"offsetHours":0},
+  {"collectionId":"special_soul_forge","epoch":"2026-08-30T00:00:00+09:00","cycleHours":168,"openHours":72,"offsetHours":42},
+  {"collectionId":"special_evolution_gate","epoch":"2026-08-30T00:00:00+09:00","cycleHours":168,"openHours":72,"offsetHours":84},
+  {"collectionId":"special_starlight_rift","epoch":"2026-08-30T00:00:00+09:00","cycleHours":168,"openHours":72,"offsetHours":126}
+]

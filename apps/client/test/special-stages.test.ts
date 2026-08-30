@@ -26,12 +26,12 @@ test('SPECIAL hub remains locked until chapter one is cleared', () => {
   assert.equal(getStage(firstSpecial.id).id, firstSpecial.id);
 });
 
-test('resource, restriction and event SPECIAL families are present at canonical initial volume', () => {
+test('periodic resource, restriction and event SPECIAL families are present at canonical initial volume', () => {
   const ids = new Set(SPECIAL_STAGES.map((stage) => stage.id));
-  for (let i = 1; i <= 5; i += 1) assert.ok(ids.has(`resource_gold_0${i}`));
-  for (let i = 1; i <= 4; i += 1) assert.ok(ids.has(`resource_soul_0${i}`));
-  for (let i = 1; i <= 5; i += 1) assert.ok(ids.has(`resource_evolution_0${i}`));
-  for (let i = 1; i <= 4; i += 1) assert.ok(ids.has(`resource_starlight_0${i}`));
+  for (let i = 1; i <= 5; i += 1) assert.ok(ids.has(`special_gold_convoy_0${i}`));
+  for (let i = 1; i <= 4; i += 1) assert.ok(ids.has(`special_soul_forge_0${i}`));
+  for (let i = 1; i <= 5; i += 1) assert.ok(ids.has(`special_evolution_gate_0${i}`));
+  for (let i = 1; i <= 4; i += 1) assert.ok(ids.has(`special_starlight_rift_0${i}`));
   assert.ok(ids.has('special_five_banners_01') && ids.has('special_five_banners_02'));
   assert.ok(ids.has('special_light_purse_01') && ids.has('special_light_purse_02'));
   for (let i = 1; i <= 6; i += 1) assert.ok(ids.has(`event_summer_01_0${i}`));

@@ -4,6 +4,7 @@ import type { BattleUnitDefinition } from '@frontline/sim';
 import { createCoopPlayableBattle, type CoopPlayableBattleState } from '@frontline/sim/coop-playable';
 import { getFormationRestrictionViolation } from '@frontline/sim/formation-restrictions';
 import { applyPermanentRewardBattleEffects, buildCharacterCombatSlot, getEvolutionForm, normalizeCharacterLevel, normalizeCharacterPlusLevel, type PermanentRewardApplicableSlot } from '@frontline/sim/meta-progression';
+import { getPeriodicCollectionWindowState, PERIODIC_REWARD_COLLECTION_IDS, type PeriodicCollectionSchedule, type PeriodicRewardCollectionId } from '@frontline/sim/periodic-special';
 import type { EnemyArchetype, PlayerRosterSlot } from '@frontline/sim/playable';
 import playerUnitsJson from '../../../content/units/chapter-01.json' with { type: 'json' };
 import recruitmentUnitsJson from '../../../content/units/recruitment-01.json' with { type: 'json' };
@@ -43,6 +44,7 @@ import stagePoliciesRestrictionSpecialJson from '../../../content/stages/policie
 import stagePoliciesEventSpecialJson from '../../../content/stages/policies-special-event.json' with { type: 'json' };
 import stageCollectionsJson from '../../../content/stage-collections.json' with { type: 'json' };
 import eventAvailabilityJson from '../../../content/stages/event-availability.json' with { type: 'json' };
+import periodicAvailabilityJson from '../../../content/stages/periodic-availability.json' with { type: 'json' };
 import type { CoopPlayerLoadout } from './coop-room.ts';
 import { SERVER_CHARACTER_LEVEL_CURVE, SERVER_EVOLUTION_FORMS, SERVER_PERMANENT_REWARDS, SERVER_REWARD_SCOPES_BY_CHARACTER } from './meta-content-v2.ts';
 
@@ -91,6 +93,7 @@ const STAGE_POLICIES = parseStagePolicies([
 const STAGE_POLICY_BY_ID = new Map(STAGE_POLICIES.map((policy) => [policy.stageId, policy] as const));
 
 interface CollectionAvailabilityContent { readonly collectionId: string; readonly windows: readonly { readonly start: string; readonly end: string }[]; }
+interface PeriodicAvailabilityContent { readonly collectionId: string; readonly epoch: string; readonly cycleHours: number; readonly openHours: number; readonly offsetHours: number; }
 interface StageCollectionRuntimeContent { readonly id: string; readonly stageIds: readonly string[]; }
 const COLLECTION_STAGE_IDS = new Map((stageCollectionsJson as readonly StageCollectionRuntimeContent[]).map((collection) => [collection.id, collection.stageIds] as const));
 const EVENT_WINDOWS_BY_STAGE_ID = new Map<string, readonly { readonly startMs: number; readonly endMs: number }[]>();
@@ -104,9 +107,35 @@ for (const availability of eventAvailabilityJson as readonly CollectionAvailabil
   });
   for (const stageId of stageIds) EVENT_WINDOWS_BY_STAGE_ID.set(stageId, windows);
 }
+const PERIODIC_SCHEDULE_BY_STAGE_ID = new Map<string, PeriodicCollectionSchedule>();
+const PERIODIC_ID_SET = new Set<string>(PERIODIC_REWARD_COLLECTION_IDS);
+const seenPeriodicIds = new Set<string>();
+for (const availability of periodicAvailabilityJson as readonly PeriodicAvailabilityContent[]) {
+  if (!PERIODIC_ID_SET.has(availability.collectionId)) throw new Error(`server periodic availability references unknown periodic collection:${availability.collectionId}`);
+  if (seenPeriodicIds.has(availability.collectionId)) throw new Error(`duplicate_server_periodic_collection:${availability.collectionId}`);
+  const stageIds = COLLECTION_STAGE_IDS.get(availability.collectionId);
+  if (!stageIds) throw new Error(`server periodic availability references unknown collection:${availability.collectionId}`);
+  const epochMs = Date.parse(availability.epoch);
+  if (!Number.isFinite(epochMs)) throw new Error(`invalid_server_periodic_epoch:${availability.collectionId}`);
+  if (!Number.isInteger(availability.cycleHours) || !Number.isInteger(availability.openHours) || !Number.isInteger(availability.offsetHours)) throw new Error(`invalid_server_periodic_integer:${availability.collectionId}`);
+  if (availability.cycleHours <= 0 || availability.openHours <= 0 || availability.openHours > availability.cycleHours || availability.offsetHours < 0) throw new Error(`invalid_server_periodic_duration:${availability.collectionId}`);
+  const schedule: PeriodicCollectionSchedule = {
+    collectionId: availability.collectionId as PeriodicRewardCollectionId,
+    epochMs,
+    cycleMs: availability.cycleHours * 60 * 60 * 1000,
+    openMs: availability.openHours * 60 * 60 * 1000,
+    offsetMs: availability.offsetHours * 60 * 60 * 1000,
+  };
+  seenPeriodicIds.add(availability.collectionId);
+  for (const stageId of stageIds) PERIODIC_SCHEDULE_BY_STAGE_ID.set(stageId, schedule);
+}
+for (const collectionId of PERIODIC_REWARD_COLLECTION_IDS) if (!seenPeriodicIds.has(collectionId)) throw new Error(`server periodic availability missing collection:${collectionId}`);
+
 export function isServerStageAvailable(stageId: string, nowMs = Date.now()): boolean {
   const windows = EVENT_WINDOWS_BY_STAGE_ID.get(stageId);
-  return !windows || windows.some((window) => nowMs >= window.startMs && nowMs <= window.endMs);
+  if (windows && !windows.some((window) => nowMs >= window.startMs && nowMs <= window.endMs)) return false;
+  const schedule = PERIODIC_SCHEDULE_BY_STAGE_ID.get(stageId);
+  return !schedule || getPeriodicCollectionWindowState(schedule, nowMs).available;
 }
 
 function fighter(content: CombatContent): BattleUnitDefinition {

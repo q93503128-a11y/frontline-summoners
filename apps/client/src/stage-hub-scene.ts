@@ -1,5 +1,6 @@
 import Phaser from 'phaser';
 import { INTERNAL_WIDTH } from '@frontline/shared';
+import { PERIODIC_REWARD_COLLECTION_IDS } from '@frontline/sim/periodic-special';
 import { loadGuestProgress, type GuestProgress } from './save';
 import {
   STAGE_COLLECTIONS,
@@ -19,6 +20,7 @@ const EMPTY_PROGRESS: GuestProgress = {
   permanentRewardIds: [],
   discoveredEnemyIds: [],
 };
+const PERIODIC_COLLECTION_IDS = new Set<string>(PERIODIC_REWARD_COLLECTION_IDS);
 
 export class StageHubScene extends Phaser.Scene {
   private progress: GuestProgress = EMPTY_PROGRESS;
@@ -93,23 +95,25 @@ export class StageHubScene extends Phaser.Scene {
       const available = isStageCollectionAvailable(collection);
       const unlocked = progressionUnlocked && available;
       const availabilityText = getStageCollectionAvailabilityText(collection);
+      const periodic = PERIODIC_COLLECTION_IDS.has(collection.id);
       const cleared = getCollectionClearedIds(
         collection,
         this.progress.clearedStageIds,
         this.progress.specialClearedStageIds,
       ).length;
       const special = collection.stageType === 'SPECIAL';
-      const accent = special ? 0x9066a6 : 0x6d8fb5;
+      const accent = periodic ? 0x8d7b4b : special ? 0x9066a6 : 0x6d8fb5;
       const card = this.add.rectangle(
         x,
         365,
         compact ? 430 : 440,
         390,
-        unlocked ? (special ? 0x2b2535 : 0x242c3a) : 0x1d222c,
+        unlocked ? (periodic ? 0x302c20 : special ? 0x2b2535 : 0x242c3a) : 0x1d222c,
         0.98,
       ).setStrokeStyle(4, unlocked ? accent : 0x3c4554, 1);
       this.collectionLayer!.add(card);
-      this.collectionLayer!.add(addText(this, x, 205, availabilityText ? 'EVENT' : special ? 'SPECIAL' : 'PROGRESSION', compact ? 21 : 17, unlocked ? (special ? '#d6b5e8' : '#a9caee') : '#69727e', 'center').setOrigin(0.5));
+      const categoryLabel = periodic ? 'PERIODIC' : availabilityText ? 'EVENT' : special ? 'SPECIAL' : 'PROGRESSION';
+      this.collectionLayer!.add(addText(this, x, 205, categoryLabel, compact ? 21 : 17, unlocked ? (periodic ? '#e4cf8f' : special ? '#d6b5e8' : '#a9caee') : '#69727e', 'center').setOrigin(0.5));
       this.collectionLayer!.add(addText(this, x, 252, collection.title, compact ? 31 : 30, unlocked ? '#ffffff' : '#747d89', 'center').setOrigin(0.5).setWordWrapWidth(380));
       this.collectionLayer!.add(addText(this, x, 315, collection.description, compact ? 22 : 18, unlocked ? '#c5cedb' : '#656e7a', 'center').setOrigin(0.5).setWordWrapWidth(380));
       this.collectionLayer!.add(addText(this, x, 382, `${cleared} / ${collection.stages.length} 클리어`, compact ? 24 : 21, unlocked ? '#8ee3aa' : '#6c7580', 'center').setOrigin(0.5));
@@ -120,7 +124,8 @@ export class StageHubScene extends Phaser.Scene {
         const reason = !available && availabilityText ? availabilityText : `메인 진도 ${remaining}개 더 필요`;
         this.collectionLayer!.add(addText(this, x, 470, reason, compact ? 20 : 16, '#8b8290', 'center').setOrigin(0.5));
       }
-      const button = addButton(this, x, compact ? 535 : 532, 250, compact ? 84 : 60, unlocked ? '스테이지 선택' : availabilityText ? '기간 외' : '잠김', () => {
+      const lockedLabel = periodic && availabilityText ? '주기 대기' : availabilityText ? '기간 외' : '잠김';
+      const button = addButton(this, x, compact ? 535 : 532, 250, compact ? 84 : 60, unlocked ? '스테이지 선택' : lockedLabel, () => {
         if (unlocked) this.scene.start('stage-select', { collectionId: collection.id });
       }, unlocked ? accent : 0x3f4855);
       if (!unlocked) button.setAlpha(0.62);
@@ -132,7 +137,7 @@ export class StageHubScene extends Phaser.Scene {
         this,
         INTERNAL_WIDTH / 2,
         605,
-        `전선 묶음 ${STAGE_COLLECTIONS.length}개 · 메인 진행과 이벤트 기간에 따라 새 전선이 열린다.`,
+        `전선 묶음 ${STAGE_COLLECTIONS.length}개 · 메인 진행과 주기/이벤트 일정에 따라 새 전선이 열린다.`,
         16,
         '#8995a7',
         'center',

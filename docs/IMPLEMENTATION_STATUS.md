@@ -2,7 +2,8 @@
 
 기준: 2026-08-30  
 최상위 기획 정본: `docs/CANONICAL.md`  
-세부 정합 감사: `docs/content-wiki/systems/IMPLEMENTATION_WIKI_AUDIT_2026-08-30.md`
+세부 정합 감사: `docs/content-wiki/systems/IMPLEMENTATION_WIKI_AUDIT_2026-08-30.md`  
+주기 SPECIAL 이행 기록: `docs/content-wiki/systems/PERIODIC_RESOURCE_SPECIAL_IMPLEMENTATION_2026-08-30.md`
 
 이 문서는 현재 실행 코드/콘텐츠의 구현 사실과 남은 큰 공백을 기록한다. 기획 정본을 대체하지 않는다.
 
@@ -10,27 +11,38 @@
 
 - MAIN: 4장 × 20 = **80 전장**.
 - 일반 SPECIAL stage: **61 전장**.
-  - 기존 프로토타입 5.
+  - 기존 특수전 5.
   - 제한 SPECIAL 4: 다섯 깃발 2 / 가벼운 주머니 2.
-  - 주기 재화 SPECIAL playable prototype 18: 황금5 / 혼4 / 진화5 / 별빛4.
+  - 주기 재화 SPECIAL 18: 황금5 / 혼4 / 진화5 / 별빛4.
   - 상시 도전/보스 SPECIAL 23: 폭식룡4 / 망자4 / 유리성4 / 기계성4 / 균열4 / 세 왕3.
   - 기간 이벤트 11: 한여름 괴수 6 / 제로 엣지 5.
 - 표준 stage 합계: **141**.
 - 기록 SPECIAL은 일반 stage와 분리된 runtime foundation 2종: 끝없는 전선 / 보스 러시.
 - 플레이어 캐릭터: **43종**.
 - 진화 form 데이터: **129**.
-- 실행 적/보스: **56종**.
+- 실행 적/보스: **80종**.
+  - MAIN 40.
+  - 상시 SPECIAL 실행 적/보스 6.
+  - 이벤트 10.
+  - 주기 재화 SPECIAL 전용 24.
 - stage collection: **19**.
 
-주의: 위 숫자는 실행 데이터 규모이며 각 콘텐츠가 상세 위키의 모든 DESIGN_TARGET을 충족한다는 의미가 아니다.
+주의: 위 숫자는 실행 데이터 규모이며 각 콘텐츠가 상세 위키의 모든 DESIGN_TARGET을 사람 플레이까지 거쳐 LOCKED했다는 의미가 아니다.
 
 ## 저장/메타경제
 
-- 게스트 저장 schema **v13**.
+- 게스트 메인 진행 저장 schema **v13**.
 - resource ledger: `gold`, `evo_fragment`, `evo_core`, `evo_crown`, `soul_essence`, `summon_crystal`, `sweep_ticket`.
 - earned/spent monotonic ledger로 stale save가 소비한 재화를 되살리지 못하게 한다.
 - v2~v12 세이브는 기존 contiguous MAIN NORMAL_CLEAR를 기준으로 MAIN first-clear 일반 재화를 v13 migration에서 한 번 소급 지급하고 `mainRewardedStageIds`로 재지급을 막는다.
 - 기록 최고점은 max-merge로 stale save가 개인 기록을 낮추지 못한다.
+- 주기 재화 charge는 메인 progress schema와 분리된 guest local persistence `frontline-summoners:periodic-reward-charge:v1`로 저장한다.
+  - collection별 max 4.
+  - 12시간마다 +1.
+  - 닫힌 동안도 회복.
+  - first clear 충전 미소모.
+  - repeat charged 1회 소비.
+  - charge 0에서도 depleted reward로 플레이 가능.
 
 ### MAIN 일반 재화
 
@@ -44,7 +56,6 @@
   - evo_core 25
   - evo_crown 4
   - 소탕권 44
-- 초기 위키 하단 요약의 산술 오기는 stage별 상세 milestone을 직접 합산한 위 수치로 정정했다.
 
 ### Base Lv / +Lv
 
@@ -59,10 +70,9 @@
 
 - 모집 1회 100, 10회 1,000 `summon_crystal`을 transaction 안에서 먼저 검증·차감한다.
 - 10회 할인/최소 희귀 보장/천장/선택권 없음.
-- 중복 처리 정책을 모집 화면에서 선택 가능:
-  - `+1 우선`: 동일 캐릭터에 직접 +1, +50 초과분은 자동 분해.
-  - `분해 우선`: C4 / B8 / A20 / S70 / SS220 `soul_essence` 획득.
-- 분해→동일 희귀도 교차 +1 효율은 25% 출발값을 유지한다.
+- 중복 처리 정책:
+  - `+1 우선`: 동일 캐릭터에 직접 +1, +50 초과분 자동 분해.
+  - `분해 우선`: C4 / B8 / A20 / S70 / SS220 `soul_essence`.
 - 신규 획득/중복 처리/모집 결정 소비/혼 재화 지급은 하나의 save transaction 결과로 저장한다.
 
 ### 진화
@@ -70,14 +80,12 @@
 - F2/F3 진화는 레벨/이전 form/재화 조건을 검사하고 재화를 차감해 해금한다.
 - 이전 해금 형태 재선택 가능.
 - 재생산 최종 하한 60F 유지.
-- explicit form grammar가 형태별 fractional move, 자연 KB 수, target mode, cycle/hit/backswing을 데이터로 변경할 수 있다.
 - 스토리 10종 F2/F3 20개는 role-template가 아니라 explicit combat form으로 실행한다.
 
 아직 메타경제에서 남은 것:
 
 - 실제 sweep action의 소탕권 1장 소비 + repeat reward transaction.
-- periodic reward charge max4 / 12h recovery / charged-depleted 경제.
-- authenticated account/server resource ledger와 guest→account authoritative sync.
+- periodic charge의 authenticated account/server authoritative sync.
 - 전체 경제 사람 플레이테스트 및 공급량 조정.
 
 ## 캐릭터/적 전투사양 정합
@@ -85,26 +93,26 @@
 현재 이행됨:
 
 - 스토리 10종 F1을 `STORY_ROSTER_V1_COMBAT_SPECS.md`의 Lv1 DESIGN_TARGET으로 이행.
-- 스토리 10종 F2/F3를 explicit form으로 이행.
-- 수렵창병 BEAST 특효, 화염술사 NATURE 특효, 전투마도사 NEUTRAL, 공허현자 ANOMALY 정체성 반영.
-- 제1장 적/보스 10종을 상세 전투사양으로 이행.
-- 제1장 적 속성군은 `NEUTRAL / BEAST`만 사용.
-- 황금가면 사령술사는 `NEUTRAL + BOSS`, 철문장군은 `NEUTRAL + ARMORED + BOSS`.
-- 기존 story/enemy runtime ID는 기존 게스트 세이브·도감·편성 호환성을 위해 유지한다. 이는 전투사양의 legacy 유지가 아니라 식별자 compatibility layer다.
+- 스토리 10종 F2/F3 explicit form 이행.
+- 제1장 적/보스 10종 상세 전투사양 이행.
 - 공통 C/B/A 모집 캐릭터 F1.
 - 초기 3시리즈 S/SS F1.
 - 메인 2~4장 일반 적/스테이지.
-- 진화 recipe.
-- 메인 영구 보상.
+- 상시 SPECIAL 보스 mechanics.
+- 이벤트 전용 적/보스 10종.
+- 주기 재화 SPECIAL 전용 적/보스 24종.
+- 진화 recipe / 메인 영구 보상.
 
 아직 TESTED/LOCKED 아님:
 
-- 이번 스토리/제1장 수치는 사람 플레이테스트 전 `DESIGN_TARGET`.
-- 공허현자 F3의 3-hit 20/20/60 분할은 후보안이며 per-hit damage split grammar 전까지 억지 구현하지 않음.
+- 스토리/제1장 수치는 사람 플레이테스트 전 `DESIGN_TARGET`.
+- 공허현자 F3의 3-hit 20/20/60 분할은 per-hit damage split grammar 전까지 후보 상태.
 - 일부 문서의 후보 specialty/tag는 확정값처럼 확대하지 않음.
-- 제1장 stage geometry/trigger는 기존 canonicalization을 유지했으나 새 유닛/적 수치 기준 사람 난이도 검증이 필요.
+- 새 주기 SPECIAL 전용 적 24종은 production art/motion 전 generic visual fallback을 사용한다.
 
-상세 기록: `docs/content-wiki/systems/STORY_CH1_CANONICAL_MIGRATION_2026-08-30.md`.
+상세 기록:
+- `docs/content-wiki/systems/STORY_CH1_CANONICAL_MIGRATION_2026-08-30.md`
+- `docs/content-wiki/systems/PERIODIC_RESOURCE_SPECIAL_IMPLEMENTATION_2026-08-30.md`
 
 ## 전투 코어
 
@@ -112,7 +120,9 @@
 - standing/attack range, foreswing/hit/backswing, 자연 KB/강제이동/DYING.
 - Slow / Push / Weaken / one-time Revive.
 - conditional close-range attack.
+- `BOSS_HP_BELOW`, `ANY_OF`, wave dependency trigger.
 - 폭식룡 HP 60%/30% threshold advance + 다음 공격 startup 감소.
+- deterministic attackPattern으로 상시/주기 SPECIAL 보스 루프 실행.
 - evolution explicit form이 공격주기/접촉 프레임/backswing/KB/target mode를 generic data로 교체 가능.
 - 상태/정의가 simulation hash/signature에 포함됨.
 
@@ -153,33 +163,38 @@
 
 ### 주기 재화
 
-현재 상태는 **상세 위키 완성본이 아니라 18-stage playable prototype**이다.
+실행 경로 기준 정식화됨:
 
-구현됨:
+- canonical 18전장:
+  - `special_gold_convoy_01~05`
+  - `special_soul_forge_01~04`
+  - `special_evolution_gate_01~05`
+  - `special_starlight_rift_01~04`
+- dedicated enemy/boss 24종.
+- detailed first/charged/depleted reward 수치.
+- `COLLECTION_CHARGE` 정책 18전장.
+- 72h open recurring availability를 client/server가 동일 generic 계산기로 판정.
+- 실행 schedule은 168h cycle + 0/42/84/126h stagger.
+  - collection별 closed 96h = 4일.
+  - 정본의 `다음 등장 최대 5일` 충족.
+  - 한 주기 내 항상 1~2 collection open.
+- progression + previous NORMAL_CLEAR 단계 해금.
+- first clear charge 미소모 / repeat charge 소비 / depleted 반복 가능.
 
-- 18개 전투 stage.
-- gold/evolution/soul/recruitment resource reward supply.
-- sequential/progression unlock.
+아직 남은 것:
 
-위키 대비 미구현/드리프트:
-
-- periodic 72h rotation.
-- reward charge max4 / 12h recovery.
-- charged/depleted reward grammar.
-- dedicated periodic enemy roster.
-- 위키 canonical `special_*` stage IDs.
-- 상세 위키의 first/charged/depleted 경제 수치.
-
-따라서 `주기 재화 SPECIAL 완료`라고 표기하지 않는다.
+- production art/motion.
+- charge의 authenticated account/server save 병합.
+- 실제 sweep action.
+- 경제/난이도 사람 플레이테스트 후 TESTED/LOCKED 승격.
 
 ## 기록 SPECIAL
 
 별도 deterministic runtime foundation 구현:
 
-- `record_endless_front`: 적 기지 파괴로 종료하지 않고 플레이어 기지 파괴 시 종료, tick 기반 생존 기록.
-- `record_boss_rush`: 9보스 순차, 보스 사이 600F 정비, 보급/쿨타임 상태 유지, 최고 격파 보스 기록.
-
-Save v13에 `endlessBestTimeMs`, `endlessBestReachedMinute`, `bossRushBestDefeated` 저장.
+- `record_endless_front`: 플레이어 기지 파괴까지 tick 기반 생존 기록.
+- `record_boss_rush`: 9보스 순차, 보스 사이 600F 정비, 보급/쿨타임 유지, 최고 격파 기록.
+- Save v13에 `endlessBestTimeMs`, `endlessBestReachedMinute`, `bossRushBestDefeated` 저장.
 
 아직 미완료:
 
@@ -189,9 +204,9 @@ Save v13에 `endlessBestTimeMs`, `endlessBestReachedMinute`, `bossRushBestDefeat
 
 ## 재클리어/거점 병기
 
-- NORMAL_CLEAR 후 무료 2× foundation은 구현.
-- `sweep_ticket`은 실제 획득/저장되지만 sweep 실행 및 1장 소비 transaction은 미완료.
-- periodic reward charge 미완료.
+- NORMAL_CLEAR 후 무료 2× foundation 구현.
+- `sweep_ticket`은 획득/저장되지만 sweep 실행 및 1장 소비 transaction 미완료.
+- 주기 SPECIAL charged/depleted repeat reward는 구현.
 - 거점 병기는 generic damage+push foundation만 있음.
 - 위키의 전선포/결계발진기/보급투하기 catalog/equip/progression/shared-coop rules는 미완료.
 
@@ -201,13 +216,12 @@ Save v13에 `endlessBestTimeMs`, `endlessBestReachedMinute`, `bossRushBestDefeat
 
 - 대부분 MAIN/SPECIAL 동일 stage definition 사용.
 - authoritative server runtime.
-- 각 플레이어 5칸 loadout.
-- 개인 경제.
-- shared base victory path.
+- 각 플레이어 5칸 loadout / 개인 경제 / shared base victory path.
 - progression/evolution/permanent reward validation.
 - stage-specific coop scaling.
 - formation restriction enforcement.
 - event availability enforcement.
+- periodic recurring availability enforcement.
 
 미완료:
 
@@ -215,7 +229,7 @@ Save v13에 `endlessBestTimeMs`, `endlessBestReachedMinute`, `bossRushBestDefeat
 - 친구 목록/초대/최근 플레이어/차단.
 - 빠른 통신 최종 UX.
 - full shared base weapon semantics.
-- 협동 결과의 server-authoritative 계정 wallet 지급.
+- 협동 결과의 server-authoritative 계정 wallet/periodic charge 지급.
 
 ## PvP / 계정
 
@@ -230,7 +244,7 @@ Save v13에 `endlessBestTimeMs`, `endlessBestReachedMinute`, `bossRushBestDefeat
 - account transfer/delete/reset release UX.
 - server wallet/record persistence.
 
-게스트 IndexedDB save만으로 계정 시스템 완료라고 하지 않는다.
+게스트 IndexedDB/local persistence만으로 계정 시스템 완료라고 하지 않는다.
 
 ## 도감/UI/아트/오디오
 
@@ -254,7 +268,7 @@ Save v13에 `endlessBestTimeMs`, `endlessBestReachedMinute`, `bossRushBestDefeat
 - full filter/search/favorite.
 - viewport/safe-area/zoom 전수 QA.
 
-현재 temporary art mapping은 최종 아트 완료로 세지 않는다.
+현재 temporary/generic art fallback은 최종 아트 완료로 세지 않는다.
 
 ## 업적/프로필
 
@@ -263,11 +277,10 @@ SPECIAL/event 문서의 프로필 보상은 현재 자원 보상으로 대체해
 
 ## 다음 개발 우선순위
 
-1. **주기 재화 SPECIAL 정식화**: dedicated enemies + rotation + reward charge + charged/depleted + canonical ID migration.
-2. **전투 grammar 확장**: HP phase pattern, per-hit effect/damage split, killSupplyMultiplier, full sweep semantics, base weapon 3종.
-3. **기록전 사용자 flow**: hub/battle/result/reward + long-run QA.
-4. **계정/친구/PvP**.
-5. 마지막 production art/motion/audio/accessibility/release QA.
+1. **전투/재클리어 grammar 확장**: 실제 sweep transaction, HP phase pattern, per-hit effect/damage split, killSupplyMultiplier, base weapon 3종.
+2. **기록전 사용자 flow**: hub/battle/result/reward + long-run QA.
+3. **계정/친구/PvP**: authoritative wallet/periodic charge sync 포함.
+4. 마지막 production art/motion/audio/accessibility/release QA.
 
 ## 검증 원칙
 

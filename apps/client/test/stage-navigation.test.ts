@@ -22,10 +22,13 @@ const CH3 = STAGES.slice(40, 60).map((stage) => stage.id);
 const CH4 = STAGES.slice(60, 80).map((stage) => stage.id);
 const DURING_SUMMER = Date.parse('2026-08-29T12:00:00+09:00');
 const AFTER_SUMMER = Date.parse('2026-10-01T12:00:00+09:00');
+const GOLD_OPEN = Date.parse('2026-08-30T12:00:00+09:00');
+const GOLD_CLOSED = Date.parse('2026-09-03T12:00:00+09:00');
 
 test('stage navigation covers four main chapters plus fifteen executable SPECIAL collections', () => {
   assert.equal(STAGE_COLLECTIONS.length, 19);
   assert.deepEqual(STAGE_COLLECTIONS.slice(0, 4).map((collection) => collection.id), ['chapter-01','chapter-02','chapter-03','chapter-04']);
+  assert.equal(getStageCollectionForStage('special_gold_convoy_05').id, 'special_gold_convoy');
   assert.equal(getStageCollectionForStage('special_five_banners_02').id, 'special_five_banners');
   assert.equal(getStageCollectionForStage('special_light_purse_02').id, 'special_light_purse');
   assert.equal(getStageCollectionForStage('event_summer_01_06').id, 'event_summer_kaiju_01');
@@ -47,12 +50,21 @@ test('main chapter collection gates still require contiguous canonical progressi
   assert.equal(isStageCollectionUnlocked(getStageCollection('chapter-04'), [...CH1, ...CH2, CH3[19]!]), false);
 });
 
+test('periodic SPECIAL availability repeats 72h windows and participates in sortie gates', () => {
+  const gold = getStageCollection('special_gold_convoy');
+  assert.equal(isStageCollectionAvailable(gold, GOLD_OPEN), true);
+  assert.equal(isStageCollectionAvailable(gold, GOLD_CLOSED), false);
+  assert.equal(getStageCollectionAvailabilityText(gold, GOLD_CLOSED), '주기 종료 · 약 60시간 후 재개방');
+  assert.equal(isSortieStageUnlocked('special_gold_convoy_01', CH1.slice(0, 3), [], GOLD_OPEN), true);
+  assert.equal(isSortieStageUnlocked('special_gold_convoy_01', CH1.slice(0, 3), [], GOLD_CLOSED), false);
+});
+
 test('periodic SPECIAL tiers require both previous SPECIAL clear and configured main progress', () => {
-  assert.equal(isSortieStageUnlocked('resource_gold_01', CH1, []), true);
-  assert.equal(isSortieStageUnlocked('resource_gold_02', CH1, []), false);
-  assert.equal(isSortieStageUnlocked('resource_gold_02', CH1, ['resource_gold_01']), true);
-  assert.equal(isSortieStageUnlocked('resource_gold_03', [...CH1, ...CH2.slice(0, 9)], ['resource_gold_01','resource_gold_02']), false);
-  assert.equal(isSortieStageUnlocked('resource_gold_03', [...CH1, ...CH2.slice(0, 10)], ['resource_gold_01','resource_gold_02']), true);
+  assert.equal(isSortieStageUnlocked('special_gold_convoy_01', CH1, [], GOLD_OPEN), true);
+  assert.equal(isSortieStageUnlocked('special_gold_convoy_02', CH1, [], GOLD_OPEN), false);
+  assert.equal(isSortieStageUnlocked('special_gold_convoy_02', CH1, ['special_gold_convoy_01'], GOLD_OPEN), true);
+  assert.equal(isSortieStageUnlocked('special_gold_convoy_03', [...CH1, ...CH2.slice(0, 19)], ['special_gold_convoy_01','special_gold_convoy_02'], GOLD_OPEN), false);
+  assert.equal(isSortieStageUnlocked('special_gold_convoy_03', [...CH1, ...CH2], ['special_gold_convoy_01','special_gold_convoy_02'], GOLD_OPEN), true);
 });
 
 test('restriction collections enforce chapter gates and internal clear order', () => {
@@ -88,8 +100,9 @@ test('permanent challenge collections retain chapter gates and internal order', 
   assert.equal(isSortieStageUnlocked('special_echoes_01', [...CH1, ...CH2, ...CH3, ...CH4], []), true);
 });
 
-test('SPECIAL lock text distinguishes main progression gate from previous-stage gate', () => {
-  assert.equal(getSpecialStageUnlockText('resource_gold_02', CH1, []), '이전 단계 NORMAL_CLEAR 필요');
-  assert.equal(getSpecialStageUnlockText('resource_gold_03', CH1, ['resource_gold_01','resource_gold_02']), '메인 30 스테이지 진도 필요');
-  assert.equal(getSpecialStageUnlockText('resource_gold_03', [...CH1, ...CH2.slice(0, 10)], ['resource_gold_01','resource_gold_02']), undefined);
+test('SPECIAL lock text distinguishes periodic availability, main progression and previous-stage gates', () => {
+  assert.equal(getSpecialStageUnlockText('special_gold_convoy_02', CH1, [], GOLD_OPEN), '이전 단계 NORMAL_CLEAR 필요');
+  assert.equal(getSpecialStageUnlockText('special_gold_convoy_03', CH1, ['special_gold_convoy_01','special_gold_convoy_02'], GOLD_OPEN), '메인 40 스테이지 진도 필요');
+  assert.equal(getSpecialStageUnlockText('special_gold_convoy_03', [...CH1, ...CH2], ['special_gold_convoy_01','special_gold_convoy_02'], GOLD_OPEN), undefined);
+  assert.equal(getSpecialStageUnlockText('special_gold_convoy_01', CH1, [], GOLD_CLOSED), '주기 종료 · 약 60시간 후 재개방');
 });

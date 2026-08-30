@@ -11,7 +11,8 @@
     "./evolution-catalog": "./src/evolution-catalog.ts",
     "./resource-ledger": "./src/resource-ledger.ts",
     "./formation-restrictions": "./src/formation-restrictions.ts",
-    "./record-playable": "./src/record-playable.ts"
+    "./record-playable": "./src/record-playable.ts",
+    "./periodic-special": "./src/periodic-special.ts"
   },
   "scripts": {
     "typecheck": "tsc --noEmit",
