@@ -18,6 +18,14 @@ import {
   revokeAuthSession,
   type AuthSessionPrincipal,
 } from './auth-session-authority.ts';
+import {
+  claimTrustedBattle,
+  completeTrustedBattle,
+  startTrustedBattle,
+  TRUSTED_BATTLE_KINDS,
+  type TrustedBattleCommand,
+  type TrustedBattleKind,
+} from './trusted-battle-authority.ts';
 
 export interface AccountHttpResult {
   readonly status: number;
@@ -33,9 +41,13 @@ const ACCOUNT_PATHS = new Set([
   '/api/account/recruitment',
   '/api/account/sweep',
   '/api/account/logout',
+  '/api/account/battles/start',
+  '/api/account/battles/complete',
+  '/api/account/battles/claim',
 ]);
 const BASE_WEAPON_SET = new Set<string>(BASE_WEAPON_IDS);
 const DUPLICATE_POLICIES = new Set<string>(['APPLY_PLUS', 'DISMANTLE']);
+const TRUSTED_BATTLE_KIND_SET = new Set<string>(TRUSTED_BATTLE_KINDS);
 
 function object(value: unknown): Record<string, unknown> {
   if (typeof value !== 'object' || value === null || Array.isArray(value)) throw new AccountRequestError('request body must be an object');
@@ -123,6 +135,40 @@ function parseSweepMutation(value: unknown): AccountSweepMutationInput {
   return { ...commonMutationFields(raw), stageId: string(raw.stageId, 'stageId') };
 }
 
+function parseBattleStart(value: unknown): { kind: TrustedBattleKind; targetId: string } {
+  const raw = object(value);
+  const kind = string(raw.kind, 'kind', 16);
+  if (!TRUSTED_BATTLE_KIND_SET.has(kind)) throw new AccountRequestError('kind must be MAIN or SPECIAL');
+  return { kind: kind as TrustedBattleKind, targetId: string(raw.targetId, 'targetId') };
+}
+
+function parseBattleCommand(value: unknown, index: number): TrustedBattleCommand {
+  const raw = object(value);
+  const tick = integer(raw.tick, `commands[${index}].tick`, 0, Number.MAX_SAFE_INTEGER);
+  const type = string(raw.type, `commands[${index}].type`, 32);
+  if (type === 'SPAWN') return { tick, type, slotId: string(raw.slotId, `commands[${index}].slotId`) };
+  if (type === 'UPGRADE_SUPPLY') return { tick, type };
+  if (type === 'FIRE_BASE_WEAPON') return { tick, type };
+  throw new AccountRequestError(`unknown battle command type:${type}`);
+}
+
+function parseBattleComplete(value: unknown): { battleId: string; commands: readonly TrustedBattleCommand[] } {
+  const raw = object(value);
+  if (!Array.isArray(raw.commands)) throw new AccountRequestError('commands must be an array');
+  return {
+    battleId: string(raw.battleId, 'battleId'),
+    commands: raw.commands.map((command, index) => parseBattleCommand(command, index)),
+  };
+}
+
+function parseBattleClaim(value: unknown): { battleId: string; expectedRevision: number } {
+  const raw = object(value);
+  return {
+    battleId: string(raw.battleId, 'battleId'),
+    expectedRevision: integer(raw.expectedRevision, 'expectedRevision', 0, Number.MAX_SAFE_INTEGER),
+  };
+}
+
 function successMutation(result: Awaited<ReturnType<typeof applyAccountMetaProgression>> | Awaited<ReturnType<typeof applyAccountRecruitment>> | Awaited<ReturnType<typeof applyAccountSweep>>): AccountHttpResult {
   if (!result.ok) {
     return { status: 409, body: { error: 'revision_conflict', currentRevision: result.currentRevision } };
@@ -146,6 +192,8 @@ function isServerStateFailure(message: string): boolean {
     || message.includes('did not commit both rows')
     || message.includes('revision is behind mutation receipt')
     || message.includes('account save missing for mutation receipt')
+    || message.includes('trusted battle start snapshot JSON is invalid')
+    || message.includes('trusted battle result JSON is invalid')
     || message.startsWith('D1_');
 }
 
@@ -155,6 +203,11 @@ function errorResult(error: unknown): AccountHttpResult {
   if (message.includes('idempotency key reused with different input')) {
     return { status: 409, body: { error: 'idempotency_conflict' } };
   }
+  if (message.includes('trusted battle completion replay differs') || message.includes('trusted battle completion race differs')) {
+    return { status: 409, body: { error: 'battle_proof_conflict' } };
+  }
+  if (message.includes('trusted battle expired')) return { status: 410, body: { error: 'battle_expired' } };
+  if (message.includes('too many active trusted battles')) return { status: 429, body: { error: 'too_many_active_battles' } };
   if (isServerStateFailure(message)) return { status: 500, body: { error: 'account_state_failure' } };
   return { status: 400, body: { error: 'invalid_mutation', message } };
 }
@@ -207,6 +260,36 @@ export async function resolveAuthenticatedAccountHttp(
       return successMutation(await applyAccountSweep(db, principal.userId, parseSweepMutation(await readBody(request)), nowMs));
     }
 
+    if (request.method === 'POST' && url.pathname === '/api/account/battles/start') {
+      const input = parseBattleStart(await readBody(request));
+      const result = await startTrustedBattle(db, principal.userId, input.kind, input.targetId, nowMs);
+      return { status: 201, body: result };
+    }
+
+    if (request.method === 'POST' && url.pathname === '/api/account/battles/complete') {
+      const input = parseBattleComplete(await readBody(request));
+      const result = await completeTrustedBattle(db, principal.userId, input.battleId, input.commands, nowMs);
+      return { status: 200, body: result };
+    }
+
+    if (request.method === 'POST' && url.pathname === '/api/account/battles/claim') {
+      const input = parseBattleClaim(await readBody(request));
+      const result = await claimTrustedBattle(db, principal.userId, input.battleId, input.expectedRevision, nowMs);
+      if (!result.ok) return { status: 409, body: { error: 'revision_conflict', currentRevision: result.currentRevision } };
+      return {
+        status: 200,
+        body: {
+          replayed: result.replayed,
+          awarded: result.awarded,
+          completion: result.completion,
+          revision: result.record.revision,
+          schemaVersion: result.record.snapshot.schemaVersion,
+          snapshot: result.record.snapshot,
+          result: result.result,
+        },
+      };
+    }
+
     return { status: 405, body: { error: 'method_not_allowed' }, headers: { allow: url.pathname === '/api/account' ? 'GET' : 'POST' } };
   } catch (error) {
     return errorResult(error);
@@ -217,4 +300,7 @@ export const __accountHttpTestOnly = {
   parseMetaMutation,
   parseRecruitmentMutation,
   parseSweepMutation,
+  parseBattleStart,
+  parseBattleComplete,
+  parseBattleClaim,
 };
