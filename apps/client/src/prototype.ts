@@ -40,6 +40,8 @@ import stagePoliciesThreeJson from '../../../content/stages/policies-03.json' wi
 import stagePoliciesFourJson from '../../../content/stages/policies-04.json' with { type: 'json' };
 import stagePoliciesResourceJson from '../../../content/stages/policies-special-resource.json' with { type: 'json' };
 import stagePoliciesPermanentSpecialJson from '../../../content/stages/policies-special-permanent.json' with { type: 'json' };
+import stagePoliciesRestrictionSpecialJson from '../../../content/stages/policies-special-restriction.json' with { type: 'json' };
+import stagePoliciesEventSpecialJson from '../../../content/stages/policies-special-event.json' with { type: 'json' };
 import rewardScopesJson from '../../../content/permanent-rewards/reward-scopes.json' with { type: 'json' };
 import { REWARD_SCOPES, applyPermanentRewardBattleEffects, type RewardScope } from './permanent-rewards.ts';
 
@@ -106,7 +108,15 @@ const PROGRESSION_STAGE_CONTENT: readonly CampaignStageContent[] = [...CHAPTER_O
 const BASE_STAGE_CONTENT: readonly CampaignStageContent[] = [...PROGRESSION_STAGE_CONTENT, ...SPECIAL_STAGE_CONTENT];
 if (new Set(BASE_STAGE_CONTENT.map((stage) => stage.id)).size !== BASE_STAGE_CONTENT.length) throw new Error('playable stage ids must be globally unique');
 
-const STAGE_POLICIES = parseStagePolicies([...stagePoliciesOneTwoJson, ...stagePoliciesThreeJson, ...stagePoliciesFourJson, ...stagePoliciesResourceJson, ...stagePoliciesPermanentSpecialJson], new Set(BASE_STAGE_CONTENT.map((stage) => stage.id)));
+const STAGE_POLICIES = parseStagePolicies([
+  ...stagePoliciesOneTwoJson,
+  ...stagePoliciesThreeJson,
+  ...stagePoliciesFourJson,
+  ...stagePoliciesResourceJson,
+  ...stagePoliciesPermanentSpecialJson,
+  ...stagePoliciesRestrictionSpecialJson,
+  ...stagePoliciesEventSpecialJson,
+], new Set(BASE_STAGE_CONTENT.map((stage) => stage.id)));
 const STAGE_POLICY_BY_ID = new Map(STAGE_POLICIES.map((policy) => [policy.stageId, policy] as const));
 function withStagePolicy(stage: CampaignStageContent): PrototypeStage {
   const policy = STAGE_POLICY_BY_ID.get(stage.id);
