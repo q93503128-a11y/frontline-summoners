@@ -168,8 +168,9 @@ function buildSpecialBattleResult(
   snapshot: AccountSaveSnapshotV2,
   stageId: string,
   nowMs: number,
+  availabilityAtMs = nowMs,
 ): BuiltMutation<AccountSpecialBattleMutationResult> {
-  assertAccountSpecialStagePlayable(stageId, snapshot.clearedStageIds, snapshot.specialClearedStageIds, nowMs);
+  assertAccountSpecialStagePlayable(stageId, snapshot.clearedStageIds, snapshot.specialClearedStageIds, availabilityAtMs);
   const specialClearedStageIds = new Set(snapshot.specialClearedStageIds);
   const firstClear = !specialClearedStageIds.has(stageId);
   specialClearedStageIds.add(stageId);
@@ -245,6 +246,7 @@ export async function applyAccountSpecialBattleResult(
   accountId: string,
   input: AccountSpecialBattleMutationInput,
   nowMs = Date.now(),
+  availabilityAtMs = nowMs,
 ): Promise<AccountSpecialMutationApplyResult<AccountSpecialBattleMutationResult>> {
   const battleId = nonEmptyId(input.battleId, 'battleId');
   return commitMutation(
@@ -254,7 +256,7 @@ export async function applyAccountSpecialBattleResult(
     'SPECIAL_BATTLE_RESULT',
     battleId,
     fingerprint({ stageId: input.stageId }),
-    (snapshot) => buildSpecialBattleResult(snapshot, input.stageId, nowMs),
+    (snapshot) => buildSpecialBattleResult(snapshot, input.stageId, nowMs, availabilityAtMs),
     nowMs,
   );
 }
