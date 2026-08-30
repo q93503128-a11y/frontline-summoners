@@ -3,24 +3,29 @@ import test from 'node:test';
 import type { CoopPlayerLoadout } from '../src/coop-room.ts';
 import { createServerCoopBattle, getServerCoopStage, getServerRuntimeCoopStageIds, isServerStageAvailable } from '../src/runtime-content.ts';
 
+const FRONT_CANNON = 'base_weapon_front_cannon' as const;
 function loadout(ids: readonly string[]): CoopPlayerLoadout {
-  return { characters: ids.map((characterId) => ({ characterId, level: 1, plusLevel: 0 })), permanentRewardIds: [] };
+  return {
+    characters: ids.map((characterId) => ({ characterId, level: 1, plusLevel: 0 })),
+    permanentRewardIds: [],
+    clearedStageIds: [],
+  };
 }
 
 const one = loadout(['militia']);
 
 test('authoritative co-op enforces three characters per player in 다섯 깃발', () => {
-  assert.doesNotThrow(() => createServerCoopBattle('special_five_banners_01', loadout(['militia','guard','hunter']), one));
+  assert.doesNotThrow(() => createServerCoopBattle('special_five_banners_01', loadout(['militia','guard','hunter']), one, FRONT_CANNON));
   assert.throws(
-    () => createServerCoopBattle('special_five_banners_01', loadout(['militia','guard','hunter','duelist']), one),
+    () => createServerCoopBattle('special_five_banners_01', loadout(['militia','guard','hunter','duelist']), one, FRONT_CANNON),
     /stage_formation_restricted:special_five_banners_01/,
   );
 });
 
 test('authoritative co-op enforces resolved production cost 400 in 가벼운 주머니', () => {
-  assert.doesNotThrow(() => createServerCoopBattle('special_light_purse_01', loadout(['militia','lancer']), one));
+  assert.doesNotThrow(() => createServerCoopBattle('special_light_purse_01', loadout(['militia','lancer']), one, FRONT_CANNON));
   assert.throws(
-    () => createServerCoopBattle('special_light_purse_01', loadout(['militia','pyromancer']), one),
+    () => createServerCoopBattle('special_light_purse_01', loadout(['militia','pyromancer']), one, FRONT_CANNON),
     /stage_formation_restricted:special_light_purse_01/,
   );
 });
