@@ -35,6 +35,45 @@ export interface AccountMutationResponse extends AccountRemoteSave {
   readonly result: unknown;
 }
 
+export type AccountTrustedBattleKind = 'MAIN' | 'SPECIAL';
+export type AccountTrustedBattleCommand =
+  | { readonly tick: number; readonly type: 'SPAWN'; readonly slotId: string }
+  | { readonly tick: number; readonly type: 'UPGRADE_SUPPLY' }
+  | { readonly tick: number; readonly type: 'FIRE_BASE_WEAPON' };
+
+export interface AccountTrustedBattleStart {
+  readonly battleId: string;
+  readonly kind: AccountTrustedBattleKind;
+  readonly targetId: string;
+  readonly startRevision: number;
+  readonly initialStateHash: string;
+  readonly expiresAtMs: number;
+}
+
+export interface AccountTrustedBattleCompletion {
+  readonly battleId: string;
+  readonly kind: AccountTrustedBattleKind;
+  readonly targetId: string;
+  readonly winner: 'PLAYER' | 'ENEMY' | 'DRAW';
+  readonly clearFrames: number;
+  readonly finalStateHash: string;
+  readonly playerBaseHp: number;
+  readonly enemyBaseHp: number;
+  readonly completedAtMs: number;
+}
+
+export interface AccountTrustedBattleCompleteResponse {
+  readonly replayed: boolean;
+  readonly result: AccountTrustedBattleCompletion;
+}
+
+export interface AccountTrustedBattleClaimResponse extends AccountRemoteSave {
+  readonly replayed: boolean;
+  readonly awarded: boolean;
+  readonly completion: AccountTrustedBattleCompletion;
+  readonly result: unknown;
+}
+
 type CachedAccountState = {
   readonly sessionFingerprint: string;
   readonly remote: AccountRemoteSave;
@@ -63,6 +102,10 @@ function nonNegativeInteger(value: unknown): number | null {
   return Number.isInteger(value) && (value as number) >= 0 ? value as number : null;
 }
 
+function nonEmptyString(value: unknown): string | null {
+  return typeof value === 'string' && value.trim().length > 0 ? value.trim() : null;
+}
+
 function parseRemoteSave(value: unknown): AccountRemoteSave | null {
   if (!isRecord(value)) return null;
   const revision = nonNegativeInteger(value.revision);
@@ -76,6 +119,51 @@ function parseMutationResponse(value: unknown): AccountMutationResponse | null {
   const remote = parseRemoteSave(value);
   if (!remote || typeof value.replayed !== 'boolean' || !Object.hasOwn(value, 'result')) return null;
   return { ...remote, replayed: value.replayed, result: value.result };
+}
+
+function parseTrustedBattleKind(value: unknown): AccountTrustedBattleKind | null {
+  return value === 'MAIN' || value === 'SPECIAL' ? value : null;
+}
+
+function parseTrustedBattleStart(value: unknown): AccountTrustedBattleStart | null {
+  if (!isRecord(value)) return null;
+  const battleId = nonEmptyString(value.battleId);
+  const kind = parseTrustedBattleKind(value.kind);
+  const targetId = nonEmptyString(value.targetId);
+  const startRevision = nonNegativeInteger(value.startRevision);
+  const initialStateHash = nonEmptyString(value.initialStateHash);
+  const expiresAtMs = nonNegativeInteger(value.expiresAtMs);
+  if (!battleId || !kind || !targetId || startRevision === null || !initialStateHash || expiresAtMs === null) return null;
+  return { battleId, kind, targetId, startRevision, initialStateHash, expiresAtMs };
+}
+
+function parseTrustedBattleCompletion(value: unknown): AccountTrustedBattleCompletion | null {
+  if (!isRecord(value)) return null;
+  const battleId = nonEmptyString(value.battleId);
+  const kind = parseTrustedBattleKind(value.kind);
+  const targetId = nonEmptyString(value.targetId);
+  const winner = value.winner === 'PLAYER' || value.winner === 'ENEMY' || value.winner === 'DRAW' ? value.winner : null;
+  const clearFrames = nonNegativeInteger(value.clearFrames);
+  const finalStateHash = nonEmptyString(value.finalStateHash);
+  const playerBaseHp = nonNegativeInteger(value.playerBaseHp);
+  const enemyBaseHp = nonNegativeInteger(value.enemyBaseHp);
+  const completedAtMs = nonNegativeInteger(value.completedAtMs);
+  if (!battleId || !kind || !targetId || !winner || clearFrames === null || !finalStateHash || playerBaseHp === null || enemyBaseHp === null || completedAtMs === null) return null;
+  return { battleId, kind, targetId, winner, clearFrames, finalStateHash, playerBaseHp, enemyBaseHp, completedAtMs };
+}
+
+function parseTrustedBattleCompleteResponse(value: unknown): AccountTrustedBattleCompleteResponse | null {
+  if (!isRecord(value) || typeof value.replayed !== 'boolean') return null;
+  const result = parseTrustedBattleCompletion(value.result);
+  return result ? { replayed: value.replayed, result } : null;
+}
+
+function parseTrustedBattleClaimResponse(value: unknown): AccountTrustedBattleClaimResponse | null {
+  if (!isRecord(value)) return null;
+  const remote = parseRemoteSave(value);
+  const completion = parseTrustedBattleCompletion(value.completion);
+  if (!remote || !completion || typeof value.replayed !== 'boolean' || typeof value.awarded !== 'boolean' || !Object.hasOwn(value, 'result')) return null;
+  return { ...remote, replayed: value.replayed, awarded: value.awarded, completion, result: value.result };
 }
 
 function setState(state: AccountClientState): void {
@@ -244,6 +332,22 @@ function requireOnlineRevision(): number {
   return currentState.remote.revision;
 }
 
+async function handleOnlineActionError(token: string, error: unknown): Promise<never> {
+  if (error instanceof AccountRevisionConflictError) {
+    await refreshAuthenticatedAccount();
+    throw error;
+  }
+  if (error instanceof AccountApiError && error.status === 401) {
+    currentToken = null;
+    storeSessionToken(null);
+    clearReadCache();
+    setState({ kind: 'GUEST_LOCAL' });
+    throw error;
+  }
+  await enterOfflineCache(token);
+  throw error;
+}
+
 async function mutate(path: string, request: Readonly<Record<string, unknown>>): Promise<AccountMutationResponse> {
   const token = currentToken;
   if (!token) throw new Error('authenticated account session is not available');
@@ -258,19 +362,7 @@ async function mutate(path: string, request: Readonly<Record<string, unknown>>):
     await acceptRemoteSave(token, response);
     return response;
   } catch (error) {
-    if (error instanceof AccountRevisionConflictError) {
-      await refreshAuthenticatedAccount();
-      throw error;
-    }
-    if (error instanceof AccountApiError && error.status === 401) {
-      currentToken = null;
-      storeSessionToken(null);
-      clearReadCache();
-      setState({ kind: 'GUEST_LOCAL' });
-      throw error;
-    }
-    await enterOfflineCache(token);
-    throw error;
+    return handleOnlineActionError(token, error);
   }
 }
 
@@ -284,6 +376,65 @@ export function mutateAuthenticatedAccountRecruitment(request: AccountRecruitmen
 
 export function mutateAuthenticatedAccountSweep(request: AccountSweepRequest): Promise<AccountMutationResponse> {
   return mutate('/api/account/sweep', request as unknown as Readonly<Record<string, unknown>>);
+}
+
+export async function startAuthenticatedTrustedBattle(kind: AccountTrustedBattleKind, targetId: string): Promise<AccountTrustedBattleStart> {
+  const token = currentToken;
+  if (!token) throw new Error('authenticated account session is not available');
+  const localRevision = requireOnlineRevision();
+  try {
+    const payload = await requestJson('/api/account/battles/start', {
+      method: 'POST',
+      body: JSON.stringify({ kind, targetId }),
+    });
+    const result = parseTrustedBattleStart(payload);
+    if (!result) throw new Error('trusted battle start response shape is invalid');
+    if (result.startRevision !== localRevision) {
+      await refreshAuthenticatedAccount();
+      throw new AccountRevisionConflictError(result.startRevision);
+    }
+    return result;
+  } catch (error) {
+    return handleOnlineActionError(token, error);
+  }
+}
+
+export async function completeAuthenticatedTrustedBattle(
+  battleId: string,
+  commands: readonly AccountTrustedBattleCommand[],
+): Promise<AccountTrustedBattleCompleteResponse> {
+  const token = currentToken;
+  if (!token) throw new Error('authenticated account session is not available');
+  requireOnlineRevision();
+  try {
+    const payload = await requestJson('/api/account/battles/complete', {
+      method: 'POST',
+      body: JSON.stringify({ battleId, commands }),
+    });
+    const result = parseTrustedBattleCompleteResponse(payload);
+    if (!result) throw new Error('trusted battle completion response shape is invalid');
+    return result;
+  } catch (error) {
+    return handleOnlineActionError(token, error);
+  }
+}
+
+export async function claimAuthenticatedTrustedBattle(battleId: string): Promise<AccountTrustedBattleClaimResponse> {
+  const token = currentToken;
+  if (!token) throw new Error('authenticated account session is not available');
+  const expectedRevision = requireOnlineRevision();
+  try {
+    const payload = await requestJson('/api/account/battles/claim', {
+      method: 'POST',
+      body: JSON.stringify({ battleId, expectedRevision }),
+    });
+    const result = parseTrustedBattleClaimResponse(payload);
+    if (!result) throw new Error('trusted battle claim response shape is invalid');
+    await acceptRemoteSave(token, result);
+    return result;
+  } catch (error) {
+    return handleOnlineActionError(token, error);
+  }
 }
 
 export async function logoutAuthenticatedAccount(): Promise<{ readonly serverRevoked: boolean }> {
@@ -304,4 +455,8 @@ export async function logoutAuthenticatedAccount(): Promise<{ readonly serverRev
 export const __accountNetworkTestOnly = {
   parseRemoteSave,
   parseMutationResponse,
+  parseTrustedBattleStart,
+  parseTrustedBattleCompletion,
+  parseTrustedBattleCompleteResponse,
+  parseTrustedBattleClaimResponse,
 };
