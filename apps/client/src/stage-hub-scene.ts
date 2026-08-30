@@ -1,7 +1,8 @@
 import Phaser from 'phaser';
 import { INTERNAL_WIDTH } from '@frontline/shared';
 import { PERIODIC_REWARD_COLLECTION_IDS } from '@frontline/sim/periodic-special';
-import { loadGuestProgress, type GuestProgress } from './save';
+import { loadActiveProgress } from './active-progress';
+import type { GuestProgress } from './save';
 import {
   STAGE_COLLECTIONS,
   getCollectionClearedIds,
@@ -27,6 +28,7 @@ export class StageHubScene extends Phaser.Scene {
   private page = 0;
   private collectionLayer?: Phaser.GameObjects.Container;
   private pageText?: Phaser.GameObjects.Text;
+  private authorityText?: Phaser.GameObjects.Text;
 
   constructor() { super('stage-hub'); }
 
@@ -35,6 +37,7 @@ export class StageHubScene extends Phaser.Scene {
     const compact = isCompactMobileViewport();
     addText(this, 54, 38, '출 정', 46, COLORS.cream);
     addText(this, 56, 94, compact ? '전선을 고르고 출격한다.' : '장과 특수전 중 진행할 전선 묶음을 고른다.', compact ? 22 : 19, COLORS.muted);
+    this.authorityText = addText(this, 56, 122, '', compact ? 17 : 14, '#8f9aac');
     addButton(this, 805, compact ? 70 : 65, 160, compact ? 84 : 50, '기록전', () => this.scene.start('record-hub'), 0x6a667f);
     addButton(this, 985, compact ? 70 : 65, 160, compact ? 84 : 50, '병기', () => this.scene.start('base-weapon'), 0x6d6b8e);
     addButton(this, 1165, compact ? 70 : 65, 160, compact ? 84 : 50, '메인', () => this.scene.start('main-menu'), 0x586275);
@@ -44,11 +47,20 @@ export class StageHubScene extends Phaser.Scene {
     this.pageText = addText(this, INTERNAL_WIDTH / 2, 650, '', compact ? 22 : 18, '#9ca9bb', 'center').setOrigin(0.5);
 
     this.renderCollections();
-    void loadGuestProgress().then((progress) => {
+    void loadActiveProgress().then((view) => {
       if (!this.scene.isActive()) return;
-      this.progress = progress;
+      this.progress = view.progress;
+      this.authorityText?.setText(view.authority === 'GUEST_LOCAL'
+        ? '게스트 로컬 진행'
+        : view.authority === 'ACCOUNT_ONLINE'
+          ? '로그인 계정 · 서버 진행'
+          : '로그인 계정 · 오프라인 캐시 · 출정/재화 변경 불가');
+      this.authorityText?.setColor(view.authority === 'ACCOUNT_ONLINE' ? '#8ee3aa' : view.authority === 'ACCOUNT_OFFLINE_CACHE' ? '#f2d37c' : '#8f9aac');
       this.focusCurrentProgressPage();
       this.renderCollections();
+    }).catch((error: unknown) => {
+      if (!this.scene.isActive()) return;
+      this.authorityText?.setText(error instanceof Error ? error.message : '진행 정보를 읽지 못했습니다.').setColor('#ff9a91');
     });
   }
 
