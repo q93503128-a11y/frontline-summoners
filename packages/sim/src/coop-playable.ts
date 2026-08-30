@@ -14,6 +14,7 @@ import {
   tryFireBaseWeapon,
   type BaseWeaponDefinition,
   type BaseWeaponFailureReason,
+  type BaseWeaponId,
   type EnemyArchetype,
   type EnemyWaveDefinition,
   type PlayerRosterSlot,
@@ -63,6 +64,8 @@ export interface CoopPlayableBattleState {
   readonly enemyRewardSupplyBySeat: Record<CoopPlayableSeatId, Record<string, number>>;
   readonly rewardedEnemySimulationIds: number[];
   readonly ownerBySimulationId: Record<string, CoopPlayableSeatId>;
+  baseWeaponLastActivatedSeatId: CoopPlayableSeatId | null;
+  baseWeaponPendingSupplySeatId: CoopPlayableSeatId | null;
   stateHash: string;
 }
 
@@ -104,7 +107,9 @@ export interface CoopPlayableSnapshot {
     readonly enemyHp: number;
     readonly enemyMaxHp: number;
   };
+  readonly baseWeaponId: BaseWeaponId | null;
   readonly baseWeaponCooldownFrames: number;
+  readonly baseWeaponLastActivatedSeatId: CoopPlayableSeatId | null;
   readonly players: readonly {
     readonly seatId: CoopPlayableSeatId;
     readonly supply: number;
@@ -261,6 +266,8 @@ export function createCoopPlayableBattle(config: CoopPlayableBattleConfig): Coop
     },
     rewardedEnemySimulationIds: [],
     ownerBySimulationId: {},
+    baseWeaponLastActivatedSeatId: null,
+    baseWeaponPendingSupplySeatId: null,
     stateHash: '',
   };
   state.stateHash = computeCoopPlayableStateHash(state);
@@ -314,8 +321,13 @@ export function tryUpgradeCoopSupply(state: CoopPlayableBattleState, seatId: Coo
   return { ok: true, level: player.supplyLevel };
 }
 
-export function tryFireCoopBaseWeapon(state: CoopPlayableBattleState): CoopBaseWeaponResult {
-  return tryFireBaseWeapon(state.shared);
+export function tryFireCoopBaseWeapon(state: CoopPlayableBattleState, seatId: CoopPlayableSeatId): CoopBaseWeaponResult {
+  const result = tryFireBaseWeapon(state.shared);
+  if (!result.ok) return result;
+  state.baseWeaponLastActivatedSeatId = seatId;
+  state.baseWeaponPendingSupplySeatId = state.shared.baseWeapon.kind === 'SUPPLY_DROP' ? seatId : null;
+  state.stateHash = computeCoopPlayableStateHash(state);
+  return result;
 }
 
 function accruePlayerSupply(state: CoopPlayableBattleState, seatId: CoopPlayableSeatId): void {
@@ -325,6 +337,20 @@ function accruePlayerSupply(state: CoopPlayableBattleState, seatId: CoopPlayable
   const gained = Math.trunc(player.incomeRemainder / SIM_TICK_RATE);
   player.incomeRemainder %= SIM_TICK_RATE;
   if (gained > 0) player.supply = Math.min(level.maxSupply, player.supply + gained);
+}
+
+function resolveCoopSupplyDropIfDue(state: CoopPlayableBattleState): void {
+  const seatId = state.baseWeaponPendingSupplySeatId;
+  if (seatId === null || !state.shared.baseWeaponPending || state.shared.baseWeapon.kind !== 'SUPPLY_DROP') return;
+  if (state.shared.battle.tick < state.shared.baseWeaponResolveTick) return;
+  const player = state.players[seatId];
+  const maxSupply = getCoopCurrentSupplyLevel(state, seatId).maxSupply;
+  const proportional = Math.round(maxSupply * (state.shared.baseWeapon.supplyGainPermille ?? 180) / 1000);
+  const gain = Math.max(state.shared.baseWeapon.supplyGainMin ?? 120, Math.min(state.shared.baseWeapon.supplyGainMax ?? 900, proportional));
+  player.supply = Math.min(maxSupply, player.supply + gain);
+  state.baseWeaponPendingSupplySeatId = null;
+  state.shared.baseWeaponPending = false;
+  state.shared.baseWeaponResolveTick = -1;
 }
 
 function grantEnemyDeathRewards(state: CoopPlayableBattleState): void {
@@ -347,6 +373,7 @@ export function stepCoopPlayableBattle(state: CoopPlayableBattleState): CoopPlay
   if (state.shared.battle.winner !== null) return state;
   accruePlayerSupply(state, 'A');
   accruePlayerSupply(state, 'B');
+  resolveCoopSupplyDropIfDue(state);
   stepPlayableBattle(state.shared);
   grantEnemyDeathRewards(state);
   state.stateHash = computeCoopPlayableStateHash(state);
@@ -371,7 +398,7 @@ export function applyCoopPlayableCommands(
         ? { seatId, commandIndex, command, ok: true, supplyLevel: result.level }
         : { seatId, commandIndex, command, ok: false, reason: result.reason };
     }
-    const result = tryFireCoopBaseWeapon(state);
+    const result = tryFireCoopBaseWeapon(state, seatId);
     return result.ok
       ? { seatId, commandIndex, command, ok: true, baseWeaponReadyTick: result.readyTick }
       : { seatId, commandIndex, command, ok: false, reason: result.reason };
@@ -423,7 +450,8 @@ export function computeCoopPlayableStateHash(state: CoopPlayableBattleState): st
     .sort(([a], [b]) => a.localeCompare(b))
     .map(([enemyId, reward]) => `${enemyId}:${reward}`)
     .join('|')).join('#');
-  return fnv1a([state.shared.stateHash, players, owners, rewarded, rewards].join('#'));
+  const baseWeaponSeatState = `${state.baseWeaponLastActivatedSeatId ?? '-'}:${state.baseWeaponPendingSupplySeatId ?? '-'}`;
+  return fnv1a([state.shared.stateHash, players, owners, rewarded, rewards, baseWeaponSeatState].join('#'));
 }
 
 export function getCoopPlayableSnapshot(state: CoopPlayableBattleState): CoopPlayableSnapshot {
@@ -438,7 +466,9 @@ export function getCoopPlayableSnapshot(state: CoopPlayableBattleState): CoopPla
       enemyHp: battle.bases.ENEMY.hp,
       enemyMaxHp: battle.bases.ENEMY.maxHp,
     },
+    baseWeaponId: state.shared.baseWeapon.id ?? null,
     baseWeaponCooldownFrames: getBaseWeaponCooldownRemaining(state.shared),
+    baseWeaponLastActivatedSeatId: state.baseWeaponLastActivatedSeatId,
     players: COOP_PLAYABLE_SEATS.map((seatId) => {
       const player = state.players[seatId];
       const nextSupplyLevel = player.supplyLevels[player.supplyLevel];
