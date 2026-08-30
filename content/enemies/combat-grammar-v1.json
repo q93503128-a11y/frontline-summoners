@@ -1,0 +1,43 @@
+[
+  {
+    "id": "boss_ch3_archmagus",
+    "attackPattern": [
+      { "attackDamage": 420, "attackMinRange": 390, "attackMaxRange": 690, "cycleFrames": 155, "hitFrames": [96,108], "hitDamages": [147,273] },
+      { "attackDamage": 260, "attackMinRange": 220, "attackMaxRange": 410, "cycleFrames": 110, "hitFrames": [58], "hitDamages": [260] }
+    ],
+    "attackPhases": [
+      { "maxHpPermille": 1000, "patternIndices": [0] },
+      { "maxHpPermille": 500, "patternIndices": [0,0,1] }
+    ]
+  },
+  {
+    "id": "boss_ch3_belzar",
+    "hitDamages": [105,105,210],
+    "hitEffects": [
+      {},
+      {},
+      { "onHitPush": { "chancePermille": 350, "distance": 45, "frames": 12 } }
+    ],
+    "attackPattern": [
+      { "attackDamage": 420, "attackMinRange": 100, "attackMaxRange": 285, "cycleFrames": 92, "hitFrames": [28,36,48], "hitDamages": [105,105,210], "hitEffects": [{},{},{"onHitPush":{"chancePermille":350,"distance":45,"frames":12}}] }
+    ],
+    "attackPhases": [
+      { "maxHpPermille": 1000, "patternIndices": [0] },
+      { "maxHpPermille": 400, "patternIndices": [0], "cyclePermille": 891 }
+    ]
+  },
+  {
+    "id": "boss_ch4_zero_engine",
+    "attackPattern": [
+      { "attackDamage": 300, "attackMinRange": 0, "attackMaxRange": 365, "cycleFrames": 105, "hitFrames": [38], "hitDamages": [300] },
+      { "attackDamage": 520, "attackMinRange": 300, "attackMaxRange": 610, "cycleFrames": 145, "hitFrames": [92], "hitDamages": [520] },
+      { "attackDamage": 450, "attackMinRange": 130, "attackMaxRange": 430, "cycleFrames": 115, "hitFrames": [48,56,68], "hitDamages": [90,113,247] },
+      { "attackDamage": 520, "attackMinRange": 300, "attackMaxRange": 650, "cycleFrames": 145, "hitFrames": [92], "hitDamages": [520] }
+    ],
+    "attackPhases": [
+      { "maxHpPermille": 1000, "patternIndices": [0,0,1,0,2] },
+      { "maxHpPermille": 600, "patternIndices": [0,3,2,0,3] },
+      { "maxHpPermille": 300, "patternIndices": [2,0,3,2], "cyclePermille": 900 }
+    ]
+  }
+]

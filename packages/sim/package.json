@@ -12,7 +12,8 @@
     "./resource-ledger": "./src/resource-ledger.ts",
     "./formation-restrictions": "./src/formation-restrictions.ts",
     "./record-playable": "./src/record-playable.ts",
-    "./periodic-special": "./src/periodic-special.ts"
+    "./periodic-special": "./src/periodic-special.ts",
+    "./combat-grammar": "./src/combat-grammar.ts"
   },
   "scripts": {
     "typecheck": "tsc --noEmit",

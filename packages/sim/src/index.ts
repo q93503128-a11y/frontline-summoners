@@ -51,7 +51,6 @@ export type DamageBonus =
 export interface OnHitSlowDefinition {
   readonly chancePermille: number;
   readonly durationFrames: number;
-  /** Movement speed while slowed. 600 means 60% of normal speed. */
   readonly speedPermille: number;
 }
 
@@ -64,8 +63,13 @@ export interface OnHitPushDefinition {
 export interface OnHitWeakenDefinition {
   readonly chancePermille: number;
   readonly durationFrames: number;
-  /** Outgoing attack damage while weakened. 750 means 75% of normal damage. */
   readonly attackPermille: number;
+}
+
+export interface AttackHitEffectDefinition {
+  readonly onHitSlow?: OnHitSlowDefinition;
+  readonly onHitPush?: OnHitPushDefinition;
+  readonly onHitWeaken?: OnHitWeakenDefinition;
 }
 
 export interface ReviveOnceDefinition {
@@ -74,18 +78,14 @@ export interface ReviveOnceDefinition {
 }
 
 export interface HpThresholdAdvanceDefinition {
-  /** Descending HP thresholds. [600, 300] means one trigger at 60% and one at 30%. */
   readonly thresholdsPermille: readonly number[];
-  /** Forward distance per crossed threshold. */
   readonly distance: number;
-  /** One-time startup reduction applied to the next attack after a threshold trigger. */
   readonly nextAttackStartupReductionFrames: number;
 }
 
 export interface AttackTiming {
   readonly cycleFrames: number;
   readonly hitFrames: readonly number[];
-  readonly backswingFrames: number;
 }
 
 export interface AttackPatternStep {
@@ -94,9 +94,22 @@ export interface AttackPatternStep {
   readonly attackMaxRange: number;
   readonly cycleFrames: number;
   readonly hitFrames: readonly number[];
+  /** Exact damage for each hit frame. Missing preserves legacy attackDamage-per-hit behavior. */
+  readonly hitDamages?: readonly number[];
+  /** Per-hit effects. Missing preserves the profile-level effect on every hit. */
+  readonly hitEffects?: readonly AttackHitEffectDefinition[];
   readonly onHitSlow?: OnHitSlowDefinition;
   readonly onHitPush?: OnHitPushDefinition;
   readonly onHitWeaken?: OnHitWeakenDefinition;
+}
+
+export interface AttackPhaseDefinition {
+  /** Phase applies at or below this HP ratio. Phases must be ordered 1000 -> lower thresholds. */
+  readonly maxHpPermille: number;
+  /** Indices into attackPattern, used as a deterministic loop for this phase. */
+  readonly patternIndices: readonly number[];
+  /** Optional cycle scaling only. Startup/hit frames remain authored and readable. */
+  readonly cyclePermille?: number;
 }
 
 export interface CloseRangeAttackDefinition extends AttackPatternStep {
@@ -116,21 +129,19 @@ export interface BattleUnitDefinition {
   readonly naturalKnockbackFrames: number;
   readonly naturalKnockbackDistance: number;
   readonly deathFrames: number;
-  readonly attackTiming: AttackTiming;
-  /** Optional deterministic attack sequence. Missing means the legacy single attack profile. */
+  readonly attackTiming: AttackTiming & { readonly backswingFrames: number };
+  readonly hitDamages?: readonly number[];
+  readonly hitEffects?: readonly AttackHitEffectDefinition[];
   readonly attackPattern?: readonly AttackPatternStep[];
-  /** Optional conditional replacement attack selected when the nearest target is close enough at attack start. */
+  readonly attackPhases?: readonly AttackPhaseDefinition[];
   readonly closeRangeAttack?: CloseRangeAttackDefinition;
   readonly onHitSlow?: OnHitSlowDefinition;
   readonly onHitPush?: OnHitPushDefinition;
   readonly onHitWeaken?: OnHitWeakenDefinition;
   readonly reviveOnce?: ReviveOnceDefinition;
   readonly hpThresholdAdvance?: HpThresholdAdvanceDefinition;
-  /** One or two identity attributes. NEUTRAL is used alone. There is no global RPS table. */
   readonly attributes?: readonly CombatAttribute[];
-  /** Supplemental combat taxonomy such as ARMORED/GIANT/BOSS. */
   readonly combatTags?: readonly CombatTag[];
-  /** Optional specialist damage. Only the strongest matching bonus is applied. */
   readonly damageBonuses?: readonly DamageBonus[];
 }
 
@@ -144,6 +155,8 @@ export interface BattleUnit {
   stateFrame: number;
   nextAttackTick: number;
   attackPatternIndex: number;
+  attackPhaseIndex: number;
+  attackPhaseCursor: number;
   usingCloseRangeAttack: boolean;
   naturalKnockbacksConsumed: number;
   knockbackStartX: number;
@@ -153,6 +166,8 @@ export interface BattleUnit {
   slowSpeedPermille: number;
   weakenUntilTick: number;
   weakenAttackPermille: number;
+  damageTakenUntilTick: number;
+  damageTakenPermille: number;
   reviveUsed: boolean;
   reviveReadyTick: number;
   hpThresholdAdvancesConsumed: number;
@@ -196,15 +211,13 @@ type BaseHit = { readonly targetKind: 'BASE'; readonly targetTeam: BattleTeam; r
 type HitEvent = UnitHit | BaseHit;
 
 type ActiveAttackProfile = {
-  readonly attackDamage: number;
   readonly attackMinRange: number;
   readonly attackMaxRange: number;
   readonly cycleFrames: number;
   readonly hitFrames: readonly number[];
+  readonly hitDamages: readonly number[];
+  readonly hitEffects: readonly AttackHitEffectDefinition[];
   readonly backswingFrames: number;
-  readonly onHitSlow?: OnHitSlowDefinition;
-  readonly onHitPush?: OnHitPushDefinition;
-  readonly onHitWeaken?: OnHitWeakenDefinition;
 };
 
 const oppositeTeam = (team: BattleTeam): BattleTeam => (team === 'PLAYER' ? 'ENEMY' : 'PLAYER');
@@ -223,34 +236,51 @@ function assertAttackFrames(cycleFrames: number, hitFrames: readonly number[], c
 function assertProbabilityPermille(value: number, context: string): void {
   if (!Number.isInteger(value) || value < 1 || value > 1000) throw new Error(`${context}.chancePermille must be an integer in 1..1000`);
 }
-
 function assertSlow(effect: OnHitSlowDefinition | undefined, context: string): void {
   if (!effect) return;
   assertProbabilityPermille(effect.chancePermille, context);
   if (!Number.isInteger(effect.durationFrames) || effect.durationFrames <= 0) throw new Error(`${context}.durationFrames must be positive`);
   if (!Number.isInteger(effect.speedPermille) || effect.speedPermille < 1 || effect.speedPermille >= 1000) throw new Error(`${context}.speedPermille must be an integer in 1..999`);
 }
-
 function assertPush(effect: OnHitPushDefinition | undefined, context: string): void {
   if (!effect) return;
   assertProbabilityPermille(effect.chancePermille, context);
   if (!Number.isInteger(effect.distance) || effect.distance < 0) throw new Error(`${context}.distance must be a non-negative integer`);
   if (!Number.isInteger(effect.frames) || effect.frames <= 0) throw new Error(`${context}.frames must be positive`);
 }
-
 function assertWeaken(effect: OnHitWeakenDefinition | undefined, context: string): void {
   if (!effect) return;
   assertProbabilityPermille(effect.chancePermille, context);
   if (!Number.isInteger(effect.durationFrames) || effect.durationFrames <= 0) throw new Error(`${context}.durationFrames must be positive`);
   if (!Number.isInteger(effect.attackPermille) || effect.attackPermille < 1 || effect.attackPermille >= 1000) throw new Error(`${context}.attackPermille must be an integer in 1..999`);
 }
-
+function assertHitEffect(effect: AttackHitEffectDefinition, context: string): void {
+  assertSlow(effect.onHitSlow, `${context}.onHitSlow`);
+  assertPush(effect.onHitPush, `${context}.onHitPush`);
+  assertWeaken(effect.onHitWeaken, `${context}.onHitWeaken`);
+}
+function assertPerHit(
+  hitFrames: readonly number[],
+  hitDamages: readonly number[] | undefined,
+  hitEffects: readonly AttackHitEffectDefinition[] | undefined,
+  context: string,
+): void {
+  if (hitDamages !== undefined) {
+    if (hitDamages.length !== hitFrames.length) throw new Error(`${context}.hitDamages length must match hitFrames`);
+    if (hitDamages.some((damage) => !Number.isInteger(damage) || damage < 0)) throw new Error(`${context}.hitDamages must use non-negative integers`);
+  }
+  if (hitEffects !== undefined) {
+    if (hitEffects.length !== hitFrames.length) throw new Error(`${context}.hitEffects length must match hitFrames`);
+    hitEffects.forEach((effect, index) => assertHitEffect(effect, `${context}.hitEffects[${index}]`));
+  }
+}
 function assertAttackProfile(profile: AttackPatternStep, context: string): void {
   if (!Number.isInteger(profile.attackDamage) || profile.attackDamage < 0) throw new Error(`${context}.attackDamage must be a non-negative integer`);
   if (!Number.isInteger(profile.attackMinRange) || profile.attackMinRange < 0) throw new Error(`${context}.attackMinRange must be a non-negative integer`);
   if (!Number.isInteger(profile.attackMaxRange) || profile.attackMaxRange < 0) throw new Error(`${context}.attackMaxRange must be a non-negative integer`);
   if (profile.attackMinRange > profile.attackMaxRange) throw new Error(`${context}.attackMinRange must be <= attackMaxRange`);
   assertAttackFrames(profile.cycleFrames, profile.hitFrames, context);
+  assertPerHit(profile.hitFrames, profile.hitDamages, profile.hitEffects, context);
   assertSlow(profile.onHitSlow, `${context}.onHitSlow`);
   assertPush(profile.onHitPush, `${context}.onHitPush`);
   assertWeaken(profile.onHitWeaken, `${context}.onHitWeaken`);
@@ -266,12 +296,25 @@ function assertDefinition(definition: BattleUnitDefinition): void {
   if (!Number.isInteger(definition.standingRange) || definition.standingRange < 0) throw new Error('standingRange must be non-negative');
   assertAttackFrames(timing.cycleFrames, timing.hitFrames, 'attackTiming');
   if (!Number.isInteger(timing.backswingFrames) || timing.backswingFrames < 0) throw new Error('backswingFrames must be non-negative');
+  assertPerHit(timing.hitFrames, definition.hitDamages, definition.hitEffects, 'attackTiming');
   assertSlow(definition.onHitSlow, 'onHitSlow');
   assertPush(definition.onHitPush, 'onHitPush');
   assertWeaken(definition.onHitWeaken, 'onHitWeaken');
   if (definition.attackPattern !== undefined) {
     if (definition.attackPattern.length === 0) throw new Error('attackPattern must contain at least one step');
     definition.attackPattern.forEach((step, index) => assertAttackProfile(step, `attackPattern[${index}]`));
+  }
+  if (definition.attackPhases !== undefined) {
+    if (!definition.attackPattern || definition.attackPattern.length === 0) throw new Error('attackPhases require attackPattern');
+    if (definition.attackPhases.length === 0) throw new Error('attackPhases must contain at least one phase');
+    if (definition.attackPhases[0]!.maxHpPermille !== 1000) throw new Error('attackPhases must start at maxHpPermille 1000');
+    definition.attackPhases.forEach((phase, index) => {
+      if (!Number.isInteger(phase.maxHpPermille) || phase.maxHpPermille < 1 || phase.maxHpPermille > 1000) throw new Error(`attackPhases[${index}].maxHpPermille must be in 1..1000`);
+      if (index > 0 && phase.maxHpPermille >= definition.attackPhases![index - 1]!.maxHpPermille) throw new Error('attackPhases maxHpPermille must be strictly descending');
+      if (phase.patternIndices.length === 0) throw new Error(`attackPhases[${index}].patternIndices must not be empty`);
+      if (phase.patternIndices.some((value) => !Number.isInteger(value) || value < 0 || value >= definition.attackPattern!.length)) throw new Error(`attackPhases[${index}].patternIndices references unknown attackPattern step`);
+      if (phase.cyclePermille !== undefined && (!Number.isInteger(phase.cyclePermille) || phase.cyclePermille < 100 || phase.cyclePermille > 2000)) throw new Error(`attackPhases[${index}].cyclePermille must be in 100..2000`);
+    });
   }
   if (definition.closeRangeAttack) {
     assertAttackProfile(definition.closeRangeAttack, 'closeRangeAttack');
@@ -299,35 +342,20 @@ function assertDefinition(definition: BattleUnitDefinition): void {
   if (new Set(attributes).size !== attributes.length) throw new Error('attributes must be unique');
   if (attributes.some((attribute) => !COMBAT_ATTRIBUTE_VALUES.has(attribute))) throw new Error('unknown combat attribute');
   if (attributes.includes('NEUTRAL') && attributes.length !== 1) throw new Error('NEUTRAL cannot be combined with another attribute');
-
   const tags = definition.combatTags ?? [];
   if (new Set(tags).size !== tags.length) throw new Error('combatTags must be unique');
   if (tags.some((tag) => !COMBAT_TAG_VALUES.has(tag))) throw new Error('unknown combat tag');
-
-  const bonuses = definition.damageBonuses ?? [];
-  const bonusKeys = bonuses.map((bonus) => `${bonus.targetKind}:${bonus.target}`);
-  if (new Set(bonusKeys).size !== bonuses.length) throw new Error('damage bonus targets must be unique');
-  for (const bonus of bonuses) {
-    if (bonus.targetKind === 'ATTRIBUTE') {
-      if (!COMBAT_ATTRIBUTE_VALUES.has(bonus.target)) throw new Error('unknown damage bonus attribute');
-    } else if (!COMBAT_TAG_VALUES.has(bonus.target)) {
-      throw new Error('unknown damage bonus tag');
-    }
-    if (!Number.isInteger(bonus.multiplierPermille) || bonus.multiplierPermille < 1000 || bonus.multiplierPermille > 3000) {
-      throw new Error('damage bonus multiplierPermille must be an integer from 1000 to 3000');
-    }
+  for (const bonus of definition.damageBonuses ?? []) {
+    if (!Number.isInteger(bonus.multiplierPermille) || bonus.multiplierPermille < 1000 || bonus.multiplierPermille > 3000) throw new Error('damage bonus multiplierPermille must be in 1000..3000');
   }
 }
 
-/** No implicit attribute matchup exists. Only explicit specialist bonuses apply. */
 export function getUnitAttackDamageAgainst(source: BattleUnitDefinition, target: BattleUnitDefinition, attackDamage = source.attackDamage): number {
   const targetAttributes = new Set(target.attributes ?? []);
   const targetTags = new Set(target.combatTags ?? []);
   let multiplierPermille = 1000;
   for (const bonus of source.damageBonuses ?? []) {
-    const matches = bonus.targetKind === 'ATTRIBUTE'
-      ? targetAttributes.has(bonus.target)
-      : targetTags.has(bonus.target);
+    const matches = bonus.targetKind === 'ATTRIBUTE' ? targetAttributes.has(bonus.target) : targetTags.has(bonus.target);
     if (matches) multiplierPermille = Math.max(multiplierPermille, bonus.multiplierPermille);
   }
   return Math.trunc((attackDamage * multiplierPermille) / 1000);
@@ -356,14 +384,33 @@ export function createBattle(config: BattleConfig): BattleState {
 export function spawnUnit(state: BattleState, definition: BattleUnitDefinition, team: BattleTeam, anchorX = team === 'PLAYER' ? state.bases.PLAYER.anchorX : state.bases.ENEMY.anchorX): BattleUnit {
   assertDefinition(definition);
   const unit: BattleUnit = {
-    simulationId: state.nextSimulationId++, definition, team, hp: definition.maxHp,
-    anchorX: clamp(Math.trunc(anchorX), 0, state.mapLength), state: UnitState.Moving, stateFrame: 0,
-    nextAttackTick: 0, attackPatternIndex: 0, usingCloseRangeAttack: false,
-    naturalKnockbacksConsumed: 0, knockbackStartX: 0, knockbackTargetX: 0,
-    forcedDisplacementFrames: 0, slowUntilTick: 0, slowSpeedPermille: 1000,
-    weakenUntilTick: 0, weakenAttackPermille: 1000,
-    reviveUsed: false, reviveReadyTick: 0,
-    hpThresholdAdvancesConsumed: 0, nextAttackStartupReductionFrames: 0, activeAttackStartupReductionFrames: 0,
+    simulationId: state.nextSimulationId++,
+    definition,
+    team,
+    hp: definition.maxHp,
+    anchorX: clamp(Math.trunc(anchorX), 0, state.mapLength),
+    state: UnitState.Moving,
+    stateFrame: 0,
+    nextAttackTick: 0,
+    attackPatternIndex: 0,
+    attackPhaseIndex: 0,
+    attackPhaseCursor: 0,
+    usingCloseRangeAttack: false,
+    naturalKnockbacksConsumed: 0,
+    knockbackStartX: 0,
+    knockbackTargetX: 0,
+    forcedDisplacementFrames: 0,
+    slowUntilTick: 0,
+    slowSpeedPermille: 1000,
+    weakenUntilTick: 0,
+    weakenAttackPermille: 1000,
+    damageTakenUntilTick: 0,
+    damageTakenPermille: 1000,
+    reviveUsed: false,
+    reviveReadyTick: 0,
+    hpThresholdAdvancesConsumed: 0,
+    nextAttackStartupReductionFrames: 0,
+    activeAttackStartupReductionFrames: 0,
   };
   state.units.push(unit);
   return unit;
@@ -372,11 +419,9 @@ export function spawnUnit(state: BattleState, definition: BattleUnitDefinition, 
 function isTargetable(unit: BattleUnit): boolean {
   return unit.state !== UnitState.NaturalKnockback && unit.state !== UnitState.Reviving && unit.state !== UnitState.Dying;
 }
-
 function signedDistance(source: BattleUnit, targetX: number): number {
   return directionFor(source.team) * (targetX - source.anchorX);
 }
-
 function findNearestDetectionDistance(state: BattleState, source: BattleUnit): number | null {
   let nearest: number | null = null;
   for (const target of state.units) {
@@ -400,12 +445,12 @@ function advanceDisplacement(unit: BattleUnit, duration: number): void {
     unit.forcedDisplacementFrames = 0;
   }
 }
-
 function advanceTimers(state: BattleState): void {
   for (const unit of state.units) {
     if (unit.state !== UnitState.Moving) unit.stateFrame += 1;
     if (unit.slowUntilTick <= state.tick) unit.slowSpeedPermille = 1000;
     if (unit.weakenUntilTick <= state.tick) unit.weakenAttackPermille = 1000;
+    if (unit.damageTakenUntilTick <= state.tick) unit.damageTakenPermille = 1000;
     if (unit.state === UnitState.Reviving && state.tick >= unit.reviveReadyTick) {
       const revive = unit.definition.reviveOnce;
       if (!revive) throw new Error('reviving unit is missing reviveOnce definition');
@@ -415,17 +460,14 @@ function advanceTimers(state: BattleState): void {
       unit.reviveReadyTick = 0;
       continue;
     }
-    if (unit.state === UnitState.NaturalKnockback) {
-      advanceDisplacement(unit, unit.definition.naturalKnockbackFrames);
-    } else if (unit.state === UnitState.ForcedDisplacement) {
-      advanceDisplacement(unit, Math.max(1, unit.forcedDisplacementFrames));
-    } else if (unit.state === UnitState.AttackWait && state.tick >= unit.nextAttackTick) {
+    if (unit.state === UnitState.NaturalKnockback) advanceDisplacement(unit, unit.definition.naturalKnockbackFrames);
+    else if (unit.state === UnitState.ForcedDisplacement) advanceDisplacement(unit, Math.max(1, unit.forcedDisplacementFrames));
+    else if (unit.state === UnitState.AttackWait && state.tick >= unit.nextAttackTick) {
       unit.state = UnitState.Moving;
       unit.stateFrame = 0;
     }
   }
 }
-
 function moveUnits(state: BattleState): void {
   for (const unit of state.units) {
     if (unit.state !== UnitState.Moving) continue;
@@ -447,47 +489,82 @@ function reduceHitFrames(hitFrames: readonly number[], reduction: number): reado
   }
   return reduced;
 }
-
-function profileFromStep(step: AttackPatternStep, backswingFrames: number, startupReductionFrames = 0): ActiveAttackProfile {
+function repeatEffect(effect: AttackHitEffectDefinition, count: number): readonly AttackHitEffectDefinition[] {
+  return Array.from({ length: count }, () => effect);
+}
+function buildHitEffects(
+  hitFrames: readonly number[],
+  authored: readonly AttackHitEffectDefinition[] | undefined,
+  onHitSlow: OnHitSlowDefinition | undefined,
+  onHitPush: OnHitPushDefinition | undefined,
+  onHitWeaken: OnHitWeakenDefinition | undefined,
+): readonly AttackHitEffectDefinition[] {
+  if (authored) return authored;
+  const effect: AttackHitEffectDefinition = {
+    ...(onHitSlow === undefined ? {} : { onHitSlow }),
+    ...(onHitPush === undefined ? {} : { onHitPush }),
+    ...(onHitWeaken === undefined ? {} : { onHitWeaken }),
+  };
+  return repeatEffect(effect, hitFrames.length);
+}
+function applyCyclePermille(cycleFrames: number, hitFrames: readonly number[], permille: number): number {
+  const scaled = Math.max(1, Math.round(cycleFrames * permille / 1000));
+  return Math.max(hitFrames[hitFrames.length - 1]! + 1, scaled);
+}
+function activePhase(unit: BattleUnit): AttackPhaseDefinition | undefined {
+  return unit.definition.attackPhases?.[unit.attackPhaseIndex];
+}
+function profileFromStep(step: AttackPatternStep, backswingFrames: number, startupReductionFrames = 0, cyclePermille = 1000): ActiveAttackProfile {
+  const hitFrames = reduceHitFrames(step.hitFrames, startupReductionFrames);
   return {
-    attackDamage: step.attackDamage,
     attackMinRange: step.attackMinRange,
     attackMaxRange: step.attackMaxRange,
-    cycleFrames: step.cycleFrames,
-    hitFrames: reduceHitFrames(step.hitFrames, startupReductionFrames),
+    cycleFrames: applyCyclePermille(step.cycleFrames, hitFrames, cyclePermille),
+    hitFrames,
+    hitDamages: step.hitDamages ?? Array.from({ length: step.hitFrames.length }, () => step.attackDamage),
+    hitEffects: buildHitEffects(step.hitFrames, step.hitEffects, step.onHitSlow, step.onHitPush, step.onHitWeaken),
     backswingFrames,
-    ...(step.onHitSlow === undefined ? {} : { onHitSlow: step.onHitSlow }),
-    ...(step.onHitPush === undefined ? {} : { onHitPush: step.onHitPush }),
-    ...(step.onHitWeaken === undefined ? {} : { onHitWeaken: step.onHitWeaken }),
   };
 }
-
 function getActiveAttackProfile(unit: BattleUnit): ActiveAttackProfile {
   const reduction = unit.activeAttackStartupReductionFrames;
-  if (unit.usingCloseRangeAttack && unit.definition.closeRangeAttack) {
-    return profileFromStep(unit.definition.closeRangeAttack, unit.definition.attackTiming.backswingFrames, reduction);
-  }
+  if (unit.usingCloseRangeAttack && unit.definition.closeRangeAttack) return profileFromStep(unit.definition.closeRangeAttack, unit.definition.attackTiming.backswingFrames, reduction);
+  const phase = activePhase(unit);
   const step = unit.definition.attackPattern?.[unit.attackPatternIndex];
-  if (step) return profileFromStep(step, unit.definition.attackTiming.backswingFrames, reduction);
+  if (step) return profileFromStep(step, unit.definition.attackTiming.backswingFrames, reduction, phase?.cyclePermille ?? 1000);
+  const hitFrames = reduceHitFrames(unit.definition.attackTiming.hitFrames, reduction);
   return {
-    attackDamage: unit.definition.attackDamage,
     attackMinRange: unit.definition.attackMinRange,
     attackMaxRange: unit.definition.attackMaxRange,
     cycleFrames: unit.definition.attackTiming.cycleFrames,
-    hitFrames: reduceHitFrames(unit.definition.attackTiming.hitFrames, reduction),
+    hitFrames,
+    hitDamages: unit.definition.hitDamages ?? Array.from({ length: unit.definition.attackTiming.hitFrames.length }, () => unit.definition.attackDamage),
+    hitEffects: buildHitEffects(unit.definition.attackTiming.hitFrames, unit.definition.hitEffects, unit.definition.onHitSlow, unit.definition.onHitPush, unit.definition.onHitWeaken),
     backswingFrames: unit.definition.attackTiming.backswingFrames,
-    ...(unit.definition.onHitSlow === undefined ? {} : { onHitSlow: unit.definition.onHitSlow }),
-    ...(unit.definition.onHitPush === undefined ? {} : { onHitPush: unit.definition.onHitPush }),
-    ...(unit.definition.onHitWeaken === undefined ? {} : { onHitWeaken: unit.definition.onHitWeaken }),
   };
 }
-
+function resolveAttackPhase(unit: BattleUnit): void {
+  const phases = unit.definition.attackPhases;
+  if (!phases) return;
+  const hpPermille = Math.max(0, Math.min(1000, Math.floor(unit.hp * 1000 / unit.definition.maxHp)));
+  let nextPhaseIndex = 0;
+  for (let index = 1; index < phases.length; index += 1) {
+    if (hpPermille <= phases[index]!.maxHpPermille) nextPhaseIndex = index;
+  }
+  if (unit.attackPhaseIndex !== nextPhaseIndex) {
+    unit.attackPhaseIndex = nextPhaseIndex;
+    unit.attackPhaseCursor = 0;
+  }
+  const phase = phases[nextPhaseIndex]!;
+  unit.attackPatternIndex = phase.patternIndices[unit.attackPhaseCursor % phase.patternIndices.length]!;
+}
 function detectAndStartAttacks(state: BattleState): void {
   for (const unit of state.units) {
     if (unit.state !== UnitState.Moving || state.tick < unit.nextAttackTick) continue;
     const nearest = findNearestDetectionDistance(state, unit);
     if (nearest !== null && nearest <= unit.definition.standingRange) {
       unit.usingCloseRangeAttack = !!unit.definition.closeRangeAttack && nearest <= unit.definition.closeRangeAttack.triggerMaxDistance;
+      if (!unit.usingCloseRangeAttack) resolveAttackPhase(unit);
       unit.activeAttackStartupReductionFrames = unit.nextAttackStartupReductionFrames;
       unit.nextAttackStartupReductionFrames = 0;
       const attack = getActiveAttackProfile(unit);
@@ -497,53 +574,50 @@ function detectAndStartAttacks(state: BattleState): void {
     }
   }
 }
-
 function isInsideAttackRange(source: BattleUnit, targetX: number, attack: ActiveAttackProfile): boolean {
   const distance = signedDistance(source, targetX);
   return distance >= attack.attackMinRange && distance <= attack.attackMaxRange;
 }
-
 function outgoingDamage(state: BattleState, source: BattleUnit, damage: number): number {
   const permille = source.weakenUntilTick > state.tick ? source.weakenAttackPermille : 1000;
   return Math.trunc(damage * permille / 1000);
 }
-
-function makeUnitHit(state: BattleState, source: BattleUnit, target: BattleUnit, attack: ActiveAttackProfile): UnitHit {
-  const damage = outgoingDamage(state, source, attack.attackDamage);
+function makeUnitHit(state: BattleState, source: BattleUnit, target: BattleUnit, rawDamage: number, effect: AttackHitEffectDefinition): UnitHit {
+  const damage = outgoingDamage(state, source, rawDamage);
   return {
     targetKind: 'UNIT',
     sourceId: source.simulationId,
     targetId: target.simulationId,
     damage: getUnitAttackDamageAgainst(source.definition, target.definition, damage),
-    ...(attack.onHitSlow === undefined ? {} : { onHitSlow: attack.onHitSlow }),
-    ...(attack.onHitPush === undefined ? {} : { onHitPush: attack.onHitPush }),
-    ...(attack.onHitWeaken === undefined ? {} : { onHitWeaken: attack.onHitWeaken }),
+    ...(effect.onHitSlow === undefined ? {} : { onHitSlow: effect.onHitSlow }),
+    ...(effect.onHitPush === undefined ? {} : { onHitPush: effect.onHitPush }),
+    ...(effect.onHitWeaken === undefined ? {} : { onHitWeaken: effect.onHitWeaken }),
   };
 }
-
 function collectHits(state: BattleState): HitEvent[] {
   const hits: HitEvent[] = [];
   for (const source of state.units) {
     const attack = getActiveAttackProfile(source);
-    if (source.state !== UnitState.Foreswing || !attack.hitFrames.includes(source.stateFrame)) continue;
+    if (source.state !== UnitState.Foreswing) continue;
+    const hitIndex = attack.hitFrames.indexOf(source.stateFrame);
+    if (hitIndex < 0) continue;
+    const hitDamage = attack.hitDamages[hitIndex] ?? 0;
+    const hitEffect = attack.hitEffects[hitIndex] ?? {};
     const unitTargets = state.units
       .filter((target) => target.team !== source.team && isTargetable(target) && isInsideAttackRange(source, target.anchorX, attack))
       .sort((a, b) => signedDistance(source, a.anchorX) - signedDistance(source, b.anchorX) || a.simulationId - b.simulationId);
     const base = state.bases[oppositeTeam(source.team)];
     const baseIsInRange = isInsideAttackRange(source, base.anchorX, attack) && base.hp > 0;
     if (source.definition.targetMode === 'AREA') {
-      for (const target of unitTargets) hits.push(makeUnitHit(state, source, target, attack));
-      if (baseIsInRange) hits.push({ targetKind: 'BASE', targetTeam: base.team, damage: outgoingDamage(state, source, attack.attackDamage) });
+      for (const target of unitTargets) hits.push(makeUnitHit(state, source, target, hitDamage, hitEffect));
+      if (baseIsInRange) hits.push({ targetKind: 'BASE', targetTeam: base.team, damage: outgoingDamage(state, source, hitDamage) });
       continue;
     }
     const nearestUnit = unitTargets[0];
     const unitDistance = nearestUnit ? signedDistance(source, nearestUnit.anchorX) : Number.POSITIVE_INFINITY;
     const baseDistance = baseIsInRange ? signedDistance(source, base.anchorX) : Number.POSITIVE_INFINITY;
-    if (nearestUnit && unitDistance <= baseDistance) {
-      hits.push(makeUnitHit(state, source, nearestUnit, attack));
-    } else if (baseIsInRange) {
-      hits.push({ targetKind: 'BASE', targetTeam: base.team, damage: outgoingDamage(state, source, attack.attackDamage) });
-    }
+    if (nearestUnit && unitDistance <= baseDistance) hits.push(makeUnitHit(state, source, nearestUnit, hitDamage, hitEffect));
+    else if (baseIsInRange) hits.push({ targetKind: 'BASE', targetTeam: base.team, damage: outgoingDamage(state, source, hitDamage) });
   }
   return hits;
 }
@@ -552,7 +626,6 @@ function naturalThreshold(definition: BattleUnitDefinition, index: number): numb
   const count = definition.naturalKnockbackCount;
   return Math.trunc((definition.maxHp * (count + 1 - index)) / (count + 1));
 }
-
 function enterNaturalKnockback(state: BattleState, unit: BattleUnit): void {
   const direction = directionFor(unit.team);
   unit.state = UnitState.NaturalKnockback;
@@ -563,7 +636,6 @@ function enterNaturalKnockback(state: BattleState, unit: BattleUnit): void {
   unit.usingCloseRangeAttack = false;
   unit.activeAttackStartupReductionFrames = 0;
 }
-
 function enterForcedDisplacement(state: BattleState, unit: BattleUnit, distance: number, frames: number): void {
   const direction = directionFor(unit.team);
   unit.state = UnitState.ForcedDisplacement;
@@ -574,7 +646,6 @@ function enterForcedDisplacement(state: BattleState, unit: BattleUnit, distance:
   unit.usingCloseRangeAttack = false;
   unit.activeAttackStartupReductionFrames = 0;
 }
-
 function enterReviving(state: BattleState, unit: BattleUnit): void {
   const revive = unit.definition.reviveOnce;
   if (!revive) throw new Error('enterReviving requires reviveOnce');
@@ -587,7 +658,6 @@ function enterReviving(state: BattleState, unit: BattleUnit): void {
   unit.reviveUsed = true;
   unit.reviveReadyTick = state.tick + revive.delayFrames;
 }
-
 function enterDying(unit: BattleUnit): void {
   unit.hp = 0;
   unit.state = UnitState.Dying;
@@ -596,7 +666,6 @@ function enterDying(unit: BattleUnit): void {
   unit.usingCloseRangeAttack = false;
   unit.activeAttackStartupReductionFrames = 0;
 }
-
 function deterministicProc(tick: number, sourceId: number, targetId: number, salt: number, chancePermille: number): boolean {
   let value = Math.imul(tick + 1, 0x9e3779b1) ^ Math.imul(sourceId + 17, 0x85ebca6b) ^ Math.imul(targetId + 31, 0xc2b2ae35) ^ salt;
   value ^= value >>> 16;
@@ -604,8 +673,7 @@ function deterministicProc(tick: number, sourceId: number, targetId: number, sal
   value ^= value >>> 15;
   return (value >>> 0) % 1000 < chancePermille;
 }
-
-function applyHitEffects(state: BattleState, unit: BattleUnit, hits: readonly UnitHit[], naturalKnockbackTriggered: boolean): void {
+function applyHitEffects(state: BattleState, unit: BattleUnit, hits: readonly UnitHit[], displacementAlreadyTriggered: boolean): void {
   if (!isTargetable(unit)) return;
   if (unit.slowUntilTick <= state.tick) {
     for (const hit of hits) {
@@ -625,7 +693,7 @@ function applyHitEffects(state: BattleState, unit: BattleUnit, hits: readonly Un
       break;
     }
   }
-  if (naturalKnockbackTriggered) return;
+  if (displacementAlreadyTriggered) return;
   for (const hit of hits) {
     const push = hit.onHitPush;
     if (!push || push.distance === 0 || !deterministicProc(state.tick, hit.sourceId, unit.simulationId, 0x70757368, push.chancePermille)) continue;
@@ -633,7 +701,6 @@ function applyHitEffects(state: BattleState, unit: BattleUnit, hits: readonly Un
     break;
   }
 }
-
 function countHpThresholdAdvances(unit: BattleUnit, oldHp: number, newHp: number): number {
   const special = unit.definition.hpThresholdAdvance;
   if (!special) return 0;
@@ -644,7 +711,6 @@ function countHpThresholdAdvances(unit: BattleUnit, oldHp: number, newHp: number
   }
   return crossed;
 }
-
 function applyHpThresholdAdvance(state: BattleState, unit: BattleUnit, crossed: number): void {
   const special = unit.definition.hpThresholdAdvance;
   if (!special || crossed <= 0) return;
@@ -657,7 +723,10 @@ function applyHpThresholdAdvance(state: BattleState, unit: BattleUnit, crossed: 
   unit.activeAttackStartupReductionFrames = 0;
   unit.nextAttackStartupReductionFrames = Math.max(unit.nextAttackStartupReductionFrames, special.nextAttackStartupReductionFrames);
 }
-
+function incomingDamage(state: BattleState, unit: BattleUnit, damage: number): number {
+  const permille = unit.damageTakenUntilTick > state.tick ? unit.damageTakenPermille : 1000;
+  return Math.trunc(damage * permille / 1000);
+}
 function applyHits(state: BattleState, hits: readonly HitEvent[]): void {
   const unitHits = new Map<number, UnitHit[]>();
   const baseDamage: Record<BattleTeam, number> = { PLAYER: 0, ENEMY: 0 };
@@ -670,30 +739,28 @@ function applyHits(state: BattleState, hits: readonly HitEvent[]): void {
   }
   for (const unit of state.units) {
     const targetHits = unitHits.get(unit.simulationId) ?? [];
-    const damage = targetHits.reduce((sum, hit) => sum + hit.damage, 0);
-    if (damage <= 0 || !isTargetable(unit)) continue;
+    if (targetHits.length === 0 || !isTargetable(unit)) continue;
+    const rawDamage = targetHits.reduce((sum, hit) => sum + hit.damage, 0);
+    const damage = incomingDamage(state, unit, rawDamage);
     const oldHp = unit.hp;
     const newHp = Math.max(0, oldHp - damage);
     unit.hp = newHp;
-    if (newHp <= 0) {
+    if (newHp <= 0 && damage > 0) {
       if (unit.definition.reviveOnce && !unit.reviveUsed) enterReviving(state, unit);
       else enterDying(unit);
       continue;
     }
     let crossed = 0;
-    for (let index = unit.naturalKnockbacksConsumed + 1; index <= unit.definition.naturalKnockbackCount; index += 1) {
-      if (oldHp > naturalThreshold(unit.definition, index) && newHp <= naturalThreshold(unit.definition, index)) crossed += 1;
+    if (damage > 0) {
+      for (let index = unit.naturalKnockbacksConsumed + 1; index <= unit.definition.naturalKnockbackCount; index += 1) {
+        if (oldHp > naturalThreshold(unit.definition, index) && newHp <= naturalThreshold(unit.definition, index)) crossed += 1;
+      }
     }
-    const specialCrossed = countHpThresholdAdvances(unit, oldHp, newHp);
+    const specialCrossed = damage > 0 ? countHpThresholdAdvances(unit, oldHp, newHp) : 0;
     const naturalKnockbackTriggered = crossed > 0;
-    if (naturalKnockbackTriggered) {
-      unit.naturalKnockbacksConsumed = Math.min(unit.definition.naturalKnockbackCount, unit.naturalKnockbacksConsumed + crossed);
-    }
-    if (specialCrossed > 0) {
-      applyHpThresholdAdvance(state, unit, specialCrossed);
-    } else if (naturalKnockbackTriggered) {
-      enterNaturalKnockback(state, unit);
-    }
+    if (naturalKnockbackTriggered) unit.naturalKnockbacksConsumed = Math.min(unit.definition.naturalKnockbackCount, unit.naturalKnockbacksConsumed + crossed);
+    if (specialCrossed > 0) applyHpThresholdAdvance(state, unit, specialCrossed);
+    else if (naturalKnockbackTriggered) enterNaturalKnockback(state, unit);
     applyHitEffects(state, unit, targetHits, naturalKnockbackTriggered || specialCrossed > 0);
   }
   for (const team of ['PLAYER', 'ENEMY'] as const) state.bases[team].hp = Math.max(0, state.bases[team].hp - baseDamage[team]);
@@ -709,29 +776,59 @@ export function applyAreaDamageToTeam(state: BattleState, targetTeam: BattleTeam
   state.stateHash = computeStateHash(state);
   return targets.length;
 }
-
-export function applyForcedDisplacementToTeam(
-  state: BattleState,
-  targetTeam: BattleTeam,
-  distance: number,
-  frames: number,
-): number {
+export function applyForcedDisplacementToUnit(state: BattleState, unit: BattleUnit, distance: number, frames: number): boolean {
+  if (!Number.isInteger(distance) || distance < 0) throw new Error('forced displacement distance must be a non-negative integer');
+  if (!Number.isInteger(frames) || frames <= 0) throw new Error('forced displacement frames must be a positive integer');
+  if (distance === 0 || state.winner !== null || !isTargetable(unit)) return false;
+  enterForcedDisplacement(state, unit, distance, frames);
+  state.stateHash = computeStateHash(state);
+  return true;
+}
+export function applyForcedDisplacementToTeam(state: BattleState, targetTeam: BattleTeam, distance: number, frames: number): number {
   if (!Number.isInteger(distance) || distance < 0) throw new Error('forced displacement distance must be a non-negative integer');
   if (!Number.isInteger(frames) || frames <= 0) throw new Error('forced displacement frames must be a positive integer');
   if (distance === 0 || state.winner !== null) return 0;
-  const targets = state.units.filter((unit) => unit.team === targetTeam && isTargetable(unit));
-  for (const unit of targets) enterForcedDisplacement(state, unit, distance, frames);
-  if (targets.length > 0) state.stateHash = computeStateHash(state);
-  return targets.length;
+  let applied = 0;
+  for (const unit of state.units) {
+    if (unit.team !== targetTeam || !isTargetable(unit)) continue;
+    enterForcedDisplacement(state, unit, distance, frames);
+    applied += 1;
+  }
+  if (applied > 0) state.stateHash = computeStateHash(state);
+  return applied;
+}
+export function applyDamageTakenModifierToUnitIds(
+  state: BattleState,
+  targetTeam: BattleTeam,
+  simulationIds: readonly number[],
+  durationFrames: number,
+  damageTakenPermille: number,
+): number {
+  if (!Number.isInteger(durationFrames) || durationFrames <= 0) throw new Error('damage modifier durationFrames must be positive');
+  if (!Number.isInteger(damageTakenPermille) || damageTakenPermille < 1 || damageTakenPermille > 1000) throw new Error('damageTakenPermille must be in 1..1000');
+  const ids = new Set(simulationIds);
+  let applied = 0;
+  for (const unit of state.units) {
+    if (unit.team !== targetTeam || !ids.has(unit.simulationId) || !isTargetable(unit)) continue;
+    unit.damageTakenUntilTick = state.tick + durationFrames;
+    unit.damageTakenPermille = damageTakenPermille;
+    applied += 1;
+  }
+  if (applied > 0) state.stateHash = computeStateHash(state);
+  return applied;
 }
 
 function advanceAttackPattern(unit: BattleUnit): void {
   if (unit.usingCloseRangeAttack) return;
+  const phases = unit.definition.attackPhases;
+  if (phases) {
+    unit.attackPhaseCursor += 1;
+    return;
+  }
   const pattern = unit.definition.attackPattern;
   if (!pattern) return;
   unit.attackPatternIndex = (unit.attackPatternIndex + 1) % pattern.length;
 }
-
 function finishAttackOrWait(state: BattleState, unit: BattleUnit): void {
   advanceAttackPattern(unit);
   unit.usingCloseRangeAttack = false;
@@ -739,7 +836,6 @@ function finishAttackOrWait(state: BattleState, unit: BattleUnit): void {
   unit.state = state.tick >= unit.nextAttackTick ? UnitState.Moving : UnitState.AttackWait;
   unit.stateFrame = 0;
 }
-
 function advanceAttackStates(state: BattleState): void {
   for (const unit of state.units) {
     const attack = getActiveAttackProfile(unit);
@@ -751,12 +847,9 @@ function advanceAttackStates(state: BattleState): void {
           unit.stateFrame = 0;
         }
       }
-    } else if (unit.state === UnitState.Backswing && unit.stateFrame >= attack.backswingFrames) {
-      finishAttackOrWait(state, unit);
-    }
+    } else if (unit.state === UnitState.Backswing && unit.stateFrame >= attack.backswingFrames) finishAttackOrWait(state, unit);
   }
 }
-
 function removeDeadAndResolveVictory(state: BattleState): void {
   for (let index = state.units.length - 1; index >= 0; index -= 1) {
     const unit = state.units[index]!;
@@ -791,20 +884,24 @@ function fnv1a(text: string): string {
   }
   return (hash >>> 0).toString(16).padStart(8, '0');
 }
-
-function slowSignature(effect: OnHitSlowDefinition | undefined): string {
-  return effect ? `${effect.chancePermille}:${effect.durationFrames}:${effect.speedPermille}` : '-';
-}
-function pushSignature(effect: OnHitPushDefinition | undefined): string {
-  return effect ? `${effect.chancePermille}:${effect.distance}:${effect.frames}` : '-';
-}
-function weakenSignature(effect: OnHitWeakenDefinition | undefined): string {
-  return effect ? `${effect.chancePermille}:${effect.durationFrames}:${effect.attackPermille}` : '-';
-}
+function slowSignature(effect: OnHitSlowDefinition | undefined): string { return effect ? `${effect.chancePermille}:${effect.durationFrames}:${effect.speedPermille}` : '-'; }
+function pushSignature(effect: OnHitPushDefinition | undefined): string { return effect ? `${effect.chancePermille}:${effect.distance}:${effect.frames}` : '-'; }
+function weakenSignature(effect: OnHitWeakenDefinition | undefined): string { return effect ? `${effect.chancePermille}:${effect.durationFrames}:${effect.attackPermille}` : '-'; }
+function hitEffectSignature(effect: AttackHitEffectDefinition): string { return `${slowSignature(effect.onHitSlow)}:${pushSignature(effect.onHitPush)}:${weakenSignature(effect.onHitWeaken)}`; }
 function attackStepSignature(step: AttackPatternStep): string {
-  return [step.attackDamage, step.attackMinRange, step.attackMaxRange, step.cycleFrames, step.hitFrames.join(','), slowSignature(step.onHitSlow), pushSignature(step.onHitPush), weakenSignature(step.onHitWeaken)].join(':');
+  return [
+    step.attackDamage,
+    step.attackMinRange,
+    step.attackMaxRange,
+    step.cycleFrames,
+    step.hitFrames.join(','),
+    step.hitDamages?.join(',') ?? '-',
+    step.hitEffects?.map(hitEffectSignature).join(',') ?? '-',
+    slowSignature(step.onHitSlow),
+    pushSignature(step.onHitPush),
+    weakenSignature(step.onHitWeaken),
+  ].join(':');
 }
-
 export function getBattleUnitDefinitionSignature(definition: BattleUnitDefinition): string {
   const attributes = [...(definition.attributes ?? [])].sort().join(',');
   const tags = [...(definition.combatTags ?? [])].sort().join(',');
@@ -829,6 +926,8 @@ export function getBattleUnitDefinitionSignature(definition: BattleUnitDefinitio
     timing.cycleFrames,
     timing.hitFrames.join(','),
     timing.backswingFrames,
+    `[hitDamage:${definition.hitDamages?.join(',') ?? '-'}]`,
+    `[hitEffects:${definition.hitEffects?.map(hitEffectSignature).join(',') ?? '-'}]`,
     `[${attributes}]`,
     `[${tags}]`,
     `[${bonuses}]`,
@@ -839,49 +938,43 @@ export function getBattleUnitDefinitionSignature(definition: BattleUnitDefinitio
     `[advance:${definition.hpThresholdAdvance ? `${definition.hpThresholdAdvance.thresholdsPermille.join(',')}:${definition.hpThresholdAdvance.distance}:${definition.hpThresholdAdvance.nextAttackStartupReductionFrames}` : '-'}]`,
   ];
   if (definition.attackPattern) parts.push(`[pattern:${definition.attackPattern.map(attackStepSignature).join(';')}]`);
+  if (definition.attackPhases) parts.push(`[phases:${definition.attackPhases.map((phase) => `${phase.maxHpPermille}:${phase.patternIndices.join(',')}:${phase.cyclePermille ?? 1000}`).join(';')}]`);
   if (definition.closeRangeAttack) parts.push(`[close:${definition.closeRangeAttack.triggerMaxDistance}:${attackStepSignature(definition.closeRangeAttack)}]`);
   return parts.join('/');
 }
-
 export function computeStateHash(state: BattleState): string {
   const units = [...state.units]
     .sort((a, b) => a.simulationId - b.simulationId)
-    .map((unit) => {
-      const fields: Array<string | number> = [
-        unit.simulationId,
-        getBattleUnitDefinitionSignature(unit.definition),
-        unit.team,
-        unit.hp,
-        unit.anchorX,
-        unit.state,
-        unit.stateFrame,
-        unit.nextAttackTick,
-        unit.attackPatternIndex,
-        unit.usingCloseRangeAttack ? 1 : 0,
-        unit.naturalKnockbacksConsumed,
-        unit.knockbackStartX,
-        unit.knockbackTargetX,
-        unit.forcedDisplacementFrames,
-        unit.slowUntilTick,
-        unit.slowSpeedPermille,
-        unit.weakenUntilTick,
-        unit.weakenAttackPermille,
-        unit.reviveUsed ? 1 : 0,
-        unit.reviveReadyTick,
-        unit.hpThresholdAdvancesConsumed,
-        unit.nextAttackStartupReductionFrames,
-        unit.activeAttackStartupReductionFrames,
-      ];
-      return fields.join(':');
-    })
+    .map((unit) => [
+      unit.simulationId,
+      getBattleUnitDefinitionSignature(unit.definition),
+      unit.team,
+      unit.hp,
+      unit.anchorX,
+      unit.state,
+      unit.stateFrame,
+      unit.nextAttackTick,
+      unit.attackPatternIndex,
+      unit.attackPhaseIndex,
+      unit.attackPhaseCursor,
+      unit.usingCloseRangeAttack ? 1 : 0,
+      unit.naturalKnockbacksConsumed,
+      unit.knockbackStartX,
+      unit.knockbackTargetX,
+      unit.forcedDisplacementFrames,
+      unit.slowUntilTick,
+      unit.slowSpeedPermille,
+      unit.weakenUntilTick,
+      unit.weakenAttackPermille,
+      unit.damageTakenUntilTick,
+      unit.damageTakenPermille,
+      unit.reviveUsed ? 1 : 0,
+      unit.reviveReadyTick,
+      unit.hpThresholdAdvancesConsumed,
+      unit.nextAttackStartupReductionFrames,
+      unit.activeAttackStartupReductionFrames,
+    ].join(':'))
     .join('|');
-  const bases = [
-    state.bases.PLAYER.anchorX,
-    state.bases.PLAYER.maxHp,
-    state.bases.PLAYER.hp,
-    state.bases.ENEMY.anchorX,
-    state.bases.ENEMY.maxHp,
-    state.bases.ENEMY.hp,
-  ].join(':');
+  const bases = [state.bases.PLAYER.anchorX, state.bases.PLAYER.maxHp, state.bases.PLAYER.hp, state.bases.ENEMY.anchorX, state.bases.ENEMY.maxHp, state.bases.ENEMY.hp].join(':');
   return fnv1a([state.tick, state.nextSimulationId, state.mapLength, bases, state.winner ?? '-', units].join('#'));
 }
