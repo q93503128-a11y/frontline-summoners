@@ -1,6 +1,7 @@
 import Phaser from 'phaser';
 import { INTERNAL_HEIGHT, INTERNAL_WIDTH } from '@frontline/shared';
 import { ReplayBattleScene as BattleScene } from './replay-battle-scene';
+import { BaseWeaponScene } from './base-weapon-scene';
 import { CatalogScene } from './catalog-scene';
 import { CoopBattleScene, CoopLobbyScene } from './coop-scenes';
 import { DeckScene } from './deck-scene';
@@ -30,7 +31,7 @@ const game = new Phaser.Game({
   antialias: true,
   pixelArt: false,
   roundPixels: false,
-  scene: [BootScene, MainMenuScene, StageHubScene, StageSelectScene, DeckScene, CatalogScene, BattleScene, ResultScene],
+  scene: [BootScene, MainMenuScene, StageHubScene, StageSelectScene, BaseWeaponScene, DeckScene, CatalogScene, BattleScene, ResultScene],
   scale: {
     mode: Phaser.Scale.FIT,
     autoCenter: Phaser.Scale.CENTER_BOTH,
