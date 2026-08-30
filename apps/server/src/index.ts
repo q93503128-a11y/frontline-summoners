@@ -13,6 +13,7 @@ import {
   disconnectCoopSeat,
   getCoopRoomSnapshot,
   parseCoopClientMessage,
+  setCoopSeatBaseWeapon,
   setCoopSeatReady,
   setCoopSeatUnready,
   submitCoopFrameInput,
@@ -21,6 +22,7 @@ import {
   type CoopSeatId,
 } from './coop-room.ts';
 import {
+  assertServerCoopBaseWeaponUnlocked,
   createServerCoopBattle,
   getServerCoopLoadout,
   getServerCoopStage,
@@ -42,7 +44,7 @@ type StoredCoopRoom = {
   battle: CoopPlayableBattleState | null;
 };
 
-const ROOM_STORAGE_KEY = 'coop-room-v3';
+const ROOM_STORAGE_KEY = 'coop-room-v4';
 
 const CORS_HEADERS = {
   'access-control-allow-origin': '*',
@@ -266,14 +268,25 @@ export class BattleRoom extends DurableObject<Env> {
         }));
         return;
       }
+      if (parsed.type === 'SELECT_BASE_WEAPON') {
+        setCoopSeatBaseWeapon(record.room, attachment.seatId, attachment.clientId, parsed.baseWeaponId);
+        await this.saveRecord();
+        this.broadcastRoomState();
+        return;
+      }
       if (parsed.type === 'READY') {
         getServerCoopLoadout(parsed.loadout);
+        const selectedBaseWeaponId = record.room.seats[attachment.seatId].selectedBaseWeaponId;
+        assertServerCoopBaseWeaponUnlocked(selectedBaseWeaponId, parsed.loadout.clearedStageIds);
         const result = setCoopSeatReady(record.room, attachment.seatId, attachment.clientId, parsed.loadout);
         if (result.battleStarted) {
           const loadoutA = record.room.seats.A.loadout;
           const loadoutB = record.room.seats.B.loadout;
+          const weaponA = record.room.seats.A.selectedBaseWeaponId;
+          const weaponB = record.room.seats.B.selectedBaseWeaponId;
           if (!loadoutA || !loadoutB) throw new Error('co-op ready state is missing validated loadout');
-          record.battle = createServerCoopBattle(record.room.stageId, loadoutA, loadoutB);
+          if (weaponA !== weaponB) throw new Error('co-op ready state is missing shared base weapon agreement');
+          record.battle = createServerCoopBattle(record.room.stageId, loadoutA, loadoutB, weaponA);
         }
         await this.saveRecord();
         this.broadcastRoomState();
