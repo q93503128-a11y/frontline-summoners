@@ -15,5 +15,6 @@ export class PvpHubScene extends BasePvpHubScene {
     addButton(this, 145, 570, 150, compact ? 70 : 50, '1v1 친선', () => this.scene.start('pvp-friendly-lobby'), 0x735d87).setDepth(51);
     addButton(this, 305, 570, 150, compact ? 70 : 50, '2v2 일반', () => this.scene.start('pvp-2v2-matchmaking'), 0x5d748f).setDepth(51);
     addButton(this, 465, 570, 150, compact ? 70 : 50, '2v2 친선', () => this.scene.start('pvp-friendly-2v2-lobby'), 0x6d628d).setDepth(51);
+    addButton(this, 905, 570, 280, compact ? 70 : 50, '시즌 상세 · 전적', () => this.scene.start('pvp-season'), 0x665b7f).setDepth(51);
   }
 }
