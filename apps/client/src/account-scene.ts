@@ -8,7 +8,13 @@ import {
   subscribeAccountClientState,
   type AccountClientState,
 } from './account-network.ts';
+import {
+  loadAuthenticatedAccountProfile,
+  mutateAuthenticatedAccountProfile,
+} from './account-profile-network.ts';
+import { loadGuestAchievementProfile } from './achievement-profile.ts';
 import { fetchGoogleAuthConfig, loginWithGoogleCredential } from './google-login.ts';
+import { loadGuestProgress } from './save.ts';
 import { addButton, addText, COLORS, drawBackdrop } from './scene-ui';
 import { isCompactMobileViewport } from './viewport';
 
@@ -28,6 +34,11 @@ declare global {
 const GOOGLE_GSI_SCRIPT_ID = 'frontline-google-gsi';
 const GOOGLE_GSI_SCRIPT_SRC = 'https://accounts.google.com/gsi/client';
 let googleScriptPromise: Promise<void> | null = null;
+
+function newRequestId(): string {
+  if (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function') return crypto.randomUUID();
+  return `guest-profile-${Date.now()}-${Math.random().toString(36).slice(2)}`;
+}
 
 function ensureGoogleIdentityScript(): Promise<void> {
   if (window.google?.accounts?.id) return Promise.resolve();
@@ -92,6 +103,9 @@ export class AccountScene extends Phaser.Scene {
     this.stateText = addText(this, INTERNAL_WIDTH / 2, 200, '', compact ? 32 : 30, '#ffffff', 'center').setOrigin(0.5);
     this.detailText = addText(this, INTERNAL_WIDTH / 2, 250, '', compact ? 21 : 18, COLORS.muted, 'center').setOrigin(0.5);
     this.messageText = addText(this, INTERNAL_WIDTH / 2, 425, '계정 상태 확인 중…', compact ? 21 : 18, COLORS.muted, 'center').setOrigin(0.5);
+
+    addButton(this, INTERNAL_WIDTH / 2, 510, 330, compact ? 82 : 58, '게스트 프로필 가져오기', () => void this.importGuestProfilePreferences(), 0x6b7194);
+    addText(this, INTERNAL_WIDTH / 2, 552, '장착 취향만 가져오며 업적/장식 소유권은 서버가 다시 검증합니다.', compact ? 17 : 15, COLORS.muted, 'center').setOrigin(0.5);
 
     addButton(this, 180, INTERNAL_HEIGHT - 72, 220, compact ? 82 : 58, '메 인', () => this.scene.start('main-menu'), 0x586275);
     addButton(this, INTERNAL_WIDTH / 2, INTERNAL_HEIGHT - 72, 250, compact ? 82 : 58, '서버 새로고침', () => void this.refresh(), 0x5f8fb8);
@@ -180,6 +194,28 @@ export class AccountScene extends Phaser.Scene {
       this.removeGoogleHost();
     } catch (error) {
       if (!this.destroyed) this.setMessage(error instanceof Error ? error.message : 'Google 로그인에 실패했습니다.', COLORS.red);
+    }
+  }
+
+  private async importGuestProfilePreferences(): Promise<void> {
+    if (getAccountClientState().kind !== 'AUTHENTICATED_ONLINE') {
+      this.setMessage('온라인 로그인 계정에서만 게스트 프로필 취향을 가져올 수 있습니다.', COLORS.gold);
+      return;
+    }
+    this.setMessage('게스트 프로필 장착 취향을 서버에서 검증 중…', COLORS.muted);
+    try {
+      const guestProgress = await loadGuestProgress();
+      const guestProfile = loadGuestAchievementProfile(guestProgress);
+      const accountProfile = await loadAuthenticatedAccountProfile();
+      if (!accountProfile) throw new Error('계정 프로필을 불러오지 못했습니다.');
+      await mutateAuthenticatedAccountProfile({
+        requestId: newRequestId(),
+        profileLoadout: guestProfile.profileLoadout,
+      });
+      if (this.destroyed) return;
+      this.setMessage('게스트 장착 취향을 가져왔습니다 · 서버 미해금 장식과 로컬 업적 소유권은 이전하지 않았습니다.', COLORS.green);
+    } catch (error) {
+      if (!this.destroyed) this.setMessage(error instanceof Error ? error.message : '게스트 프로필 가져오기에 실패했습니다.', COLORS.red);
     }
   }
 
