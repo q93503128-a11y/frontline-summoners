@@ -1,5 +1,5 @@
-import { getAccountClientState, refreshAuthenticatedAccount } from './account-network';
-import { resolveCoopApiOrigin } from './coop-network';
+import { getAccountClientState, refreshAuthenticatedAccount } from './account-network.ts';
+import { resolveCoopApiOrigin } from './coop-network.ts';
 
 export type PublicCoopMatchmakingState =
   | { readonly state: 'IDLE' }
