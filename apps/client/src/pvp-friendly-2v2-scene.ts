@@ -9,6 +9,7 @@ import {
   leaveFriendlyPvp2v2Lobby,
   type FriendlyPvp2v2LobbyState,
 } from './pvp-friendly-2v2-network.ts';
+import { createFriendPvp2v2Invite } from './social-network.ts';
 
 function errorText(error: unknown): string {
   const message = error instanceof Error ? error.message : '2v2 친선전 요청 오류';
@@ -22,6 +23,12 @@ function errorText(error: unknown): string {
     friendly_2v2_lobby_full: '이미 4명이 확정된 2v2 친선전 방입니다.',
     friendly_2v2_blocked: '차단 관계가 포함된 방에는 참가할 수 없습니다.',
     friendly_2v2_room_initialization_failed: '2v2 친선 전투방을 만들지 못했습니다.',
+    friendly_2v2_host_only: '방장만 친구를 직접 초대할 수 있습니다.',
+    social_target_not_found: '해당 친구 코드를 찾을 수 없습니다.',
+    social_friend_required: '친구 목록에 있는 지휘관만 직접 초대할 수 있습니다.',
+    social_blocked: '차단 관계인 플레이어에게는 초대를 보낼 수 없습니다.',
+    social_pvp_2v2_already_joined: '이미 이 2v2 방에 참가한 친구입니다.',
+    social_pvp_2v2_invite_pending: '이 친구에게 보낸 2v2 초대가 이미 대기 중입니다.',
   };
   return labels[message] ?? message;
 }
@@ -35,15 +42,25 @@ export class FriendlyPvp2v2LobbyScene extends Phaser.Scene {
 
   constructor() { super('pvp-friendly-2v2-lobby'); }
 
+  init(data: { lobby?: FriendlyPvp2v2LobbyState } = {}): void {
+    this.lobby = data.lobby ?? null;
+    this.pending = false;
+  }
+
   create(): void {
     drawBackdrop(this, 'map');
     const compact = isCompactMobileViewport();
     addText(this, 48, 34, '2v2 친선전', compact ? 42 : 44, COLORS.cream);
-    addText(this, 50, 86, '방 코드 4인 초대 · 표준 Lv50/+0 · 레이팅/시즌 보상 없음', compact ? 18 : 16, COLORS.muted);
+    addText(this, 50, 86, '친구 직접 초대 또는 방 코드 · 표준 Lv50/+0 · 레이팅/시즌 보상 없음', compact ? 18 : 16, COLORS.muted);
     addButton(this, 1165, 62, 170, compact ? 78 : 50, 'PvP 허브', () => { void this.leave(); }, 0x586275);
-    this.status = addText(this, INTERNAL_WIDTH / 2, 675, '친구 3명을 초대하거나 받은 코드를 입력하세요.', compact ? 20 : 16, '#a9b5c5', 'center').setOrigin(0.5);
+    this.status = addText(this, INTERNAL_WIDTH / 2, 675, '친구 3명을 직접 초대하거나 받은 코드를 입력하세요.', compact ? 20 : 16, '#a9b5c5', 'center').setOrigin(0.5);
     this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => this.pollEvent?.destroy());
     this.render();
+    if (this.lobby?.state === 'MATCHED') this.enter(this.lobby);
+    else if (this.lobby?.state === 'WAITING') {
+      this.status.setText(this.lobby.host ? '2v2 파티 대기 중 · 친구를 직접 초대할 수 있습니다.' : `좌석 ${this.lobby.seatId ?? '-'} 참가 완료 · 나머지 인원을 기다립니다.`).setColor('#8ee3aa');
+      this.startPolling();
+    }
   }
 
   private render(): void {
@@ -71,11 +88,17 @@ export class FriendlyPvp2v2LobbyScene extends Phaser.Scene {
     seats.forEach((seat, index) => {
       const occupied = index < lobby.participantCount;
       const x = 330 + (index % 2) * 620;
-      const y = 360 + Math.floor(index / 2) * 58;
+      const y = 350 + Math.floor(index / 2) * 55;
       this.content!.add(addText(this, x, y, `${occupied ? '●' : '○'} ${seat}`, compact ? 19 : 16, occupied ? '#8ee3aa' : '#7f8a99', 'center').setOrigin(0.5));
     });
-    this.content.add(addButton(this, 455, 500, 300, compact ? 86 : 62, '코드 복사', () => { void this.copyCode(lobby.inviteCode); }, 0x5f7897));
-    this.content.add(addButton(this, 825, 500, 300, compact ? 86 : 62, lobby.host ? '방 취소' : '방 나가기', () => { void this.leaveLobby(); }, 0x815b60));
+    if (lobby.host) {
+      this.content.add(addButton(this, 330, 500, 245, compact ? 86 : 62, '친구 직접 초대', () => { void this.inviteFriendByPrompt(); }, 0x6f6a9a));
+      this.content.add(addButton(this, 640, 500, 245, compact ? 86 : 62, '코드 복사', () => { void this.copyCode(lobby.inviteCode); }, 0x5f7897));
+      this.content.add(addButton(this, 950, 500, 245, compact ? 86 : 62, '방 취소', () => { void this.leaveLobby(); }, 0x815b60));
+    } else {
+      this.content.add(addButton(this, 455, 500, 300, compact ? 86 : 62, '코드 복사', () => { void this.copyCode(lobby.inviteCode); }, 0x5f7897));
+      this.content.add(addButton(this, 825, 500, 300, compact ? 86 : 62, '방 나가기', () => { void this.leaveLobby(); }, 0x815b60));
+    }
   }
 
   private async createLobby(): Promise<void> {
@@ -87,7 +110,7 @@ export class FriendlyPvp2v2LobbyScene extends Phaser.Scene {
       if (!this.scene.isActive()) return;
       this.lobby = lobby;
       if (lobby.state === 'MATCHED') return this.enter(lobby);
-      this.status?.setText('친구 3명에게 참가 코드를 보내세요.').setColor('#8ee3aa');
+      this.status?.setText('친구 직접 초대 버튼으로 최대 3명을 부르거나 코드를 공유하세요.').setColor('#8ee3aa');
       this.render();
       this.startPolling();
     } catch (error) {
@@ -109,6 +132,21 @@ export class FriendlyPvp2v2LobbyScene extends Phaser.Scene {
       this.status?.setText(`좌석 ${lobby.seatId ?? '-'} 참가 완료 · 나머지 인원을 기다립니다.`).setColor('#8ee3aa');
       this.render();
       this.startPolling();
+    } catch (error) {
+      if (this.scene.isActive()) this.status?.setText(errorText(error)).setColor('#ff9a91');
+    } finally { this.pending = false; }
+  }
+
+  private async inviteFriendByPrompt(): Promise<void> {
+    const lobby = this.lobby;
+    if (this.pending || !lobby || lobby.state !== 'WAITING' || !lobby.host || typeof window === 'undefined') return;
+    const friendCode = window.prompt('직접 초대할 친구 코드(FS-XXXXXXXX)를 입력하세요.');
+    if (!friendCode) return;
+    this.pending = true;
+    this.status?.setText('2v2 친구 초대를 보내는 중…').setColor('#a9b5c5');
+    try {
+      await createFriendPvp2v2Invite(lobby.inviteCode, friendCode);
+      if (this.scene.isActive()) this.status?.setText('2v2 친선전 초대를 보냈습니다. 상대가 수락하면 이 방에 자동 참가합니다.').setColor('#8ee3aa');
     } catch (error) {
       if (this.scene.isActive()) this.status?.setText(errorText(error)).setColor('#ff9a91');
     } finally { this.pending = false; }
