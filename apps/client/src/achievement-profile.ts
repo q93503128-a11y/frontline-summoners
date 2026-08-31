@@ -181,6 +181,32 @@ export function deriveReadOnlyAccountAchievementProfile(progress: GuestProgress)
   };
 }
 
+export function deriveAccountAchievementProfile(
+  progress: GuestProgress,
+  remoteProfile: Readonly<Record<string, unknown>>,
+  editable: boolean,
+): AchievementProfileState {
+  const factIds = normalizeAchievementFactIds(remoteProfile.factIds);
+  const pvpBestTier = normalizePvpAchievementTier(remoteProfile.pvpBestTier);
+  const evaluations = evaluateAchievements(buildAchievementEvaluationInput(progress, factIds, pvpBestTier));
+  const claimedAchievementIds = stringArray(remoteProfile.claimedAchievementIds).filter((id) => ACHIEVEMENT_ID_SET.has(id));
+  const ownedCosmeticIds = normalizeOwnedProfileCosmeticIds(
+    stringArray(remoteProfile.ownedCosmeticIds).filter((id) => COSMETIC_ID_SET.has(id)),
+    claimedAchievementIds,
+  );
+  const profileLoadout = normalizeProfileLoadout(remoteProfile.profileLoadout, ownedCosmeticIds, canonicalOwnedCharacterIds(progress));
+  return {
+    evaluations,
+    claimedAchievementIds,
+    ownedCosmeticIds,
+    profileLoadout,
+    factIds,
+    ...(pvpBestTier === undefined ? {} : { pvpBestTier }),
+    completedCount: evaluations.filter((evaluation) => evaluation.complete).length,
+    editable,
+  };
+}
+
 export function saveGuestProfileLoadout(progress: GuestProgress, nextLoadout: ProfileLoadout): AchievementProfileState {
   const stored = readStoredGuestProfile(progress);
   const profileLoadout = normalizeProfileLoadout(nextLoadout, stored.ownedCosmeticIds, canonicalOwnedCharacterIds(progress));
