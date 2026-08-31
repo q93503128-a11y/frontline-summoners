@@ -13,6 +13,7 @@ import { RecruitmentScene } from './recruitment-scene';
 import { BootScene as BaseBootScene, MainMenuScene as BaseMainMenuScene } from './navigation-scenes';
 import { ProfileScene } from './profile-scene';
 import { PublicCoopLobbyScene, PublicCoopMatchmakingScene } from './public-coop-scenes';
+import { Pvp2v2BattleScene, Pvp2v2MatchmakingScene } from './pvp-2v2-scenes';
 import { FriendlyPvpLobbyScene, FriendlyPvpMatchScene } from './pvp-friendly-scenes';
 import { PvpHubScene, PvpMatchmakingScene, PvpMatchScene } from './pvp-scenes';
 import { RecordBattleScene } from './record-battle-scene';
@@ -44,7 +45,8 @@ class MainMenuScene extends BaseMainMenuScene {
     addButton(this, 635, compact ? 540 : 542, 190, h, 'PvP 대전', () => this.scene.start('pvp-hub'), 0x85634f);
     addButton(this, 885, compact ? 540 : 542, 190, h, '친구·초대', () => this.scene.start('social'), 0x6b628f);
     addButton(this, 1135, compact ? 540 : 542, 190, h, '계 정', () => this.scene.start('account'), 0x6f7f96);
-    addButton(this, 635, compact ? 638 : 620, 220, compact ? 78 : 54, '1v1 친선 PvP', () => this.scene.start('pvp-friendly-lobby'), 0x735d87);
+    addButton(this, 510, compact ? 638 : 620, 220, compact ? 78 : 54, '1v1 친선 PvP', () => this.scene.start('pvp-friendly-lobby'), 0x735d87);
+    addButton(this, 760, compact ? 638 : 620, 220, compact ? 78 : 54, '2v2 일반전', () => this.scene.start('pvp-2v2-matchmaking'), 0x5d748f);
   }
 }
 
@@ -77,6 +79,8 @@ game.scene.add('pvp-matchmaking', PvpMatchmakingScene, false);
 game.scene.add('pvp-match', PvpMatchScene, false);
 game.scene.add('pvp-friendly-lobby', FriendlyPvpLobbyScene, false);
 game.scene.add('pvp-friendly-match', FriendlyPvpMatchScene, false);
+game.scene.add('pvp-2v2-matchmaking', Pvp2v2MatchmakingScene, false);
+game.scene.add('pvp-2v2-match', Pvp2v2BattleScene, false);
 game.scene.add('record-hub', RecordHubScene, false);
 game.scene.add('record-battle', RecordBattleScene, false);
 game.scene.add('record-result', RecordResultScene, false);
