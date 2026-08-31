@@ -23,6 +23,10 @@
       {
         "name": "PVP_ROOM",
         "class_name": "PvpRoom"
+      },
+      {
+        "name": "PVP_FRIENDLY_ROOM",
+        "class_name": "FriendlyPvpRoom"
       }
     ]
   },
@@ -32,6 +36,10 @@
       "storage": "sqlite"
     },
     "PvpRoom": {
+      "type": "durable-object",
+      "storage": "sqlite"
+    },
+    "FriendlyPvpRoom": {
       "type": "durable-object",
       "storage": "sqlite"
     }
