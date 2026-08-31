@@ -1,5 +1,6 @@
 import {
   ACHIEVEMENTS,
+  PROFILE_COSMETICS,
   PVP_ACHIEVEMENT_TIERS,
   evaluateAchievements,
   normalizeAchievementFactIds,
@@ -77,6 +78,7 @@ type ReceiptRow = {
 };
 
 const ACHIEVEMENT_ID_SET = new Set(ACHIEVEMENTS.map((achievement) => achievement.id));
+const COSMETIC_ID_SET = new Set(PROFILE_COSMETICS.map((cosmetic) => cosmetic.id));
 const FORM_ORDER_BY_ID = new Map(SERVER_EVOLUTION_FORMS.map((form) => [form.formId, form.formOrder] as const));
 const PVP_TIER_INDEX = new Map(PVP_ACHIEVEMENT_TIERS.map((tier, index) => [tier, index] as const));
 
@@ -150,9 +152,10 @@ export function normalizeAccountProfileSnapshot(
   const evaluations = evaluateAchievements(buildAccountAchievementEvaluationInput(save, factIds, pvpBestTier));
   const newlyCompleted = evaluations.filter((evaluation) => evaluation.complete).map((evaluation) => evaluation.achievementId);
   const claimedAchievementIds = [...new Set([...validAchievementIds(raw.claimedAchievementIds), ...newlyCompleted])];
-  // Account cosmetics are never accepted from the client or trusted merely because they were present in storage.
-  // Ownership is reconstructed from permanent server-side achievement claims plus defaults.
-  const ownedCosmeticIds = normalizeOwnedProfileCosmeticIds([], claimedAchievementIds);
+  // Public profile mutations can change only profileLoadout. Known cosmetic ids already present in the
+  // server-owned snapshot are therefore trusted server grants (achievement or other permanent honors),
+  // while unknown ids are still discarded by the canonical catalog normalizer.
+  const ownedCosmeticIds = normalizeOwnedProfileCosmeticIds(raw.ownedCosmeticIds, claimedAchievementIds);
   const ownedCharacterIds = getAccountOwnedCharacterIds(save);
   const profileLoadout = normalizeProfileLoadout(raw.profileLoadout, ownedCosmeticIds, ownedCharacterIds);
   return {
@@ -334,6 +337,39 @@ export async function applyAccountProfileLoadout(
   const record = await initializeAccountProfile(db, accountId, nowMs);
   if (record.revision !== nextRevision) throw new Error(`account profile mutation committed without expected profile revision:${requestId}`);
   return { ok: true, replayed: false, record, result };
+}
+
+export async function grantAccountProfileCosmetics(
+  db: D1Database,
+  rawAccountId: string,
+  cosmeticIds: readonly string[],
+  nowMs = Date.now(),
+): Promise<{ readonly record: AccountProfileRecord; readonly grantedIds: readonly string[] }> {
+  const accountId = nonEmptyId(rawAccountId, 'accountId');
+  const requested = [...new Set(cosmeticIds.filter((id) => COSMETIC_ID_SET.has(id)))];
+  if (requested.length === 0) return { record: await initializeAccountProfile(db, accountId, nowMs), grantedIds: [] };
+  for (let attempt = 0; attempt < 4; attempt += 1) {
+    const current = await initializeAccountProfile(db, accountId, nowMs);
+    const owned = new Set(current.snapshot.ownedCosmeticIds);
+    const grantedIds = requested.filter((id) => !owned.has(id));
+    if (grantedIds.length === 0) return { record: current, grantedIds: [] };
+    const nextOwnedCosmeticIds = normalizeOwnedProfileCosmeticIds(
+      [...current.snapshot.ownedCosmeticIds, ...grantedIds],
+      current.snapshot.claimedAchievementIds,
+    );
+    const nextSnapshot: AccountProfileSnapshotV1 = { ...current.snapshot, ownedCosmeticIds: nextOwnedCosmeticIds };
+    const write = await db.prepare(
+      'UPDATE account_profiles SET revision = revision + 1, snapshot_json = ?1, updated_at = unixepoch() WHERE user_id = ?2 AND revision = ?3',
+    ).bind(JSON.stringify(nextSnapshot), accountId, current.revision).run();
+    if ((write.meta.changes ?? 0) === 1) {
+      return { record: await syncAccountProfileAchievements(db, accountId, nowMs), grantedIds };
+    }
+  }
+  const record = await syncAccountProfileAchievements(db, accountId, nowMs);
+  const owned = new Set(record.snapshot.ownedCosmeticIds);
+  const missing = requested.filter((id) => !owned.has(id));
+  if (missing.length > 0) throw new Error(`account profile cosmetic grant conflict:${missing.join(',')}`);
+  return { record, grantedIds: [] };
 }
 
 export async function recordAccountAchievementFact(
