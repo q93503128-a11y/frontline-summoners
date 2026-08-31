@@ -1,5 +1,6 @@
 import { resolveAuthSession } from './auth-session-authority.ts';
 import { claimPvpSeasonHonors, getPvpSeasonOverview } from './pvp-season-authority.ts';
+import { grantPvpSeasonHonorProfileCosmetics } from './pvp-season-profile-reward.ts';
 
 export interface PvpSeasonHttpEnv { readonly DB: D1Database; }
 export interface PvpSeasonHttpResult { readonly status: number; readonly body: unknown; }
@@ -33,7 +34,11 @@ export async function resolvePvpSeasonHttp(
       if (typeof body.seasonId !== 'string' || body.seasonId.trim().length === 0) {
         return { status: 400, body: { error: 'pvp_season_id_required' } };
       }
-      return { status: 200, body: await claimPvpSeasonHonors(env.DB, principal.userId, body.seasonId, nowMs) };
+      const claim = await claimPvpSeasonHonors(env.DB, principal.userId, body.seasonId, nowMs);
+      // Grant on every claim attempt, including replay. If the history row was committed but a
+      // transient profile write failed, the next request repairs the permanent cosmetic grant.
+      const profileGrant = await grantPvpSeasonHonorProfileCosmetics(env.DB, principal.userId, claim.honors, nowMs);
+      return { status: 200, body: { ...claim, ...profileGrant } };
     }
     return { status: 404, body: { error: 'not_found' } };
   } catch (error) {
