@@ -7,6 +7,8 @@
     ".": "./src/index.ts",
     "./playable": "./src/playable.ts",
     "./coop-playable": "./src/coop-playable.ts",
+    "./pvp-content": "./src/pvp-content.ts",
+    "./pvp-playable": "./src/pvp-playable.ts",
     "./meta-progression": "./src/meta-progression.ts",
     "./evolution-catalog": "./src/evolution-catalog.ts",
     "./evolution-form-overrides": "./src/evolution-form-overrides.ts",
