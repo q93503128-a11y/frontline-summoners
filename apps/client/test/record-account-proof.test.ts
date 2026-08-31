@@ -52,8 +52,11 @@ test('record battle starts a RECORD proof, verifies initial hash and logs only a
   assert.match(battle, /trustedBattleId: this\.trustedBattleId, trustedCommands: \[\.\.\.this\.trustedCommands\]/);
 });
 
-test('record result completes server replay before claim and never falls back to guest save for trusted proofs', async () => {
+test('record result completes server replay before claim, recovers online state for retry, and never guest-fallbacks trusted proofs', async () => {
   const result = await readSource('../src/record-result-scene.ts');
+  assert.match(result, /getAccountClientState\(\)\.kind !== 'AUTHENTICATED_ONLINE'/);
+  assert.match(result, /await refreshAuthenticatedAccount\(\)/);
+  assert.match(result, /온라인 연결을 복구한 뒤 결과 재전송을 다시 시도하세요/);
   assert.match(result, /completeAuthenticatedTrustedBattle\(battleId, commands\)/);
   assert.match(result, /claimAuthenticatedTrustedBattle\(battleId\)/);
   assert.match(result, /assertTrustedCompletion\(this\.modeId, completed\.result\)/);
