@@ -56,7 +56,14 @@ export interface AccountGuestMigrationRollbackClient {
   readonly migrationId: string;
 }
 
+export interface LocalGuestMigrationMarker {
+  readonly migrationId: string;
+  readonly sourceHash: string;
+  readonly migratedAtMs: number;
+}
+
 const SESSION_TOKEN_KEY = 'frontline.account.sessionToken.v1';
+const GUEST_MIGRATION_MARKER_KEY = 'frontline.guest.migratedToAccount.v1';
 const SESSION_TOKEN_PATTERN = /^[0-9a-f]{64}$/i;
 
 function isRecord(value: unknown): value is Record<string, unknown> {
@@ -79,6 +86,32 @@ function readToken(): string | null {
   } catch {
     return null;
   }
+}
+
+export function getLocalGuestMigrationMarker(): LocalGuestMigrationMarker | null {
+  if (typeof window === 'undefined') return null;
+  try {
+    const raw: unknown = JSON.parse(window.localStorage.getItem(GUEST_MIGRATION_MARKER_KEY) ?? 'null');
+    if (!isRecord(raw)) return null;
+    const migrationId = nonEmptyString(raw.migrationId);
+    const sourceHash = nonEmptyString(raw.sourceHash);
+    const migratedAtMs = nonNegativeInteger(raw.migratedAtMs);
+    return migrationId && sourceHash && migratedAtMs !== null ? { migrationId, sourceHash, migratedAtMs } : null;
+  } catch {
+    return null;
+  }
+}
+
+function writeLocalGuestMigrationMarker(marker: LocalGuestMigrationMarker): void {
+  if (typeof window === 'undefined') return;
+  try { window.localStorage.setItem(GUEST_MIGRATION_MARKER_KEY, JSON.stringify(marker)); } catch { /* marker is best-effort */ }
+}
+
+function clearLocalGuestMigrationMarker(migrationId: string): void {
+  if (typeof window === 'undefined') return;
+  try {
+    if (getLocalGuestMigrationMarker()?.migrationId === migrationId) window.localStorage.removeItem(GUEST_MIGRATION_MARKER_KEY);
+  } catch { /* marker is best-effort */ }
 }
 
 function parseSummary(value: unknown): AccountProgressSummaryClient | null {
@@ -217,6 +250,7 @@ export async function commitAuthenticatedGuestMigration(
   });
   const result = parseCommit(payload);
   if (!result) throw new Error('guest migration commit response shape is invalid');
+  writeLocalGuestMigrationMarker({ migrationId: result.migrationId, sourceHash: result.sourceHash, migratedAtMs: Date.now() });
   clearAccountProfileNetworkState();
   await refreshAuthenticatedAccount();
   return result;
@@ -227,6 +261,7 @@ export async function rollbackAuthenticatedGuestMigration(migrationId: string): 
   const payload = await request('/api/account/migration/rollback', { migrationId, expectedRevision });
   const result = parseRollback(payload);
   if (!result) throw new Error('guest migration rollback response shape is invalid');
+  clearLocalGuestMigrationMarker(migrationId);
   clearAccountProfileNetworkState();
   await refreshAuthenticatedAccount();
   return result;
@@ -238,4 +273,5 @@ export const __guestMigrationNetworkTestOnly = {
   parseCommit,
   parseRollback,
   SESSION_TOKEN_KEY,
+  GUEST_MIGRATION_MARKER_KEY,
 };
