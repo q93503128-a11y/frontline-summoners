@@ -2,6 +2,7 @@ import type { PvpModeId } from '@frontline/sim/pvp-content';
 import { resolveAuthSession } from './auth-session-authority.ts';
 import { getAccountPvpEligibility, getAccountPvpSeatAuthority } from './account-pvp-authority.ts';
 import {
+  PVP_CURRENT_SEASON_ID,
   clearExpiredPvpQueueRow,
   enterPublicPvpQueue,
   getPvpLeaderboard,
@@ -13,6 +14,7 @@ import {
   type PublicPvpModeId,
   type PublicPvpMatchAssignment,
 } from './pvp-authority.ts';
+import { assertPvpPublicQueueAdmission } from './pvp-season-operations-authority.ts';
 import { voidTrustedPvpMatch } from './pvp-result-authority.ts';
 import type { PvpRoom } from './pvp-durable-room.ts';
 
@@ -117,6 +119,7 @@ async function joinLive1v1(
   nowMs: number,
 ): Promise<PvpHttpResult> {
   if (!LIVE_PUBLIC_1V1_MODES.has(modeId)) return { status: 409, body: { error: 'pvp_2v2_runtime_not_open_yet' } };
+  await assertPvpPublicQueueAdmission(env.DB, nowMs);
   await getAccountPvpSeatAuthority(env.DB, accountId, modeId, nowMs);
   let own = await enterPublicPvpQueue(env.DB, accountId, modeId, nowMs);
   if (own.state === 'MATCHED') return matchedBody(env, accountId, own);
@@ -169,7 +172,7 @@ export async function resolvePvpHttp(
     if (request.method === 'GET' && url.pathname === '/api/pvp/leaderboard') {
       const requested = Number(url.searchParams.get('limit') ?? '100');
       const limit = Number.isFinite(requested) ? requested : 100;
-      return { status: 200, body: { seasonId: 'preseason_v1', entries: await getPvpLeaderboard(env.DB, limit) } };
+      return { status: 200, body: { seasonId: PVP_CURRENT_SEASON_ID, entries: await getPvpLeaderboard(env.DB, limit) } };
     }
 
     if (request.method === 'POST' && url.pathname === '/api/pvp/matchmaking/join') {
@@ -199,8 +202,12 @@ export async function resolvePvpHttp(
     return { status: 404, body: { error: 'not_found' } };
   } catch (error) {
     const message = error instanceof Error ? error.message : 'pvp_request_failed';
+    if (message.includes('pvp_public_queue_closed_for_season_settlement')) {
+      return { status: 503, body: { error: message } };
+    }
     const forbidden = message.includes('required') || message.includes('ineligible') || message.includes('locked');
-    return { status: forbidden ? 403 : 400, body: { error: message } };
+    const conflict = message.includes('mismatch') || message.includes('conflict');
+    return { status: forbidden ? 403 : conflict ? 409 : 400, body: { error: message } };
   }
 }
 
