@@ -14,6 +14,7 @@
     "./meta-economy": "./src/meta-economy.ts",
     "./main-stage-rewards": "./src/main-stage-rewards.ts",
     "./record-rewards": "./src/record-rewards.ts",
+    "./record-content": "./src/record-content.ts",
     "./special-rewards": "./src/special-rewards.ts",
     "./formation-restrictions": "./src/formation-restrictions.ts",
     "./record-playable": "./src/record-playable.ts",
