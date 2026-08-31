@@ -222,6 +222,12 @@ export class FriendCoopBattleScene extends Phaser.Scene {
     else if (this.snapshot) this.showResult(this.snapshot.winner === 'PLAYER');
   }
 
+  private accountSettlementLabel(): string {
+    return this.snapshot?.winner === 'PLAYER'
+      ? '계정 보상·협동 기록 저장 완료'
+      : '계정 적 도감 기록 저장 완료';
+  }
+
   private onMessage(message: CoopServerMessage): void {
     if (!this.scene.isActive()) return;
     if (message.type === 'ERROR') {
@@ -237,7 +243,7 @@ export class FriendCoopBattleScene extends Phaser.Scene {
     if (message.type === 'ACCOUNT_SETTLED') {
       if (message.seatId === this.session.seatId) {
         this.accountSettled = true;
-        this.settlementText?.setText('계정 보상·협동 기록 저장 완료').setColor('#8ee3aa');
+        this.settlementText?.setText(this.accountSettlementLabel()).setColor('#8ee3aa');
         void refreshAuthenticatedAccount();
       }
       return;
@@ -341,8 +347,8 @@ export class FriendCoopBattleScene extends Phaser.Scene {
     const panel = this.add.rectangle(INTERNAL_WIDTH / 2, INTERNAL_HEIGHT / 2, 720, 390, 0x202632, 0.99).setStrokeStyle(4, victory ? 0x6aa478 : 0xa36363, 1);
     this.resultLayer.add([blocker, panel]);
     this.resultLayer.add(addText(this, INTERNAL_WIDTH / 2, 260, victory ? '친구 협동 승리' : '친구 협동 패배', 42, victory ? '#bdf1c7' : '#ffb0a9', 'center').setOrigin(0.5));
-    this.settlementText = addText(this, INTERNAL_WIDTH / 2, 330, victory ? '서버가 계정 보상과 협동 기록을 처리하는 중…' : '패배에서는 클리어 보상이 지급되지 않습니다.', 18, '#c0cad7', 'center').setOrigin(0.5).setWordWrapWidth(620);
-    if (this.accountSettled) this.settlementText.setText('계정 보상·협동 기록 저장 완료').setColor('#8ee3aa');
+    this.settlementText = addText(this, INTERNAL_WIDTH / 2, 330, victory ? '서버가 계정 보상과 협동 기록을 처리하는 중…' : '패배에서는 클리어 보상이 없고 실제 조우한 적만 도감에 기록됩니다.', 18, '#c0cad7', 'center').setOrigin(0.5).setWordWrapWidth(620);
+    if (this.accountSettled) this.settlementText.setText(this.accountSettlementLabel()).setColor('#8ee3aa');
     this.resultLayer.add(this.settlementText);
     this.resultLayer.add(addButton(this, 510, 430, 220, 60, '친구 목록', () => { this.session.close(); this.scene.start('social'); }, 0x6b628f));
     this.resultLayer.add(addButton(this, 770, 430, 220, 60, '메인', () => { this.session.close(); this.scene.start('main-menu'); }, 0x586275));
