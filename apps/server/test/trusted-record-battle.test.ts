@@ -1,19 +1,45 @@
 import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
 import test from 'node:test';
+import { MAIN_STAGE_RESOURCE_REWARDS } from '@frontline/sim/main-stage-rewards';
 import { createInitialAccountSave } from '../src/account-save-authority.ts';
 import { __accountMutationTestOnly } from '../src/account-mutation-authority.ts';
 import { createAccountTrustedRecordBattle } from '../src/account-trusted-battle-runtime.ts';
 import { __trustedBattleTestOnly, TRUSTED_BATTLE_KINDS } from '../src/trusted-battle-authority.ts';
 import { __accountHttpTestOnly } from '../src/account-http.ts';
-import { ACCOUNT_MAIN_STAGE_IDS } from '../src/account-content.ts';
+
+const STARTED_AT_SECONDS = Math.floor(Date.parse('2026-08-31T03:30:00Z') / 1000);
+const EXPIRES_AT_SECONDS = STARTED_AT_SECONDS + 6 * 60 * 60;
+const COMPLETED_AT_MS = (STARTED_AT_SECONDS + 60) * 1000;
 
 function unlockedSnapshot(count: number) {
   let snapshot = createInitialAccountSave();
-  for (const stageId of ACCOUNT_MAIN_STAGE_IDS.slice(0, count)) {
-    snapshot = __accountMutationTestOnly.buildMainBattleResult(snapshot, stageId, 'SOLO_BATTLE').snapshot;
+  for (const reward of MAIN_STAGE_RESOURCE_REWARDS.slice(0, count)) {
+    snapshot = __accountMutationTestOnly.buildMainBattleResult(snapshot, reward.stageId, 'SOLO_BATTLE').snapshot;
   }
   return snapshot;
+}
+
+function recordRow(
+  battleId: string,
+  targetId: 'record_endless_front' | 'record_boss_rush',
+  snapshot: ReturnType<typeof unlockedSnapshot>,
+  initialStateHash: string,
+) {
+  return {
+    battle_id: battleId,
+    battle_kind: 'RECORD' as const,
+    target_id: targetId,
+    start_revision: 0,
+    start_snapshot_json: JSON.stringify(snapshot),
+    initial_state_hash: initialStateHash,
+    started_at: STARTED_AT_SECONDS,
+    expires_at: EXPIRES_AT_SECONDS,
+    completion_fingerprint: null,
+    completed_at: null,
+    result_json: null,
+    claimed_at: null,
+  };
 }
 
 test('trusted battle authority exposes RECORD and reconstructs deterministic record initial hashes', () => {
@@ -30,20 +56,11 @@ test('trusted battle authority exposes RECORD and reconstructs deterministic rec
 test('trusted endless replay derives survival score and discoveries without client score input', () => {
   const snapshot = unlockedSnapshot(60);
   const initial = createAccountTrustedRecordBattle('record_endless_front', snapshot);
-  const result = __trustedBattleTestOnly.replayRecordBattle({
-    battle_id: 'record-endless-test',
-    battle_kind: 'RECORD',
-    target_id: 'record_endless_front',
-    start_revision: 0,
-    start_snapshot_json: JSON.stringify(snapshot),
-    initial_state_hash: initial.battle.stateHash,
-    started_at: 1_000,
-    expires_at: 99_999,
-    completion_fingerprint: null,
-    completed_at: null,
-    result_json: null,
-    claimed_at: null,
-  }, [], 2_000_000);
+  const result = __trustedBattleTestOnly.replayRecordBattle(
+    recordRow('record-endless-test', 'record_endless_front', snapshot, initial.battle.stateHash),
+    [],
+    COMPLETED_AT_MS,
+  );
 
   assert.equal(result.kind, 'RECORD');
   assert.equal(result.recordMode, 'ENDLESS_FRONT');
@@ -55,20 +72,11 @@ test('trusted endless replay derives survival score and discoveries without clie
 test('trusted boss-rush replay derives defeated count rather than accepting a client claim', () => {
   const snapshot = unlockedSnapshot(80);
   const initial = createAccountTrustedRecordBattle('record_boss_rush', snapshot);
-  const result = __trustedBattleTestOnly.replayRecordBattle({
-    battle_id: 'record-boss-test',
-    battle_kind: 'RECORD',
-    target_id: 'record_boss_rush',
-    start_revision: 0,
-    start_snapshot_json: JSON.stringify(snapshot),
-    initial_state_hash: initial.battle.stateHash,
-    started_at: 1_000,
-    expires_at: 99_999,
-    completion_fingerprint: null,
-    completed_at: null,
-    result_json: null,
-    claimed_at: null,
-  }, [], 2_000_000);
+  const result = __trustedBattleTestOnly.replayRecordBattle(
+    recordRow('record-boss-test', 'record_boss_rush', snapshot, initial.battle.stateHash),
+    [],
+    COMPLETED_AT_MS,
+  );
 
   assert.equal(result.kind, 'RECORD');
   assert.equal(result.recordMode, 'BOSS_RUSH');
