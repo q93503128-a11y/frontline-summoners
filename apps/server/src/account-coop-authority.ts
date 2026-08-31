@@ -1,4 +1,5 @@
 import { initializeAccountSave, type AccountSaveSnapshotV2 } from './account-save-authority.ts';
+import { applyAccountEnemyDiscoveries } from './account-enemy-discovery-authority.ts';
 import { applyAccountMainBattleResult } from './account-mutation-authority.ts';
 import { applyAccountSpecialBattleResult } from './account-special-mutation-authority.ts';
 import { initializeAccountProfile, recordAccountAchievementFact } from './account-profile-authority.ts';
@@ -83,6 +84,7 @@ async function settleStageOnce(
   expectedRevision: number,
   nowMs: number,
   availabilityAtMs: number,
+  discoveredEnemyIds: readonly string[],
 ) {
   if (ACCOUNT_MAIN_STAGE_INDEX.has(stageId)) {
     return applyAccountMainBattleResult(db, accountId, {
@@ -90,13 +92,31 @@ async function settleStageOnce(
       expectedRevision,
       stageId,
       source: 'COOP_BATTLE',
+      discoveredEnemyIds,
     }, nowMs);
   }
   return applyAccountSpecialBattleResult(db, accountId, {
     battleId,
     expectedRevision,
     stageId,
+    discoveredEnemyIds,
   }, nowMs, availabilityAtMs);
+}
+
+export async function settleAuthenticatedCoopDiscoveries(
+  db: D1Database,
+  accountId: string,
+  discoveredEnemyIds: readonly string[],
+  nowMs = Date.now(),
+): Promise<number> {
+  let lastRevision = -1;
+  for (let attempt = 0; attempt < 4; attempt += 1) {
+    const current = await initializeAccountSave(db, accountId, undefined, nowMs);
+    lastRevision = current.revision;
+    const result = await applyAccountEnemyDiscoveries(db, accountId, current.revision, discoveredEnemyIds, nowMs);
+    if (result.ok) return result.record.revision;
+  }
+  throw new Error(`authenticated coop discovery revision conflict:${accountId}:${lastRevision}`);
 }
 
 export async function settleAuthenticatedCoopWin(
@@ -107,19 +127,21 @@ export async function settleAuthenticatedCoopWin(
   options: {
     readonly friendMatch: boolean;
     readonly reconnected: boolean;
+    readonly discoveredEnemyIds?: readonly string[];
     readonly battleStartedAtMs?: number;
   },
   nowMs = Date.now(),
 ): Promise<AccountCoopSettlement> {
   const battleId = `coop:${matchId}`;
   const availabilityAtMs = options.battleStartedAtMs ?? nowMs;
+  const discoveredEnemyIds = [...(options.discoveredEnemyIds ?? [])].sort();
   let lastRevision = -1;
   let replayed = false;
   for (let attempt = 0; attempt < 4; attempt += 1) {
     const current = await initializeAccountSave(db, accountId, undefined, nowMs);
     lastRevision = current.revision;
     assertAccountCoopStagePlayable(current.snapshot, stageId, availabilityAtMs);
-    const result = await settleStageOnce(db, accountId, stageId, battleId, current.revision, nowMs, availabilityAtMs);
+    const result = await settleStageOnce(db, accountId, stageId, battleId, current.revision, nowMs, availabilityAtMs, discoveredEnemyIds);
     if (!result.ok) continue;
     lastRevision = result.record.revision;
     replayed = result.replayed;
