@@ -9,11 +9,11 @@ import { __accountHttpTestOnly } from '../src/account-http.ts';
 import { ACCOUNT_MAIN_STAGE_IDS } from '../src/account-content.ts';
 
 function unlockedSnapshot(count: number) {
-  const snapshot = createInitialAccountSave();
-  return {
-    ...snapshot,
-    clearedStageIds: ACCOUNT_MAIN_STAGE_IDS.slice(0, count),
-  };
+  let snapshot = createInitialAccountSave();
+  for (const stageId of ACCOUNT_MAIN_STAGE_IDS.slice(0, count)) {
+    snapshot = __accountMutationTestOnly.buildMainBattleResult(snapshot, stageId, 'SOLO_BATTLE').snapshot;
+  }
+  return snapshot;
 }
 
 test('trusted battle authority exposes RECORD and reconstructs deterministic record initial hashes', () => {
