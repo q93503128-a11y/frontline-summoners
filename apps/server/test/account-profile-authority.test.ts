@@ -32,23 +32,24 @@ test('account MAIN progression auto-claims matching cosmetic achievement on the 
   assert.ok(normalized.snapshot.ownedCosmeticIds.includes('frame_border_iron'));
 });
 
-test('stored or client-forged known cosmetics are discarded unless backed by a server claim', () => {
+test('known server-stored cosmetic grants survive normalization while unknown ids are discarded', () => {
   const normalized = __accountProfileTestOnly.normalizeAccountProfileSnapshot({
     schemaVersion: 1,
     claimedAchievementIds: [],
-    ownedCosmeticIds: ['frame_pvp_master', 'badge_boss_8'],
+    ownedCosmeticIds: ['frame_pvp_season_platinum', 'badge_pvp_season_top10', 'not_a_real_cosmetic'],
     profileLoadout: {
-      frameId: 'frame_pvp_master',
+      frameId: 'frame_pvp_season_platinum',
       bannerId: 'banner_default_frontline',
       emblemId: 'emblem_default',
-      badgeIds: ['badge_boss_8'],
+      badgeIds: ['badge_pvp_season_top10', 'not_a_real_cosmetic'],
     },
     factIds: [],
   }, save());
-  assert.ok(!normalized.snapshot.ownedCosmeticIds.includes('frame_pvp_master'));
-  assert.ok(!normalized.snapshot.ownedCosmeticIds.includes('badge_boss_8'));
-  assert.equal(normalized.snapshot.profileLoadout.frameId, 'frame_default_wood');
-  assert.deepEqual(normalized.snapshot.profileLoadout.badgeIds, []);
+  assert.ok(normalized.snapshot.ownedCosmeticIds.includes('frame_pvp_season_platinum'));
+  assert.ok(normalized.snapshot.ownedCosmeticIds.includes('badge_pvp_season_top10'));
+  assert.ok(!normalized.snapshot.ownedCosmeticIds.includes('not_a_real_cosmetic'));
+  assert.equal(normalized.snapshot.profileLoadout.frameId, 'frame_pvp_season_platinum');
+  assert.deepEqual(normalized.snapshot.profileLoadout.badgeIds, ['badge_pvp_season_top10']);
 });
 
 test('server achievement input derives co-op, growth and record axes from account save instead of client facts', () => {
@@ -75,7 +76,7 @@ test('server achievement input derives co-op, growth and record axes from accoun
   assert.equal(input.pvpBestTier, undefined);
 });
 
-test('public profile mutation parser accepts only loadout preference and cannot self-report claims, facts or PvP tier', () => {
+test('public profile mutation parser accepts only loadout preference and cannot self-report claims, facts, PvP tier or cosmetic ownership', () => {
   const parsed = __accountHttpTestOnly.parseProfileMutation({
     requestId: 'profile-1',
     expectedRevision: 2,
@@ -88,6 +89,7 @@ test('public profile mutation parser accepts only loadout preference and cannot 
       badgeIds: [],
     },
     claimedAchievementIds: ['ach_main_80'],
+    ownedCosmeticIds: ['badge_pvp_season_top10'],
     factIds: ['quirk_turnip_five'],
     pvpBestTier: 'MASTER',
   });
@@ -112,5 +114,6 @@ test('profile mutation source uses profile-local CAS and receipt batch instead o
   assert.match(source, /CASE WHEN revision = \?3 THEN revision \+ 1 ELSE -1 END/);
   assert.match(source, /INSERT INTO account_profile_mutation_receipts/);
   assert.match(source, /db\.batch\(/);
+  assert.match(source, /grantAccountProfileCosmetics/);
   assert.doesNotMatch(source, /UPDATE account_saves/);
 });
