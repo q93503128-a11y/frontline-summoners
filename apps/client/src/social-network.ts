@@ -1,5 +1,6 @@
 import { getAccountClientState, refreshAuthenticatedAccount } from './account-network';
 import { resolveCoopApiOrigin } from './coop-network';
+import type { FriendlyPvp2v2LobbyState } from './pvp-friendly-2v2-network';
 import type { FriendlyPvpGrowthPolicy } from './pvp-friendly-network';
 
 export interface SocialPublicProfile {
@@ -28,16 +29,26 @@ export interface SocialCoopInviteView {
   readonly expiresAtMs: number;
 }
 
+export interface SocialPvpInviterView {
+  readonly friendCode: string;
+  readonly displayName: string;
+  readonly online: boolean;
+}
+
 export interface SocialPvpInviteView {
   readonly inviteId: string;
-  readonly inviter: {
-    readonly friendCode: string;
-    readonly displayName: string;
-    readonly online: boolean;
-  };
+  readonly inviter: SocialPvpInviterView;
   readonly inviteCode: string;
   readonly modeId: 'pvp_friendly_1v1';
   readonly growthPolicy: FriendlyPvpGrowthPolicy;
+  readonly expiresAtMs: number;
+}
+
+export interface SocialPvp2v2InviteView {
+  readonly inviteId: string;
+  readonly inviter: SocialPvpInviterView;
+  readonly inviteCode: string;
+  readonly modeId: 'pvp_friendly_2v2';
   readonly expiresAtMs: number;
 }
 
@@ -50,6 +61,7 @@ export interface SocialSummary {
   readonly recentPlayers: readonly SocialRecentPlayer[];
   readonly coopInvites: readonly SocialCoopInviteView[];
   readonly pvpInvites: readonly SocialPvpInviteView[];
+  readonly pvp2v2Invites: readonly SocialPvp2v2InviteView[];
 }
 
 export interface FriendCoopHostResult {
@@ -80,6 +92,12 @@ export interface FriendPvpJoinResult {
   readonly seatId: 'A' | 'B';
   readonly growthPolicy: FriendlyPvpGrowthPolicy;
   readonly websocketPath: string;
+}
+
+export interface FriendPvp2v2InviteResult {
+  readonly inviteId: string;
+  readonly inviteCode: string;
+  readonly expiresAtMs: number;
 }
 
 const SESSION_TOKEN_KEY = 'frontline.account.sessionToken.v1';
@@ -130,6 +148,13 @@ function profile(value: unknown): SocialPublicProfile {
   };
 }
 
+function inviter(value: unknown): SocialPvpInviterView {
+  if (!isRecord(value) || typeof value.friendCode !== 'string' || typeof value.displayName !== 'string' || typeof value.online !== 'boolean') {
+    throw new Error('친선전 초대자 응답 형식이 올바르지 않습니다.');
+  }
+  return { friendCode: value.friendCode, displayName: value.displayName, online: value.online };
+}
+
 function profileArray(value: unknown): readonly SocialPublicProfile[] {
   if (!Array.isArray(value)) throw new Error('소셜 목록 응답 형식이 올바르지 않습니다.');
   return value.map(profile);
@@ -140,9 +165,26 @@ function growthPolicy(value: unknown): FriendlyPvpGrowthPolicy {
   throw new Error('친선전 성장 규칙 응답 형식이 올바르지 않습니다.');
 }
 
+function parsePvp2v2Lobby(value: unknown): FriendlyPvp2v2LobbyState {
+  if (!isRecord(value) || value.modeId !== 'pvp_friendly_2v2' || typeof value.inviteCode !== 'string' || typeof value.host !== 'boolean' || typeof value.participantCount !== 'number') {
+    throw new Error('2v2 친선전 참가 응답 형식이 올바르지 않습니다.');
+  }
+  const seatId = value.seatId === 'A1' || value.seatId === 'A2' || value.seatId === 'B1' || value.seatId === 'B2' ? value.seatId : null;
+  if (value.state === 'WAITING') {
+    if (typeof value.expiresAtMs !== 'number') throw new Error('2v2 친선전 대기 응답 형식이 올바르지 않습니다.');
+    return { state: 'WAITING', modeId: 'pvp_friendly_2v2', inviteCode: value.inviteCode, participantCount: value.participantCount, seatId, expiresAtMs: value.expiresAtMs, host: value.host };
+  }
+  if (value.state === 'MATCHED') {
+    if (!seatId || typeof value.matchId !== 'string' || typeof value.websocketPath !== 'string') throw new Error('2v2 친선전 매치 응답 형식이 올바르지 않습니다.');
+    return { state: 'MATCHED', modeId: 'pvp_friendly_2v2', inviteCode: value.inviteCode, matchId: value.matchId, participantCount: 4, seatId, host: value.host, websocketPath: value.websocketPath };
+  }
+  throw new Error('2v2 친선전 상태 응답 형식이 올바르지 않습니다.');
+}
+
 function summary(value: unknown): SocialSummary {
   if (!isRecord(value) || !Array.isArray(value.recentPlayers) || !Array.isArray(value.coopInvites)) throw new Error('소셜 요약 응답 형식이 올바르지 않습니다.');
   const pvpInvites = Array.isArray(value.pvpInvites) ? value.pvpInvites : [];
+  const pvp2v2Invites = Array.isArray(value.pvp2v2Invites) ? value.pvp2v2Invites : [];
   return {
     self: profile(value.self),
     friends: profileArray(value.friends),
@@ -169,15 +211,27 @@ function summary(value: unknown): SocialSummary {
       return { inviteId: entry.inviteId, inviter: profile(entry.inviter), matchId: entry.matchId, stageId: entry.stageId, expiresAtMs: entry.expiresAtMs };
     }),
     pvpInvites: pvpInvites.map((entry): SocialPvpInviteView => {
-      if (!isRecord(entry) || typeof entry.inviteId !== 'string' || typeof entry.inviteCode !== 'string' || entry.modeId !== 'pvp_friendly_1v1' || typeof entry.expiresAtMs !== 'number' || !isRecord(entry.inviter) || typeof entry.inviter.friendCode !== 'string' || typeof entry.inviter.displayName !== 'string' || typeof entry.inviter.online !== 'boolean') {
+      if (!isRecord(entry) || typeof entry.inviteId !== 'string' || typeof entry.inviteCode !== 'string' || entry.modeId !== 'pvp_friendly_1v1' || typeof entry.expiresAtMs !== 'number') {
         throw new Error('친선 PvP 초대 응답 형식이 올바르지 않습니다.');
       }
       return {
         inviteId: entry.inviteId,
-        inviter: { friendCode: entry.inviter.friendCode, displayName: entry.inviter.displayName, online: entry.inviter.online },
+        inviter: inviter(entry.inviter),
         inviteCode: entry.inviteCode,
         modeId: 'pvp_friendly_1v1',
         growthPolicy: growthPolicy(entry.growthPolicy),
+        expiresAtMs: entry.expiresAtMs,
+      };
+    }),
+    pvp2v2Invites: pvp2v2Invites.map((entry): SocialPvp2v2InviteView => {
+      if (!isRecord(entry) || typeof entry.inviteId !== 'string' || typeof entry.inviteCode !== 'string' || entry.modeId !== 'pvp_friendly_2v2' || typeof entry.expiresAtMs !== 'number') {
+        throw new Error('2v2 친선 PvP 초대 응답 형식이 올바르지 않습니다.');
+      }
+      return {
+        inviteId: entry.inviteId,
+        inviter: inviter(entry.inviter),
+        inviteCode: entry.inviteCode,
+        modeId: 'pvp_friendly_2v2',
         expiresAtMs: entry.expiresAtMs,
       };
     }),
@@ -274,4 +328,22 @@ export function cancelFriendPvpInvite(inviteId: string): Promise<unknown> {
   return post('/api/social/pvp/cancel', { inviteId });
 }
 
-export const __socialNetworkTestOnly = { summary, profile };
+export async function createFriendPvp2v2Invite(inviteCode: string, friendCode: string): Promise<FriendPvp2v2InviteResult> {
+  const payload = await post('/api/social/pvp-2v2/invite', { inviteCode, friendCode });
+  if (!isRecord(payload) || typeof payload.inviteId !== 'string' || typeof payload.inviteCode !== 'string' || payload.modeId !== 'pvp_friendly_2v2' || typeof payload.expiresAtMs !== 'number') {
+    throw new Error('2v2 친구 초대 응답 형식이 올바르지 않습니다.');
+  }
+  return { inviteId: payload.inviteId, inviteCode: payload.inviteCode, expiresAtMs: payload.expiresAtMs };
+}
+
+export async function acceptFriendPvp2v2Invite(inviteId: string): Promise<FriendlyPvp2v2LobbyState> {
+  const payload = await post('/api/social/pvp-2v2/accept', { inviteId });
+  if (!isRecord(payload) || payload.inviteId !== inviteId) throw new Error('2v2 친구 초대 참가 응답 형식이 올바르지 않습니다.');
+  return parsePvp2v2Lobby(payload.lobby);
+}
+
+export function declineFriendPvp2v2Invite(inviteId: string): Promise<unknown> {
+  return post('/api/social/pvp-2v2/decline', { inviteId });
+}
+
+export const __socialNetworkTestOnly = { summary, profile, parsePvp2v2Lobby };
