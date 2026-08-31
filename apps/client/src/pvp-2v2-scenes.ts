@@ -91,7 +91,7 @@ export class Pvp2v2MatchmakingScene extends Phaser.Scene {
   private enter(state: Extract<Pvp2v2MatchmakingState, { state: 'MATCHED' }>): void {
     this.pollEvent?.destroy(); this.pollEvent = undefined;
     this.status?.setText(`좌석 ${state.seatId} 확정 · 2v2 전투로 이동합니다.`).setColor('#8ee3aa');
-    this.time.delayedCall(100, () => this.scene.start('pvp-2v2-match', { websocketPath: state.websocketPath }));
+    this.time.delayedCall(100, () => this.scene.start('pvp-2v2-match', { websocketPath: state.websocketPath, modeId: 'pvp_casual_2v2', nextScene: 'pvp-2v2-matchmaking' }));
   }
   private async cancel(): Promise<void> {
     if (this.state.state === 'QUEUED') await leavePvp2v2Matchmaking().catch(() => undefined);
@@ -101,6 +101,8 @@ export class Pvp2v2MatchmakingScene extends Phaser.Scene {
 
 export class Pvp2v2BattleScene extends Phaser.Scene {
   private websocketPath = '';
+  private modeId: 'pvp_casual_2v2' | 'pvp_friendly_2v2' = 'pvp_casual_2v2';
+  private nextScene = 'pvp-2v2-matchmaking';
   private session: Pvp2v2Session | null = null;
   private snapshot: Pvp2v2BattleSnapshot | null = null;
   private battlefield?: Phaser.GameObjects.Container;
@@ -114,11 +116,19 @@ export class Pvp2v2BattleScene extends Phaser.Scene {
   private finished = false;
 
   constructor() { super('pvp-2v2-match'); }
-  init(data: { websocketPath?: string } = {}): void { this.websocketPath = data.websocketPath ?? ''; this.readySent = false; this.finished = false; this.snapshot = null; }
+  init(data: { websocketPath?: string; modeId?: 'pvp_casual_2v2' | 'pvp_friendly_2v2'; nextScene?: string } = {}): void {
+    this.websocketPath = data.websocketPath ?? '';
+    this.modeId = data.modeId ?? 'pvp_casual_2v2';
+    this.nextScene = data.nextScene ?? (this.modeId === 'pvp_friendly_2v2' ? 'pvp-friendly-2v2-lobby' : 'pvp-2v2-matchmaking');
+    this.readySent = false;
+    this.finished = false;
+    this.snapshot = null;
+  }
   create(): void {
     drawBackdrop(this, 'map');
     const compact = isCompactMobileViewport();
-    addText(this, 36, 22, '대전 · 2v2 일반전', compact ? 31 : 28, COLORS.cream);
+    const friendly = this.modeId === 'pvp_friendly_2v2';
+    addText(this, 36, 22, `대전 · ${friendly ? '2v2 친선전' : '2v2 일반전'}`, compact ? 31 : 28, COLORS.cream);
     this.connection = addText(this, 1230, 28, '연결 중…', compact ? 18 : 15, '#a9b5c5', 'right').setOrigin(1, 0);
     this.status = addText(this, INTERNAL_WIDTH / 2, 510, '2v2 전투 서버에 연결 중…', compact ? 18 : 15, '#a9b5c5', 'center').setOrigin(0.5);
     addButton(this, 1185, compact ? 78 : 75, 160, compact ? 78 : 46, '전투 나가기', () => this.leave(), 0x815b60);
@@ -152,7 +162,7 @@ export class Pvp2v2BattleScene extends Phaser.Scene {
     if (message.type === 'BATTLE_STARTED' || message.type === 'FRAME_COMMITTED') { this.snapshot = message.battle; this.session.startInputPump(); this.renderBattle(); this.renderControls(); return; }
     if (message.type === 'BATTLE_FINISHED') { this.snapshot = message.battle; this.renderBattle(); this.renderControls(); this.showResult(message.result, message.reason); return; }
     if (message.type === 'BATTLE_VOID') { this.showVoid(message.reason); return; }
-    if (message.type === 'ACCOUNT_SETTLED') this.status?.setText('2v2 일반전 기록 저장 완료').setColor('#8ee3aa');
+    if (message.type === 'ACCOUNT_SETTLED') this.status?.setText(this.modeId === 'pvp_friendly_2v2' ? '2v2 친선전 종료 기록 저장 완료 · 레이팅/보상 변동 없음' : '2v2 일반전 기록 저장 완료').setColor('#8ee3aa');
     else if (message.type === 'ACCOUNT_SETTLEMENT_ERROR') this.status?.setText(`2v2 결과 저장 재시도 필요 · ${message.message}`).setColor('#ffd493');
   }
   private renderBattle(): void {
@@ -195,18 +205,20 @@ export class Pvp2v2BattleScene extends Phaser.Scene {
   private showResult(result: 'A' | 'B' | 'DRAW', reason: string): void {
     if (this.finished) return; this.finished = true; this.session?.stopInputPump();
     const mine = this.session?.seatId; const myTeam = mine?.startsWith('A') ? 'A' : 'B'; const draw = result === 'DRAW'; const won = !draw && result === myTeam;
+    const friendly = this.modeId === 'pvp_friendly_2v2';
     this.resultLayer = this.add.container(0, 0).setDepth(400); const compact = isCompactMobileViewport();
     this.resultLayer.add(this.add.rectangle(INTERNAL_WIDTH / 2, INTERNAL_HEIGHT / 2, INTERNAL_WIDTH, INTERNAL_HEIGHT, 0x080b11, 0.84).setInteractive());
     this.resultLayer.add(this.add.rectangle(INTERNAL_WIDTH / 2, INTERNAL_HEIGHT / 2, 740, 400, 0x202632, 0.99).setStrokeStyle(4, draw ? 0x777d88 : won ? 0x69a87b : 0xa86464, 1));
     this.resultLayer.add(addText(this, INTERNAL_WIDTH / 2, 260, draw ? '2v2 무승부' : won ? '우리 팀 승리' : '우리 팀 패배', compact ? 48 : 42, draw ? '#d8dde5' : won ? '#bdf1c7' : '#ffb0a9', 'center').setOrigin(0.5));
-    this.resultLayer.add(addText(this, INTERNAL_WIDTH / 2, 330, reason === 'FORFEIT' ? '상대 팀 재접속 유예 종료 · 기권 판정' : '서버 권위 4인 전투 결과', compact ? 20 : 17, '#c2ccd8', 'center').setOrigin(0.5));
+    this.resultLayer.add(addText(this, INTERNAL_WIDTH / 2, 330, `${friendly ? '친선전 · 전적/보상 변동 없음' : '일반전'} · ${reason === 'FORFEIT' ? '상대 팀 재접속 유예 종료' : '서버 권위 4인 전투 결과'}`, compact ? 20 : 17, '#c2ccd8', 'center').setOrigin(0.5));
     this.resultLayer.add(addButton(this, 505, 445, 220, compact ? 82 : 60, 'PvP 허브', () => { this.session?.close(); this.scene.start('pvp-hub'); }, 0x5f7897));
-    this.resultLayer.add(addButton(this, 775, 445, 220, compact ? 82 : 60, '2v2 다시 매칭', () => { this.session?.close(); this.scene.start('pvp-2v2-matchmaking'); }, 0x6b7799));
+    this.resultLayer.add(addButton(this, 775, 445, 220, compact ? 82 : 60, friendly ? '새 친선방' : '2v2 다시 매칭', () => { this.session?.close(); this.scene.start(this.nextScene); }, 0x6b7799));
   }
   private showVoid(reason: string): void {
     if (this.finished) return; this.finished = true; this.session?.stopInputPump(); this.resultLayer = this.add.container(0, 0).setDepth(400); const compact = isCompactMobileViewport();
+    const friendly = this.modeId === 'pvp_friendly_2v2';
     this.resultLayer.add(this.add.rectangle(INTERNAL_WIDTH / 2, INTERNAL_HEIGHT / 2, INTERNAL_WIDTH, INTERNAL_HEIGHT, 0x080b11, 0.84).setInteractive()); this.resultLayer.add(this.add.rectangle(INTERNAL_WIDTH / 2, INTERNAL_HEIGHT / 2, 740, 350, 0x202632, 0.99).setStrokeStyle(4, 0x777d88, 1));
-    this.resultLayer.add(addText(this, INTERNAL_WIDTH / 2, 285, '2v2 무효 경기', compact ? 44 : 39, '#d8dde5', 'center').setOrigin(0.5)); this.resultLayer.add(addText(this, INTERNAL_WIDTH / 2, 350, reason === 'both_teams_disconnect_timeout' ? '양 팀에서 연결 이탈이 발생해 전적 없이 종료했습니다.' : reason, compact ? 19 : 16, '#b9c3d0', 'center').setOrigin(0.5)); this.resultLayer.add(addButton(this, INTERNAL_WIDTH / 2, 440, 260, compact ? 82 : 60, '2v2 다시 매칭', () => { this.session?.close(); this.scene.start('pvp-2v2-matchmaking'); }, 0x6b7799));
+    this.resultLayer.add(addText(this, INTERNAL_WIDTH / 2, 285, '2v2 무효 경기', compact ? 44 : 39, '#d8dde5', 'center').setOrigin(0.5)); this.resultLayer.add(addText(this, INTERNAL_WIDTH / 2, 350, reason === 'both_teams_disconnect_timeout' ? '양 팀에서 연결 이탈이 발생해 전적 없이 종료했습니다.' : reason, compact ? 19 : 16, '#b9c3d0', 'center').setOrigin(0.5)); this.resultLayer.add(addButton(this, INTERNAL_WIDTH / 2, 440, 260, compact ? 82 : 60, friendly ? '새 친선방' : '2v2 다시 매칭', () => { this.session?.close(); this.scene.start(this.nextScene); }, 0x6b7799));
   }
   private leave(): void { this.session?.close(); this.scene.start('pvp-hub'); }
 }
