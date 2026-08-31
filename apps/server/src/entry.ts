@@ -1,5 +1,6 @@
 import worker, { BattleRoom, type Env } from './index.ts';
 import { resolveGuestMigrationHttp } from './account-guest-migration-http.ts';
+import { resolveCoopMatchmakingHttp } from './coop-matchmaking-http.ts';
 import { resolveSocialHttp } from './social-http.ts';
 
 export { BattleRoom };
@@ -20,6 +21,8 @@ function json(data: unknown, status: number, extra?: Readonly<Record<string, str
 export default {
   async fetch(request: Request, env: Env): Promise<Response> {
     if (request.method !== 'OPTIONS') {
+      const matchmaking = await resolveCoopMatchmakingHttp(request, env);
+      if (matchmaking) return json(matchmaking.body, matchmaking.status);
       const social = await resolveSocialHttp(request, env);
       if (social) return json(social.body, social.status, social.headers);
       const migration = await resolveGuestMigrationHttp(request, env.DB);
