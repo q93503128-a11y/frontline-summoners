@@ -48,6 +48,7 @@ export interface PvpSettlementView {
   readonly firstReachRewards?: readonly {
     readonly accountId: string;
     readonly grants: readonly PvpFirstReachGrant[];
+    readonly newlyGrantedCosmeticIds: readonly string[];
   }[];
 }
 
@@ -140,8 +141,8 @@ export async function completeTrustedPvp1v1Result(
         { accountId: b.user_id, rating: settled.b },
       ],
       firstReachRewards: [
-        { accountId: a.user_id, grants: aReward.granted },
-        { accountId: b.user_id, grants: bReward.granted },
+        { accountId: a.user_id, grants: aReward.granted, newlyGrantedCosmeticIds: aReward.newlyGrantedCosmeticIds },
+        { accountId: b.user_id, grants: bReward.granted, newlyGrantedCosmeticIds: bReward.newlyGrantedCosmeticIds },
       ],
     };
   }
