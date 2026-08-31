@@ -2,6 +2,7 @@ import { resolveAuthSession } from './auth-session-authority.ts';
 import {
   getPvpLeaderboardView,
   type PvpLeaderboardScope,
+  type PvpLeaderboardView,
 } from './pvp-leaderboard-authority.ts';
 
 export interface PvpLeaderboardHttpEnv {
@@ -28,6 +29,16 @@ function numericQuery(value: string | null, fallback: number): number {
   return Number.isFinite(parsed) ? parsed : fallback;
 }
 
+function publicView(view: PvpLeaderboardView): Readonly<Record<string, unknown>> {
+  return {
+    seasonId: view.seasonId,
+    scope: view.scope,
+    selfRank: view.selfRank,
+    totalPlayers: view.totalPlayers,
+    entries: view.entries.map(({ userId: _userId, ...entry }) => entry),
+  };
+}
+
 export async function resolvePvpLeaderboardHttp(
   request: Request,
   env: PvpLeaderboardHttpEnv,
@@ -42,14 +53,14 @@ export async function resolvePvpLeaderboardHttp(
   if (!requestedScope) return { status: 400, body: { error: 'pvp_leaderboard_scope_unknown' } };
   try {
     const view = await getPvpLeaderboardView(env.DB, principal.userId, requestedScope, {
-      limit: numericQuery(url.searchParams.get('limit'), requestedScope === 'TOP' ? 100 : 100),
+      limit: numericQuery(url.searchParams.get('limit'), 100),
       radius: numericQuery(url.searchParams.get('radius'), 5),
     });
-    return { status: 200, body: view };
+    return { status: 200, body: publicView(view) };
   } catch (error) {
     const message = error instanceof Error ? error.message : 'pvp_leaderboard_failed';
     return { status: 400, body: { error: message } };
   }
 }
 
-export const __pvpLeaderboardHttpTestOnly = { scope, numericQuery };
+export const __pvpLeaderboardHttpTestOnly = { scope, numericQuery, publicView };
