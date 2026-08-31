@@ -18,10 +18,18 @@
 
 ## 1. 사전 준비
 
-Cloudflare Worker secret에 충분히 긴 운영 토큰을 등록한다.
+이번 운영 흐름을 처음 배포하는 환경에서는 **Worker 코드보다 먼저 또는 같은 릴리스 절차 안에서 D1 migration 0020을 적용**한다.
 
 ```bash
 cd apps/server
+npx wrangler d1 migrations apply frontline-summoners-db --remote
+```
+
+`pvp_season_operations` 테이블이 없는 상태에서 새 Worker만 먼저 배포하면 공개 PvP 신규 매칭의 시즌 래치 조회가 실패할 수 있으므로 이 순서를 생략하지 않는다.
+
+그 다음 Cloudflare Worker secret에 충분히 긴 운영 토큰을 등록한다.
+
+```bash
 npx wrangler secret put PVP_OPERATIONS_TOKEN
 ```
 
@@ -265,11 +273,12 @@ liveQueueEntries = 0
 
 다음은 하지 않는다.
 
-1. 공개 큐를 연 채 `finalize` 시도
-2. 진행 중 경기 존재 상태에서 강제로 시즌 스냅샷 변경
-3. closure 생성 전에 새 `PVP_CURRENT_SEASON_ID` 배포
-4. 새 시즌 코드가 배포되지 않은 상태에서 `roll` 우회
-5. D1에서 `pvp_ratings`를 수동 UPDATE하여 시즌 이동
-6. `pvp_season_results`를 수동 덮어써 최종 순위 수정
+1. migration 0020 없이 시즌 운영 래치가 필요한 Worker를 먼저 배포
+2. 공개 큐를 연 채 `finalize` 시도
+3. 진행 중 경기 존재 상태에서 강제로 시즌 스냅샷 변경
+4. closure 생성 전에 새 `PVP_CURRENT_SEASON_ID` 배포
+5. 새 시즌 코드가 배포되지 않은 상태에서 `roll` 우회
+6. D1에서 `pvp_ratings`를 수동 UPDATE하여 시즌 이동
+7. `pvp_season_results`를 수동 덮어써 최종 순위 수정
 
 운영 API가 이 순서 대부분을 서버에서 거부하도록 되어 있다.
