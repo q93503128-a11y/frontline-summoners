@@ -5,6 +5,7 @@ import {
   type PvpTierId,
 } from '@frontline/sim/pvp-content';
 import { grantResources, type ResourceAmounts } from '@frontline/sim/resource-ledger';
+import { grantAccountProfileCosmetics } from './account-profile-authority.ts';
 import {
   ACCOUNT_SAVE_SCHEMA_VERSION,
   initializeAccountSave,
@@ -16,11 +17,13 @@ import {
 export interface PvpFirstReachGrant {
   readonly tierId: Exclude<PvpTierId, 'BRONZE'>;
   readonly resources: ResourceAmounts;
+  readonly cosmeticRewardIds: readonly string[];
 }
 
 export interface PvpFirstReachGrantResult {
   readonly accountId: string;
   readonly granted: readonly PvpFirstReachGrant[];
+  readonly newlyGrantedCosmeticIds: readonly string[];
   readonly resultingRevision: number;
 }
 
@@ -59,8 +62,27 @@ function aggregateResources(rewards: readonly PvpTierFirstReachReward[]): Resour
   return totals as ResourceAmounts;
 }
 
+function cosmeticIdsForRewards(rewards: readonly PvpTierFirstReachReward[]): readonly string[] {
+  return [...new Set(rewards.flatMap((reward) => reward.cosmeticRewardIds))];
+}
+
 function grantsFromRewards(rewards: readonly PvpTierFirstReachReward[]): readonly PvpFirstReachGrant[] {
-  return rewards.map((reward) => ({ tierId: reward.tierId, resources: reward.currencies }));
+  return rewards.map((reward) => ({
+    tierId: reward.tierId,
+    resources: reward.currencies,
+    cosmeticRewardIds: reward.cosmeticRewardIds,
+  }));
+}
+
+async function repairEligibleCosmetics(
+  db: D1Database,
+  accountId: string,
+  rewards: readonly PvpTierFirstReachReward[],
+  nowMs: number,
+): Promise<readonly string[]> {
+  const cosmeticIds = cosmeticIdsForRewards(rewards);
+  if (cosmeticIds.length === 0) return [];
+  return (await grantAccountProfileCosmetics(db, accountId, cosmeticIds, nowMs)).grantedIds;
 }
 
 export async function getClaimedPvpFirstReachTiers(
@@ -74,6 +96,10 @@ export async function getClaimedPvpFirstReachTiers(
  * Grants every currently eligible, never-before-received first-reach tier reward in one
  * account-save revision. The save mutation and all tier receipts share one D1 batch so
  * a retry cannot duplicate currency even if two ranked settlements race.
+ *
+ * Profile cosmetics live in the independently revisioned account-profile snapshot, so
+ * every retry also repairs every cosmetic implied by the account's authoritative best MMR.
+ * This closes the failure window where currency receipts committed but a profile write did not.
  */
 export async function grantPvpFirstReachRewards(
   db: D1Database,
@@ -86,14 +112,17 @@ export async function grantPvpFirstReachRewards(
   const eligible = eligibleRewards(bestMmr);
   if (eligible.length === 0) {
     const save = await initializeAccountSave(db, accountId, undefined, nowMs);
-    return { accountId, granted: [], resultingRevision: save.revision };
+    return { accountId, granted: [], newlyGrantedCosmeticIds: [], resultingRevision: save.revision };
   }
 
   for (let attempt = 0; attempt < 4; attempt += 1) {
     const save = await initializeAccountSave(db, accountId, undefined, nowMs);
     const claimed = new Set((await loadReceipts(db, accountId)).map((row) => row.tier_id));
     const pending = eligible.filter((reward) => !claimed.has(reward.tierId));
-    if (pending.length === 0) return { accountId, granted: [], resultingRevision: save.revision };
+    if (pending.length === 0) {
+      const newlyGrantedCosmeticIds = await repairEligibleCosmetics(db, accountId, eligible, nowMs);
+      return { accountId, granted: [], newlyGrantedCosmeticIds, resultingRevision: save.revision };
+    }
 
     const resources = aggregateResources(pending);
     const nextSnapshot = normalizeAccountSaveSnapshot({
@@ -116,19 +145,21 @@ export async function grantPvpFirstReachRewards(
           `INSERT INTO pvp_first_reach_reward_receipts
            (user_id, tier_id, reward_json, resulting_revision)
            VALUES (?1, ?2, ?3, ?4)`,
-        ).bind(accountId, reward.tierId, JSON.stringify(reward.currencies), nextRevision)),
+        ).bind(accountId, reward.tierId, JSON.stringify({ currencies: reward.currencies, cosmeticRewardIds: reward.cosmeticRewardIds }), nextRevision)),
       ]);
       if (writes.length !== pending.length + 1 || (writes[0]?.meta.changes ?? 0) !== 1) {
         throw new Error('pvp first-reach reward batch incomplete');
       }
       const record = await loadAccountSave(db, accountId, nowMs);
       if (!record || record.revision !== nextRevision) throw new Error('pvp first-reach reward revision mismatch');
-      return { accountId, granted: grantsFromRewards(pending), resultingRevision: record.revision };
+      const newlyGrantedCosmeticIds = await repairEligibleCosmetics(db, accountId, eligible, nowMs);
+      return { accountId, granted: grantsFromRewards(pending), newlyGrantedCosmeticIds, resultingRevision: record.revision };
     } catch (error) {
       const latestReceipts = new Set((await loadReceipts(db, accountId)).map((row) => row.tier_id));
       if (pending.every((reward) => latestReceipts.has(reward.tierId))) {
         const latest = await initializeAccountSave(db, accountId, undefined, nowMs);
-        return { accountId, granted: [], resultingRevision: latest.revision };
+        const newlyGrantedCosmeticIds = await repairEligibleCosmetics(db, accountId, eligible, nowMs);
+        return { accountId, granted: [], newlyGrantedCosmeticIds, resultingRevision: latest.revision };
       }
       const latest = await loadAccountSave(db, accountId, nowMs);
       if (latest && latest.revision !== save.revision) continue;
@@ -142,5 +173,6 @@ export async function grantPvpFirstReachRewards(
 export const __pvpRewardAuthorityTestOnly = {
   eligibleRewards,
   aggregateResources,
+  cosmeticIdsForRewards,
   grantsFromRewards,
 };
