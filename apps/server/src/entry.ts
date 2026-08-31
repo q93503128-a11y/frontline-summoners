@@ -1,13 +1,19 @@
 import worker, { BattleRoom, type Env } from './index.ts';
 import { resolveGuestMigrationHttp } from './account-guest-migration-http.ts';
 import { resolveCoopMatchmakingHttp } from './coop-matchmaking-http.ts';
+import { FriendlyPvpRoom } from './pvp-friendly-durable-room.ts';
+import {
+  resolveFriendlyPvpHttp,
+  resolveFriendlyPvpWebSocket,
+  type FriendlyPvpHttpEnv,
+} from './pvp-friendly-http.ts';
 import { PvpRoom } from './pvp-durable-room.ts';
 import { resolvePvpHttp, resolvePvpWebSocket, type PvpHttpEnv } from './pvp-http.ts';
 import { resolveSocialHttp } from './social-http.ts';
 
-export { BattleRoom, PvpRoom };
+export { BattleRoom, FriendlyPvpRoom, PvpRoom };
 
-type EntryEnv = Env & PvpHttpEnv;
+type EntryEnv = Env & PvpHttpEnv & FriendlyPvpHttpEnv;
 
 const CORS_HEADERS = {
   'access-control-allow-origin': '*',
@@ -24,9 +30,13 @@ function json(data: unknown, status: number, extra?: Readonly<Record<string, str
 
 export default {
   async fetch(request: Request, env: EntryEnv): Promise<Response> {
+    const friendlyPvpSocket = await resolveFriendlyPvpWebSocket(request, env);
+    if (friendlyPvpSocket) return friendlyPvpSocket;
     const pvpSocket = await resolvePvpWebSocket(request, env);
     if (pvpSocket) return pvpSocket;
     if (request.method !== 'OPTIONS') {
+      const friendlyPvp = await resolveFriendlyPvpHttp(request, env);
+      if (friendlyPvp) return json(friendlyPvp.body, friendlyPvp.status);
       const pvp = await resolvePvpHttp(request, env);
       if (pvp) return json(pvp.body, pvp.status);
       const matchmaking = await resolveCoopMatchmakingHttp(request, env);
