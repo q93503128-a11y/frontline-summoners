@@ -7,12 +7,14 @@ import { isSortieStageUnlocked } from './stage-navigation';
 import { addButton, addText, COLORS, drawBackdrop } from './scene-ui';
 import {
   acceptFriendCoopInvite,
+  acceptFriendPvp2v2Invite,
   acceptFriendPvpInvite,
   acceptFriendRequest,
   blockSocialUser,
   createFriendCoopInvite,
   createFriendPvpInvite,
   declineFriendCoopInvite,
+  declineFriendPvp2v2Invite,
   declineFriendPvpInvite,
   loadSocialSummary,
   removeFriend,
@@ -20,6 +22,7 @@ import {
   unblockSocialUser,
   updateSocialDisplayName,
   type SocialPublicProfile,
+  type SocialPvp2v2InviteView,
   type SocialPvpInviteView,
   type SocialSummary,
 } from './social-network';
@@ -50,12 +53,22 @@ function errorText(error: unknown): string {
     social_pvp_invite_pending: '이 친구에게 보낸 친선전 초대가 이미 대기 중입니다.',
     social_pvp_invite_expired: '친선전 초대가 만료되었습니다.',
     social_pvp_invite_not_pending: '친선전 초대가 이미 처리되었습니다.',
+    social_pvp_2v2_invite_pending: '이 2v2 파티의 친구 초대가 이미 대기 중입니다.',
+    social_pvp_2v2_invite_expired: '2v2 친선전 초대가 만료되었습니다.',
+    social_pvp_2v2_invite_not_pending: '2v2 친선전 초대가 이미 처리되었습니다.',
+    social_pvp_2v2_already_joined: '이미 해당 2v2 파티에 참가한 친구입니다.',
     friendly_pvp_lobby_expired: '친선전 방이 만료되었습니다.',
     friendly_pvp_lobby_full: '친선전 방이 이미 가득 찼습니다.',
     friendly_pvp_blocked: '차단 관계인 플레이어와는 친선전을 시작할 수 없습니다.',
+    friendly_2v2_lobby_expired: '2v2 친선전 방이 만료되었습니다.',
+    friendly_2v2_lobby_cancelled: '방장이 2v2 친선전 방을 닫았습니다.',
+    friendly_2v2_lobby_full: '이미 4명이 확정된 2v2 친선전 방입니다.',
+    friendly_2v2_blocked: '차단 관계가 포함된 2v2 방에는 참가할 수 없습니다.',
     pvp_chapter_1_required: '메인 1장을 완료해야 친선 PvP를 사용할 수 있습니다.',
     pvp_requires_10_owned_characters: '친선 1v1에는 보유 캐릭터 10명이 필요합니다.',
     pvp_deck_requires_10_characters: '친선 1v1 편성 10칸을 모두 채워 주세요.',
+    pvp_requires_5_owned_characters: '2v2 친선전에는 보유 캐릭터 5명이 필요합니다.',
+    pvp_deck_requires_5_characters: '2v2 친선전 편성 앞 5칸을 채워 주세요.',
   };
   return friendly[message] ?? message;
 }
@@ -184,6 +197,23 @@ export class SocialScene extends Phaser.Scene {
     });
   }
 
+  private renderPvp2v2InviteRow(invite: SocialPvp2v2InviteView, y: number): void {
+    if (!this.contentLayer) return;
+    const compact = isCompactMobileViewport();
+    const profile = invite.inviter;
+    this.contentLayer.add(this.add.rectangle(INTERNAL_WIDTH / 2, y, 1120, 86, 0x252f3e, 0.98).setStrokeStyle(2, profile.online ? 0x64849c : 0x505c69, 1));
+    this.contentLayer.add(addText(this, 105, y - 25, `${profile.displayName} · ${profile.friendCode}`, compact ? 21 : 17, '#ffffff'));
+    this.contentLayer.add(addText(this, 105, y + 9, `${profile.online ? '● 온라인' : '○ 오프라인'} · 2v2 친선 파티 · 표준 성장`, compact ? 16 : 13, profile.online ? '#b9dcf2' : '#a6b2bd'));
+    const actions = [
+      { label: '파티 참가', accent: 0x5c7895, run: () => { void this.acceptPvp2v2Invite(invite.inviteId); } },
+      { label: '거절', accent: 0x75685a, run: () => { void this.runAndRefresh(() => declineFriendPvp2v2Invite(invite.inviteId), '2v2 친선전 초대를 거절했습니다.'); } },
+      { label: '차단', accent: 0x8d5f64, run: () => { void this.runAndRefresh(() => blockSocialUser(profile.friendCode), '초대자를 차단했습니다.'); } },
+    ];
+    actions.forEach((action, index) => {
+      this.contentLayer!.add(addButton(this, 820 + index * 145, y, 132, compact ? 66 : 46, action.label, action.run, action.accent));
+    });
+  }
+
   private renderFriends(): void {
     if (!this.summary || !this.contentLayer) return;
     const progress = getAuthenticatedCoopClientProgress();
@@ -193,7 +223,7 @@ export class SocialScene extends Phaser.Scene {
     this.selectedStageIndex = Math.min(this.selectedStageIndex, Math.max(0, eligibleStages.length - 1));
     const selectedStage = eligibleStages[this.selectedStageIndex];
     const stageLabel = selectedStage ? `${selectedStage.name} · ${this.selectedStageIndex + 1}/${eligibleStages.length}` : '협동 가능 전장 없음';
-    this.contentLayer.add(addText(this, 100, 294, `협동 전장 · ${stageLabel} · 친선전은 친구별 직접 초대`, 16, '#d4c28e'));
+    this.contentLayer.add(addText(this, 100, 294, `협동 전장 · ${stageLabel} · 2v2 직접 초대는 2v2 친선 로비에서`, 16, '#d4c28e'));
     this.contentLayer.add(addButton(this, 935, 294, 90, 42, '◀', () => { if (eligibleStages.length) { this.selectedStageIndex = (this.selectedStageIndex - 1 + eligibleStages.length) % eligibleStages.length; this.render(); } }, 0x586275));
     this.contentLayer.add(addButton(this, 1040, 294, 90, 42, '▶', () => { if (eligibleStages.length) { this.selectedStageIndex = (this.selectedStageIndex + 1) % eligibleStages.length; this.render(); } }, 0x586275));
     const page = this.pageSlice(this.summary.friends);
@@ -216,13 +246,16 @@ export class SocialScene extends Phaser.Scene {
     const outgoing = this.summary.outgoingRequests;
     const invites = this.summary.coopInvites;
     const pvpInvites = this.summary.pvpInvites;
-    this.contentLayer.add(addText(this, 100, 294, `받은 요청 ${incoming.length} · 보낸 요청 ${outgoing.length} · 협동 ${invites.length} · 친선 ${pvpInvites.length}`, 16, '#d4c28e'));
+    const pvp2v2Invites = this.summary.pvp2v2Invites;
+    this.contentLayer.add(addText(this, 100, 294, `받은 ${incoming.length} · 보낸 ${outgoing.length} · 협동 ${invites.length} · 1v1 ${pvpInvites.length} · 2v2 ${pvp2v2Invites.length}`, 16, '#d4c28e'));
     const merged: readonly (
       | { kind: 'INCOMING_REQUEST'; profile: SocialPublicProfile }
       | { kind: 'OUTGOING_REQUEST'; profile: SocialPublicProfile }
       | { kind: 'COOP_INVITE'; inviteId: string; profile: SocialPublicProfile; stageId: string }
       | { kind: 'PVP_INVITE'; invite: SocialPvpInviteView }
+      | { kind: 'PVP_2V2_INVITE'; invite: SocialPvp2v2InviteView }
     )[] = [
+      ...pvp2v2Invites.map((invite) => ({ kind: 'PVP_2V2_INVITE' as const, invite })),
       ...pvpInvites.map((invite) => ({ kind: 'PVP_INVITE' as const, invite })),
       ...invites.map((invite) => ({ kind: 'COOP_INVITE' as const, inviteId: invite.inviteId, profile: invite.inviter, stageId: invite.stageId })),
       ...incoming.map((profile) => ({ kind: 'INCOMING_REQUEST' as const, profile })),
@@ -235,7 +268,9 @@ export class SocialScene extends Phaser.Scene {
     }
     page.items.forEach((entry, index) => {
       const y = 355 + index * 92;
-      if (entry.kind === 'PVP_INVITE') {
+      if (entry.kind === 'PVP_2V2_INVITE') {
+        this.renderPvp2v2InviteRow(entry.invite, y);
+      } else if (entry.kind === 'PVP_INVITE') {
         this.renderPvpInviteRow(entry.invite, y);
       } else if (entry.kind === 'INCOMING_REQUEST') {
         this.renderProfileRow(entry.profile, y, '받은 친구 요청', [
@@ -356,6 +391,29 @@ export class SocialScene extends Phaser.Scene {
         websocketPath: result.websocketPath,
         growthPolicy: result.growthPolicy,
       });
+    } catch (error) {
+      this.busy = false;
+      this.statusText?.setText(errorText(error)).setColor('#ff9a91');
+      void this.refresh();
+    }
+  }
+
+  private async acceptPvp2v2Invite(inviteId: string): Promise<void> {
+    if (this.busy) return;
+    this.busy = true;
+    this.statusText?.setText('2v2 친선 파티에 참가하는 중…').setColor('#a9b5c5');
+    try {
+      const lobby = await acceptFriendPvp2v2Invite(inviteId);
+      if (!this.scene.isActive()) return;
+      if (lobby.state === 'MATCHED') {
+        this.scene.start('pvp-2v2-match', {
+          websocketPath: lobby.websocketPath,
+          modeId: 'pvp_friendly_2v2',
+          nextScene: 'pvp-friendly-2v2-lobby',
+        });
+      } else {
+        this.scene.start('pvp-friendly-2v2-lobby', { lobby });
+      }
     } catch (error) {
       this.busy = false;
       this.statusText?.setText(errorText(error)).setColor('#ff9a91');
