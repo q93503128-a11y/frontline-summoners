@@ -91,6 +91,37 @@ function buildStandardizedSlots(
   return slots;
 }
 
+async function buildStandardizedSeatAuthority(
+  db: D1Database,
+  accountId: string,
+  modeId: PvpModeId,
+  requiredSlots: 5 | 10,
+  nowMs: number,
+): Promise<AccountPvpSeatAuthority> {
+  const record = await initializeAccountSave(db, accountId, undefined, nowMs);
+  const social = await ensureSocialProfile(db, accountId);
+  const ownedCharacterCount = getAccountOwnedCharacterIds(record.snapshot).length;
+  const chapter1Complete = record.snapshot.clearedStageIds.includes(CHAPTER_ONE_FINAL_STAGE_ID);
+  if (!chapter1Complete) throw new Error('pvp_chapter_1_required');
+  if (ownedCharacterCount < requiredSlots) throw new Error(`pvp_requires_${requiredSlots}_owned_characters`);
+  if (record.snapshot.deckSlotIds.length < requiredSlots) throw new Error(`pvp_deck_requires_${requiredSlots}_characters`);
+  const baseWeaponId = record.snapshot.selectedBaseWeaponId;
+  if (!isServerCoopBaseWeaponUnlocked(baseWeaponId, record.snapshot.clearedStageIds)) {
+    throw new Error(`pvp_base_weapon_locked:${baseWeaponId}`);
+  }
+  return {
+    accountId,
+    accountRevision: record.revision,
+    modeId,
+    displayName: social.display_name,
+    playerSlots: buildStandardizedSlots(record.snapshot, requiredSlots),
+    selectedBaseWeaponId: baseWeaponId,
+    standardized: true,
+    standardizedLevel: PVP_STANDARDIZATION.baseLevel,
+    standardizedPlusLevel: PVP_STANDARDIZATION.plusLevel,
+  };
+}
+
 export async function getAccountPvpEligibility(
   db: D1Database,
   accountId: string,
@@ -126,14 +157,11 @@ export async function getAccountPvpSeatAuthority(
 ): Promise<AccountPvpSeatAuthority> {
   const mode = getPvpMode(modeId);
   if (mode.growthPolicy !== 'STANDARDIZED') throw new Error('pvp_mode_requires_friendly_growth_choice');
-  const record = await initializeAccountSave(db, accountId, undefined, nowMs);
-  const social = await ensureSocialProfile(db, accountId);
-  const ownedCharacterCount = getAccountOwnedCharacterIds(record.snapshot).length;
-  const chapter1Complete = record.snapshot.clearedStageIds.includes(CHAPTER_ONE_FINAL_STAGE_ID);
-  if (!chapter1Complete) throw new Error('pvp_chapter_1_required');
-  if (ownedCharacterCount < mode.slotsPerPlayer) throw new Error(`pvp_requires_${mode.slotsPerPlayer}_owned_characters`);
-  if (record.snapshot.deckSlotIds.length < mode.slotsPerPlayer) throw new Error(`pvp_deck_requires_${mode.slotsPerPlayer}_characters`);
   if (mode.ranked) {
+    const record = await initializeAccountSave(db, accountId, undefined, nowMs);
+    const social = await ensureSocialProfile(db, accountId);
+    const ownedCharacterCount = getAccountOwnedCharacterIds(record.snapshot).length;
+    const chapter1Complete = record.snapshot.clearedStageIds.includes(CHAPTER_ONE_FINAL_STAGE_ID);
     const failure = getPvpRankedEligibilityFailure({
       chapter1Complete,
       ownedCharacterCount,
@@ -143,21 +171,20 @@ export async function getAccountPvpSeatAuthority(
     });
     if (failure) throw new Error(`pvp_ranked_ineligible:${failure}`);
   }
-  const baseWeaponId = record.snapshot.selectedBaseWeaponId;
-  if (!isServerCoopBaseWeaponUnlocked(baseWeaponId, record.snapshot.clearedStageIds)) {
-    throw new Error(`pvp_base_weapon_locked:${baseWeaponId}`);
-  }
-  return {
-    accountId,
-    accountRevision: record.revision,
-    modeId,
-    displayName: social.display_name,
-    playerSlots: buildStandardizedSlots(record.snapshot, mode.slotsPerPlayer),
-    selectedBaseWeaponId: baseWeaponId,
-    standardized: true,
-    standardizedLevel: PVP_STANDARDIZATION.baseLevel,
-    standardizedPlusLevel: PVP_STANDARDIZATION.plusLevel,
-  };
+  return buildStandardizedSeatAuthority(db, accountId, modeId, mode.slotsPerPlayer, nowMs);
+}
+
+/**
+ * Friendly 2v2 initially ships on the same Lv50/+0 standardization as public 2v2.
+ * The design keeps ACTUAL as an optional future room rule, but the first live team
+ * friendly path must not silently inherit account permanent combat bonuses.
+ */
+export async function getAccountFriendlyPvp2v2SeatAuthority(
+  db: D1Database,
+  accountId: string,
+  nowMs = Date.now(),
+): Promise<AccountPvpSeatAuthority> {
+  return buildStandardizedSeatAuthority(db, accountId, 'pvp_friendly_2v2', 5, nowMs);
 }
 
 export const __accountPvpTestOnly = {
