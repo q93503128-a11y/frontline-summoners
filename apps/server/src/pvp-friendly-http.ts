@@ -16,7 +16,7 @@ export interface FriendlyPvpHttpResult {
   readonly body: unknown;
 }
 
-const FRIENDLY_LOBBY_TTL_MS = 10 * 60 * 1000;
+export const FRIENDLY_PVP_LOBBY_TTL_MS = 10 * 60 * 1000;
 const FRIENDLY_SOCKET_PATTERN = /^\/api\/pvp\/friendly\/(PV-[A-F0-9]{10})\/websocket$/;
 
 function isRecord(value: unknown): value is Record<string, unknown> {
@@ -32,7 +32,7 @@ async function readJson(request: Request): Promise<Record<string, unknown>> {
   }
 }
 
-function normalizeInviteCode(value: unknown): string | null {
+export function normalizeFriendlyPvpInviteCode(value: unknown): string | null {
   if (typeof value !== 'string') return null;
   const normalized = value.trim().toUpperCase();
   return /^PV-[A-F0-9]{10}$/.test(normalized) ? normalized : null;
@@ -82,6 +82,94 @@ function matchedBody(inviteCode: string, payload: Record<string, unknown>): Frie
   };
 }
 
+/** Trusted server-side lobby creation used by both the public code flow and social friend invites. */
+export async function createFriendlyPvpLobbyForAccount(
+  env: FriendlyPvpHttpEnv,
+  accountId: string,
+  growthPolicy: FriendlyPvpGrowthPolicy,
+  nowMs = Date.now(),
+): Promise<FriendlyPvpHttpResult> {
+  await getAccountFriendlyPvpAuthority(env.DB, accountId, growthPolicy, nowMs);
+  for (let attempt = 0; attempt < 4; attempt += 1) {
+    const inviteCode = makeInviteCode();
+    const hostToken = crypto.randomUUID();
+    const expiresAtMs = nowMs + FRIENDLY_PVP_LOBBY_TTL_MS;
+    const initialized = await internalPost(env, inviteCode, '/initialize-host', {
+      inviteCode,
+      accountId,
+      growthPolicy,
+      hostToken,
+      expiresAtMs,
+    });
+    if (initialized.status === 409) continue;
+    if (initialized.status >= 400) {
+      const error = typeof initialized.payload.error === 'string' ? initialized.payload.error : 'friendly_pvp_initialization_failed';
+      return { status: initialized.status, body: { error } };
+    }
+    return {
+      status: 201,
+      body: { state: 'WAITING', modeId: 'pvp_friendly_1v1', inviteCode, growthPolicy, expiresAtMs },
+    };
+  }
+  return { status: 503, body: { error: 'friendly_pvp_code_generation_failed' } };
+}
+
+export async function joinFriendlyPvpLobbyForAccount(
+  env: FriendlyPvpHttpEnv,
+  accountId: string,
+  rawInviteCode: unknown,
+): Promise<FriendlyPvpHttpResult> {
+  const inviteCode = normalizeFriendlyPvpInviteCode(rawInviteCode);
+  if (!inviteCode) return { status: 400, body: { error: 'friendly_pvp_invite_code_invalid' } };
+  const joined = await internalPost(env, inviteCode, '/join-guest', { accountId });
+  if (joined.status >= 400) {
+    const error = typeof joined.payload.error === 'string' ? joined.payload.error : 'friendly_pvp_join_failed';
+    return { status: joined.status, body: { error } };
+  }
+  return matchedBody(inviteCode, joined.payload);
+}
+
+export async function getFriendlyPvpLobbyStatusForAccount(
+  env: FriendlyPvpHttpEnv,
+  accountId: string,
+  rawInviteCode: unknown,
+): Promise<FriendlyPvpHttpResult> {
+  const inviteCode = normalizeFriendlyPvpInviteCode(rawInviteCode);
+  if (!inviteCode) return { status: 400, body: { error: 'friendly_pvp_invite_code_invalid' } };
+  const status = await internalPost(env, inviteCode, '/status', { accountId });
+  if (status.status >= 400) {
+    const error = typeof status.payload.error === 'string' ? status.payload.error : 'friendly_pvp_status_failed';
+    return { status: status.status, body: { error } };
+  }
+  if (status.payload.state === 'MATCHED') return matchedBody(inviteCode, status.payload);
+  if (status.payload.state === 'EXPIRED') return { status: 410, body: { error: 'friendly_pvp_lobby_expired' } };
+  return {
+    status: 200,
+    body: {
+      state: 'WAITING',
+      modeId: 'pvp_friendly_1v1',
+      inviteCode,
+      growthPolicy: status.payload.growthPolicy as FriendlyPvpGrowthPolicy,
+      expiresAtMs: status.payload.expiresAtMs,
+    },
+  };
+}
+
+export async function cancelFriendlyPvpLobbyForAccount(
+  env: FriendlyPvpHttpEnv,
+  accountId: string,
+  rawInviteCode: unknown,
+): Promise<FriendlyPvpHttpResult> {
+  const inviteCode = normalizeFriendlyPvpInviteCode(rawInviteCode);
+  if (!inviteCode) return { status: 400, body: { error: 'friendly_pvp_invite_code_invalid' } };
+  const cancelled = await internalPost(env, inviteCode, '/cancel', { accountId });
+  if (cancelled.status >= 400) {
+    const error = typeof cancelled.payload.error === 'string' ? cancelled.payload.error : 'friendly_pvp_cancel_failed';
+    return { status: cancelled.status, body: { error } };
+  }
+  return { status: 200, body: { state: 'CANCELLED', inviteCode } };
+}
+
 export async function resolveFriendlyPvpWebSocket(
   request: Request,
   env: FriendlyPvpHttpEnv,
@@ -114,75 +202,21 @@ export async function resolveFriendlyPvpHttp(
       const body = await readJson(request);
       const growthPolicy = parseFriendlyPvpGrowthPolicy(body.growthPolicy);
       if (!growthPolicy) return { status: 400, body: { error: 'friendly_pvp_growth_policy_required' } };
-      await getAccountFriendlyPvpAuthority(env.DB, principal.userId, growthPolicy, nowMs);
-      for (let attempt = 0; attempt < 4; attempt += 1) {
-        const inviteCode = makeInviteCode();
-        const hostToken = crypto.randomUUID();
-        const expiresAtMs = nowMs + FRIENDLY_LOBBY_TTL_MS;
-        const initialized = await internalPost(env, inviteCode, '/initialize-host', {
-          inviteCode,
-          accountId: principal.userId,
-          growthPolicy,
-          hostToken,
-          expiresAtMs,
-        });
-        if (initialized.status === 409) continue;
-        if (initialized.status >= 400) {
-          const error = typeof initialized.payload.error === 'string' ? initialized.payload.error : 'friendly_pvp_initialization_failed';
-          return { status: initialized.status, body: { error } };
-        }
-        return {
-          status: 201,
-          body: { state: 'WAITING', modeId: 'pvp_friendly_1v1', inviteCode, growthPolicy, expiresAtMs },
-        };
-      }
-      return { status: 503, body: { error: 'friendly_pvp_code_generation_failed' } };
+      return createFriendlyPvpLobbyForAccount(env, principal.userId, growthPolicy, nowMs);
     }
 
     if (request.method === 'POST' && url.pathname === '/api/pvp/friendly/join') {
       const body = await readJson(request);
-      const inviteCode = normalizeInviteCode(body.inviteCode);
-      if (!inviteCode) return { status: 400, body: { error: 'friendly_pvp_invite_code_invalid' } };
-      const joined = await internalPost(env, inviteCode, '/join-guest', { accountId: principal.userId });
-      if (joined.status >= 400) {
-        const error = typeof joined.payload.error === 'string' ? joined.payload.error : 'friendly_pvp_join_failed';
-        return { status: joined.status, body: { error } };
-      }
-      return matchedBody(inviteCode, joined.payload);
+      return joinFriendlyPvpLobbyForAccount(env, principal.userId, body.inviteCode);
     }
 
     if (request.method === 'GET' && url.pathname === '/api/pvp/friendly/status') {
-      const inviteCode = normalizeInviteCode(url.searchParams.get('inviteCode'));
-      if (!inviteCode) return { status: 400, body: { error: 'friendly_pvp_invite_code_invalid' } };
-      const status = await internalPost(env, inviteCode, '/status', { accountId: principal.userId });
-      if (status.status >= 400) {
-        const error = typeof status.payload.error === 'string' ? status.payload.error : 'friendly_pvp_status_failed';
-        return { status: status.status, body: { error } };
-      }
-      if (status.payload.state === 'MATCHED') return matchedBody(inviteCode, status.payload);
-      if (status.payload.state === 'EXPIRED') return { status: 410, body: { error: 'friendly_pvp_lobby_expired' } };
-      return {
-        status: 200,
-        body: {
-          state: 'WAITING',
-          modeId: 'pvp_friendly_1v1',
-          inviteCode,
-          growthPolicy: status.payload.growthPolicy as FriendlyPvpGrowthPolicy,
-          expiresAtMs: status.payload.expiresAtMs,
-        },
-      };
+      return getFriendlyPvpLobbyStatusForAccount(env, principal.userId, url.searchParams.get('inviteCode'));
     }
 
     if (request.method === 'POST' && url.pathname === '/api/pvp/friendly/cancel') {
       const body = await readJson(request);
-      const inviteCode = normalizeInviteCode(body.inviteCode);
-      if (!inviteCode) return { status: 400, body: { error: 'friendly_pvp_invite_code_invalid' } };
-      const cancelled = await internalPost(env, inviteCode, '/cancel', { accountId: principal.userId });
-      if (cancelled.status >= 400) {
-        const error = typeof cancelled.payload.error === 'string' ? cancelled.payload.error : 'friendly_pvp_cancel_failed';
-        return { status: cancelled.status, body: { error } };
-      }
-      return { status: 200, body: { state: 'CANCELLED', inviteCode } };
+      return cancelFriendlyPvpLobbyForAccount(env, principal.userId, body.inviteCode);
     }
 
     return { status: 404, body: { error: 'not_found' } };
@@ -193,4 +227,4 @@ export async function resolveFriendlyPvpHttp(
   }
 }
 
-export const __friendlyPvpHttpTestOnly = { normalizeInviteCode, makeInviteCode };
+export const __friendlyPvpHttpTestOnly = { normalizeInviteCode: normalizeFriendlyPvpInviteCode, makeInviteCode };
