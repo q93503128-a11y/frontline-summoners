@@ -2,8 +2,13 @@ import Phaser from 'phaser';
 import { INTERNAL_HEIGHT, INTERNAL_WIDTH } from '@frontline/shared';
 import { getProfileCosmetic, type ProfileCosmeticKind, type ProfileLoadout } from '@frontline/sim/achievement-profile';
 import {
+  loadAuthenticatedAccountProfile,
+  mutateAuthenticatedAccountProfile,
+} from './account-profile-network.ts';
+import {
   ACHIEVEMENTS,
   ACHIEVEMENT_CATEGORIES,
+  deriveAccountAchievementProfile,
   deriveReadOnlyAccountAchievementProfile,
   getAchievementRewardNames,
   getOwnedCosmeticsByKind,
@@ -42,6 +47,11 @@ function nextIndex(current: number, length: number): number {
   return length <= 0 ? 0 : (current + 1) % length;
 }
 
+function newRequestId(): string {
+  if (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function') return crypto.randomUUID();
+  return `profile-${Date.now()}-${Math.random().toString(36).slice(2)}`;
+}
+
 export class ProfileScene extends Phaser.Scene {
   private progress: GuestProgress | null = null;
   private authority: ActiveProgressAuthority = 'GUEST_LOCAL';
@@ -49,6 +59,8 @@ export class ProfileScene extends Phaser.Scene {
   private layer?: Phaser.GameObjects.Container;
   private categoryIndex = 0;
   private page = 0;
+  private accountMutationPending = false;
+  private statusMessage = '';
 
   constructor() { super('profile'); }
 
@@ -60,21 +72,51 @@ export class ProfileScene extends Phaser.Scene {
     addButton(this, 1180, 62, 150, compact ? 78 : 50, '메인', () => this.scene.start('main-menu'), 0x59677f);
     addText(this, INTERNAL_WIDTH / 2, INTERNAL_HEIGHT / 2, '프로필 불러오는 중…', 24, COLORS.muted, 'center').setOrigin(0.5);
 
-    void loadActiveProgress().then((view) => {
+    void loadActiveProgress().then(async (view) => {
       if (!this.scene.isActive()) return;
       this.progress = view.progress;
       this.authority = view.authority;
-      this.state = view.authority === 'GUEST_LOCAL'
-        ? loadGuestAchievementProfile(view.progress)
-        : deriveReadOnlyAccountAchievementProfile(view.progress);
+      if (view.authority === 'GUEST_LOCAL') {
+        this.state = loadGuestAchievementProfile(view.progress);
+      } else {
+        const remote = await loadAuthenticatedAccountProfile();
+        if (!this.scene.isActive()) return;
+        this.state = remote
+          ? deriveAccountAchievementProfile(view.progress, remote.profile, view.authority === 'ACCOUNT_ONLINE')
+          : deriveReadOnlyAccountAchievementProfile(view.progress);
+        if (!remote) this.statusMessage = '계정 프로필 서버 상태를 읽지 못해 임시 읽기 전용';
+      }
       this.render();
     });
   }
 
   private saveLoadout(next: ProfileLoadout): void {
-    if (!this.progress || !this.state?.editable) return;
-    this.state = saveGuestProfileLoadout(this.progress, next);
+    if (!this.progress || !this.state?.editable || this.accountMutationPending) return;
+    if (this.authority === 'GUEST_LOCAL') {
+      this.state = saveGuestProfileLoadout(this.progress, next);
+      this.statusMessage = '로컬 프로필 저장 완료';
+      this.render();
+      return;
+    }
+    if (this.authority !== 'ACCOUNT_ONLINE') return;
+    this.accountMutationPending = true;
+    this.statusMessage = '계정 프로필 저장 중…';
     this.render();
+    void mutateAuthenticatedAccountProfile({ requestId: newRequestId(), profileLoadout: next })
+      .then((response) => {
+        if (!this.scene.isActive() || !this.progress) return;
+        this.state = deriveAccountAchievementProfile(this.progress, response.profile, true);
+        this.statusMessage = response.replayed ? '계정 프로필 저장 확인 완료' : '계정 프로필 서버 저장 완료';
+      })
+      .catch(() => {
+        if (!this.scene.isActive()) return;
+        this.statusMessage = '계정 프로필 저장 실패 · 최신 상태를 다시 불러와 재시도';
+      })
+      .finally(() => {
+        if (!this.scene.isActive()) return;
+        this.accountMutationPending = false;
+        this.render();
+      });
   }
 
   private cycleCosmetic(kind: Exclude<ProfileCosmeticKind, 'BADGE'>): void {
@@ -143,7 +185,9 @@ export class ProfileScene extends Phaser.Scene {
     const banner = this.add.rectangle(x, y - height / 2 + 62, width - 14, 112, bannerColor, 0.92);
     this.layer!.add([card, banner]);
 
-    const authorityLabel = this.authority === 'GUEST_LOCAL' ? '게스트 지휘관' : '계정 지휘관';
+    const authorityLabel = this.authority === 'GUEST_LOCAL'
+      ? '게스트 지휘관'
+      : this.authority === 'ACCOUNT_ONLINE' ? '계정 지휘관 · 서버' : '계정 지휘관 · 오프라인 캐시';
     this.layer!.add(addText(this, x - 190, y - 225, authorityLabel, compact ? 19 : 17, '#dfe7f3'));
     const titleName = state.profileLoadout.titleId ? getProfileCosmetic(state.profileLoadout.titleId).name : '칭호 없음';
     this.layer!.add(addText(this, x, y - 183, titleName, compact ? 25 : 23, COLORS.gold, 'center').setOrigin(0.5));
@@ -167,9 +211,10 @@ export class ProfileScene extends Phaser.Scene {
     this.layer!.add(addText(this, x - 190, y + 78, `대표 배지 · ${badgeNames.length ? badgeNames.join(' · ') : '없음'}`, 16, '#d4dbe7').setWordWrapWidth(380));
 
     const controlY = y + 155;
-    const buttonAccent = state.editable ? 0x6d86a7 : 0x424b59;
+    const controlsEnabled = state.editable && !this.accountMutationPending;
+    const buttonAccent = controlsEnabled ? 0x6d86a7 : 0x424b59;
     const buttons = [
-      addButton(this, x - 135, controlY, 120, compact ? 70 : 48, state.editable ? '대표' : '읽기', () => this.cyclePortrait(), buttonAccent),
+      addButton(this, x - 135, controlY, 120, compact ? 70 : 48, controlsEnabled ? '대표' : '읽기', () => this.cyclePortrait(), buttonAccent),
       addButton(this, x, controlY, 120, compact ? 70 : 48, '칭호', () => this.cycleCosmetic('TITLE'), buttonAccent),
       addButton(this, x + 135, controlY, 120, compact ? 70 : 48, '프레임', () => this.cycleCosmetic('FRAME'), buttonAccent),
       addButton(this, x - 135, controlY + 66, 120, compact ? 70 : 48, '배너', () => this.cycleCosmetic('BANNER'), buttonAccent),
@@ -177,7 +222,8 @@ export class ProfileScene extends Phaser.Scene {
       addButton(this, x + 135, controlY + 66, 120, compact ? 70 : 48, '배지', () => this.cycleBadges(), buttonAccent),
     ];
     this.layer!.add(buttons);
-    if (!state.editable) this.layer!.add(addText(this, x, y + 236, '계정 프로필 편집은 읽기 전용', 15, '#8f9bac', 'center').setOrigin(0.5));
+    const footer = this.statusMessage || (!state.editable ? '오프라인/불완전 계정 프로필은 읽기 전용' : '');
+    if (footer) this.layer!.add(addText(this, x, y + 236, footer, 15, '#8f9bac', 'center').setOrigin(0.5));
   }
 
   private renderAchievementList(): void {
