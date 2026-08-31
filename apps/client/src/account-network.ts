@@ -35,7 +35,7 @@ export interface AccountMutationResponse extends AccountRemoteSave {
   readonly result: unknown;
 }
 
-export type AccountTrustedBattleKind = 'MAIN' | 'SPECIAL';
+export type AccountTrustedBattleKind = 'MAIN' | 'SPECIAL' | 'RECORD';
 export type AccountTrustedBattleCommand =
   | { readonly tick: number; readonly type: 'SPAWN'; readonly slotId: string }
   | { readonly tick: number; readonly type: 'UPGRADE_SUPPLY' }
@@ -60,6 +60,9 @@ export interface AccountTrustedBattleCompletion {
   readonly playerBaseHp: number;
   readonly enemyBaseHp: number;
   readonly completedAtMs: number;
+  readonly recordMode?: 'ENDLESS_FRONT' | 'BOSS_RUSH';
+  readonly defeatedBosses?: number;
+  readonly recordCompleted?: boolean;
 }
 
 export interface AccountTrustedBattleCompleteResponse {
@@ -122,7 +125,7 @@ function parseMutationResponse(value: unknown): AccountMutationResponse | null {
 }
 
 function parseTrustedBattleKind(value: unknown): AccountTrustedBattleKind | null {
-  return value === 'MAIN' || value === 'SPECIAL' ? value : null;
+  return value === 'MAIN' || value === 'SPECIAL' || value === 'RECORD' ? value : null;
 }
 
 function parseTrustedBattleStart(value: unknown): AccountTrustedBattleStart | null {
@@ -149,7 +152,21 @@ function parseTrustedBattleCompletion(value: unknown): AccountTrustedBattleCompl
   const enemyBaseHp = nonNegativeInteger(value.enemyBaseHp);
   const completedAtMs = nonNegativeInteger(value.completedAtMs);
   if (!battleId || !kind || !targetId || !winner || clearFrames === null || !finalStateHash || playerBaseHp === null || enemyBaseHp === null || completedAtMs === null) return null;
-  return { battleId, kind, targetId, winner, clearFrames, finalStateHash, playerBaseHp, enemyBaseHp, completedAtMs };
+
+  if (kind !== 'RECORD') {
+    return { battleId, kind, targetId, winner, clearFrames, finalStateHash, playerBaseHp, enemyBaseHp, completedAtMs };
+  }
+  const recordMode = value.recordMode === 'ENDLESS_FRONT' || value.recordMode === 'BOSS_RUSH' ? value.recordMode : null;
+  if (!recordMode) return null;
+  if (recordMode === 'BOSS_RUSH') {
+    const defeatedBosses = nonNegativeInteger(value.defeatedBosses);
+    if (defeatedBosses === null || typeof value.recordCompleted !== 'boolean') return null;
+    return {
+      battleId, kind, targetId, winner, clearFrames, finalStateHash, playerBaseHp, enemyBaseHp, completedAtMs,
+      recordMode, defeatedBosses, recordCompleted: value.recordCompleted,
+    };
+  }
+  return { battleId, kind, targetId, winner, clearFrames, finalStateHash, playerBaseHp, enemyBaseHp, completedAtMs, recordMode };
 }
 
 function parseTrustedBattleCompleteResponse(value: unknown): AccountTrustedBattleCompleteResponse | null {
