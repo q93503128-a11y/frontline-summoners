@@ -35,7 +35,7 @@ test('profile mutation parser requires replayed result while preserving authorit
   assert.deepEqual(parsed?.result, { profileLoadout: {} });
 });
 
-test('profile transport shares the authenticated session token surface and keeps a fingerprinted read cache', async () => {
+test('profile transport shares the authenticated session token surface and keeps cache plus live memory fingerprint-bound', async () => {
   const [profileNetwork, accountNetwork] = await Promise.all([
     readSource('../src/account-profile-network.ts'),
     readSource('../src/account-network.ts'),
@@ -44,6 +44,9 @@ test('profile transport shares the authenticated session token surface and keeps
   assert.match(accountNetwork, /frontline\.account\.sessionToken\.v1/);
   assert.match(profileNetwork, /sessionFingerprint/);
   assert.match(profileNetwork, /frontline\.account\.profileReadCache\.v1/);
+  assert.match(profileNetwork, /currentProfileSessionFingerprint/);
+  assert.match(profileNetwork, /currentProfileSessionFingerprint !== fingerprint/);
+  assert.match(profileNetwork, /currentProfile && currentProfileSessionFingerprint === fingerprint/);
   assert.match(profileNetwork, /authorization.*Bearer/s);
   assert.match(profileNetwork, /\/api\/account\/profile/);
   assert.match(profileNetwork, /expectedRevision: current\.revision/);
