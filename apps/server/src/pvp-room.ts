@@ -46,6 +46,7 @@ export interface PvpRoomSnapshot {
     readonly connected: boolean;
     readonly ready: boolean;
     readonly reconnecting: boolean;
+    readonly nextSequence: number;
   }[];
 }
 
@@ -136,6 +137,7 @@ export function getPvpRoomSnapshot(state: PvpRoomState): PvpRoomSnapshot {
       connected: state.seats[seatId].connected,
       ready: state.seats[seatId].ready,
       reconnecting: state.seats[seatId].disconnectedAtMs !== null,
+      nextSequence: state.seats[seatId].lastSequence + 1,
     })),
   };
 }
