@@ -15,6 +15,10 @@ import {
   recordAccountAchievementFact,
   recordAccountPvpAchievementTier,
 } from './account-profile-authority.ts';
+import {
+  grantPvpFirstReachRewards,
+  type PvpFirstReachGrant,
+} from './pvp-reward-authority.ts';
 
 function seconds(ms: number): number {
   return Math.floor(ms / 1000);
@@ -39,6 +43,10 @@ export interface PvpSettlementView {
   readonly ratings?: readonly {
     readonly accountId: string;
     readonly rating: PvpRatingView;
+  }[];
+  readonly firstReachRewards?: readonly {
+    readonly accountId: string;
+    readonly grants: readonly PvpFirstReachGrant[];
   }[];
 }
 
@@ -108,6 +116,10 @@ export async function completeTrustedPvp1v1Result(
     const a = participants.find((entry) => entry.team_id === 'A' && entry.seat_index === 0);
     const b = participants.find((entry) => entry.team_id === 'B' && entry.seat_index === 0);
     if (!a || !b) throw new Error('pvp_ranked_participants_missing_after_settlement');
+    const [aReward, bReward] = await Promise.all([
+      grantPvpFirstReachRewards(db, a.user_id, settled.a.bestMmr, nowMs),
+      grantPvpFirstReachRewards(db, b.user_id, settled.b.bestMmr, nowMs),
+    ]);
     await Promise.all([
       recordAccountAchievementFact(db, a.user_id, 'pvp_first_ranked', nowMs),
       recordAccountAchievementFact(db, b.user_id, 'pvp_first_ranked', nowMs),
@@ -122,6 +134,10 @@ export async function completeTrustedPvp1v1Result(
       ratings: [
         { accountId: a.user_id, rating: settled.a },
         { accountId: b.user_id, rating: settled.b },
+      ],
+      firstReachRewards: [
+        { accountId: a.user_id, grants: aReward.granted },
+        { accountId: b.user_id, grants: bReward.granted },
       ],
     };
   }
