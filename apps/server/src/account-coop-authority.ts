@@ -80,6 +80,7 @@ async function settleStageOnce(
   battleId: string,
   expectedRevision: number,
   nowMs: number,
+  availabilityAtMs: number,
 ) {
   if (ACCOUNT_MAIN_STAGE_INDEX.has(stageId)) {
     return applyAccountMainBattleResult(db, accountId, {
@@ -93,7 +94,7 @@ async function settleStageOnce(
     battleId,
     expectedRevision,
     stageId,
-  }, nowMs, nowMs);
+  }, nowMs, availabilityAtMs);
 }
 
 export async function settleAuthenticatedCoopWin(
@@ -101,17 +102,22 @@ export async function settleAuthenticatedCoopWin(
   accountId: string,
   stageId: string,
   matchId: string,
-  options: { readonly friendMatch: boolean; readonly reconnected: boolean },
+  options: {
+    readonly friendMatch: boolean;
+    readonly reconnected: boolean;
+    readonly battleStartedAtMs?: number;
+  },
   nowMs = Date.now(),
 ): Promise<AccountCoopSettlement> {
   const battleId = `coop:${matchId}`;
+  const availabilityAtMs = options.battleStartedAtMs ?? nowMs;
   let lastRevision = -1;
   let replayed = false;
   for (let attempt = 0; attempt < 4; attempt += 1) {
     const current = await initializeAccountSave(db, accountId, undefined, nowMs);
     lastRevision = current.revision;
-    assertAccountCoopStagePlayable(current.snapshot, stageId, nowMs);
-    const result = await settleStageOnce(db, accountId, stageId, battleId, current.revision, nowMs);
+    assertAccountCoopStagePlayable(current.snapshot, stageId, availabilityAtMs);
+    const result = await settleStageOnce(db, accountId, stageId, battleId, current.revision, nowMs, availabilityAtMs);
     if (!result.ok) continue;
     lastRevision = result.record.revision;
     replayed = result.replayed;
