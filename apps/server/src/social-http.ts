@@ -1,7 +1,15 @@
 import { resolveAuthSession } from './auth-session-authority.ts';
 import { getAccountCoopSeatAuthority } from './account-coop-authority.ts';
+import { getAccountFriendlyPvpAuthority, parseFriendlyPvpGrowthPolicy } from './pvp-friendly-authority.ts';
+import {
+  cancelFriendlyPvpLobbyForAccount,
+  createFriendlyPvpLobbyForAccount,
+  joinFriendlyPvpLobbyForAccount,
+  type FriendlyPvpHttpEnv,
+} from './pvp-friendly-http.ts';
 import {
   acceptSocialFriendRequest,
+  areSocialFriends,
   blockSocialUser,
   createSocialCoopInvite,
   declineSocialCoopInvite,
@@ -15,9 +23,17 @@ import {
   unblockSocialUser,
   updateSocialDisplayName,
 } from './social-authority.ts';
+import {
+  cancelSocialPvpInviteByInviter,
+  createSocialPvpInvite,
+  declineSocialPvpInvite,
+  getIncomingSocialPvpInvites,
+  getPendingSocialPvpInviteForInvitee,
+  getSocialPvpInviterSummary,
+  markSocialPvpInviteAccepted,
+} from './social-pvp-authority.ts';
 
-export interface SocialHttpEnv {
-  readonly DB: D1Database;
+export interface SocialHttpEnv extends FriendlyPvpHttpEnv {
   readonly BATTLE_ROOM: DurableObjectNamespace;
 }
 
@@ -53,9 +69,10 @@ async function requireTargetByFriendCode(db: D1Database, raw: unknown): Promise<
 }
 
 function errorStatus(message: string): number {
+  if (message.includes('expired')) return 410;
   if (message.includes('not_found') || message.includes('missing')) return 404;
   if (message.includes('blocked') || message.includes('already') || message.includes('pending') || message.includes('conflict') || message.includes('friend_required')) return 409;
-  if (message.includes('locked') || message.includes('not currently available') || message.includes('not_coop_eligible')) return 403;
+  if (message.includes('locked') || message.includes('not currently available') || message.includes('not_coop_eligible') || message.includes('required')) return 403;
   return 400;
 }
 
@@ -148,16 +165,82 @@ async function acceptFriendCoopInvite(
   };
 }
 
-export async function resolveSocialHttp(request: Request, env: SocialHttpEnv): Promise<SocialHttpResult | null> {
+async function createFriendPvpInvite(
+  request: Request,
+  env: SocialHttpEnv,
+  userId: string,
+  nowMs: number,
+): Promise<SocialHttpResult> {
+  const body = await readJson(request);
+  const inviteeId = await requireTargetByFriendCode(env.DB, body.friendCode);
+  if (inviteeId === userId) throw new Error('social_self_target');
+  if (!await areSocialFriends(env.DB, userId, inviteeId)) throw new Error('social_friend_required');
+  const growthPolicy = parseFriendlyPvpGrowthPolicy(body.growthPolicy);
+  if (!growthPolicy) return { status: 400, body: { error: 'friendly_pvp_growth_policy_required' } };
+
+  // Validate both players before allocating a Durable Object lobby.
+  await getAccountFriendlyPvpAuthority(env.DB, inviteeId, growthPolicy, nowMs);
+  const lobbyResult = await createFriendlyPvpLobbyForAccount(env, userId, growthPolicy, nowMs);
+  if (lobbyResult.status >= 400 || !isRecord(lobbyResult.body)) return lobbyResult;
+  const inviteCode = text(lobbyResult.body.inviteCode);
+  const expiresAtMs = lobbyResult.body.expiresAtMs;
+  if (!inviteCode || typeof expiresAtMs !== 'number') {
+    return { status: 503, body: { error: 'social_pvp_lobby_payload_invalid' } };
+  }
+  try {
+    const invite = await createSocialPvpInvite(env.DB, userId, inviteeId, inviteCode, growthPolicy, expiresAtMs, nowMs);
+    return {
+      status: 201,
+      body: {
+        invite: { inviteId: invite.inviteId, inviteCode, growthPolicy, expiresAtMs },
+        lobby: lobbyResult.body,
+      },
+    };
+  } catch (error) {
+    await cancelFriendlyPvpLobbyForAccount(env, userId, inviteCode).catch(() => undefined);
+    throw error;
+  }
+}
+
+async function acceptFriendPvpInvite(
+  request: Request,
+  env: SocialHttpEnv,
+  userId: string,
+  nowMs: number,
+): Promise<SocialHttpResult> {
+  const body = await readJson(request);
+  const inviteId = text(body.inviteId);
+  if (!inviteId) return { status: 400, body: { error: 'invite_id_required' } };
+  const invite = await getPendingSocialPvpInviteForInvitee(env.DB, userId, inviteId, nowMs);
+  await getAccountFriendlyPvpAuthority(env.DB, userId, invite.growthPolicy, nowMs);
+  const joined = await joinFriendlyPvpLobbyForAccount(env, userId, invite.inviteCode);
+  if (joined.status >= 400) return joined;
+  await markSocialPvpInviteAccepted(env.DB, userId, inviteId);
+  return { status: 200, body: { inviteId, match: joined.body } };
+}
+
+export async function resolveSocialHttp(request: Request, env: SocialHttpEnv, nowMs = Date.now()): Promise<SocialHttpResult | null> {
   const url = new URL(request.url);
   if (!url.pathname.startsWith('/api/social')) return null;
-  const principal = await resolveAuthSession(env.DB, request.headers.get('authorization'));
+  const principal = await resolveAuthSession(env.DB, request.headers.get('authorization'), nowMs);
   if (!principal) return { status: 401, body: { error: 'authentication_required' } };
 
   try {
-    await touchSocialPresence(env.DB, principal.userId);
+    await touchSocialPresence(env.DB, principal.userId, nowMs);
     if (request.method === 'GET' && url.pathname === '/api/social') {
-      return { status: 200, body: await getSocialSummary(env.DB, principal.userId) };
+      const [summary, pvpInvites] = await Promise.all([
+        getSocialSummary(env.DB, principal.userId, nowMs),
+        getIncomingSocialPvpInvites(env.DB, principal.userId, nowMs),
+      ]);
+      const pvpInviteViews = await Promise.all(pvpInvites.map(async (invite) => ({
+        inviteId: invite.inviteId,
+        inviter: await getSocialPvpInviterSummary(env.DB, invite.inviterId, nowMs),
+        inviteCode: invite.inviteCode,
+        modeId: invite.modeId,
+        growthPolicy: invite.growthPolicy,
+        expiresAtMs: invite.expiresAtMs,
+      })));
+      return { status: 200, body: { ...summary, pvpInvites: pvpInviteViews } };
     }
 
     const body = request.method === 'POST' ? await readJson(request.clone()) : {};
@@ -202,6 +285,26 @@ export async function resolveSocialHttp(request: Request, env: SocialHttpEnv): P
       const inviteId = text(body.inviteId);
       if (!inviteId) return { status: 400, body: { error: 'invite_id_required' } };
       await declineSocialCoopInvite(env.DB, principal.userId, inviteId);
+      return { status: 200, body: { ok: true } };
+    }
+    if (request.method === 'POST' && url.pathname === '/api/social/pvp/invite') {
+      return createFriendPvpInvite(request, env, principal.userId, nowMs);
+    }
+    if (request.method === 'POST' && url.pathname === '/api/social/pvp/accept') {
+      return acceptFriendPvpInvite(request, env, principal.userId, nowMs);
+    }
+    if (request.method === 'POST' && url.pathname === '/api/social/pvp/decline') {
+      const inviteId = text(body.inviteId);
+      if (!inviteId) return { status: 400, body: { error: 'invite_id_required' } };
+      const invite = await declineSocialPvpInvite(env.DB, principal.userId, inviteId);
+      await cancelFriendlyPvpLobbyForAccount(env, invite.inviterId, invite.inviteCode).catch(() => undefined);
+      return { status: 200, body: { ok: true } };
+    }
+    if (request.method === 'POST' && url.pathname === '/api/social/pvp/cancel') {
+      const inviteId = text(body.inviteId);
+      if (!inviteId) return { status: 400, body: { error: 'invite_id_required' } };
+      const invite = await cancelSocialPvpInviteByInviter(env.DB, principal.userId, inviteId);
+      await cancelFriendlyPvpLobbyForAccount(env, principal.userId, invite.inviteCode).catch(() => undefined);
       return { status: 200, body: { ok: true } };
     }
     return { status: 404, body: { error: 'not_found' } };
