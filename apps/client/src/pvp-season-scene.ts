@@ -131,8 +131,9 @@ export class PvpSeasonScene extends Phaser.Scene {
     const shown = honorNames.slice(0, 3).join(' · ');
     const extra = honorNames.length > 3 ? ` 외 ${honorNames.length - 3}개` : '';
     this.content.add(addText(this, 105, 620, honorNames.length > 0 ? `명예: ${shown}${extra}` : '획득 가능한 시즌 명예 없음', compact ? 16 : 14, honorNames.length > 0 ? '#cfe6ff' : '#8793a2'));
-    if (latest.honorClaimed) {
-      this.content.add(addText(this, 1170, 585, '수령 완료', compact ? 18 : 15, '#8ee3aa', 'right').setOrigin(1, 0));
+    if (latest.honorClaimed && latest.honors.length > 0) {
+      // Replay is intentionally useful: it repairs a profile grant if an older/partial claim row exists.
+      this.content.add(addButton(this, 1090, 588, 185, compact ? 72 : 54, this.claiming ? '확인 중…' : '장식 확인', () => { void this.claim(latest.seasonId); }, this.claiming ? 0x4c535d : 0x58736d));
     } else if (latest.honors.length > 0) {
       this.content.add(addButton(this, 1090, 588, 185, compact ? 72 : 54, this.claiming ? '확인 중…' : '명예 수령', () => { void this.claim(latest.seasonId); }, this.claiming ? 0x4c535d : 0x6d7894));
     } else {
