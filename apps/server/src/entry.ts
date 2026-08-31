@@ -16,11 +16,12 @@ import {
 } from './pvp-friendly-http.ts';
 import { PvpRoom } from './pvp-durable-room.ts';
 import { resolvePvpHttp, resolvePvpWebSocket, type PvpHttpEnv } from './pvp-http.ts';
+import { resolvePvpSeasonHttp, type PvpSeasonHttpEnv } from './pvp-season-http.ts';
 import { resolveSocialHttp } from './social-http.ts';
 
 export { BattleRoom, FriendlyPvpRoom, Pvp2v2Room, PvpRoom };
 
-type EntryEnv = Env & PvpHttpEnv & FriendlyPvpHttpEnv & Pvp2v2HttpEnv & FriendlyPvp2v2HttpEnv;
+type EntryEnv = Env & PvpHttpEnv & FriendlyPvpHttpEnv & Pvp2v2HttpEnv & FriendlyPvp2v2HttpEnv & PvpSeasonHttpEnv;
 
 const CORS_HEADERS = {
   'access-control-allow-origin': '*',
@@ -46,6 +47,8 @@ export default {
     const pvpSocket = await resolvePvpWebSocket(request, env);
     if (pvpSocket) return pvpSocket;
     if (request.method !== 'OPTIONS') {
+      const season = await resolvePvpSeasonHttp(request, env);
+      if (season) return json(season.body, season.status);
       const friendlyPvp2v2 = await resolveFriendlyPvp2v2Http(request, env);
       if (friendlyPvp2v2) return json(friendlyPvp2v2.body, friendlyPvp2v2.status);
       const pvp2v2 = await resolvePvp2v2Http(request, env);
