@@ -44,7 +44,7 @@ guest save v15에서 account save v2로 다음 축을 옮긴다.
 - 로컬 claimed achievement id를 신뢰해서 서버 장식을 발행하지 않는다.
 - 로컬 owned cosmetic id를 신뢰하지 않는다.
 - account profile은 imported account save를 기준으로 server achievement evaluator가 다시 계산한다.
-- 서버에 이미 존재하는 authoritative PvP/fact/profile history는 client 자기신고로 덮어쓰지 않는다.
+- 서버에 이미 존재하는 authoritative social/PvP/fact/profile history는 client 자기신고로 덮어쓰지 않는다.
 
 ## 3. strict guest → account 변환
 
@@ -222,9 +222,9 @@ guest save v15에는 `totalPulls`가 있으나 current account save v2에는 대
 
 ### 소셜/PvP 계정 데이터
 
-친구/차단/PvP rating/season history는 현재 account save v2 migration snapshot 대상이 아니다. guest local save가 authoritative source도 아니다.
+친구/차단/recent player 및 향후 PvP rating/season history는 account save v2 migration snapshot 대상이 아니다. guest local save가 authoritative source도 아니다.
 
-따라서 guest progression 교체가 향후/별도 server social identity data를 client 자기신고로 덮어쓰는 경로가 되지 않는다.
+현재 authenticated social/friend-coop authority는 별도 server social tables와 Durable Object/account session 경계에서 동작한다. 따라서 guest progression 교체가 server social identity/history를 client 자기신고로 덮어쓰지 않는다.
 
 ## 12. 아직 남은 account 제품화
 
@@ -235,8 +235,10 @@ guest save v15에는 `totalPulls`가 있으나 current account save v2에는 대
 - 여러 기기에서 migration prompt/marker UX 사람 QA.
 - migration 이후 guest local save를 삭제/보관하는 최종 UX 정책.
 - Record SPECIAL authenticated trusted battle proof.
-- 친구/협동 authenticated seat/result binding.
-- PvP/social account authority.
+- 공개 협동 matchmaking/reconnect network soak 같은 co-op release hardening.
+- PvP account authority.
+
+친구/초대/최근 플레이어/차단, authenticated friend-coop seat/result binding, 친구/재접속 achievement fact는 `SOCIAL_FRIEND_COOP_IMPLEMENTATION_2026-08-31.md` 기준으로 현재 구현됐다.
 
 ## 13. 검증 경계
 
