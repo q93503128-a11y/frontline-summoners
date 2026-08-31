@@ -29,17 +29,10 @@ CREATE TABLE IF NOT EXISTS pvp_matches (
   )),
   season_id TEXT NOT NULL,
   state TEXT NOT NULL DEFAULT 'CREATED' CHECK (state IN ('CREATED','ACTIVE','COMPLETED','VOID','EXPIRED')),
-  account_a TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-  account_b TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
   result TEXT CHECK (result IS NULL OR result IN ('A','B','DRAW')),
-  a_mmr_before INTEGER CHECK (a_mmr_before IS NULL OR a_mmr_before >= 0),
-  b_mmr_before INTEGER CHECK (b_mmr_before IS NULL OR b_mmr_before >= 0),
-  a_mmr_after INTEGER CHECK (a_mmr_after IS NULL OR a_mmr_after >= 0),
-  b_mmr_after INTEGER CHECK (b_mmr_after IS NULL OR b_mmr_after >= 0),
   created_at INTEGER NOT NULL,
   started_at INTEGER,
   completed_at INTEGER,
-  CHECK (account_a <> account_b),
   CHECK (
     (state IN ('CREATED','ACTIVE') AND result IS NULL AND completed_at IS NULL)
     OR (state = 'COMPLETED' AND result IS NOT NULL AND completed_at IS NOT NULL)
@@ -47,12 +40,22 @@ CREATE TABLE IF NOT EXISTS pvp_matches (
   )
 );
 
-CREATE INDEX IF NOT EXISTS idx_pvp_matches_account_a
-  ON pvp_matches(account_a, created_at DESC);
-CREATE INDEX IF NOT EXISTS idx_pvp_matches_account_b
-  ON pvp_matches(account_b, created_at DESC);
 CREATE INDEX IF NOT EXISTS idx_pvp_matches_season
   ON pvp_matches(season_id, mode_id, completed_at DESC);
+
+CREATE TABLE IF NOT EXISTS pvp_match_participants (
+  match_id TEXT NOT NULL REFERENCES pvp_matches(match_id) ON DELETE CASCADE,
+  user_id TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  team_id TEXT NOT NULL CHECK (team_id IN ('A','B')),
+  seat_index INTEGER NOT NULL CHECK (seat_index IN (0,1)),
+  mmr_before INTEGER CHECK (mmr_before IS NULL OR mmr_before >= 0),
+  mmr_after INTEGER CHECK (mmr_after IS NULL OR mmr_after >= 0),
+  PRIMARY KEY (match_id, user_id),
+  UNIQUE (match_id, team_id, seat_index)
+);
+
+CREATE INDEX IF NOT EXISTS idx_pvp_participants_user
+  ON pvp_match_participants(user_id, match_id);
 
 CREATE TABLE IF NOT EXISTS pvp_matchmaking_queue (
   user_id TEXT PRIMARY KEY REFERENCES users(id) ON DELETE CASCADE,
@@ -63,12 +66,13 @@ CREATE TABLE IF NOT EXISTS pvp_matchmaking_queue (
   queued_at INTEGER NOT NULL,
   expires_at INTEGER NOT NULL CHECK (expires_at > queued_at),
   match_id TEXT,
-  seat_id TEXT CHECK (seat_id IS NULL OR seat_id IN ('A','B')),
+  team_id TEXT CHECK (team_id IS NULL OR team_id IN ('A','B')),
+  seat_index INTEGER CHECK (seat_index IS NULL OR seat_index IN (0,1)),
   paired_at INTEGER,
   CHECK (
-    (state = 'QUEUED' AND match_id IS NULL AND seat_id IS NULL AND paired_at IS NULL)
+    (state = 'QUEUED' AND match_id IS NULL AND team_id IS NULL AND seat_index IS NULL AND paired_at IS NULL)
     OR
-    (state IN ('PAIRING','MATCHED') AND match_id IS NOT NULL AND seat_id IS NOT NULL AND paired_at IS NOT NULL)
+    (state IN ('PAIRING','MATCHED') AND match_id IS NOT NULL AND team_id IS NOT NULL AND seat_index IS NOT NULL AND paired_at IS NOT NULL)
   )
 );
 
@@ -76,5 +80,5 @@ CREATE INDEX IF NOT EXISTS idx_pvp_queue_mode_mmr
   ON pvp_matchmaking_queue(mode_id, season_id, state, mmr_snapshot, queued_at)
   WHERE state = 'QUEUED';
 CREATE UNIQUE INDEX IF NOT EXISTS idx_pvp_queue_match_seat
-  ON pvp_matchmaking_queue(match_id, seat_id)
+  ON pvp_matchmaking_queue(match_id, team_id, seat_index)
   WHERE match_id IS NOT NULL;
