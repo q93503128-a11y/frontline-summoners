@@ -23,6 +23,14 @@ test('friend coop scenes use account progress and never import guest save persis
   assert.doesNotMatch(source, /recordNormalStageClear|recordSpecialStageClear|recordGuestEnemyDiscoveries/);
 });
 
+test('friend coop result distinguishes victory rewards from loss-only enemy codex persistence', async () => {
+  const source = await readSource('../src/friend-coop-scenes.ts');
+  assert.match(source, /accountSettlementLabel/);
+  assert.match(source, /계정 보상·협동 기록 저장 완료/);
+  assert.match(source, /계정 적 도감 기록 저장 완료/);
+  assert.match(source, /패배에서는 클리어 보상이 없고 실제 조우한 적만 도감에 기록됩니다/);
+});
+
 test('quick communication UI exposes only the canonical eight fixed phrases', async () => {
   assert.equal(COOP_QUICK_MESSAGE_IDS.length, 8);
   assert.deepEqual(COOP_QUICK_MESSAGE_IDS.map((id) => COOP_QUICK_MESSAGE_LABELS[id]), [
@@ -34,16 +42,19 @@ test('quick communication UI exposes only the canonical eight fixed phrases', as
   assert.doesNotMatch(source, /chatInput|freeText|sendChat/);
 });
 
-test('social scene includes friend requests, direct coop invites, recent players and block management', async () => {
+test('social scene includes incoming and outgoing friend requests, direct coop invites, recent players and block management', async () => {
   const source = await readSource('../src/social-scene.ts');
   assert.match(source, /sendFriendRequest/);
   assert.match(source, /acceptFriendRequest/);
+  assert.match(source, /outgoingRequests/);
+  assert.match(source, /보낸 친구 요청 · 수락 대기/);
   assert.match(source, /createFriendCoopInvite/);
   assert.match(source, /acceptFriendCoopInvite/);
   assert.match(source, /recentPlayers/);
   assert.match(source, /blockSocialUser/);
   assert.match(source, /unblockSocialUser/);
   assert.match(source, /친구 코드는 계정 식별용 · 자유 채팅 없음 · 차단 우선/);
+  assert.doesNotMatch(source, /cancelFriendRequest|friends\/cancel/);
 });
 
 test('social transport requires authenticated online state before reading bearer session', async () => {
