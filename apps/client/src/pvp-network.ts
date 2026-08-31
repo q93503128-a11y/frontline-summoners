@@ -61,6 +61,7 @@ export interface PvpRoomSnapshot {
     readonly connected: boolean;
     readonly ready: boolean;
     readonly reconnecting: boolean;
+    readonly nextSequence: number;
   }[];
 }
 
@@ -234,6 +235,13 @@ export class PvpSession {
     socket.addEventListener('error', () => { if (socket.readyState !== WebSocket.CLOSED) socket.close(); });
   }
 
+  private syncInputCursor(room: PvpRoomSnapshot): void {
+    if (!this.seatId) return;
+    const mine = room.seats.find((seat) => seat.seatId === this.seatId);
+    if (mine) this.sequence = Math.max(this.sequence, mine.nextSequence);
+    this.lastSubmittedTick = Math.max(this.lastSubmittedTick, room.committedTick);
+  }
+
   private handleMessage(raw: unknown): void {
     if (typeof raw !== 'string') return;
     let decoded: unknown;
@@ -245,14 +253,19 @@ export class PvpSession {
       this.clientId = message.clientId;
       this.room = message.room;
       this.battle = message.battle;
+      this.syncInputCursor(message.room);
     } else if (message.type === 'ROOM_STATE') {
       this.room = message.room;
       this.battle = message.battle;
+      this.syncInputCursor(message.room);
     } else if (message.type === 'BATTLE_STARTED' || message.type === 'FRAME_COMMITTED' || message.type === 'BATTLE_FINISHED') {
       this.battle = message.battle;
       if (message.type === 'BATTLE_FINISHED') this.stopInputPump();
     } else if (message.type === 'BATTLE_VOID') {
       this.stopInputPump();
+    } else if (message.type === 'INPUT_ACK') {
+      this.sequence = Math.max(this.sequence, message.sequence + 1);
+      this.lastSubmittedTick = Math.max(this.lastSubmittedTick, message.tick);
     }
     for (const subscriber of this.subscribers) subscriber(message);
   }
