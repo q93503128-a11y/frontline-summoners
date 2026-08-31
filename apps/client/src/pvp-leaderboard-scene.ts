@@ -21,7 +21,7 @@ function tierName(id: string): string {
 }
 
 function scopeTitle(scope: PvpLeaderboardScope): string {
-  if (scope === 'TOP') return '전체 Top 100';
+  if (scope === 'TOP') return '전체 Top 1000';
   if (scope === 'AROUND_ME') return '내 순위 주변 ±5';
   return '친구 랭킹';
 }
@@ -68,7 +68,7 @@ export class PvpLeaderboardScene extends Phaser.Scene {
     this.status?.setText(`${scopeTitle(this.scope)} 동기화 중…`).setColor('#a9b5c5');
     try {
       const view = await getPvpLeaderboardView(this.scope, {
-        limit: this.scope === 'TOP' ? 100 : 250,
+        limit: this.scope === 'TOP' ? 1000 : 250,
         radius: 5,
       });
       if (!this.scene.isActive() || view.scope !== this.scope) return;
