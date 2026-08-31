@@ -11,6 +11,7 @@ import {
   removeSocialFriend,
   resolveSocialUserByFriendCode,
   sendSocialFriendRequest,
+  touchSocialPresence,
   unblockSocialUser,
   updateSocialDisplayName,
 } from './social-authority.ts';
@@ -154,6 +155,7 @@ export async function resolveSocialHttp(request: Request, env: SocialHttpEnv): P
   if (!principal) return { status: 401, body: { error: 'authentication_required' } };
 
   try {
+    await touchSocialPresence(env.DB, principal.userId);
     if (request.method === 'GET' && url.pathname === '/api/social') {
       return { status: 200, body: await getSocialSummary(env.DB, principal.userId) };
     }
