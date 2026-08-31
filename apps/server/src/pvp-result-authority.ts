@@ -100,7 +100,7 @@ async function completeCasual1v1(
   ]);
   if (writes.some((write) => (write.meta.changes ?? 0) !== 1)) throw new Error('pvp_casual_result_conflict');
   await db.prepare(`DELETE FROM pvp_matchmaking_queue WHERE match_id = ?1`).bind(matchId).run();
-  await recordRecentCoopPlayers(db, a.user_id, b.user_id, matchId, 'PvP 1v1 일반전');
+  await recordRecentCoopPlayers(db, a.user_id, b.user_id, matchId, 'PvP 1v1 일반전').catch(() => undefined);
   return { matchId, result, modeId: match.mode_id, rated: false };
 }
 
@@ -129,7 +129,7 @@ export async function completeTrustedPvp1v1Result(
       recordAccountPvpAchievementTier(db, a.user_id, achievementTier(settled.a.displayedTier), nowMs),
       recordAccountPvpAchievementTier(db, b.user_id, achievementTier(settled.b.displayedTier), nowMs),
     ]);
-    if (!wasAlreadyCompleted) await recordRecentCoopPlayers(db, a.user_id, b.user_id, matchId, 'PvP 1v1 랭킹전');
+    if (!wasAlreadyCompleted) await recordRecentCoopPlayers(db, a.user_id, b.user_id, matchId, 'PvP 1v1 랭킹전').catch(() => undefined);
     return {
       matchId,
       result: settled.result,
