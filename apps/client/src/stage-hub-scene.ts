@@ -38,6 +38,7 @@ export class StageHubScene extends Phaser.Scene {
     addText(this, 54, 38, '출 정', 46, COLORS.cream);
     addText(this, 56, 94, compact ? '전선을 고르고 출격한다.' : '장과 특수전 중 진행할 전선 묶음을 고른다.', compact ? 22 : 19, COLORS.muted);
     this.authorityText = addText(this, 56, 122, '', compact ? 17 : 14, '#8f9aac');
+    addButton(this, 625, compact ? 70 : 65, 160, compact ? 84 : 50, '공개 협동', () => this.scene.start('public-coop-matchmaking'), 0x5f7897);
     addButton(this, 805, compact ? 70 : 65, 160, compact ? 84 : 50, '기록전', () => this.scene.start('record-hub'), 0x6a667f);
     addButton(this, 985, compact ? 70 : 65, 160, compact ? 84 : 50, '병기', () => this.scene.start('base-weapon'), 0x6d6b8e);
     addButton(this, 1165, compact ? 70 : 65, 160, compact ? 84 : 50, '메인', () => this.scene.start('main-menu'), 0x586275);
