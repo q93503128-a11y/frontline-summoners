@@ -285,18 +285,18 @@ export type PvpRewardCurrency =
 export interface PvpTierFirstReachReward {
   readonly tierId: Exclude<PvpTierId, 'BRONZE'>;
   readonly currencies: Readonly<Partial<Record<PvpRewardCurrency, number>>>;
-  readonly cosmeticDesignNote?: string;
+  readonly cosmeticRewardIds: readonly string[];
 }
 
-/** Economy quantities remain DESIGN_TARGET until human economy QA. */
+/** Economy quantities remain DESIGN_TARGET until human economy QA. Cosmetic kinds follow the v1 ranking wiki. */
 export const PVP_TIER_FIRST_REACH_REWARDS: readonly PvpTierFirstReachReward[] = [
-  { tierId: 'SILVER', currencies: { gold: 5000, summon_crystal: 100, soul_essence: 40 } },
-  { tierId: 'GOLD', currencies: { gold: 10000, summon_crystal: 200, soul_essence: 80, evo_fragment: 8 }, cosmeticDesignNote: '칭호' },
-  { tierId: 'PLATINUM', currencies: { gold: 18000, summon_crystal: 300, soul_essence: 140, evo_fragment: 15 }, cosmeticDesignNote: '테두리' },
-  { tierId: 'DIAMOND', currencies: { gold: 30000, summon_crystal: 500, soul_essence: 240, evo_core: 2 }, cosmeticDesignNote: '칭호+테두리' },
-  { tierId: 'MASTER', currencies: { gold: 45000, summon_crystal: 700, soul_essence: 360, evo_core: 3 }, cosmeticDesignNote: '프로필 배너' },
-  { tierId: 'GRANDMASTER', currencies: { gold: 60000, summon_crystal: 900, soul_essence: 500, evo_crown: 1 }, cosmeticDesignNote: '전용 문장' },
-  { tierId: 'FRONTLINE_APEX', currencies: { gold: 80000, summon_crystal: 1200, soul_essence: 700, evo_crown: 1 }, cosmeticDesignNote: '최상위 테두리' },
+  { tierId: 'SILVER', currencies: { gold: 5000, summon_crystal: 100, soul_essence: 40 }, cosmeticRewardIds: [] },
+  { tierId: 'GOLD', currencies: { gold: 10000, summon_crystal: 200, soul_essence: 80, evo_fragment: 8 }, cosmeticRewardIds: ['title_pvp_gold'] },
+  { tierId: 'PLATINUM', currencies: { gold: 18000, summon_crystal: 300, soul_essence: 140, evo_fragment: 15 }, cosmeticRewardIds: ['frame_pvp_platinum'] },
+  { tierId: 'DIAMOND', currencies: { gold: 30000, summon_crystal: 500, soul_essence: 240, evo_core: 2 }, cosmeticRewardIds: ['title_pvp_diamond', 'frame_pvp_diamond'] },
+  { tierId: 'MASTER', currencies: { gold: 45000, summon_crystal: 700, soul_essence: 360, evo_core: 3 }, cosmeticRewardIds: ['banner_pvp_master'] },
+  { tierId: 'GRANDMASTER', currencies: { gold: 60000, summon_crystal: 900, soul_essence: 500, evo_crown: 1 }, cosmeticRewardIds: ['emblem_pvp_grandmaster'] },
+  { tierId: 'FRONTLINE_APEX', currencies: { gold: 80000, summon_crystal: 1200, soul_essence: 700, evo_crown: 1 }, cosmeticRewardIds: ['frame_pvp_apex'] },
 ] as const;
 
 export function getPvpFirstReachRewardsBetween(previousBestMmr: number, nextBestMmr: number): readonly PvpTierFirstReachReward[] {
