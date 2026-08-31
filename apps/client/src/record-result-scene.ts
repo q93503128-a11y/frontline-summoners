@@ -3,6 +3,8 @@ import { INTERNAL_WIDTH } from '@frontline/shared';
 import {
   claimAuthenticatedTrustedBattle,
   completeAuthenticatedTrustedBattle,
+  getAccountClientState,
+  refreshAuthenticatedAccount,
   type AccountTrustedBattleCommand,
   type AccountTrustedBattleCompletion,
 } from './account-network.ts';
@@ -158,6 +160,12 @@ export class RecordResultScene extends Phaser.Scene {
     battleId: string,
     commands: readonly AccountTrustedBattleCommand[],
   ): Promise<RecordedRecordResult> {
+    if (getAccountClientState().kind !== 'AUTHENTICATED_ONLINE') {
+      await refreshAuthenticatedAccount();
+      if (getAccountClientState().kind !== 'AUTHENTICATED_ONLINE') {
+        throw new Error('온라인 연결을 복구한 뒤 결과 재전송을 다시 시도하세요.');
+      }
+    }
     const completed = await completeAuthenticatedTrustedBattle(battleId, commands);
     assertTrustedCompletion(this.modeId, completed.result);
     const claim = await claimAuthenticatedTrustedBattle(battleId);
