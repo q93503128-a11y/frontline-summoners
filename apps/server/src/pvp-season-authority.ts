@@ -240,12 +240,12 @@ export async function finalizePvpSeason(
   }
   await assertNoLiveSeasonActivity(db, seasonId, nowMs);
   const now = seconds(nowMs);
-  const writes = await db.batch([
+  await db.batch([
     db.prepare(
-      `INSERT INTO pvp_season_closures
+      `INSERT OR IGNORE INTO pvp_season_closures
        (season_id, next_season_id, closed_at, rolled_at, player_count, placement_player_count)
        SELECT ?1, ?2, ?3, NULL,
-              COUNT(*), SUM(CASE WHEN placement_matches >= ?4 THEN 1 ELSE 0 END)
+              COUNT(*), COALESCE(SUM(CASE WHEN placement_matches >= ?4 THEN 1 ELSE 0 END), 0)
        FROM pvp_ratings WHERE season_id = ?1`,
     ).bind(seasonId, nextSeasonId, now, PVP_PLACEMENT_MATCH_COUNT),
     db.prepare(
@@ -269,9 +269,9 @@ export async function finalizePvpSeason(
        WHERE season_id = ?1 AND placement_matches < ?2`,
     ).bind(seasonId, PVP_PLACEMENT_MATCH_COUNT),
   ]);
-  if ((writes[0]?.meta.changes ?? 0) !== 1) throw new Error('pvp_season_closure_create_failed');
   const closed = await loadClosure(db, seasonId);
   if (!closed) throw new Error('pvp_season_closure_missing_after_create');
+  if (closed.next_season_id !== nextSeasonId) throw new Error('pvp_season_closure_next_id_conflict');
   return closureView(closed);
 }
 
