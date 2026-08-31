@@ -6,13 +6,23 @@ const readSource = (relative: string): Promise<string> => readFile(new URL(relat
 
 test('guest to account profile import is explicit and sends loadout preference only', async () => {
   const scene = await readSource('../src/account-scene.ts');
-  assert.match(scene, /'게스트 프로필 가져오기'/);
+  assert.match(scene, /'장식 취향만 가져오기'/);
   assert.match(scene, /loadGuestProgress\(\)/);
   assert.match(scene, /loadGuestAchievementProfile\(guestProgress\)/);
   assert.match(scene, /mutateAuthenticatedAccountProfile\(\{\s*requestId: newRequestId\(\),\s*profileLoadout: guestProfile\.profileLoadout/s);
   const mutationBlock = scene.slice(scene.indexOf('private async importGuestProfilePreferences'), scene.indexOf('private async refresh'));
   assert.doesNotMatch(mutationBlock, /claimedAchievementIds|ownedCosmeticIds|factIds|pvpBestTier/);
+  assert.match(mutationBlock, /profileLoadout: guestProfile\.profileLoadout/);
   assert.match(scene, /서버 미해금 장식과 로컬 업적 소유권은 이전하지 않았습니다/);
+});
+
+test('profile preference import remains separate from full guest progression migration', async () => {
+  const scene = await readSource('../src/account-scene.ts');
+  const preferenceBlock = scene.slice(scene.indexOf('private async importGuestProfilePreferences'), scene.indexOf('private async refresh'));
+  assert.doesNotMatch(preferenceBlock, /commitAuthenticatedGuestMigration|REPLACE_EXISTING|GUEST_REPLACE_CONFIRMATION/);
+  assert.match(scene, /'게스트 진행 비교'/);
+  assert.match(scene, /'게스트 진행 적용'/);
+  assert.match(scene, /'취소 · 서버 유지'/);
 });
 
 test('profile authority stays separate from combat save v2 revision surface', async () => {
