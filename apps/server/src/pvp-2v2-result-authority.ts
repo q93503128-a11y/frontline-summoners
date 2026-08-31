@@ -5,6 +5,7 @@ import {
   loadPvpMatchParticipants,
   type PvpTeamId,
 } from './pvp-authority.ts';
+import { recordRecentCoopPlayers } from './social-authority.ts';
 
 function delta(result: PvpTimedResult, teamId: PvpTeamId): { wins: number; losses: number; draws: number } {
   if (result === 'DRAW') return { wins: 0, losses: 0, draws: 1 };
@@ -54,6 +55,11 @@ export async function completeTrustedCasualPvp2v2Result(
   const writes = await db.batch(statements);
   if (writes.some((write) => (write.meta.changes ?? 0) !== 1)) throw new Error('pvp_2v2_result_conflict');
   await db.prepare('DELETE FROM pvp_matchmaking_queue WHERE match_id = ?1').bind(matchId).run();
+  for (let a = 0; a < participants.length; a += 1) {
+    for (let b = a + 1; b < participants.length; b += 1) {
+      await recordRecentCoopPlayers(db, participants[a]!.user_id, participants[b]!.user_id, matchId, 'pvp_casual_2v2');
+    }
+  }
   return { matchId, result, rated: false };
 }
 
