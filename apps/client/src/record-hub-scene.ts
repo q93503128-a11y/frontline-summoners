@@ -1,7 +1,8 @@
 import Phaser from 'phaser';
 import { INTERNAL_WIDTH } from '@frontline/shared';
 import { BOSS_RUSH_SEQUENCE, RECORD_MODE_DEFINITIONS, isRecordModeUnlocked, type RecordModeId } from './record-content.ts';
-import { loadGuestProgress, type GuestProgress } from './save.ts';
+import { loadActiveProgress, type ActiveProgressAuthority } from './active-progress.ts';
+import { type GuestProgress } from './save.ts';
 import { addButton, addText, COLORS, drawBackdrop } from './scene-ui.ts';
 import { isCompactMobileViewport } from './viewport.ts';
 
@@ -24,8 +25,15 @@ function unlockText(modeId: RecordModeId): string {
     : '메인 4장 최종전 NORMAL_CLEAR 후 해금';
 }
 
+function authorityLabel(authority: ActiveProgressAuthority): string {
+  if (authority === 'ACCOUNT_ONLINE') return '계정 기록 · 서버 결정론 검증';
+  if (authority === 'ACCOUNT_OFFLINE_CACHE') return '계정 오프라인 캐시 · 기록 도전/저장 불가';
+  return '게스트 로컬 기록';
+}
+
 export class RecordHubScene extends Phaser.Scene {
   private progress: GuestProgress = EMPTY_PROGRESS;
+  private authority: ActiveProgressAuthority = 'GUEST_LOCAL';
   private layer?: Phaser.GameObjects.Container;
 
   constructor() { super('record-hub'); }
@@ -39,9 +47,14 @@ export class RecordHubScene extends Phaser.Scene {
     addButton(this, 1165, compact ? 70 : 65, 160, compact ? 84 : 50, '출정', () => this.scene.start('stage-hub'), 0x586275);
     this.renderModes();
 
-    void loadGuestProgress().then((progress) => {
+    void loadActiveProgress().then((view) => {
       if (!this.scene.isActive()) return;
-      this.progress = progress;
+      this.progress = view.progress;
+      this.authority = view.authority;
+      this.renderModes();
+    }).catch(() => {
+      if (!this.scene.isActive()) return;
+      this.authority = 'ACCOUNT_OFFLINE_CACHE';
       this.renderModes();
     });
   }
@@ -52,10 +65,12 @@ export class RecordHubScene extends Phaser.Scene {
     const compact = isCompactMobileViewport();
     const record = this.progress.recordModeProgress;
     const positions = [390, 890];
+    this.layer.add(addText(this, INTERNAL_WIDTH / 2, 138, authorityLabel(this.authority), compact ? 19 : 15, this.authority === 'ACCOUNT_OFFLINE_CACHE' ? '#ffb37c' : '#8fa9c4', 'center').setOrigin(0.5));
 
     RECORD_MODE_DEFINITIONS.forEach((mode, index) => {
       const x = positions[index] ?? INTERNAL_WIDTH / 2;
       const unlocked = isRecordModeUnlocked(mode.id, this.progress.clearedStageIds);
+      const canChallenge = unlocked && this.authority !== 'ACCOUNT_OFFLINE_CACHE';
       const accent = mode.id === 'record_endless_front' ? 0x587d91 : 0x8a5d72;
       const card = this.add.rectangle(x, 385, 430, 430, unlocked ? 0x242c3a : 0x1d222c, 0.98).setStrokeStyle(4, unlocked ? accent : 0x3c4554, 1);
       this.layer!.add(card);
@@ -73,11 +88,12 @@ export class RecordHubScene extends Phaser.Scene {
       this.layer!.add(addText(this, x, 430, claimed, compact ? 19 : 16, unlocked ? '#9fb0c3' : '#666f7a', 'center').setOrigin(0.5));
       this.layer!.add(addText(this, x, 470, '1× 고정 · SOLO_ONLY · 소탕 불가', compact ? 19 : 16, unlocked ? '#9dcdb1' : '#626b74', 'center').setOrigin(0.5));
       if (!unlocked) this.layer!.add(addText(this, x, 510, unlockText(mode.id), compact ? 19 : 16, '#8b8290', 'center').setOrigin(0.5));
+      else if (!canChallenge) this.layer!.add(addText(this, x, 510, '온라인 복구 후 서버 검증 기록 도전 가능', compact ? 19 : 16, '#d7a37d', 'center').setOrigin(0.5));
 
-      const button = addButton(this, x, compact ? 570 : 565, 240, compact ? 84 : 62, unlocked ? '기록 도전' : '잠김', () => {
-        if (unlocked) this.scene.start('record-battle', { modeId: mode.id });
-      }, unlocked ? accent : 0x3f4855);
-      if (!unlocked) button.setAlpha(0.62);
+      const button = addButton(this, x, compact ? 570 : 565, 240, compact ? 84 : 62, !unlocked ? '잠김' : canChallenge ? '기록 도전' : '온라인 필요', () => {
+        if (canChallenge) this.scene.start('record-battle', { modeId: mode.id });
+      }, canChallenge ? accent : 0x3f4855);
+      if (!canChallenge) button.setAlpha(0.62);
       this.layer!.add(button);
     });
 
