@@ -539,9 +539,9 @@ export async function getPvpLeaderboard(
 ): Promise<readonly PvpLeaderboardEntry[]> {
   const safeLimit = Math.max(1, Math.min(1000, Math.trunc(limit)));
   const rows = await db.prepare(
-    `SELECT r.user_id, u.display_name, r.mmr, r.displayed_tier, r.ranked_wins
+    `SELECT r.user_id, p.display_name, r.mmr, r.displayed_tier, r.ranked_wins
      FROM pvp_ratings r
-     JOIN users u ON u.id = r.user_id
+     JOIN social_profiles p ON p.user_id = r.user_id
      WHERE r.season_id = ?1 AND r.placement_matches >= ?2
      ORDER BY r.mmr DESC, r.ranked_wins DESC, r.updated_at ASC, r.user_id ASC
      LIMIT ?3`,
