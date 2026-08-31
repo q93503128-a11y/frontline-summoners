@@ -72,5 +72,8 @@ export async function getFriendlyPvp2v2LobbyStatus(inviteCode: string): Promise<
 export async function cancelFriendlyPvp2v2Lobby(inviteCode: string): Promise<void> {
   await request('/api/pvp/friendly-2v2/cancel', { method: 'POST', body: JSON.stringify({ inviteCode }) });
 }
+export async function leaveFriendlyPvp2v2Lobby(inviteCode: string): Promise<void> {
+  await request('/api/pvp/friendly-2v2/leave', { method: 'POST', body: JSON.stringify({ inviteCode }) });
+}
 
 export const __friendlyPvp2v2NetworkTestOnly = { parseState };
