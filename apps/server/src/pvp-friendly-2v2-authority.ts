@@ -3,7 +3,7 @@ import type { PvpTimedResult } from '@frontline/sim/pvp-content';
 import { recordAccountAchievementFact } from './account-profile-authority.ts';
 import { getAccountFriendlyPvp2v2SeatAuthority } from './account-pvp-authority.ts';
 import { loadPvpMatch, loadPvpMatchParticipants } from './pvp-authority.ts';
-import { isEitherSocialBlocked } from './social-authority.ts';
+import { isEitherSocialBlocked, recordRecentCoopPlayers } from './social-authority.ts';
 
 export const FRIENDLY_2V2_SEAT_ORDER = ['A1', 'B1', 'A2', 'B2'] as const satisfies readonly Pvp2v2SeatId[];
 export const FRIENDLY_2V2_LOBBY_TTL_MS = 10 * 60 * 1000;
@@ -246,7 +246,8 @@ export async function settleFriendlyPvp2v2Match(
   const match = await loadPvpMatch(db, matchId);
   if (!match) throw new Error('friendly_2v2_match_not_found');
   if (match.mode_id !== 'pvp_friendly_2v2') throw new Error('friendly_2v2_match_mode_invalid');
-  if (match.state !== 'COMPLETED') {
+  const freshlyCompleted = match.state !== 'COMPLETED';
+  if (freshlyCompleted) {
     if (match.state !== 'CREATED' && match.state !== 'ACTIVE') throw new Error('friendly_2v2_match_not_completable');
     const write = await db.prepare(
       `UPDATE pvp_matches SET state = 'COMPLETED', result = ?1, completed_at = ?2
@@ -256,6 +257,13 @@ export async function settleFriendlyPvp2v2Match(
   }
   const participants = await loadPvpMatchParticipants(db, matchId);
   await Promise.all(participants.map((entry) => recordAccountAchievementFact(db, entry.user_id, 'pvp_first_friendly', nowMs)));
+  if (freshlyCompleted) {
+    for (let a = 0; a < participants.length; a += 1) {
+      for (let b = a + 1; b < participants.length; b += 1) {
+        await recordRecentCoopPlayers(db, participants[a]!.user_id, participants[b]!.user_id, matchId, 'PvP 2v2 친선전').catch(() => undefined);
+      }
+    }
+  }
   return { matchId, result, rated: false };
 }
 
