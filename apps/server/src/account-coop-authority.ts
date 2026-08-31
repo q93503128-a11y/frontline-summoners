@@ -34,11 +34,13 @@ function buildAccountCoopLoadout(snapshot: AccountSaveSnapshotV2): CoopPlayerLoa
       ...(progress.selectedFormId === undefined ? {} : { selectedFormId: progress.selectedFormId }),
     };
   });
-  return getServerCoopLoadout({
+  const loadout: CoopPlayerLoadout = {
     characters,
     permanentRewardIds: [...snapshot.permanentRewardIds],
     clearedStageIds: [...snapshot.clearedStageIds],
-  });
+  };
+  getServerCoopLoadout(loadout);
+  return loadout;
 }
 
 export function assertAccountCoopStagePlayable(
