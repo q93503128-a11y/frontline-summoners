@@ -62,12 +62,14 @@ export type AccountRecordMutationInput =
       readonly expectedRevision: number;
       readonly mode: 'ENDLESS_FRONT';
       readonly survivalFrames: number;
+      readonly discoveredEnemyIds?: readonly string[];
     }
   | {
       readonly battleId: string;
       readonly expectedRevision: number;
       readonly mode: 'BOSS_RUSH';
       readonly defeatedBosses: number;
+      readonly discoveredEnemyIds?: readonly string[];
     };
 
 export interface AccountRecordMutationResult {
@@ -296,8 +298,13 @@ function buildMainBattleResult(
   };
 }
 
-function buildRecordResult(snapshot: AccountSaveSnapshotV2, input: AccountRecordMutationInput): BuiltMutation<AccountRecordMutationResult> {
+function buildRecordResult(
+  snapshot: AccountSaveSnapshotV2,
+  input: AccountRecordMutationInput,
+  discoveredEnemyIds: readonly string[] = [],
+): BuiltMutation<AccountRecordMutationResult> {
   const current = snapshot.recordModeProgress;
+  const discovery = mergeAccountEnemyDiscoveries(snapshot, discoveredEnemyIds);
   if (input.mode === 'ENDLESS_FRONT') {
     if (!snapshot.clearedStageIds.includes('main_03_020')) throw new Error('ENDLESS_FRONT is locked');
     const survivalFrames = nonNegativeInteger(input.survivalFrames, 'survivalFrames');
@@ -315,7 +322,7 @@ function buildRecordResult(snapshot: AccountSaveSnapshotV2, input: AccountRecord
       endlessRewardedMinute: rewardedMinute,
     };
     const next = normalizeAccountSaveSnapshot({
-      ...snapshot,
+      ...discovery.snapshot,
       recordModeProgress,
       resourceLedgerById: grantResources(snapshot.resourceLedgerById, resourceReward),
     });
@@ -335,7 +342,7 @@ function buildRecordResult(snapshot: AccountSaveSnapshotV2, input: AccountRecord
     bossRushRewardedDefeated: rewardedDefeated,
   };
   const next = normalizeAccountSaveSnapshot({
-    ...snapshot,
+    ...discovery.snapshot,
     recordModeProgress,
     resourceLedgerById: grantResources(snapshot.resourceLedgerById, resourceReward),
   });
@@ -427,11 +434,12 @@ export async function applyAccountRecordResult(
   nowMs = Date.now(),
 ): Promise<AccountMutationApplyResult<AccountRecordMutationResult>> {
   const battleId = nonEmptyId(input.battleId, 'battleId');
+  const discoveredEnemyIds = normalizeServerEnemyDiscoveries(input.discoveredEnemyIds ?? []);
   const inputFingerprint = input.mode === 'ENDLESS_FRONT'
-    ? fingerprint({ mode: input.mode, survivalFrames: input.survivalFrames })
-    : fingerprint({ mode: input.mode, defeatedBosses: input.defeatedBosses });
+    ? fingerprint({ mode: input.mode, survivalFrames: input.survivalFrames, discoveredEnemyIds })
+    : fingerprint({ mode: input.mode, defeatedBosses: input.defeatedBosses, discoveredEnemyIds });
   return commitMutation(db, accountId, input.expectedRevision, 'RECORD_RESULT', battleId, inputFingerprint,
-    (snapshot) => buildRecordResult(snapshot, input), nowMs);
+    (snapshot) => buildRecordResult(snapshot, input, discoveredEnemyIds), nowMs);
 }
 
 export async function applyAccountRecruitment(
