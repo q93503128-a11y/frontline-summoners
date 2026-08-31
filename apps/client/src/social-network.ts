@@ -1,5 +1,6 @@
 import { getAccountClientState, refreshAuthenticatedAccount } from './account-network';
 import { resolveCoopApiOrigin } from './coop-network';
+import type { FriendlyPvpGrowthPolicy } from './pvp-friendly-network';
 
 export interface SocialPublicProfile {
   readonly friendCode: string;
@@ -27,6 +28,19 @@ export interface SocialCoopInviteView {
   readonly expiresAtMs: number;
 }
 
+export interface SocialPvpInviteView {
+  readonly inviteId: string;
+  readonly inviter: {
+    readonly friendCode: string;
+    readonly displayName: string;
+    readonly online: boolean;
+  };
+  readonly inviteCode: string;
+  readonly modeId: 'pvp_friendly_1v1';
+  readonly growthPolicy: FriendlyPvpGrowthPolicy;
+  readonly expiresAtMs: number;
+}
+
 export interface SocialSummary {
   readonly self: SocialPublicProfile;
   readonly friends: readonly SocialPublicProfile[];
@@ -35,6 +49,7 @@ export interface SocialSummary {
   readonly blocked: readonly SocialPublicProfile[];
   readonly recentPlayers: readonly SocialRecentPlayer[];
   readonly coopInvites: readonly SocialCoopInviteView[];
+  readonly pvpInvites: readonly SocialPvpInviteView[];
 }
 
 export interface FriendCoopHostResult {
@@ -49,6 +64,22 @@ export interface FriendCoopJoinResult {
   readonly matchId: string;
   readonly stageId: string;
   readonly guestPath: string;
+}
+
+export interface FriendPvpHostResult {
+  readonly inviteId: string;
+  readonly inviteCode: string;
+  readonly growthPolicy: FriendlyPvpGrowthPolicy;
+  readonly expiresAtMs: number;
+}
+
+export interface FriendPvpJoinResult {
+  readonly inviteId: string;
+  readonly inviteCode: string;
+  readonly matchId: string;
+  readonly seatId: 'A' | 'B';
+  readonly growthPolicy: FriendlyPvpGrowthPolicy;
+  readonly websocketPath: string;
 }
 
 const SESSION_TOKEN_KEY = 'frontline.account.sessionToken.v1';
@@ -104,8 +135,14 @@ function profileArray(value: unknown): readonly SocialPublicProfile[] {
   return value.map(profile);
 }
 
+function growthPolicy(value: unknown): FriendlyPvpGrowthPolicy {
+  if (value === 'STANDARDIZED' || value === 'ACTUAL') return value;
+  throw new Error('친선전 성장 규칙 응답 형식이 올바르지 않습니다.');
+}
+
 function summary(value: unknown): SocialSummary {
   if (!isRecord(value) || !Array.isArray(value.recentPlayers) || !Array.isArray(value.coopInvites)) throw new Error('소셜 요약 응답 형식이 올바르지 않습니다.');
+  const pvpInvites = Array.isArray(value.pvpInvites) ? value.pvpInvites : [];
   return {
     self: profile(value.self),
     friends: profileArray(value.friends),
@@ -130,6 +167,19 @@ function summary(value: unknown): SocialSummary {
         throw new Error('협동 초대 응답 형식이 올바르지 않습니다.');
       }
       return { inviteId: entry.inviteId, inviter: profile(entry.inviter), matchId: entry.matchId, stageId: entry.stageId, expiresAtMs: entry.expiresAtMs };
+    }),
+    pvpInvites: pvpInvites.map((entry): SocialPvpInviteView => {
+      if (!isRecord(entry) || typeof entry.inviteId !== 'string' || typeof entry.inviteCode !== 'string' || entry.modeId !== 'pvp_friendly_1v1' || typeof entry.expiresAtMs !== 'number' || !isRecord(entry.inviter) || typeof entry.inviter.friendCode !== 'string' || typeof entry.inviter.displayName !== 'string' || typeof entry.inviter.online !== 'boolean') {
+        throw new Error('친선 PvP 초대 응답 형식이 올바르지 않습니다.');
+      }
+      return {
+        inviteId: entry.inviteId,
+        inviter: { friendCode: entry.inviter.friendCode, displayName: entry.inviter.displayName, online: entry.inviter.online },
+        inviteCode: entry.inviteCode,
+        modeId: 'pvp_friendly_1v1',
+        growthPolicy: growthPolicy(entry.growthPolicy),
+        expiresAtMs: entry.expiresAtMs,
+      };
     }),
   };
 }
@@ -186,6 +236,42 @@ export async function acceptFriendCoopInvite(inviteId: string): Promise<FriendCo
 
 export function declineFriendCoopInvite(inviteId: string): Promise<unknown> {
   return post('/api/social/coop/decline', { inviteId });
+}
+
+export async function createFriendPvpInvite(friendCode: string, policy: FriendlyPvpGrowthPolicy): Promise<FriendPvpHostResult> {
+  const payload = await post('/api/social/pvp/invite', { friendCode, growthPolicy: policy });
+  if (!isRecord(payload) || !isRecord(payload.invite) || typeof payload.invite.inviteId !== 'string' || typeof payload.invite.inviteCode !== 'string' || typeof payload.invite.expiresAtMs !== 'number' || !isRecord(payload.lobby) || payload.lobby.state !== 'WAITING') {
+    throw new Error('친구 친선전 초대 응답 형식이 올바르지 않습니다.');
+  }
+  return {
+    inviteId: payload.invite.inviteId,
+    inviteCode: payload.invite.inviteCode,
+    growthPolicy: growthPolicy(payload.invite.growthPolicy),
+    expiresAtMs: payload.invite.expiresAtMs,
+  };
+}
+
+export async function acceptFriendPvpInvite(inviteId: string): Promise<FriendPvpJoinResult> {
+  const payload = await post('/api/social/pvp/accept', { inviteId });
+  if (!isRecord(payload) || payload.inviteId !== inviteId || !isRecord(payload.match) || payload.match.state !== 'MATCHED' || typeof payload.match.inviteCode !== 'string' || typeof payload.match.matchId !== 'string' || (payload.match.seatId !== 'A' && payload.match.seatId !== 'B') || typeof payload.match.websocketPath !== 'string') {
+    throw new Error('친구 친선전 참가 응답 형식이 올바르지 않습니다.');
+  }
+  return {
+    inviteId,
+    inviteCode: payload.match.inviteCode,
+    matchId: payload.match.matchId,
+    seatId: payload.match.seatId,
+    growthPolicy: growthPolicy(payload.match.growthPolicy),
+    websocketPath: payload.match.websocketPath,
+  };
+}
+
+export function declineFriendPvpInvite(inviteId: string): Promise<unknown> {
+  return post('/api/social/pvp/decline', { inviteId });
+}
+
+export function cancelFriendPvpInvite(inviteId: string): Promise<unknown> {
+  return post('/api/social/pvp/cancel', { inviteId });
 }
 
 export const __socialNetworkTestOnly = { summary, profile };
