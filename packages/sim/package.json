@@ -11,6 +11,8 @@
     "./pvp-arena-content": "./src/pvp-arena-content.ts",
     "./pvp-playable": "./src/pvp-playable.ts",
     "./pvp-playable-frame": "./src/pvp-playable-frame.ts",
+    "./pvp-2v2-playable": "./src/pvp-2v2-playable.ts",
+    "./pvp-2v2-playable-frame": "./src/pvp-2v2-playable-frame.ts",
     "./pvp-standardization": "./src/pvp-standardization.ts",
     "./meta-progression": "./src/meta-progression.ts",
     "./evolution-catalog": "./src/evolution-catalog.ts",
