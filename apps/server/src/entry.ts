@@ -17,11 +17,15 @@ import {
 import { PvpRoom } from './pvp-durable-room.ts';
 import { resolvePvpHttp, resolvePvpWebSocket, type PvpHttpEnv } from './pvp-http.ts';
 import { resolvePvpSeasonHttp, type PvpSeasonHttpEnv } from './pvp-season-http.ts';
+import {
+  resolvePvpSeasonOperationsHttp,
+  type PvpSeasonOperationsHttpEnv,
+} from './pvp-season-operations-http.ts';
 import { resolveSocialHttp } from './social-http.ts';
 
 export { BattleRoom, FriendlyPvpRoom, Pvp2v2Room, PvpRoom };
 
-type EntryEnv = Env & PvpHttpEnv & FriendlyPvpHttpEnv & Pvp2v2HttpEnv & FriendlyPvp2v2HttpEnv & PvpSeasonHttpEnv;
+type EntryEnv = Env & PvpHttpEnv & FriendlyPvpHttpEnv & Pvp2v2HttpEnv & FriendlyPvp2v2HttpEnv & PvpSeasonHttpEnv & PvpSeasonOperationsHttpEnv;
 
 const CORS_HEADERS = {
   'access-control-allow-origin': '*',
@@ -47,6 +51,8 @@ export default {
     const pvpSocket = await resolvePvpWebSocket(request, env);
     if (pvpSocket) return pvpSocket;
     if (request.method !== 'OPTIONS') {
+      const seasonOperations = await resolvePvpSeasonOperationsHttp(request, env);
+      if (seasonOperations) return json(seasonOperations.body, seasonOperations.status);
       const season = await resolvePvpSeasonHttp(request, env);
       if (season) return json(season.body, season.status);
       const friendlyPvp2v2 = await resolveFriendlyPvp2v2Http(request, env);
