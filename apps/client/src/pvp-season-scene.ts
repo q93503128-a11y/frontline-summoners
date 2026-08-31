@@ -2,7 +2,11 @@ import Phaser from 'phaser';
 import { INTERNAL_WIDTH } from '@frontline/shared';
 import { addButton, addText, COLORS, drawBackdrop } from './scene-ui.ts';
 import { isCompactMobileViewport } from './viewport.ts';
-import { getPvpSeasonOverview, type PvpSeasonOverview } from './pvp-season-network.ts';
+import {
+  claimPvpSeasonHonors,
+  getPvpSeasonOverview,
+  type PvpSeasonOverview,
+} from './pvp-season-network.ts';
 
 function tierName(id: string): string {
   const names: Readonly<Record<string, string>> = {
@@ -13,11 +17,13 @@ function tierName(id: string): string {
 }
 function resultName(result: 'WIN' | 'LOSS' | 'DRAW'): string { return result === 'WIN' ? '승' : result === 'LOSS' ? '패' : '무'; }
 function deltaText(delta: number | null): string { return delta === null ? '-' : delta > 0 ? `+${delta}` : String(delta); }
+function phaseName(phase: PvpSeasonOverview['phase']): string { return phase === 'PRESEASON' ? '프리시즌' : '정규 시즌'; }
 
 export class PvpSeasonScene extends Phaser.Scene {
   private overview: PvpSeasonOverview | null = null;
   private content?: Phaser.GameObjects.Container;
   private status?: Phaser.GameObjects.Text;
+  private claiming = false;
 
   constructor() { super('pvp-season'); }
 
@@ -25,7 +31,7 @@ export class PvpSeasonScene extends Phaser.Scene {
     drawBackdrop(this, 'map');
     const compact = isCompactMobileViewport();
     addText(this, 48, 34, 'PvP 시즌 기록', compact ? 42 : 44, COLORS.cream);
-    addText(this, 50, 86, '현재 순위 · 티어 분포 · 최근 랭킹전 기록', compact ? 18 : 16, COLORS.muted);
+    addText(this, 50, 86, '현재 순위 · 티어 분포 · 최근 랭킹전 · 종료 시즌 명예', compact ? 18 : 16, COLORS.muted);
     addButton(this, 1165, 62, 170, compact ? 78 : 50, 'PvP 허브', () => this.scene.start('pvp-hub'), 0x586275);
     this.status = addText(this, INTERNAL_WIDTH / 2, 687, '시즌 기록을 불러오는 중…', compact ? 18 : 15, '#a9b5c5', 'center').setOrigin(0.5);
     this.render();
@@ -42,6 +48,21 @@ export class PvpSeasonScene extends Phaser.Scene {
     } catch (error) {
       if (this.scene.isActive()) this.status?.setText(error instanceof Error ? error.message : '시즌 기록을 불러오지 못했습니다.').setColor('#ff9a91');
     }
+  }
+
+  private async claim(seasonId: string): Promise<void> {
+    if (this.claiming) return;
+    this.claiming = true;
+    this.status?.setText(`${seasonId} 명예 보상을 확인하는 중…`).setColor('#ffd493');
+    try {
+      const result = await claimPvpSeasonHonors(seasonId);
+      if (!this.scene.isActive()) return;
+      this.status?.setText(result.honors.length > 0 ? `시즌 명예 ${result.honors.length}개 수령 완료` : '시즌 정산 확인 완료').setColor('#8ee3aa');
+      this.overview = await getPvpSeasonOverview();
+      if (this.scene.isActive()) this.render();
+    } catch (error) {
+      if (this.scene.isActive()) this.status?.setText(error instanceof Error ? error.message : '시즌 명예 보상을 받지 못했습니다.').setColor('#ff9a91');
+    } finally { this.claiming = false; }
   }
 
   private render(): void {
@@ -62,7 +83,7 @@ export class PvpSeasonScene extends Phaser.Scene {
     this.content.add(addText(this, 270, 240, rankText, compact ? 23 : 20, '#cfe6ff', 'center').setOrigin(0.5));
     this.content.add(addText(this, 270, 290, `${rating.rankedWins}승 ${rating.rankedLosses}패 ${rating.rankedDraws}무\n최고 ${rating.bestMmr} MMR`, compact ? 20 : 17, '#c4cfdd', 'center').setOrigin(0.5));
     this.content.add(addText(this, 270, 365, `참가 ${overview.ratedPlayerCount}명 · 배치 완료 ${overview.placementPlayerCount}명`, compact ? 18 : 15, '#9fabb9', 'center').setOrigin(0.5));
-    this.content.add(addText(this, 270, 420, `프리시즌 운영 중\n정규 시즌 목표 ${overview.activeWeeksTarget}주 + 정산 ${overview.settlementDaysTarget}일`, compact ? 17 : 14, '#8f9baa', 'center').setOrigin(0.5));
+    this.content.add(addText(this, 270, 420, `${phaseName(overview.phase)} 운영 중\n정규 시즌 목표 ${overview.activeWeeksTarget}주 + 정산 ${overview.settlementDaysTarget}일`, compact ? 17 : 14, '#8f9baa', 'center').setOrigin(0.5));
 
     this.content.add(this.add.rectangle(770, 285, 500, 335, 0x272936, 0.98).setStrokeStyle(3, 0x77678c, 1));
     this.content.add(addText(this, 770, 140, '배치 완료 티어 분포', compact ? 26 : 23, '#eadcff', 'center').setOrigin(0.5));
@@ -88,6 +109,27 @@ export class PvpSeasonScene extends Phaser.Scene {
       });
     }
 
-    this.content.add(addText(this, INTERNAL_WIDTH / 2, 495, '시즌 최초 티어 도달 보상은 서버에서 1회만 지급되며, 친선전은 이 기록에 영향을 주지 않습니다.', compact ? 17 : 14, '#9aa6b4', 'center').setOrigin(0.5));
+    this.content.add(addText(this, INTERNAL_WIDTH / 2, 495, '티어 최초 도달 보상은 계정당 1회 · 시즌 종료 보상은 성장 재화 대신 명예 기록 중심', compact ? 17 : 14, '#9aa6b4', 'center').setOrigin(0.5));
+
+    this.content.add(this.add.rectangle(INTERNAL_WIDTH / 2, 585, 1140, 125, 0x202833, 0.98).setStrokeStyle(2, 0x687687, 1));
+    const latest = overview.recentSeasonHistory[0];
+    if (!latest) {
+      this.content.add(addText(this, INTERNAL_WIDTH / 2, 585, '아직 정산 완료된 시즌 기록이 없습니다.', compact ? 20 : 17, '#929eae', 'center').setOrigin(0.5));
+      return;
+    }
+    const finalRank = latest.finalRank === null ? '미배치' : `#${latest.finalRank}`;
+    this.content.add(addText(this, 105, 548, `종료 시즌 · ${latest.seasonId}`, compact ? 18 : 15, '#f0d67d'));
+    this.content.add(addText(this, 105, 585, `${tierName(latest.finalTier)} ${latest.finalMmr} MMR · ${finalRank} · ${latest.rankedWins}승 ${latest.rankedLosses}패 ${latest.rankedDraws}무`, compact ? 18 : 15, '#d2dae5'));
+    const honorNames = latest.honors.map((honor) => honor.displayName);
+    const shown = honorNames.slice(0, 3).join(' · ');
+    const extra = honorNames.length > 3 ? ` 외 ${honorNames.length - 3}개` : '';
+    this.content.add(addText(this, 105, 620, honorNames.length > 0 ? `명예: ${shown}${extra}` : '획득 가능한 시즌 명예 없음', compact ? 16 : 14, honorNames.length > 0 ? '#cfe6ff' : '#8793a2'));
+    if (latest.honorClaimed) {
+      this.content.add(addText(this, 1170, 585, '수령 완료', compact ? 18 : 15, '#8ee3aa', 'right').setOrigin(1, 0));
+    } else if (latest.honors.length > 0) {
+      this.content.add(addButton(this, 1090, 588, 185, compact ? 72 : 54, this.claiming ? '확인 중…' : '명예 수령', () => { void this.claim(latest.seasonId); }, this.claiming ? 0x4c535d : 0x6d7894));
+    } else {
+      this.content.add(addText(this, 1170, 585, '정산 완료', compact ? 18 : 15, '#8f9baa', 'right').setOrigin(1, 0));
+    }
   }
 }
