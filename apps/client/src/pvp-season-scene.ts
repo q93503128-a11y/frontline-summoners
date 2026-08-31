@@ -57,7 +57,14 @@ export class PvpSeasonScene extends Phaser.Scene {
     try {
       const result = await claimPvpSeasonHonors(seasonId);
       if (!this.scene.isActive()) return;
-      this.status?.setText(result.honors.length > 0 ? `시즌 명예 ${result.honors.length}개 수령 완료` : '시즌 정산 확인 완료').setColor('#8ee3aa');
+      const newCount = result.newlyGrantedCosmeticIds.length;
+      if (newCount > 0) {
+        this.status?.setText(`시즌 명예 ${result.honors.length}개 · 프로필 장식 ${newCount}개 수령 완료`).setColor('#8ee3aa');
+      } else if (result.cosmeticIds.length > 0) {
+        this.status?.setText(`시즌 명예 확인 완료 · 프로필 장식 ${result.cosmeticIds.length}개 보유 중`).setColor('#8ee3aa');
+      } else {
+        this.status?.setText('시즌 정산 확인 완료').setColor('#8ee3aa');
+      }
       this.overview = await getPvpSeasonOverview();
       if (this.scene.isActive()) this.render();
     } catch (error) {
@@ -109,7 +116,7 @@ export class PvpSeasonScene extends Phaser.Scene {
       });
     }
 
-    this.content.add(addText(this, INTERNAL_WIDTH / 2, 495, '티어 최초 도달 보상은 계정당 1회 · 시즌 종료 보상은 성장 재화 대신 명예 기록 중심', compact ? 17 : 14, '#9aa6b4', 'center').setOrigin(0.5));
+    this.content.add(addText(this, INTERNAL_WIDTH / 2, 495, '티어 최초 도달 보상은 계정당 1회 · 시즌 명예는 수령 후 프로필에서 실제 장착 가능', compact ? 17 : 14, '#9aa6b4', 'center').setOrigin(0.5));
 
     this.content.add(this.add.rectangle(INTERNAL_WIDTH / 2, 585, 1140, 125, 0x202833, 0.98).setStrokeStyle(2, 0x687687, 1));
     const latest = overview.recentSeasonHistory[0];
