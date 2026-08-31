@@ -20,6 +20,11 @@ import {
   type EndlessRecordState,
 } from '@frontline/sim/record-playable';
 import { type ArtFamily, type SpriteStrip } from './assets.ts';
+import { loadActiveProgress, type ActiveProgressAuthority } from './active-progress.ts';
+import {
+  startAuthenticatedTrustedBattle,
+  type AccountTrustedBattleCommand,
+} from './account-network.ts';
 import { BASE_WEAPON_UNLOCKS } from './base-weapon-progression.ts';
 import { drawBattlefield, getBattlefieldBasePalette } from './battlefield.ts';
 import { showBossArrival } from './boss-warning.ts';
@@ -35,7 +40,7 @@ import {
   type RecordModeId,
 } from './record-content.ts';
 import { getStage, type PrototypeRosterSlot, type PrototypeStage } from './prototype.ts';
-import { loadGuestProgress, recordGuestEnemyDiscoveries } from './save.ts';
+import { recordGuestEnemyDiscoveries } from './save.ts';
 import {
   BATTLE_UNIT_HOTKEY_CODES,
   COLORS,
@@ -73,6 +78,9 @@ export class RecordBattleScene extends Phaser.Scene {
   private runtime!: RecordRuntime;
   private presentationStage!: PrototypeStage;
   private activeSlots: readonly PrototypeRosterSlot[] = [];
+  private authority: ActiveProgressAuthority = 'GUEST_LOCAL';
+  private trustedBattleId: string | null = null;
+  private trustedCommands: AccountTrustedBattleCommand[] = [];
   private accumulator = 0;
   private ready = false;
   private resolved = false;
@@ -109,6 +117,9 @@ export class RecordBattleScene extends Phaser.Scene {
       mapLength: this.modeId === 'record_endless_front' ? 2600 : 2850,
     };
     this.activeSlots = [];
+    this.authority = 'GUEST_LOCAL';
+    this.trustedBattleId = null;
+    this.trustedCommands = [];
     this.accumulator = 0;
     this.ready = false;
     this.resolved = false;
@@ -125,17 +136,32 @@ export class RecordBattleScene extends Phaser.Scene {
     drawBattlefield(this, this.presentationStage);
     const loading = addText(this, INTERNAL_WIDTH / 2, 330, '기록전 편성과 전장 불러오는 중…', 25, '#ffffff', 'center').setOrigin(0.5);
     this.input.keyboard?.on('keydown', (event: KeyboardEvent) => this.handleHotkey(event));
-    void loadGuestProgress().then((progress) => {
+    void loadActiveProgress().then(async (view) => {
       if (!this.scene.isActive()) return;
+      if (view.authority === 'ACCOUNT_OFFLINE_CACHE') {
+        this.scene.start('record-hub');
+        return;
+      }
+      const progress = view.progress;
       if (!isRecordModeUnlocked(this.modeId, progress.clearedStageIds)) {
         this.scene.start('record-hub');
         return;
       }
+      this.authority = view.authority;
       this.discoveredEnemyIds = new Set(progress.discoveredEnemyIds ?? []);
       this.activeSlots = buildGuestDeckSlots(progress);
       this.runtime = this.modeId === 'record_endless_front'
         ? createGuestEndlessRecordBattle(progress)
         : createGuestBossRushRecordBattle(progress);
+
+      if (this.authority === 'ACCOUNT_ONLINE') {
+        const ticket = await startAuthenticatedTrustedBattle('RECORD', this.modeId);
+        if (ticket.kind !== 'RECORD' || ticket.targetId !== this.modeId) throw new Error('trusted record ticket target mismatch');
+        if (ticket.initialStateHash !== this.runtime.battle.stateHash) throw new Error('trusted record initial state hash mismatch');
+        this.trustedBattleId = ticket.battleId;
+      }
+
+      if (!this.scene.isActive()) return;
       loading.destroy();
       this.drawHud();
       this.drawBases();
@@ -189,20 +215,32 @@ export class RecordBattleScene extends Phaser.Scene {
     if (event.code === 'KeyE') this.tryFireBaseWeaponInput();
   }
 
+  private appendTrustedCommand(command: AccountTrustedBattleCommand): void {
+    if (this.authority === 'ACCOUNT_ONLINE') this.trustedCommands.push(command);
+  }
+
   private trySpawn(slotId: string): void {
     if (!this.canAcceptAction()) return;
-    trySpawnPlayerUnit(this.battleState(), slotId);
+    const tick = this.battleState().battle.tick;
+    const result = trySpawnPlayerUnit(this.battleState(), slotId);
+    if (result.ok) this.appendTrustedCommand({ tick, type: 'SPAWN', slotId });
   }
 
   private tryUpgradeSupplyInput(): void {
     if (!this.canAcceptAction()) return;
-    tryUpgradeSupply(this.battleState());
+    const tick = this.battleState().battle.tick;
+    const result = tryUpgradeSupply(this.battleState());
+    if (result.ok) this.appendTrustedCommand({ tick, type: 'UPGRADE_SUPPLY' });
   }
 
   private tryFireBaseWeaponInput(): void {
     if (!this.canAcceptAction()) return;
+    const tick = this.battleState().battle.tick;
     const result = tryFireBaseWeapon(this.battleState());
-    if (result.ok) this.playBaseWeaponFx();
+    if (result.ok) {
+      this.appendTrustedCommand({ tick, type: 'FIRE_BASE_WEAPON' });
+      this.playBaseWeaponFx();
+    }
   }
 
   private togglePause(): void {
@@ -234,7 +272,7 @@ export class RecordBattleScene extends Phaser.Scene {
     const mode = getRecordModeDefinition(this.modeId);
     this.add.rectangle(INTERNAL_WIDTH / 2, 53, INTERNAL_WIDTH, 106, 0x151a24, 0.95);
     addText(this, 35, 14, mode.displayName, battleUiFontSize(27, 34), '#ffffff');
-    addText(this, 36, 55, '기록 SPECIAL · SOLO_ONLY', battleUiFontSize(16, 22), '#aeb8c8');
+    addText(this, 36, 55, this.authority === 'ACCOUNT_ONLINE' ? '기록 SPECIAL · 서버 검증 · SOLO_ONLY' : '기록 SPECIAL · SOLO_ONLY', battleUiFontSize(16, 22), '#aeb8c8');
     this.timerText = addText(this, 430, 22, '0:00', battleUiFontSize(24, 31), '#dbe2ee', 'center').setOrigin(0.5, 0);
     this.recordText = addText(this, 565, 24, '', battleUiFontSize(17, 22), '#f1d58a', 'center').setOrigin(0.5, 0);
     addText(this, 675, 27, '1× 고정', battleUiFontSize(17, 22), '#9dcdb1', 'center').setOrigin(0.5, 0);
@@ -258,7 +296,6 @@ export class RecordBattleScene extends Phaser.Scene {
     addText(this, 42, 286, '아군 거점', battleUiFontSize(18, 23), '#cfe5ff');
     addText(this, 1238, 286, '기록전 생성원', battleUiFontSize(18, 23), '#ffd3cc', 'right').setOrigin(1, 0);
     this.add.rectangle(88, 328, 156, 16, 0x161b23).setStrokeStyle(2, 0x7990aa);
-    this.playerBaseBar = this.add.rectangle(12, 328, 152, 16, 0x161b23).setOrigin(0, 0.5);
     this.playerBaseBar = this.add.rectangle(12, 328, 152, 10, 0x74c7ff).setOrigin(0, 0.5);
     this.playerBaseText = addText(this, 88, 340, '', battleUiFontSize(18, 22), '#e8f5ff', 'center').setOrigin(0.5, 0);
     addText(this, 1192, 325, '파괴 불가', battleUiFontSize(18, 22), '#ffd8d1', 'center').setOrigin(0.5, 0);
@@ -383,6 +420,7 @@ export class RecordBattleScene extends Phaser.Scene {
       .filter((enemyId) => !this.discoveredEnemyIds.has(enemyId)))];
     if (newlySeen.length === 0) return;
     for (const enemyId of newlySeen) this.discoveredEnemyIds.add(enemyId);
+    if (this.authority !== 'GUEST_LOCAL') return;
     this.enemyDiscoveryWrite = this.enemyDiscoveryWrite
       .then(async () => {
         const result = await recordGuestEnemyDiscoveries(newlySeen);
@@ -466,9 +504,12 @@ export class RecordBattleScene extends Phaser.Scene {
   private finishRecord(): void {
     if (this.resolved) return;
     this.resolved = true;
-    const data = this.runtime.mode === 'ENDLESS_FRONT'
+    const score = this.runtime.mode === 'ENDLESS_FRONT'
       ? { modeId: this.modeId, survivalMs: getEndlessRecordSurvivalMs(this.runtime) }
       : { modeId: this.modeId, defeatedBosses: this.runtime.defeatedBosses, completed: this.runtime.completed };
-    this.time.delayedCall(550, () => this.scene.start('record-result', data));
+    const proof = this.authority === 'ACCOUNT_ONLINE' && this.trustedBattleId
+      ? { trustedBattleId: this.trustedBattleId, trustedCommands: [...this.trustedCommands] }
+      : {};
+    this.time.delayedCall(550, () => this.scene.start('record-result', { ...score, ...proof }));
   }
 }
