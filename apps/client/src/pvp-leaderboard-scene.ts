@@ -9,7 +9,8 @@ import {
   type PvpLeaderboardViewClient,
 } from './pvp-leaderboard-network.ts';
 
-const PAGE_SIZE = 10;
+const PAGE_SIZE = 9;
+const ROW_STEP = 36;
 
 function tierName(id: string): string {
   const names: Readonly<Record<string, string>> = {
@@ -88,13 +89,13 @@ export class PvpLeaderboardScene extends Phaser.Scene {
     if (!this.content) return;
     const background = entry.isSelf ? 0x354153 : (entry.rank % 2 === 0 ? 0x232b37 : 0x202732);
     const stroke = entry.isSelf ? 0xe0c879 : 0x354151;
-    this.content.add(this.add.rectangle(INTERNAL_WIDTH / 2, y + 18, 1120, 43, background, 0.98).setStrokeStyle(entry.isSelf ? 2 : 1, stroke, 1));
+    this.content.add(this.add.rectangle(INTERNAL_WIDTH / 2, y + 14, 1120, 34, background, 0.98).setStrokeStyle(entry.isSelf ? 2 : 1, stroke, 1));
     const main = entry.isSelf ? '#fff0b8' : '#d9e2ed';
-    this.content.add(addText(this, 95, y, `#${entry.rank}`, compact ? 18 : 16, entry.rank <= 3 ? '#f0d67d' : main));
-    this.content.add(addText(this, 210, y, `${entry.displayName}${entry.isSelf ? '  (나)' : ''}`.slice(0, 24), compact ? 18 : 16, main));
-    this.content.add(addText(this, 650, y, tierName(entry.displayedTier), compact ? 17 : 15, '#cfe0f6'));
-    this.content.add(addText(this, 900, y, `${entry.mmr} MMR`, compact ? 17 : 15, '#f2d998', 'right').setOrigin(1, 0));
-    this.content.add(addText(this, 1170, y, `${entry.rankedWins}승`, compact ? 17 : 15, '#9fd7b2', 'right').setOrigin(1, 0));
+    this.content.add(addText(this, 95, y, `#${entry.rank}`, compact ? 17 : 15, entry.rank <= 3 ? '#f0d67d' : main));
+    this.content.add(addText(this, 210, y, `${entry.displayName}${entry.isSelf ? '  (나)' : ''}`.slice(0, 24), compact ? 17 : 15, main));
+    this.content.add(addText(this, 650, y, tierName(entry.displayedTier), compact ? 16 : 14, '#cfe0f6'));
+    this.content.add(addText(this, 900, y, `${entry.mmr} MMR`, compact ? 16 : 14, '#f2d998', 'right').setOrigin(1, 0));
+    this.content.add(addText(this, 1170, y, `${entry.rankedWins}승`, compact ? 16 : 14, '#9fd7b2', 'right').setOrigin(1, 0));
   }
 
   private render(): void {
@@ -129,16 +130,16 @@ export class PvpLeaderboardScene extends Phaser.Scene {
     const pageCount = Math.max(1, Math.ceil(view.entries.length / PAGE_SIZE));
     const start = this.scope === 'AROUND_ME' ? 0 : this.page * PAGE_SIZE;
     const visible = this.scope === 'AROUND_ME' ? view.entries : view.entries.slice(start, start + PAGE_SIZE);
-    visible.forEach((entry, index) => this.row(entry, 260 + index * 43, compact));
+    visible.forEach((entry, index) => this.row(entry, 252 + index * ROW_STEP, compact));
 
     if (this.scope !== 'AROUND_ME' && pageCount > 1) {
-      this.content.add(addButton(this, 420, 652, 150, compact ? 66 : 44, '이 전', () => {
+      this.content.add(addButton(this, 420, 635, 150, compact ? 66 : 44, '이 전', () => {
         if (this.page <= 0) return;
         this.page -= 1;
         this.render();
       }, this.page <= 0 ? 0x434b56 : 0x596b82));
-      this.content.add(addText(this, INTERNAL_WIDTH / 2, 665, `${this.page + 1} / ${pageCount}`, compact ? 18 : 15, '#c4cfdd', 'center').setOrigin(0.5));
-      this.content.add(addButton(this, 860, 652, 150, compact ? 66 : 44, '다 음', () => {
+      this.content.add(addText(this, INTERNAL_WIDTH / 2, 648, `${this.page + 1} / ${pageCount}`, compact ? 18 : 15, '#c4cfdd', 'center').setOrigin(0.5));
+      this.content.add(addButton(this, 860, 635, 150, compact ? 66 : 44, '다 음', () => {
         if (this.page >= pageCount - 1) return;
         this.page += 1;
         this.render();
