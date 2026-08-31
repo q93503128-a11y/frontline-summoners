@@ -1,93 +1,77 @@
 # 계정 Save v2 구현 메모 — 2026-08-30
 
-상태: `IMPLEMENTED_SERVER_STORAGE_AND_MUTATION_FOUNDATION`
+상태: `IMPLEMENTED_ACCOUNT_AUTHORITY_FOUNDATION`
 
 상위 정본:
 - `docs/CANONICAL.md`
 - `docs/content-wiki/systems/ACCOUNT_SAVE_SYNC_SPEC.md`
 
-후속 이행 기록:
+관련 이행 기록:
 - `docs/content-wiki/systems/ACCOUNT_MUTATION_IDEMPOTENCY_IMPLEMENTATION_2026-08-30.md`
+- `docs/content-wiki/systems/ACCOUNT_AUTH_SESSION_IMPLEMENTATION_2026-08-30.md`
+- `docs/content-wiki/systems/GUEST_ACCOUNT_MIGRATION_IMPLEMENTATION_2026-08-31.md`
+- `docs/content-wiki/systems/RECORD_TRUSTED_PROOF_IMPLEMENTATION_2026-08-31.md`
 
-이 문서는 현재 서버 코드에 실제로 들어간 저장 foundation을 기록한다. 로그인/OAuth, 게스트 이전 UX, 공개 계정 API까지 완료됐다는 뜻이 아니다.
+이 문서는 현재 account save v2의 저장/검증/인증/authoritative mutation 경계를 기록한다. account lifecycle, PvP, production QA까지 완료됐다는 뜻은 아니다.
 
-## 구현된 범위
-
-### 1. canonical account save snapshot v2
+## 1. canonical account save snapshot v2
 
 `apps/server/src/account-save-authority.ts`
 
-서버 정본 snapshot에 다음을 한 revision 아래 보관한다.
+하나의 revisioned server snapshot에 다음을 보관한다.
 
-- MAIN NORMAL_CLEAR 연속 진행.
-- NORMAL_CLEAR source.
-- MAIN first-clear reward receipt high-water (`mainRewardedStageIds`).
+- MAIN NORMAL_CLEAR 연속 진행과 source.
+- MAIN first-clear reward receipt high-water.
 - SPECIAL clear.
-- 영구 보상.
-- 적 발견.
-- 모집 캐릭터 소유.
-- 캐릭터 Base Lv / +Lv / 해금 form / 선택 form.
-- 덱.
-- 선택 거점 병기.
-- meta resource monotonic ledger.
-- 주기 SPECIAL reward charge 4종.
-- 기록 SPECIAL 최고기록/보상 high-water.
+- permanent reward.
+- enemy discovery.
+- recruitment character ownership.
+- Base Lv / +Lv / unlocked form / selected form.
+- deck.
+- selected base weapon.
+- monotonic resource ledger.
+- periodic SPECIAL charge 4종.
+- Record best/reward high-water.
 
-서버 save schema는 `2`다.
+server save schema는 `2`다.
 
-### 2. 경제 데이터 엄격 검증
+## 2. strict server validation
 
-로그인 계정의 서버 snapshot은 게스트 로컬 save처럼 손상값을 조용히 보정하지 않는다.
+로그인 계정 snapshot은 guest local save처럼 손상값을 조용히 보정하지 않는다.
 
 - unknown resource ID 거부.
 - `earned`, `spent` 음수/소수 거부.
 - `spent > earned` 거부.
-- canonical periodic charge collection 4종 전체 필요.
+- canonical periodic collection 4종 전체 필요.
 - charge 0..4.
 - cap 4에서 `nextChargeAtMs = null`.
 - cap 미만에서 유효한 다음 충전 시각 필요.
-- charge refresh는 서버 시각 기준.
+- charge refresh는 server time 기준.
+- Record best/reward high-water 관계 검증.
+- Boss Rush runtime cap 9 검증.
+- selected base weapon을 MAIN 진행으로 재검증.
+- future schema write-protect.
 
-### 3. 기록 high-water
-
-끝없는 전선:
-- `endlessBestTimeMs`
-- `endlessBestReachedMinute`
-- `endlessRewardedMinute`
-
-보스 러시:
-- `bossRushBestDefeated`
-- `bossRushRewardedDefeated`
-
-best/reward high-water 관계와 현재 9보스 runtime cap을 strict validation한다.
-`applyAccountRecordResult`는 trusted battle result를 받아 신규 milestone만 지급한다.
-
-### 4. 선택 거점 병기 validation
-
-- canonical 3종 ID만 허용.
-- account MAIN NORMAL_CLEAR 진행으로 unlock 재검증.
-- 잠긴 병기 snapshot 거부.
-
-### 5. v1 → v2 migration
+## 3. v1 → v2 migration
 
 기존 `account_progression_saves` v1의 진행/소유/성장/덱을 보존한다.
 
 v1에 없던 필드 기본값:
 - wallet: 빈 ledger.
 - periodic charge: 4칸 full.
-- record: 0.
+- Record: 0.
 - selected base weapon: 전선포격기.
 
 v1에는 MAIN first-clear wallet receipt가 없으므로 기존 cleared MAIN을 migrated `mainRewardedStageIds`에도 넣어 소급 중복 지급을 막는다.
 원본 v1 row는 migration 실패 시 덮어쓰지 않는다.
 
-### 6. revisioned D1 storage
+## 4. revisioned D1 storage
 
 migration:
 - `apps/server/migrations/0003_account_save_v2.sql`
 
 canonical table:
-- `account_saves`
+- `account_saves`.
 - account당 1 row.
 - `schema_version = 2`.
 - monotonic `revision`.
@@ -95,43 +79,67 @@ canonical table:
 - `updated_at`.
 
 서버 함수:
-- `loadAccountSave`
-- `initializeAccountSave`
-- `replaceAccountSave`
+- `loadAccountSave`.
+- `initializeAccountSave`.
+- `replaceAccountSave`.
 
-`replaceAccountSave`는 `expectedRevision` mismatch 시 `revision_conflict`를 반환한다.
+`replaceAccountSave`는 `expectedRevision` mismatch에서 `revision_conflict`를 반환한다.
+재화/성장 mutation은 conflict를 자동 재실행하지 않는다.
 
-### 7. authoritative mutation / idempotency foundation
+## 5. authoritative mutation / idempotency
 
-현재 account save v2 위에서 구현된 내부 server mutation:
+현재 account save v2 위에서 server가 authoritative하게 처리한다.
 
 - MAIN battle result.
-- 일반/주기/이벤트 SPECIAL battle result.
-- 기록 SPECIAL result.
-- 모집 server RNG + wallet + ownership/duplicate.
+- 일반/주기/이벤트/permanent SPECIAL result.
+- Record result.
+- recruitment server RNG + wallet + ownership/duplicate.
 - MAIN/SPECIAL sweep.
 - Base Lv.
 - +Lv.
-- evolution unlock.
-- evolution form select.
+- evolution unlock/form select.
 - deck set.
 - base weapon select.
 
-`battleId` / `requestId` receipt를 사용하며 동일 key + 동일 business input 재전송은 exact replay다.
-save CAS와 receipt는 D1 batch로 함께 확정하고 revision race는 CHECK 실패로 전체 rollback한다.
+`battleId` / `requestId` receipt를 사용한다.
+동일 key + 동일 business input 재전송은 exact replay다.
+save CAS와 receipt는 D1 batch에서 함께 확정되며 race에서 재지급/재차감/재추첨을 허용하지 않는다.
 
-상세는 `ACCOUNT_MUTATION_IDEMPOTENCY_IMPLEMENTATION_2026-08-30.md`를 따른다.
+## 6. Record authority
 
-### 8. SPECIAL progression / availability authority
+Record reward resolver와 mode/wave/boss sequence는 `@frontline/sim` 공용 구현을 사용한다.
+
+끝없는 전선:
+- `endlessBestTimeMs`.
+- `endlessBestReachedMinute`.
+- `endlessRewardedMinute`.
+
+보스 러시:
+- `bossRushBestDefeated`.
+- `bossRushRewardedDefeated`.
+
+authenticated account Record는 public score mutation을 받지 않는다.
+
+- start에서 account snapshot/revision과 initial state hash를 고정.
+- client는 accepted deterministic command log만 제출.
+- server가 동일 Record runtime을 재생.
+- Endless survival frame과 Boss Rush defeated count를 server가 계산.
+- Record 패배도 정상적인 high-water 저장 대상으로 처리.
+- 실제 encounter enemy discovery와 milestone reward를 Record mutation의 같은 revision에 합침.
+- 동일 battleId replay에서 중복 milestone reward/discovery 없음.
+
+상세는 `RECORD_TRUSTED_PROOF_IMPLEMENTATION_2026-08-31.md`를 따른다.
+
+## 7. SPECIAL progression / reward / sweep authority
 
 account authority 범위:
 - MAIN80.
 - SPECIAL61.
+- stage policy 141.
 - 전체 실행 enemy discovery catalog.
 - 전체 v2 permanent reward/evolution catalog.
-- stage policy 141.
 
-SPECIAL은 authored collection/unlock data를 사용한다.
+SPECIAL은 authored collection/unlock data와 server time availability를 사용한다.
 
 - collection `unlockAfterStageId`.
 - `requiredProgressionStageId`.
@@ -140,18 +148,11 @@ SPECIAL은 authored collection/unlock data를 사용한다.
 - periodic availability.
 - sweep policy.
 
-과거 blanket `main_01_020` SPECIAL gate는 제거했다.
-과거 SPECIAL clear history는 구조적 unlock 정합만 검사하고, 새 battle/sweep에서만 현재 server-time availability를 검사한다.
-
-### 9. server-authoritative SPECIAL reward / sweep
-
-SPECIAL reward는 `@frontline/sim/special-rewards` 공용 resolver를 사용한다.
-
-- 주기 18전장: first / charged / depleted.
-- 일반/상시/제한/이벤트 rewarded stage 38개: first bonus + repeat.
-- 현재 resource reward 없는 challenge stage는 `{}`.
-
-주기 first clear는 charge 미소모, charged repeat는 1칸 소비, charge 0은 depleted reward다.
+주기 SPECIAL:
+- first / charged / depleted reward.
+- first clear는 charge 미소모.
+- charged repeat는 1칸 소비.
+- charge 0은 depleted reward.
 
 소탕:
 - prior NORMAL_CLEAR.
@@ -159,30 +160,28 @@ SPECIAL reward는 `@frontline/sim/special-rewards` 공용 resolver를 사용한�
 - ticket 1장.
 - repeat reward only.
 - periodic charge 필요 시 1칸 소비.
-- first clear/progression/permanent reward/record 생성 금지.
+- first clear/progression/permanent reward/Record 생성 금지.
 
-### 10. server-authoritative meta progression
+## 8. meta progression authority
 
 `apps/server/src/account-meta-mutation-authority.ts`
-
-모든 action은 보유/해금/재화 판정을 server snapshot/content에서 다시 계산한다.
 
 Base Lv:
 - 시작 cap 10.
 - 장 완료마다 20 / 30 / 40 / 50.
-- canonical Gold curve로 서버 차감.
+- canonical Gold curve server 차감.
 
 +Lv:
 - +50 cap.
-- STORY/C/B/A/S/SS authored acquisition/rarity 기준 canonical soul essence 비용.
+- STORY/C/B/A/S/SS authored acquisition/rarity별 soul essence 비용.
 - client가 rarity/cost를 제출하지 않음.
 
 진화:
-- 해당 character form 여부.
+- character/form 관계 검증.
 - previous form.
 - required Base Lv.
 - canonical recipe cost.
-- unlock된 form만 선택.
+- unlocked form만 선택.
 
 덱:
 - 1..10.
@@ -194,44 +193,85 @@ Base Lv:
 - canonical 3종.
 - MAIN 진행 기반 server unlock.
 
-이 mutation들은 `META_PROGRESSION` request receipt와 account revision CAS를 공유한다.
+## 9. verified auth/session + client account state
 
-## 자동검증
+현재 구현:
+- Google Identity Services login.
+- Google ID token RS256/audience/expiry 검증.
+- stable Google `sub` binding.
+- server `auth_sessions`.
+- random bearer session token, DB에는 SHA-256 hash 저장.
+- exact origin/CORS 경계.
 
-관련 테스트:
-- `apps/server/test/account-save-authority.test.ts`
-- `apps/server/test/account-mutation-authority.test.ts`
-- `apps/server/test/account-special-mutation-authority.test.ts`
-- `apps/server/test/account-meta-mutation-authority.test.ts`
-- `apps/server/test/progression-authority.test.ts`
-- `packages/sim/test/special-rewards.test.ts`
+client state:
+- `GUEST_LOCAL`.
+- `AUTHENTICATED_ONLINE`.
+- `AUTHENTICATED_OFFLINE_CACHE`.
 
-검사 범위:
-- 신규 account v2 / v1→v2 migration.
-- wallet/charge/record/base weapon strict validation.
-- MAIN80 / SPECIAL61 / policy141 authority.
-- MAIN/SPECIAL/record/recruitment/sweep transaction.
-- SPECIAL authored history/current availability.
-- Base Lv canonical Gold + 장별 cap.
-- +Lv rarity/acquisition별 soul cost.
-- evolution prerequisite/recipe/selection.
-- deck exact order/ownership/uniqueness.
-- base weapon unlock authority.
-- insufficient wallet rejection.
-- mutation receipt migration / battleId unique / rollback-safe CAS.
+online account에서만 mutation을 허용한다.
+offline cache에는 mutation queue/journal이 없으며 read-only다.
+
+## 10. reversible guest → account migration
+
+현재 실제 client/server 경로가 있다.
+
+- login만으로 guest를 server에 자동 덮어쓰지 않음.
+- pristine account import와 populated account conflict를 구분.
+- populated replacement는 destructive confirmation 필요.
+- source hash / expected revision 검증.
+- account save + profile + archive 원자 처리.
+- migration replay idempotency.
+- 직후 다른 mutation이 없을 때 explicit rollback 가능.
+
+상세는 `GUEST_ACCOUNT_MIGRATION_IMPLEMENTATION_2026-08-31.md`를 따른다.
+
+## 11. trusted battle proof
+
+authenticated solo MAIN/SPECIAL/Record는 client 자기신고 terminal result를 account reward authority로 쓰지 않는다.
+
+- start proof.
+- accepted tick command log.
+- canonical server replay.
+- stored completion proof.
+- claim.
+- idempotent battle receipt.
+- actual encounter discovery.
+
+MAIN/SPECIAL은 terminal victory가 clear/reward 조건이다.
+Record는 defeat까지 포함한 server-derived score가 high-water 조건이다.
+
+## 12. 자동검증
+
+관련 테스트 예:
+- `apps/server/test/account-save-authority.test.ts`.
+- `apps/server/test/account-mutation-authority.test.ts`.
+- `apps/server/test/account-special-mutation-authority.test.ts`.
+- `apps/server/test/account-meta-mutation-authority.test.ts`.
+- `apps/server/test/trusted-battle-authority.test.ts`.
+- `apps/server/test/trusted-record-battle.test.ts`.
+- `apps/client/test/account-network.test.ts`.
+- `apps/client/test/record-account-proof.test.ts`.
+- `packages/sim/test/special-rewards.test.ts`.
+- `packages/sim/test/record-playable.test.ts`.
+
+Record trusted proof 코드 기준점:
+- `3f26839d238d276a7e861db0a5fd046c604fecf0`.
+- Actions `33355073898`.
+- typecheck / schema / sim / server / client / build 전체 green.
 
 ## 아직 완료하지 않은 것
 
-`ACCOUNT_SAVE_SYNC_SPEC.md`상 남은 작업:
+account/save authority 자체가 더 이상 초기 storage-only 단계는 아니지만 다음은 남아 있다.
 
-- Google/email 인증 및 실제 `AUTHENTICATED_ONLINE` session.
-- client account state machine (`GUEST_LOCAL`, `AUTHENTICATED_ONLINE`, `AUTHENTICATED_OFFLINE_CACHE`).
-- guest→빈 account 이전 transaction/UX.
-- 기존 server 진행과 guest 진행 충돌 선택 UX.
-- authenticated 공개 account mutation route.
-- trusted solo/SPECIAL/record battle completion registry/result proof.
-- 모집/성장/진화/덱/병기 mutation을 실제 authenticated client flow에 연결.
-- 협동 결과를 canonical account progression/wallet/periodic charge에 실제 지급.
-- account reset/delete/friend/block/PvP account data.
+- email magic-link/인증코드.
+- session renewal/rotation/revoke-all-devices 최종 정책.
+- account transfer/delete/reset/recovery 제품 UX.
+- migration archive 장기 retention/cleanup 정책.
+- 여러 기기 migration/account lifecycle 사람 QA.
+- 공개 PvE co-op matchmaking queue 및 reconnect/network release hardening.
+- PvP runtime/matchmaking/MMR/season/tier/account reward.
+- PvP/QUIRK 등 아직 실제 authoritative fact source가 없는 achievement 일부.
+- Record/SPECIAL/achievement exact 경제와 장기전 사람 QA.
+- production art/motion/audio/accessibility/viewport/release QA.
 
-따라서 현재 단계는 `계정 기능 완료`가 아니라 **서버 정본 save v2 + migration/revision + MAIN/SPECIAL/record/recruitment/sweep/meta-progression mutation/idempotency foundation 완료**로 센다.
+따라서 현재 단계는 **account save v2 + verified session + reversible migration + authoritative mutation + MAIN/SPECIAL/Record trusted proof가 연결된 account authority foundation 완료**로 센다. 전체 온라인 제품/게임 release complete로 세지는 않는다.
