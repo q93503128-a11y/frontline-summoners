@@ -15,6 +15,12 @@ export interface SocialPvpInviteRecord {
   readonly createdAtMs: number;
 }
 
+export interface SocialPvpInviterSummary {
+  readonly friendCode: string;
+  readonly displayName: string;
+  readonly online: boolean;
+}
+
 type SocialPvpInviteRow = {
   readonly invite_id: string;
   readonly inviter_id: string;
@@ -52,6 +58,23 @@ async function loadRow(db: D1Database, inviteId: string): Promise<SocialPvpInvit
     `SELECT invite_id, inviter_id, invitee_id, invite_code, mode_id, growth_policy, status, expires_at, created_at
      FROM social_pvp_invites WHERE invite_id = ?1`,
   ).bind(inviteId).first<SocialPvpInviteRow>();
+}
+
+export async function getSocialPvpInviterSummary(
+  db: D1Database,
+  rawUserId: string,
+  nowMs = Date.now(),
+): Promise<SocialPvpInviterSummary> {
+  const userId = nonEmptyId(rawUserId, 'userId');
+  const row = await db.prepare(
+    'SELECT friend_code, display_name, online_until FROM social_profiles WHERE user_id = ?1',
+  ).bind(userId).first<{ friend_code: string; display_name: string; online_until: number }>();
+  if (!row) throw new Error('social_profile_missing');
+  return {
+    friendCode: row.friend_code,
+    displayName: row.display_name,
+    online: row.online_until > Math.floor(nowMs / 1000),
+  };
 }
 
 export async function createSocialPvpInvite(
