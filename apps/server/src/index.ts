@@ -1,5 +1,5 @@
 import { DurableObject } from 'cloudflare:workers';
-import { SIM_TICK_RATE } from '@frontline/shared';
+import { COOP_QUICK_MESSAGE_IDS, SIM_TICK_RATE, type CoopQuickMessageId } from '@frontline/shared';
 import {
   applyCoopPlayableFrame,
   getCoopPlayableSnapshot,
@@ -8,6 +8,7 @@ import {
 } from '@frontline/sim/coop-playable';
 import { resolveAuthenticatedAccountHttp } from './account-http.ts';
 import { resolveAuthHttp, type AuthHttpResult } from './auth-http.ts';
+import { getAccountCoopSeatAuthority, settleAuthenticatedCoopWin } from './account-coop-authority.ts';
 import { drainCoopFramesAfterAiHandoff } from './coop-ai-handoff.ts';
 import {
   connectCoopSeat,
@@ -29,6 +30,7 @@ import {
   getServerCoopLoadout,
   getServerCoopStage,
 } from './runtime-content.ts';
+import { isEitherSocialBlocked, recordRecentCoopPlayers } from './social-authority.ts';
 
 export interface Env {
   DB: D1Database;
@@ -45,10 +47,21 @@ type SocketAttachment = {
 type StoredCoopRoom = {
   room: CoopRoomState;
   joinTokens: Record<CoopSeatId, string>;
+  seatAccountIds: Record<CoopSeatId, string | null>;
+  matchKind: 'CODE' | 'FRIEND';
+  reconnectedSeats: Record<CoopSeatId, boolean>;
+  quickMessageTimesMs: Record<CoopSeatId, number[]>;
+  settledSeats: Record<CoopSeatId, boolean>;
+  recentPlayersRecorded: boolean;
+  battleStartedAtMs: number | null;
   battle: CoopPlayableBattleState | null;
 };
 
-const ROOM_STORAGE_KEY = 'coop-room-v4';
+const ROOM_STORAGE_KEY = 'coop-room-v5';
+const QUICK_MESSAGE_COOLDOWN_MS = 900;
+const QUICK_MESSAGE_BURST_WINDOW_MS = 8_000;
+const QUICK_MESSAGE_BURST_MAX = 4;
+const QUICK_MESSAGE_ID_SET = new Set<string>(COOP_QUICK_MESSAGE_IDS);
 
 const CORS_HEADERS = {
   'access-control-allow-origin': '*',
@@ -80,6 +93,14 @@ function isRecord(value: unknown): value is Record<string, unknown> {
 
 function nonEmptyString(value: unknown): string | null {
   return typeof value === 'string' && value.trim().length > 0 ? value.trim() : null;
+}
+
+function isSeatId(value: unknown): value is CoopSeatId {
+  return value === 'A' || value === 'B';
+}
+
+function isQuickMessageId(value: unknown): value is CoopQuickMessageId {
+  return typeof value === 'string' && QUICK_MESSAGE_ID_SET.has(value);
 }
 
 async function readJsonObject(request: Request): Promise<Record<string, unknown>> {
@@ -196,6 +217,18 @@ export class BattleRoom extends DurableObject<Env> {
     if (this.record) await this.ctx.storage.put(ROOM_STORAGE_KEY, this.record);
   }
 
+  private publicRoomSnapshot(record: StoredCoopRoom) {
+    const room = getCoopRoomSnapshot(record.room);
+    return {
+      ...room,
+      matchKind: record.matchKind,
+      seats: room.seats.map((seat) => ({
+        ...seat,
+        accountBound: record.seatAccountIds[seat.seatId] !== null,
+      })),
+    };
+  }
+
   async fetch(request: Request): Promise<Response> {
     const url = new URL(request.url);
 
@@ -207,22 +240,67 @@ export class BattleRoom extends DurableObject<Env> {
       const joinTokens = isRecord(body.joinTokens) ? body.joinTokens : {};
       const tokenA = nonEmptyString(joinTokens.A);
       const tokenB = nonEmptyString(joinTokens.B);
+      const seatAccountIds = isRecord(body.seatAccountIds) ? body.seatAccountIds : {};
+      const accountA = nonEmptyString(seatAccountIds.A);
+      const accountB = nonEmptyString(seatAccountIds.B);
+      const matchKind = body.matchKind === 'FRIEND' ? 'FRIEND' : 'CODE';
       if (!matchId || !stageId || !tokenA || !tokenB || tokenA === tokenB) {
         return json({ error: 'invalid_match_initialization' }, { status: 400 });
       }
+      if ((accountA === null) !== (accountB === null) || (accountA !== null && accountA === accountB)) {
+        return json({ error: 'invalid_account_bound_seats' }, { status: 400 });
+      }
+      if (matchKind === 'FRIEND' && (!accountA || !accountB)) return json({ error: 'friend_match_requires_accounts' }, { status: 400 });
       if (coopStageRequestError(stageId)) return json({ error: 'invalid_coop_stage' }, { status: 400 });
       if (existing) {
         if (existing.room.matchId === matchId && existing.room.stageId === stageId) return json({ ok: true, alreadyInitialized: true });
         return json({ error: 'room_already_initialized' }, { status: 409 });
       }
+      const room = createCoopRoom(matchId, stageId);
+      if (accountA && accountB) {
+        const [authorityA, authorityB] = await Promise.all([
+          getAccountCoopSeatAuthority(this.env.DB, accountA, stageId),
+          getAccountCoopSeatAuthority(this.env.DB, accountB, stageId),
+        ]);
+        room.seats.A.selectedBaseWeaponId = authorityA.selectedBaseWeaponId;
+        room.seats.B.selectedBaseWeaponId = authorityB.selectedBaseWeaponId;
+      }
       this.record = {
-        room: createCoopRoom(matchId, stageId),
+        room,
         joinTokens: { A: tokenA, B: tokenB },
+        seatAccountIds: { A: accountA, B: accountB },
+        matchKind,
+        reconnectedSeats: { A: false, B: false },
+        quickMessageTimesMs: { A: [], B: [] },
+        settledSeats: { A: false, B: false },
+        recentPlayersRecorded: false,
+        battleStartedAtMs: null,
         battle: null,
       };
       this.loaded = true;
       await this.saveRecord();
       return json({ ok: true });
+    }
+
+    if (request.method === 'POST' && url.pathname === '/cancel') {
+      const record = await this.loadRecord();
+      if (!record) return json({ ok: true, alreadyMissing: true });
+      if (record.room.phase !== 'LOBBY') return json({ error: 'room_already_started' }, { status: 409 });
+      this.record = null;
+      this.loaded = true;
+      await this.ctx.storage.deleteAll();
+      return json({ ok: true });
+    }
+
+    if (request.method === 'POST' && url.pathname === '/seat-token') {
+      const record = await this.loadRecord();
+      if (!record) return json({ error: 'match_not_initialized' }, { status: 404 });
+      const body = await readJsonObject(request);
+      const seatId = body.seatId;
+      const accountId = nonEmptyString(body.accountId);
+      if (!isSeatId(seatId) || !accountId) return json({ error: 'invalid_seat_token_request' }, { status: 400 });
+      if (record.seatAccountIds[seatId] !== accountId) return json({ error: 'seat_account_mismatch' }, { status: 403 });
+      return json({ token: record.joinTokens[seatId] });
     }
 
     if (request.headers.get('upgrade')?.toLowerCase() !== 'websocket') {
@@ -238,6 +316,7 @@ export class BattleRoom extends DurableObject<Env> {
     const pair = new WebSocketPair();
     const [client, server] = Object.values(pair) as [WebSocket, WebSocket];
     const clientId = crypto.randomUUID();
+    const reconnectingFromAi = record.room.phase === 'BATTLE' && record.room.seats[seatId].control === 'AI';
 
     for (const socket of this.ctx.getWebSockets()) {
       const attachment = socket.deserializeAttachment() as SocketAttachment | null;
@@ -247,6 +326,7 @@ export class BattleRoom extends DurableObject<Env> {
     }
 
     connectCoopSeat(record.room, seatId, clientId);
+    if (reconnectingFromAi) record.reconnectedSeats[seatId] = true;
     server.serializeAttachment({ clientId, seatId } satisfies SocketAttachment);
     this.ctx.acceptWebSocket(server);
     await this.saveRecord();
@@ -256,7 +336,7 @@ export class BattleRoom extends DurableObject<Env> {
       clientId,
       seatId,
       simTickRate: SIM_TICK_RATE,
-      room: getCoopRoomSnapshot(record.room),
+      room: this.publicRoomSnapshot(record),
       ...(record.battle === null ? {} : { battle: getCoopPlayableSnapshot(record.battle) }),
     }));
     if (record.battle) {
@@ -265,6 +345,10 @@ export class BattleRoom extends DurableObject<Env> {
         committedTick: record.room.committedTick,
         battle: getCoopPlayableSnapshot(record.battle),
       }));
+    }
+    if (record.room.phase === 'FINISHED') {
+      await this.settleAuthenticatedOutcome(record);
+      await this.saveRecord();
     }
     this.broadcastRoomState();
     return new Response(null, { status: 101, webSocket: client });
@@ -287,7 +371,12 @@ export class BattleRoom extends DurableObject<Env> {
     }
 
     try {
-      const parsed = parseCoopClientMessage(JSON.parse(message) as unknown);
+      const decoded: unknown = JSON.parse(message);
+      if (isRecord(decoded) && decoded.type === 'QUICK_MESSAGE') {
+        await this.handleQuickMessage(record, attachment, decoded.messageId, ws);
+        return;
+      }
+      const parsed = parseCoopClientMessage(decoded);
       if (parsed.type === 'PING') {
         ws.send(JSON.stringify({
           type: 'PONG',
@@ -303,10 +392,13 @@ export class BattleRoom extends DurableObject<Env> {
         return;
       }
       if (parsed.type === 'READY') {
-        getServerCoopLoadout(parsed.loadout);
+        const accountId = record.seatAccountIds[attachment.seatId];
+        const loadout = accountId
+          ? (await getAccountCoopSeatAuthority(this.env.DB, accountId, record.room.stageId)).loadout
+          : getServerCoopLoadout(parsed.loadout);
         const selectedBaseWeaponId = record.room.seats[attachment.seatId].selectedBaseWeaponId;
-        assertServerCoopBaseWeaponUnlocked(selectedBaseWeaponId, parsed.loadout.clearedStageIds);
-        const result = setCoopSeatReady(record.room, attachment.seatId, attachment.clientId, parsed.loadout);
+        assertServerCoopBaseWeaponUnlocked(selectedBaseWeaponId, loadout.clearedStageIds);
+        const result = setCoopSeatReady(record.room, attachment.seatId, attachment.clientId, loadout);
         if (result.battleStarted) {
           const loadoutA = record.room.seats.A.loadout;
           const loadoutB = record.room.seats.B.loadout;
@@ -315,6 +407,7 @@ export class BattleRoom extends DurableObject<Env> {
           if (!loadoutA || !loadoutB) throw new Error('co-op ready state is missing validated loadout');
           if (weaponA !== weaponB) throw new Error('co-op ready state is missing shared base weapon agreement');
           record.battle = createServerCoopBattle(record.room.stageId, loadoutA, loadoutB, weaponA);
+          record.battleStartedAtMs = Date.now();
         }
         await this.saveRecord();
         this.broadcastRoomState();
@@ -340,7 +433,7 @@ export class BattleRoom extends DurableObject<Env> {
       if (!record.battle) throw new Error('co-op simulation is not initialized');
       ws.send(JSON.stringify({ type: 'INPUT_ACK', tick: parsed.input.tick, sequence: parsed.input.sequence }));
       const finished = this.applyCommittedFrames(record, result.committedFrames);
-      if (finished) this.finishBattle(record);
+      if (finished) await this.finishBattle(record);
       await this.saveRecord();
     } catch (error) {
       ws.send(JSON.stringify({
@@ -357,6 +450,39 @@ export class BattleRoom extends DurableObject<Env> {
 
   async webSocketError(ws: WebSocket): Promise<void> {
     await this.handleDisconnect(ws);
+  }
+
+  private async handleQuickMessage(
+    record: StoredCoopRoom,
+    attachment: SocketAttachment,
+    rawMessageId: unknown,
+    ws: WebSocket,
+  ): Promise<void> {
+    if (!isQuickMessageId(rawMessageId)) throw new Error('invalid_quick_message_id');
+    const seat = record.room.seats[attachment.seatId];
+    if (!seat.connected || seat.clientId !== attachment.clientId || seat.control !== 'PLAYER') throw new Error('quick_message_seat_not_controlled');
+    const nowMs = Date.now();
+    const recent = record.quickMessageTimesMs[attachment.seatId].filter((time) => nowMs - time <= QUICK_MESSAGE_BURST_WINDOW_MS);
+    const last = recent[recent.length - 1];
+    if (last !== undefined && nowMs - last < QUICK_MESSAGE_COOLDOWN_MS) {
+      ws.send(JSON.stringify({ type: 'ERROR', code: 'quick_message_rate_limited' }));
+      return;
+    }
+    if (recent.length >= QUICK_MESSAGE_BURST_MAX) {
+      ws.send(JSON.stringify({ type: 'ERROR', code: 'quick_message_rate_limited' }));
+      return;
+    }
+    recent.push(nowMs);
+    record.quickMessageTimesMs[attachment.seatId] = recent;
+    await this.saveRecord();
+
+    const payload = { type: 'QUICK_MESSAGE', seatId: attachment.seatId, messageId: rawMessageId, serverTimeMs: nowMs };
+    this.sendToSeat(attachment.seatId, payload);
+    const otherSeatId: CoopSeatId = attachment.seatId === 'A' ? 'B' : 'A';
+    const senderAccountId = record.seatAccountIds[attachment.seatId];
+    const receiverAccountId = record.seatAccountIds[otherSeatId];
+    if (senderAccountId && receiverAccountId && await isEitherSocialBlocked(this.env.DB, senderAccountId, receiverAccountId)) return;
+    this.sendToSeat(otherSeatId, payload);
   }
 
   private applyCommittedFrames(record: StoredCoopRoom, frames: readonly CoopCommittedFrame[]): boolean {
@@ -383,9 +509,10 @@ export class BattleRoom extends DurableObject<Env> {
     return finished;
   }
 
-  private finishBattle(record: StoredCoopRoom): void {
+  private async finishBattle(record: StoredCoopRoom): Promise<void> {
     if (!record.battle || record.room.phase === 'FINISHED') return;
     record.room.phase = 'FINISHED';
+    await this.saveRecord();
     this.broadcast({
       type: 'BATTLE_FINISHED',
       stageId: record.room.stageId,
@@ -394,6 +521,41 @@ export class BattleRoom extends DurableObject<Env> {
       battle: getCoopPlayableSnapshot(record.battle),
     });
     this.broadcastRoomState();
+    await this.settleAuthenticatedOutcome(record);
+  }
+
+  private async settleAuthenticatedOutcome(record: StoredCoopRoom): Promise<void> {
+    if (!record.battle || record.room.phase !== 'FINISHED') return;
+    const accountA = record.seatAccountIds.A;
+    const accountB = record.seatAccountIds.B;
+    if (accountA && accountB && !record.recentPlayersRecorded) {
+      await recordRecentCoopPlayers(this.env.DB, accountA, accountB, record.room.matchId, record.room.stageId);
+      record.recentPlayersRecorded = true;
+    }
+    if (record.battle.shared.battle.winner !== 'PLAYER') {
+      await this.saveRecord();
+      return;
+    }
+    for (const seatId of ['A', 'B'] as const) {
+      const accountId = record.seatAccountIds[seatId];
+      if (!accountId || record.settledSeats[seatId]) continue;
+      try {
+        await settleAuthenticatedCoopWin(this.env.DB, accountId, record.room.stageId, record.room.matchId, {
+          friendMatch: record.matchKind === 'FRIEND',
+          reconnected: record.reconnectedSeats[seatId],
+          ...(record.battleStartedAtMs === null ? {} : { battleStartedAtMs: record.battleStartedAtMs }),
+        });
+        record.settledSeats[seatId] = true;
+        this.sendToSeat(seatId, { type: 'ACCOUNT_SETTLED', seatId, stageId: record.room.stageId });
+      } catch (error) {
+        this.sendToSeat(seatId, {
+          type: 'ACCOUNT_SETTLEMENT_ERROR',
+          seatId,
+          message: error instanceof Error ? error.message : 'account settlement failed',
+        });
+      }
+    }
+    await this.saveRecord();
   }
 
   private async handleDisconnect(ws: WebSocket): Promise<void> {
@@ -405,7 +567,7 @@ export class BattleRoom extends DurableObject<Env> {
     if (wasController && record.room.phase === 'BATTLE' && record.battle) {
       const frames = drainCoopFramesAfterAiHandoff(record.room);
       const finished = this.applyCommittedFrames(record, frames);
-      if (finished) this.finishBattle(record);
+      if (finished) await this.finishBattle(record);
     }
     await this.saveRecord();
     this.broadcastRoomState();
@@ -415,9 +577,17 @@ export class BattleRoom extends DurableObject<Env> {
     if (!this.record) return;
     this.broadcast({
       type: 'ROOM_STATE',
-      room: getCoopRoomSnapshot(this.record.room),
+      room: this.publicRoomSnapshot(this.record),
       ...(this.record.battle === null ? {} : { battle: getCoopPlayableSnapshot(this.record.battle) }),
     });
+  }
+
+  private sendToSeat(seatId: CoopSeatId, payload: unknown): void {
+    const message = JSON.stringify(payload);
+    for (const socket of this.ctx.getWebSockets()) {
+      const attachment = socket.deserializeAttachment() as SocketAttachment | null;
+      if (attachment?.seatId === seatId && socket.readyState === WebSocket.OPEN) socket.send(message);
+    }
   }
 
   private broadcast(payload: unknown): void {
