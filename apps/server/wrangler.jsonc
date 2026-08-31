@@ -19,11 +19,19 @@
       {
         "name": "BATTLE_ROOM",
         "class_name": "BattleRoom"
+      },
+      {
+        "name": "PVP_ROOM",
+        "class_name": "PvpRoom"
       }
     ]
   },
   "exports": {
     "BattleRoom": {
+      "type": "durable-object",
+      "storage": "sqlite"
+    },
+    "PvpRoom": {
       "type": "durable-object",
       "storage": "sqlite"
     }
