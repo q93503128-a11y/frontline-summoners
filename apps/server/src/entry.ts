@@ -14,6 +14,7 @@ import {
   resolveFriendlyPvpWebSocket,
   type FriendlyPvpHttpEnv,
 } from './pvp-friendly-http.ts';
+import { resolvePvpLeaderboardHttp, type PvpLeaderboardHttpEnv } from './pvp-leaderboard-http.ts';
 import { PvpRoom } from './pvp-durable-room.ts';
 import { resolvePvpHttp, resolvePvpWebSocket, type PvpHttpEnv } from './pvp-http.ts';
 import { resolvePvpSeasonHttp, type PvpSeasonHttpEnv } from './pvp-season-http.ts';
@@ -25,7 +26,7 @@ import { resolveSocialHttp } from './social-http.ts';
 
 export { BattleRoom, FriendlyPvpRoom, Pvp2v2Room, PvpRoom };
 
-type EntryEnv = Env & PvpHttpEnv & FriendlyPvpHttpEnv & Pvp2v2HttpEnv & FriendlyPvp2v2HttpEnv & PvpSeasonHttpEnv & PvpSeasonOperationsHttpEnv;
+type EntryEnv = Env & PvpHttpEnv & FriendlyPvpHttpEnv & Pvp2v2HttpEnv & FriendlyPvp2v2HttpEnv & PvpSeasonHttpEnv & PvpSeasonOperationsHttpEnv & PvpLeaderboardHttpEnv;
 
 const CORS_HEADERS = {
   'access-control-allow-origin': '*',
@@ -55,6 +56,8 @@ export default {
       if (seasonOperations) return json(seasonOperations.body, seasonOperations.status);
       const season = await resolvePvpSeasonHttp(request, env);
       if (season) return json(season.body, season.status);
+      const leaderboard = await resolvePvpLeaderboardHttp(request, env);
+      if (leaderboard) return json(leaderboard.body, leaderboard.status);
       const friendlyPvp2v2 = await resolveFriendlyPvp2v2Http(request, env);
       if (friendlyPvp2v2) return json(friendlyPvp2v2.body, friendlyPvp2v2.status);
       const pvp2v2 = await resolvePvp2v2Http(request, env);
