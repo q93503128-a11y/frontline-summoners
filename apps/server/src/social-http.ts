@@ -44,8 +44,11 @@ import {
   markSocialPvpInviteAccepted,
 } from './social-pvp-authority.ts';
 
-export interface SocialHttpEnv extends FriendlyPvpHttpEnv, FriendlyPvp2v2HttpEnv {
+export interface SocialHttpEnv {
+  readonly DB: D1Database;
   readonly BATTLE_ROOM: DurableObjectNamespace;
+  readonly PVP_FRIENDLY_ROOM?: FriendlyPvpHttpEnv['PVP_FRIENDLY_ROOM'];
+  readonly PVP_2V2_ROOM?: FriendlyPvp2v2HttpEnv['PVP_2V2_ROOM'];
 }
 
 export interface SocialHttpResult {
@@ -84,7 +87,18 @@ function errorStatus(message: string): number {
   if (message.includes('not_found') || message.includes('missing')) return 404;
   if (message.includes('blocked') || message.includes('already') || message.includes('pending') || message.includes('conflict') || message.includes('friend_required') || message.includes('full')) return 409;
   if (message.includes('locked') || message.includes('not currently available') || message.includes('not_coop_eligible') || message.includes('required') || message.includes('host_only')) return 403;
+  if (message.includes('service_unavailable')) return 503;
   return 400;
+}
+
+function friendlyPvpEnv(env: SocialHttpEnv): FriendlyPvpHttpEnv {
+  if (!env.PVP_FRIENDLY_ROOM) throw new Error('friendly_pvp_service_unavailable');
+  return { DB: env.DB, PVP_FRIENDLY_ROOM: env.PVP_FRIENDLY_ROOM };
+}
+
+function friendlyPvp2v2Env(env: SocialHttpEnv): FriendlyPvp2v2HttpEnv {
+  if (!env.PVP_2V2_ROOM) throw new Error('friendly_2v2_service_unavailable');
+  return { DB: env.DB, PVP_2V2_ROOM: env.PVP_2V2_ROOM };
 }
 
 async function createFriendCoopInvite(
@@ -190,7 +204,8 @@ async function createFriendPvpInvite(
   if (!growthPolicy) return { status: 400, body: { error: 'friendly_pvp_growth_policy_required' } };
 
   await getAccountFriendlyPvpAuthority(env.DB, inviteeId, growthPolicy, nowMs);
-  const lobbyResult = await createFriendlyPvpLobbyForAccount(env, userId, growthPolicy, nowMs);
+  const pvpEnv = friendlyPvpEnv(env);
+  const lobbyResult = await createFriendlyPvpLobbyForAccount(pvpEnv, userId, growthPolicy, nowMs);
   if (lobbyResult.status >= 400 || !isRecord(lobbyResult.body)) return lobbyResult;
   const inviteCode = text(lobbyResult.body.inviteCode);
   const expiresAtMs = lobbyResult.body.expiresAtMs;
@@ -207,7 +222,7 @@ async function createFriendPvpInvite(
       },
     };
   } catch (error) {
-    await cancelFriendlyPvpLobbyForAccount(env, userId, inviteCode).catch(() => undefined);
+    await cancelFriendlyPvpLobbyForAccount(pvpEnv, userId, inviteCode).catch(() => undefined);
     throw error;
   }
 }
@@ -223,7 +238,7 @@ async function acceptFriendPvpInvite(
   if (!inviteId) return { status: 400, body: { error: 'invite_id_required' } };
   const invite = await getPendingSocialPvpInviteForInvitee(env.DB, userId, inviteId, nowMs);
   await getAccountFriendlyPvpAuthority(env.DB, userId, invite.growthPolicy, nowMs);
-  const joined = await joinFriendlyPvpLobbyForAccount(env, userId, invite.inviteCode);
+  const joined = await joinFriendlyPvpLobbyForAccount(friendlyPvpEnv(env), userId, invite.inviteCode);
   if (joined.status >= 400) return joined;
   await markSocialPvpInviteAccepted(env.DB, userId, inviteId);
   return { status: 200, body: { inviteId, match: joined.body } };
@@ -269,7 +284,7 @@ async function acceptFriendPvp2v2Invite(
       ...(authorization === null ? {} : { authorization }),
     },
     body: JSON.stringify({ inviteCode: invite.inviteCode }),
-  }), env, nowMs);
+  }), friendlyPvp2v2Env(env), nowMs);
   if (!joined) return { status: 503, body: { error: 'social_pvp_2v2_join_unavailable' } };
   if (joined.status >= 400) return joined;
   await markSocialPvp2v2InviteAccepted(env.DB, userId, inviteId);
@@ -364,14 +379,14 @@ export async function resolveSocialHttp(request: Request, env: SocialHttpEnv, no
       const inviteId = text(body.inviteId);
       if (!inviteId) return { status: 400, body: { error: 'invite_id_required' } };
       const invite = await declineSocialPvpInvite(env.DB, principal.userId, inviteId);
-      await cancelFriendlyPvpLobbyForAccount(env, invite.inviterId, invite.inviteCode).catch(() => undefined);
+      await cancelFriendlyPvpLobbyForAccount(friendlyPvpEnv(env), invite.inviterId, invite.inviteCode).catch(() => undefined);
       return { status: 200, body: { ok: true } };
     }
     if (request.method === 'POST' && url.pathname === '/api/social/pvp/cancel') {
       const inviteId = text(body.inviteId);
       if (!inviteId) return { status: 400, body: { error: 'invite_id_required' } };
       const invite = await cancelSocialPvpInviteByInviter(env.DB, principal.userId, inviteId);
-      await cancelFriendlyPvpLobbyForAccount(env, principal.userId, invite.inviteCode).catch(() => undefined);
+      await cancelFriendlyPvpLobbyForAccount(friendlyPvpEnv(env), principal.userId, invite.inviteCode).catch(() => undefined);
       return { status: 200, body: { ok: true } };
     }
     if (request.method === 'POST' && url.pathname === '/api/social/pvp-2v2/invite') {
