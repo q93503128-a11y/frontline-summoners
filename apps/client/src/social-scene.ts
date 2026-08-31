@@ -174,23 +174,31 @@ export class SocialScene extends Phaser.Scene {
   private renderRequests(): void {
     if (!this.summary || !this.contentLayer) return;
     const incoming = this.summary.incomingRequests;
+    const outgoing = this.summary.outgoingRequests;
     const invites = this.summary.coopInvites;
-    this.contentLayer.add(addText(this, 100, 294, `받은 친구 요청 ${incoming.length} · 협동 초대 ${invites.length}`, 16, '#d4c28e'));
-    const merged: readonly ({ kind: 'REQUEST'; profile: SocialPublicProfile } | { kind: 'INVITE'; inviteId: string; profile: SocialPublicProfile; stageId: string })[] = [
-      ...incoming.map((profile) => ({ kind: 'REQUEST' as const, profile })),
+    this.contentLayer.add(addText(this, 100, 294, `받은 요청 ${incoming.length} · 보낸 요청 ${outgoing.length} · 협동 초대 ${invites.length}`, 16, '#d4c28e'));
+    const merged: readonly (
+      | { kind: 'INCOMING_REQUEST'; profile: SocialPublicProfile }
+      | { kind: 'OUTGOING_REQUEST'; profile: SocialPublicProfile }
+      | { kind: 'INVITE'; inviteId: string; profile: SocialPublicProfile; stageId: string }
+    )[] = [
+      ...incoming.map((profile) => ({ kind: 'INCOMING_REQUEST' as const, profile })),
+      ...outgoing.map((profile) => ({ kind: 'OUTGOING_REQUEST' as const, profile })),
       ...invites.map((invite) => ({ kind: 'INVITE' as const, inviteId: invite.inviteId, profile: invite.inviter, stageId: invite.stageId })),
     ];
     const page = this.pageSlice(merged);
     if (page.items.length === 0) {
-      this.contentLayer.add(addText(this, INTERNAL_WIDTH / 2, 450, '대기 중인 요청이나 초대가 없습니다.', 23, '#abb5c2', 'center').setOrigin(0.5));
+      this.contentLayer.add(addText(this, INTERNAL_WIDTH / 2, 450, '대기 중인 친구 요청이나 협동 초대가 없습니다.', 23, '#abb5c2', 'center').setOrigin(0.5));
       return;
     }
     page.items.forEach((entry, index) => {
-      if (entry.kind === 'REQUEST') {
-        this.renderProfileRow(entry.profile, 355 + index * 92, '친구 요청', [
+      if (entry.kind === 'INCOMING_REQUEST') {
+        this.renderProfileRow(entry.profile, 355 + index * 92, '받은 친구 요청', [
           { label: '수락', accent: 0x5f8f75, run: () => { void this.runAndRefresh(() => acceptFriendRequest(entry.profile.friendCode), '친구 요청을 수락했습니다.'); } },
           { label: '차단', accent: 0x8d5f64, run: () => { void this.runAndRefresh(() => blockSocialUser(entry.profile.friendCode), '요청자를 차단했습니다.'); } },
         ]);
+      } else if (entry.kind === 'OUTGOING_REQUEST') {
+        this.renderProfileRow(entry.profile, 355 + index * 92, '보낸 친구 요청 · 수락 대기', []);
       } else {
         const stageName = (() => { try { return getStage(entry.stageId).name; } catch { return entry.stageId; } })();
         this.renderProfileRow(entry.profile, 355 + index * 92, `협동 초대 · ${stageName}`, [
