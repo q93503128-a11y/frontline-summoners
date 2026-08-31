@@ -12,9 +12,19 @@ import {
   loadAuthenticatedAccountProfile,
   mutateAuthenticatedAccountProfile,
 } from './account-profile-network.ts';
+import {
+  GUEST_REPLACE_CONFIRMATION,
+  captureGuestMigrationEnvelope,
+  commitAuthenticatedGuestMigration,
+  previewAuthenticatedGuestMigration,
+  rollbackAuthenticatedGuestMigration,
+  type AccountGuestMigrationPreviewClient,
+  type AccountProgressSummaryClient,
+  type GuestMigrationEnvelopeClient,
+} from './account-guest-migration-network.ts';
 import { loadGuestAchievementProfile } from './achievement-profile.ts';
 import { fetchGoogleAuthConfig, loginWithGoogleCredential } from './google-login.ts';
-import { loadGuestProgress } from './save.ts';
+import { loadGuestProgress, type GuestProgress } from './save.ts';
 import { addButton, addText, COLORS, drawBackdrop } from './scene-ui';
 import { isCompactMobileViewport } from './viewport';
 
@@ -38,6 +48,29 @@ let googleScriptPromise: Promise<void> | null = null;
 function newRequestId(): string {
   if (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function') return crypto.randomUUID();
   return `guest-profile-${Date.now()}-${Math.random().toString(36).slice(2)}`;
+}
+
+function hasMeaningfulGuestProgress(progress: GuestProgress): boolean {
+  if (progress.clearedStageIds.length > 0 || progress.specialClearedStageIds.length > 0) return true;
+  if ((progress.ownedRecruitmentCharacterIds?.length ?? 0) > 0 || (progress.discoveredEnemyIds?.length ?? 0) > 0) return true;
+  if ((progress.recordModeProgress?.endlessBestTimeMs ?? 0) > 0 || (progress.recordModeProgress?.bossRushBestDefeated ?? 0) > 0) return true;
+  for (const entry of Object.values(progress.characterProgressById ?? {})) {
+    if (entry.level > 1 || entry.plusLevel > 0 || entry.unlockedFormIds.length > 1) return true;
+  }
+  for (const ledger of Object.values(progress.resourceLedgerById ?? {})) {
+    if ((ledger?.earned ?? 0) > (ledger?.spent ?? 0)) return true;
+  }
+  return false;
+}
+
+function summaryText(label: string, summary: AccountProgressSummaryClient): string {
+  const highest = summary.highestMainStageId ? ` · 최고 ${summary.highestMainStageId}` : '';
+  const resource = Object.entries(summary.resourceBalances)
+    .filter(([, value]) => value > 0)
+    .slice(0, 3)
+    .map(([id, value]) => `${id} ${value}`)
+    .join(', ');
+  return `${label}: MAIN ${summary.mainClearCount}${highest} · SPECIAL ${summary.specialClearCount} · 캐릭터 ${summary.ownedCharacterCount}${resource ? ` · ${resource}` : ''}`;
 }
 
 function ensureGoogleIdentityScript(): Promise<void> {
@@ -89,6 +122,10 @@ export class AccountScene extends Phaser.Scene {
   private googleHost: HTMLDivElement | null = null;
   private unsubscribeState: (() => void) | null = null;
   private destroyed = false;
+  private migrationEnvelope: GuestMigrationEnvelopeClient | null = null;
+  private migrationPreview: AccountGuestMigrationPreviewClient | null = null;
+  private replacementArmed = false;
+  private lastMigrationId: string | null = null;
 
   constructor() { super('account'); }
 
@@ -99,17 +136,22 @@ export class AccountScene extends Phaser.Scene {
     addText(this, 62, 46, '계 정', compact ? 48 : 44, COLORS.cream);
     addText(this, 64, 104, '로그인 계정은 서버 저장이 정본입니다.', compact ? 22 : 19, COLORS.muted);
 
-    this.add.rectangle(INTERNAL_WIDTH / 2, 305, compact ? 850 : 760, 300, 0x202735, 0.98).setStrokeStyle(3, 0x657086);
-    this.stateText = addText(this, INTERNAL_WIDTH / 2, 200, '', compact ? 32 : 30, '#ffffff', 'center').setOrigin(0.5);
-    this.detailText = addText(this, INTERNAL_WIDTH / 2, 250, '', compact ? 21 : 18, COLORS.muted, 'center').setOrigin(0.5);
-    this.messageText = addText(this, INTERNAL_WIDTH / 2, 425, '계정 상태 확인 중…', compact ? 21 : 18, COLORS.muted, 'center').setOrigin(0.5);
+    this.add.rectangle(INTERNAL_WIDTH / 2, 285, compact ? 980 : 900, 330, 0x202735, 0.98).setStrokeStyle(3, 0x657086);
+    this.stateText = addText(this, INTERNAL_WIDTH / 2, 175, '', compact ? 32 : 30, '#ffffff', 'center').setOrigin(0.5);
+    this.detailText = addText(this, INTERNAL_WIDTH / 2, 225, '', compact ? 21 : 18, COLORS.muted, 'center').setOrigin(0.5);
+    this.messageText = addText(this, INTERNAL_WIDTH / 2, 360, '계정 상태 확인 중…', compact ? 18 : 16, COLORS.muted, 'center')
+      .setOrigin(0.5)
+      .setWordWrapWidth(compact ? 900 : 820);
 
-    addButton(this, INTERNAL_WIDTH / 2, 510, 330, compact ? 82 : 58, '게스트 프로필 가져오기', () => void this.importGuestProfilePreferences(), 0x6b7194);
-    addText(this, INTERNAL_WIDTH / 2, 552, '장착 취향만 가져오며 업적/장식 소유권은 서버가 다시 검증합니다.', compact ? 17 : 15, COLORS.muted, 'center').setOrigin(0.5);
+    addButton(this, 350, 495, 240, compact ? 78 : 54, '게스트 진행 비교', () => void this.prepareMigrationPreview(false), 0x647a98);
+    addButton(this, 680, 495, 260, compact ? 78 : 54, '게스트 진행 적용', () => void this.applyGuestMigration(), 0x6f835e);
+    addButton(this, 1015, 495, 250, compact ? 78 : 54, '취소 · 서버 유지', () => this.keepServerProgress(), 0x6d6672);
+    addButton(this, 500, 565, 270, compact ? 78 : 54, '직전 이전 되돌리기', () => void this.rollbackGuestMigration(), 0x8a6262);
+    addButton(this, 855, 565, 300, compact ? 78 : 54, '장식 취향만 가져오기', () => void this.importGuestProfilePreferences(), 0x6b7194);
 
-    addButton(this, 180, INTERNAL_HEIGHT - 72, 220, compact ? 82 : 58, '메 인', () => this.scene.start('main-menu'), 0x586275);
-    addButton(this, INTERNAL_WIDTH / 2, INTERNAL_HEIGHT - 72, 250, compact ? 82 : 58, '서버 새로고침', () => void this.refresh(), 0x5f8fb8);
-    addButton(this, INTERNAL_WIDTH - 180, INTERNAL_HEIGHT - 72, 220, compact ? 82 : 58, '로그아웃', () => void this.logout(), 0x8c5f62);
+    addButton(this, 180, INTERNAL_HEIGHT - 58, 220, compact ? 76 : 52, '메 인', () => this.scene.start('main-menu'), 0x586275);
+    addButton(this, INTERNAL_WIDTH / 2, INTERNAL_HEIGHT - 58, 250, compact ? 76 : 52, '서버 새로고침', () => void this.refresh(), 0x5f8fb8);
+    addButton(this, INTERNAL_WIDTH - 180, INTERNAL_HEIGHT - 58, 220, compact ? 76 : 52, '로그아웃', () => void this.logout(), 0x8c5f62);
 
     this.unsubscribeState = subscribeAccountClientState((state) => this.renderState(state));
     this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => this.cleanup());
@@ -122,6 +164,7 @@ export class AccountScene extends Phaser.Scene {
       await restoreAuthenticatedAccountSession();
       if (this.destroyed) return;
       await this.setupGoogleLogin();
+      if (getAccountClientState().kind === 'AUTHENTICATED_ONLINE') await this.prepareMigrationPreview(true);
     } catch (error) {
       if (!this.destroyed) this.setMessage(error instanceof Error ? error.message : '계정 초기화에 실패했습니다.', COLORS.red);
     }
@@ -190,10 +233,90 @@ export class AccountScene extends Phaser.Scene {
     try {
       await loginWithGoogleCredential(response.credential);
       if (this.destroyed) return;
-      this.setMessage('로그인 완료 · 서버 계정 저장을 불러왔습니다.', COLORS.green);
       this.removeGoogleHost();
+      await this.prepareMigrationPreview(true);
     } catch (error) {
       if (!this.destroyed) this.setMessage(error instanceof Error ? error.message : 'Google 로그인에 실패했습니다.', COLORS.red);
+    }
+  }
+
+  private async prepareMigrationPreview(automatic: boolean): Promise<void> {
+    if (getAccountClientState().kind !== 'AUTHENTICATED_ONLINE') {
+      if (!automatic) this.setMessage('게스트 진행 이전은 온라인 로그인 상태에서만 가능합니다.', COLORS.gold);
+      return;
+    }
+    const guestProgress = await loadGuestProgress();
+    if (!hasMeaningfulGuestProgress(guestProgress)) {
+      this.migrationEnvelope = null;
+      this.migrationPreview = null;
+      this.replacementArmed = false;
+      if (!automatic) this.setMessage('이전할 게스트 진행이 없습니다.', COLORS.muted);
+      else this.setMessage('로그인 완료 · 서버 계정 저장을 불러왔습니다.', COLORS.green);
+      return;
+    }
+    const guestProfile = loadGuestAchievementProfile(guestProgress);
+    const envelope = captureGuestMigrationEnvelope(guestProgress, guestProfile.profileLoadout);
+    const preview = await previewAuthenticatedGuestMigration(envelope);
+    if (this.destroyed) return;
+    this.migrationEnvelope = envelope;
+    this.migrationPreview = preview;
+    this.replacementArmed = false;
+    const guidance = preview.serverEmpty
+      ? '서버 계정이 비어 있습니다. 게스트 진행 적용을 누르면 이전합니다.'
+      : '서버에도 진행이 있습니다. 자동 합치기하지 않습니다. 교체하려면 게스트 진행 적용을 두 번 눌러 확인하세요.';
+    this.setMessage(`${summaryText('게스트', preview.guest)}\n${summaryText('서버', preview.server)}\n${guidance}`, preview.serverEmpty ? COLORS.green : COLORS.gold);
+  }
+
+  private async applyGuestMigration(): Promise<void> {
+    if (!this.migrationEnvelope || !this.migrationPreview) {
+      await this.prepareMigrationPreview(false);
+      if (!this.migrationEnvelope || !this.migrationPreview) return;
+    }
+    const preview = this.migrationPreview;
+    if (!preview.serverEmpty && !this.replacementArmed) {
+      this.replacementArmed = true;
+      this.setMessage(`${summaryText('게스트', preview.guest)}\n${summaryText('서버', preview.server)}\n주의: 다음 '게스트 진행 적용' 클릭은 서버 게임 진행/재화/보유를 게스트 snapshot으로 교체합니다. 친구·PvP 계정 식별 데이터는 대상이 아닙니다.`, COLORS.red);
+      return;
+    }
+    this.setMessage('게스트 진행을 서버 transaction으로 이전 중…', COLORS.muted);
+    try {
+      const result = await commitAuthenticatedGuestMigration(
+        this.migrationEnvelope,
+        preview,
+        preview.serverEmpty ? 'IMPORT_IF_EMPTY' : 'REPLACE_EXISTING',
+        preview.serverEmpty ? undefined : GUEST_REPLACE_CONFIRMATION,
+      );
+      if (this.destroyed) return;
+      this.lastMigrationId = result.migrationId;
+      this.migrationEnvelope = null;
+      this.migrationPreview = null;
+      this.replacementArmed = false;
+      this.setMessage('게스트 진행 이전 완료 · 진행/재화/캐릭터/기록과 프로필 장식 판정이 서버 정본으로 전환되었습니다. 직후 상태라면 되돌리기도 가능합니다.', COLORS.green);
+    } catch (error) {
+      if (!this.destroyed) this.setMessage(error instanceof Error ? error.message : '게스트 진행 이전에 실패했습니다.', COLORS.red);
+    }
+  }
+
+  private keepServerProgress(): void {
+    this.migrationEnvelope = null;
+    this.migrationPreview = null;
+    this.replacementArmed = false;
+    this.setMessage('서버 진행을 유지합니다. 게스트 진행은 이 기기에 그대로 남아 있으며 자동 병합하지 않습니다.', COLORS.green);
+  }
+
+  private async rollbackGuestMigration(): Promise<void> {
+    if (!this.lastMigrationId) {
+      this.setMessage('이 화면에서 방금 완료한 되돌릴 이전 기록이 없습니다.', COLORS.muted);
+      return;
+    }
+    this.setMessage('직전 게스트 진행 이전을 되돌리는 중…', COLORS.muted);
+    try {
+      await rollbackAuthenticatedGuestMigration(this.lastMigrationId);
+      if (this.destroyed) return;
+      this.lastMigrationId = null;
+      this.setMessage('직전 이전을 되돌렸습니다. 서버 진행과 계정 프로필이 이전 snapshot으로 복구되었습니다.', COLORS.green);
+    } catch (error) {
+      if (!this.destroyed) this.setMessage(error instanceof Error ? error.message : '이전을 되돌릴 수 없습니다. 이전 후 다른 서버 변경이 있었을 수 있습니다.', COLORS.red);
     }
   }
 
@@ -238,6 +361,10 @@ export class AccountScene extends Phaser.Scene {
     }
     const result = await logoutAuthenticatedAccount();
     if (this.destroyed) return;
+    this.migrationEnvelope = null;
+    this.migrationPreview = null;
+    this.replacementArmed = false;
+    this.lastMigrationId = null;
     this.setMessage(result.serverRevoked ? '로그아웃했습니다.' : '로컬 로그아웃 완료 · 서버 revoke 확인은 실패했습니다.', result.serverRevoked ? COLORS.green : COLORS.gold);
     await this.setupGoogleLogin().catch((error) => this.setMessage(error instanceof Error ? error.message : 'Google 로그인 준비에 실패했습니다.', COLORS.red));
   }
@@ -263,5 +390,7 @@ export class AccountScene extends Phaser.Scene {
 
 export const __accountSceneTestOnly = {
   stateSummary,
+  hasMeaningfulGuestProgress,
+  summaryText,
   googleScriptSrc: GOOGLE_GSI_SCRIPT_SRC,
 };
