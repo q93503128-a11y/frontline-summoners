@@ -19,6 +19,7 @@ import {
   grantPvpFirstReachRewards,
   type PvpFirstReachGrant,
 } from './pvp-reward-authority.ts';
+import { recordRecentCoopPlayers } from './social-authority.ts';
 
 function seconds(ms: number): number {
   return Math.floor(ms / 1000);
@@ -99,6 +100,7 @@ async function completeCasual1v1(
   ]);
   if (writes.some((write) => (write.meta.changes ?? 0) !== 1)) throw new Error('pvp_casual_result_conflict');
   await db.prepare(`DELETE FROM pvp_matchmaking_queue WHERE match_id = ?1`).bind(matchId).run();
+  await recordRecentCoopPlayers(db, a.user_id, b.user_id, matchId, 'pvp_casual_1v1');
   return { matchId, result, modeId: match.mode_id, rated: false };
 }
 
@@ -111,6 +113,7 @@ export async function completeTrustedPvp1v1Result(
   const match = await loadPvpMatch(db, matchId);
   if (!match) throw new Error('pvp_match_not_found');
   if (match.mode_id === 'pvp_ranked_1v1') {
+    const wasAlreadyCompleted = match.state === 'COMPLETED';
     const settled = await completeRankedPvpMatch(db, matchId, result, nowMs);
     const participants = await loadPvpMatchParticipants(db, matchId);
     const a = participants.find((entry) => entry.team_id === 'A' && entry.seat_index === 0);
@@ -126,6 +129,7 @@ export async function completeTrustedPvp1v1Result(
       recordAccountPvpAchievementTier(db, a.user_id, achievementTier(settled.a.displayedTier), nowMs),
       recordAccountPvpAchievementTier(db, b.user_id, achievementTier(settled.b.displayedTier), nowMs),
     ]);
+    if (!wasAlreadyCompleted) await recordRecentCoopPlayers(db, a.user_id, b.user_id, matchId, 'pvp_ranked_1v1');
     return {
       matchId,
       result: settled.result,
