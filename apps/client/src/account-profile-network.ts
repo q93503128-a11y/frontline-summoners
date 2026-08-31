@@ -25,6 +25,7 @@ const PROFILE_CACHE_KEY = 'frontline.account.profileReadCache.v1';
 const SESSION_TOKEN_PATTERN = /^[0-9a-f]{64}$/i;
 
 let currentProfile: AccountRemoteProfile | null = null;
+let currentProfileSessionFingerprint: string | null = null;
 
 type CachedProfile = {
   readonly sessionFingerprint: string;
@@ -52,6 +53,12 @@ function loadSessionToken(): string | null {
 async function sessionFingerprint(token: string): Promise<string> {
   const digest = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(token));
   return Array.from(new Uint8Array(digest), (value) => value.toString(16).padStart(2, '0')).join('');
+}
+
+function setCurrentProfile(remote: AccountRemoteProfile | null, fingerprint: string | null): AccountRemoteProfile | null {
+  currentProfile = remote;
+  currentProfileSessionFingerprint = remote ? fingerprint : null;
+  return remote;
 }
 
 export function parseAccountRemoteProfile(value: unknown): AccountRemoteProfile | null {
@@ -99,34 +106,28 @@ async function requestProfile(token: string, init?: RequestInit): Promise<Respon
 
 export async function loadAuthenticatedAccountProfile(): Promise<AccountRemoteProfile | null> {
   const token = loadSessionToken();
-  if (!token) {
-    currentProfile = null;
-    return null;
-  }
+  if (!token) return setCurrentProfile(null, null);
+  const fingerprint = await sessionFingerprint(token);
+  if (currentProfileSessionFingerprint !== fingerprint) setCurrentProfile(null, null);
   const state = getAccountClientState();
   if (state.kind === 'AUTHENTICATED_OFFLINE_CACHE') {
-    currentProfile = await loadCache(token);
-    return currentProfile;
+    return setCurrentProfile(await loadCache(token), fingerprint);
   }
-  if (state.kind === 'GUEST_LOCAL') {
-    currentProfile = null;
-    return null;
-  }
+  if (state.kind === 'GUEST_LOCAL') return setCurrentProfile(null, null);
   try {
     const response = await requestProfile(token);
     if (!response.ok) {
-      if (response.status === 401) return null;
+      if (response.status === 401) return setCurrentProfile(null, null);
       throw new Error(`account profile read failed:${response.status}`);
     }
     const payload: unknown = await response.json();
     const remote = parseAccountRemoteProfile(payload);
     if (!remote) throw new Error('account profile response shape is invalid');
-    currentProfile = remote;
+    setCurrentProfile(remote, fingerprint);
     await saveCache(token, remote);
     return remote;
   } catch {
-    currentProfile = await loadCache(token);
-    return currentProfile;
+    return setCurrentProfile(await loadCache(token), fingerprint);
   }
 }
 
@@ -140,7 +141,10 @@ export async function mutateAuthenticatedAccountProfile(request: AccountProfileL
   const token = loadSessionToken();
   if (!token) throw new Error('authenticated account session is not available');
   if (getAccountClientState().kind !== 'AUTHENTICATED_ONLINE') throw new Error('account profile mutation requires AUTHENTICATED_ONLINE state');
-  const current = currentProfile ?? await loadAuthenticatedAccountProfile();
+  const fingerprint = await sessionFingerprint(token);
+  const current = currentProfile && currentProfileSessionFingerprint === fingerprint
+    ? currentProfile
+    : await loadAuthenticatedAccountProfile();
   if (!current) throw new Error('authoritative account profile is not available');
   const response = await requestProfile(token, {
     method: 'POST',
@@ -150,20 +154,20 @@ export async function mutateAuthenticatedAccountProfile(request: AccountProfileL
   if (!response.ok) {
     if (response.status === 409 && isRecord(payload) && payload.error === 'revision_conflict') {
       const revision = nonNegativeInteger(payload.currentRevision);
-      currentProfile = await loadAuthenticatedAccountProfile();
+      await loadAuthenticatedAccountProfile();
       throw new AccountProfileRevisionConflictError(revision);
     }
     throw new Error(`account profile mutation failed:${response.status}`);
   }
   const parsed = parseMutationResponse(payload);
   if (!parsed) throw new Error('account profile mutation response shape is invalid');
-  currentProfile = parsed;
+  setCurrentProfile(parsed, fingerprint);
   await saveCache(token, parsed);
   return parsed;
 }
 
 export function clearAccountProfileNetworkState(): void {
-  currentProfile = null;
+  setCurrentProfile(null, null);
 }
 
 export const __accountProfileNetworkTestOnly = {
