@@ -13,6 +13,7 @@ import { RecruitmentScene } from './recruitment-scene';
 import { BootScene as BaseBootScene, MainMenuScene as BaseMainMenuScene } from './navigation-scenes';
 import { ProfileScene } from './profile-scene';
 import { PublicCoopLobbyScene, PublicCoopMatchmakingScene } from './public-coop-scenes';
+import { PvpHubScene, PvpMatchmakingScene, PvpMatchScene } from './pvp-scenes';
 import { RecordBattleScene } from './record-battle-scene';
 import { RecordHubScene } from './record-hub-scene';
 import { RecordResultScene } from './record-result-scene';
@@ -37,10 +38,11 @@ class MainMenuScene extends BaseMainMenuScene {
     super.create();
     const compact = isCompactMobileViewport();
     const h = compact ? 84 : 60;
-    addButton(this, 185, compact ? 540 : 542, 210, h, '프로필·업적', () => this.scene.start('profile'), 0x7b6a91);
-    addButton(this, 455, compact ? 540 : 542, 220, h, '2인 협동', () => this.scene.start('coop-lobby'), 0x5f7897);
-    addButton(this, 735, compact ? 540 : 542, 220, h, '친구·초대', () => this.scene.start('social'), 0x6b628f);
-    addButton(this, 1015, compact ? 540 : 542, 210, h, '계 정', () => this.scene.start('account'), 0x6f7f96);
+    addButton(this, 135, compact ? 540 : 542, 190, h, '프로필·업적', () => this.scene.start('profile'), 0x7b6a91);
+    addButton(this, 385, compact ? 540 : 542, 190, h, '2인 협동', () => this.scene.start('coop-lobby'), 0x5f7897);
+    addButton(this, 635, compact ? 540 : 542, 190, h, 'PvP 대전', () => this.scene.start('pvp-hub'), 0x85634f);
+    addButton(this, 885, compact ? 540 : 542, 190, h, '친구·초대', () => this.scene.start('social'), 0x6b628f);
+    addButton(this, 1135, compact ? 540 : 542, 190, h, '계 정', () => this.scene.start('account'), 0x6f7f96);
   }
 }
 
@@ -68,6 +70,9 @@ game.scene.add('friend-coop-lobby', FriendCoopLobbyScene, false);
 game.scene.add('friend-coop-battle', FriendCoopBattleScene, false);
 game.scene.add('public-coop-matchmaking', PublicCoopMatchmakingScene, false);
 game.scene.add('public-coop-lobby', PublicCoopLobbyScene, false);
+game.scene.add('pvp-hub', PvpHubScene, false);
+game.scene.add('pvp-matchmaking', PvpMatchmakingScene, false);
+game.scene.add('pvp-match', PvpMatchScene, false);
 game.scene.add('record-hub', RecordHubScene, false);
 game.scene.add('record-battle', RecordBattleScene, false);
 game.scene.add('record-result', RecordResultScene, false);
