@@ -176,7 +176,7 @@ POST가 받는 business input은:
 - factIds.
 - pvpBestTier.
 
-`factIds`와 PvP tier를 기록하는 함수는 server-internal hook으로만 존재하며 실제 친구/PvP/QUIRK authority가 연결될 때 호출한다.
+`factIds`와 PvP tier를 기록하는 함수는 server-internal hook으로만 존재한다. 현재 친구 협동 fact 두 종은 실제 authenticated co-op authority에서 이 hook을 호출하고, PvP/QUIRK는 아직 future source다.
 
 ## 8. profile mutation / idempotency
 
@@ -209,13 +209,9 @@ POST가 받는 business input은:
 - profile mutation pending 동안 연속 장착 입력 차단.
 - revision conflict/네트워크 실패 시 임의 자동 재실행하지 않음.
 
-## 10. 명시적 guest profile preference import
+## 10. guest profile preference import와 전체 migration의 분리
 
-계정 화면에 `게스트 프로필 가져오기`를 추가했다.
-
-이 기능은 **전체 guest save migration이 아니다**.
-
-온라인 로그인 계정에서 명시적으로 눌렀을 때 오직 guest의 현재 `profileLoadout` 선호만 서버 profile mutation으로 보낸다.
+계정 화면의 `게스트 프로필 가져오기`는 오직 guest의 현재 `profileLoadout` 취향만 명시적으로 가져오는 기능이다.
 
 전송하지 않는 것:
 
@@ -225,14 +221,17 @@ POST가 받는 business input은:
 - guest PvP tier.
 - guest progression/economy snapshot.
 
-서버는 가져온 loadout을 현재 account가 실제 소유한 캐릭터/장식에 대해 다시 normalize한다. 따라서 게스트에서 장착하던 장식이 account에서 미해금이면 적용되지 않는다.
+서버는 가져온 loadout을 현재 account가 실제 소유한 캐릭터/장식에 대해 다시 normalize한다.
 
-이는 `guest → populated account`를 자동 병합하지 않는 account save 원칙과 맞는다.
+별도로 **전체 guest progress v15 → account save v2 migration/conflict/rollback 경로도 현재 구현돼 있다.**
 
-아직 남은 별도 기능:
+- 빈 account는 explicit `IMPORT_IF_EMPTY`.
+- populated account는 자동 merge하지 않음.
+- populated account replacement는 2단 destructive confirmation.
+- account save + profile + migration archive를 같은 D1 batch에서 처리.
+- rollback/idempotency/revision 검증.
 
-- guest 전투 진행/재화/캐릭터 ownership 전체를 빈 account로 이전하는 transaction.
-- guest와 이미 진행된 server account가 동시에 있을 때 선택/충돌 UX.
+자세한 경계는 `GUEST_ACCOUNT_MIGRATION_IMPLEMENTATION_2026-08-31.md`를 따른다.
 
 ## 11. 플레이어 UI
 
@@ -273,29 +272,31 @@ manual reward mailbox/claim button은 만들지 않았다.
 
 경제 사람 QA 뒤 정확한 수량이 확정되면 server-authoritative reward mutation으로 추가해야 한다.
 
-## 13. 아직 미구현인 업적 event source
+## 13. authoritative 업적 event source 상태
 
-카탈로그/evaluator/profile authority가 있다는 것과 아래 실제 이벤트 권위가 있다는 것은 다르다.
+### 현재 연결됨
 
-남은 것:
+- account save 기반 MAIN/SPECIAL/GROWTH/CODEX/COOP clear/RECORD progress.
+- 친구와 첫 authenticated 협동 승리 → `coop_friend_first`.
+- 실제 AI handoff 뒤 동일 seat 재접속 승리 → `coop_reconnected_win`.
 
-- 친구와 첫 협동.
-- 재접속 후 승리.
+친구/재접속 fact는 Durable Object의 authenticated account-bound terminal settlement에서 server가 기록한다. public client 자기신고 route는 없다.
+
+### 아직 남음
+
 - PvP 첫 랭킹/친선 및 tier authority.
 - QUIRK 4종 battle fact source.
-- `codex_main_core_complete`의 최종 authoritative fact source가 필요하다면 해당 도감 정의와 함께 연결.
-
-현재 이 조건들은 false/default 상태를 유지하며 client 자기신고로 열 수 없다.
+- `codex_main_core_complete`에 별도 authoritative fact source가 실제 정의상 필요하다면 해당 도감 정의와 함께 연결.
 
 ## 14. production 잔여
 
 - exact resource reward 경제 검증.
-- 친구/협동/PvP/QUIRK trigger source 연결.
+- PvP/QUIRK trigger source 연결.
 - 완료 toast/card 연출.
 - cosmetic production art.
-- 프로필 공유/친구/랭킹 화면 연계.
+- public/shared profile 및 ranking surface.
+- 친구 profile presentation polish.
 - 모바일/PC viewport 및 실제 터치 QA.
-- 전체 guest progression → account migration/conflict UX.
 
 ## 15. 자동 검증 기준
 
@@ -316,13 +317,9 @@ manual reward mailbox/claim button은 만들지 않았다.
 - public API가 loadout 외 claim/fact/tier를 받지 않음.
 - account profile cache/live memory의 session fingerprint binding.
 - online edit / offline read-only UI wiring.
-- explicit guest import가 loadout만 전송함.
+- explicit guest profile import가 loadout만 전송함.
+- full guest migration이 profile preference import와 분리됨.
 - account profile mutation이 account save v2 revision을 변경하지 않음.
-- unresolved economy reward 미발행.
+- friend/reconnect achievement fact가 authenticated co-op server settlement에서 파생됨.
 
-최종 코드 기준:
-
-- `b6a3c7a640269cc59fe83e9e60dbca332ac78bff`
-- **CI #813 전체 green: typecheck / content schema / simulation / server / client / build**.
-
-자동 테스트 green만으로 UX와 경제를 `TESTED/LOCKED`로 승격하지 않는다.
+친구/co-op 구현 세부 검증은 `SOCIAL_FRIEND_COOP_IMPLEMENTATION_2026-08-31.md`를 함께 본다.
