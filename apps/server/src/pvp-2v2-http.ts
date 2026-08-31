@@ -10,6 +10,7 @@ import {
   tryCreatePublicPvpMatch,
   type PublicPvpMatchAssignment,
 } from './pvp-authority.ts';
+import { assertPvpPublicQueueAdmission } from './pvp-season-operations-authority.ts';
 import { voidTrustedPvpMatch } from './pvp-result-authority.ts';
 
 export interface Pvp2v2HttpEnv {
@@ -86,6 +87,7 @@ export async function resolvePvp2v2Http(request: Request, env: Pvp2v2HttpEnv, no
   if (!principal) return { status: 401, body: { error: 'authentication_required' } };
   try {
     if (request.method === 'POST' && url.pathname === '/api/pvp/2v2/matchmaking/join') {
+      await assertPvpPublicQueueAdmission(env.DB, nowMs);
       await getAccountPvpSeatAuthority(env.DB, principal.userId, 'pvp_casual_2v2', nowMs);
       const existing = await loadPvpQueueRow(env.DB, principal.userId);
       if (existing && existing.state !== 'QUEUED') return status(env, principal.userId, nowMs);
@@ -103,6 +105,11 @@ export async function resolvePvp2v2Http(request: Request, env: Pvp2v2HttpEnv, no
     return { status: 404, body: { error: 'not_found' } };
   } catch (error) {
     const message = error instanceof Error ? error.message : 'pvp_2v2_request_failed';
-    return { status: message.includes('required') || message.includes('locked') ? 403 : 400, body: { error: message } };
+    if (message.includes('pvp_public_queue_closed_for_season_settlement')) {
+      return { status: 503, body: { error: message } };
+    }
+    const forbidden = message.includes('required') || message.includes('locked');
+    const conflict = message.includes('mismatch') || message.includes('conflict');
+    return { status: forbidden ? 403 : conflict ? 409 : 400, body: { error: message } };
   }
 }
