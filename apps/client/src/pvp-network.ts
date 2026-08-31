@@ -51,6 +51,28 @@ export interface PvpLeaderboardEntry {
   readonly rank: number;
 }
 
+export interface PvpFirstReachGrantView {
+  readonly tierId: Exclude<PvpTierId, 'BRONZE'>;
+  readonly resources: Readonly<Record<string, number>>;
+  readonly cosmeticRewardIds: readonly string[];
+}
+
+export interface PvpSettlementView {
+  readonly matchId: string;
+  readonly result: 'A' | 'B' | 'DRAW';
+  readonly modeId: string;
+  readonly rated: boolean;
+  readonly ratings?: readonly {
+    readonly accountId: string;
+    readonly rating: PvpRatingView;
+  }[];
+  readonly firstReachRewards?: readonly {
+    readonly accountId: string;
+    readonly grants: readonly PvpFirstReachGrantView[];
+    readonly newlyGrantedCosmeticIds: readonly string[];
+  }[];
+}
+
 export interface PvpRoomSnapshot {
   readonly matchId: string;
   readonly modeId: PvpModeId;
@@ -102,13 +124,13 @@ export interface PvpBattleSnapshot {
 }
 
 export type PvpServerMessage =
-  | { readonly type: 'WELCOME'; readonly clientId: string; readonly seatId: PvpSeatId; readonly simTickRate: number; readonly room: PvpRoomSnapshot; readonly battle: PvpBattleSnapshot }
+  | { readonly type: 'WELCOME'; readonly clientId: string; readonly seatId: PvpSeatId; readonly accountId: string; readonly simTickRate: number; readonly room: PvpRoomSnapshot; readonly battle: PvpBattleSnapshot }
   | { readonly type: 'ROOM_STATE'; readonly room: PvpRoomSnapshot; readonly battle: PvpBattleSnapshot; readonly terminalResult?: 'A' | 'B' | 'DRAW' | null; readonly terminalReason?: string | null }
   | { readonly type: 'BATTLE_STARTED'; readonly firstInputTick: number; readonly simTickRate: number; readonly battle: PvpBattleSnapshot }
   | { readonly type: 'FRAME_COMMITTED'; readonly battle: PvpBattleSnapshot; readonly outcomes: readonly unknown[] }
   | { readonly type: 'BATTLE_FINISHED'; readonly result: 'A' | 'B' | 'DRAW'; readonly reason: string; readonly clearFrames: number; readonly battle: PvpBattleSnapshot }
   | { readonly type: 'BATTLE_VOID'; readonly reason: string }
-  | { readonly type: 'ACCOUNT_SETTLED'; readonly settlement: unknown }
+  | { readonly type: 'ACCOUNT_SETTLED'; readonly settlement: PvpSettlementView }
   | { readonly type: 'ACCOUNT_SETTLEMENT_ERROR'; readonly message: string }
   | { readonly type: 'INPUT_ACK'; readonly tick: number; readonly sequence: number }
   | { readonly type: 'PONG'; readonly committedTick: number; readonly simulationTick: number; readonly stateHash: string }
@@ -201,6 +223,7 @@ export class PvpSession {
   private deliberatelyClosed = false;
 
   seatId: PvpSeatId | null = null;
+  accountId: string | null = null;
   clientId: string | null = null;
   room: PvpRoomSnapshot | null = null;
   battle: PvpBattleSnapshot | null = null;
@@ -250,6 +273,7 @@ export class PvpSession {
     const message = decoded as unknown as PvpServerMessage;
     if (message.type === 'WELCOME') {
       this.seatId = message.seatId;
+      this.accountId = message.accountId;
       this.clientId = message.clientId;
       this.room = message.room;
       this.battle = message.battle;
