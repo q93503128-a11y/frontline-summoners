@@ -61,11 +61,17 @@ export interface PvpSeasonHonorClaimResult {
   readonly replayed: boolean;
   readonly honors: readonly PvpSeasonHonor[];
   readonly claimedAtMs: number;
+  readonly cosmeticIds: readonly string[];
+  readonly newlyGrantedCosmeticIds: readonly string[];
+  readonly profileRevision: number;
 }
 
 const SESSION_TOKEN_KEY = 'frontline.account.sessionToken.v1';
 const SESSION_TOKEN_PATTERN = /^[0-9a-f]{64}$/i;
 function isRecord(value: unknown): value is Record<string, unknown> { return typeof value === 'object' && value !== null && !Array.isArray(value); }
+function stringArray(value: unknown): readonly string[] | null {
+  return Array.isArray(value) && value.every((entry) => typeof entry === 'string') ? value as string[] : null;
+}
 function token(): string {
   if (getAccountClientState().kind !== 'AUTHENTICATED_ONLINE') throw new Error('시즌 정보는 온라인 로그인 상태에서 확인할 수 있습니다.');
   const value = typeof window === 'undefined' ? null : window.sessionStorage.getItem(SESSION_TOKEN_KEY);
@@ -102,7 +108,7 @@ export async function claimPvpSeasonHonors(seasonId: string): Promise<PvpSeasonH
     method: 'POST',
     body: JSON.stringify({ seasonId }),
   });
-  if (!isRecord(payload) || payload.seasonId !== seasonId || typeof payload.replayed !== 'boolean' || !Array.isArray(payload.honors) || typeof payload.claimedAtMs !== 'number') {
+  if (!isRecord(payload) || payload.seasonId !== seasonId || typeof payload.replayed !== 'boolean' || !Array.isArray(payload.honors) || typeof payload.claimedAtMs !== 'number' || stringArray(payload.cosmeticIds) === null || stringArray(payload.newlyGrantedCosmeticIds) === null || typeof payload.profileRevision !== 'number') {
     throw new Error('PvP 시즌 명예 보상 응답 형식이 올바르지 않습니다.');
   }
   return payload as unknown as PvpSeasonHonorClaimResult;
