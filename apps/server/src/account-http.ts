@@ -1,4 +1,5 @@
 import { BASE_WEAPON_IDS, type BaseWeaponId } from '@frontline/sim/playable';
+import type { ProfileLoadout } from '@frontline/sim/achievement-profile';
 import { initializeAccountSave } from './account-save-authority.ts';
 import {
   applyAccountMetaProgression,
@@ -9,6 +10,11 @@ import {
   type AccountDuplicatePolicy,
   type AccountRecruitmentMutationInput,
 } from './account-mutation-authority.ts';
+import {
+  applyAccountProfileLoadout,
+  initializeAccountProfile,
+  type AccountProfileMutationInput,
+} from './account-profile-authority.ts';
 import {
   applyAccountSweep,
   type AccountSweepMutationInput,
@@ -38,6 +44,7 @@ class AccountRequestError extends Error {}
 const ACCOUNT_PATHS = new Set([
   '/api/account',
   '/api/account/meta',
+  '/api/account/profile',
   '/api/account/recruitment',
   '/api/account/sweep',
   '/api/account/logout',
@@ -61,6 +68,10 @@ function string(value: unknown, name: string, max = 128): string {
   return trimmed;
 }
 
+function optionalString(value: unknown, name: string, max = 128): string | undefined {
+  return value === undefined ? undefined : string(value, name, max);
+}
+
 function integer(value: unknown, name: string, min: number, max: number): number {
   if (!Number.isInteger(value) || (value as number) < min || (value as number) > max) {
     throw new AccountRequestError(`${name} must be an integer in ${min}..${max}`);
@@ -72,6 +83,11 @@ function stringArray(value: unknown, name: string, maxLength: number): readonly 
   if (!Array.isArray(value) || value.length < 1 || value.length > maxLength) {
     throw new AccountRequestError(`${name} must contain 1..${maxLength} strings`);
   }
+  return value.map((entry, index) => string(entry, `${name}[${index}]`));
+}
+
+function optionalStringArray(value: unknown, name: string, maxLength: number): readonly string[] {
+  if (!Array.isArray(value) || value.length > maxLength) throw new AccountRequestError(`${name} must contain 0..${maxLength} strings`);
   return value.map((entry, index) => string(entry, `${name}[${index}]`));
 }
 
@@ -113,6 +129,32 @@ function parseMetaMutation(value: unknown): AccountMetaMutationInput {
     return { ...common, action, baseWeaponId: baseWeaponId as BaseWeaponId };
   }
   throw new AccountRequestError(`unknown account meta action:${action}`);
+}
+
+function parseProfileLoadout(value: unknown): ProfileLoadout {
+  const raw = object(value);
+  const portraitCharacterId = optionalString(raw.portraitCharacterId, 'profileLoadout.portraitCharacterId');
+  const titleId = optionalString(raw.titleId, 'profileLoadout.titleId');
+  const frameId = string(raw.frameId, 'profileLoadout.frameId');
+  const bannerId = string(raw.bannerId, 'profileLoadout.bannerId');
+  const emblemId = string(raw.emblemId, 'profileLoadout.emblemId');
+  const badgeIds = optionalStringArray(raw.badgeIds, 'profileLoadout.badgeIds', 3);
+  return {
+    ...(portraitCharacterId === undefined ? {} : { portraitCharacterId }),
+    ...(titleId === undefined ? {} : { titleId }),
+    frameId,
+    bannerId,
+    emblemId,
+    badgeIds,
+  };
+}
+
+function parseProfileMutation(value: unknown): AccountProfileMutationInput {
+  const raw = object(value);
+  return {
+    ...commonMutationFields(raw),
+    profileLoadout: parseProfileLoadout(raw.profileLoadout),
+  };
 }
 
 function parseRecruitmentMutation(value: unknown): AccountRecruitmentMutationInput {
@@ -185,6 +227,28 @@ function successMutation(result: Awaited<ReturnType<typeof applyAccountMetaProgr
   };
 }
 
+function profileBody(record: Awaited<ReturnType<typeof initializeAccountProfile>>): Readonly<Record<string, unknown>> {
+  return {
+    revision: record.revision,
+    schemaVersion: record.snapshot.schemaVersion,
+    profile: record.snapshot,
+    evaluations: record.evaluations,
+    completedCount: record.completedCount,
+  };
+}
+
+function successProfileMutation(result: Awaited<ReturnType<typeof applyAccountProfileLoadout>>): AccountHttpResult {
+  if (!result.ok) return { status: 409, body: { error: 'revision_conflict', currentRevision: result.currentRevision } };
+  return {
+    status: 200,
+    body: {
+      replayed: result.replayed,
+      ...profileBody(result.record),
+      result: result.result,
+    },
+  };
+}
+
 function isServerStateFailure(message: string): boolean {
   return message.includes('stored account')
     || message.includes('committed without expected')
@@ -192,6 +256,7 @@ function isServerStateFailure(message: string): boolean {
     || message.includes('did not commit both rows')
     || message.includes('revision is behind mutation receipt')
     || message.includes('account save missing for mutation receipt')
+    || message.includes('account profile revision is behind mutation receipt')
     || message.includes('trusted battle start snapshot JSON is invalid')
     || message.includes('trusted battle result JSON is invalid')
     || message.startsWith('D1_');
@@ -243,6 +308,10 @@ export async function resolveAuthenticatedAccountHttp(
       };
     }
 
+    if (request.method === 'GET' && url.pathname === '/api/account/profile') {
+      return { status: 200, body: profileBody(await initializeAccountProfile(db, principal.userId, nowMs)) };
+    }
+
     if (request.method === 'POST' && url.pathname === '/api/account/logout') {
       await revokeAuthSession(db, principal);
       return { status: 200, body: { ok: true } };
@@ -250,6 +319,10 @@ export async function resolveAuthenticatedAccountHttp(
 
     if (request.method === 'POST' && url.pathname === '/api/account/meta') {
       return successMutation(await applyAccountMetaProgression(db, principal.userId, parseMetaMutation(await readBody(request)), nowMs));
+    }
+
+    if (request.method === 'POST' && url.pathname === '/api/account/profile') {
+      return successProfileMutation(await applyAccountProfileLoadout(db, principal.userId, parseProfileMutation(await readBody(request)), nowMs));
     }
 
     if (request.method === 'POST' && url.pathname === '/api/account/recruitment') {
@@ -290,7 +363,7 @@ export async function resolveAuthenticatedAccountHttp(
       };
     }
 
-    return { status: 405, body: { error: 'method_not_allowed' }, headers: { allow: url.pathname === '/api/account' ? 'GET' : 'POST' } };
+    return { status: 405, body: { error: 'method_not_allowed' }, headers: { allow: url.pathname === '/api/account' || url.pathname === '/api/account/profile' ? 'GET,POST' : 'POST' } };
   } catch (error) {
     return errorResult(error);
   }
@@ -298,6 +371,7 @@ export async function resolveAuthenticatedAccountHttp(
 
 export const __accountHttpTestOnly = {
   parseMetaMutation,
+  parseProfileMutation,
   parseRecruitmentMutation,
   parseSweepMutation,
   parseBattleStart,
