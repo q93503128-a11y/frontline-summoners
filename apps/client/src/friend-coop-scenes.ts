@@ -32,8 +32,8 @@ export class FriendCoopLobbyScene extends Phaser.Scene {
   private session: CoopSession | null = null;
   private contentLayer?: Phaser.GameObjects.Container;
   private statusText?: Phaser.GameObjects.Text;
-  private unsubscribeMessage?: () => void;
-  private unsubscribeConnection?: () => void;
+  private unsubscribeMessage: (() => void) | undefined;
+  private unsubscribeConnection: (() => void) | undefined;
 
   constructor() { super('friend-coop-lobby'); }
 
@@ -178,8 +178,8 @@ export class FriendCoopBattleScene extends Phaser.Scene {
   private connectionText?: Phaser.GameObjects.Text;
   private quickNotice?: Phaser.GameObjects.Text;
   private settlementText?: Phaser.GameObjects.Text;
-  private unsubscribeMessage?: () => void;
-  private unsubscribeConnection?: () => void;
+  private unsubscribeMessage: (() => void) | undefined;
+  private unsubscribeConnection: (() => void) | undefined;
   private resultShown = false;
   private accountSettled = false;
 
