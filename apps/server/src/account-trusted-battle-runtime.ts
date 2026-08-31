@@ -15,6 +15,17 @@ import {
   type PermanentRewardApplicableSlot,
 } from '@frontline/sim/meta-progression';
 import {
+  BOSS_RUSH_SEQUENCE,
+  ENDLESS_RECORD_WAVES,
+  type RecordModeId,
+} from '@frontline/sim/record-content';
+import {
+  createBossRushRecordBattle,
+  createEndlessRecordBattle,
+  type BossRushRecordState,
+  type EndlessRecordState,
+} from '@frontline/sim/record-playable';
+import {
   createPlayableBattle,
   getBaseWeaponDefinition,
   type EnemyArchetype,
@@ -207,6 +218,57 @@ export function createAccountTrustedBattle(stageId: string, snapshot: AccountSav
     supplyLevels: progression.supplyLevels,
     killSupplyMultiplierPermille: killSupplyMultiplierPermille(stage),
     baseWeapon: getBaseWeaponDefinition(snapshot.selectedBaseWeaponId),
+  });
+}
+
+export type AccountTrustedRecordState = EndlessRecordState | BossRushRecordState;
+
+export function createAccountTrustedRecordBattle(modeId: RecordModeId, snapshot: AccountSaveSnapshotV2): AccountTrustedRecordState {
+  const slots = buildAccountSlots(snapshot);
+  const baseWeapon = getBaseWeaponDefinition(snapshot.selectedBaseWeaponId);
+  if (modeId === 'record_endless_front') {
+    const progression = applyPermanentRewardBattleEffects({
+      ownedRewardIds: snapshot.permanentRewardIds,
+      startingSupply: 300,
+      playerBaseHp: 8000,
+      playerUnitCap: 50,
+      playerSlots: slots,
+      enemies: BASE_ENEMIES,
+    }, SERVER_PERMANENT_REWARDS);
+    return createEndlessRecordBattle({
+      mapLength: 2600,
+      playerBaseHp: progression.playerBaseHp,
+      startingSupply: progression.startingSupply,
+      playerSlots: progression.playerSlots,
+      enemies: progression.enemies,
+      enemyWaves: ENDLESS_RECORD_WAVES,
+      playerUnitCap: progression.playerUnitCap,
+      enemyUnitCap: 42,
+      supplyLevels: progression.supplyLevels,
+      baseWeapon,
+    });
+  }
+
+  const progression = applyPermanentRewardBattleEffects({
+    ownedRewardIds: snapshot.permanentRewardIds,
+    startingSupply: 350,
+    playerBaseHp: 9000,
+    playerUnitCap: 50,
+    playerSlots: slots,
+    enemies: BASE_ENEMIES,
+  }, SERVER_PERMANENT_REWARDS);
+  return createBossRushRecordBattle({
+    mapLength: 2850,
+    playerBaseHp: progression.playerBaseHp,
+    startingSupply: progression.startingSupply,
+    playerSlots: progression.playerSlots,
+    enemies: progression.enemies,
+    bossSequence: BOSS_RUSH_SEQUENCE,
+    firstBossDelayFrames: 90,
+    playerUnitCap: progression.playerUnitCap,
+    enemyUnitCap: 24,
+    supplyLevels: progression.supplyLevels,
+    baseWeapon,
   });
 }
 
