@@ -1,6 +1,11 @@
 PRAGMA foreign_keys = ON;
 
-CREATE TABLE IF NOT EXISTS pvp_ratings (
+-- 0001 created an early prototype table named pvp_ratings. Keep that history/data
+-- intact, but move it out of the canonical v1 namespace before creating the new
+-- revisioned season/ranking model below.
+ALTER TABLE pvp_ratings RENAME TO pvp_ratings_legacy;
+
+CREATE TABLE pvp_ratings (
   user_id TEXT PRIMARY KEY REFERENCES users(id) ON DELETE CASCADE,
   season_id TEXT NOT NULL DEFAULT 'preseason_v1',
   mmr INTEGER NOT NULL DEFAULT 1000 CHECK (mmr >= 0),
@@ -19,10 +24,10 @@ CREATE TABLE IF NOT EXISTS pvp_ratings (
   updated_at INTEGER NOT NULL
 );
 
-CREATE INDEX IF NOT EXISTS idx_pvp_ratings_season_mmr
+CREATE INDEX idx_pvp_ratings_season_mmr
   ON pvp_ratings(season_id, mmr DESC, ranked_wins DESC, updated_at ASC);
 
-CREATE TABLE IF NOT EXISTS pvp_matches (
+CREATE TABLE pvp_matches (
   match_id TEXT PRIMARY KEY,
   mode_id TEXT NOT NULL CHECK (mode_id IN (
     'pvp_casual_1v1','pvp_ranked_1v1','pvp_friendly_1v1','pvp_casual_2v2','pvp_friendly_2v2'
@@ -40,10 +45,10 @@ CREATE TABLE IF NOT EXISTS pvp_matches (
   )
 );
 
-CREATE INDEX IF NOT EXISTS idx_pvp_matches_season
+CREATE INDEX idx_pvp_matches_season
   ON pvp_matches(season_id, mode_id, completed_at DESC);
 
-CREATE TABLE IF NOT EXISTS pvp_match_participants (
+CREATE TABLE pvp_match_participants (
   match_id TEXT NOT NULL REFERENCES pvp_matches(match_id) ON DELETE CASCADE,
   user_id TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
   team_id TEXT NOT NULL CHECK (team_id IN ('A','B')),
@@ -54,10 +59,10 @@ CREATE TABLE IF NOT EXISTS pvp_match_participants (
   UNIQUE (match_id, team_id, seat_index)
 );
 
-CREATE INDEX IF NOT EXISTS idx_pvp_participants_user
+CREATE INDEX idx_pvp_participants_user
   ON pvp_match_participants(user_id, match_id);
 
-CREATE TABLE IF NOT EXISTS pvp_matchmaking_queue (
+CREATE TABLE pvp_matchmaking_queue (
   user_id TEXT PRIMARY KEY REFERENCES users(id) ON DELETE CASCADE,
   mode_id TEXT NOT NULL CHECK (mode_id IN ('pvp_casual_1v1','pvp_ranked_1v1','pvp_casual_2v2')),
   season_id TEXT NOT NULL,
@@ -76,9 +81,9 @@ CREATE TABLE IF NOT EXISTS pvp_matchmaking_queue (
   )
 );
 
-CREATE INDEX IF NOT EXISTS idx_pvp_queue_mode_mmr
+CREATE INDEX idx_pvp_queue_mode_mmr
   ON pvp_matchmaking_queue(mode_id, season_id, state, mmr_snapshot, queued_at)
   WHERE state = 'QUEUED';
-CREATE UNIQUE INDEX IF NOT EXISTS idx_pvp_queue_match_seat
+CREATE UNIQUE INDEX idx_pvp_queue_match_seat
   ON pvp_matchmaking_queue(match_id, team_id, seat_index)
   WHERE match_id IS NOT NULL;
