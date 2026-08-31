@@ -14,6 +14,7 @@
 - guest → account migration: `docs/content-wiki/systems/GUEST_ACCOUNT_MIGRATION_IMPLEMENTATION_2026-08-31.md`
 - achievement/profile: `docs/content-wiki/systems/ACHIEVEMENT_PROFILE_IMPLEMENTATION_2026-08-31.md`
 - social/friend co-op: `docs/content-wiki/systems/SOCIAL_FRIEND_COOP_IMPLEMENTATION_2026-08-31.md`
+- Record trusted proof: `docs/content-wiki/systems/RECORD_TRUSTED_PROOF_IMPLEMENTATION_2026-08-31.md`
 - sweep: `docs/content-wiki/systems/SWEEP_SAVE_V14_IMPLEMENTATION_2026-08-30.md`
 
 이 문서는 현재 실행 코드/콘텐츠의 구현 사실과 남은 큰 공백을 기록한다. 기획 정본을 대체하지 않는다. 과거 이행 문서의 Save v14 같은 표기는 해당 구현 시점 기록이며 현재 실행 guest progress schema는 **v15**다.
@@ -63,7 +64,6 @@
 - Record best/reward high-water.
 
 resource ledger:
-
 - `gold`
 - `evo_fragment`
 - `evo_core`
@@ -73,7 +73,6 @@ resource ledger:
 - `sweep_ticket`
 
 `earned/spent` monotonic ledger로 stale merge가 이미 소비한 재화를 되살리지 못하게 한다.
-
 v2~v15 migration 경로를 유지하며 과거 MAIN reward, periodic charge, selected weapon, record high-water를 현재 schema로 보정한다.
 
 ### guest profile meta
@@ -97,7 +96,6 @@ combat/economy save와 별도 local profile meta를 유지한다.
 `account_saves` D1 table에 account당 revisioned canonical snapshot 1개를 둔다.
 
 포함:
-
 - MAIN/SPECIAL progression.
 - NORMAL_CLEAR provenance.
 - first-clear receipt.
@@ -108,10 +106,9 @@ combat/economy save와 별도 local profile meta를 유지한다.
 - selected base weapon.
 - resource ledger.
 - periodic charge 4종.
-- record best/reward high-water.
+- Record best/reward high-water.
 
 strict validation:
-
 - unknown currency 거부.
 - `spent > earned` 거부.
 - malformed periodic charge 거부.
@@ -139,10 +136,6 @@ strict validation:
 
 **구현됨: `IMPLEMENTED_REVERSIBLE_ACCOUNT_MIGRATION`.**
 
-빈 account 이전과 populated account conflict UX가 실제 client/server 경로로 연결됐다.
-
-핵심:
-
 - login만으로 guest save 자동 overwrite 금지.
 - guest v15 → strict account save v2 mapping.
 - preview에서 guest/server 진행 비교.
@@ -151,14 +144,13 @@ strict validation:
 - populated account 교체는 2단 destructive confirmation.
 - source hash + current revision 검증.
 - account save + profile + migration archive를 D1 batch로 원자 처리.
-- 같은 migration id/input idempotent replay.
+- 동일 migration id/input idempotent replay.
 - migration 직전 account/profile snapshot archive.
 - 직후 다른 mutation이 없을 때 explicit rollback 가능.
 - rollback도 revision을 과거 숫자로 되돌리지 않고 새 revision으로 증가.
 - guest claimed cosmetic/fact/PvP tier를 server authority로 가져오지 않음.
 
-현재 제외/잔여:
-
+잔여:
 - guest `totalPulls` 통계 보존 surface.
 - 장기 migration archive retention/cleanup 정책.
 - 여러 기기 prompt/marker 사람 QA.
@@ -171,16 +163,17 @@ strict validation:
 client/server가 `@frontline/sim`에서 공유:
 
 - MAIN80 reward.
-- record milestone reward.
+- Record milestone reward.
 - recruitment/Base Lv/+Lv economy.
 - 일반/이벤트/상시 SPECIAL reward.
 - periodic SPECIAL first/charged/depleted reward와 charge resolver.
+- Record mode ID/unlock/wave/Boss Rush sequence.
 
-account mutation foundation:
+account mutation:
 
 - MAIN result.
 - SPECIAL result.
-- record result resolver.
+- Record result.
 - recruitment 1/10.
 - MAIN/SPECIAL sweep.
 - Base Lv.
@@ -190,6 +183,7 @@ account mutation foundation:
 - base weapon select.
 
 `account_mutation_receipts`와 revision CAS를 D1 batch에 묶어 동일 business input replay에서 재지급/재차감/재추첨/charge 재소비를 막는다.
+Record result는 trusted replay에서 얻은 기록 high-water, milestone reward, 실제 적 발견을 같은 account revision에 합친다.
 
 정확한 일부 Record/SPECIAL/achievement resource 수량은 사람 경제 검증 전 DESIGN_TARGET이다.
 
@@ -226,32 +220,44 @@ client account state:
 - revision conflict에서 원 mutation 자동 재실행 금지.
 - offline mutation journal 없음.
 
-### 잔여 account 제품화
-
+잔여 account 제품화:
 - email magic link/인증코드.
 - session renewal/rotation/revoke-all-devices 최종 정책.
 - account transfer/delete/reset/recovery UX.
 
 ---
 
-## 7. authenticated trusted solo battle
+## 7. authenticated trusted solo / Record battle
 
-MAIN/SPECIAL 일반 전장은 client 자기신고 result 대신 trusted replay 경로를 사용한다.
+MAIN/SPECIAL/Record의 authenticated solo 결과는 client 자기신고 결과 대신 trusted replay 경로를 사용한다.
 
-- start에서 server snapshot + target 고정.
+공통:
+- start에서 server snapshot + target + revision 고정.
 - client는 locally accepted deterministic command만 tick과 함께 기록.
-- complete는 battleId + command log만 전송.
-- server가 canonical runtime을 replay해 terminal winner/frame/hash/base HP 계산.
-- client forged winner/discovery/reward surface 없음.
+- complete는 `battleId + command log`만 전송.
+- client forged winner/discovery/reward/score 입력 surface 없음.
+- server canonical runtime replay.
 - completion proof 저장.
 - claim에서 stored proof로 account mutation 실행.
-- actual simulation encounter enemy만 discovery merge.
+- 실제 simulation encounter enemy만 discovery merge.
 - start/complete/claim replay/idempotency/expiry/active-run 경계.
-- authenticated solo client + `TrustedBattleResultScene` 연결.
 
-잔여:
+MAIN/SPECIAL:
+- server가 terminal winner/frame/hash/base HP를 계산.
+- 승리 proof만 clear/reward mutation.
+- 패배는 실제 발견 enemy만 저장.
 
-- **Record SPECIAL authenticated trusted proof/client 연결.**
+Record:
+- shared `@frontline/sim/record-content`의 동일 wave/boss 정본 사용.
+- start ticket `initialStateHash`와 local Record runtime hash 불일치 시 진행 거부.
+- Endless는 server가 player base 파괴 frame을 authoritative survival score로 계산.
+- Boss Rush는 server가 실제 boss death transition으로 defeated count/전체 완료를 계산.
+- Record는 패배해도 그 시점까지의 high-water를 저장.
+- Record high-water + milestone reward + encounter discovery를 동일 mutation/revision에 저장.
+- offline account cache는 Record 조회만 가능하고 새 기록 도전은 차단.
+- trusted 결과 처리 실패 시 guest save로 fallback하지 않고 동일 proof 재전송 UX 제공.
+
+현재 trusted replay에는 server CPU/abuse guard로 최대 30분 frame 제한이 있다. 이것은 디자인상 Record 상한으로 LOCKED된 값이 아니며 장기전 부하 QA 대상이다.
 
 ---
 
@@ -286,7 +292,6 @@ MAIN/SPECIAL 일반 전장은 client 자기신고 result 대신 trusted replay �
 - 43종 × 3 = 129 authored form.
 
 잔여:
-
 - 전투/경제 사람 플레이 수치 조정.
 - Growth/Recruitment/Deck/BaseWeapon 화면의 account-state UX 최종 QA.
 - production contact frame과 판정 일치 QA.
@@ -298,7 +303,6 @@ MAIN/SPECIAL 일반 전장은 client 자기신고 result 대신 trusted replay �
 ### 일반 SPECIAL61
 
 구현:
-
 - 제한전.
 - 주기 재화 18.
 - 상시 도전/보스 23.
@@ -312,23 +316,24 @@ MAIN/SPECIAL 일반 전장은 client 자기신고 result 대신 trusted replay �
 - guest battle/sweep와 account mutation이 shared resolver 사용.
 
 잔여:
-
 - production art/motion.
 - 사람 경제/난이도 QA 후 TESTED/LOCKED 승격.
 - event 전용 누적/profile reward 후속.
 
 ### Record SPECIAL
 
+구현:
 - Endless: MAIN3 완료 후, 1× SOLO_ONLY, base 파괴까지 생존, 새 정수 minute high-water reward.
 - Boss Rush: MAIN4 완료 후, 1× SOLO_ONLY, 9보스 순차, boss 사이 600F, 경제/cooldown/weapon 유지.
 - `record-hub → record-battle → record-result`.
-- guest 덱/level/+level/form/permanent reward/base weapon 사용.
+- guest는 guest 덱/성장/permanent reward/base weapon과 local durable high-water 사용.
+- authenticated account는 server snapshot 덱/성장/permanent reward/base weapon과 trusted start/replay/claim 사용.
+- account score/보상/도감은 server replay 결과만 저장.
 - 12분 entity-bound regression.
 
 잔여:
-
-- account authenticated trusted proof/client 연결.
 - 장기전 사람 QA / milestone 경제 조정.
+- 30분 이상 Record 정책/서버 부하 검증.
 - production art/motion/audio.
 
 ---
@@ -342,15 +347,13 @@ MAIN/SPECIAL 일반 전장은 client 자기신고 result 대신 trusted replay �
 - 보급낙하기: 지연 후 maxSupply 비례 보급.
 
 해금:
-
 - 전선포격기 기본.
 - 결계발진기 `main_02_010`.
 - 보급낙하기 `main_03_010`.
 
 solo/record/account에서 선택 weapon authority가 실제 simulation/mutation에 연결됐다.
 
-### co-op shared weapon
-
+co-op:
 - 팀 공유 1슬롯.
 - 양쪽 같은 unlocked weapon 합의 후 ready.
 - server가 양쪽 progression으로 재검증.
@@ -378,7 +381,6 @@ solo/record/account에서 선택 weapon authority가 실제 simulation/mutation�
 ### authenticated friend/social closure
 
 구현:
-
 - friend code + display name.
 - presence TTL/online 표시.
 - incoming/outgoing friend request.
@@ -398,16 +400,9 @@ solo/record/account에서 선택 weapon authority가 실제 simulation/mutation�
 - victory에서 각 account에 canonical MAIN/SPECIAL clear/reward/progression 저장.
 - victory/loss 모두 actual authoritative snapshot encounter enemy discovery 저장.
 - recent-player relation 저장.
-- `coop_friend_first` server achievement fact.
-- `coop_reconnected_win` server achievement fact.
-
-중요:
-
-- friend co-op loss는 clear/reward를 주지 않고 actual encounter discovery만 저장한다.
-- account co-op result는 client 자기신고 winner/enemy list를 받지 않는다.
+- `coop_friend_first` / `coop_reconnected_win` server achievement fact.
 
 잔여 online/co-op 제품화:
-
 - **공개 PvE 협동 matchmaking queue**.
 - reconnect grace/AI takeover 모바일·네트워크 soak와 최종 UX.
 - quick-message sound on/off option.
@@ -418,7 +413,6 @@ solo/record/account에서 선택 weapon authority가 실제 simulation/mutation�
 ## 12. 업적 / 프로필
 
 초기 achievement 50:
-
 - MAIN 8.
 - SPECIAL 8.
 - GROWTH 10.
@@ -429,7 +423,6 @@ solo/record/account에서 선택 weapon authority가 실제 simulation/mutation�
 - QUIRK 4.
 
 구현:
-
 - typed requirement + shared evaluator.
 - hidden QUIRK 미완료 mask.
 - account save 기반 server evaluation/auto-claim.
@@ -440,10 +433,7 @@ solo/record/account에서 선택 weapon authority가 실제 simulation/mutation�
 - friend first co-op fact source.
 - reconnect-after-handoff win fact source.
 
-전체 guest progression migration은 별도 구현으로 이미 닫혔으며 profile preference import와 자동 merge하지 않는다.
-
 잔여:
-
 - actual PvP match/tier source.
 - QUIRK battle fact source.
 - `codex_main_core_complete`에 추가 authoritative fact가 필요하다면 해당 정의와 함께 연결.
@@ -458,18 +448,17 @@ solo/record/account에서 선택 weapon authority가 실제 simulation/mutation�
 ## 13. 도감 / UI / production art/audio
 
 구현:
-
 - 미발견 enemy silhouette + ???.
 - 미획득 ally silhouette + ???.
 - 미획득 ally 편성 미표시.
 - guest actual encounter discovery.
-- authenticated solo trusted replay discovery.
+- authenticated MAIN/SPECIAL trusted replay discovery.
+- authenticated Record trusted replay discovery.
 - authenticated friend co-op actual authoritative encounter discovery.
 - stage/deck/growth/recruitment/codex/base-weapon/record/profile/account/social/co-op 기본 UI.
 - 일부 compact mobile/safe-area 대응.
 
 production 잔여:
-
 - character/enemy/boss 고유 production art.
 - F1/F2/F3 portrait.
 - character-specific contact-frame attack animation.
@@ -489,7 +478,6 @@ production 잔여:
 PvP는 아직 foundation 이전 단계다.
 
 남음:
-
 - 1v1 일반.
 - 1v1 랭킹.
 - 1v1 친선.
@@ -518,24 +506,21 @@ PvP는 아직 foundation 이전 단계다.
 - account meta progression: `2232d4b92a16b49f9bb78efcaf1051d9560902d2`, CI #746 green.
 - verified identity/session foundation: `5972fe8bcfeac8c0c9ac9ee48fbb9222f95fe428`, CI #755 green.
 - client account 3-state foundation: `71653a5df696a38010cb2235fbe24b087c7c2730`, CI #757 green.
-- Google ID token/login UI: `5a45fc2d2960a3ccad19ccfc933dcadb5ced8d9e`.
 - trusted solo battle wiring: `dfb52e2bc04fa41ee3a66a33e04f633e0ac27c46`, follow-up through `75f368ee6090a81d794577e2a2e32f895c746a78`.
 - 43 characters / 129 authored forms: `ab0b152755a216526b76b8e496615cfb80829c18`, CI #799 green.
-- achievement/profile guest runtime: `30374313e1372a0da5a8370f08648775079dc140`, CI #801 green.
 - account achievement/profile authority: `b6a3c7a640269cc59fe83e9e60dbca332ac78bff`, CI #813 full green.
-- reversible guest → account migration: current server/client migration authority and `GUEST_ACCOUNT_MIGRATION_IMPLEMENTATION_2026-08-31.md` regression baseline.
-- authenticated social/friend co-op closure: code/test baseline `a9d743d514fcdb69bcd68bfa862dad6641aad1ed`, Actions run `33351096636` **typecheck/schema/sim/server/client/build 전체 green**.
+- authenticated social/friend co-op closure: `a9d743d514fcdb69bcd68bfa862dad6641aad1ed`, Actions `33351096636` full green.
+- authenticated Record trusted proof: code/test baseline `3f26839d238d276a7e861db0a5fd046c604fecf0`, Actions `33355073898` **typecheck/schema/sim/server/client/build 전체 green**.
 
 ---
 
 ## 16. 다음 개발 우선순위
 
-1. **Record account trusted proof**: authenticated Record start/replay/claim 경계와 account Record mutation 연결.
-2. **공개 협동 matchmaking + co-op release hardening**: public queue, reconnect grace/AI takeover network soak, quick-communication/audio/profile polish.
-3. **PvP foundation**: standardization, 1v1/2v2 runtime/matchmaking, rating/season, PvP achievement source.
-4. **account lifecycle 제품화**: email auth, renewal/rotation/revoke-all, transfer/delete/reset/recovery.
-5. **Record/SPECIAL/achievement 경제·사람 QA**: 장기전 난이도와 reward 공급량 TESTED/LOCKED 후보화.
-6. **production UX/art/audio/accessibility**: achievement toast/card, cosmetic/profile presentation, 전체 production art/motion/audio/viewport/release QA.
+1. **공개 협동 matchmaking + co-op release hardening**: public queue, reconnect grace/AI takeover network soak, quick-communication/audio/profile polish.
+2. **PvP foundation**: standardization, 1v1/2v2 runtime/matchmaking, rating/season, PvP achievement source.
+3. **account lifecycle 제품화**: email auth, renewal/rotation/revoke-all, transfer/delete/reset/recovery.
+4. **Record/SPECIAL/achievement 경제·사람 QA**: 장기전 난이도, 30분 guard 정책, reward 공급량 TESTED/LOCKED 후보화.
+5. **production UX/art/audio/accessibility**: achievement toast/card, cosmetic/profile presentation, 전체 production art/motion/audio/viewport/release QA.
 
 ---
 
@@ -551,4 +536,5 @@ PvP는 아직 foundation 이전 단계다.
 - revision conflict에서 재화/profile mutation을 자동 재실행하지 않는다.
 - social DB에 co-op seat join token을 보관하지 않는다.
 - co-op account reward/discovery는 server room의 authoritative terminal/snapshot 상태에서만 파생한다.
+- authenticated Record score/reward/discovery는 server replay completion에서만 파생한다.
 - 대형 배치 중 불필요하게 CI를 반복하지 않고 마지막 통합 검증에서 회귀를 모아 수정한다.
