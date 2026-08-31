@@ -1,20 +1,20 @@
 import Phaser from 'phaser';
 import { INTERNAL_WIDTH } from '@frontline/shared';
 import type { BaseWeaponId } from '@frontline/sim/playable';
-import { getAccountClientState } from './account-network';
-import { accountCoopLoadout, getAuthenticatedCoopClientProgress, type AccountCoopClientProgress } from './coop-account-progress';
+import { getAccountClientState } from './account-network.ts';
+import { accountCoopLoadout, getAuthenticatedCoopClientProgress, type AccountCoopClientProgress } from './coop-account-progress.ts';
 import {
   getPublicCoopMatchmakingStatus,
   joinPublicCoopMatchmaking,
   leavePublicCoopMatchmaking,
   type PublicCoopMatchmakingState,
-} from './coop-matchmaking-network';
-import { CoopSession, type CoopServerMessage } from './coop-network';
-import { BASE_WEAPON_UNLOCKS, getUnlockedBaseWeaponIds } from './base-weapon-progression';
-import { ALL_STAGES, getStage } from './prototype';
-import { addButton, addText, COLORS, drawBackdrop } from './scene-ui';
-import { isSortieStageUnlocked } from './stage-navigation';
-import { isCompactMobileViewport } from './viewport';
+} from './coop-matchmaking-network.ts';
+import { CoopSession, type CoopServerMessage } from './coop-network.ts';
+import { BASE_WEAPON_UNLOCKS, getUnlockedBaseWeaponIds } from './base-weapon-progression.ts';
+import { ALL_STAGES, getStage } from './prototype.ts';
+import { addButton, addText, COLORS, drawBackdrop } from './scene-ui.ts';
+import { isSortieStageUnlocked } from './stage-navigation.ts';
+import { isCompactMobileViewport } from './viewport.ts';
 
 function baseWeaponName(id: BaseWeaponId | null | undefined): string {
   return BASE_WEAPON_UNLOCKS.find((entry) => entry.id === id)?.displayName ?? '전선포격기';
@@ -44,7 +44,7 @@ export class PublicCoopMatchmakingScene extends Phaser.Scene {
   private content?: Phaser.GameObjects.Container;
   private status?: Phaser.GameObjects.Text;
   private polling = false;
-  private pollEvent?: Phaser.Time.TimerEvent;
+  private pollEvent: Phaser.Time.TimerEvent | undefined;
 
   constructor() { super('public-coop-matchmaking'); }
 
@@ -184,8 +184,8 @@ export class PublicCoopLobbyScene extends Phaser.Scene {
   private session: CoopSession | null = null;
   private content?: Phaser.GameObjects.Container;
   private status?: Phaser.GameObjects.Text;
-  private unsubscribeMessage?: () => void;
-  private unsubscribeConnection?: () => void;
+  private unsubscribeMessage: (() => void) | undefined;
+  private unsubscribeConnection: (() => void) | undefined;
 
   constructor() { super('public-coop-lobby'); }
 
