@@ -10,13 +10,9 @@ export class PvpHubScene extends BasePvpHubScene {
   override create(): void {
     super.create();
     const compact = isCompactMobileViewport();
-    const cover = this.add.rectangle(305, 552, 470, 72, 0x242c39, 1).setDepth(50);
-    const label = addText(this, 305, 532, '추가 대전 모드', compact ? 18 : 15, '#aebccd', 'center').setOrigin(0.5).setDepth(51);
-    const friendly = addButton(this, 205, 574, 190, compact ? 70 : 50, '1v1 친선전', () => this.scene.start('pvp-friendly-lobby'), 0x735d87).setDepth(51);
-    const team = addButton(this, 405, 574, 190, compact ? 70 : 50, '2v2 일반전', () => this.scene.start('pvp-2v2-matchmaking'), 0x5d748f).setDepth(51);
-    cover.setInteractive(false);
-    label.setInteractive(false);
-    friendly.setDepth(51);
-    team.setDepth(51);
+    this.add.rectangle(305, 552, 470, 72, 0x242c39, 1).setDepth(50);
+    addText(this, 305, 532, '추가 대전 모드', compact ? 18 : 15, '#aebccd', 'center').setOrigin(0.5).setDepth(51);
+    addButton(this, 205, 574, 190, compact ? 70 : 50, '1v1 친선전', () => this.scene.start('pvp-friendly-lobby'), 0x735d87).setDepth(51);
+    addButton(this, 405, 574, 190, compact ? 70 : 50, '2v2 일반전', () => this.scene.start('pvp-2v2-matchmaking'), 0x5d748f).setDepth(51);
   }
 }
