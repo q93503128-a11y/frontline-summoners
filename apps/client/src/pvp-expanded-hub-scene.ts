@@ -3,16 +3,17 @@ import { addButton, addText } from './scene-ui.ts';
 import { isCompactMobileViewport } from './viewport.ts';
 
 /**
- * Keeps the original ranked/casual hub intact while the wider PvP surface grows.
- * The lower action strip replaces the old placeholder copy with live v1 modes.
+ * Keeps ranked/casual 1v1 records and leaderboard intact while exposing every
+ * v1 PvP mode from one hub. 2v2 ranked intentionally remains absent.
  */
 export class PvpHubScene extends BasePvpHubScene {
   override create(): void {
     super.create();
     const compact = isCompactMobileViewport();
-    this.add.rectangle(305, 552, 470, 72, 0x242c39, 1).setDepth(50);
-    addText(this, 305, 532, '추가 대전 모드', compact ? 18 : 15, '#aebccd', 'center').setOrigin(0.5).setDepth(51);
-    addButton(this, 205, 574, 190, compact ? 70 : 50, '1v1 친선전', () => this.scene.start('pvp-friendly-lobby'), 0x735d87).setDepth(51);
-    addButton(this, 405, 574, 190, compact ? 70 : 50, '2v2 일반전', () => this.scene.start('pvp-2v2-matchmaking'), 0x5d748f).setDepth(51);
+    this.add.rectangle(305, 552, 500, 90, 0x242c39, 1).setDepth(50);
+    addText(this, 305, 520, '추가 대전 모드', compact ? 18 : 15, '#aebccd', 'center').setOrigin(0.5).setDepth(51);
+    addButton(this, 145, 570, 150, compact ? 70 : 50, '1v1 친선', () => this.scene.start('pvp-friendly-lobby'), 0x735d87).setDepth(51);
+    addButton(this, 305, 570, 150, compact ? 70 : 50, '2v2 일반', () => this.scene.start('pvp-2v2-matchmaking'), 0x5d748f).setDepth(51);
+    addButton(this, 465, 570, 150, compact ? 70 : 50, '2v2 친선', () => this.scene.start('pvp-friendly-2v2-lobby'), 0x6d628d).setDepth(51);
   }
 }
