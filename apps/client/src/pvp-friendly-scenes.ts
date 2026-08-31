@@ -5,6 +5,7 @@ import { getSlotById } from './prototype.ts';
 import { addButton, addText, COLORS, drawBackdrop } from './scene-ui.ts';
 import { isCompactMobileViewport } from './viewport.ts';
 import { PvpSession, type PvpBattleSnapshot, type PvpConnectionState, type PvpServerMessage } from './pvp-network.ts';
+import { cancelFriendPvpInvite } from './social-network.ts';
 import {
   cancelFriendlyPvpLobby,
   createFriendlyPvpLobby,
@@ -36,6 +37,8 @@ function friendlyError(error: unknown): string {
     friendly_pvp_lobby_full: '이미 다른 플레이어가 참가한 방입니다.',
     friendly_pvp_self_join: '자신이 만든 방에는 참가할 수 없습니다.',
     friendly_pvp_blocked: '차단 관계인 플레이어와는 친선전을 시작할 수 없습니다.',
+    social_pvp_invite_pending: '이 친구에게 보낸 친선전 초대가 이미 대기 중입니다.',
+    social_pvp_invite_expired: '친선전 초대가 만료되었습니다.',
   };
   return labels[message] ?? message;
 }
@@ -43,6 +46,7 @@ function friendlyError(error: unknown): string {
 export class FriendlyPvpLobbyScene extends Phaser.Scene {
   private growthPolicy: FriendlyPvpGrowthPolicy = 'STANDARDIZED';
   private lobby: FriendlyPvpLobbyState | null = null;
+  private socialInviteId: string | null = null;
   private content?: Phaser.GameObjects.Container;
   private status?: Phaser.GameObjects.Text;
   private pollEvent?: Phaser.Time.TimerEvent;
@@ -50,15 +54,37 @@ export class FriendlyPvpLobbyScene extends Phaser.Scene {
 
   constructor() { super('pvp-friendly-lobby'); }
 
+  init(data: {
+    socialInviteId?: string;
+    inviteCode?: string;
+    growthPolicy?: FriendlyPvpGrowthPolicy;
+    expiresAtMs?: number;
+  } = {}): void {
+    this.socialInviteId = typeof data.socialInviteId === 'string' ? data.socialInviteId : null;
+    this.growthPolicy = data.growthPolicy === 'ACTUAL' ? 'ACTUAL' : 'STANDARDIZED';
+    this.lobby = typeof data.inviteCode === 'string' && typeof data.expiresAtMs === 'number'
+      ? {
+          state: 'WAITING',
+          modeId: 'pvp_friendly_1v1',
+          inviteCode: data.inviteCode,
+          growthPolicy: this.growthPolicy,
+          expiresAtMs: data.expiresAtMs,
+        }
+      : null;
+    this.pending = false;
+    this.pollEvent = undefined;
+  }
+
   create(): void {
     drawBackdrop(this, 'map');
     const compact = isCompactMobileViewport();
     addText(this, 48, 34, '1v1 친선전', compact ? 42 : 44, COLORS.cream);
-    addText(this, 50, 86, '방 코드로 초대 · 레이팅/보상 없음 · 성장 규칙을 방장이 선택', compact ? 18 : 16, COLORS.muted);
+    addText(this, 50, 86, '친구 직접 초대 또는 방 코드 · 레이팅/보상 없음 · 성장 규칙 선택', compact ? 18 : 16, COLORS.muted);
     addButton(this, 1165, 62, 170, compact ? 78 : 50, 'PvP 허브', () => { void this.leave(); }, 0x586275);
-    this.status = addText(this, INTERNAL_WIDTH / 2, 682, '친선전 규칙을 선택하세요.', compact ? 20 : 16, '#a9b5c5', 'center').setOrigin(0.5);
+    this.status = addText(this, INTERNAL_WIDTH / 2, 682, this.lobby ? '친구의 수락을 기다리는 중…' : '친선전 규칙을 선택하세요.', compact ? 20 : 16, '#a9b5c5', 'center').setOrigin(0.5);
     this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => this.pollEvent?.destroy());
     this.render();
+    if (this.lobby?.state === 'WAITING') this.startPolling();
   }
 
   private render(): void {
@@ -94,10 +120,12 @@ export class FriendlyPvpLobbyScene extends Phaser.Scene {
     const secondsLeft = Math.max(0, Math.ceil((lobby.expiresAtMs - Date.now()) / 1000));
     const minutes = Math.floor(secondsLeft / 60);
     const seconds = String(secondsLeft % 60).padStart(2, '0');
-    this.content.add(addText(this, INTERNAL_WIDTH / 2, 165, '친구 참가 대기', compact ? 34 : 30, '#fff4cf', 'center').setOrigin(0.5));
+    this.content.add(addText(this, INTERNAL_WIDTH / 2, 165, this.socialInviteId ? '친구 친선전 수락 대기' : '친구 참가 대기', compact ? 34 : 30, '#fff4cf', 'center').setOrigin(0.5));
     this.content.add(addText(this, INTERNAL_WIDTH / 2, 235, lobby.inviteCode, compact ? 50 : 46, '#f0d67d', 'center').setOrigin(0.5));
     this.content.add(addText(this, INTERNAL_WIDTH / 2, 300, `${growthName(lobby.growthPolicy)} · 방 만료 ${minutes}:${seconds}`, compact ? 22 : 18, '#c9d3e0', 'center').setOrigin(0.5));
-    this.content.add(addText(this, INTERNAL_WIDTH / 2, 355, '상대가 코드를 입력하면 자동으로 전투방이 열립니다.', compact ? 20 : 17, '#aeb9c7', 'center').setOrigin(0.5));
+    this.content.add(addText(this, INTERNAL_WIDTH / 2, 355,
+      this.socialInviteId ? '친구가 요청 탭에서 수락하면 자동으로 전투가 시작됩니다.' : '상대가 코드를 입력하면 자동으로 전투방이 열립니다.',
+      compact ? 20 : 17, '#aeb9c7', 'center').setOrigin(0.5));
     this.content.add(addButton(this, 455, 455, 300, compact ? 88 : 64, '코드 복사', () => { void this.copyCode(lobby.inviteCode); }, 0x5f7897));
     this.content.add(addButton(this, 825, 455, 300, compact ? 88 : 64, '방 취소', () => { void this.cancelLobby(); }, 0x815b60));
   }
@@ -105,6 +133,7 @@ export class FriendlyPvpLobbyScene extends Phaser.Scene {
   private async createLobby(): Promise<void> {
     if (this.pending) return;
     this.pending = true;
+    this.socialInviteId = null;
     this.status?.setText('친선전 방을 만드는 중…').setColor('#a9b5c5');
     try {
       const state = await createFriendlyPvpLobby(this.growthPolicy);
@@ -124,6 +153,7 @@ export class FriendlyPvpLobbyScene extends Phaser.Scene {
     const code = window.prompt('친구에게 받은 친선전 참가 코드를 입력하세요.');
     if (!code) return;
     this.pending = true;
+    this.socialInviteId = null;
     this.status?.setText('친선전 방에 참가하는 중…').setColor('#a9b5c5');
     try {
       const state = await joinFriendlyPvpLobby(code);
@@ -151,7 +181,16 @@ export class FriendlyPvpLobbyScene extends Phaser.Scene {
       if (state.state === 'MATCHED') return this.enterMatch(state);
       this.render();
     } catch (error) {
-      if (this.scene.isActive()) this.status?.setText(friendlyError(error)).setColor('#ff9a91');
+      if (this.scene.isActive()) {
+        if (this.socialInviteId) {
+          this.socialInviteId = null;
+          this.lobby = null;
+          this.status?.setText('친구 초대가 거절·취소·만료되어 방이 닫혔습니다.').setColor('#ffd493');
+          this.render();
+        } else {
+          this.status?.setText(friendlyError(error)).setColor('#ff9a91');
+        }
+      }
       this.pollEvent?.destroy();
       this.pollEvent = undefined;
     } finally { this.pending = false; }
@@ -160,6 +199,7 @@ export class FriendlyPvpLobbyScene extends Phaser.Scene {
   private enterMatch(state: Extract<FriendlyPvpLobbyState, { state: 'MATCHED' }>): void {
     this.pollEvent?.destroy();
     this.pollEvent = undefined;
+    this.socialInviteId = null;
     this.status?.setText('친선전 상대 확정 · 전투 서버로 이동합니다.').setColor('#8ee3aa');
     this.time.delayedCall(100, () => this.scene.start('pvp-friendly-match', {
       websocketPath: state.websocketPath,
@@ -176,9 +216,16 @@ export class FriendlyPvpLobbyScene extends Phaser.Scene {
     }
   }
 
-  private async cancelLobby(): Promise<void> {
+  private async closeWaitingLobby(): Promise<void> {
     const lobby = this.lobby;
-    if (lobby?.state === 'WAITING') await cancelFriendlyPvpLobby(lobby.inviteCode).catch(() => undefined);
+    if (lobby?.state !== 'WAITING') return;
+    if (this.socialInviteId) await cancelFriendPvpInvite(this.socialInviteId).catch(() => undefined);
+    else await cancelFriendlyPvpLobby(lobby.inviteCode).catch(() => undefined);
+    this.socialInviteId = null;
+  }
+
+  private async cancelLobby(): Promise<void> {
+    await this.closeWaitingLobby();
     this.lobby = null;
     this.pollEvent?.destroy();
     this.pollEvent = undefined;
@@ -189,8 +236,7 @@ export class FriendlyPvpLobbyScene extends Phaser.Scene {
   }
 
   private async leave(): Promise<void> {
-    const lobby = this.lobby;
-    if (lobby?.state === 'WAITING') await cancelFriendlyPvpLobby(lobby.inviteCode).catch(() => undefined);
+    await this.closeWaitingLobby();
     if (this.scene.isActive()) this.scene.start('pvp-hub');
   }
 }
