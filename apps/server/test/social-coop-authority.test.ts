@@ -33,17 +33,45 @@ test('account coop loadout is rebuilt from account deck and account character gr
   assert.deepEqual(built.clearedStageIds, initial.clearedStageIds);
 });
 
+test('worker actually routes authenticated social HTTP before anonymous match creation', async () => {
+  const source = await readFile(new URL('../src/index.ts', import.meta.url), 'utf8');
+  assert.match(source, /import \{ resolveSocialHttp \} from '\.\/social-http\.ts'/);
+  assert.match(source, /const socialHttpResult = await resolveSocialHttp\(request, env\)/);
+  assert.match(source, /if \(socialHttpResult\)/);
+});
+
+test('all authenticated social requests refresh presence ttl', async () => {
+  const source = await readFile(new URL('../src/social-http.ts', import.meta.url), 'utf8');
+  assert.match(source, /touchSocialPresence/);
+  assert.match(source, /await touchSocialPresence\(env\.DB, principal\.userId\)/);
+});
+
 test('friend coop room binds accounts, rate-limits quick messages, tracks reconnect and settles server rewards', async () => {
   const source = await readFile(new URL('../src/index.ts', import.meta.url), 'utf8');
   assert.match(source, /seatAccountIds: Record<CoopSeatId, string \| null>/);
   assert.match(source, /matchKind: 'CODE' \| 'FRIEND'/);
   assert.match(source, /getAccountCoopSeatAuthority\(this\.env\.DB, accountId, record\.room\.stageId\)/);
+  assert.match(source, /if \(!accountId\) getServerCoopLoadout\(loadout\)/);
   assert.match(source, /QUICK_MESSAGE_COOLDOWN_MS = 900/);
   assert.match(source, /QUICK_MESSAGE_BURST_MAX = 4/);
   assert.match(source, /isEitherSocialBlocked\(this\.env\.DB, senderAccountId, receiverAccountId\)/);
   assert.match(source, /record\.reconnectedSeats\[seatId\] = true/);
   assert.match(source, /settleAuthenticatedCoopWin\(/);
   assert.match(source, /recordRecentCoopPlayers\(/);
+});
+
+test('authenticated coop records only enemies actually present in authoritative snapshots and persists them on win or loss', async () => {
+  const roomSource = await readFile(new URL('../src/index.ts', import.meta.url), 'utf8');
+  const authoritySource = await readFile(new URL('../src/account-coop-authority.ts', import.meta.url), 'utf8');
+  assert.match(roomSource, /encounteredEnemyIds\?: string\[\]/);
+  assert.match(roomSource, /private recordEncounteredEnemies/);
+  assert.match(roomSource, /if \(unit\.team === 'ENEMY'\) encountered\.add\(unit\.definitionId\)/);
+  assert.match(roomSource, /this\.recordEncounteredEnemies\(record, applied\.snapshot\)/);
+  assert.match(roomSource, /settleAuthenticatedCoopDiscoveries\(this\.env\.DB, accountId, discoveredEnemyIds\)/);
+  assert.match(roomSource, /discoveredEnemyIds,/);
+  assert.match(authoritySource, /applyAccountEnemyDiscoveries/);
+  assert.match(authoritySource, /discoveredEnemyIds,/);
+  assert.match(authoritySource, /source: 'COOP_BATTLE'/);
 });
 
 test('friend and reconnect achievement facts are server-derived from authenticated coop settlement', async () => {
