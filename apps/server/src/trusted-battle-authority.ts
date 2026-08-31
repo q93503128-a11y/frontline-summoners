@@ -5,6 +5,8 @@ import {
   tryUpgradeSupply,
   type PlayableBattleState,
 } from '@frontline/sim/playable';
+import { isRecordModeId, isRecordModeUnlocked, type RecordModeId } from '@frontline/sim/record-content';
+import { stepBossRushRecordBattle, stepEndlessRecordBattle } from '@frontline/sim/record-playable';
 import {
   initializeAccountSave,
   normalizeAccountSaveSnapshot,
@@ -16,12 +18,20 @@ import {
   normalizeServerEnemyDiscoveries,
 } from './account-enemy-discovery-authority.ts';
 import { ACCOUNT_MAIN_STAGE_INDEX, ACCOUNT_SPECIAL_STAGE_IDS } from './account-content.ts';
-import { applyAccountMainBattleResult, type AccountMainBattleMutationResult } from './account-mutation-authority.ts';
+import {
+  applyAccountMainBattleResult,
+  applyAccountRecordResult,
+  type AccountMainBattleMutationResult,
+  type AccountRecordMutationResult,
+} from './account-mutation-authority.ts';
 import { applyAccountSpecialBattleResult, type AccountSpecialBattleMutationResult } from './account-special-mutation-authority.ts';
 import { assertAccountSpecialStagePlayable } from './account-stage-authority.ts';
-import { createAccountTrustedBattle } from './account-trusted-battle-runtime.ts';
+import {
+  createAccountTrustedBattle,
+  createAccountTrustedRecordBattle,
+} from './account-trusted-battle-runtime.ts';
 
-export const TRUSTED_BATTLE_KINDS = ['MAIN', 'SPECIAL'] as const;
+export const TRUSTED_BATTLE_KINDS = ['MAIN', 'SPECIAL', 'RECORD'] as const;
 export type TrustedBattleKind = (typeof TRUSTED_BATTLE_KINDS)[number];
 export const TRUSTED_BATTLE_LIFETIME_MS = 6 * 60 * 60 * 1000;
 export const TRUSTED_BATTLE_MAX_REPLAY_FRAMES = 30 * 60 * 30;
@@ -53,9 +63,12 @@ export interface TrustedBattleCompletionResult {
   readonly enemyBaseHp: number;
   readonly discoveredEnemyIds: readonly string[];
   readonly completedAtMs: number;
+  readonly recordMode?: 'ENDLESS_FRONT' | 'BOSS_RUSH';
+  readonly defeatedBosses?: number;
+  readonly recordCompleted?: boolean;
 }
 
-export type TrustedBattleClaimMutationResult = AccountMainBattleMutationResult | AccountSpecialBattleMutationResult;
+export type TrustedBattleClaimMutationResult = AccountMainBattleMutationResult | AccountSpecialBattleMutationResult | AccountRecordMutationResult;
 export type TrustedBattleClaimResult =
   | {
       readonly ok: true;
@@ -136,8 +149,19 @@ function assertStartAllowed(kind: TrustedBattleKind, targetId: string, snapshot:
     if (index > snapshot.clearedStageIds.length) throw new Error(`trusted MAIN stage is locked:${targetId}`);
     return;
   }
-  if (!ACCOUNT_SPECIAL_STAGE_IDS.has(targetId)) throw new Error(`unknown trusted SPECIAL stage:${targetId}`);
-  assertAccountSpecialStagePlayable(targetId, snapshot.clearedStageIds, snapshot.specialClearedStageIds, nowMs);
+  if (kind === 'SPECIAL') {
+    if (!ACCOUNT_SPECIAL_STAGE_IDS.has(targetId)) throw new Error(`unknown trusted SPECIAL stage:${targetId}`);
+    assertAccountSpecialStagePlayable(targetId, snapshot.clearedStageIds, snapshot.specialClearedStageIds, nowMs);
+    return;
+  }
+  if (!isRecordModeId(targetId)) throw new Error(`unknown trusted RECORD mode:${targetId}`);
+  if (!isRecordModeUnlocked(targetId, snapshot.clearedStageIds)) throw new Error(`trusted RECORD mode is locked:${targetId}`);
+}
+
+function initialStateHash(kind: TrustedBattleKind, targetId: string, snapshot: AccountSaveSnapshotV2): string {
+  if (kind !== 'RECORD') return createAccountTrustedBattle(targetId, snapshot).stateHash;
+  if (!isRecordModeId(targetId)) throw new Error(`unknown trusted RECORD mode:${targetId}`);
+  return createAccountTrustedRecordBattle(targetId, snapshot).battle.stateHash;
 }
 
 export async function startTrustedBattle(
@@ -158,7 +182,7 @@ export async function startTrustedBattle(
   ).bind(accountId, Math.floor(nowMs / 1000)).first<{ count: number }>();
   if ((active?.count ?? 0) >= TRUSTED_BATTLE_MAX_ACTIVE_RUNS) throw new Error('too many active trusted battles');
 
-  const battle = createAccountTrustedBattle(targetId, account.snapshot);
+  const stateHash = initialStateHash(kind, targetId, account.snapshot);
   const battleId = crypto.randomUUID();
   const startedAtSeconds = Math.floor(nowMs / 1000);
   const expiresAtSeconds = Math.floor((nowMs + TRUSTED_BATTLE_LIFETIME_MS) / 1000);
@@ -174,7 +198,7 @@ export async function startTrustedBattle(
     targetId,
     account.revision,
     JSON.stringify(account.snapshot),
-    battle.stateHash,
+    stateHash,
     startedAtSeconds,
     expiresAtSeconds,
   ).run();
@@ -184,7 +208,7 @@ export async function startTrustedBattle(
     kind,
     targetId,
     startRevision: account.revision,
-    initialStateHash: battle.stateHash,
+    initialStateHash: stateHash,
     expiresAtMs: expiresAtSeconds * 1000,
   };
 }
@@ -226,7 +250,7 @@ function collectEnemyDiscoveries(state: PlayableBattleState, discovered: Set<str
   }
 }
 
-function replayTrustedBattle(row: TrustedBattleRow, commands: readonly TrustedBattleCommand[], completedAtMs: number): TrustedBattleCompletionResult {
+function replayStandardBattle(row: TrustedBattleRow, commands: readonly TrustedBattleCommand[], completedAtMs: number): TrustedBattleCompletionResult {
   const snapshot = parseStoredSnapshot(row);
   const state = createAccountTrustedBattle(row.target_id, snapshot);
   if (state.stateHash !== row.initial_state_hash) throw new Error(`trusted battle initial state hash drift:${row.battle_id}`);
@@ -255,6 +279,50 @@ function replayTrustedBattle(row: TrustedBattleRow, commands: readonly TrustedBa
     discoveredEnemyIds: normalizeServerEnemyDiscoveries([...discoveredEnemyIds]),
     completedAtMs,
   };
+}
+
+function replayRecordBattle(row: TrustedBattleRow, commands: readonly TrustedBattleCommand[], completedAtMs: number): TrustedBattleCompletionResult {
+  if (!isRecordModeId(row.target_id)) throw new Error(`trusted RECORD row has unknown mode:${row.target_id}`);
+  const snapshot = parseStoredSnapshot(row);
+  const runtime = createAccountTrustedRecordBattle(row.target_id, snapshot);
+  const state = runtime.battle;
+  if (state.stateHash !== row.initial_state_hash) throw new Error(`trusted record initial state hash drift:${row.battle_id}`);
+  const discoveredEnemyIds = new Set<string>();
+  collectEnemyDiscoveries(state, discoveredEnemyIds);
+  let commandIndex = 0;
+  while (!runtime.ended && state.battle.tick < TRUSTED_BATTLE_MAX_REPLAY_FRAMES) {
+    while (commandIndex < commands.length && commands[commandIndex]!.tick === state.battle.tick) {
+      applyCommand(state, commands[commandIndex]!);
+      commandIndex += 1;
+    }
+    if (runtime.mode === 'ENDLESS_FRONT') stepEndlessRecordBattle(runtime);
+    else stepBossRushRecordBattle(runtime);
+    collectEnemyDiscoveries(state, discoveredEnemyIds);
+  }
+  if (!runtime.ended) throw new Error('trusted record exceeded replay frame limit');
+  if (commandIndex !== commands.length) throw new Error('trusted record command log contains actions after terminal result');
+  const completed = runtime.mode === 'BOSS_RUSH' && runtime.completed;
+  const winner = completed ? 'PLAYER' : state.battle.winner ?? 'DRAW';
+  return {
+    battleId: row.battle_id,
+    kind: 'RECORD',
+    targetId: row.target_id,
+    winner,
+    clearFrames: state.battle.tick,
+    finalStateHash: state.stateHash,
+    playerBaseHp: state.battle.bases.PLAYER.hp,
+    enemyBaseHp: state.battle.bases.ENEMY.hp,
+    discoveredEnemyIds: normalizeServerEnemyDiscoveries([...discoveredEnemyIds]),
+    completedAtMs,
+    recordMode: runtime.mode,
+    ...(runtime.mode === 'BOSS_RUSH' ? { defeatedBosses: runtime.defeatedBosses, recordCompleted: runtime.completed } : {}),
+  };
+}
+
+function replayTrustedBattle(row: TrustedBattleRow, commands: readonly TrustedBattleCommand[], completedAtMs: number): TrustedBattleCompletionResult {
+  return row.battle_kind === 'RECORD'
+    ? replayRecordBattle(row, commands, completedAtMs)
+    : replayStandardBattle(row, commands, completedAtMs);
 }
 
 export async function completeTrustedBattle(
@@ -291,6 +359,43 @@ export async function completeTrustedBattle(
   return { replayed: true, result: parseStoredCompletion(row) };
 }
 
+async function claimRecordBattle(
+  db: D1Database,
+  accountId: string,
+  row: TrustedBattleRow,
+  completion: TrustedBattleCompletionResult,
+  expectedRevision: number,
+): Promise<TrustedBattleClaimResult> {
+  if (!isRecordModeId(row.target_id) || !completion.recordMode) throw new Error(`trusted RECORD completion is malformed:${row.battle_id}`);
+  const mutation = completion.recordMode === 'ENDLESS_FRONT'
+    ? await applyAccountRecordResult(db, accountId, {
+        battleId: row.battle_id,
+        expectedRevision,
+        mode: 'ENDLESS_FRONT',
+        survivalFrames: completion.clearFrames,
+        discoveredEnemyIds: completion.discoveredEnemyIds,
+      }, completion.completedAtMs)
+    : await applyAccountRecordResult(db, accountId, {
+        battleId: row.battle_id,
+        expectedRevision,
+        mode: 'BOSS_RUSH',
+        defeatedBosses: completion.defeatedBosses ?? 0,
+        discoveredEnemyIds: completion.discoveredEnemyIds,
+      }, completion.completedAtMs);
+  if (!mutation.ok) return mutation;
+  await db.prepare(
+    'UPDATE trusted_battle_runs SET claimed_at = COALESCE(claimed_at, unixepoch()) WHERE battle_id = ?1 AND user_id = ?2',
+  ).bind(row.battle_id, accountId).run();
+  return {
+    ok: true,
+    replayed: mutation.replayed,
+    awarded: true,
+    record: mutation.record,
+    completion,
+    result: mutation.result,
+  };
+}
+
 export async function claimTrustedBattle(
   db: D1Database,
   rawAccountId: string,
@@ -305,6 +410,10 @@ export async function claimTrustedBattle(
   if (!row) throw new Error(`unknown trusted battle:${battleId}`);
   if (row.completed_at === null) throw new Error(`trusted battle is not completed:${battleId}`);
   const completion = parseStoredCompletion(row);
+
+  if (row.battle_kind === 'RECORD') {
+    return claimRecordBattle(db, accountId, row, completion, expected);
+  }
 
   if (completion.winner !== 'PLAYER') {
     const discovery = await applyAccountEnemyDiscoveries(db, accountId, expected, completion.discoveredEnemyIds, nowMs);
@@ -348,6 +457,7 @@ export async function claimTrustedBattle(
 export const __trustedBattleTestOnly = {
   normalizeCommands,
   replayTrustedBattle,
+  replayRecordBattle,
   collectEnemyDiscoveries,
   parseStoredCompletion,
 };
