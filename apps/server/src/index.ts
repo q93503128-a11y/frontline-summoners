@@ -8,7 +8,7 @@ import {
 } from '@frontline/sim/coop-playable';
 import { resolveAuthenticatedAccountHttp } from './account-http.ts';
 import { resolveAuthHttp, type AuthHttpResult } from './auth-http.ts';
-import { getAccountCoopSeatAuthority, settleAuthenticatedCoopWin } from './account-coop-authority.ts';
+import { getAccountCoopSeatAuthority, settleAuthenticatedCoopDiscoveries, settleAuthenticatedCoopWin } from './account-coop-authority.ts';
 import { drainCoopFramesAfterAiHandoff } from './coop-ai-handoff.ts';
 import {
   connectCoopSeat,
@@ -30,6 +30,7 @@ import {
   getServerCoopLoadout,
   getServerCoopStage,
 } from './runtime-content.ts';
+import { resolveSocialHttp } from './social-http.ts';
 import { isEitherSocialBlocked, recordRecentCoopPlayers } from './social-authority.ts';
 
 export interface Env {
@@ -54,6 +55,7 @@ type StoredCoopRoom = {
   settledSeats: Record<CoopSeatId, boolean>;
   recentPlayersRecorded: boolean;
   battleStartedAtMs: number | null;
+  encounteredEnemyIds?: string[];
   battle: CoopPlayableBattleState | null;
 };
 
@@ -151,6 +153,14 @@ export default {
       return json(accountHttpResult.body, {
         status: accountHttpResult.status,
         ...(accountHttpResult.headers === undefined ? {} : { headers: accountHttpResult.headers }),
+      });
+    }
+
+    const socialHttpResult = await resolveSocialHttp(request, env);
+    if (socialHttpResult) {
+      return json(socialHttpResult.body, {
+        status: socialHttpResult.status,
+        ...(socialHttpResult.headers === undefined ? {} : { headers: socialHttpResult.headers }),
       });
     }
 
@@ -275,6 +285,7 @@ export class BattleRoom extends DurableObject<Env> {
         settledSeats: { A: false, B: false },
         recentPlayersRecorded: false,
         battleStartedAtMs: null,
+        encounteredEnemyIds: [],
         battle: null,
       };
       this.loaded = true;
@@ -395,7 +406,8 @@ export class BattleRoom extends DurableObject<Env> {
         const accountId = record.seatAccountIds[attachment.seatId];
         const loadout = accountId
           ? (await getAccountCoopSeatAuthority(this.env.DB, accountId, record.room.stageId)).loadout
-          : getServerCoopLoadout(parsed.loadout);
+          : parsed.loadout;
+        if (!accountId) getServerCoopLoadout(loadout);
         const selectedBaseWeaponId = record.room.seats[attachment.seatId].selectedBaseWeaponId;
         assertServerCoopBaseWeaponUnlocked(selectedBaseWeaponId, loadout.clearedStageIds);
         const result = setCoopSeatReady(record.room, attachment.seatId, attachment.clientId, loadout);
@@ -408,6 +420,7 @@ export class BattleRoom extends DurableObject<Env> {
           if (weaponA !== weaponB) throw new Error('co-op ready state is missing shared base weapon agreement');
           record.battle = createServerCoopBattle(record.room.stageId, loadoutA, loadoutB, weaponA);
           record.battleStartedAtMs = Date.now();
+          this.recordEncounteredEnemies(record, getCoopPlayableSnapshot(record.battle));
         }
         await this.saveRecord();
         this.broadcastRoomState();
@@ -485,6 +498,12 @@ export class BattleRoom extends DurableObject<Env> {
     this.sendToSeat(otherSeatId, payload);
   }
 
+  private recordEncounteredEnemies(record: StoredCoopRoom, snapshot: ReturnType<typeof getCoopPlayableSnapshot>): void {
+    const encountered = new Set(record.encounteredEnemyIds ?? []);
+    for (const unit of snapshot.units) if (unit.team === 'ENEMY') encountered.add(unit.definitionId);
+    record.encounteredEnemyIds = [...encountered];
+  }
+
   private applyCommittedFrames(record: StoredCoopRoom, frames: readonly CoopCommittedFrame[]): boolean {
     if (!record.battle) return false;
     let finished = record.room.phase === 'FINISHED';
@@ -503,6 +522,7 @@ export class BattleRoom extends DurableObject<Env> {
         A: frame.inputs.A.commands as readonly CoopPlayableCommand[],
         B: frame.inputs.B.commands as readonly CoopPlayableCommand[],
       });
+      this.recordEncounteredEnemies(record, applied.snapshot);
       this.broadcast({ type: 'FRAME_COMMITTED', frame, outcomes: applied.outcomes, battle: applied.snapshot });
       if (applied.snapshot.winner !== null) finished = true;
     }
@@ -532,19 +552,22 @@ export class BattleRoom extends DurableObject<Env> {
       await recordRecentCoopPlayers(this.env.DB, accountA, accountB, record.room.matchId, record.room.stageId);
       record.recentPlayersRecorded = true;
     }
-    if (record.battle.shared.battle.winner !== 'PLAYER') {
-      await this.saveRecord();
-      return;
-    }
+    const victory = record.battle.shared.battle.winner === 'PLAYER';
+    const discoveredEnemyIds = [...(record.encounteredEnemyIds ?? [])].sort();
     for (const seatId of ['A', 'B'] as const) {
       const accountId = record.seatAccountIds[seatId];
       if (!accountId || record.settledSeats[seatId]) continue;
       try {
-        await settleAuthenticatedCoopWin(this.env.DB, accountId, record.room.stageId, record.room.matchId, {
-          friendMatch: record.matchKind === 'FRIEND',
-          reconnected: record.reconnectedSeats[seatId],
-          ...(record.battleStartedAtMs === null ? {} : { battleStartedAtMs: record.battleStartedAtMs }),
-        });
+        if (victory) {
+          await settleAuthenticatedCoopWin(this.env.DB, accountId, record.room.stageId, record.room.matchId, {
+            friendMatch: record.matchKind === 'FRIEND',
+            reconnected: record.reconnectedSeats[seatId],
+            discoveredEnemyIds,
+            ...(record.battleStartedAtMs === null ? {} : { battleStartedAtMs: record.battleStartedAtMs }),
+          });
+        } else {
+          await settleAuthenticatedCoopDiscoveries(this.env.DB, accountId, discoveredEnemyIds);
+        }
         record.settledSeats[seatId] = true;
         this.sendToSeat(seatId, { type: 'ACCOUNT_SETTLED', seatId, stageId: record.room.stageId });
       } catch (error) {
