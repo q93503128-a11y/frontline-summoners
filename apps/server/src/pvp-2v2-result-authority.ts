@@ -57,7 +57,7 @@ export async function completeTrustedCasualPvp2v2Result(
   await db.prepare('DELETE FROM pvp_matchmaking_queue WHERE match_id = ?1').bind(matchId).run();
   for (let a = 0; a < participants.length; a += 1) {
     for (let b = a + 1; b < participants.length; b += 1) {
-      await recordRecentCoopPlayers(db, participants[a]!.user_id, participants[b]!.user_id, matchId, 'PvP 2v2 일반전');
+      await recordRecentCoopPlayers(db, participants[a]!.user_id, participants[b]!.user_id, matchId, 'PvP 2v2 일반전').catch(() => undefined);
     }
   }
   return { matchId, result, rated: false };
