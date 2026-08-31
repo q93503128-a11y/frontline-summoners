@@ -97,6 +97,27 @@ async function matchedBody(
   };
 }
 
+async function leaveWaitingLobby(
+  env: FriendlyPvp2v2HttpEnv,
+  lobby: FriendlyPvp2v2LobbyView,
+  accountId: string,
+  nowMs: number,
+): Promise<void> {
+  if (lobby.state !== 'WAITING') throw new Error('friendly_2v2_lobby_not_leavable');
+  if (!lobby.participantAccountIds.includes(accountId)) return;
+  if (lobby.hostAccountId === accountId) {
+    await cancelFriendlyPvp2v2Lobby(env.DB, lobby.inviteCode, accountId, nowMs);
+    return;
+  }
+  const participants = lobby.participantAccountIds.filter((id) => id !== accountId);
+  const write = await env.DB.prepare(
+    `UPDATE pvp_friendly_2v2_lobbies
+     SET participant_json = ?1, revision = revision + 1, updated_at = ?2
+     WHERE invite_code = ?3 AND state = 'WAITING' AND revision = ?4`,
+  ).bind(JSON.stringify(participants), Math.floor(nowMs / 1000), lobby.inviteCode, lobby.revision).run();
+  if ((write.meta.changes ?? 0) !== 1) throw new Error('friendly_2v2_lobby_revision_conflict');
+}
+
 export async function resolveFriendlyPvp2v2WebSocket(
   request: Request,
   env: FriendlyPvp2v2HttpEnv,
@@ -164,6 +185,16 @@ export async function resolveFriendlyPvp2v2Http(
       if (!inviteCode) return { status: 400, body: { error: 'friendly_2v2_invite_code_invalid' } };
       await cancelFriendlyPvp2v2Lobby(env.DB, inviteCode, principal.userId, nowMs);
       return { status: 200, body: { state: 'CANCELLED', inviteCode } };
+    }
+
+    if (request.method === 'POST' && url.pathname === '/api/pvp/friendly-2v2/leave') {
+      const body = await readJson(request);
+      const inviteCode = normalizeFriendlyPvp2v2InviteCode(body.inviteCode);
+      if (!inviteCode) return { status: 400, body: { error: 'friendly_2v2_invite_code_invalid' } };
+      const lobby = await loadFriendlyPvp2v2Lobby(env.DB, inviteCode, nowMs);
+      if (!lobby) return { status: 200, body: { state: 'LEFT', inviteCode } };
+      await leaveWaitingLobby(env, lobby, principal.userId, nowMs);
+      return { status: 200, body: { state: lobby.hostAccountId === principal.userId ? 'CANCELLED' : 'LEFT', inviteCode } };
     }
 
     return { status: 404, body: { error: 'not_found' } };
