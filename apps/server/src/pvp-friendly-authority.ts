@@ -13,7 +13,7 @@ import {
   isServerCoopBaseWeaponUnlocked,
 } from './runtime-content.ts';
 import { SERVER_PERMANENT_REWARDS } from './meta-content-v2.ts';
-import { ensureSocialProfile, isEitherSocialBlocked } from './social-authority.ts';
+import { ensureSocialProfile, isEitherSocialBlocked, recordRecentCoopPlayers } from './social-authority.ts';
 import { loadPvpMatch, loadPvpMatchParticipants } from './pvp-authority.ts';
 
 export const FRIENDLY_PVP_GROWTH_POLICIES = ['STANDARDIZED', 'ACTUAL'] as const;
@@ -175,7 +175,8 @@ export async function settleFriendlyPvpMatch(
   const match = await loadPvpMatch(db, matchId);
   if (!match) throw new Error('friendly_pvp_match_not_found');
   if (match.mode_id !== 'pvp_friendly_1v1') throw new Error('friendly_pvp_match_mode_invalid');
-  if (match.state !== 'COMPLETED') {
+  const freshlyCompleted = match.state !== 'COMPLETED';
+  if (freshlyCompleted) {
     if (match.state !== 'CREATED' && match.state !== 'ACTIVE') throw new Error('friendly_pvp_match_not_completable');
     const write = await db.prepare(
       `UPDATE pvp_matches SET state = 'COMPLETED', result = ?1, completed_at = ?2
@@ -186,6 +187,9 @@ export async function settleFriendlyPvpMatch(
   const participants = await loadPvpMatchParticipants(db, matchId);
   const ids = participants.map((entry) => entry.user_id);
   await Promise.all(ids.map((accountId) => recordAccountAchievementFact(db, accountId, 'pvp_first_friendly', nowMs)));
+  if (freshlyCompleted && ids.length === 2) {
+    await recordRecentCoopPlayers(db, ids[0]!, ids[1]!, matchId, 'PvP 1v1 친선전').catch(() => undefined);
+  }
 }
 
 export async function voidFriendlyPvpMatch(db: D1Database, matchId: string, nowMs = Date.now()): Promise<void> {
