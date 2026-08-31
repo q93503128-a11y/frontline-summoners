@@ -1,3 +1,4 @@
+import type { CoopQuickMessageId } from '@frontline/shared';
 import type { BaseWeaponId } from '@frontline/sim/playable';
 
 export type CoopSeatId = 'A' | 'B';
@@ -27,6 +28,7 @@ export interface CoopRoomSnapshot {
   readonly phase: CoopRoomPhase;
   readonly committedTick: number;
   readonly agreedBaseWeaponId: BaseWeaponId | null;
+  readonly matchKind?: 'CODE' | 'FRIEND';
   readonly seats: readonly {
     readonly seatId: CoopSeatId;
     readonly clientId: string | null;
@@ -35,6 +37,7 @@ export interface CoopRoomSnapshot {
     readonly control: 'PLAYER' | 'AI';
     readonly deckSize: number;
     readonly selectedBaseWeaponId: BaseWeaponId;
+    readonly accountBound?: boolean;
   }[];
 }
 
@@ -79,6 +82,9 @@ export type CoopServerMessage =
   | { readonly type: 'BATTLE_RESUME'; readonly committedTick: number; readonly battle: CoopBattleSnapshot }
   | { readonly type: 'FRAME_COMMITTED'; readonly battle: CoopBattleSnapshot; readonly outcomes: readonly unknown[] }
   | { readonly type: 'BATTLE_FINISHED'; readonly stageId?: string; readonly winner?: 'PLAYER' | 'ENEMY' | null; readonly clearFrames?: number; readonly committedTick?: number; readonly battle: CoopBattleSnapshot }
+  | { readonly type: 'QUICK_MESSAGE'; readonly seatId: CoopSeatId; readonly messageId: CoopQuickMessageId; readonly serverTimeMs: number }
+  | { readonly type: 'ACCOUNT_SETTLED'; readonly seatId: CoopSeatId; readonly stageId: string }
+  | { readonly type: 'ACCOUNT_SETTLEMENT_ERROR'; readonly seatId: CoopSeatId; readonly message: string }
   | { readonly type: 'INPUT_ACK'; readonly tick: number; readonly sequence: number }
   | { readonly type: 'PONG'; readonly committedTick: number; readonly simulationTick?: number; readonly stateHash?: string }
   | { readonly type: 'ERROR'; readonly code: string; readonly message?: string };
@@ -262,6 +268,10 @@ export class CoopSession {
   sendUnready(): void {
     this.send({ type: 'UNREADY' });
     this.readySent = false;
+  }
+
+  sendQuickMessage(messageId: CoopQuickMessageId): void {
+    this.send({ type: 'QUICK_MESSAGE', messageId });
   }
 
   get isReadySent(): boolean { return this.readySent; }
