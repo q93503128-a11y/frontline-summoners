@@ -10,9 +10,13 @@ import {
 } from '@frontline/sim/pvp-2v2-playable';
 import { applyPvp2v2Frame, getPvp2v2Snapshot, type Pvp2v2Command } from '@frontline/sim/pvp-2v2-playable-frame';
 import { FRONT_CANNON_BASE_WEAPON } from '@frontline/sim/playable';
-import { getAccountPvpSeatAuthority } from './account-pvp-authority.ts';
+import { getAccountFriendlyPvp2v2SeatAuthority, getAccountPvpSeatAuthority } from './account-pvp-authority.ts';
 import { loadPvpMatch, loadPvpMatchParticipants, markPvpMatchActive } from './pvp-authority.ts';
 import { completeTrustedCasualPvp2v2Result } from './pvp-2v2-result-authority.ts';
+import {
+  settleFriendlyPvp2v2Match,
+  voidFriendlyPvp2v2Match,
+} from './pvp-friendly-2v2-authority.ts';
 import { voidTrustedPvpMatch } from './pvp-result-authority.ts';
 import {
   connectPvp2v2Seat,
@@ -75,14 +79,16 @@ export class Pvp2v2Room extends DurableObject<Pvp2v2RoomEnv> {
         return json({ error: 'pvp_2v2_room_already_initialized' }, { status: 409 });
       }
       const match = await loadPvpMatch(this.env.DB, matchId);
-      if (!match || match.mode_id !== 'pvp_casual_2v2') return json({ error: 'pvp_match_not_live_2v2' }, { status: 400 });
+      if (!match || (match.mode_id !== 'pvp_casual_2v2' && match.mode_id !== 'pvp_friendly_2v2')) return json({ error: 'pvp_match_not_live_2v2' }, { status: 400 });
       if (match.state !== 'CREATED') return json({ error: 'pvp_match_not_creatable' }, { status: 409 });
       const participants = await loadPvpMatchParticipants(this.env.DB, matchId);
       if (participants.length !== 4) return json({ error: 'pvp_2v2_match_seats_invalid' }, { status: 400 });
       const accountBySeat = {} as Record<Pvp2v2SeatId, string>;
       for (const participant of participants) accountBySeat[participantSeat(participant.team_id, participant.seat_index)] = participant.user_id;
       if (PVP_2V2_SEAT_IDS.some((seatId) => !accountBySeat[seatId])) return json({ error: 'pvp_2v2_match_seats_invalid' }, { status: 400 });
-      const authorities = await Promise.all(PVP_2V2_SEAT_IDS.map((seatId) => getAccountPvpSeatAuthority(this.env.DB, accountBySeat[seatId], 'pvp_casual_2v2')));
+      const authorities = await Promise.all(PVP_2V2_SEAT_IDS.map((seatId) => match.mode_id === 'pvp_friendly_2v2'
+        ? getAccountFriendlyPvp2v2SeatAuthority(this.env.DB, accountBySeat[seatId])
+        : getAccountPvpSeatAuthority(this.env.DB, accountBySeat[seatId], 'pvp_casual_2v2')));
       const authorityBySeat = Object.fromEntries(PVP_2V2_SEAT_IDS.map((seatId, index) => [seatId, authorities[index]!])) as Record<Pvp2v2SeatId, Awaited<ReturnType<typeof getAccountPvpSeatAuthority>>>;
       const player = (seatId: Pvp2v2SeatId) => ({ slots: authorityBySeat[seatId].playerSlots, startingSupply: PVP_ARENA_TEAM_V1.startingSupplyPerPlayer });
       const battle = createPvp2v2Battle({
@@ -92,7 +98,7 @@ export class Pvp2v2Room extends DurableObject<Pvp2v2RoomEnv> {
         teamB: { players: [player('B1'), player('B2')], baseWeapon: FRONT_CANNON_BASE_WEAPON, unitCap: PVP_ARENA_TEAM_V1.unitCapPerSide },
       });
       this.record = {
-        room: createPvp2v2Room(matchId, 'pvp_casual_2v2'),
+        room: createPvp2v2Room(matchId, match.mode_id),
         joinTokens: Object.fromEntries(PVP_2V2_SEAT_IDS.map((seatId) => [seatId, tokens[seatId]!])) as Record<Pvp2v2SeatId, string>,
         seatAccountIds: accountBySeat,
         battle,
@@ -120,7 +126,8 @@ export class Pvp2v2Room extends DurableObject<Pvp2v2RoomEnv> {
       const record = await this.loadRecord();
       if (!record) return json({ ok: true, alreadyMissing: true });
       if (record.room.phase !== 'LOBBY') return json({ error: 'pvp_2v2_room_already_started' }, { status: 409 });
-      await voidTrustedPvpMatch(this.env.DB, record.room.matchId);
+      if (record.room.modeId === 'pvp_friendly_2v2') await voidFriendlyPvp2v2Match(this.env.DB, record.room.matchId);
+      else await voidTrustedPvpMatch(this.env.DB, record.room.matchId);
       this.record = null; this.loaded = true; await this.ctx.storage.deleteAll();
       return json({ ok: true });
     }
@@ -173,7 +180,7 @@ export class Pvp2v2Room extends DurableObject<Pvp2v2RoomEnv> {
       const frames = submitPvp2v2FrameInput(record.room, attachment.seatId, attachment.clientId, parsed.input, allowedSlotIds);
       ws.send(JSON.stringify({ type: 'INPUT_ACK', tick: parsed.input.tick, sequence: parsed.input.sequence }));
       for (const frame of frames) {
-        const commands = Object.fromEntries(PVP_2V2_SEAT_IDS.map((seatId) => [seatId, frame.inputs[seatId].commands as readonly Pvp2v2Command[]])) as Record<Pvp2v2SeatId, readonly Pvp2v2Command[]>;
+        const commands = Object.fromEntries(PVP_2V2_SEAT_IDS.map((frameSeatId) => [frameSeatId, frame.inputs[frameSeatId].commands as readonly Pvp2v2Command[]])) as Record<Pvp2v2SeatId, readonly Pvp2v2Command[]>;
         const applied = applyPvp2v2Frame(record.battle, { tick: frame.tick, commands });
         this.broadcast({ type: 'FRAME_COMMITTED', frame, outcomes: applied.outcomes, battle: getPvp2v2Snapshot(record.battle) });
         const result = simulationResult(record.battle);
@@ -225,14 +232,18 @@ export class Pvp2v2Room extends DurableObject<Pvp2v2RoomEnv> {
   private async finishVoid(record: StoredRoom): Promise<void> {
     if (record.room.phase === 'FINISHED') return;
     finishPvp2v2Room(record.room); record.terminalResult = null; record.terminalReason = 'VOID';
-    await voidTrustedPvpMatch(this.env.DB, record.room.matchId).catch(() => undefined); record.settled = true;
+    if (record.room.modeId === 'pvp_friendly_2v2') await voidFriendlyPvp2v2Match(this.env.DB, record.room.matchId).catch(() => undefined);
+    else await voidTrustedPvpMatch(this.env.DB, record.room.matchId).catch(() => undefined);
+    record.settled = true;
     await this.saveRecord(); this.broadcast({ type: 'BATTLE_VOID', reason: 'both_teams_disconnect_timeout' }); this.broadcastState(record);
   }
 
   private async settle(record: StoredRoom): Promise<void> {
     if (record.settled || record.room.phase !== 'FINISHED' || !record.terminalResult || record.terminalReason === 'VOID') return;
     try {
-      const settlement = await completeTrustedCasualPvp2v2Result(this.env.DB, record.room.matchId, record.terminalResult);
+      const settlement = record.room.modeId === 'pvp_friendly_2v2'
+        ? await settleFriendlyPvp2v2Match(this.env.DB, record.room.matchId, record.terminalResult)
+        : await completeTrustedCasualPvp2v2Result(this.env.DB, record.room.matchId, record.terminalResult);
       record.settled = true; await this.saveRecord(); this.broadcast({ type: 'ACCOUNT_SETTLED', settlement });
     } catch (error) { this.broadcast({ type: 'ACCOUNT_SETTLEMENT_ERROR', message: error instanceof Error ? error.message : 'PvP 2v2 settlement failed' }); }
   }
