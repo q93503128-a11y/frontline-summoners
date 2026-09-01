@@ -106,16 +106,15 @@ function matchesSearch(slot: PrototypeRosterSlot, rawSearch: string): boolean {
   return haystack.includes(search);
 }
 
-export function filterOwnedRosterSlots(
+/**
+ * Applies only presentation/search filters. Ownership remains a save-authority concern and the caller must
+ * pass the already-authorized visible roster (Deck passes owned slots; Catalog may pass the full roster).
+ */
+export function filterRosterSlots(
   slots: readonly PrototypeRosterSlot[],
   progress: GuestProgress,
   query: RosterBrowserQuery,
 ): readonly PrototypeRosterSlot[] {
-  const owned = new Set(progress.clearedStageIds.length >= 0 ? progress.ownedRecruitmentCharacterIds ?? [] : []);
-  // Story ownership is resolved by the caller-provided slots/progress helper in existing save authority;
-  // this set is extended below using the canonical owned list encoded in characterProgress when present.
-  for (const id of Object.keys(progress.characterProgressById ?? {})) owned.add(id);
-
   return slots.filter((slot) => {
     if (!matchesQuick(slot, query.quick, query.favoriteIds)) return false;
     if (query.role !== 'ALL' && slot.role !== query.role) return false;
