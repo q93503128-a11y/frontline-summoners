@@ -1,5 +1,6 @@
 import Phaser from 'phaser';
 import { INTERNAL_WIDTH } from '@frontline/shared';
+import { qualifiesStoryTenLateQuirk } from '@frontline/sim/achievement-quirks';
 import { getProfileCosmetic, getSpecialStageProfileRewardIds } from '@frontline/sim/achievement-profile';
 import { BATTLEFIELD_THEME_LABELS } from './battlefield';
 import {
@@ -11,8 +12,8 @@ import {
   type PrototypeStage,
 } from './prototype';
 import { getPermanentRewardEffectText } from './permanent-reward-ui';
-import { recordNormalStageClear, recordSpecialStageClear } from './save';
-import { loadGuestAchievementProfile } from './achievement-profile';
+import { getEffectiveDeckSlotIds, recordNormalStageClear, recordSpecialStageClear } from './save';
+import { loadGuestAchievementProfile, recordGuestAchievementFact } from './achievement-profile';
 import { addButton, addText, COLORS, drawBackdrop } from './scene-ui';
 import { getStageCollectionForStage } from './stage-navigation';
 import { isCompactMobileViewport } from './viewport';
@@ -98,9 +99,18 @@ export class ResultScene extends Phaser.Scene {
       const status = addText(this, INTERNAL_WIDTH / 2, compact ? 450 : 448, compact ? '진행 저장 중…' : 'NORMAL_CLEAR 진행·재화 저장 중…', compact ? 20 : 16, '#8f9aac', 'center').setOrigin(0.5);
       void recordNormalStageClear(this.stage.id, 'SOLO_BATTLE').then((result) => {
         this.resultRecorded = true;
+        const deckSlotIds = getEffectiveDeckSlotIds(result.progress);
+        const storyTenQuirk = qualifiesStoryTenLateQuirk(this.stage.id, deckSlotIds);
+        let storyTenNew = false;
+        if (storyTenQuirk) {
+          const beforeProfile = loadGuestAchievementProfile(result.progress);
+          storyTenNew = !beforeProfile.factIds.includes('quirk_story_ten_late');
+          recordGuestAchievementFact(result.progress, 'quirk_story_ten_late');
+        }
         if (!this.scene.isActive()) return;
         rewardTitle.setText(result.firstClear ? '영구 보상 획득' : 'NORMAL_CLEAR 재클리어 보상');
-        rewardText.setText(`${result.firstClear ? '첫 클리어 · ' : '재클리어 · '}${formatResourceReward(result.resourceReward)}`);
+        const quirkText = storyTenQuirk ? `\n${storyTenNew ? '숨겨진 업적 달성' : '숨겨진 업적 조건 재달성'} · 열 명의 이야기` : '';
+        rewardText.setText(`${result.firstClear ? '첫 클리어 · ' : '재클리어 · '}${formatResourceReward(result.resourceReward)}${quirkText}`);
         if (result.persisted) {
           status.setText(compact
             ? result.firstClear ? 'NORMAL_CLEAR · 다음 스테이지 개방' : '재클리어 보상 저장 완료'
