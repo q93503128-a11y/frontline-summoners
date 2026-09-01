@@ -1,5 +1,6 @@
 import Phaser from 'phaser';
 import { APP_NAME, INTERNAL_HEIGHT, INTERNAL_WIDTH } from '@frontline/shared';
+import { loadActiveProgress } from './active-progress';
 import { ART_FAMILIES } from './assets';
 import { BATTLEFIELD_THEME_LABELS } from './battlefield';
 import { getPermanentRewardEffectText } from './permanent-reward-ui';
@@ -73,7 +74,7 @@ export class MainMenuScene extends Phaser.Scene {
     addText(this, compact ? 74 : 88, compact ? 238 : 272, compact ? '승리할수록 전선과 동료가 열린다.' : '첫 출정은 징집병 하나. 승리할수록 전선과 동료가 열린다.', compact ? 24 : 22, COLORS.muted);
 
     this.add.rectangle(compact ? 1020 : 1040, compact ? 120 : 105, compact ? 390 : 320, compact ? 145 : 110, 0x222936, 0.96).setStrokeStyle(2, 0x556077);
-    addText(this, compact ? 850 : 900, compact ? 78 : 72, '게스트 지휘관', compact ? 28 : 26, '#ffffff');
+    const authorityText = addText(this, compact ? 850 : 900, compact ? 78 : 72, '진행 불러오는 중…', compact ? 28 : 26, '#ffffff');
     const progressText = addText(this, compact ? 850 : 900, compact ? 122 : 110, '진행도 불러오는 중…', compact ? 22 : 18, COLORS.muted);
 
     const menuButtonHeight = compact ? 108 : 92;
@@ -84,12 +85,23 @@ export class MainMenuScene extends Phaser.Scene {
     addText(this, compact ? 74 : 88, compact ? 610 : 628, compact ? '첫 NORMAL_CLEAR 영구 보상 · 에너지 제한 없음' : '출정에서 전선 묶음을 고른 뒤 스테이지로 진입 · 에너지 제한 없음', compact ? 24 : 20, '#9cd6ad');
     if (!compact) addText(this, 1185, 675, 'PRE-ALPHA', 17, '#657086').setOrigin(1, 0.5);
 
-    void loadGuestProgress().then((progress) => {
+    void loadActiveProgress().then((view) => {
       if (!this.scene.isActive()) return;
+      const progress = view.progress;
       const owned = getOwnedCharacterIds(progress).length;
+      authorityText.setText(view.authority === 'GUEST_LOCAL'
+        ? '게스트 지휘관'
+        : view.authority === 'ACCOUNT_ONLINE'
+          ? '계정 지휘관 · 서버'
+          : '계정 지휘관 · 오프라인');
+      authorityText.setColor(view.authority === 'ACCOUNT_ONLINE' ? '#8ee3aa' : view.authority === 'ACCOUNT_OFFLINE_CACHE' ? '#f2d37c' : '#ffffff');
       progressText.setText(compact
         ? `진도 ${progress.clearedStageIds.length}/${STAGES.length} · 특수 ${progress.specialClearedStageIds.length}/${SPECIAL_STAGES.length} · 동료 ${owned}`
         : `진도 ${progress.clearedStageIds.length}/${STAGES.length} · 특수 ${progress.specialClearedStageIds.length}/${SPECIAL_STAGES.length} · 영구 보상 ${progress.permanentRewardIds.length}/${STAGES.length} · 동료 ${owned}/${ALL_PLAYER_SLOTS.length}`);
+    }).catch((error: unknown) => {
+      if (!this.scene.isActive()) return;
+      authorityText.setText('진행 정보 오류').setColor('#ff9a91');
+      progressText.setText(error instanceof Error ? error.message : '진행 정보를 읽지 못했습니다.');
     });
   }
 }
