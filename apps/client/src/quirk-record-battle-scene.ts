@@ -12,7 +12,7 @@ import {
 } from '@frontline/sim/record-playable';
 import { recordGuestAchievementFact } from './achievement-profile.ts';
 import { loadActiveProgress, type ActiveProgressAuthority } from './active-progress.ts';
-import { RecordBattleScene } from './record-battle-scene.ts';
+import { AccessibleRecordBattleScene as RecordBattleScene } from './accessible-record-battle-scene.ts';
 import { addText } from './scene-ui.ts';
 import { isPortraitMobileViewport } from './viewport.ts';
 
