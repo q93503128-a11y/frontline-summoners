@@ -1,6 +1,6 @@
 # 1차 완성 정본 대조 감사 — 2026-09-01
 
-상태: **DESIGN_TARGET / code-audited, integrated CI + human product QA pending**
+상태: **DESIGN_TARGET / code-audited, integrated CI GREEN + human product QA pending**
 
 감사 기준 우선순위:
 
@@ -22,7 +22,7 @@
 
 1. production character/enemy art, motion, audio의 실제 웹 배포 자산
 2. guest/account/coop/PvP를 포함한 사람 멀티기기·viewport·장시간 플레이 QA
-3. 일부 UI 탐색/legacy 중복 코드/문서 상태 정리
+3. 일부 UI productization과 오래된 status 문서 정리
 
 ### 진척 추정
 
@@ -31,7 +31,7 @@
 - **규칙·콘텐츠·시스템 구현 진척: 약 92%**
 - **first-completion 제품 완성도 / release readiness: 약 78%**
 
-시스템 구현률보다 제품 완성도가 낮은 이유는 production asset과 실제 사람 QA가 플레이 체감에서 차지하는 비중이 크기 때문이다.
+협동 진입/legacy navigation 정리는 실제 오류 가능성을 줄였지만, production asset과 실제 사람 QA 비중이 크므로 이번 cleanup만으로 수치를 임의 상향하지 않는다.
 
 ## 정본 범위 대조
 
@@ -46,13 +46,13 @@
 | Lv1~50 / +레벨 | IMPLEMENTED | guest + account active meta authority 연결. 사람 계정 round-trip QA 남음 |
 | 8속성 | IMPLEMENTED | content schema canonical enum 및 실제 전투 bonus 사용 |
 | 모집 3시리즈 | IMPLEMENTED | 1/10회, 서버/게스트 RNG, 중복 +/분해. pity/direct select는 의도적으로 없음 |
-| 편성 10칸 | IMPLEMENTED, 이번 감사에서 확장 | active account authority + 탭/드래그 + 조합 필터/검색/즐겨찾기 |
+| 편성 10칸 | IMPLEMENTED | active account authority + 탭/드래그 + 조합 필터/검색/즐겨찾기 |
 | SPECIAL 해금 | IMPLEMENTED | `main_01_020` NORMAL_CLEAR 기준 |
 | NORMAL_CLEAR 후 2배속 | IMPLEMENTED | first-completion 범위에 실제 연결된 상태 |
 | 소탕 | IMPLEMENTED | guest/account save authority 및 eligibility 경로 존재 |
-| 도감 | IMPLEMENTED, 이번 감사에서 account read 수정 | 미획득/미발견 은폐, 전략 정보. 로그인 시 guest local을 읽던 단절을 active progress로 교정 |
+| 도감 | IMPLEMENTED | 미획득/미발견 은폐, 전략 정보, account active progress read authority 연결 |
 | 메인 스토리 12장면 | IMPLEMENTED | 4장 × intro/prelude/outro, skip/auto-skip, solo/trusted/coop routing |
-| PvE 2인 협동 | IMPLEMENTED / HUMAN QA PENDING | 참가코드 guest, 친구 account, 공개 account 경로와 퀵 메시지/보상 authority 존재 |
+| PvE 2인 협동 | IMPLEMENTED / HUMAN QA PENDING | 스테이지 문맥에서 solo/friend/public 선택, 참가코드 guest, 친구 account, 공개 account 경로와 퀵 메시지/보상 authority 존재 |
 | 친구/초대/최근 사용자 | IMPLEMENTED / HUMAN QA PENDING | social graph, invite, block, presence 구현 축 존재 |
 | PvP 1v1 casual/ranked/friendly | IMPLEMENTED / HUMAN QA PENDING | actual scenes/server authority/MMR/tier/leaderboard/reward 구현 |
 | PvP 2v2 casual/friendly | IMPLEMENTED / HUMAN QA PENDING | actual 2v2 matchmaking/battle/friendly scene 등록. ranked 2v2는 범위 밖 |
@@ -62,7 +62,7 @@
 | achievement/profile cosmetics | IMPLEMENTED | 일반/숨김/전투 attribution/season/event/record 보상 연결 |
 | production art/motion/audio | **MAJOR GAP** | production rules는 있으나 웹 제공 `public/assets`는 아직 실자산 패키지가 사실상 비어 있음 |
 
-## 이번 감사에서 발견하고 수정한 실제 단절
+## 이번 감사 이후 발견하고 수정한 실제 단절
 
 ### 1. 로그인 도감이 guest save를 읽던 문제
 
@@ -99,9 +99,51 @@
 
 `최근 획득`은 실제 획득 timestamp authority가 없으므로 허위 순서를 만들지 않고 남겼다.
 
-### 4. 이전 통합 CI의 direct TypeScript ESM import 실패
+### 4. direct TypeScript ESM import 실패
 
 `battle-vfx-density.ts`의 직접 Node 테스트 dependency import를 `.ts` 명시 경로로 수정했다.
+
+### 5. 스테이지 문맥 협동 진입 단절
+
+정본은 `SOLO_OR_COOP` 스테이지에서 혼자/친구/공개 협동을 선택하도록 되어 있었지만, 실제 카드에서는 전투와 소탕만 직접 제공하고 협동은 별도 상위 화면에서 전장을 다시 골랐다.
+
+`StageSortieModeScene`을 추가해 현재 stage id를 유지한 채 다음을 선택하도록 연결했다.
+
+- solo
+- guest code coop
+- account friend coop
+- account public coop
+
+소탕은 기존 stage card authority를 유지한다.
+
+CI #905 전체 GREEN.
+
+### 6. 메인/허브의 협동 authority 우회와 legacy navigation 중복
+
+스테이지 문맥 출정이 생긴 뒤에도 다음 과거 진입점이 남아 있었다.
+
+- 메인 메뉴 `2인 협동 -> coop-lobby` 직접 진입
+- 출정 허브 `공개 협동 -> public-coop-matchmaking` stage-agnostic 직접 진입
+- `navigation-scenes.ts`의 사용되지 않는 guest-only `StageHubScene`/`StageSelectScene`
+
+이를 정리했다.
+
+현재 player-facing 협동 흐름은:
+
+```text
+main / 출정
+  -> stage-hub
+  -> stage-select
+  -> SOLO_OR_COOP stage
+  -> sortie-mode
+     -> solo / friend / public
+```
+
+게스트 코드 협동 runtime은 `sortie-mode`가 선택 stage를 넘기는 전용 guest 경로로만 유지한다.
+
+`navigation-scenes.ts`는 Boot/MainMenu만 남겼고, 스테이지 UI 테스트들도 실제 dedicated runtime source를 검사한다.
+
+CI #907 전체 GREEN.
 
 ## 오래된 status 문서와 실제 코드의 충돌
 
@@ -153,13 +195,18 @@
 - 4장 연속 difficulty/boss fatigue
 - Record 장시간
 
-### C. UI/legacy cleanup
+### C. 남은 UI productization / 문서 정리
 
-실제 `main.ts`는 전용 `stage-hub-scene.ts`, `story-stage-select-scene.ts`를 사용하지만 `navigation-scenes.ts` 안에 오래된 StageHub/StageSelect 구현도 남아 있다.
+legacy StageHub/StageSelect 중복은 제거됐다.
 
-이는 현재 플레이 경로를 막지는 않지만 `CANONICAL`의 deprecated code cleanup 원칙에 맞지 않는 기술부채다.
+현재 남은 대표 항목은 다음이다.
 
-이번 콘텐츠 slice에서는 런타임 기능 확장을 우선했으므로 강제 삭제하지 않았다. 전용 cleanup milestone에서 tests/imports와 함께 제거하는 것이 안전하다.
+- 편성 `최근 획득`을 만들려면 실제 acquisition timestamp/history authority 필요
+- 검색은 현재 브라우저 prompt 기반이므로 dedicated in-game text input은 polish 후보
+- `docs/IMPLEMENTATION_STATUS.md`의 오래된 PvP/status 서술 갱신
+- 실제 모바일/데스크톱 viewport에서 버튼/텍스트 배치 사람 검수
+
+이 항목들은 production asset과 실제 사람 QA보다 우선도가 낮다.
 
 ## first-completion 밖이므로 추가하지 않은 것
 
@@ -175,8 +222,14 @@
 
 ## 통합 검증 메모
 
-CI #902에서는 simulation, server 140 tests, client suite가 통과했고 새 roster filter의 optional combat metadata 타입 정규화 3곳만 typecheck에서 실패했다. 해당 필드는 schema상 optional이므로 `?? []`로 정상화했으며 이 commit에서 전체 CI를 다시 검증한다.
+최근 자동 gate:
 
-CI가 green이어도 사람 플레이가 없으면 각 구현 문서는 `code-wired` 또는 `HUMAN QA PENDING` 상태를 유지한다.
+- CI #903: roster/browser + active progress surface 묶음 전체 GREEN
+- CI #905: stage-context sortie routing 전체 GREEN
+- CI #907: canonical coop entry + legacy navigation cleanup 전체 GREEN
+
+각 GREEN은 typecheck, content schema, simulation, server protocol/tests, client diagnostics/full suite, production build를 포함한다.
+
+CI가 green이어도 사람 플레이가 없으면 각 구현 문서는 `code-wired`, `automated CI GREEN`, 또는 `HUMAN QA PENDING` 상태를 유지한다.
 
 first-completion을 release-ready에 가깝게 올리는 다음 대형 묶음은 **production asset pipeline + 대표 캐릭터/보스/전장 실자산 적용** 또는 **실제 브라우저/멀티기기 acceptance QA에서 발견된 기능 결함 수정**이 가장 가치가 크다.
