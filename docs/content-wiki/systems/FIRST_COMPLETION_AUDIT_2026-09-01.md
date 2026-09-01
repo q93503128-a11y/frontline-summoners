@@ -31,7 +31,7 @@
 - **규칙·콘텐츠·시스템 구현 진척: 약 92%**
 - **first-completion 제품 완성도 / release readiness: 약 78%**
 
-협동 진입/legacy navigation 정리는 실제 오류 가능성을 줄였지만, production asset과 실제 사람 QA 비중이 크므로 이번 cleanup만으로 수치를 임의 상향하지 않는다.
+production runtime pipeline까지 연결되었지만 실제 최종 아트/음원과 사람 QA 비중이 크므로 이번 engineering integration만으로 수치를 임의 상향하지 않는다.
 
 ## 정본 범위 대조
 
@@ -60,7 +60,8 @@
 | guest/login/save/migration/delete | IMPLEMENTED / HUMAN RECOVERY QA PENDING | guest save v15, account save, GIS/auth, reversible migration/delete 경로 존재 |
 | 접근성/VFX/저사양 | IMPLEMENTED / HUMAN QA PENDING | shake/flash/motion/LOW/VFX LOW/battery 정책. simulation은 독립 |
 | achievement/profile cosmetics | IMPLEMENTED | 일반/숨김/전투 attribution/season/event/record 보상 연결 |
-| production art/motion/audio | **MAJOR GAP** | production rules는 있으나 웹 제공 `public/assets`는 아직 실자산 패키지가 사실상 비어 있음 |
+| production asset runtime pipeline | CODE-WIRED / CI GREEN | 129 form + enemy/boss + battlefield/audio 계약, APPROVED gate, active F1/F2/F3 resolver, Deck portrait, Battle KB/Death consumer 연결 |
+| production art/motion/audio 실자산 | **MAJOR GAP** | production candidate는 아직 0개이며 대표 vertical slice도 `AWAITING_ART`. 실제 최종 자산 제작·검수·웹 제공이 남음 |
 
 ## 이번 감사 이후 발견하고 수정한 실제 단절
 
@@ -145,6 +146,31 @@ main / 출정
 
 CI #907 전체 GREEN.
 
+### 7. Production asset 계약과 실제 runtime consumer 단절
+
+placeholder를 최종 자산으로 직접 덧칠하지 않기 위한 production pipeline을 추가했다.
+
+- 43명 × F1/F2/F3 = 129 form 요구사항
+- enemy/boss 전체 요구사항
+- battlefield/audio 요구사항
+- `AWAITING_ART -> READY_FOR_REVIEW -> APPROVED` lifecycle
+- `APPROVED`만 runtime 사용
+- 미승인 대상은 기존 placeholder fallback
+- Boot runtime strip preload
+
+추가 코드 대조에서 문서상 active form mirror가 연결된 것으로 적혀 있었지만 실제 `resolveUnitArt()`가 F1 fallback만 보던 누락도 발견했다. 현재는 explicit form → active visual-form mirror → canonical F1 순서로 고쳤다.
+
+또한:
+
+- `DeckScene`의 별도 `UNIT_ART / ART_BY_ID / ART_FAMILIES` portrait resolver 제거
+- 선택된 form을 production resolver에 명시 전달
+- `BattleScene`이 production Knockback/Death strip을 실제 state rendering에서 소비
+- authored Death가 있을 때 placeholder용 generic 회전/페이드가 덮어쓰지 않도록 분리
+- strip별 frameHeight 기준 sprite scale 갱신
+- motion/frame mapping을 `production-motion.ts`로 분리해 회귀 테스트 고정
+
+초기 계약 CI #908 및 runtime integration CI #914 전체 GREEN.
+
 ## 오래된 status 문서와 실제 코드의 충돌
 
 `docs/IMPLEMENTATION_STATUS.md`에는 PvP가 아직 foundation 수준인 것처럼 남아 있는 부분이 있다.
@@ -167,19 +193,30 @@ CI #907 전체 GREEN.
 
 우선순위는 다음과 같다.
 
-### A. Production asset productization
+### A. 실제 Production asset vertical slice
 
-가장 큰 플레이어 체감 공백이다.
+runtime pipeline과 승인 gate는 연결됐다. 이제 가장 큰 플레이어 체감 공백은 실제 자산이다.
 
-- 캐릭터별 실제 production identity
-- 적/보스 production identity
-- F1/F2/F3 외형 차이
-- 공격 contact motion/FX
-- 전장 배경
-- BGM/SFX
-- 저사양/접근성 대체 자산
+첫 대표 묶음은 다음을 대상으로 한다.
 
-현재 시스템/콘텐츠가 충분히 닫혔으므로 이전보다 asset 제작을 시작할 근거가 커졌지만, 한 번에 43×3 전체를 만들기보다는 대표 세트로 production pipeline과 품질 기준을 먼저 검증하는 것이 안전하다.
+- 징집병 F1/F2/F3
+- 일반 적 대표 1종
+- 보스 대표 1종
+- 첫 전장 배경
+- Chapter 1 BGM
+- battle core SFX
+
+대표 세트에서 먼저 검증할 항목:
+
+- 캐릭터별 production identity
+- F1/F2/F3 실루엣 차이
+- attack contact frame
+- Knockback/Death readability
+- 전장과 유닛 명도 대비
+- BGM/SFX bus 및 autoplay 정책
+- 저사양/접근성 대체 동작
+
+현재 모든 예약은 `AWAITING_ART`이며, 실제 자산을 만들었다는 허위 상태는 없다. 특히 S/SS는 사용자 검수 없이 임의 승인하지 않는다.
 
 ### B. 사람 QA / balance certification
 
@@ -206,7 +243,7 @@ legacy StageHub/StageSelect 중복은 제거됐다.
 - `docs/IMPLEMENTATION_STATUS.md`의 오래된 PvP/status 서술 갱신
 - 실제 모바일/데스크톱 viewport에서 버튼/텍스트 배치 사람 검수
 
-이 항목들은 production asset과 실제 사람 QA보다 우선도가 낮다.
+이 항목들은 production 실자산과 실제 사람 QA보다 우선도가 낮다.
 
 ## first-completion 밖이므로 추가하지 않은 것
 
@@ -227,9 +264,11 @@ legacy StageHub/StageSelect 중복은 제거됐다.
 - CI #903: roster/browser + active progress surface 묶음 전체 GREEN
 - CI #905: stage-context sortie routing 전체 GREEN
 - CI #907: canonical coop entry + legacy navigation cleanup 전체 GREEN
+- CI #908 / run `33517401836`: initial production asset contract 전체 GREEN
+- CI #914 / run `33564942315`: active form + Deck resolver + Battle production KB/Death runtime integration 전체 GREEN
 
 각 GREEN은 typecheck, content schema, simulation, server protocol/tests, client diagnostics/full suite, production build를 포함한다.
 
 CI가 green이어도 사람 플레이가 없으면 각 구현 문서는 `code-wired`, `automated CI GREEN`, 또는 `HUMAN QA PENDING` 상태를 유지한다.
 
-first-completion을 release-ready에 가깝게 올리는 다음 대형 묶음은 **production asset pipeline + 대표 캐릭터/보스/전장 실자산 적용** 또는 **실제 브라우저/멀티기기 acceptance QA에서 발견된 기능 결함 수정**이 가장 가치가 크다.
+first-completion을 release-ready에 가깝게 올리는 다음 대형 묶음은 **대표 production 실자산을 검수 가능한 vertical slice로 준비·승인하는 작업** 또는 **실제 브라우저/멀티기기 acceptance QA에서 발견된 기능 결함 수정**이 가장 가치가 크다.
