@@ -35,10 +35,10 @@ export class PvpSeasonScene extends Phaser.Scene {
     addButton(this, 1165, 62, 170, compact ? 78 : 50, 'PvP 허브', () => this.scene.start('pvp-hub'), 0x586275);
     this.status = addText(this, INTERNAL_WIDTH / 2, 687, '시즌 기록을 불러오는 중…', compact ? 18 : 15, '#a9b5c5', 'center').setOrigin(0.5);
     this.render();
-    void this.load();
+    void this.loadSeasonOverview();
   }
 
-  private async load(): Promise<void> {
+  private async loadSeasonOverview(): Promise<void> {
     try {
       const overview = await getPvpSeasonOverview();
       if (!this.scene.isActive()) return;
@@ -94,12 +94,12 @@ export class PvpSeasonScene extends Phaser.Scene {
 
     this.content.add(this.add.rectangle(770, 285, 500, 335, 0x272936, 0.98).setStrokeStyle(3, 0x77678c, 1));
     this.content.add(addText(this, 770, 140, '배치 완료 티어 분포', compact ? 26 : 23, '#eadcff', 'center').setOrigin(0.5));
-    const tierOrder = ['FRONTLINE_APEX','GRANDMASTER','MASTER','DIAMOND','PLATINUM','GOLD','SILVER','BRONZE'];
+    const tierOrder: PvpSeasonOverview['tierPopulation'][number]['tierId'][] = ['FRONTLINE_APEX','GRANDMASTER','MASTER','DIAMOND','PLATINUM','GOLD','SILVER','BRONZE'];
     const byTier = new Map(overview.tierPopulation.map((entry) => [entry.tierId, entry.players] as const));
     tierOrder.forEach((tier, index) => {
       const y = 183 + index * 34;
       this.content!.add(addText(this, 565, y, tierName(tier), compact ? 16 : 14, '#c7d0dc'));
-      this.content!.add(addText(this, 975, y, `${byTier.get(tier as never) ?? 0}명`, compact ? 16 : 14, '#f0d67d', 'right').setOrigin(1, 0));
+      this.content!.add(addText(this, 975, y, `${byTier.get(tier) ?? 0}명`, compact ? 16 : 14, '#f0d67d', 'right').setOrigin(1, 0));
     });
 
     this.content.add(this.add.rectangle(1090, 285, 270, 335, 0x222a34, 0.98).setStrokeStyle(3, 0x5f6d7e, 1));
