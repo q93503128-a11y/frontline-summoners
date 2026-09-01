@@ -8,6 +8,7 @@ import {
   type AccountSaveRecord,
   type AccountSaveSnapshotV2,
 } from './account-save-authority.ts';
+import { initializeAccountProfile } from './account-profile-authority.ts';
 import { mergeAccountEnemyDiscoveries, normalizeServerEnemyDiscoveries } from './account-enemy-discovery-authority.ts';
 import { ACCOUNT_MAIN_STAGE_INDEX, ACCOUNT_SPECIAL_STAGE_IDS } from './account-content.ts';
 import { assertAccountSpecialStagePlayable, getAccountStagePolicy } from './account-stage-authority.ts';
@@ -254,7 +255,7 @@ export async function applyAccountSpecialBattleResult(
 ): Promise<AccountSpecialMutationApplyResult<AccountSpecialBattleMutationResult>> {
   const battleId = nonEmptyId(input.battleId, 'battleId');
   const discoveredEnemyIds = normalizeServerEnemyDiscoveries(input.discoveredEnemyIds ?? []);
-  return commitMutation(
+  const result = await commitMutation(
     db,
     accountId,
     input.expectedRevision,
@@ -264,6 +265,10 @@ export async function applyAccountSpecialBattleResult(
     (snapshot) => buildSpecialBattleResult(snapshot, input.stageId, nowMs, availabilityAtMs, discoveredEnemyIds),
     nowMs,
   );
+  // SPECIAL stage achievements include event cumulative profile rewards. Sync immediately after a
+  // successful authoritative clear so the cosmetic is owned before the player opens the profile UI.
+  if (result.ok) await initializeAccountProfile(db, accountId, nowMs);
+  return result;
 }
 
 export async function applyAccountSweep(
