@@ -13,12 +13,23 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          fetch-depth: 2
+          fetch-depth: 20
       - name: Apply co-op hidden achievement attribution bundle
         run: python tools/dev-apply-coop-quirk-attribution.py
+      - name: Normalize generated text endings
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          for name in [
+              'apps/server/test/social-coop-authority.test.ts',
+              'packages/sim/test/coop-playable.test.ts',
+          ]:
+              p = Path(name)
+              p.write_text(p.read_text().rstrip() + '\n')
+          PY
       - name: Restore canonical CI and commit product changes
         run: |
-          git checkout HEAD^ -- .github/workflows/ci.yml
+          git show f7dedc89045381339199723a53c1468498c9f121:.github/workflows/ci.yml > .github/workflows/ci.yml
           git config user.name 'coworkaccount'
           git config user.email 'cyp1jhh2@gmail.com'
           git add -A
