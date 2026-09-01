@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import type { BattleUnitDefinition } from '../src/index.ts';
+import { spawnUnit, type BattleUnitDefinition } from '../src/index.ts';
+import { TURNIP_RIDER_CHARACTER_ID } from '../src/combat-quirk-attribution.ts';
 import {
   applyCoopPlayableFrame,
   createCoopPlayableBattle,
@@ -185,4 +186,24 @@ test('identical co-op frame sequence yields identical hash', () => {
     return state.stateHash;
   };
   assert.equal(run(), run());
+});
+
+test('co-op five-turnip hidden fact is attributed per seat instead of combining teammates', () => {
+  const state = createCoopPlayableBattle(config());
+  const addTurnip = (seatId: 'A' | 'B', x: number): void => {
+    const spawned = spawnUnit(state.shared.battle, unit(TURNIP_RIDER_CHARACTER_ID, { attackDamage: 0 }), 'PLAYER', x);
+    state.ownerBySimulationId[String(spawned.simulationId)] = seatId;
+  };
+  for (const x of [100, 120, 140]) addTurnip('A', x);
+  for (const x of [160, 180]) addTurnip('B', x);
+
+  const mixed = applyCoopPlayableFrame(state, 0, { A: [], B: [] });
+  assert.ok(!mixed.quirkFactsBySeat.A.includes('quirk_turnip_five'));
+  assert.ok(!mixed.quirkFactsBySeat.B.includes('quirk_turnip_five'));
+
+  addTurnip('A', 200);
+  addTurnip('A', 220);
+  const attributed = applyCoopPlayableFrame(state, 1, { A: [], B: [] });
+  assert.ok(attributed.quirkFactsBySeat.A.includes('quirk_turnip_five'));
+  assert.ok(!attributed.quirkFactsBySeat.B.includes('quirk_turnip_five'));
 });

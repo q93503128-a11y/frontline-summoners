@@ -19,6 +19,7 @@ export const COMBAT_QUIRK_FACT_IDS = [
   'quirk_bellcrab_multi',
 ] as const satisfies readonly AchievementFactId[];
 export type CombatQuirkFactId = (typeof COMBAT_QUIRK_FACT_IDS)[number];
+export type CombatQuirkPlayerUnitPredicate = (unit: BattleUnit) => boolean;
 
 interface ActiveObservedAttack {
   readonly attackMinRange: number;
@@ -165,13 +166,16 @@ function captureClockduckCandidate(state: BattleState, source: BattleUnit): Cloc
   };
 }
 
-export function captureCombatQuirkFrame(state: BattleState): CombatQuirkFrameCapture {
+export function captureCombatQuirkFrame(
+  state: BattleState,
+  playerUnitPredicate: CombatQuirkPlayerUnitPredicate = () => true,
+): CombatQuirkFrameCapture {
   const bellCrabUnitTargetCounts: number[] = [];
   const clockduckFinishCandidates: ClockduckFinishCandidate[] = [];
   const sources = [...state.units].sort((a, b) => a.simulationId - b.simulationId);
 
   for (const source of sources) {
-    if (source.team !== 'PLAYER' || source.hp <= 0) continue;
+    if (source.team !== 'PLAYER' || source.hp <= 0 || !playerUnitPredicate(source)) continue;
     if (source.definition.id === BELL_CRAB_CHARACTER_ID) {
       const targetCount = captureBellCrabTargets(state, source);
       if (targetCount !== null) bellCrabUnitTargetCounts.push(targetCount);
@@ -183,7 +187,7 @@ export function captureCombatQuirkFrame(state: BattleState): CombatQuirkFrameCap
 
   return {
     tick: state.tick,
-    turnipAliveBefore: state.units.filter(aliveForTurnipChallenge).length,
+    turnipAliveBefore: state.units.filter((unit) => aliveForTurnipChallenge(unit) && playerUnitPredicate(unit)).length,
     bellCrabUnitTargetCounts,
     clockduckFinishCandidates,
   };
@@ -192,9 +196,10 @@ export function captureCombatQuirkFrame(state: BattleState): CombatQuirkFrameCap
 export function resolveCombatQuirkFacts(
   capture: CombatQuirkFrameCapture,
   stateAfterStep: BattleState,
+  playerUnitPredicate: CombatQuirkPlayerUnitPredicate = () => true,
 ): readonly CombatQuirkFactId[] {
   const facts = new Set<CombatQuirkFactId>();
-  const turnipAliveAfter = stateAfterStep.units.filter(aliveForTurnipChallenge).length;
+  const turnipAliveAfter = stateAfterStep.units.filter((unit) => aliveForTurnipChallenge(unit) && playerUnitPredicate(unit)).length;
   if (Math.max(capture.turnipAliveBefore, turnipAliveAfter) >= TURNIP_FIVE_REQUIRED_COUNT) {
     facts.add('quirk_turnip_five');
   }

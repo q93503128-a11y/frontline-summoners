@@ -23,9 +23,15 @@ import {
   type SupplyLevelDefinition,
   type UpgradeFailureReason,
 } from './playable.ts';
+import {
+  captureCombatQuirkFrame,
+  resolveCombatQuirkFacts,
+  type CombatQuirkFactId,
+} from './combat-quirk-attribution.ts';
 
 export const COOP_PLAYABLE_SEATS = ['A', 'B'] as const;
 export type CoopPlayableSeatId = (typeof COOP_PLAYABLE_SEATS)[number];
+export type CoopCombatQuirkFactsBySeat = Readonly<Record<CoopPlayableSeatId, readonly CombatQuirkFactId[]>>;
 
 export interface CoopPlayerEconomyConfig {
   readonly startingSupply: number;
@@ -409,7 +415,11 @@ export function applyCoopPlayableFrame(
   state: CoopPlayableBattleState,
   tick: number,
   commandsBySeat: Readonly<Record<CoopPlayableSeatId, readonly CoopPlayableCommand[]>>,
-): { readonly outcomes: readonly CoopCommandOutcome[]; readonly snapshot: CoopPlayableSnapshot } {
+): {
+  readonly outcomes: readonly CoopCommandOutcome[];
+  readonly snapshot: CoopPlayableSnapshot;
+  readonly quirkFactsBySeat: CoopCombatQuirkFactsBySeat;
+} {
   if (tick !== state.shared.battle.tick) {
     throw new Error(`co-op frame tick ${tick} does not match simulation tick ${state.shared.battle.tick}`);
   }
@@ -417,8 +427,20 @@ export function applyCoopPlayableFrame(
     ...applyCoopPlayableCommands(state, 'A', commandsBySeat.A),
     ...applyCoopPlayableCommands(state, 'B', commandsBySeat.B),
   ];
+  const ownedBy = (seatId: CoopPlayableSeatId) => (unit: { readonly simulationId: number }) =>
+    state.ownerBySimulationId[String(unit.simulationId)] === seatId;
+  const predicateA = ownedBy('A');
+  const predicateB = ownedBy('B');
+  const captures = {
+    A: captureCombatQuirkFrame(state.shared.battle, predicateA),
+    B: captureCombatQuirkFrame(state.shared.battle, predicateB),
+  } as const;
   stepCoopPlayableBattle(state);
-  return { outcomes, snapshot: getCoopPlayableSnapshot(state) };
+  const quirkFactsBySeat: CoopCombatQuirkFactsBySeat = {
+    A: resolveCombatQuirkFacts(captures.A, state.shared.battle, predicateA),
+    B: resolveCombatQuirkFacts(captures.B, state.shared.battle, predicateB),
+  };
+  return { outcomes, snapshot: getCoopPlayableSnapshot(state), quirkFactsBySeat };
 }
 
 function fnv1a(text: string): string {

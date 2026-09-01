@@ -7,6 +7,9 @@ import { ACCOUNT_MAIN_STAGE_INDEX, ACCOUNT_SPECIAL_STAGE_IDS } from './account-c
 import { assertAccountSpecialStagePlayable } from './account-stage-authority.ts';
 import { getServerCoopLoadout, getServerCoopStage, type ServerCoopStageRuntime } from './runtime-content.ts';
 import type { CoopPlayerLoadout } from './coop-room.ts';
+import { COMBAT_QUIRK_FACT_IDS, type CombatQuirkFactId } from '@frontline/sim/combat-quirk-attribution';
+
+const COMBAT_QUIRK_FACT_ID_SET = new Set<string>(COMBAT_QUIRK_FACT_IDS);
 
 export interface AccountCoopSeatAuthority {
   readonly accountId: string;
@@ -117,6 +120,17 @@ export async function settleAuthenticatedCoopDiscoveries(
     if (result.ok) return result.record.revision;
   }
   throw new Error(`authenticated coop discovery revision conflict:${accountId}:${lastRevision}`);
+}
+
+export async function settleAuthenticatedCoopCombatFacts(
+  db: D1Database,
+  accountId: string,
+  factIds: readonly CombatQuirkFactId[],
+  nowMs = Date.now(),
+): Promise<readonly CombatQuirkFactId[]> {
+  const canonical = [...new Set(factIds.filter((factId) => COMBAT_QUIRK_FACT_ID_SET.has(factId)))];
+  for (const factId of canonical) await recordAccountAchievementFact(db, accountId, factId, nowMs);
+  return canonical;
 }
 
 export async function settleAuthenticatedCoopWin(

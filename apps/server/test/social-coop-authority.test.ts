@@ -102,3 +102,16 @@ test('authenticated friend invite never returns seat token by friend code alone'
   assert.match(source, /body: JSON\.stringify\(\{ seatId: 'B', accountId: userId \}\)/);
   assert.doesNotMatch(source, /social_coop_invites[^\n]*joinToken/);
 });
+
+test('authenticated co-op persists combat hidden facts for the owning seat on wins or losses', async () => {
+  const [roomSource, authoritySource] = await Promise.all([
+    readSource('../src/index.ts'),
+    readSource('../src/account-coop-authority.ts'),
+  ]);
+  assert.match(roomSource, /combatQuirkFactIdsBySeat\?: Record<CoopSeatId, CombatQuirkFactId\[\]>/);
+  assert.match(roomSource, /recordCombatQuirkFacts\(record, applied\.quirkFactsBySeat\)/);
+  assert.match(roomSource, /record\.combatQuirkFactIdsBySeat\?\.\[seatId\] \?\? \[\]/);
+  assert.match(roomSource, /await settleAuthenticatedCoopCombatFacts\(/);
+  assert.match(authoritySource, /COMBAT_QUIRK_FACT_IDS/);
+  assert.match(authoritySource, /recordAccountAchievementFact\(db, accountId, factId, nowMs\)/);
+});

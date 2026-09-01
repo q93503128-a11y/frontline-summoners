@@ -3,12 +3,19 @@ import { COOP_QUICK_MESSAGE_IDS, SIM_TICK_RATE, type CoopQuickMessageId } from '
 import {
   applyCoopPlayableFrame,
   getCoopPlayableSnapshot,
+  type CoopCombatQuirkFactsBySeat,
   type CoopPlayableBattleState,
   type CoopPlayableCommand,
 } from '@frontline/sim/coop-playable';
+import type { CombatQuirkFactId } from '@frontline/sim/combat-quirk-attribution';
 import { resolveAuthenticatedAccountHttp } from './account-http.ts';
 import { resolveAuthHttp, type AuthHttpResult } from './auth-http.ts';
-import { getAccountCoopSeatAuthority, settleAuthenticatedCoopDiscoveries, settleAuthenticatedCoopWin } from './account-coop-authority.ts';
+import {
+  getAccountCoopSeatAuthority,
+  settleAuthenticatedCoopCombatFacts,
+  settleAuthenticatedCoopDiscoveries,
+  settleAuthenticatedCoopWin,
+} from './account-coop-authority.ts';
 import { drainCoopFramesAfterAiHandoff } from './coop-ai-handoff.ts';
 import {
   connectCoopSeat,
@@ -56,6 +63,7 @@ type StoredCoopRoom = {
   recentPlayersRecorded: boolean;
   battleStartedAtMs: number | null;
   encounteredEnemyIds?: string[];
+  combatQuirkFactIdsBySeat?: Record<CoopSeatId, CombatQuirkFactId[]>;
   battle: CoopPlayableBattleState | null;
 };
 
@@ -286,6 +294,7 @@ export class BattleRoom extends DurableObject<Env> {
         recentPlayersRecorded: false,
         battleStartedAtMs: null,
         encounteredEnemyIds: [],
+        combatQuirkFactIdsBySeat: { A: [], B: [] },
         battle: null,
       };
       this.loaded = true;
@@ -504,6 +513,14 @@ export class BattleRoom extends DurableObject<Env> {
     record.encounteredEnemyIds = [...encountered];
   }
 
+  private recordCombatQuirkFacts(record: StoredCoopRoom, factsBySeat: CoopCombatQuirkFactsBySeat): void {
+    const current = record.combatQuirkFactIdsBySeat ?? { A: [], B: [] };
+    for (const seatId of ['A', 'B'] as const) {
+      current[seatId] = [...new Set([...current[seatId], ...factsBySeat[seatId]])];
+    }
+    record.combatQuirkFactIdsBySeat = current;
+  }
+
   private applyCommittedFrames(record: StoredCoopRoom, frames: readonly CoopCommittedFrame[]): boolean {
     if (!record.battle) return false;
     let finished = record.room.phase === 'FINISHED';
@@ -523,6 +540,7 @@ export class BattleRoom extends DurableObject<Env> {
         B: frame.inputs.B.commands as readonly CoopPlayableCommand[],
       });
       this.recordEncounteredEnemies(record, applied.snapshot);
+      this.recordCombatQuirkFacts(record, applied.quirkFactsBySeat);
       this.broadcast({ type: 'FRAME_COMMITTED', frame, outcomes: applied.outcomes, battle: applied.snapshot });
       if (applied.snapshot.winner !== null) finished = true;
     }
@@ -568,6 +586,11 @@ export class BattleRoom extends DurableObject<Env> {
         } else {
           await settleAuthenticatedCoopDiscoveries(this.env.DB, accountId, discoveredEnemyIds);
         }
+        await settleAuthenticatedCoopCombatFacts(
+          this.env.DB,
+          accountId,
+          record.combatQuirkFactIdsBySeat?.[seatId] ?? [],
+        );
         record.settledSeats[seatId] = true;
         this.sendToSeat(seatId, { type: 'ACCOUNT_SETTLED', seatId, stageId: record.room.stageId });
       } catch (error) {
