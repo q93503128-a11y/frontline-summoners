@@ -16,15 +16,35 @@ jobs:
       - name: Install dependencies
         run: npm install --ignore-scripts
       - name: Typecheck
-        run: npm run typecheck
+        shell: bash
+        run: |
+          set -o pipefail
+          npm run typecheck 2>&1 | tee "$RUNNER_TEMP/typecheck.log"
       - name: Test content schema
         run: npm run test -w @frontline/content-schema
       - name: Test simulation
         if: always()
-        run: npm run test -w @frontline/sim
+        shell: bash
+        run: |
+          set -o pipefail
+          npm run test -w @frontline/sim 2>&1 | tee "$RUNNER_TEMP/sim-test.log"
       - name: Test server co-op protocol
         if: always()
-        run: npm run test -w @frontline/server
+        shell: bash
+        run: |
+          set -o pipefail
+          npm run test -w @frontline/server 2>&1 | tee "$RUNNER_TEMP/server-test.log"
+      - name: Upload core verification diagnostics
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: core-verification-diagnostics
+          path: |
+            ${{ runner.temp }}/typecheck.log
+            ${{ runner.temp }}/sim-test.log
+            ${{ runner.temp }}/server-test.log
+          if-no-files-found: warn
+          retention-days: 3
       - name: Diagnose failing client tests
         if: always()
         shell: bash
