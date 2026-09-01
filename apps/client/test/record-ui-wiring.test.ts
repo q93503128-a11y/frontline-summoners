@@ -11,7 +11,7 @@ test('record SPECIAL is reachable from sortie and all three player-facing scenes
   ]);
   assert.match(hub, /'기록전', \(\) => this\.scene\.start\('record-hub'\)/);
   assert.match(main, /import \{ RecordHubScene \} from '\.\/record-hub-scene';/);
-  assert.match(main, /import \{ RecordBattleScene \} from '\.\/record-battle-scene';/);
+  assert.match(main, /import \{ QuirkRecordBattleScene as RecordBattleScene \} from '\.\/quirk-record-battle-scene';/);
   assert.match(main, /import \{ RecordResultScene \} from '\.\/record-result-scene';/);
   assert.match(main, /game\.scene\.add\('record-hub', RecordHubScene, false\)/);
   assert.match(main, /game\.scene\.add\('record-battle', RecordBattleScene, false\)/);
