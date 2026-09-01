@@ -1,11 +1,11 @@
 import Phaser from 'phaser';
 import { INTERNAL_WIDTH } from '@frontline/shared';
 import { getBaseWeaponDefinition, type BaseWeaponId } from '@frontline/sim/playable';
+import { loadActiveProgress } from './active-progress.ts';
+import { selectActiveBaseWeapon } from './active-meta-progression.ts';
 import { BASE_WEAPON_UNLOCKS, isBaseWeaponUnlocked } from './base-weapon-progression.ts';
 import {
   getGuestSelectedBaseWeaponId,
-  loadGuestProgress,
-  selectGuestBaseWeapon,
   type GuestProgress,
 } from './save.ts';
 import { addButton, addText, COLORS, drawBackdrop } from './scene-ui.ts';
@@ -59,9 +59,12 @@ export class BaseWeaponScene extends Phaser.Scene {
     addButton(this, 1165, compact ? 70 : 65, 160, compact ? 84 : 50, '출정', () => this.scene.start('stage-hub'), 0x586275);
     this.status = addText(this, INTERNAL_WIDTH / 2, 690, '', compact ? 20 : 17, '#9ca9bb', 'center').setOrigin(0.5);
     this.renderWeapons();
-    void loadGuestProgress().then((progress) => {
+    void loadActiveProgress().then((view) => {
       if (!this.scene.isActive()) return;
-      this.progress = progress;
+      this.progress = view.progress;
+      if (view.authority === 'ACCOUNT_OFFLINE_CACHE') {
+        this.status?.setText('계정 장착 정보를 읽기 전용으로 불러왔습니다. 변경하려면 온라인 연결이 필요합니다.').setColor('#ffcf8a');
+      }
       this.renderWeapons();
     });
   }
@@ -103,7 +106,7 @@ export class BaseWeaponScene extends Phaser.Scene {
   private async equip(baseWeaponId: BaseWeaponId): Promise<void> {
     this.status?.setText('장착 저장 중...').setColor('#d7c38b');
     try {
-      const result = await selectGuestBaseWeapon(baseWeaponId);
+      const result = await selectActiveBaseWeapon(baseWeaponId);
       if (!this.scene.isActive()) return;
       this.progress = result.guestProgress;
       this.status?.setText(result.persisted ? '거점 병기 장착 저장 완료' : '영구 저장 실패 · 현재 탭에서는 선택 유지').setColor(result.persisted ? '#8ee3aa' : '#ffb37c');
