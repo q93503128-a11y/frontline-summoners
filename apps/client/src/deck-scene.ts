@@ -1,5 +1,7 @@
 import Phaser from 'phaser';
 import { INTERNAL_HEIGHT, INTERNAL_WIDTH } from '@frontline/shared';
+import { loadActiveProgress } from './active-progress';
+import { recordActiveDeck, resetActiveDeckToAutomatic } from './active-meta-progression';
 import { ART_BY_ID, ART_FAMILIES, UNIT_ART } from './assets';
 import { buildCharacterCombatSlot, getEvolutionForm } from './character-growth';
 import { formatCombatTraits, formatDamageSpecialty } from './combat-trait-labels';
@@ -13,9 +15,6 @@ import {
   MAX_DECK_SLOTS,
   getEffectiveDeckSlotIds,
   getOwnedCharacterIds,
-  loadGuestProgress,
-  recordGuestDeck,
-  resetGuestDeckToAutomatic,
   type GuestProgress,
 } from './save';
 import { isCompactMobileViewport } from './viewport';
@@ -152,12 +151,19 @@ export class DeckScene extends Phaser.Scene {
     button(this, 910, 660, 170, compact ? 84 : 48, '자동 편성', () => { void this.resetAutomatic(); }, 0x6d6b55);
     button(this, 1120, 660, 190, compact ? 84 : 48, '편성 저장', () => { void this.saveDeck(); }, 0x5f8fb8);
 
-    void loadGuestProgress().then((progress) => {
+    void loadActiveProgress().then((view) => {
       if (!this.scene.isActive()) return;
+      const progress = view.progress;
       this.progress = progress;
       this.selectedIds = [...getEffectiveDeckSlotIds(progress)];
-      this.statusText?.setText(progress.deckSlotIds === undefined ? '기존 자동 편성을 불러왔습니다. 저장하면 수동 편성이 권위가 됩니다.' : '저장된 수동 편성을 불러왔습니다.');
-      this.statusText?.setColor('#9fcfff');
+      this.statusText?.setText(view.authority === 'ACCOUNT_OFFLINE_CACHE'
+        ? '계정 편성을 읽기 전용으로 불러왔습니다. 저장하려면 온라인 연결이 필요합니다.'
+        : view.authority === 'ACCOUNT_ONLINE'
+          ? '계정 서버 편성을 불러왔습니다.'
+          : progress.deckSlotIds === undefined
+            ? '기존 자동 편성을 불러왔습니다. 저장하면 수동 편성이 권위가 됩니다.'
+            : '저장된 수동 편성을 불러왔습니다.');
+      this.statusText?.setColor(view.authority === 'ACCOUNT_OFFLINE_CACHE' ? '#ffcf8a' : '#9fcfff');
       this.renderAll();
     });
   }
@@ -343,7 +349,7 @@ export class DeckScene extends Phaser.Scene {
     this.statusText?.setText('편성 저장 중…');
     this.statusText?.setColor('#9ca9bb');
     try {
-      const result = await recordGuestDeck(this.selectedIds);
+      const result = await recordActiveDeck(this.selectedIds);
       this.progress = result.guestProgress;
       this.selectedIds = [...result.deckSlotIds];
       if (!this.scene.isActive()) return;
@@ -362,19 +368,19 @@ export class DeckScene extends Phaser.Scene {
   private async resetAutomatic(): Promise<void> {
     if (this.saving) return;
     this.saving = true;
-    this.statusText?.setText('자동 편성으로 되돌리는 중…');
+    this.statusText?.setText('자동 편성을 계산하는 중…');
     this.statusText?.setColor('#9ca9bb');
     try {
-      const result = await resetGuestDeckToAutomatic();
+      const result = await resetActiveDeckToAutomatic();
       this.progress = result.guestProgress;
       this.selectedIds = [...result.deckSlotIds];
       if (!this.scene.isActive()) return;
-      this.statusText?.setText(result.persisted ? '자동 편성으로 복귀했습니다. 보유 순서 기준 최대 10명이 적용됩니다.' : '영구 저장 실패 · 현재 탭에서는 자동 편성을 유지합니다.');
+      this.statusText?.setText(result.persisted ? '현재 보유 순서 기준 자동 편성을 적용했습니다.' : '영구 저장 실패 · 현재 탭에서는 자동 편성을 유지합니다.');
       this.statusText?.setColor(result.persisted ? '#8ee3aa' : '#ffb37c');
       this.renderAll();
     } catch (error) {
       if (!this.scene.isActive()) return;
-      this.statusText?.setText(error instanceof Error ? error.message : '자동 편성으로 되돌리지 못했습니다.');
+      this.statusText?.setText(error instanceof Error ? error.message : '자동 편성을 적용하지 못했습니다.');
       this.statusText?.setColor('#ff9a91');
     } finally {
       this.saving = false;
