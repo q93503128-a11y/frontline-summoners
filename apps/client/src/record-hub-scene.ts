@@ -1,8 +1,10 @@
 import Phaser from 'phaser';
 import { INTERNAL_WIDTH } from '@frontline/shared';
+import { getProfileCosmetic } from '@frontline/sim/achievement-profile';
+import { RECORD_PROFILE_HONORS } from '@frontline/sim/record-rewards';
 import { BOSS_RUSH_SEQUENCE, RECORD_MODE_DEFINITIONS, isRecordModeUnlocked, type RecordModeId } from './record-content.ts';
 import { loadActiveProgress, type ActiveProgressAuthority } from './active-progress.ts';
-import { type GuestProgress } from './save.ts';
+import { type GuestProgress, type RecordModeProgress } from './save.ts';
 import { addButton, addText, COLORS, drawBackdrop } from './scene-ui.ts';
 import { isCompactMobileViewport } from './viewport.ts';
 
@@ -29,6 +31,23 @@ function authorityLabel(authority: ActiveProgressAuthority): string {
   if (authority === 'ACCOUNT_ONLINE') return '계정 기록 · 서버 결정론 검증';
   if (authority === 'ACCOUNT_OFFLINE_CACHE') return '계정 오프라인 캐시 · 기록 도전/저장 불가';
   return '게스트 로컬 기록';
+}
+
+function recordHonorProgressText(modeId: RecordModeId, progress?: RecordModeProgress): string {
+  const expectedMode = modeId === 'record_endless_front' ? 'ENDLESS_FRONT' : 'BOSS_RUSH';
+  const modeHonors = RECORD_PROFILE_HONORS.filter((honor) => honor.mode === expectedMode);
+  const current = modeId === 'record_endless_front'
+    ? progress?.endlessBestReachedMinute ?? 0
+    : progress?.bossRushBestDefeated ?? 0;
+  const reached = modeHonors.filter((honor) => current >= honor.threshold);
+  if (reached.length > 0 && reached.length === modeHonors.length) {
+    const names = [...new Set(reached.map((honor) => getProfileCosmetic(honor.cosmeticId).name))];
+    return `명예 달성 · ${names.join(' · ')}`;
+  }
+  const nextThreshold = Math.min(...modeHonors.filter((honor) => current < honor.threshold).map((honor) => honor.threshold));
+  const nextNames = [...new Set(modeHonors.filter((honor) => honor.threshold === nextThreshold).map((honor) => getProfileCosmetic(honor.cosmeticId).name))];
+  const target = modeId === 'record_endless_front' ? `${nextThreshold}분` : `${nextThreshold}/${BOSS_RUSH_SEQUENCE.length}보스`;
+  return `다음 명예 · ${target} · ${nextNames.join(' · ')}`;
 }
 
 export class RecordHubScene extends Phaser.Scene {
@@ -72,11 +91,11 @@ export class RecordHubScene extends Phaser.Scene {
       const unlocked = isRecordModeUnlocked(mode.id, this.progress.clearedStageIds);
       const canChallenge = unlocked && this.authority !== 'ACCOUNT_OFFLINE_CACHE';
       const accent = mode.id === 'record_endless_front' ? 0x587d91 : 0x8a5d72;
-      const card = this.add.rectangle(x, 385, 430, 430, unlocked ? 0x242c3a : 0x1d222c, 0.98).setStrokeStyle(4, unlocked ? accent : 0x3c4554, 1);
+      const card = this.add.rectangle(x, 390, 430, 450, unlocked ? 0x242c3a : 0x1d222c, 0.98).setStrokeStyle(4, unlocked ? accent : 0x3c4554, 1);
       this.layer!.add(card);
-      this.layer!.add(addText(this, x, 205, unlocked ? 'RECORD SPECIAL' : 'LOCKED', compact ? 20 : 16, unlocked ? '#b9d9ec' : '#69727e', 'center').setOrigin(0.5));
-      this.layer!.add(addText(this, x, 255, mode.displayName, compact ? 34 : 31, unlocked ? '#ffffff' : '#747d89', 'center').setOrigin(0.5));
-      this.layer!.add(addText(this, x, 320, mode.description, compact ? 21 : 18, unlocked ? '#c5cedb' : '#656e7a', 'center').setOrigin(0.5).setWordWrapWidth(370));
+      this.layer!.add(addText(this, x, 195, unlocked ? 'RECORD SPECIAL' : 'LOCKED', compact ? 20 : 16, unlocked ? '#b9d9ec' : '#69727e', 'center').setOrigin(0.5));
+      this.layer!.add(addText(this, x, 245, mode.displayName, compact ? 34 : 31, unlocked ? '#ffffff' : '#747d89', 'center').setOrigin(0.5));
+      this.layer!.add(addText(this, x, 308, mode.description, compact ? 21 : 18, unlocked ? '#c5cedb' : '#656e7a', 'center').setOrigin(0.5).setWordWrapWidth(370));
 
       const best = mode.id === 'record_endless_front'
         ? `최고 생존 ${formatDuration(record?.endlessBestTimeMs ?? 0)} · ${record?.endlessBestReachedMinute ?? 0}분 경계`
@@ -84,13 +103,14 @@ export class RecordHubScene extends Phaser.Scene {
       const claimed = mode.id === 'record_endless_front'
         ? `보상 수령 경계 ${record?.endlessRewardedMinute ?? 0}분`
         : `보상 수령 구간 ${record?.bossRushRewardedDefeated ?? 0}보스`;
-      this.layer!.add(addText(this, x, 392, best, compact ? 22 : 19, unlocked ? '#f1d58a' : '#6f6b61', 'center').setOrigin(0.5));
-      this.layer!.add(addText(this, x, 430, claimed, compact ? 19 : 16, unlocked ? '#9fb0c3' : '#666f7a', 'center').setOrigin(0.5));
-      this.layer!.add(addText(this, x, 470, '1× 고정 · SOLO_ONLY · 소탕 불가', compact ? 19 : 16, unlocked ? '#9dcdb1' : '#626b74', 'center').setOrigin(0.5));
-      if (!unlocked) this.layer!.add(addText(this, x, 510, unlockText(mode.id), compact ? 19 : 16, '#8b8290', 'center').setOrigin(0.5));
-      else if (!canChallenge) this.layer!.add(addText(this, x, 510, '온라인 복구 후 서버 검증 기록 도전 가능', compact ? 19 : 16, '#d7a37d', 'center').setOrigin(0.5));
+      this.layer!.add(addText(this, x, 382, best, compact ? 22 : 19, unlocked ? '#f1d58a' : '#6f6b61', 'center').setOrigin(0.5));
+      this.layer!.add(addText(this, x, 420, claimed, compact ? 19 : 16, unlocked ? '#9fb0c3' : '#666f7a', 'center').setOrigin(0.5));
+      this.layer!.add(addText(this, x, 458, recordHonorProgressText(mode.id, record), compact ? 17 : 14, unlocked ? '#e0c990' : '#66695f', 'center').setOrigin(0.5).setWordWrapWidth(390));
+      this.layer!.add(addText(this, x, 495, '1× 고정 · SOLO_ONLY · 소탕 불가', compact ? 18 : 15, unlocked ? '#9dcdb1' : '#626b74', 'center').setOrigin(0.5));
+      if (!unlocked) this.layer!.add(addText(this, x, 530, unlockText(mode.id), compact ? 18 : 15, '#8b8290', 'center').setOrigin(0.5));
+      else if (!canChallenge) this.layer!.add(addText(this, x, 530, '온라인 복구 후 서버 검증 기록 도전 가능', compact ? 18 : 15, '#d7a37d', 'center').setOrigin(0.5));
 
-      const button = addButton(this, x, compact ? 570 : 565, 240, compact ? 84 : 62, !unlocked ? '잠김' : canChallenge ? '기록 도전' : '온라인 필요', () => {
+      const button = addButton(this, x, compact ? 585 : 580, 240, compact ? 76 : 58, !unlocked ? '잠김' : canChallenge ? '기록 도전' : '온라인 필요', () => {
         if (canChallenge) this.scene.start('record-battle', { modeId: mode.id });
       }, canChallenge ? accent : 0x3f4855);
       if (!canChallenge) button.setAlpha(0.62);
@@ -98,7 +118,9 @@ export class RecordHubScene extends Phaser.Scene {
     });
 
     if (!compact) {
-      this.layer.add(addText(this, INTERNAL_WIDTH / 2, 646, '새 정수 분/새 보스 구간을 처음 넘을 때만 성장 보상이 추가된다. 같은 기록 이하 반복 지급은 없다.', 16, '#8995a7', 'center').setOrigin(0.5));
+      this.layer.add(addText(this, INTERNAL_WIDTH / 2, 648, '새 정수 분/새 보스 구간은 최초 1회 재화 보상. 15분 생존과 보스 러시 완주에는 별도 프로필 명예 보상이 있다.', 16, '#8995a7', 'center').setOrigin(0.5));
     }
   }
 }
+
+export const __recordHubSceneTestOnly = { recordHonorProgressText };
