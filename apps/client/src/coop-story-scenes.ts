@@ -89,7 +89,7 @@ function guestResultText(scene: Phaser.Scene): string {
 export class StoryGuestCoopLobbyScene extends CoopLobbyScene {
   private preferredStageId: string | undefined;
 
-  override init(data: { preferredStageId?: string } = {}): void {
+  init(data: { preferredStageId?: string } = {}): void {
     this.preferredStageId = data.preferredStageId;
   }
 
