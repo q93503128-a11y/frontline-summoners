@@ -63,9 +63,10 @@ test('runtime and catalog share the coarse-pointer compact-mobile classifier ins
   assert.match(viewport, /coarsePointer && Math\.min\(width, height\) <= COMPACT_MOBILE_SHORT_SIDE/);
   assert.match(viewport, /window\.matchMedia\('\(pointer: coarse\)'\)\.matches/);
 
-  assert.match(ui, /const renderedSize = isCompactMobileViewport\(\) \? Math\.max\(size, 16\) : size;/);
+  assert.match(ui, /const scaledSize = Math\.round\(size \* getUiScaleFactor\(settings\)\);/);
+  assert.match(ui, /const renderedSize = isCompactMobileViewport\(\) \? Math\.max\(scaledSize, 16\) : Math\.max\(scaledSize, 12\);/);
   assert.match(ui, /fontSize: `\$\{renderedSize\}px`/);
-  assert.match(ui, /strokeThickness: renderedSize >= 30 \? 4 : 0/);
+  assert.match(ui, /strokeThickness: highContrast \?/);
   assert.match(catalog, /const renderedSize = isCompactMobileViewport\(\) \? Math\.max\(size, 16\) : size;/);
   assert.match(catalog, /fontSize: `\$\{renderedSize\}px`/);
 });
