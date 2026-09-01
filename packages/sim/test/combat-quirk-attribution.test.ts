@@ -100,3 +100,21 @@ test('clockduck does not receive finishing credit when its own hit is not indepe
   assert.equal(boss.state, UnitState.Dying);
   assert.ok(!facts.includes('quirk_duck_mech_finish'));
 });
+
+test('clockduck lethal hit does not count while a MACHINE BOSS is entering revive', () => {
+  const state = createBattle({ mapLength: 1000, playerBaseHp: 1000, enemyBaseHp: 1000 });
+  const duck = spawnUnit(state, unit(CLOCKDUCK_CHARACTER_ID, { attackDamage: 80 }), 'PLAYER', 400);
+  duck.state = UnitState.Foreswing;
+  duck.stateFrame = 0;
+  duck.nextAttackTick = 30;
+  const boss = spawnUnit(state, unit('reviving-machine-boss', {
+    maxHp: 70,
+    attackDamage: 0,
+    attributes: [CombatAttribute.Machine],
+    combatTags: [CombatTag.Boss],
+    reviveOnce: { delayFrames: 30, hpPermille: 500 },
+  }), 'ENEMY', 450);
+  const facts = observeOneStep(state);
+  assert.equal(boss.state, UnitState.Reviving);
+  assert.ok(!facts.includes('quirk_duck_mech_finish'));
+});
