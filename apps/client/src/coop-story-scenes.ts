@@ -3,7 +3,10 @@ import { CoopBattleScene, CoopLobbyScene } from './coop-scenes';
 import { getAuthenticatedCoopClientProgress } from './coop-account-progress';
 import { CoopSession, type CoopServerMessage } from './coop-network';
 import { FriendCoopBattleScene, FriendCoopLobbyScene } from './friend-coop-scenes';
+import { ALL_STAGES } from './prototype';
 import { PublicCoopLobbyScene } from './public-coop-scenes';
+import { loadGuestProgress } from './save';
+import { isSortieStageUnlocked } from './stage-navigation';
 import { getPostStageStory, getPreStageStory } from './story-content';
 import { presentStoryOverlay, type StoryOverlayHandle } from './story-overlay';
 
@@ -14,6 +17,10 @@ import { presentStoryOverlay, type StoryOverlayHandle } from './story-overlay';
 type CoopLobbySessionCarrier = Phaser.Scene & { readonly session?: CoopSession | null };
 type GuestLobbyCarrier = CoopLobbySessionCarrier & {
   readonly progress?: { readonly clearedStageIds?: readonly string[] };
+};
+type GuestLobbyPageCarrier = Phaser.Scene & {
+  page?: number;
+  render?: () => void;
 };
 type GuestBattleResultCarrier = Phaser.Scene & {
   readonly resultLayer?: Phaser.GameObjects.Container;
@@ -80,9 +87,29 @@ function guestResultText(scene: Phaser.Scene): string {
 }
 
 export class StoryGuestCoopLobbyScene extends CoopLobbyScene {
+  private preferredStageId: string | undefined;
+
+  override init(data: { preferredStageId?: string } = {}): void {
+    this.preferredStageId = data.preferredStageId;
+  }
+
   override create(): void {
     super.create();
     attachGuestLobbyPreStory(this);
+    const preferredStageId = this.preferredStageId;
+    if (!preferredStageId) return;
+
+    // CoopLobbyScene keeps guest save/session authority private. This adapter only focuses its existing stage picker
+    // after the base async progress load; it does not create a second room path or mutate the chosen stage later.
+    void Promise.resolve().then(() => loadGuestProgress()).then((progress) => {
+      if (!this.scene.isActive()) return;
+      const eligible = ALL_STAGES.filter((stage) => stage.multiplayerPolicy === 'SOLO_OR_COOP' && isSortieStageUnlocked(stage.id, progress.clearedStageIds));
+      const index = eligible.findIndex((stage) => stage.id === preferredStageId);
+      if (index < 0) return;
+      const carrier = this as unknown as GuestLobbyPageCarrier;
+      carrier.page = Math.floor(index / 5);
+      carrier.render?.();
+    }).catch(() => undefined);
   }
 }
 
