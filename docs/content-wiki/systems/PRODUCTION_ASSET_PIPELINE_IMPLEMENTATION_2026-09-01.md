@@ -1,6 +1,6 @@
 # Production Asset Pipeline 구현 기록 — 2026-09-01
 
-상태: `DESIGN_TARGET / integration in progress`
+상태: `DESIGN_TARGET / automated CI GREEN, human art·browser QA pending`
 
 상위 정본:
 
@@ -104,7 +104,24 @@ Boot preload는 더 이상 placeholder `ART_FAMILIES`만 고정 순회하지 않
 - selected form identity는 placeholder fallback 중에도 보존
 - active visual-form mirror가 progression을 쓰지 않고 form 선택만 추적
 
-## 5. 아직 닫지 않은 연결
+## 5. 자동 검증 결과
+
+통합 CI #908 / run `33517401836`에서 아래가 모두 PASS했다.
+
+- Install dependencies
+- Typecheck
+- Content schema
+- Simulation
+- Server co-op protocol/tests
+- Core verification diagnostics upload
+- Client diagnostics
+- Client diagnostics artifact upload
+- Client full suite
+- Production build
+
+검증 대상 code/doc HEAD는 `895eca05490c5315dc86836b30edc9ead10ad868`이다. 이후 `public/assets/README.md`의 production 경로 설명은 docs-only `[skip ci]`로 추가했다.
+
+## 6. 아직 닫지 않은 연결
 
 이번 계약 자체와 별개로 다음 runtime consumer는 추가 연결이 필요하다.
 
@@ -115,8 +132,8 @@ Boot preload는 더 이상 placeholder `ART_FAMILIES`만 고정 순회하지 않
 
 1~2는 코드 integration 항목이며 최종 아트 디자인 자체를 먼저 만들 필요는 없다. 3은 사용자 승인 전 임의 진행하지 않는다.
 
-## 6. 상태 의미
+## 7. 상태 의미
 
-- 현재 문서 상태는 `DESIGN_TARGET / integration in progress`다.
+- 현재 문서 상태는 `DESIGN_TARGET / automated CI GREEN, human art·browser QA pending`이다.
 - 자동 CI가 성공해도 `TESTED`로 올리지 않는다.
 - production candidate `APPROVED`는 실제 자산 존재 + 정본 조건 검증 + 필요한 사용자 아트 검수를 거친 뒤에만 사용한다.
