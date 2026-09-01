@@ -1,6 +1,5 @@
 import Phaser from 'phaser';
 import { INTERNAL_HEIGHT, INTERNAL_WIDTH } from '@frontline/shared';
-import { ART_BY_ID, ART_FAMILIES, UNIT_ART, type ArtFamily, type AttackFxStyle } from './assets';
 import {
   getClientSettings,
   getScreenShakeFactor,
@@ -9,6 +8,7 @@ import {
   shouldUseReducedMotion,
   shouldUseStrongFlash,
 } from './client-settings';
+import { resolveUnitArt, type ResolvedUnitArt } from './production-assets.ts';
 import { isCompactMobileViewport } from './viewport';
 
 export const FONT = '"Malgun Gothic", "Apple SD Gothic Neo", "Noto Sans KR", sans-serif';
@@ -142,10 +142,12 @@ export function flashCamera(
   scene.cameras.main.flash(durationMs, red, green, blue);
 }
 
-export function familyForUnit(unitId: string): { family: ArtFamily; tint: number; displayScale: number; attackFx: AttackFxStyle } {
-  const variant = UNIT_ART[unitId] ?? { familyId: 'warrior', tint: 0xffffff, attackFx: 'SLASH' as const };
-  const family = ART_BY_ID[variant.familyId] ?? ART_FAMILIES[0]!;
-  return { family, tint: variant.tint, displayScale: variant.displayScale ?? 1, attackFx: variant.attackFx };
+/**
+ * Central player-facing art resolver. Production art is returned only after its manifest entry is APPROVED;
+ * otherwise the existing verified CC0 placeholder family remains authoritative.
+ */
+export function familyForUnit(unitId: string, selectedFormId?: string): ResolvedUnitArt {
+  return resolveUnitArt(unitId, selectedFormId);
 }
 
 export function battleUiFontSize(regular: number, compact: number): number {
