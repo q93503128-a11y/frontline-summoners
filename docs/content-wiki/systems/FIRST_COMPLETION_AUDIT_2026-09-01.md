@@ -177,6 +177,6 @@
 
 이 감사 문서 자체는 `TESTED` 증거가 아니다.
 
-다음 integrated CI green 뒤에도 사람 플레이가 없으면 각 구현 문서는 `code-wired` 또는 `HUMAN QA PENDING` 상태를 유지한다.
+이번 milestone의 마지막 non-skip commit에서 통합 CI를 실행한다. CI가 green이어도 사람 플레이가 없으면 각 구현 문서는 `code-wired` 또는 `HUMAN QA PENDING` 상태를 유지한다.
 
 first-completion을 release-ready에 가깝게 올리는 다음 대형 묶음은 **production asset pipeline + 대표 캐릭터/보스/전장 실자산 적용** 또는 **실제 브라우저/멀티기기 acceptance QA에서 발견된 기능 결함 수정**이 가장 가치가 크다.
