@@ -1,5 +1,6 @@
 import Phaser from 'phaser';
 import { getClientSettings } from './client-settings';
+import { getStage } from './prototype';
 import { StageSelectScene } from './stage-select-scene';
 import { getPreStageStory } from './story-content';
 import { shouldPresentStory } from './story-progress';
@@ -15,8 +16,9 @@ function stageIdFromData(data: unknown): string | undefined {
 }
 
 /**
- * Adds optional first-view narrative in front of solo MAIN sorties without changing StageSelectScene's
- * unlock/formation/sweep authority. Coop will use the same story routing policy in its own lobby pass.
+ * Adds stage-context sortie routing in front of solo MAIN/SPECIAL entry without changing StageSelectScene's
+ * unlock/formation/sweep authority. SOLO_OR_COOP stages open the sortie-mode picker; solo-only stages keep
+ * the direct optional narrative route.
  */
 export class StoryStageSelectScene extends StageSelectScene {
   override create(): void {
@@ -26,6 +28,12 @@ export class StoryStageSelectScene extends StageSelectScene {
     scenePlugin.start = ((key: string, data?: object) => {
       if (key === 'battle') {
         const stageId = stageIdFromData(data);
+        if (stageId) {
+          const stage = getStage(stageId);
+          if (stage.multiplayerPolicy === 'SOLO_OR_COOP') {
+            return originalStart('sortie-mode', { stageId });
+          }
+        }
         const story = stageId ? getPreStageStory(stageId) : undefined;
         if (story && shouldPresentStory(story, getClientSettings().autoSkipStory)) {
           const storyData = data === undefined
