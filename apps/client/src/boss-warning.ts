@@ -1,14 +1,14 @@
 import Phaser from 'phaser';
 import { INTERNAL_WIDTH } from '@frontline/shared';
+import { getBattleFeedbackPolicy } from './battle-feedback-policy';
 
 const FONT = '"Malgun Gothic", "Apple SD Gothic Neo", "Noto Sans KR", sans-serif';
 
 /** Purely visual warning. It never changes simulation time, input state, or combat data. */
 export function showBossArrival(scene: Phaser.Scene, bossName: string): void {
-  const layer = scene.add.container(INTERNAL_WIDTH / 2, 205).setDepth(80).setAlpha(0);
+  const policy = getBattleFeedbackPolicy();
+  const layer = scene.add.container(INTERNAL_WIDTH / 2, 205).setDepth(80).setAlpha(policy.reducedMotion ? 1 : 0);
   const dim = scene.add.rectangle(0, 0, 700, 108, 0x120e12, 0.9).setStrokeStyle(3, 0xd06762, 0.95);
-  const upper = scene.add.rectangle(0, -46, 684, 5, 0xe17369, 0.9);
-  const lower = scene.add.rectangle(0, 46, 684, 5, 0x7e3536, 0.9);
   const title = scene.add.text(0, -24, '우 두 머 리  출 현', {
     fontFamily: FONT,
     fontSize: '24px',
@@ -21,9 +21,23 @@ export function showBossArrival(scene: Phaser.Scene, bossName: string): void {
     color: '#fff0cf',
     fontStyle: 'bold',
   }).setOrigin(0.5);
-  layer.add([dim, upper, lower, title, name]);
+  layer.add([dim, title, name]);
 
-  scene.cameras.main.shake(110, 0.0014);
+  if (!policy.reducedDecorativeEffects) {
+    const upper = scene.add.rectangle(0, -46, 684, 5, 0xe17369, 0.9);
+    const lower = scene.add.rectangle(0, 46, 684, 5, 0x7e3536, 0.9);
+    layer.add([upper, lower]);
+  }
+
+  if (policy.screenShakeFactor > 0) scene.cameras.main.shake(110, 0.0014);
+
+  if (policy.reducedMotion) {
+    scene.time.delayedCall(1050, () => {
+      if (layer.active) layer.destroy(true);
+    });
+    return;
+  }
+
   scene.tweens.add({
     targets: layer,
     alpha: 1,
