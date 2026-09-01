@@ -40,11 +40,14 @@ test('public matchmaking scene uses account coop progress and routes matched sea
   assert.match(source, /friend-coop-battle/);
 });
 
-test('sortie hub and Phaser registry expose public matchmaking entry points', async () => {
+test('stage-context sortie picker and Phaser registry expose public matchmaking entry points', async () => {
+  const sortie = await readFile(new URL('../src/stage-sortie-mode-scene.ts', import.meta.url), 'utf8');
   const hub = await readFile(new URL('../src/stage-hub-scene.ts', import.meta.url), 'utf8');
   const main = await readFile(new URL('../src/main.ts', import.meta.url), 'utf8');
-  assert.match(hub, /공개 협동/);
-  assert.match(hub, /public-coop-matchmaking/);
+  assert.match(sortie, /'공개 협동'/);
+  assert.match(sortie, /joinPublicCoopMatchmaking\(this\.stage\.id\)/);
+  assert.match(sortie, /this\.scene\.start\('public-coop-matchmaking'\)/);
+  assert.doesNotMatch(hub, /this\.scene\.start\('public-coop-matchmaking'\)/);
   assert.match(main, /PublicCoopMatchmakingScene/);
   assert.match(main, /PublicCoopLobbyScene/);
   assert.match(main, /game\.scene\.add\('public-coop-matchmaking'/);
