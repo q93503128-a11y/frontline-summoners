@@ -1,6 +1,6 @@
 # 첫 Production Vertical Slice 인입 계약 — 2026-09-02
 
-상태: `DESIGN_TARGET / intake contract code-wired, integrated CI pending, human art review pending`
+상태: `DESIGN_TARGET / intake contract code-wired, integrated CI GREEN, human art review pending`
 
 상위 정본:
 
@@ -200,3 +200,25 @@ GitHub Actions `CI`의 Typecheck 직후 별도 gate로 실행한다.
 9. meadow에서 8~12기 중첩 시 캐릭터 외곽이 살아 있는지
 
 이 검수 전에는 `READY_FOR_REVIEW` 이상으로 올리지 않는다.
+
+## 10. 자동 검증 결과
+
+CI #918 / run `33568943788`에서 새 `Check production asset intake` 단계를 포함한 전체 파이프라인이 GREEN이었다.
+
+검증된 코드 HEAD:
+
+`a66f4897c7aa31c0ceb2e67d439e5842596fed5b`
+
+PASS 범위:
+
+- install
+- typecheck
+- production asset intake check
+- content schema
+- simulation
+- server co-op protocol
+- client individual diagnostics
+- client full suite
+- production build
+
+이는 사람의 캐릭터 디자인 승인, 실제 PNG 품질 승인, 브라우저 silhouette/contact QA를 대체하지 않는다.
