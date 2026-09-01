@@ -23,6 +23,7 @@ import {
   type PvpSeasonOperationsHttpEnv,
 } from './pvp-season-operations-http.ts';
 import { resolveSocialHttp } from './social-http.ts';
+import { resolveTrustedCombatQuirkCompleteHttp } from './trusted-combat-quirk-http.ts';
 
 export { BattleRoom, FriendlyPvpRoom, Pvp2v2Room, PvpRoom };
 
@@ -52,6 +53,8 @@ export default {
     const pvpSocket = await resolvePvpWebSocket(request, env);
     if (pvpSocket) return pvpSocket;
     if (request.method !== 'OPTIONS') {
+      const trustedCombatQuirk = await resolveTrustedCombatQuirkCompleteHttp(request, env.DB);
+      if (trustedCombatQuirk) return json(trustedCombatQuirk.body, trustedCombatQuirk.status, trustedCombatQuirk.headers);
       const seasonOperations = await resolvePvpSeasonOperationsHttp(request, env);
       if (seasonOperations) return json(seasonOperations.body, seasonOperations.status);
       const season = await resolvePvpSeasonHttp(request, env);
