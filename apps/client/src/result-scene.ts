@@ -1,5 +1,6 @@
 import Phaser from 'phaser';
 import { INTERNAL_WIDTH } from '@frontline/shared';
+import { getProfileCosmetic, getSpecialStageProfileRewardIds } from '@frontline/sim/achievement-profile';
 import { BATTLEFIELD_THEME_LABELS } from './battlefield';
 import {
   STAGES,
@@ -11,6 +12,7 @@ import {
 } from './prototype';
 import { getPermanentRewardEffectText } from './permanent-reward-ui';
 import { recordNormalStageClear, recordSpecialStageClear } from './save';
+import { loadGuestAchievementProfile } from './achievement-profile';
 import { addButton, addText, COLORS, drawBackdrop } from './scene-ui';
 import { getStageCollectionForStage } from './stage-navigation';
 import { isCompactMobileViewport } from './viewport';
@@ -29,6 +31,11 @@ function formatResourceReward(reward: Readonly<Record<string, number | undefined
     .filter(([, amount]) => typeof amount === 'number' && amount > 0)
     .map(([id, amount]) => `${labels[id] ?? id} +${amount!.toLocaleString('ko-KR')}`);
   return parts.length > 0 ? parts.join(' · ') : '추가 재화 보상 없음';
+}
+
+function formatSpecialProfileReward(stageId: string): string | undefined {
+  const names = getSpecialStageProfileRewardIds(stageId).map((id) => getProfileCosmetic(id).name);
+  return names.length > 0 ? `프로필 장식 해금 · ${names.join(' · ')}` : undefined;
 }
 
 export class ResultScene extends Phaser.Scene {
@@ -64,8 +71,10 @@ export class ResultScene extends Phaser.Scene {
       const status = addText(this, INTERNAL_WIDTH / 2, compact ? 446 : 447, compact ? 'SPECIAL 결과 저장 중…' : 'SPECIAL 클리어·재화 결과 저장 중…', compact ? 21 : 16, '#8f9aac', 'center').setOrigin(0.5);
       void recordSpecialStageClear(this.stage.id).then((result) => {
         this.resultRecorded = true;
+        if (result.firstClear) loadGuestAchievementProfile(result.progress);
         if (!this.scene.isActive()) return;
-        rewardText.setText(`${result.firstClear ? '첫 클리어 · ' : '재클리어 · '}${formatResourceReward(result.resourceReward)}`);
+        const profileReward = result.firstClear ? formatSpecialProfileReward(this.stage.id) : undefined;
+        rewardText.setText(`${result.firstClear ? '첫 클리어 · ' : '재클리어 · '}${formatResourceReward(result.resourceReward)}${profileReward ? `\n${profileReward}` : ''}`);
         if (result.persisted) {
           status.setText(result.firstClear ? 'SPECIAL 첫 클리어 저장 완료' : 'SPECIAL 재클리어 보상 저장 완료');
           status.setColor('#8ee3aa');
@@ -122,3 +131,5 @@ export class ResultScene extends Phaser.Scene {
     addButton(this, 900, compact ? 600 : 590, 220, resultButtonHeight, '메인', () => guarded(() => this.scene.start('main-menu')), 0x667185);
   }
 }
+
+export const __resultSceneTestOnly = { formatResourceReward, formatSpecialProfileReward };
