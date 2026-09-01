@@ -37,7 +37,7 @@ export class Pvp2v2MatchmakingScene extends Phaser.Scene {
   private state: Pvp2v2MatchmakingState = { state: 'IDLE' };
   private status?: Phaser.GameObjects.Text;
   private content?: Phaser.GameObjects.Container;
-  private pollEvent?: Phaser.Time.TimerEvent;
+  private pollEvent: Phaser.Time.TimerEvent | undefined;
   private pending = false;
 
   constructor() { super('pvp-2v2-matchmaking'); }
