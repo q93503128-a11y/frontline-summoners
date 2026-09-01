@@ -1,3 +1,4 @@
+import { getActiveVisualFormId } from './active-visual-forms.ts';
 import { ART_BY_ID, ART_FAMILIES, UNIT_ART, type ArtFamily, type AttackFxStyle, type SpriteStrip } from './assets.ts';
 import { EVOLUTION_FORMS } from './character-growth.ts';
 import { ALL_PLAYER_SLOTS, ALL_STAGES, ENEMIES } from './prototype.ts';
@@ -218,7 +219,9 @@ function approvedCandidate(unitId: string, formId?: string): ProductionUnitArtCa
 }
 
 export function resolveUnitArt(unitId: string, selectedFormId?: string): ResolvedUnitArt {
-  const resolvedFormId = PLAYER_IDS.has(unitId) ? (selectedFormId ?? F1_FORM_BY_CHARACTER.get(unitId)) : undefined;
+  const resolvedFormId = PLAYER_IDS.has(unitId)
+    ? (selectedFormId ?? getActiveVisualFormId(unitId) ?? F1_FORM_BY_CHARACTER.get(unitId))
+    : undefined;
   const production = approvedCandidate(unitId, resolvedFormId);
   if (production) {
     return {
