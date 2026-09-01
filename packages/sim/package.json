@@ -29,7 +29,8 @@
     "./periodic-special": "./src/periodic-special.ts",
     "./combat-grammar": "./src/combat-grammar.ts",
     "./achievement-profile": "./src/achievement-profile.ts",
-    "./achievement-quirks": "./src/achievement-quirks.ts"
+    "./achievement-quirks": "./src/achievement-quirks.ts",
+    "./combat-quirk-attribution": "./src/combat-quirk-attribution.ts"
   },
   "scripts": {
     "typecheck": "tsc --noEmit",
