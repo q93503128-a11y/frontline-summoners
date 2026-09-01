@@ -1,5 +1,12 @@
 import Phaser from 'phaser';
 import { INTERNAL_WIDTH } from '@frontline/shared';
+import { loadActiveProgress } from './active-progress';
+import {
+  recordActiveCharacterLevel,
+  recordActiveCharacterPlusLevel,
+  recordActiveEvolutionUnlock,
+  selectActiveEvolutionForm,
+} from './active-meta-progression';
 import { buildCharacterCombatSlot, getEvolutionForms, getEvolutionRecipe } from './character-growth';
 import { getLevelUpgradeGoldCost, getPlusLevelSoulEssenceCost } from './meta-economy';
 import { getSlotById } from './prototype';
@@ -7,11 +14,6 @@ import {
   getGuestBaseLevelCap,
   getGuestResourceBalance,
   getOwnedCharacterIds,
-  loadGuestProgress,
-  recordGuestCharacterLevel,
-  recordGuestCharacterPlusLevel,
-  recordGuestEvolutionUnlock,
-  selectGuestEvolutionForm,
   type GuestProgress,
 } from './save';
 import { addButton, addText, COLORS, drawBackdrop, familyForUnit, rarityColor } from './scene-ui';
@@ -59,7 +61,7 @@ export class GrowthScene extends Phaser.Scene {
     this.statusText = addText(this, 830, 684, '성장 정보를 불러오는 중…', compact ? 18 : 15, '#9ca9bb', 'center').setOrigin(0.5);
     addButton(this, 150, 650, 150, compact ? 76 : 50, '◀ 이전', () => this.changePage(-1), 0x586275);
     addButton(this, 350, 650, 150, compact ? 76 : 50, '다음 ▶', () => this.changePage(1), 0x586275);
-    void loadGuestProgress().then((progress) => {
+    void loadActiveProgress().then(({ progress }) => {
       if (!this.scene.isActive()) return;
       this.progress = progress;
       const owned = getOwnedCharacterIds(progress);
@@ -154,7 +156,7 @@ export class GrowthScene extends Phaser.Scene {
   private async upgradeLevel(characterId: string, targetLevel: number): Promise<void> {
     this.saving = true; this.statusText?.setText(`Lv${targetLevel} 강화 비용 확인 중…`); this.statusText?.setColor('#c7d0dd');
     try {
-      const result = await recordGuestCharacterLevel(characterId, targetLevel); this.progress = result.guestProgress;
+      const result = await recordActiveCharacterLevel(characterId, targetLevel); this.progress = result.guestProgress;
       if (!this.scene.isActive()) return;
       const spent = result.spentResources?.gold ?? 0;
       this.statusText?.setText(result.persisted ? `Lv${result.characterProgress.level} 강화 완료 · G${spent.toLocaleString('ko-KR')} 사용` : '강화는 적용됐지만 영구 저장에 실패했습니다.');
@@ -168,7 +170,7 @@ export class GrowthScene extends Phaser.Scene {
     const current = this.progress.characterProgressById?.[characterId]; if (!current) return;
     this.saving = true; this.statusText?.setText('+레벨 재화 확인 중…'); this.statusText?.setColor('#c7d0dd');
     try {
-      const result = await recordGuestCharacterPlusLevel(characterId, current.plusLevel + 1); this.progress = result.guestProgress;
+      const result = await recordActiveCharacterPlusLevel(characterId, current.plusLevel + 1); this.progress = result.guestProgress;
       if (!this.scene.isActive()) return;
       const spent = result.spentResources?.soul_essence ?? 0;
       this.statusText?.setText(result.persisted ? `+${result.characterProgress.plusLevel} 강화 완료 · 혼 ${spent} 사용` : '+레벨은 적용됐지만 영구 저장에 실패했습니다.');
@@ -181,7 +183,7 @@ export class GrowthScene extends Phaser.Scene {
   private async unlockForm(characterId: string, formId: string): Promise<void> {
     this.saving = true; this.statusText?.setText('진화 조건과 재료 확인 중…'); this.statusText?.setColor('#c7d0dd');
     try {
-      const result = await recordGuestEvolutionUnlock(characterId, formId); this.progress = result.guestProgress;
+      const result = await recordActiveEvolutionUnlock(characterId, formId); this.progress = result.guestProgress;
       if (!this.scene.isActive()) return;
       const form = getEvolutionForms(characterId).find((candidate) => candidate.formId === formId);
       this.statusText?.setText(result.persisted ? `${form?.name ?? '형태'} 진화 완료` : '진화는 적용됐지만 영구 저장에 실패했습니다.');
@@ -196,7 +198,7 @@ export class GrowthScene extends Phaser.Scene {
   private async selectForm(characterId: string, formId: string): Promise<void> {
     this.saving = true; this.statusText?.setText('형태 변경 저장 중…'); this.statusText?.setColor('#c7d0dd');
     try {
-      const result = await selectGuestEvolutionForm(characterId, formId); this.progress = result.guestProgress; if (!this.scene.isActive()) return;
+      const result = await selectActiveEvolutionForm(characterId, formId); this.progress = result.guestProgress; if (!this.scene.isActive()) return;
       this.statusText?.setText(result.persisted ? '형태 변경 저장 완료' : '형태는 변경됐지만 저장에 실패했습니다.'); this.statusText?.setColor(result.persisted ? '#8ee3aa' : '#ffb37c'); this.renderList(); this.renderDetail();
     } catch (error) {
       if (!this.scene.isActive()) return; this.statusText?.setText(error instanceof Error ? error.message : '형태 변경에 실패했습니다.'); this.statusText?.setColor('#ff9a91');
