@@ -18,13 +18,18 @@ import {
   startAuthenticatedTrustedBattle,
   type AccountTrustedBattleStart,
 } from './account-network';
-import { type ArtFamily, type AttackFxStyle, type SpriteStrip } from './assets';
+import { type AttackFxStyle } from './assets';
 import { BASE_WEAPON_UNLOCKS } from './base-weapon-progression';
 import { BATTLEFIELD_THEME_LABELS, drawBattlefield, getBattlefieldBasePalette } from './battlefield';
 import { showBossArrival } from './boss-warning';
-import { classifyImpact, getAttackSpriteFrame, getLoopingSpriteFrame } from './combat-visuals';
+import { classifyImpact } from './combat-visuals';
 import { formatCompactTraits } from './combat-trait-labels';
 import { buildGuestDeckSlots, createGuestPrototypeBattle } from './player-loadout';
+import {
+  getRuntimeMotionFrame,
+  selectRuntimeMotionStrip,
+  usesAuthoredDeathMotion,
+} from './production-motion.ts';
 import { getProjectileArcOffsetY, getProjectileTravelPlan, usesTravelProjectile } from './projectile-visuals';
 import { STAGES, getStage, type PrototypeRosterSlot, type PrototypeStage } from './prototype';
 import { recordGuestEnemyDiscoveries } from './save';
@@ -709,19 +714,26 @@ export class BattleScene extends Phaser.Scene {
         }
       }
 
-      const strip = this.stripForState(art.family, unit);
+      const strip = selectRuntimeMotionStrip(art.family, unit.state);
       const stateKey = `${strip.key}:${unit.state}`;
       if (view.stateKey !== stateKey) {
         view.sprite.setTexture(strip.key, 0);
         view.stateKey = stateKey;
       }
-      const frame = this.frameForState(art.family, strip, unit);
+      const frame = getRuntimeMotionFrame(art.family, strip, unit, this.state.battle.tick);
       if (frame >= 0 && frame < strip.frames) view.sprite.setFrame(frame);
+      view.sprite.setScale((art.family.displayHeight / strip.frameHeight) * art.displayScale);
       view.sprite.x = this.toScreenX(unit.anchorX);
       view.sprite.y = unit.state === UnitState.NaturalKnockback ? 486 : 490;
-      view.sprite.setAlpha(unit.state === UnitState.Dying ? Math.max(0.15, 1 - unit.stateFrame / Math.max(1, unit.definition.deathFrames)) : 1);
-      if (unit.state === UnitState.Dying) view.sprite.setAngle((unit.team === 'PLAYER' ? -1 : 1) * Math.min(70, unit.stateFrame * 5));
-      else view.sprite.setAngle(0);
+      const authoredDeath = usesAuthoredDeathMotion(art.family, unit.state);
+      view.sprite.setAlpha(unit.state === UnitState.Dying && !authoredDeath
+        ? Math.max(0.15, 1 - unit.stateFrame / Math.max(1, unit.definition.deathFrames))
+        : 1);
+      if (unit.state === UnitState.Dying && !authoredDeath) {
+        view.sprite.setAngle((unit.team === 'PLAYER' ? -1 : 1) * Math.min(70, unit.stateFrame * 5));
+      } else {
+        view.sprite.setAngle(0);
+      }
       view.shadow.x = view.sprite.x;
       view.shadow.setAlpha(unit.state === UnitState.Dying ? Math.max(0, 0.34 * (1 - unit.stateFrame / Math.max(1, unit.definition.deathFrames))) : unit.state === UnitState.NaturalKnockback ? 0.2 : 0.34);
       view.hpBg.x = view.sprite.x;
@@ -761,25 +773,6 @@ export class BattleScene extends Phaser.Scene {
       if (!view) continue;
       view.trait.setVisible(unit.team === 'ENEMY' && unit.state !== UnitState.Dying && visibleIds.has(unit.simulationId));
     }
-  }
-
-  private stripForState(family: ArtFamily, unit: BattleUnit): SpriteStrip {
-    if (unit.state === UnitState.Foreswing || unit.state === UnitState.Backswing) return family.attack;
-    if (unit.state === UnitState.Moving) return family.run;
-    return family.idle;
-  }
-
-  private frameForState(family: ArtFamily, strip: SpriteStrip, unit: BattleUnit): number {
-    if (unit.state === UnitState.Foreswing || unit.state === UnitState.Backswing) {
-      return getAttackSpriteFrame({
-        frameCount: strip.frames,
-        contactFrame: family.attackContactFrame,
-        timing: unit.definition.attackTiming,
-        state: unit.state,
-        stateFrame: unit.stateFrame,
-      });
-    }
-    return getLoopingSpriteFrame(strip.frames, this.state.battle.tick, unit.simulationId);
   }
 
   private syncHud(): void {
