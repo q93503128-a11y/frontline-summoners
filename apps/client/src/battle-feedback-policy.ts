@@ -5,7 +5,7 @@ import {
   shouldUseReducedMotion,
   shouldUseStrongFlash,
   type ClientSettingsV1,
-} from './client-settings';
+} from './client-settings.ts';
 
 export interface BattleFeedbackPolicy {
   readonly screenShakeFactor: number;
