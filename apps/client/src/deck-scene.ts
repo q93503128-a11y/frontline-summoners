@@ -12,6 +12,27 @@ import {
   type PrototypeRosterSlot,
 } from './prototype';
 import {
+  DEFAULT_ROSTER_BROWSER_QUERY,
+  ROSTER_ATTACK_FILTERS,
+  ROSTER_COST_FILTERS,
+  ROSTER_COUNTER_FILTERS,
+  ROSTER_GROWTH_FILTERS,
+  ROSTER_QUICK_FILTERS,
+  ROSTER_RANGE_FILTERS,
+  ROSTER_ROLE_FILTERS,
+  cycleRosterFilter,
+  filterRosterSlots,
+  summarizeRosterBrowserQuery,
+  type RosterAttackFilter,
+  type RosterCostFilter,
+  type RosterCounterFilter,
+  type RosterGrowthFilter,
+  type RosterQuickFilter,
+  type RosterRangeFilter,
+  type RosterRoleFilter,
+} from './roster-browser.ts';
+import { loadRosterFavoriteIds, toggleRosterFavoriteId } from './roster-favorites.ts';
+import {
   MAX_DECK_SLOTS,
   getEffectiveDeckSlotIds,
   getOwnedCharacterIds,
@@ -29,6 +50,17 @@ const rarityColor: Record<string, string> = {
 };
 const STORY_BADGE_COLOR = '#d7c79f';
 const SPECIAL_BADGE_COLOR = '#9fd7d0';
+const ROSTER_ID_SET = new Set(ALL_PLAYER_SLOTS.map((slot) => slot.slotId));
+const QUICK_LABELS: Readonly<Record<RosterQuickFilter, string>> = {
+  ALL: '전체', STORY: '스토리', C: 'C', B: 'B', A: 'A', S: 'S', SS: 'SS', FAVORITE: '★',
+};
+const ATTACK_LABELS: Readonly<Record<RosterAttackFilter, string>> = { ALL: '전체', SINGLE: '단일', AREA: '범위' };
+const COUNTER_LABELS: Readonly<Record<RosterCounterFilter, string>> = {
+  ALL: '전체', NEUTRAL: '중립', BEAST: '야수', UNDEAD: '언데드', NATURE: '자연', ARCANE: '비전', DEMON: '악마', MACHINE: '기계', ANOMALY: '이상',
+};
+const COST_LABELS: Readonly<Record<RosterCostFilter, string>> = { ALL: '전체', LOW: '저', MID: '중', HIGH: '고' };
+const RANGE_LABELS: Readonly<Record<RosterRangeFilter, string>> = { ALL: '전체', SHORT: '근', MID: '중', LONG: '장' };
+const GROWTH_LABELS: Readonly<Record<RosterGrowthFilter, string>> = { ALL: '전체', PLUS: '+레벨', EVOLVED: '진화' };
 
 function text(
   scene: Phaser.Scene,
@@ -116,9 +148,19 @@ function sameOrder(a: readonly string[], b: readonly string[]): boolean {
 export class DeckScene extends Phaser.Scene {
   private progress: GuestProgress = { clearedStageIds: [], specialClearedStageIds: [], permanentRewardIds: [] };
   private selectedIds: string[] = [];
+  private favoriteIds: string[] = [];
+  private quickFilter: RosterQuickFilter = DEFAULT_ROSTER_BROWSER_QUERY.quick;
+  private roleFilter: RosterRoleFilter = DEFAULT_ROSTER_BROWSER_QUERY.role;
+  private attackFilter: RosterAttackFilter = DEFAULT_ROSTER_BROWSER_QUERY.attack;
+  private counterFilter: RosterCounterFilter = DEFAULT_ROSTER_BROWSER_QUERY.counter;
+  private costFilter: RosterCostFilter = DEFAULT_ROSTER_BROWSER_QUERY.cost;
+  private rangeFilter: RosterRangeFilter = DEFAULT_ROSTER_BROWSER_QUERY.range;
+  private growthFilter: RosterGrowthFilter = DEFAULT_ROSTER_BROWSER_QUERY.growth;
+  private searchText = DEFAULT_ROSTER_BROWSER_QUERY.search;
   private page = 0;
   private cardsLayer?: Phaser.GameObjects.Container;
   private deckLayer?: Phaser.GameObjects.Container;
+  private filterLayer?: Phaser.GameObjects.Container;
   private header?: Phaser.GameObjects.Text;
   private pageText?: Phaser.GameObjects.Text;
   private statusText?: Phaser.GameObjects.Text;
@@ -130,21 +172,22 @@ export class DeckScene extends Phaser.Scene {
     drawBackdrop(this);
     const compact = isCompactMobileViewport();
     this.input.dragDistanceThreshold = compact ? 18 : 8;
+    this.favoriteIds = [...loadRosterFavoriteIds(ROSTER_ID_SET)];
     this.header = text(this, 52, 28, '편성 불러오는 중…', compact ? 36 : 38, '#fff4cf');
     text(
       this,
       54,
       compact ? 78 : 80,
       compact
-        ? '탭으로 추가·제외 · 길게 끌어 상단 슬롯에 배치·교환 · 1~0 소환 순서'
-        : '보유 캐릭터를 클릭해 추가·제외하거나 끌어서 상단 1~0 슬롯에 직접 배치한다. 미획득 캐릭터는 편성 목록에 나타나지 않는다.',
+        ? '탭 추가·제외 · 길게 끌어 슬롯 배치 · ★ 즐겨찾기 · 필터 조합 가능'
+        : '보유 캐릭터만 표시 · 드래그로 1~0 슬롯 배치 · 빠른/상세 필터와 검색·즐겨찾기를 조합할 수 있다.',
       compact ? 20 : 17,
       '#b8c0ce',
     );
     button(this, 1180, compact ? 58 : 55, 150, compact ? 84 : 48, '메인', () => this.scene.start('main-menu'), 0x586275);
 
     this.pageText = text(this, 640, 632, '', compact ? 20 : 17, '#9ca9bb', 'center').setOrigin(0.5);
-    this.statusText = text(this, 640, compact ? 594 : 600, '저장 데이터를 불러오는 중…', compact ? 19 : 15, '#9ca9bb', 'center').setOrigin(0.5);
+    this.statusText = text(this, 640, compact ? 604 : 604, '저장 데이터를 불러오는 중…', compact ? 18 : 14, '#9ca9bb', 'center').setOrigin(0.5);
 
     button(this, 86, 660, 120, compact ? 84 : 48, '◀ 이전', () => this.changePage(-1), 0x586275);
     button(this, 235, 660, 140, compact ? 84 : 48, '다음 ▶', () => this.changePage(1), 0x586275);
@@ -177,8 +220,22 @@ export class DeckScene extends Phaser.Scene {
     return ALL_PLAYER_SLOTS.filter((slot) => owned.has(slot.slotId));
   }
 
+  private getFilteredSlots(): readonly PrototypeRosterSlot[] {
+    return filterRosterSlots(this.getOwnedSlots(), this.progress, {
+      quick: this.quickFilter,
+      role: this.roleFilter,
+      attack: this.attackFilter,
+      counter: this.counterFilter,
+      cost: this.costFilter,
+      range: this.rangeFilter,
+      growth: this.growthFilter,
+      search: this.searchText,
+      favoriteIds: new Set(this.favoriteIds),
+    });
+  }
+
   private get pageCount(): number {
-    return Math.max(1, Math.ceil(this.getOwnedSlots().length / this.pageSize));
+    return Math.max(1, Math.ceil(this.getFilteredSlots().length / this.pageSize));
   }
 
   private changePage(delta: number): void {
@@ -188,9 +245,11 @@ export class DeckScene extends Phaser.Scene {
 
   private renderAll(): void {
     const ownedCount = this.getOwnedSlots().length;
+    const filteredCount = this.getFilteredSlots().length;
     this.page = Math.min(this.page, this.pageCount - 1);
-    this.header?.setText(`수동 10칸 편성 · 보유 ${ownedCount}명 · 선택 ${this.selectedIds.length}/${MAX_DECK_SLOTS}`);
+    this.header?.setText(`수동 10칸 편성 · 보유 ${ownedCount}명 · 표시 ${filteredCount}명 · 선택 ${this.selectedIds.length}/${MAX_DECK_SLOTS}`);
     this.renderDeckOrder();
+    this.renderFilters();
     this.renderCards();
   }
 
@@ -215,21 +274,86 @@ export class DeckScene extends Phaser.Scene {
     }
   }
 
+  private renderFilters(): void {
+    this.filterLayer?.destroy(true);
+    this.filterLayer = this.add.container(0, 0);
+    const compact = isCompactMobileViewport();
+    const y = compact ? 222 : 215;
+    const width = 142;
+    const height = compact ? 56 : 42;
+    const startX = 82;
+    const gap = 156;
+    const labels = [
+      `분류·${QUICK_LABELS[this.quickFilter]}`,
+      `역할·${this.roleFilter === 'ALL' ? '전체' : this.roleFilter}`,
+      `공격·${ATTACK_LABELS[this.attackFilter]}`,
+      `대항·${COUNTER_LABELS[this.counterFilter]}`,
+      `비용·${COST_LABELS[this.costFilter]}`,
+      `사거리·${RANGE_LABELS[this.rangeFilter]}`,
+      `성장·${GROWTH_LABELS[this.growthFilter]}`,
+      this.searchText.trim() ? `검색·${this.searchText.trim().slice(0, 5)}` : '검색·없음',
+    ];
+    const actions = [
+      () => { this.quickFilter = cycleRosterFilter(ROSTER_QUICK_FILTERS, this.quickFilter); this.resetFilterPage(); },
+      () => { this.roleFilter = cycleRosterFilter(ROSTER_ROLE_FILTERS, this.roleFilter); this.resetFilterPage(); },
+      () => { this.attackFilter = cycleRosterFilter(ROSTER_ATTACK_FILTERS, this.attackFilter); this.resetFilterPage(); },
+      () => { this.counterFilter = cycleRosterFilter(ROSTER_COUNTER_FILTERS, this.counterFilter); this.resetFilterPage(); },
+      () => { this.costFilter = cycleRosterFilter(ROSTER_COST_FILTERS, this.costFilter); this.resetFilterPage(); },
+      () => { this.rangeFilter = cycleRosterFilter(ROSTER_RANGE_FILTERS, this.rangeFilter); this.resetFilterPage(); },
+      () => { this.growthFilter = cycleRosterFilter(ROSTER_GROWTH_FILTERS, this.growthFilter); this.resetFilterPage(); },
+      () => this.promptSearch(),
+    ];
+    labels.forEach((label, index) => {
+      this.filterLayer!.add(button(this, startX + index * gap, y, width, height, label, actions[index]!, index === 7 ? 0x6e668c : 0x52677f));
+    });
+  }
+
+  private resetFilterPage(): void {
+    this.page = 0;
+    this.statusText?.setText(summarizeRosterBrowserQuery({
+      quick: this.quickFilter,
+      role: this.roleFilter,
+      attack: this.attackFilter,
+      counter: this.counterFilter,
+      cost: this.costFilter,
+      range: this.rangeFilter,
+      growth: this.growthFilter,
+      search: this.searchText,
+      favoriteIds: new Set(this.favoriteIds),
+    }));
+    this.statusText?.setColor('#9fcfff');
+    this.renderAll();
+  }
+
+  private promptSearch(): void {
+    if (typeof window === 'undefined' || typeof window.prompt !== 'function') return;
+    const next = window.prompt('캐릭터 이름·역할·설명·속성 검색 · 비우면 검색 해제', this.searchText);
+    if (next === null) return;
+    this.searchText = next.trim();
+    this.resetFilterPage();
+  }
+
   private renderCards(): void {
     this.cardsLayer?.destroy(true);
     this.cardsLayer = this.add.container(0, 0);
     const compact = isCompactMobileViewport();
     const ownedSlots = this.getOwnedSlots();
+    const filteredSlots = this.getFilteredSlots();
     const start = this.page * this.pageSize;
-    const visible = ownedSlots.slice(start, start + this.pageSize);
+    const visible = filteredSlots.slice(start, start + this.pageSize);
     const columns = compact ? 4 : 5;
     const cardWidth = compact ? 282 : 222;
     const cardHeight = compact ? 166 : 174;
     const xGap = compact ? 300 : 236;
     const startX = compact ? 190 : 168;
-    const startY = compact ? 282 : 280;
-    const yGap = compact ? 184 : 190;
-    this.pageText?.setText(`${this.page + 1} / ${this.pageCount} · 보유 ${ownedSlots.length}명`);
+    const startY = compact ? 342 : 332;
+    const yGap = compact ? 168 : 174;
+    this.pageText?.setText(`${this.page + 1} / ${this.pageCount} · 표시 ${filteredSlots.length}/${ownedSlots.length}명`);
+
+    if (visible.length === 0) {
+      this.cardsLayer.add(text(this, INTERNAL_WIDTH / 2, 430, '현재 필터에 맞는 보유 캐릭터가 없습니다.', compact ? 24 : 20, '#9ca9bb', 'center').setOrigin(0.5));
+      return;
+    }
 
     visible.forEach((slot, localIndex) => {
       const col = localIndex % columns;
@@ -238,6 +362,7 @@ export class DeckScene extends Phaser.Scene {
       const y = startY + row * yGap;
       const selectedIndex = this.selectedIds.indexOf(slot.slotId);
       const selected = selectedIndex >= 0;
+      const favorite = this.favoriteIds.includes(slot.slotId);
       const badge = acquisitionBadge(slot);
       const baseBorder = Phaser.Display.Color.HexStringToColor(badge.color).color;
       const border = selected ? 0xf2d56f : baseBorder;
@@ -251,6 +376,15 @@ export class DeckScene extends Phaser.Scene {
 
       this.cardsLayer!.add(text(this, x - cardWidth / 2 + 12, y - cardHeight / 2 + 8, badge.label, compact ? 17 : 14, badge.color));
       if (selected) this.cardsLayer!.add(text(this, x + cardWidth / 2 - 12, y - cardHeight / 2 + 8, `#${hotkeyLabel(selectedIndex)}`, compact ? 18 : 15, '#ffe18a', 'right').setOrigin(1, 0));
+
+      const favoriteStar = text(this, x + cardWidth / 2 - 16, y - cardHeight / 2 + (selected ? 37 : 12), favorite ? '★' : '☆', compact ? 25 : 21, favorite ? '#ffe18a' : '#7f8998', 'right').setOrigin(1, 0);
+      favoriteStar.setInteractive({ useHandCursor: true });
+      favoriteStar.on('pointerdown', (_pointer: Phaser.Input.Pointer, _localX: number, _localY: number, event: Phaser.Types.Input.EventData) => event.stopPropagation());
+      favoriteStar.on('pointerup', (_pointer: Phaser.Input.Pointer, _localX: number, _localY: number, event: Phaser.Types.Input.EventData) => {
+        event.stopPropagation();
+        this.toggleFavorite(slot.slotId);
+      });
+      this.cardsLayer!.add(favoriteStar);
 
       const infoX = x - cardWidth / 2 + (compact ? 100 : 88);
       this.cardsLayer!.add(text(this, infoX, y - cardHeight / 2 + 30, slot.displayName, compact ? 21 : 18, '#ffffff'));
@@ -268,6 +402,15 @@ export class DeckScene extends Phaser.Scene {
       if (!compact) this.cardsLayer!.add(text(this, infoX, y + 51, selected ? '클릭 제외 · 드래그 슬롯 교환' : '클릭 추가 · 드래그 슬롯 배치', 11, selected ? '#ffe18a' : '#9aa7b8'));
       this.wireDragSurface(bg, slot.slotId, x, y);
     });
+  }
+
+  private toggleFavorite(slotId: string): void {
+    this.favoriteIds = [...toggleRosterFavoriteId(this.favoriteIds, slotId, ROSTER_ID_SET)];
+    const favorite = this.favoriteIds.includes(slotId);
+    this.statusText?.setText(`${getSlotById(slotId)?.displayName ?? slotId} · 즐겨찾기 ${favorite ? '등록' : '해제'} · 기기 UI 선호에 저장`);
+    this.statusText?.setColor('#f2d37c');
+    this.page = Math.min(this.page, this.pageCount - 1);
+    this.renderAll();
   }
 
   private wireDragSurface(
