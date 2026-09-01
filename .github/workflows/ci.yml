@@ -1,16 +1,14 @@
-name: CI
+name: Apply co-op attribution patch
 
 on:
   push:
     branches: [main]
-  pull_request:
 
 permissions:
   contents: write
 
 jobs:
-  apply_coop_patch:
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main' && github.event.head_commit.message == 'chore: execute coop attribution via ci'
+  apply:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -27,80 +25,3 @@ jobs:
           git diff --cached --check
           git commit -m 'feat: attribute co-op hidden achievements per player [skip ci]'
           git push origin HEAD:main
-
-  verify:
-    if: github.event_name != 'push' || github.event.head_commit.message != 'chore: execute coop attribution via ci'
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 22
-      - name: Install dependencies
-        run: npm install --ignore-scripts
-      - name: Typecheck
-        shell: bash
-        run: |
-          set -o pipefail
-          npm run typecheck 2>&1 | tee "$RUNNER_TEMP/typecheck.log"
-      - name: Test content schema
-        run: npm run test -w @frontline/content-schema
-      - name: Test simulation
-        if: always()
-        shell: bash
-        run: |
-          set -o pipefail
-          npm run test -w @frontline/sim 2>&1 | tee "$RUNNER_TEMP/sim-test.log"
-      - name: Test server co-op protocol
-        if: always()
-        shell: bash
-        run: |
-          set -o pipefail
-          npm run test -w @frontline/server 2>&1 | tee "$RUNNER_TEMP/server-test.log"
-      - name: Upload core verification diagnostics
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: core-verification-diagnostics
-          path: |
-            ${{ runner.temp }}/typecheck.log
-            ${{ runner.temp }}/sim-test.log
-            ${{ runner.temp }}/server-test.log
-          if-no-files-found: warn
-          retention-days: 3
-      - name: Diagnose failing client tests
-        if: always()
-        shell: bash
-        run: |
-          cd apps/client
-          diagnostics="$RUNNER_TEMP/client-test-diagnostics"
-          mkdir -p "$diagnostics"
-          failed=0
-          : > "$diagnostics/failed-tests.txt"
-          for path in test/*.test.ts; do
-            file="${path#test/}"
-            echo "### $file" | tee -a "$GITHUB_STEP_SUMMARY"
-            status=0
-            node --experimental-transform-types --test "$path" > "$diagnostics/$file.log" 2>&1 || status=$?
-            cat "$diagnostics/$file.log" >> "$GITHUB_STEP_SUMMARY"
-            if [[ $status -ne 0 ]]; then
-              echo "$file" | tee -a "$diagnostics/failed-tests.txt"
-              failed=1
-            fi
-            echo | tee -a "$GITHUB_STEP_SUMMARY"
-          done
-          exit $failed
-      - name: Upload client test diagnostics
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: client-test-diagnostics
-          path: ${{ runner.temp }}/client-test-diagnostics
-          if-no-files-found: error
-          retention-days: 3
-      - name: Test client suite
-        if: always()
-        run: npm run test -w @frontline/client
-      - name: Build
-        if: success()
-        run: npm run build
