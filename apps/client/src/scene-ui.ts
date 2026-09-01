@@ -1,5 +1,6 @@
 import Phaser from 'phaser';
 import { INTERNAL_HEIGHT, INTERNAL_WIDTH } from '@frontline/shared';
+import { getActiveVisualFormId } from './active-visual-forms.ts';
 import {
   getClientSettings,
   getScreenShakeFactor,
@@ -144,9 +145,10 @@ export function flashCamera(
 
 /**
  * Central player-facing art resolver. Production art is returned only after its manifest entry is APPROVED;
- * otherwise the existing verified CC0 placeholder family remains authoritative.
+ * otherwise the existing verified CC0 placeholder family remains authoritative. When callers omit a form id,
+ * the current active save's presentation-only F1/F2/F3 selection is used.
  */
-export function familyForUnit(unitId: string, selectedFormId?: string): ResolvedUnitArt {
+export function familyForUnit(unitId: string, selectedFormId = getActiveVisualFormId(unitId)): ResolvedUnitArt {
   return resolveUnitArt(unitId, selectedFormId);
 }
 
