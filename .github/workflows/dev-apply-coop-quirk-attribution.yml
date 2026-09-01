@@ -26,3 +26,5 @@ jobs:
           git diff --cached --check
           git commit -m 'feat: attribute co-op hidden achievements per player [skip ci]'
           git push origin HEAD:main
+
+# one-shot patch runner; feature commit deletes this file
