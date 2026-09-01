@@ -46,11 +46,11 @@ export class PvpLeaderboardScene extends Phaser.Scene {
     addButton(this, 210, 130, 220, compact ? 70 : 50, '전체 Top', () => void this.changeScope('TOP'), 0x657c98);
     addButton(this, 470, 130, 220, compact ? 70 : 50, '내 주변', () => void this.changeScope('AROUND_ME'), 0x6f6a91);
     addButton(this, 730, 130, 220, compact ? 70 : 50, '친 구', () => void this.changeScope('FRIENDS'), 0x647f72);
-    addButton(this, 1030, 130, 220, compact ? 70 : 50, '새로고침', () => void this.load(), 0x5c6c82);
+    addButton(this, 1030, 130, 220, compact ? 70 : 50, '새로고침', () => void this.loadLeaderboard(), 0x5c6c82);
 
     this.status = addText(this, INTERNAL_WIDTH / 2, 690, '순위표를 불러오는 중…', compact ? 18 : 15, '#a9b5c5', 'center').setOrigin(0.5);
     this.render();
-    void this.load();
+    void this.loadLeaderboard();
   }
 
   private async changeScope(scope: PvpLeaderboardScope): Promise<void> {
@@ -59,10 +59,10 @@ export class PvpLeaderboardScene extends Phaser.Scene {
     this.page = 0;
     this.view = null;
     this.render();
-    await this.load();
+    await this.loadLeaderboard();
   }
 
-  private async load(): Promise<void> {
+  private async loadLeaderboard(): Promise<void> {
     if (this.loading) return;
     this.loading = true;
     this.status?.setText(`${scopeTitle(this.scope)} 동기화 중…`).setColor('#a9b5c5');
