@@ -1,6 +1,6 @@
 # 클라이언트 접근성·저사양 설정 구현 — 2026-09-01
 
-상태: **IMPLEMENTED FOUNDATION / automated coverage authored / device QA pending**
+상태: **IMPLEMENTED FOUNDATION + BATTLE FEEDBACK WIRING / automated coverage authored / device QA pending**
 
 상위 사양: `AUDIO_BGM_SFX_ACCESSIBILITY_SPEC.md`
 
@@ -32,7 +32,21 @@
 - 강한 번쩍임 줄이기는 공용 `flashCamera` helper의 full-screen flash를 차단한다.
 - 오디오 값은 `getEffectiveAudioBusGain`으로 MASTER × child bus gain을 한 곳에서 계산한다. 현재 실제 BGM/SFX 배포 asset이 아직 없으므로 오디오 제작 이후에도 별도 설정 체계를 다시 만들지 않고 이 bus 값을 사용한다.
 
-`화면 흔들림 0`, `강한 번쩍임 줄이기`가 공격 판정이나 boss telegraph 자체를 제거하는 구조는 만들지 않는다. 공용 helper는 장식 camera feedback만 제어한다.
+추가로 `battle-feedback-policy.ts`와 `accessible-battle-scene.ts`를 통해 현재 메인/스페셜 재전투 체인에 남아 있는 legacy `Camera.shake` / `Camera.flash` 호출도 설정 계층 아래로 넣었다.
+
+- 화면 흔들림 0%는 battle camera shake를 완전히 생략한다.
+- 50%는 authored intensity의 절반만 적용한다. number뿐 아니라 vector intensity도 동일 비율로 축소한다.
+- 강한 번쩍임 줄이기는 battle camera full-screen flash를 차단한다.
+- 이 compatibility layer는 camera presentation 메서드만 감싸며 simulation step, trusted command recorder, 공격 판정, 보급, 적 스폰, 승패 판정에는 관여하지 않는다.
+- `ReplayBattleScene -> QuirkBattleScene -> AccessibleBattleScene -> BattleScene` 상속 체인으로 일반 MAIN/SPECIAL 재전투 및 trusted battle 양쪽이 같은 피드백 게이트를 통과한다.
+
+`boss-warning.ts`도 같은 battle feedback policy를 소비한다.
+
+- 움직임 줄이기/배터리 절약에서는 등장/퇴장 slide tween 없이 우두머리 이름과 경고 패널을 즉시 표시하고 동일한 표시 시간을 유지한다.
+- LOW/VFX LOW/배터리 절약에서는 위·아래 장식선을 생략하되 `우두머리 출현` 문구와 boss name은 제거하지 않는다.
+- 화면 흔들림 0에서도 boss telegraph 자체는 항상 남는다.
+
+`화면 흔들림 0`, `강한 번쩍임 줄이기`, `움직임 줄이기`가 공격 판정이나 boss telegraph 자체를 제거하는 구조는 만들지 않는다. 접근성 설정은 presentation-only 경계 안에서만 동작한다.
 
 ## 색 의존 제거
 
@@ -51,6 +65,16 @@
 - 메인 메뉴 → 설정 장면 wiring
 - 공용 UI가 UI scale / high contrast / low effects / reduced motion을 소비하는지 확인
 
+`apps/client/test/battle-feedback-accessibility.test.ts`에서 다음을 추가 고정한다.
+
+- 0/50% screen shake scale 계산
+- reduced motion duration 0 처리
+- battery saver가 battle reduced-motion/decorative policy를 함께 켜는지
+- 재전투 상속 체인이 `AccessibleBattleScene`을 통과하는지
+- battle camera shake/flash legacy 호출이 설정 gate 아래 있는지
+- boss warning이 reduced motion / reduced decorative effects를 소비하면서 핵심 경고 텍스트를 유지하는지
+- battle feedback policy가 `@frontline/sim`을 import하지 않는 presentation-only 경계
+
 ## 아직 TESTED / LOCKED가 아닌 이유
 
 다음 사람 QA 전에는 `TESTED` 또는 `LOCKED`로 올리지 않는다.
@@ -58,6 +82,7 @@
 - 640×360 및 실제 모바일 COMPACT에서 UI 125% 겹침/잘림 검사
 - 고대비 상태의 전체 화면 가독성 검사
 - LOW / 배터리 절약 상태의 실기기 frame-time 비교
-- 실제 camera shake/flash 연출이 추가되거나 연결된 장면에서 0%/reduction 검증
+- 실제 MAIN/SPECIAL 전투에서 camera shake 0/50/100%, flash reduction, boss reduced-motion 동작을 눈으로 대조
+- 공격/피격/기지포격의 세부 particle·ring·glow 밀도까지 LOW/VFX LOW에 맞춰 더 줄이는 후속 pass
 - 실제 BGM/SFX asset 연결 후 브라우저 autoplay, focus 복귀, bus mute 검증
 - 대표 모바일 Safari/Chrome storage 지속성 검사
