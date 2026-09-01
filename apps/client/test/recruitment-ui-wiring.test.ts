@@ -15,11 +15,12 @@ test('main menu exposes recruitment and the scene is registered without replacin
   assert.match(main, /scene: \[BootScene, MainMenuScene, StageHubScene, StageSelectScene, BaseWeaponScene, DeckScene, CatalogScene, BattleScene, ResultScene\]/);
 });
 
-test('recruitment UI consumes banner odds and delegates the paid transaction to save authority', async () => {
+test('recruitment UI consumes banner odds and delegates the paid transaction to active account-or-guest authority', async () => {
   const source = await readSource('../src/recruitment-scene.ts');
   assert.match(source, /this\.banner\.ratesPermille\[rarity\] \/ 10/);
   assert.match(source, /this\.banner\.poolByRarity\[rarity\]\.length/);
-  assert.match(source, /performGuestRecruitment\(count, CRYPTO_RECRUITMENT_RANDOM_SOURCE, this\.banner, this\.duplicatePolicy\)/);
+  assert.match(source, /performActiveRecruitment\(count, CRYPTO_RECRUITMENT_RANDOM_SOURCE, this\.banner, this\.duplicatePolicy\)/);
+  assert.doesNotMatch(source, /performGuestRecruitment\(/);
   assert.match(source, /getGuestResourceBalance\(this\.progress, 'summon_crystal'\)/);
   assert.match(source, /getRecruitmentCost\(1\)/);
   assert.match(source, /getRecruitmentCost\(10\)/);
@@ -51,6 +52,14 @@ test('recruitment UI communicates independent pulls and explicit duplicate conve
   assert.match(source, /혼의 파편/);
   assert.doesNotMatch(source, /tenPullMinimumRarity|thirtyPullMinimumRarity|pickupSsGuaranteeEvery|selectionCreditEvery/);
   assert.doesNotMatch(source, /guaranteedBy|selectionCreditGranted|redeemGuestBannerSelection|selectionCredits/);
+});
+
+test('account recruitment status never fabricates local banner pull history', async () => {
+  const source = await readSource('../src/recruitment-scene.ts');
+  assert.match(source, /this\.authority === 'GUEST_LOCAL'/);
+  assert.match(source, /`이 시리즈 \$\{bannerProgress\.totalPulls\}회`/);
+  assert.match(source, /'계정 서버 저장'/);
+  assert.match(source, /'계정 오프라인 · 읽기 전용'/);
 });
 
 test('recruitment result screen distinguishes new, direct plus, dismantle, and persistence outcomes', async () => {
