@@ -72,7 +72,7 @@ test('old settings payloads default story auto-skip off and explicit preference 
   assert.equal(enabled.autoSkipStory, true);
 });
 
-test('client wiring keeps story optional, immediately skippable, and after authoritative clear persistence', async () => {
+test('client wiring keeps solo story optional, immediately skippable, and after authoritative clear persistence', async () => {
   const [main, stageRoute, storyScene, result, trustedResult, settings] = await Promise.all([
     readFile(new URL('../src/main.ts', import.meta.url), 'utf8'),
     readFile(new URL('../src/story-stage-select-scene.ts', import.meta.url), 'utf8'),
@@ -93,4 +93,25 @@ test('client wiring keeps story optional, immediately skippable, and after autho
   assert.match(trustedResult, /reward\.firstClear/);
   assert.match(trustedResult, /getPostStageStory\(this\.stage\.id\)/);
   assert.match(settings, /스토리 연출 자동 건너뛰기/);
+});
+
+test('friend and public account coop keep story local to each client and gate chapter outro on account settlement', async () => {
+  const [main, coopStoryScenes, overlay] = await Promise.all([
+    readFile(new URL('../src/main.ts', import.meta.url), 'utf8'),
+    readFile(new URL('../src/coop-story-scenes.ts', import.meta.url), 'utf8'),
+    readFile(new URL('../src/story-overlay.ts', import.meta.url), 'utf8'),
+  ]);
+
+  assert.match(main, /StoryFriendCoopLobbyScene as FriendCoopLobbyScene/);
+  assert.match(main, /StoryPublicCoopLobbyScene as PublicCoopLobbyScene/);
+  assert.match(main, /StoryFriendCoopBattleScene as FriendCoopBattleScene/);
+  assert.match(coopStoryScenes, /room\.phase !== 'LOBBY'/);
+  assert.match(coopStoryScenes, /getPreStageStory\(room\.stageId\)/);
+  assert.match(coopStoryScenes, /message\.type !== 'ACCOUNT_SETTLED'/);
+  assert.match(coopStoryScenes, /session\.battle\?\.winner !== 'PLAYER'/);
+  assert.match(coopStoryScenes, /getPostStageStory\(this\.storyStageId\)/);
+  assert.match(overlay, /다른 지휘관의 화면과 전투 판정에는 영향을 주지 않습니다/);
+  assert.match(overlay, /markStoryViewed\(story\.id\)/);
+  assert.match(overlay, /'건너뛰기'/);
+  assert.match(overlay, /keydown-ESC/);
 });
