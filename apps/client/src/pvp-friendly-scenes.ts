@@ -49,7 +49,7 @@ export class FriendlyPvpLobbyScene extends Phaser.Scene {
   private socialInviteId: string | null = null;
   private content?: Phaser.GameObjects.Container;
   private status?: Phaser.GameObjects.Text;
-  private pollEvent?: Phaser.Time.TimerEvent;
+  private pollEvent: Phaser.Time.TimerEvent | undefined;
   private pending = false;
 
   constructor() { super('pvp-friendly-lobby'); }
@@ -251,8 +251,8 @@ export class FriendlyPvpMatchScene extends Phaser.Scene {
   private resultLayer?: Phaser.GameObjects.Container;
   private status?: Phaser.GameObjects.Text;
   private connection?: Phaser.GameObjects.Text;
-  private unsubscribeMessage?: () => void;
-  private unsubscribeConnection?: () => void;
+  private unsubscribeMessage: (() => void) | undefined;
+  private unsubscribeConnection: (() => void) | undefined;
   private readySent = false;
   private finished = false;
 
