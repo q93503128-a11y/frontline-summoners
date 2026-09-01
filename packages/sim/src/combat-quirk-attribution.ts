@@ -129,7 +129,9 @@ function independentDamageAgainst(state: BattleState, source: BattleUnit, target
 
 function sourceHitIndex(source: BattleUnit, attack: ActiveObservedAttack): number {
   if (source.state !== UnitState.Foreswing) return -1;
-  return attack.hitFrames.indexOf(source.stateFrame);
+  // BattleState advances non-MOVING stateFrame before collecting hits. The observer runs immediately
+  // before that step, so an already-started foreswing will hit at stateFrame + 1 this frame.
+  return attack.hitFrames.indexOf(source.stateFrame + 1);
 }
 
 function captureBellCrabTargets(state: BattleState, source: BattleUnit): number | null {
