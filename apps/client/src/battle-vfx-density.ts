@@ -1,4 +1,4 @@
-import { getBattleFeedbackPolicy, type BattleFeedbackPolicy } from './battle-feedback-policy';
+import { getBattleFeedbackPolicy, type BattleFeedbackPolicy } from './battle-feedback-policy.ts';
 
 export interface BattleVfxDescriptor {
   readonly type: string;
