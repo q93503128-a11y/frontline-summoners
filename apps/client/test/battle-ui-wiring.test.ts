@@ -118,7 +118,7 @@ test('sortie flow uses the shared collection hub and canonical normal/special cl
   assert.doesNotMatch(`${navigation}\n${result}\n${main}`, /SpecialStageSelectScene|special-select|협동 권장/);
 });
 
-test('manual deck scene uses save ownership authority and persists explicit 1-10 order', async () => {
+test('manual deck scene uses active ownership authority and persists explicit 1-10 order', async () => {
   const { deck } = await readRuntime();
   assert.match(deck, /private getOwnedSlots\(\): readonly PrototypeRosterSlot\[\]/);
   assert.match(deck, /const owned = new Set\(getOwnedCharacterIds\(this\.progress\)\);/);
@@ -128,8 +128,9 @@ test('manual deck scene uses save ownership authority and persists explicit 1-10
   assert.match(deck, /this\.selectedIds = \[\.\.\.getEffectiveDeckSlotIds\(progress\)\];/);
   assert.match(deck, /MAX_DECK_SLOTS/);
   assert.match(deck, /this\.selectedIds\.push\(slotId\);/);
-  assert.match(deck, /recordGuestDeck\(this\.selectedIds\)/);
-  assert.match(deck, /resetGuestDeckToAutomatic\(\)/);
+  assert.match(deck, /recordActiveDeck\(this\.selectedIds\)/);
+  assert.match(deck, /resetActiveDeckToAutomatic\(\)/);
+  assert.doesNotMatch(deck, /recordGuestDeck\(this\.selectedIds\)/);
   assert.match(deck, /hotkeyLabel\(index\)/);
   assert.match(deck, /선택된 순서가 1~0 소환 순서/);
   assert.match(deck, /미획득 캐릭터는 편성 목록에 나타나지 않는다/);
@@ -208,7 +209,7 @@ test('main and result scenes use current permanent-reward and SPECIAL resource-c
   assert.match(result, /const compact = isCompactMobileViewport\(\);/);
   assert.match(result, /'영구 보상 획득'/);
   assert.match(result, /getPermanentRewardEffectText\(this\.stage\.permanentRewardId\)/);
-  assert.match(result, /'NORMAL_CLEAR 저장 완료 · 다음 스테이지 개방'/);
+  assert.match(result, /NORMAL_CLEAR 저장 완료 · 다음 스테이지 개방\$\{storySuffix\}/);
   assert.match(result, /'브라우저 영구 저장 실패 · 현재 탭에서는 진행 유지'/);
   assert.match(result, /'SPECIAL 클리어'/);
   assert.match(result, /'SPECIAL 첫 클리어 저장 완료'/);
@@ -225,7 +226,7 @@ test('shared buttons recover from touch or pointer cancellation instead of stayi
   assert.match(buttonBlock, /bg\.on\('pointerout', \(\) => \{/);
   assert.match(buttonBlock, /container\.setScale\(1\);/);
   assert.match(buttonBlock, /bg\.on\('pointerupoutside', \(\) => container\.setScale\(1\)\);/);
-  assert.match(buttonBlock, /bg\.on\('pointerdown', \(\) => container\.setScale\(0\.98\)\);/);
+  assert.match(buttonBlock, /bg\.on\('pointerdown', \(\) => \{[\s\S]*?if \(!shouldUseReducedMotion\(\)\) container\.setScale\(0\.98\);[\s\S]*?\}\);/);
 });
 
 test('Phaser uses smooth filtering for current non-pixel-art character sheets', async () => {
