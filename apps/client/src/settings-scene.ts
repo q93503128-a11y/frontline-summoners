@@ -77,10 +77,10 @@ export class SettingsScene extends Phaser.Scene {
     this.settingRow(485, 319, 310, rowHeight, '배터리 절약', ON_OFF(this.settings.batterySaver), () => {
       this.change({ batterySaver: !this.settings.batterySaver });
     });
-    this.settingRow(485, 381, 310, rowHeight, '스토리 자동 건너뛰기', ON_OFF(this.settings.autoSkipStory), () => {
+    this.settingRow(485, 381, 310, rowHeight, '스토리 연출 자동 건너뛰기', ON_OFF(this.settings.autoSkipStory), () => {
       this.change({ autoSkipStory: !this.settings.autoSkipStory });
     });
-    this.content.add(addText(this, 640, 474, 'LOW / 낮은 VFX / 배터리 절약은 장식 효과를 줄입니다.\n스토리 자동 건너뛰기는 장면을 렌더하지 않습니다.\n전투 판정·위험 정보는 그대로 유지됩니다.', compact ? 15 : 13, '#a8b8a1', 'center').setOrigin(0.5));
+    this.content.add(addText(this, 640, 474, 'LOW / 낮은 VFX / 배터리 절약은 장식 효과를 줄입니다.\n스토리 연출 자동 건너뛰기는 장면을 렌더하지 않습니다.\n전투 판정·위험 정보는 그대로 유지됩니다.', compact ? 15 : 13, '#a8b8a1', 'center').setOrigin(0.5));
 
     this.panel(1055, 375, 380, 500, '오디오', 0x8b745c);
     this.settingRow(900, 195, 310, rowHeight, 'Master', `${this.settings.masterVolume}%`, () => {
