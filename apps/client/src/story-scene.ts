@@ -9,13 +9,13 @@ import { isCompactMobileViewport } from './viewport';
 export interface StorySceneData {
   readonly storyId: string;
   readonly nextScene: string;
-  readonly nextData?: unknown;
+  readonly nextData?: object;
 }
 
 export class StoryScene extends Phaser.Scene {
   private story!: StoryPresentation;
   private nextScene = 'stage-select';
-  private nextData: unknown;
+  private nextData: object | undefined;
   private beatIndex = 0;
   private speakerText?: Phaser.GameObjects.Text;
   private bodyText?: Phaser.GameObjects.Text;
