@@ -2,10 +2,10 @@ import Phaser from 'phaser';
 import { INTERNAL_HEIGHT, INTERNAL_WIDTH } from '@frontline/shared';
 import { loadActiveProgress } from './active-progress';
 import { recordActiveDeck, resetActiveDeckToAutomatic } from './active-meta-progression';
-import { ART_BY_ID, ART_FAMILIES, UNIT_ART } from './assets';
 import { buildCharacterCombatSlot, getEvolutionForm } from './character-growth';
 import { formatCombatTraits, formatDamageSpecialty } from './combat-trait-labels';
 import { DECK_SLOT_WIDTH, DECK_START_X, getDeckDropIndex, placeCharacterAtDeckIndex } from './deck-drag.ts';
+import { resolveUnitArt } from './production-assets.ts';
 import {
   ALL_PLAYER_SLOTS,
   getSlotById,
@@ -112,12 +112,6 @@ function drawBackdrop(scene: Phaser.Scene): void {
   g.fillStyle(0x263247, 1).fillTriangle(0, 570, 330, 250, 630, 570);
   g.fillStyle(0x222d40, 1).fillTriangle(430, 570, 760, 200, 1080, 570);
   g.fillStyle(0x111722).fillRect(0, 570, INTERNAL_WIDTH, 150);
-}
-
-function familyForUnit(unitId: string) {
-  const variant = UNIT_ART[unitId] ?? { familyId: 'warrior', tint: 0xffffff, attackFx: 'SLASH' as const };
-  const family = ART_BY_ID[variant.familyId] ?? ART_FAMILIES[0]!;
-  return { family, tint: variant.tint, displayScale: variant.displayScale ?? 1 };
 }
 
 function hotkeyLabel(index: number): string {
@@ -369,7 +363,8 @@ export class DeckScene extends Phaser.Scene {
       const bg = this.add.rectangle(x, y, cardWidth, cardHeight, selected ? 0x343329 : 0x252c3a, 0.98).setStrokeStyle(selected ? 4 : 3, border, 0.95);
       this.cardsLayer!.add(bg);
 
-      const art = familyForUnit(slot.definition.id);
+      const meta = this.progress.characterProgressById?.[slot.slotId];
+      const art = resolveUnitArt(slot.definition.id, meta?.selectedFormId);
       const portrait = this.add.sprite(x - cardWidth / 2 + (compact ? 54 : 48), y - 8, art.family.idle.key, 0).setTint(art.tint);
       portrait.setScale(((compact ? 76 : 70) / art.family.idle.frameHeight) * art.displayScale);
       this.cardsLayer!.add(portrait);
@@ -389,7 +384,6 @@ export class DeckScene extends Phaser.Scene {
       const infoX = x - cardWidth / 2 + (compact ? 100 : 88);
       this.cardsLayer!.add(text(this, infoX, y - cardHeight / 2 + 30, slot.displayName, compact ? 21 : 18, '#ffffff'));
 
-      const meta = this.progress.characterProgressById?.[slot.slotId];
       const level = meta?.level ?? 1;
       const plusLevel = meta?.plusLevel ?? 0;
       const currentSlot = buildCharacterCombatSlot(slot, level, meta?.selectedFormId, plusLevel);
