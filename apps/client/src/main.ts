@@ -20,7 +20,7 @@ import { FriendlyPvpLobbyScene, FriendlyPvpMatchScene } from './pvp-friendly-sce
 import { PvpLeaderboardScene } from './pvp-leaderboard-scene';
 import { PvpMatchmakingScene, PvpMatchScene } from './pvp-scenes';
 import { PvpSeasonScene } from './pvp-season-scene';
-import { RecordBattleScene } from './record-battle-scene';
+import { QuirkRecordBattleScene as RecordBattleScene } from './quirk-record-battle-scene';
 import { RecordHubScene } from './record-hub-scene';
 import { RecordResultScene } from './record-result-scene';
 import { SocialScene } from './social-scene';
