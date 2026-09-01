@@ -32,13 +32,15 @@
 - 강한 번쩍임 줄이기는 공용 `flashCamera` helper의 full-screen flash를 차단한다.
 - 오디오 값은 `getEffectiveAudioBusGain`으로 MASTER × child bus gain을 한 곳에서 계산한다. 현재 실제 BGM/SFX 배포 asset이 아직 없으므로 오디오 제작 이후에도 별도 설정 체계를 다시 만들지 않고 이 bus 값을 사용한다.
 
-추가로 `battle-feedback-policy.ts`와 `accessible-battle-scene.ts`를 통해 현재 메인/스페셜 재전투 체인에 남아 있는 legacy `Camera.shake` / `Camera.flash` 호출도 설정 계층 아래로 넣었다.
+추가로 `battle-feedback-policy.ts`와 `battle-camera-feedback.ts`를 통해 현재 battle scene에 남아 있는 legacy `Camera.shake` / `Camera.flash` 호출도 설정 계층 아래로 넣었다.
 
 - 화면 흔들림 0%는 battle camera shake를 완전히 생략한다.
 - 50%는 authored intensity의 절반만 적용한다. number뿐 아니라 vector intensity도 동일 비율로 축소한다.
 - 강한 번쩍임 줄이기는 battle camera full-screen flash를 차단한다.
 - 이 compatibility layer는 camera presentation 메서드만 감싸며 simulation step, trusted command recorder, 공격 판정, 보급, 적 스폰, 승패 판정에는 관여하지 않는다.
-- `ReplayBattleScene -> QuirkBattleScene -> AccessibleBattleScene -> BattleScene` 상속 체인으로 일반 MAIN/SPECIAL 재전투 및 trusted battle 양쪽이 같은 피드백 게이트를 통과한다.
+- 일반 MAIN/SPECIAL은 `ReplayBattleScene -> QuirkBattleScene -> AccessibleBattleScene -> BattleScene` 체인을 사용한다.
+- Record Endless/Boss Rush는 `QuirkRecordBattleScene -> AccessibleRecordBattleScene -> RecordBattleScene` 체인을 사용하며 같은 camera feedback gate를 공유한다.
+- 따라서 일반/스페셜/trusted/Record 전투의 authored camera feedback이 같은 0/50/100% shake 및 flash reduction 정책을 따른다.
 
 `boss-warning.ts`도 같은 battle feedback policy를 소비한다.
 
@@ -70,10 +72,10 @@
 - 0/50% screen shake scale 계산
 - reduced motion duration 0 처리
 - battery saver가 battle reduced-motion/decorative policy를 함께 켜는지
-- 재전투 상속 체인이 `AccessibleBattleScene`을 통과하는지
-- battle camera shake/flash legacy 호출이 설정 gate 아래 있는지
+- MAIN/SPECIAL 재전투 상속 체인과 Record 상속 체인이 각각 접근성 bridge를 통과하는지
+- 두 전투 계열이 동일한 battle camera shake/flash legacy gate를 공유하는지
 - boss warning이 reduced motion / reduced decorative effects를 소비하면서 핵심 경고 텍스트를 유지하는지
-- battle feedback policy가 `@frontline/sim`을 import하지 않는 presentation-only 경계
+- battle feedback policy/camera gate가 `@frontline/sim`을 import하지 않는 presentation-only 경계
 
 ## 아직 TESTED / LOCKED가 아닌 이유
 
@@ -82,7 +84,7 @@
 - 640×360 및 실제 모바일 COMPACT에서 UI 125% 겹침/잘림 검사
 - 고대비 상태의 전체 화면 가독성 검사
 - LOW / 배터리 절약 상태의 실기기 frame-time 비교
-- 실제 MAIN/SPECIAL 전투에서 camera shake 0/50/100%, flash reduction, boss reduced-motion 동작을 눈으로 대조
+- 실제 MAIN/SPECIAL/Record 전투에서 camera shake 0/50/100%, flash reduction, boss reduced-motion 동작을 눈으로 대조
 - 공격/피격/기지포격의 세부 particle·ring·glow 밀도까지 LOW/VFX LOW에 맞춰 더 줄이는 후속 pass
 - 실제 BGM/SFX asset 연결 후 브라우저 autoplay, focus 복귀, bus mute 검증
 - 대표 모바일 Safari/Chrome storage 지속성 검사
