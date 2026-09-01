@@ -126,6 +126,11 @@ export const PROFILE_COSMETICS: readonly ProfileCosmeticDefinition[] = [
   cosmetic('emblem_soul', 'EMBLEM', '혼의 제련', '혼의 제련소 최종 전장 기념 문장.'),
   cosmetic('banner_evolution_gate', 'BANNER', '진화의 문', '진화의 문 V 기념 배너.'),
   cosmetic('banner_star_rift', 'BANNER', '별빛 균열', '별빛 균열 IV 기념 배너.'),
+  cosmetic('banner_event_summer_kaiju', 'BANNER', '한여름 해변', '한여름 괴수 대소동 중반 돌파를 기념하는 이벤트 배너.'),
+  cosmetic('frame_event_summer_kaiju', 'FRAME', '괴수 불꽃놀이', '한여름 괴수 대소동 5전장 돌파 기념 이벤트 테두리.'),
+  cosmetic('title_event_summer_kaiju', 'TITLE', '한여름 대소동', '여름 포식괴수를 쓰러뜨린 지휘관의 이벤트 칭호.'),
+  cosmetic('emblem_event_summer_kaiju', 'EMBLEM', '여름 괴수 토벌', '한여름 괴수 대소동 완주 기념 문장.'),
+  cosmetic('emblem_event_zero_edge', 'EMBLEM', '프로토콜-0 돌파', '제로 엣지 시험운용 완주 기념 문장.'),
   cosmetic('badge_special_20', 'BADGE', 'SPECIAL 20', '서로 다른 SPECIAL 전장 20종 클리어 배지.'),
   cosmetic('title_complete_frontsoldier', 'TITLE', '완성된 전선병', '첫 Base Lv50 달성 칭호.'),
   cosmetic('emblem_plus', 'EMBLEM', '+50', '첫 +50 달성 문장.'),
@@ -219,6 +224,11 @@ export const ACHIEVEMENTS: readonly AchievementDefinition[] = [
   achievement('ach_star_4', 'SPECIAL', '별빛 균열 통과', '별빛 균열 IV 완료', 'BOOLEAN', { kind: 'SPECIAL_STAGE_CLEAR', stageId: 'special_starlight_rift_04' }, ['banner_star_rift']),
   achievement('ach_permanent_3', 'SPECIAL', '상시 도전 세 갈래', '상시 도전 collection 최종 전장 3종 완료', 'STAGE_CLEAR_SET', { kind: 'SPECIAL_FINAL_COUNT', stageIds: PERMANENT_COLLECTION_FINALS, target: 3 }, [], { designRewardNote: '모집재화 소량 수치는 경제 사람 QA 후 확정' }),
   achievement('ach_special_20', 'SPECIAL', 'SPECIAL 20', '서로 다른 SPECIAL 전장 20종 완료', 'UNIQUE_SET_COUNT', { kind: 'SPECIAL_CLEAR_COUNT', target: 20 }, ['badge_special_20'], { designRewardNote: '소탕권 수치는 경제 사람 QA 후 확정' }),
+  // Event collections unlock sequentially, so reaching these stages is also the collection's cumulative-clear milestone.
+  achievement('ach_event_summer_3', 'SPECIAL', '해변 수습반', '한여름 괴수 대소동 3전장까지 완료', 'BOOLEAN', { kind: 'SPECIAL_STAGE_CLEAR', stageId: 'event_summer_01_03' }, ['banner_event_summer_kaiju']),
+  achievement('ach_event_summer_5', 'SPECIAL', '괴수 불꽃놀이', '한여름 괴수 대소동 5전장까지 완료', 'BOOLEAN', { kind: 'SPECIAL_STAGE_CLEAR', stageId: 'event_summer_01_05' }, ['frame_event_summer_kaiju']),
+  achievement('ach_event_summer_6', 'SPECIAL', '한여름 괴수 토벌', '한여름 괴수 대소동 전 전장 완료', 'BOOLEAN', { kind: 'SPECIAL_STAGE_CLEAR', stageId: 'event_summer_01_06' }, ['title_event_summer_kaiju', 'emblem_event_summer_kaiju']),
+  achievement('ach_event_zero_edge_5', 'SPECIAL', '프로토콜-0 돌파', '제로 엣지 시험운용 전 전장 완료', 'BOOLEAN', { kind: 'SPECIAL_STAGE_CLEAR', stageId: 'event_zero_edge_01_05' }, ['emblem_event_zero_edge']),
 
   achievement('ach_lv10', 'GROWTH', '첫 Lv10', '첫 캐릭터 Base Lv10 달성', 'MAX_VALUE', { kind: 'CHARACTER_MAX_LEVEL', target: 10 }, [], { designRewardNote: 'Gold 보조 보상 수치는 경제 사람 QA 후 확정' }),
   achievement('ach_lv50', 'GROWTH', '완성된 전선병', '첫 캐릭터 Base Lv50 달성', 'MAX_VALUE', { kind: 'CHARACTER_MAX_LEVEL', target: 50 }, ['title_complete_frontsoldier']),
@@ -293,6 +303,13 @@ export function getProfileCosmetic(id: string): ProfileCosmeticDefinition {
   const cosmeticDefinition = COSMETIC_BY_ID.get(id);
   if (!cosmeticDefinition) throw new Error(`Unknown profile cosmetic:${id}`);
   return cosmeticDefinition;
+}
+
+/** Profile rewards directly attached to clearing this SPECIAL stage, including event milestones. */
+export function getSpecialStageProfileRewardIds(stageId: string): readonly string[] {
+  return [...new Set(ACHIEVEMENTS.flatMap((achievement) => achievement.requirement.kind === 'SPECIAL_STAGE_CLEAR' && achievement.requirement.stageId === stageId
+    ? achievement.cosmeticRewardIds
+    : []))];
 }
 
 function clampedProgress(current: number, target: number, achievementId: string): AchievementEvaluation {
