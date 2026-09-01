@@ -92,5 +92,5 @@ test('client wiring keeps story optional, immediately skippable, and after autho
   assert.match(result, /result\.firstClear && result\.persisted \? getPostStageStory/);
   assert.match(trustedResult, /reward\.firstClear/);
   assert.match(trustedResult, /getPostStageStory\(this\.stage\.id\)/);
-  assert.match(settings, /스토리 자동 건너뛰기/);
+  assert.match(settings, /스토리 연출 자동 건너뛰기/);
 });
