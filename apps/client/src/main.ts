@@ -6,13 +6,17 @@ import { ReplayBattleScene as BattleScene } from './replay-battle-scene';
 import { BaseWeaponScene } from './base-weapon-scene';
 import { CatalogScene } from './catalog-scene';
 import { CoopBattleScene, CoopLobbyScene } from './coop-scenes';
+import {
+  StoryFriendCoopBattleScene as FriendCoopBattleScene,
+  StoryFriendCoopLobbyScene as FriendCoopLobbyScene,
+  StoryPublicCoopLobbyScene as PublicCoopLobbyScene,
+} from './coop-story-scenes';
 import { DeckScene } from './deck-scene';
-import { FriendCoopBattleScene, FriendCoopLobbyScene } from './friend-coop-scenes';
 import { GrowthScene } from './growth-scene';
 import { RecruitmentScene } from './recruitment-scene';
 import { BootScene as BaseBootScene, MainMenuScene as BaseMainMenuScene } from './navigation-scenes';
 import { ProfileScene } from './profile-scene';
-import { PublicCoopLobbyScene, PublicCoopMatchmakingScene } from './public-coop-scenes';
+import { PublicCoopMatchmakingScene } from './public-coop-scenes';
 import { Pvp2v2BattleScene, Pvp2v2MatchmakingScene } from './pvp-2v2-scenes';
 import { PvpHubScene } from './pvp-expanded-hub-scene';
 import { FriendlyPvp2v2LobbyScene } from './pvp-friendly-2v2-scene';
