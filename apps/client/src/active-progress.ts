@@ -1,4 +1,5 @@
 import { getAccountClientState, type AccountClientState } from './account-network.ts';
+import { syncActiveVisualForms } from './active-visual-forms.ts';
 import { loadGuestProgress, type GuestProgress } from './save.ts';
 
 export type ActiveProgressAuthority = 'GUEST_LOCAL' | 'ACCOUNT_ONLINE' | 'ACCOUNT_OFFLINE_CACHE';
@@ -73,14 +74,21 @@ function accountView(state: Extract<AccountClientState, { kind: 'AUTHENTICATED_O
   };
 }
 
+function syncPresentationAuthority(view: ActiveProgressView): ActiveProgressView {
+  syncActiveVisualForms(view.progress.characterProgressById);
+  return view;
+}
+
 export async function loadActiveProgress(): Promise<ActiveProgressView> {
   const state = getAccountClientState();
-  if (state.kind === 'GUEST_LOCAL') return { authority: 'GUEST_LOCAL', progress: await loadGuestProgress() };
-  return accountView(state);
+  if (state.kind === 'GUEST_LOCAL') {
+    return syncPresentationAuthority({ authority: 'GUEST_LOCAL', progress: await loadGuestProgress() });
+  }
+  return syncPresentationAuthority(accountView(state));
 }
 
 export function getCurrentActiveProgress(): ActiveProgressView | null {
   const state = getAccountClientState();
   if (state.kind === 'GUEST_LOCAL') return null;
-  return accountView(state);
+  return syncPresentationAuthority(accountView(state));
 }
