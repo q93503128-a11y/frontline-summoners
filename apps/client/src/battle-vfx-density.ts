@@ -1,4 +1,3 @@
-import Phaser from 'phaser';
 import { getBattleFeedbackPolicy, type BattleFeedbackPolicy } from './battle-feedback-policy';
 
 export interface BattleVfxDescriptor {
@@ -64,7 +63,8 @@ export function resolveBattleVfxTreatment(
   return { visible, alphaMultiplier };
 }
 
-type ShapeLike = Phaser.GameObjects.GameObject & {
+interface BattleVfxGameObject {
+  readonly type: string;
   readonly depth?: number;
   readonly alpha?: number;
   readonly fillAlpha?: number;
@@ -72,9 +72,18 @@ type ShapeLike = Phaser.GameObjects.GameObject & {
   readonly strokeAlpha?: number;
   setAlpha?(value: number): unknown;
   setVisible?(value: boolean): unknown;
-};
+}
 
-function describe(gameObject: ShapeLike): BattleVfxDescriptor | null {
+interface BattleVfxSceneLike {
+  readonly children: { readonly list: readonly BattleVfxGameObject[] };
+  readonly events: {
+    on(event: string, listener: () => void): unknown;
+    once(event: string, listener: () => void): unknown;
+    off(event: string, listener: () => void): unknown;
+  };
+}
+
+function describe(gameObject: BattleVfxGameObject): BattleVfxDescriptor | null {
   if (typeof gameObject.depth !== 'number') return null;
   return {
     type: gameObject.type,
@@ -87,17 +96,16 @@ function describe(gameObject: ShapeLike): BattleVfxDescriptor | null {
 
 /**
  * Applies the authored LOW/battery VFX pass to newly-created battle shapes.
- * This runs after scene update so existing BattleScene FX code can stay deterministic and unchanged.
+ * This runs after scene update so existing battle FX code can stay deterministic and unchanged.
  */
-export function installBattleVfxDensityPolicy(scene: Phaser.Scene): void {
-  const processed = new WeakSet<Phaser.GameObjects.GameObject>();
+export function installBattleVfxDensityPolicy(scene: BattleVfxSceneLike): void {
+  const processed = new WeakSet<object>();
 
   const apply = (): void => {
     const policy = getBattleFeedbackPolicy();
-    for (const raw of scene.children.list) {
-      if (processed.has(raw)) continue;
-      processed.add(raw);
-      const object = raw as ShapeLike;
+    for (const object of scene.children.list) {
+      if (processed.has(object)) continue;
+      processed.add(object);
       const descriptor = describe(object);
       if (!descriptor) continue;
       const treatment = resolveBattleVfxTreatment(descriptor, policy);
@@ -112,8 +120,8 @@ export function installBattleVfxDensityPolicy(scene: Phaser.Scene): void {
     }
   };
 
-  scene.events.on(Phaser.Scenes.Events.POST_UPDATE, apply);
-  scene.events.once(Phaser.Scenes.Events.SHUTDOWN, () => {
-    scene.events.off(Phaser.Scenes.Events.POST_UPDATE, apply);
+  scene.events.on('postupdate', apply);
+  scene.events.once('shutdown', () => {
+    scene.events.off('postupdate', apply);
   });
 }
