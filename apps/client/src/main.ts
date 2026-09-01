@@ -5,8 +5,9 @@ import { AccountScene } from './account-scene';
 import { ReplayBattleScene as BattleScene } from './replay-battle-scene';
 import { BaseWeaponScene } from './base-weapon-scene';
 import { CatalogScene } from './catalog-scene';
-import { CoopBattleScene, CoopLobbyScene } from './coop-scenes';
 import {
+  StoryGuestCoopBattleScene as CoopBattleScene,
+  StoryGuestCoopLobbyScene as CoopLobbyScene,
   StoryFriendCoopBattleScene as FriendCoopBattleScene,
   StoryFriendCoopLobbyScene as FriendCoopLobbyScene,
   StoryPublicCoopLobbyScene as PublicCoopLobbyScene,
