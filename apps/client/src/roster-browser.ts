@@ -76,7 +76,7 @@ function matchesGrowth(slot: PrototypeRosterSlot, progress: GuestProgress, filte
 }
 
 function countersAttribute(slot: PrototypeRosterSlot, attribute: Attribute): boolean {
-  return slot.definition.damageBonuses.some((bonus) => bonus.targetKind === 'ATTRIBUTE' && bonus.target === attribute);
+  return (slot.definition.damageBonuses ?? []).some((bonus) => bonus.targetKind === 'ATTRIBUTE' && bonus.target === attribute);
 }
 
 function normalizeSearch(value: string): string {
@@ -86,8 +86,8 @@ function normalizeSearch(value: string): string {
 function matchesSearch(slot: PrototypeRosterSlot, rawSearch: string): boolean {
   const search = normalizeSearch(rawSearch);
   if (!search) return true;
-  const attributeText = slot.definition.attributes.join(' ');
-  const counterText = slot.definition.damageBonuses
+  const attributeText = (slot.definition.attributes ?? []).join(' ');
+  const counterText = (slot.definition.damageBonuses ?? [])
     .filter((bonus) => bonus.targetKind === 'ATTRIBUTE')
     .map((bonus) => bonus.target)
     .join(' ');
