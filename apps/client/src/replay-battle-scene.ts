@@ -1,6 +1,6 @@
 import Phaser from 'phaser';
 import { loadActiveProgress } from './active-progress';
-import { BattleScene } from './battle-scene';
+import { QuirkBattleScene as BattleScene } from './quirk-battle-scene';
 import { getReplayConvenienceState, resolveBattleSpeed, scaleReplayDeltaMs, type BattleSpeedMultiplier } from './replay-convenience';
 import { STAGES, getStage, type PrototypeStage } from './prototype';
 import { isSortieStageUnlocked } from './stage-navigation';
@@ -9,7 +9,7 @@ import { isCompactMobileViewport } from './viewport';
 
 /**
  * Adds NORMAL_CLEAR-gated replay speed without forking the combat simulation.
- * BattleScene remains the single source of truth for stepping, rendering and result flow.
+ * QuirkBattleScene wraps the same authoritative combat step with deterministic hidden-achievement observation.
  */
 export class ReplayBattleScene extends BattleScene {
   private replayStage: PrototypeStage = STAGES[0]!;
