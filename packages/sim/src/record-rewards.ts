@@ -17,13 +17,13 @@ export interface RecordProfileHonorDefinition {
 }
 
 /**
- * Profile honors intentionally sit above the basic Record achievement ladder.
+ * Profile honors intentionally sit above the basic Record reward ladder.
  * They are derived from durable Record high-water marks and are not repeatable rewards.
  * Thresholds remain DESIGN_TARGET until long-run human balance QA is complete.
  */
 export const RECORD_PROFILE_HONORS: readonly RecordProfileHonorDefinition[] = [
-  { id: 'record_honor_endless_12', mode: 'ENDLESS_FRONT', threshold: 12, cosmeticId: 'banner_endless_depth', name: '심층 전선' },
-  { id: 'record_honor_endless_15', mode: 'ENDLESS_FRONT', threshold: 15, cosmeticId: 'frame_endless_abyss', name: '끝없는 심연' },
+  { id: 'record_honor_endless_15_banner', mode: 'ENDLESS_FRONT', threshold: 15, cosmeticId: 'banner_endless_depth', name: '심층 전선' },
+  { id: 'record_honor_endless_15_frame', mode: 'ENDLESS_FRONT', threshold: 15, cosmeticId: 'frame_endless_abyss', name: '끝없는 심연' },
   { id: 'record_honor_bossrush_complete', mode: 'BOSS_RUSH', threshold: BOSS_RUSH_REWARD_CAP_DEFEATED, cosmeticId: 'emblem_bossrush_complete', name: '보스 러시 제패' },
 ] as const;
 
