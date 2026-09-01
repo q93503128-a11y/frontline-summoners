@@ -1,6 +1,6 @@
 # 스테이지 문맥 출정 방식 라우팅 구현 — 2026-09-01
 
-상태: **DESIGN_TARGET / code-wired, final integrated CI rerun + human browser/multiplayer QA pending**
+상태: **DESIGN_TARGET / automated CI GREEN, human browser/multiplayer QA pending**
 
 상위 정본:
 
@@ -112,9 +112,11 @@ joinPublicCoopMatchmaking(currentStageId)
 - guest code coop에서 선택 stage 문맥 유지
 - 스테이지 목록 복귀 시 정확한 collection/page 유지
 
-## 통합 CI 1차 결과
+## 통합 CI 결과
 
-CI #904에서 다음은 통과했다.
+### CI #904
+
+다음은 통과했다.
 
 - simulation: PASS
 - server co-op protocol/tests: PASS
@@ -123,7 +125,20 @@ CI #904에서 다음은 통과했다.
 
 Typecheck는 `StoryGuestCoopLobbyScene.init()`에 잘못 붙은 `override` 한 건만 실패했다. `CoopLobbyScene` 자체에는 `init` 선언이 없으므로 해당 modifier를 제거했고 회귀 테스트도 실제 선언에 맞췄다.
 
-따라서 기능 회귀가 추가로 발견된 것은 아니며, 수정 HEAD에서 typecheck와 production build까지 포함한 최종 통합 재검증을 진행한다.
+### CI #905
+
+수정 HEAD `6bf72837ad1030db0ed11fb031e0dc78a1c7907b`에서 최종 통합 검증이 전부 GREEN이다.
+
+- install: PASS
+- typecheck: PASS
+- content schema: PASS
+- simulation: PASS
+- server co-op protocol/tests: PASS
+- client diagnostics: PASS
+- client full suite: PASS
+- production build: PASS
+
+자동검사 통과만으로 `TESTED`로 승격하지 않는다.
 
 ## 의도적으로 하지 않은 것
 
@@ -137,9 +152,7 @@ Typecheck는 `StoryGuestCoopLobbyScene.init()`에 잘못 붙은 `override` 한 �
 
 ## 남은 검증
 
-이 문서는 `TESTED`가 아니다.
-
-통합 CI가 GREEN이어도 다음은 사람 QA가 필요하다.
+다음은 사람 QA가 필요하다.
 
 - guest: 스테이지 카드 -> 친구 코드 협동 -> 같은 전장 페이지 -> 방 생성
 - account: 스테이지 카드 -> 친구 초대 -> 상대 수락 -> 정확한 전장 방
