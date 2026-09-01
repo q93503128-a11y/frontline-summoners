@@ -38,7 +38,7 @@ test('solo keeps pre-stage story while friend and public coop keep the selected 
 test('guest code-coop adapter focuses the already-authoritative lobby picker on the selected stage page', async () => {
   const source = await readSource('../src/coop-story-scenes.ts');
   assert.match(source, /private preferredStageId: string \| undefined/);
-  assert.match(source, /override init\(data: \{ preferredStageId\?: string \} = \{\}\)/);
+  assert.match(source, /init\(data: \{ preferredStageId\?: string \} = \{\}\)/);
   assert.match(source, /ALL_STAGES\.filter\(\(stage\) => stage\.multiplayerPolicy === 'SOLO_OR_COOP'/);
   assert.match(source, /const index = eligible\.findIndex\(\(stage\) => stage\.id === preferredStageId\)/);
   assert.match(source, /carrier\.page = Math\.floor\(index \/ 5\)/);
