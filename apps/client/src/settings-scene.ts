@@ -38,7 +38,7 @@ export class SettingsScene extends Phaser.Scene {
     drawBackdrop(this, 'menu');
     const compact = isCompactMobileViewport();
     addText(this, 48, 32, '설 정', compact ? 44 : 48, COLORS.cream);
-    addText(this, 50, 88, '접근성 · 그래픽 · 오디오 설정은 이 브라우저에 즉시 저장됩니다.', compact ? 18 : 16, COLORS.muted);
+    addText(this, 50, 88, '접근성 · 그래픽 · 연출 · 오디오 설정은 이 브라우저에 즉시 저장됩니다.', compact ? 18 : 16, COLORS.muted);
     addButton(this, 1170, compact ? 62 : 58, 160, compact ? 80 : 50, '메인', () => this.scene.start('main-menu'), 0x586275);
     this.render();
   }
@@ -67,7 +67,7 @@ export class SettingsScene extends Phaser.Scene {
     });
     this.content.add(addText(this, 225, 510, '핵심 위험 표시는 색·소리 하나에만\n의존하지 않는 UI를 유지합니다.', compact ? 15 : 13, '#9fb1c6', 'center').setOrigin(0.5));
 
-    this.panel(640, 375, 380, 500, '그래픽', 0x6f8062);
+    this.panel(640, 375, 380, 500, '그래픽 · 연출', 0x6f8062);
     this.settingRow(485, 195, 310, rowHeight, '품질', GRAPHICS_LABEL[this.settings.graphicsPreset], () => {
       this.change({ graphicsPreset: cycleSettingValue(this.settings.graphicsPreset, GRAPHICS_PRESETS) });
     });
@@ -77,7 +77,10 @@ export class SettingsScene extends Phaser.Scene {
     this.settingRow(485, 319, 310, rowHeight, '배터리 절약', ON_OFF(this.settings.batterySaver), () => {
       this.change({ batterySaver: !this.settings.batterySaver });
     });
-    this.content.add(addText(this, 640, 390, 'LOW / 낮은 VFX / 배터리 절약은\n장식 효과를 줄입니다.\n\n전투 판정·위험 범위·30Hz simulation은\n설정과 무관하게 그대로 유지됩니다.', compact ? 16 : 14, '#a8b8a1', 'center').setOrigin(0.5));
+    this.settingRow(485, 381, 310, rowHeight, '스토리 자동 건너뛰기', ON_OFF(this.settings.autoSkipStory), () => {
+      this.change({ autoSkipStory: !this.settings.autoSkipStory });
+    });
+    this.content.add(addText(this, 640, 474, 'LOW / 낮은 VFX / 배터리 절약은 장식 효과를 줄입니다.\n스토리 자동 건너뛰기는 장면을 렌더하지 않습니다.\n전투 판정·위험 정보는 그대로 유지됩니다.', compact ? 15 : 13, '#a8b8a1', 'center').setOrigin(0.5));
 
     this.panel(1055, 375, 380, 500, '오디오', 0x8b745c);
     this.settingRow(900, 195, 310, rowHeight, 'Master', `${this.settings.masterVolume}%`, () => {
