@@ -5,7 +5,7 @@ import test from 'node:test';
 const readSource = (relative: string): Promise<string> => readFile(new URL(relative, import.meta.url), 'utf8');
 
 test('stage cards expose an encounter-codex path without leaking undiscovered enemy identity', async () => {
-  const source = await readSource('../src/navigation-scenes.ts');
+  const source = await readSource('../src/stage-select-scene.ts');
 
   assert.match(source, /function getStageEnemyIds\(stage: PrototypeStage\)/);
   assert.match(source, /for \(const wave of stage\.waves\)/);
@@ -18,11 +18,9 @@ test('stage cards expose an encounter-codex path without leaking undiscovered en
 });
 
 test('stage encounter entries open the exact enemy codex card and return to the same stage page', async () => {
-  const source = await readSource('../src/navigation-scenes.ts');
+  const source = await readSource('../src/stage-select-scene.ts');
 
-  assert.match(source, /this\.scene\.start\('catalog', \{[\s\S]*?mode: 'ENEMIES',[\s\S]*?focusEnemyId: enemyId/);
-  assert.match(source, /scene: 'stage-select'/);
-  assert.match(source, /data: \{ collectionId: this\.collection\.id, page: this\.page \}/);
+  assert.match(source, /this\.scene\.start\('catalog', \{ mode: 'ENEMIES', focusEnemyId: enemyId, returnTo: \{ scene: 'stage-select', data: \{ collectionId: this\.collection\.id, page: this\.page \} \} \}\)/);
   assert.match(source, /init\(data: \{ collectionId\?: string; page\?: number \} = \{\}\)/);
   assert.match(source, /this\.requestedPage = Number\.isInteger\(data\.page\)/);
   assert.match(source, /this\.page = Math\.min\(this\.pageCount\(\) - 1, this\.requestedPage\)/);
