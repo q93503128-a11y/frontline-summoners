@@ -1,3 +1,4 @@
+import { qualifiesStoryTenLateQuirk } from '@frontline/sim/achievement-quirks';
 import {
   stepPlayableBattle,
   tryFireBaseWeapon,
@@ -24,6 +25,7 @@ import {
   type AccountMainBattleMutationResult,
   type AccountRecordMutationResult,
 } from './account-mutation-authority.ts';
+import { recordAccountAchievementFact } from './account-profile-authority.ts';
 import { applyAccountSpecialBattleResult, type AccountSpecialBattleMutationResult } from './account-special-mutation-authority.ts';
 import { assertAccountSpecialStagePlayable } from './account-stage-authority.ts';
 import {
@@ -115,6 +117,12 @@ function parseStoredSnapshot(row: TrustedBattleRow): AccountSaveSnapshotV2 {
   try { decoded = JSON.parse(row.start_snapshot_json); }
   catch { throw new Error(`trusted battle start snapshot JSON is invalid:${row.battle_id}`); }
   return normalizeAccountSaveSnapshot(decoded, row.started_at * 1000);
+}
+
+function qualifiesTrustedStoryTenLateQuirk(row: TrustedBattleRow): boolean {
+  if (row.battle_kind !== 'MAIN') return false;
+  const snapshot = parseStoredSnapshot(row);
+  return qualifiesStoryTenLateQuirk(row.target_id, snapshot.deckSlotIds);
 }
 
 function parseStoredCompletion(row: TrustedBattleRow): TrustedBattleCompletionResult {
@@ -441,6 +449,9 @@ export async function claimTrustedBattle(
       }, mutationTime, row.started_at * 1000);
   if (!mutation.ok) return mutation;
 
+  if (qualifiesTrustedStoryTenLateQuirk(row)) {
+    await recordAccountAchievementFact(db, accountId, 'quirk_story_ten_late', mutationTime);
+  }
   await db.prepare(
     'UPDATE trusted_battle_runs SET claimed_at = COALESCE(claimed_at, unixepoch()) WHERE battle_id = ?1 AND user_id = ?2',
   ).bind(battleId, accountId).run();
@@ -460,4 +471,5 @@ export const __trustedBattleTestOnly = {
   replayRecordBattle,
   collectEnemyDiscoveries,
   parseStoredCompletion,
+  qualifiesTrustedStoryTenLateQuirk,
 };
