@@ -17,10 +17,10 @@ export class StoryScene extends Phaser.Scene {
   private nextScene = 'stage-select';
   private nextData: object | undefined;
   private beatIndex = 0;
-  private speakerText?: Phaser.GameObjects.Text;
-  private bodyText?: Phaser.GameObjects.Text;
-  private progressText?: Phaser.GameObjects.Text;
-  private continueButton?: Phaser.GameObjects.Container;
+  private speakerText: Phaser.GameObjects.Text | undefined;
+  private bodyText: Phaser.GameObjects.Text | undefined;
+  private progressText: Phaser.GameObjects.Text | undefined;
+  private continueButton: Phaser.GameObjects.Container | undefined;
   private finished = false;
 
   constructor() { super('story'); }
