@@ -1,6 +1,6 @@
 # 로그인 계정 메타 진행 권위 연결 — 2026-09-01
 
-상태: **DESIGN_TARGET / code-wired, integrated CI + human browser QA pending**
+상태: **DESIGN_TARGET / code-wired, integrated CI rerun + human browser QA pending**
 
 상위 정본: `docs/CANONICAL.md`, `docs/GAME_DESIGN_FULL.md`, `docs/GROWTH_RECRUITMENT_DESIGN.md`
 
@@ -82,6 +82,8 @@
 
 - `apps/client/test/recruitment-ui-wiring.test.ts`
 - `apps/client/test/growth-recruitment-loop.test.ts`
+- `apps/client/test/deck-drag.test.ts`
+- `apps/client/test/battle-ui-wiring.test.ts`
 
 다음을 새로 추가했다.
 
@@ -94,6 +96,17 @@
 3. 성장·모집·편성·거점 병기 화면이 guest mutation API를 직접 호출하지 않는다.
 4. account 모집 결과를 다시 로컬 duplicate-growth 로직에 통과시키지 않는다.
 5. account 자동 편성을 위해 새로운 save-schema mode를 임의로 만들지 않는다.
+
+## 통합 CI에서 함께 발견한 이전 HEAD 회귀
+
+이 구현을 닫으며 처음 통합 CI를 실행했을 때 active-meta 코드 자체가 아니라 직전 구현 묶음에 남아 있던 회귀도 드러났다. 현재 main을 검증 가능한 상태로 만들기 위해 기능 확장 없이 최소 수정했다.
+
+- `story-scene.ts`: `exactOptionalPropertyTypes`에서 optional Phaser 필드에 `undefined`를 재할당하던 타입 오류를 명시적 `| undefined` 필드로 교정
+- `social-coop-authority.test.ts`: 사용 중이던 `readSource` helper 누락 복구
+- `battle-feedback-policy.ts`: Node 22 direct TS test에서 해석 가능한 `.ts` import 명시
+- 접근성 UI scale / 스토리 결과 suffix / reduced-motion 버튼 동작에 뒤처진 source-wiring 기대값 갱신
+
+이 항목들은 새 콘텐츠 추가가 아니라 기존 구현과 회귀 계약을 다시 일치시키는 CI 복구다.
 
 ## TESTED 승격 조건
 
