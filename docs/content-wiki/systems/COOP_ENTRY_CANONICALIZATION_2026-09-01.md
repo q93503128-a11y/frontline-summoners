@@ -1,6 +1,6 @@
 # 협동 진입 정본화 — 2026-09-01
 
-상태: **DESIGN_TARGET / code-wired, final integrated CI + human browser/multiplayer QA pending**
+상태: **DESIGN_TARGET / automated CI GREEN, human browser/multiplayer QA pending**
 
 상위 정본:
 
@@ -117,9 +117,11 @@ stage-agnostic `공개 협동` 버튼을 제거했다.
 - 실제 dedicated hub/select가 active progress를 사용함
 - 스테이지 적 도감/영구보상/난이도/모바일 hitbox 검사가 실제 `stage-select-scene.ts`를 검사함
 
-## 통합 CI 1차 결과
+## 통합 CI 결과
 
-CI #906에서 다음은 즉시 통과했다.
+### CI #906
+
+다음은 통과했다.
 
 - typecheck: PASS
 - content schema: PASS
@@ -135,14 +137,23 @@ client diagnostics는 네 테스트 파일이 실패했다.
 - `coop-matchmaking.test.ts`
 - `battle-ui-wiring.test.ts`
 
-테스트의 검증 의미는 유지한 채 실제 runtime source로 이동했다.
+테스트 의미는 유지한 채 실제 runtime source로 이동했다.
 
-- stage hub 검증 -> `stage-hub-scene.ts`
-- stage card/도감/보상/난이도 검증 -> `stage-select-scene.ts`
-- coop entry 검증 -> `stage-sortie-mode-scene.ts`
-- registry 검증 -> `main.ts`
+### CI #907 — GREEN
 
-수정 HEAD에서 production build를 포함한 전체 CI를 다시 검증한다.
+수정 HEAD에서 다음 전체 gate가 통과했다.
+
+- Install dependencies: PASS
+- Typecheck: PASS
+- Content schema: PASS
+- Simulation: PASS
+- Server co-op protocol/tests: PASS
+- Core verification diagnostics: PASS
+- Client individual diagnostics: PASS
+- Client full suite: PASS
+- Production build: PASS
+
+따라서 자동검사 기준으로 협동 진입 정본화와 legacy navigation 제거는 닫혔다.
 
 ## TESTED 승격 조건
 
