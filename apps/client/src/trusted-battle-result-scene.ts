@@ -1,5 +1,6 @@
 import Phaser from 'phaser';
 import { INTERNAL_WIDTH } from '@frontline/shared';
+import { getProfileCosmetic, getSpecialStageProfileRewardIds } from '@frontline/sim/achievement-profile';
 import {
   AccountRevisionConflictError,
   claimAuthenticatedTrustedBattle,
@@ -53,6 +54,11 @@ function formatResourceReward(reward: Readonly<Record<string, number | undefined
     .filter(([, amount]) => typeof amount === 'number' && amount > 0)
     .map(([id, amount]) => `${labels[id] ?? id} +${amount!.toLocaleString('ko-KR')}`);
   return parts.length > 0 ? parts.join(' · ') : '추가 재화 보상 없음';
+}
+
+function formatSpecialProfileReward(stageId: string): string | undefined {
+  const names = getSpecialStageProfileRewardIds(stageId).map((id) => getProfileCosmetic(id).name);
+  return names.length > 0 ? `프로필 장식 해금 · ${names.join(' · ')}` : undefined;
 }
 
 export class TrustedBattleResultScene extends Phaser.Scene {
@@ -173,7 +179,8 @@ export class TrustedBattleResultScene extends Phaser.Scene {
       if (!claim.awarded) {
         this.rewardText?.setText(victory ? '서버 보상 없음' : '패배/무승부 · 보상 없음');
       } else if (reward) {
-        this.rewardText?.setText(`${reward.firstClear ? '첫 클리어 · ' : '재클리어 · '}${formatResourceReward(reward.resourceReward)}`);
+        const profileReward = special && reward.firstClear ? formatSpecialProfileReward(this.stage.id) : undefined;
+        this.rewardText?.setText(`${reward.firstClear ? '첫 클리어 · ' : '재클리어 · '}${formatResourceReward(reward.resourceReward)}${profileReward ? `\n${profileReward}` : ''}`);
         if (!special && reward.firstClear && this.stage.unlockUnitId) {
           const slot = getSlotById(this.stage.unlockUnitId);
           if (slot) this.rewardText?.setText(`${this.rewardText.text}\n신규 동료 · ${slot.displayName}`);
@@ -196,4 +203,5 @@ export class TrustedBattleResultScene extends Phaser.Scene {
 export const __trustedBattleResultSceneTestOnly = {
   parseTrustedRewardSummary,
   formatResourceReward,
+  formatSpecialProfileReward,
 };
