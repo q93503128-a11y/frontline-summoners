@@ -35,7 +35,7 @@
 추가로 `battle-feedback-policy.ts`와 `battle-camera-feedback.ts`를 통해 현재 battle scene에 남아 있는 legacy `Camera.shake` / `Camera.flash` 호출도 설정 계층 아래로 넣었다.
 
 - 화면 흔들림 0%는 battle camera shake를 완전히 생략한다.
-- 50%는 authored intensity의 절반만 적용한다. number뿐 아니라 vector intensity도 동일 비율로 축소한다.
+- 50%는 현재 authored numeric shake intensity의 절반만 적용한다.
 - 강한 번쩍임 줄이기는 battle camera full-screen flash를 차단한다.
 - 이 compatibility layer는 camera presentation 메서드만 감싸며 simulation step, trusted command recorder, 공격 판정, 보급, 적 스폰, 승패 판정에는 관여하지 않는다.
 - 일반 MAIN/SPECIAL은 `ReplayBattleScene -> QuirkBattleScene -> AccessibleBattleScene -> BattleScene` 체인을 사용한다.
