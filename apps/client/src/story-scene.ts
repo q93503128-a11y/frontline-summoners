@@ -38,7 +38,6 @@ export class StoryScene extends Phaser.Scene {
   }
 
   create(): void {
-    markStoryViewed(this.story.id);
     if (getClientSettings().autoSkipStory) {
       this.finish();
       return;
