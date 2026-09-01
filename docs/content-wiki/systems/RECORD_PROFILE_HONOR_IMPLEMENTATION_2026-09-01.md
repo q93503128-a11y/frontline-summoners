@@ -79,9 +79,27 @@ Record는 반복 파밍보다 기록 갱신이 핵심이므로 후반 milestone�
 - ENDLESS_FRONT 15분 → `frame_endless_abyss`
 - BOSS_RUSH 9보스 → `emblem_bossrush_complete`
 
-이 metadata는 이후 Record 결과 화면에서 신규 장식 toast/card를 붙일 때 동일 milestone을 재사용할 수 있다.
+Record 허브와 결과 화면이 이 metadata를 직접 읽기 때문에 milestone 숫자와 프로필 장식 이름을 화면별로 따로 하드코딩하지 않는다.
 
-## 7. 상태 경계
+## 7. 플레이어 노출
+
+Record 허브:
+
+- 현재 최고기록과 수령한 재화 high-water 아래에 **다음 명예 목표**를 표시한다.
+- 끝없는 전선은 `15분 · 심층 전선 · 끝없는 심연`을 미리 보여준다.
+- 보스 러시는 `9/9보스 · 보스 러시 제패`를 미리 보여준다.
+- 목표 달성 뒤에는 같은 위치가 `명예 달성` 표시로 바뀐다.
+
+Record 결과:
+
+- 재화 보상과 별도로 현재 high-water에서 달성한 프로필 명예를 표시한다.
+- 같은 이하 기록을 다시 플레이했을 때 `신규 획득`이라고 잘못 표시하지 않고 `고기록 명예` / `완주 명예`로 표현한다.
+- authenticated 결과는 trusted replay claim이 돌려준 authoritative account snapshot을 사용한다.
+- guest 결과는 durable guest high-water 저장 결과를 사용한다.
+
+따라서 플레이어가 프로필 화면을 나중에 열기 전에도 Record의 장기 장식 목표와 달성 상태를 확인할 수 있다.
+
+## 8. 상태 경계
 
 구현됨:
 
@@ -91,6 +109,8 @@ Record는 반복 파밍보다 기록 갱신이 핵심이므로 후반 milestone�
 - 9/9 보스 러시 완주 문장
 - 8보스 milestone 보존
 - authored achievement 상한 55 유지
+- Record 허브 다음 명예 목표 표시
+- Record 결과 달성 명예 표시
 
 아직 `TESTED/LOCKED`가 아님:
 
@@ -98,6 +118,6 @@ Record는 반복 파밍보다 기록 갱신이 핵심이므로 후반 milestone�
 - 15분 장식 milestone의 장기 동기 효과
 - 9보스 전체 순서/체력의 사람 밸런스
 - production profile art
-- 획득 순간 전용 toast/연출
+- 별도 animation/toast 연출
 
 이번 묶음에서는 콘텐츠 확장을 우선했고 전체 CI는 별도 통합 검증 묶음까지 반복 실행하지 않는다.
