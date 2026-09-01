@@ -39,22 +39,29 @@ test('zero shake and battery saver produce deterministic presentation-only reduc
   assert.equal(scaleBattleShakeIntensity(0.01, settings), 0);
 });
 
-test('battle scene chain gates legacy camera feedback and boss warning keeps its core text', async () => {
-  const [accessible, quirk, boss, policy] = await Promise.all([
+test('standard and Record battle chains share camera feedback gates while boss text remains intact', async () => {
+  const [cameraGate, accessible, accessibleRecord, quirk, quirkRecord, boss, policy] = await Promise.all([
+    readFile(new URL('../src/battle-camera-feedback.ts', import.meta.url), 'utf8'),
     readFile(new URL('../src/accessible-battle-scene.ts', import.meta.url), 'utf8'),
+    readFile(new URL('../src/accessible-record-battle-scene.ts', import.meta.url), 'utf8'),
     readFile(new URL('../src/quirk-battle-scene.ts', import.meta.url), 'utf8'),
+    readFile(new URL('../src/quirk-record-battle-scene.ts', import.meta.url), 'utf8'),
     readFile(new URL('../src/boss-warning.ts', import.meta.url), 'utf8'),
     readFile(new URL('../src/battle-feedback-policy.ts', import.meta.url), 'utf8'),
   ]);
 
   assert.match(quirk, /AccessibleBattleScene as BattleScene/);
-  assert.match(accessible, /camera\.shake\s*=/);
-  assert.match(accessible, /camera\.flash\s*=/);
-  assert.match(accessible, /screenShakeFactor <= 0/);
-  assert.match(accessible, /!getBattleFeedbackPolicy\(\)\.strongFlash/);
+  assert.match(quirkRecord, /AccessibleRecordBattleScene as RecordBattleScene/);
+  assert.match(accessible, /installAccessibleBattleCameraFeedback\(this\)/);
+  assert.match(accessibleRecord, /installAccessibleBattleCameraFeedback\(this\)/);
+  assert.match(cameraGate, /camera\.shake\s*=/);
+  assert.match(cameraGate, /camera\.flash\s*=/);
+  assert.match(cameraGate, /screenShakeFactor <= 0/);
+  assert.match(cameraGate, /!getBattleFeedbackPolicy\(\)\.strongFlash/);
   assert.match(boss, /policy\.reducedMotion/);
   assert.match(boss, /policy\.reducedDecorativeEffects/);
   assert.match(boss, /우 두 머 리\s+출 현/);
   assert.match(boss, /bossName/);
   assert.doesNotMatch(policy, /@frontline\/sim/);
+  assert.doesNotMatch(cameraGate, /@frontline\/sim/);
 });
