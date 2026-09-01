@@ -38,9 +38,10 @@ test('new pulls do not fabricate plus-level applications', () => {
   assert.deepEqual(planDuplicatePlusLevelApplications(baseProgress(0), [fresh]), []);
 });
 
-test('recruitment UI exposes paid pulls and explicit duplicate handling instead of forced auto-plus', async () => {
+test('recruitment UI exposes paid pulls and explicit duplicate handling through active authority', async () => {
   const source = await readFile(new URL('../src/recruitment-scene.ts', import.meta.url), 'utf8');
-  assert.match(source, /performGuestRecruitmentWithDuplicateGrowth as performGuestRecruitment/);
+  assert.match(source, /performActiveRecruitment/);
+  assert.doesNotMatch(source, /performGuestRecruitmentWithDuplicateGrowth as performGuestRecruitment/);
   assert.match(source, /getRecruitmentCost\(1\)/);
   assert.match(source, /getRecruitmentCost\(10\)/);
   assert.match(source, /'APPLY_PLUS'/);
@@ -51,7 +52,7 @@ test('recruitment UI exposes paid pulls and explicit duplicate handling instead 
   assert.match(source, /pull\.duplicateResolution === 'DISMANTLE'/);
 });
 
-test('growth scene exposes paid base level, shared plus growth, evolution unlock, and form selection', async () => {
+test('growth scene exposes paid base level, shared plus growth, evolution unlock, and form selection through active authority', async () => {
   const [main, growth] = await Promise.all([
     readFile(new URL('../src/main.ts', import.meta.url), 'utf8'),
     readFile(new URL('../src/growth-scene.ts', import.meta.url), 'utf8'),
@@ -62,11 +63,15 @@ test('growth scene exposes paid base level, shared plus growth, evolution unlock
   assert.match(growth, /buildCharacterCombatSlot\(slot, meta\.level, meta\.selectedFormId, meta\.plusLevel\)/);
   assert.match(growth, /getLevelUpgradeGoldCost/);
   assert.match(growth, /getPlusLevelSoulEssenceCost/);
-  assert.match(growth, /recordGuestCharacterLevel\(characterId, targetLevel\)/);
-  assert.match(growth, /recordGuestCharacterPlusLevel\(characterId, current\.plusLevel \+ 1\)/);
+  assert.match(growth, /recordActiveCharacterLevel\(characterId, targetLevel\)/);
+  assert.match(growth, /recordActiveCharacterPlusLevel\(characterId, current\.plusLevel \+ 1\)/);
+  assert.doesNotMatch(growth, /recordGuestCharacterLevel\(/);
+  assert.doesNotMatch(growth, /recordGuestCharacterPlusLevel\(/);
   assert.match(growth, /getEvolutionRecipe\(form\.formId\)/);
-  assert.match(growth, /recordGuestEvolutionUnlock\(characterId, formId\)/);
-  assert.match(growth, /selectGuestEvolutionForm\(characterId, formId\)/);
+  assert.match(growth, /recordActiveEvolutionUnlock\(characterId, formId\)/);
+  assert.match(growth, /selectActiveEvolutionForm\(characterId, formId\)/);
+  assert.doesNotMatch(growth, /recordGuestEvolutionUnlock\(/);
+  assert.doesNotMatch(growth, /selectGuestEvolutionForm\(/);
 });
 
 test('implemented level cap delegates to the save authority and still communicates the four chapter cap chain', async () => {
