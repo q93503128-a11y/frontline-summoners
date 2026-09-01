@@ -2,7 +2,10 @@ import Phaser from 'phaser';
 import { INTERNAL_WIDTH } from '@frontline/shared';
 import { qualifiesStoryTenLateQuirk } from '@frontline/sim/achievement-quirks';
 import { getProfileCosmetic, getSpecialStageProfileRewardIds } from '@frontline/sim/achievement-profile';
+import { loadGuestAchievementProfile, recordGuestAchievementFact } from './achievement-profile';
 import { BATTLEFIELD_THEME_LABELS } from './battlefield';
+import { getClientSettings } from './client-settings';
+import { getPermanentRewardEffectText } from './permanent-reward-ui';
 import {
   STAGES,
   getSlotById,
@@ -11,11 +14,11 @@ import {
   getStageNumber,
   type PrototypeStage,
 } from './prototype';
-import { getPermanentRewardEffectText } from './permanent-reward-ui';
 import { getEffectiveDeckSlotIds, recordNormalStageClear, recordSpecialStageClear } from './save';
-import { loadGuestAchievementProfile, recordGuestAchievementFact } from './achievement-profile';
 import { addButton, addText, COLORS, drawBackdrop } from './scene-ui';
 import { getStageCollectionForStage } from './stage-navigation';
+import { getPostStageStory } from './story-content';
+import { shouldPresentStory } from './story-progress';
 import { isCompactMobileViewport } from './viewport';
 
 function formatResourceReward(reward: Readonly<Record<string, number | undefined>>): string {
@@ -43,6 +46,7 @@ export class ResultScene extends Phaser.Scene {
   private stage!: PrototypeStage;
   private winner: string | null = null;
   private resultRecorded = false;
+  private postStoryId: string | undefined;
 
   constructor() { super('result'); }
 
@@ -50,6 +54,7 @@ export class ResultScene extends Phaser.Scene {
     this.stage = getStage(data.stageId ?? STAGES[0]!.id);
     this.winner = data.winner ?? null;
     this.resultRecorded = false;
+    this.postStoryId = undefined;
   }
 
   create(): void {
@@ -107,14 +112,17 @@ export class ResultScene extends Phaser.Scene {
           storyTenNew = !beforeProfile.factIds.includes('quirk_story_ten_late');
           recordGuestAchievementFact(result.progress, 'quirk_story_ten_late');
         }
+        const postStory = result.firstClear && result.persisted ? getPostStageStory(this.stage.id) : undefined;
+        if (postStory && shouldPresentStory(postStory, getClientSettings().autoSkipStory)) this.postStoryId = postStory.id;
         if (!this.scene.isActive()) return;
         rewardTitle.setText(result.firstClear ? '영구 보상 획득' : 'NORMAL_CLEAR 재클리어 보상');
         const quirkText = storyTenQuirk ? `\n${storyTenNew ? '숨겨진 업적 달성' : '숨겨진 업적 조건 재달성'} · 열 명의 이야기` : '';
         rewardText.setText(`${result.firstClear ? '첫 클리어 · ' : '재클리어 · '}${formatResourceReward(result.resourceReward)}${quirkText}`);
         if (result.persisted) {
+          const storySuffix = this.postStoryId ? ' · 나갈 때 장 완료 연출' : '';
           status.setText(compact
-            ? result.firstClear ? 'NORMAL_CLEAR · 다음 스테이지 개방' : '재클리어 보상 저장 완료'
-            : result.firstClear ? 'NORMAL_CLEAR 저장 완료 · 다음 스테이지 개방' : '재클리어 보상 저장 완료 · 영구 보상 반복 획득 없음');
+            ? result.firstClear ? `NORMAL_CLEAR · 다음 스테이지 개방${storySuffix}` : '재클리어 보상 저장 완료'
+            : result.firstClear ? `NORMAL_CLEAR 저장 완료 · 다음 스테이지 개방${storySuffix}` : '재클리어 보상 저장 완료 · 영구 보상 반복 획득 없음');
           status.setColor('#8ee3aa');
         } else {
           status.setText(compact ? '영구 저장 실패 · 현재 탭 진행 유지' : '브라우저 영구 저장 실패 · 현재 탭에서는 진행 유지');
@@ -136,9 +144,19 @@ export class ResultScene extends Phaser.Scene {
 
     const guarded = (action: () => void): void => { if (!this.resultRecorded) return; action(); };
     const resultButtonHeight = compact ? 84 : 68;
-    addButton(this, 380, compact ? 600 : 590, 260, resultButtonHeight, '다시 도전', () => guarded(() => this.scene.start('battle', { stageId: this.stage.id })), 0x6d88a7);
-    addButton(this, 640, compact ? 600 : 590, 220, resultButtonHeight, '스테이지', () => guarded(() => this.scene.start('stage-select', { collectionId: collection.id })), special ? 0x80659b : 0x667185);
-    addButton(this, 900, compact ? 600 : 590, 220, resultButtonHeight, '메인', () => guarded(() => this.scene.start('main-menu')), 0x667185);
+    addButton(this, 380, compact ? 600 : 590, 260, resultButtonHeight, '다시 도전', () => guarded(() => this.leaveResult('battle', { stageId: this.stage.id })), 0x6d88a7);
+    addButton(this, 640, compact ? 600 : 590, 220, resultButtonHeight, '스테이지', () => guarded(() => this.leaveResult('stage-select', { collectionId: collection.id })), special ? 0x80659b : 0x667185);
+    addButton(this, 900, compact ? 600 : 590, 220, resultButtonHeight, '메인', () => guarded(() => this.leaveResult('main-menu')), 0x667185);
+  }
+
+  private leaveResult(nextScene: string, nextData?: object): void {
+    if (this.postStoryId) {
+      const storyId = this.postStoryId;
+      this.postStoryId = undefined;
+      this.scene.start('story', { storyId, nextScene, nextData });
+      return;
+    }
+    this.scene.start(nextScene, nextData);
   }
 }
 
