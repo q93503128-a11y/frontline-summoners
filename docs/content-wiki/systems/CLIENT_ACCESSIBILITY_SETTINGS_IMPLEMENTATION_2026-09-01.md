@@ -1,6 +1,6 @@
 # 클라이언트 접근성·저사양 설정 구현 — 2026-09-01
 
-상태: **IMPLEMENTED FOUNDATION + BATTLE FEEDBACK WIRING / automated coverage authored / device QA pending**
+상태: **IMPLEMENTED FOUNDATION + BATTLE FEEDBACK/VFX WIRING / automated coverage authored / device QA pending**
 
 상위 사양: `AUDIO_BGM_SFX_ACCESSIBILITY_SPEC.md`
 
@@ -42,6 +42,21 @@
 - Record Endless/Boss Rush는 `QuirkRecordBattleScene -> AccessibleRecordBattleScene -> RecordBattleScene` 체인을 사용하며 같은 camera feedback gate를 공유한다.
 - 따라서 일반/스페셜/trusted/Record 전투의 authored camera feedback이 같은 0/50/100% shake 및 flash reduction 정책을 따른다.
 
+### 전투 VFX 밀도 pass
+
+`battle-vfx-density.ts`를 같은 presentation-only bridge에 연결했다. 이 pass는 전투가 만든 짧은 수명의 shape 중 depth 9~20 presentation layer만 후처리하며, unit sprite/container, 이동 투사체 container, HP/UI, boss warning, simulation object는 대상 밖이다.
+
+LOW 그래픽 / VFX LOW / 배터리 절약에서는 다음처럼 동작한다.
+
+- 피격/공격의 저알파 dust ellipse와 비-stroke glow circle은 생략한다.
+- 충격파처럼 위치 정보가 있는 stroke ring은 없애지 않고 투명도만 낮춘다.
+- 기지 피격의 넓은 반투명 rectangle flash는 제거하지 않고 강도만 낮춰 피격 위치는 계속 읽힌다.
+- slash/pierce tip, 고알파 contact core 등 공격 위치를 읽는 핵심 shape는 유지한다.
+- `강한 번쩍임 줄이기`에서는 depth 9~20의 밝은 백색/중성색 local core를 제거하지 않고 절반 강도로 낮춰 타격 위치 정보는 남긴다.
+- NORMAL/HIGH는 현재 authored density를 그대로 사용한다. HIGH가 NORMAL보다 추가 particle을 강제로 증식시키지는 않는다. 실제 sprite/VFX asset 제작 시 authored HIGH variant를 별도 확장할 수 있다.
+
+이 후처리는 scene display object만 다루므로 30Hz simulation, hit frame, projectile travel plan, damage, target selection, base weapon 결과에는 영향을 주지 않는다.
+
 `boss-warning.ts`도 같은 battle feedback policy를 소비한다.
 
 - 움직임 줄이기/배터리 절약에서는 등장/퇴장 slide tween 없이 우두머리 이름과 경고 패널을 즉시 표시하고 동일한 표시 시간을 유지한다.
@@ -72,10 +87,11 @@
 - 0/50% screen shake scale 계산
 - reduced motion duration 0 처리
 - battery saver가 battle reduced-motion/decorative policy를 함께 켜는지
-- MAIN/SPECIAL 재전투 상속 체인과 Record 상속 체인이 각각 접근성 bridge를 통과하는지
-- 두 전투 계열이 동일한 battle camera shake/flash legacy gate를 공유하는지
+- VFX LOW에서 dust/glow 제거, stroke ring 감쇠, base flash 감쇠, 핵심 contact shape 유지
+- flash reduction에서 local bright core를 제거하지 않고 감쇠하는지
+- MAIN/SPECIAL 재전투 상속 체인과 Record 상속 체인이 각각 camera + VFX bridge를 통과하는지
 - boss warning이 reduced motion / reduced decorative effects를 소비하면서 핵심 경고 텍스트를 유지하는지
-- battle feedback policy/camera gate가 `@frontline/sim`을 import하지 않는 presentation-only 경계
+- battle feedback/VFX policy가 `@frontline/sim`을 import하지 않는 presentation-only 경계
 
 ## 아직 TESTED / LOCKED가 아닌 이유
 
@@ -85,6 +101,6 @@
 - 고대비 상태의 전체 화면 가독성 검사
 - LOW / 배터리 절약 상태의 실기기 frame-time 비교
 - 실제 MAIN/SPECIAL/Record 전투에서 camera shake 0/50/100%, flash reduction, boss reduced-motion 동작을 눈으로 대조
-- 공격/피격/기지포격의 세부 particle·ring·glow 밀도까지 LOW/VFX LOW에 맞춰 더 줄이는 후속 pass
+- LOW/NORMAL/HIGH VFX를 실제 대규모 교전·보스전에서 대조해 핵심 hit readability가 유지되는지 확인
 - 실제 BGM/SFX asset 연결 후 브라우저 autoplay, focus 복귀, bus mute 검증
 - 대표 모바일 Safari/Chrome storage 지속성 검사
