@@ -1,5 +1,7 @@
 import Phaser from 'phaser';
 import { INTERNAL_WIDTH } from '@frontline/shared';
+import { getProfileCosmetic } from '@frontline/sim/achievement-profile';
+import { RECORD_PROFILE_HONORS } from '@frontline/sim/record-rewards';
 import {
   claimAuthenticatedTrustedBattle,
   completeAuthenticatedTrustedBattle,
@@ -43,6 +45,19 @@ function formatResourceReward(reward: Readonly<Record<string, number | undefined
     .filter(([, amount]) => typeof amount === 'number' && amount > 0)
     .map(([id, amount]) => `${labels[id] ?? id} +${amount!.toLocaleString('ko-KR')}`);
   return parts.length > 0 ? parts.join(' · ') : '새 구간 재화 보상 없음';
+}
+
+function formatRecordProfileHonors(modeId: RecordModeId, progress: RecordModeProgress): string | null {
+  const expectedMode = modeId === 'record_endless_front' ? 'ENDLESS_FRONT' : 'BOSS_RUSH';
+  const reached = RECORD_PROFILE_HONORS.filter((honor) => {
+    if (honor.mode !== expectedMode) return false;
+    return honor.mode === 'ENDLESS_FRONT'
+      ? progress.endlessBestReachedMinute >= honor.threshold
+      : progress.bossRushBestDefeated >= honor.threshold;
+  });
+  if (reached.length === 0) return null;
+  const names = [...new Set(reached.map((honor) => getProfileCosmetic(honor.cosmeticId).name))];
+  return `${modeId === 'record_endless_front' ? '고기록 명예' : '완주 명예'} · ${names.join(' · ')}`;
 }
 
 function isRecord(value: unknown): value is Record<string, unknown> {
@@ -110,7 +125,7 @@ export class RecordResultScene extends Phaser.Scene {
     addText(this, INTERNAL_WIDTH / 2, compact ? 275 : 292, endless ? '플레이어 거점 파괴 시점까지의 기록' : this.completed ? '현재 1차 보스 러시 전 구간 완료' : '실패 전까지 새로 격파한 보스 구간도 기록', compact ? 21 : 18, '#b8c5d6', 'center').setOrigin(0.5);
     const bestText = addText(this, INTERNAL_WIDTH / 2, compact ? 340 : 350, '최고기록 계산 중…', compact ? 24 : 21, '#a9caee', 'center').setOrigin(0.5);
     const rewardText = addText(this, INTERNAL_WIDTH / 2, compact ? 400 : 405, '새 구간 보상 계산 중…', compact ? 21 : 18, '#f2d37c', 'center').setOrigin(0.5).setWordWrapWidth(compact ? 760 : 700);
-    const status = addText(this, INTERNAL_WIDTH / 2, compact ? 462 : 460, this.trustedBattleId ? '서버 재생 검증·기록 저장 중…' : '기록·구간 보상 저장 중…', compact ? 20 : 16, '#8f9aac', 'center').setOrigin(0.5);
+    const status = addText(this, INTERNAL_WIDTH / 2, compact ? 472 : 470, this.trustedBattleId ? '서버 재생 검증·기록 저장 중…' : '기록·구간 보상 저장 중…', compact ? 20 : 16, '#8f9aac', 'center').setOrigin(0.5);
 
     let retryButton: Phaser.GameObjects.Container | null = null;
     const submit = (): void => {
@@ -144,16 +159,16 @@ export class RecordResultScene extends Phaser.Scene {
     };
 
     if (this.trustedBattleId) {
-      retryButton = addButton(this, INTERNAL_WIDTH / 2, compact ? 526 : 515, 230, compact ? 72 : 52, '결과 재전송', submit, 0x8d654f);
+      retryButton = addButton(this, INTERNAL_WIDTH / 2, compact ? 536 : 525, 230, compact ? 72 : 52, '결과 재전송', submit, 0x8d654f);
       retryButton.setVisible(false);
     }
     submit();
 
     const guarded = (action: () => void): void => { if (this.resultRecorded) action(); };
     const buttonHeight = compact ? 84 : 68;
-    addButton(this, 370, compact ? 610 : 595, 260, buttonHeight, '다시 도전', () => guarded(() => this.scene.start('record-battle', { modeId: this.modeId })), 0x6d88a7);
-    addButton(this, 650, compact ? 610 : 595, 240, buttonHeight, '기록전', () => guarded(() => this.scene.start('record-hub')), 0x80659b);
-    addButton(this, 910, compact ? 610 : 595, 220, buttonHeight, '메인', () => guarded(() => this.scene.start('main-menu')), 0x667185);
+    addButton(this, 370, compact ? 620 : 605, 260, buttonHeight, '다시 도전', () => guarded(() => this.scene.start('record-battle', { modeId: this.modeId })), 0x6d88a7);
+    addButton(this, 650, compact ? 620 : 605, 240, buttonHeight, '기록전', () => guarded(() => this.scene.start('record-hub')), 0x80659b);
+    addButton(this, 910, compact ? 620 : 605, 220, buttonHeight, '메인', () => guarded(() => this.scene.start('main-menu')), 0x667185);
   }
 
   private async recordAuthenticatedResult(
@@ -208,7 +223,9 @@ export class RecordResultScene extends Phaser.Scene {
       scoreText.setText(`${this.defeatedBosses} / ${BOSS_RUSH_SEQUENCE.length} 보스 격파`);
       bestText.setText(`${result.improved ? '신기록' : '기존 최고 유지'} · 최고 ${record.bossRushBestDefeated} / ${BOSS_RUSH_SEQUENCE.length} 격파`);
     }
-    rewardText.setText(formatResourceReward(result.resourceReward));
+    const resourceText = formatResourceReward(result.resourceReward);
+    const honorText = formatRecordProfileHonors(this.modeId, record);
+    rewardText.setText(honorText ? `${resourceText}\n${honorText}` : resourceText);
     if (result.serverVerified) {
       status.setText('서버 재생 검증 · 계정 기록/도감/새 구간 보상 저장 완료').setColor('#8ee3aa');
     } else if (result.persisted) {
@@ -218,3 +235,8 @@ export class RecordResultScene extends Phaser.Scene {
     }
   }
 }
+
+export const __recordResultSceneTestOnly = {
+  formatResourceReward,
+  formatRecordProfileHonors,
+};
