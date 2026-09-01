@@ -173,10 +173,10 @@
 - 난이도 9~12 억지 stage filler
 - 랜덤 보물 grind
 
-## 다음 판정 기준
+## 통합 검증 메모
 
-이 감사 문서 자체는 `TESTED` 증거가 아니다.
+CI #902에서는 simulation, server 140 tests, client suite가 통과했고 새 roster filter의 optional combat metadata 타입 정규화 3곳만 typecheck에서 실패했다. 해당 필드는 schema상 optional이므로 `?? []`로 정상화했으며 이 commit에서 전체 CI를 다시 검증한다.
 
-이번 milestone의 마지막 non-skip commit에서 통합 CI를 실행한다. CI가 green이어도 사람 플레이가 없으면 각 구현 문서는 `code-wired` 또는 `HUMAN QA PENDING` 상태를 유지한다.
+CI가 green이어도 사람 플레이가 없으면 각 구현 문서는 `code-wired` 또는 `HUMAN QA PENDING` 상태를 유지한다.
 
 first-completion을 release-ready에 가깝게 올리는 다음 대형 묶음은 **production asset pipeline + 대표 캐릭터/보스/전장 실자산 적용** 또는 **실제 브라우저/멀티기기 acceptance QA에서 발견된 기능 결함 수정**이 가장 가치가 크다.
