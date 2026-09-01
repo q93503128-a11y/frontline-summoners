@@ -37,7 +37,7 @@ export class FriendlyPvp2v2LobbyScene extends Phaser.Scene {
   private lobby: FriendlyPvp2v2LobbyState | null = null;
   private content?: Phaser.GameObjects.Container;
   private status?: Phaser.GameObjects.Text;
-  private pollEvent?: Phaser.Time.TimerEvent;
+  private pollEvent: Phaser.Time.TimerEvent | undefined;
   private pending = false;
 
   constructor() { super('pvp-friendly-2v2-lobby'); }
