@@ -220,7 +220,6 @@ export const ACHIEVEMENTS: readonly AchievementDefinition[] = [
   achievement('ach_main_80', 'MAIN', '메인80', '메인80을 모두 NORMAL_CLEAR', 'COUNT', { kind: 'MAIN_CLEAR_COUNT', target: 80 }, ['badge_main_v1']),
 
   achievement('ach_special_unlock', 'SPECIAL', 'SPECIAL 개방', '제1장을 완료해 SPECIAL 허브 개방', 'BOOLEAN', { kind: 'MAIN_STAGE_CLEAR', stageId: 'main_01_020' }, ['emblem_special']),
-  achievement('ach_gold_1', 'SPECIAL', '첫 황금 수송', '황금 수송대 I 완료', 'BOOLEAN', { kind: 'SPECIAL_STAGE_CLEAR', stageId: 'special_gold_convoy_01' }, [], { designRewardNote: 'Gold 소량 수치는 경제 사람 QA 후 확정' }),
   achievement('ach_gold_5', 'SPECIAL', '황금 운송감독', '황금 수송대 V 완료', 'BOOLEAN', { kind: 'SPECIAL_STAGE_CLEAR', stageId: 'special_gold_convoy_05' }, ['frame_gold_convoy']),
   achievement('ach_soul_4', 'SPECIAL', '혼의 제련 완료', '혼의 제련소 IV 완료', 'BOOLEAN', { kind: 'SPECIAL_STAGE_CLEAR', stageId: 'special_soul_forge_04' }, ['emblem_soul']),
   achievement('ach_evo_5', 'SPECIAL', '진화의 문 통과', '진화의 문 V 완료', 'BOOLEAN', { kind: 'SPECIAL_STAGE_CLEAR', stageId: 'special_evolution_gate_05' }, ['banner_evolution_gate']),
@@ -267,7 +266,8 @@ export const ACHIEVEMENTS: readonly AchievementDefinition[] = [
   achievement('ach_endless_15', 'RECORD', '심층 전선 15분', '끝없는 전선 15분 생존 고기록', 'MAX_VALUE', { kind: 'ENDLESS_MINUTE', target: 15 }, ['banner_endless_depth', 'frame_endless_abyss']),
   achievement('ach_bossrush_3', 'RECORD', '보스 셋', '보스 러시 3보스 격파', 'MAX_VALUE', { kind: 'BOSS_RUSH_DEFEATED', target: 3 }, ['badge_boss_3']),
   achievement('ach_bossrush_5', 'RECORD', '보스 다섯', '보스 러시 5보스 격파', 'MAX_VALUE', { kind: 'BOSS_RUSH_DEFEATED', target: 5 }, ['badge_boss_5']),
-  achievement('ach_bossrush_complete', 'RECORD', '보스 러시 제패', '현재 1차 보스 러시 9보스 전부 격파', 'MAX_VALUE', { kind: 'BOSS_RUSH_DEFEATED', target: 9 }, ['badge_boss_8', 'emblem_bossrush_complete']),
+  achievement('ach_bossrush_8', 'RECORD', '보스 여덟', '보스 러시 8보스 격파', 'MAX_VALUE', { kind: 'BOSS_RUSH_DEFEATED', target: 8 }, ['badge_boss_8']),
+  achievement('ach_bossrush_complete', 'RECORD', '보스 러시 제패', '현재 1차 보스 러시 9보스 전부 격파', 'MAX_VALUE', { kind: 'BOSS_RUSH_DEFEATED', target: 9 }, ['emblem_bossrush_complete']),
 
   achievement('ach_quirk_turnip_five', 'QUIRK', '순무 행진', '순무기수 5기 이상을 동시에 유지', 'BOOLEAN', { kind: 'FACT_BOOLEAN', factId: 'quirk_turnip_five' }, ['badge_turnip_five'], { visibility: 'HIDDEN' }),
   achievement('ach_quirk_duck_mech', 'QUIRK', '태엽 대 기계', '태엽오리기사로 기계 보스를 마무리', 'BOOLEAN', { kind: 'FACT_BOOLEAN', factId: 'quirk_duck_mech_finish' }, ['badge_duck_machine'], { visibility: 'HIDDEN' }),
