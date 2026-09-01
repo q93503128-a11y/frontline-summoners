@@ -439,7 +439,10 @@ export class PvpMatchScene extends Phaser.Scene {
   }
 
   private leaveMatch(): void {
-    if (!this.session) return this.scene.start('pvp-hub');
+    if (!this.session) {
+      this.scene.start('pvp-hub');
+      return;
+    }
     if (!this.finished && typeof window !== 'undefined') {
       const okay = window.confirm('전투 중 나가면 20초 재접속 유예 후 패배 처리될 수 있습니다. 나갈까요?');
       if (!okay) return;
