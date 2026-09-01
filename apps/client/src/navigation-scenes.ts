@@ -1,12 +1,12 @@
 import Phaser from 'phaser';
 import { APP_NAME, INTERNAL_WIDTH } from '@frontline/shared';
 import { loadActiveProgress } from './active-progress';
-import { ART_FAMILIES } from './assets';
 import {
   ALL_PLAYER_SLOTS,
   SPECIAL_STAGES,
   STAGES,
 } from './prototype';
+import { getRuntimeSpriteStrips } from './production-assets.ts';
 import { getOwnedCharacterIds } from './save';
 import { addButton, addText, COLORS, drawBackdrop } from './scene-ui';
 import { isCompactMobileViewport } from './viewport';
@@ -21,10 +21,8 @@ export class BootScene extends Phaser.Scene {
     this.add.rectangle(INTERNAL_WIDTH / 2, 410, 520, 20, 0x10141d).setStrokeStyle(2, 0x67738a);
     const bar = this.add.rectangle(INTERNAL_WIDTH / 2 - 256, 410, 1, 12, 0xf0c967).setOrigin(0, 0.5);
     this.load.setCORS('anonymous');
-    for (const family of ART_FAMILIES) {
-      for (const strip of [family.idle, family.run, family.attack]) {
-        if (!this.textures.exists(strip.key)) this.load.spritesheet(strip.key, strip.url, { frameWidth: strip.frameWidth, frameHeight: strip.frameHeight });
-      }
+    for (const strip of getRuntimeSpriteStrips()) {
+      if (!this.textures.exists(strip.key)) this.load.spritesheet(strip.key, strip.url, { frameWidth: strip.frameWidth, frameHeight: strip.frameHeight });
     }
     this.load.on('progress', (value: number) => bar.displayWidth = Math.max(1, 512 * value));
     this.load.on('loaderror', (file: { key?: string }) => status.setText(`일부 캐릭터 로드 실패 · 대체 표시 사용 예정 ${file.key ?? ''}`));
