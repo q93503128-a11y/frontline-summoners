@@ -5,11 +5,14 @@ export const PVP_CASUAL_WIN_BONUS_GOLD = 150;
 export type PvpCasualRewardModeId = 'pvp_casual_1v1' | 'pvp_casual_2v2';
 
 /**
- * v1 DESIGN_TARGET: casual PvP should give a small reason to play without becoming
- * a repeatable farming optimum. The first three casual matches across 1v1/2v2 share
- * one UTC-day cap; friendly/ranked modes never consume this allowance.
+ * v1 DESIGN_TARGET: casual PvP itself is unlimited. Only the repeatable Gold reward
+ * is capped so casual PvP does not become a farming optimum. The first three completed
+ * casual matches across 1v1/2v2 share one UTC-day Gold allowance; after that players may
+ * keep matchmaking and playing normally, but those extra matches grant 0 casual Gold.
+ * Friendly/ranked modes never consume this Gold allowance.
  */
 export const PVP_CASUAL_DAILY_REWARD = {
+  playLimitPerUtcDay: null,
   rewardedMatchesPerUtcDay: PVP_CASUAL_REWARDED_MATCHES_PER_UTC_DAY,
   participationGold: PVP_CASUAL_PARTICIPATION_GOLD,
   winBonusGold: PVP_CASUAL_WIN_BONUS_GOLD,
