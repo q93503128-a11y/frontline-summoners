@@ -77,17 +77,19 @@ export const SPECIAL_RESOURCE_REWARDS: readonly SpecialResourceRewardDefinition[
   { stageId: 'special_five_banners_02', repeatReward: { gold: 500 }, firstClearBonus: { gold: 1600, evo_fragment: 5, evo_core: 1 } },
   { stageId: 'special_light_purse_01', repeatReward: { gold: 350 }, firstClearBonus: { gold: 1000, evo_fragment: 2, summon_crystal: 20 } },
   { stageId: 'special_light_purse_02', repeatReward: { gold: 550 }, firstClearBonus: { gold: 1800, evo_core: 1, summon_crystal: 35 } },
-  { stageId: 'event_summer_01_01', repeatReward: { gold: 150 }, firstClearBonus: { gold: 350, summon_crystal: 10 } },
+  // Event meta convenience rewards are first-clear-only. Event replay remains unlimited during an open window,
+  // while repeat rewards stay deliberately below the dedicated periodic-resource stages.
+  { stageId: 'event_summer_01_01', repeatReward: { gold: 150 }, firstClearBonus: { gold: 350, summon_crystal: 10, sweep_ticket: 1 } },
   { stageId: 'event_summer_01_02', repeatReward: { gold: 220 }, firstClearBonus: { gold: 500, evo_fragment: 2, summon_crystal: 12 } },
-  { stageId: 'event_summer_01_03', repeatReward: { gold: 300 }, firstClearBonus: { gold: 750, evo_fragment: 3, summon_crystal: 15 } },
+  { stageId: 'event_summer_01_03', repeatReward: { gold: 300 }, firstClearBonus: { gold: 750, evo_fragment: 3, summon_crystal: 15, sweep_ticket: 1 } },
   { stageId: 'event_summer_01_04', repeatReward: { gold: 400 }, firstClearBonus: { gold: 1100, evo_fragment: 4, summon_crystal: 20 } },
   { stageId: 'event_summer_01_05', repeatReward: { gold: 550 }, firstClearBonus: { gold: 1700, evo_core: 1, summon_crystal: 30 } },
-  { stageId: 'event_summer_01_06', repeatReward: { gold: 700 }, firstClearBonus: { gold: 2600, evo_core: 2, summon_crystal: 50 } },
+  { stageId: 'event_summer_01_06', repeatReward: { gold: 700 }, firstClearBonus: { gold: 2600, evo_core: 2, summon_crystal: 50, sweep_ticket: 2 } },
   { stageId: 'event_zero_edge_01_01', repeatReward: { gold: 180 }, firstClearBonus: { gold: 450, summon_crystal: 12 } },
   { stageId: 'event_zero_edge_01_02', repeatReward: { gold: 260 }, firstClearBonus: { gold: 650, evo_fragment: 2, summon_crystal: 15 } },
   { stageId: 'event_zero_edge_01_03', repeatReward: { gold: 350 }, firstClearBonus: { gold: 900, evo_fragment: 3, summon_crystal: 20 } },
   { stageId: 'event_zero_edge_01_04', repeatReward: { gold: 480 }, firstClearBonus: { gold: 1400, evo_core: 1, summon_crystal: 30 } },
-  { stageId: 'event_zero_edge_01_05', repeatReward: { gold: 650 }, firstClearBonus: { gold: 2300, evo_core: 2, summon_crystal: 45 } },
+  { stageId: 'event_zero_edge_01_05', repeatReward: { gold: 650 }, firstClearBonus: { gold: 2300, evo_core: 2, summon_crystal: 45, sweep_ticket: 2 } },
 ];
 
 const ALL_REWARD_IDS = [...PERIODIC_SPECIAL_REWARDS.map((reward) => reward.stageId), ...SPECIAL_RESOURCE_REWARDS.map((reward) => reward.stageId)];
