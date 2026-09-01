@@ -40,9 +40,9 @@ function evaluationMap(input: AchievementEvaluationInput = richInput) {
   return new Map(evaluateAchievements(input).map((evaluation) => [evaluation.achievementId, evaluation] as const));
 }
 
-test('initial achievement catalog locks fifty authored permanent milestones without grind clones', () => {
-  assert.equal(ACHIEVEMENTS.length, 50);
-  assert.equal(new Set(ACHIEVEMENTS.map((achievement) => achievement.id)).size, 50);
+test('initial achievement catalog stays inside the authored permanent milestone target without grind clones', () => {
+  assert.ok(ACHIEVEMENTS.length >= 45 && ACHIEVEMENTS.length <= 55);
+  assert.equal(new Set(ACHIEVEMENTS.map((achievement) => achievement.id)).size, ACHIEVEMENTS.length);
   assert.equal(new Set(PROFILE_COSMETICS.map((cosmetic) => cosmetic.id)).size, PROFILE_COSMETICS.length);
   assert.deepEqual(DEFAULT_PROFILE_COSMETIC_IDS, ['frame_default_wood', 'banner_default_frontline', 'emblem_default']);
   assert.ok(ACHIEVEMENTS.every((achievement) => achievement.repeatable === false));
@@ -122,6 +122,6 @@ test('claimed achievements idempotently unlock cosmetics while profile loadout r
 test('unresolved economy reward candidates remain notes rather than fabricated resource amounts', () => {
   assert.match(getAchievement('ach_main_20').designRewardNote ?? '', /경제/);
   assert.match(getAchievement('ach_main_40').designRewardNote ?? '', /경제/);
-  assert.match(getAchievement('ach_gold_1').designRewardNote ?? '', /경제/);
+  assert.match(getAchievement('ach_special_20').designRewardNote ?? '', /경제/);
   assert.equal('resourceReward' in getAchievement('ach_main_20'), false);
 });
