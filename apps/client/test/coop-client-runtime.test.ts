@@ -11,9 +11,10 @@ test('co-op invite codes round-trip without putting the guest token in a progres
   assert.throws(() => decodeCoopInvite('broken'), /형식/);
 });
 
-test('main menu registers the real co-op lobby and authoritative battle scenes', async () => {
+test('main menu keeps co-op runtime registered but routes players through the canonical stage flow', async () => {
   const main = await readSource('../src/main.ts');
-  assert.match(main, /'2인 협동', \(\) => this\.scene\.start\('coop-lobby'\)/);
+  assert.match(main, /'협동 출정', \(\) => this\.scene\.start\('stage-hub'\)/);
+  assert.doesNotMatch(main, /'2인 협동', \(\) => this\.scene\.start\('coop-lobby'\)/);
   assert.match(main, /game\.scene\.add\('coop-lobby', CoopLobbyScene, false\)/);
   assert.match(main, /game\.scene\.add\('coop-battle', CoopBattleScene, false\)/);
   assert.match(main, /scene: \[BootScene, MainMenuScene, StageHubScene, StageSelectScene, BaseWeaponScene, DeckScene, CatalogScene, BattleScene, ResultScene\]/);
