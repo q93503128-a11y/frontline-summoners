@@ -1,5 +1,6 @@
 import Phaser from 'phaser';
 import { INTERNAL_WIDTH } from '@frontline/shared';
+import { qualifiesStoryTenLateQuirk } from '@frontline/sim/achievement-quirks';
 import { getProfileCosmetic, getSpecialStageProfileRewardIds } from '@frontline/sim/achievement-profile';
 import {
   AccountRevisionConflictError,
@@ -28,6 +29,10 @@ type TrustedRewardSummary = {
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === 'object' && value !== null && !Array.isArray(value);
+}
+
+function stringArray(value: unknown): readonly string[] {
+  return Array.isArray(value) ? value.filter((entry): entry is string => typeof entry === 'string') : [];
 }
 
 function parseTrustedRewardSummary(value: unknown): TrustedRewardSummary | null {
@@ -174,13 +179,15 @@ export class TrustedBattleResultScene extends Phaser.Scene {
 
       const victory = claim.completion.winner === 'PLAYER';
       const special = this.stage.stageType === 'SPECIAL';
+      const storyTenQuirk = victory && !special && qualifiesStoryTenLateQuirk(this.stage.id, stringArray(claim.snapshot.deckSlotIds));
       this.resultTitleText?.setText(victory ? '승 리' : claim.completion.winner === 'DRAW' ? '무 승 부' : '패 배')
         .setColor(victory ? COLORS.gold : COLORS.red);
       if (!claim.awarded) {
         this.rewardText?.setText(victory ? '서버 보상 없음' : '패배/무승부 · 보상 없음');
       } else if (reward) {
         const profileReward = special && reward.firstClear ? formatSpecialProfileReward(this.stage.id) : undefined;
-        this.rewardText?.setText(`${reward.firstClear ? '첫 클리어 · ' : '재클리어 · '}${formatResourceReward(reward.resourceReward)}${profileReward ? `\n${profileReward}` : ''}`);
+        const storyTenText = storyTenQuirk ? '\n숨겨진 업적 · 열 명의 이야기' : '';
+        this.rewardText?.setText(`${reward.firstClear ? '첫 클리어 · ' : '재클리어 · '}${formatResourceReward(reward.resourceReward)}${profileReward ? `\n${profileReward}` : ''}${storyTenText}`);
         if (!special && reward.firstClear && this.stage.unlockUnitId) {
           const slot = getSlotById(this.stage.unlockUnitId);
           if (slot) this.rewardText?.setText(`${this.rewardText.text}\n신규 동료 · ${slot.displayName}`);
