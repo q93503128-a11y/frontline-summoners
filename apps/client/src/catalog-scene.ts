@@ -1,5 +1,6 @@
 import Phaser from 'phaser';
 import { INTERNAL_HEIGHT, INTERNAL_WIDTH } from '@frontline/shared';
+import { loadActiveProgress } from './active-progress';
 import { ART_BY_ID, ART_FAMILIES, UNIT_ART, type UnitArtVariant } from './assets';
 import { formatCombatTraits, formatDamageSpecialty } from './combat-trait-labels';
 import { getPermanentRewardEffectText } from './permanent-reward-ui';
@@ -11,7 +12,7 @@ import {
   getSpecialStageNumber,
   getStageNumber,
 } from './prototype';
-import { getOwnedCharacterIds, loadGuestProgress, type GuestProgress } from './save';
+import { getOwnedCharacterIds, type GuestProgress } from './save';
 import { isCompactMobileViewport } from './viewport';
 
 const FONT = '"Malgun Gothic", "Apple SD Gothic Neo", "Noto Sans KR", sans-serif';
@@ -157,6 +158,7 @@ export class CatalogScene extends Phaser.Scene {
     const tabHeight = compact ? 84 : 54;
     addText(this, 54, 34, '도 감', 44, '#fff4cf');
     if (!compact) addText(this, 56, 88, '획득 동료와 실제로 조우한 적만 상세 정보가 공개된다.', 18, '#b8c0ce');
+    const authorityText = addText(this, compact ? 1040 : 910, compact ? 112 : 102, '진행 불러오는 중…', compact ? 17 : 14, '#8f9aac', 'right').setOrigin(1, 0.5);
     addButton(this, 1165, compact ? 70 : 62, 160, navigationHeight, this.returnTo ? '스테이지' : '메인', () => this.exitCatalog(), 0x586275);
 
     this.allyTab = addButton(this, 165, 135, 210, tabHeight, `동료 ${ALL_PLAYER_SLOTS.length}종`, () => this.setMode('ALLIES'), 0x6d91b5);
@@ -168,10 +170,19 @@ export class CatalogScene extends Phaser.Scene {
     this.pageText = addText(this, INTERNAL_WIDTH / 2, 652, '', compact ? 22 : 18, '#aab4c3', 'center').setOrigin(0.5);
 
     this.render();
-    void loadGuestProgress().then((progress) => {
+    void loadActiveProgress().then((view) => {
       if (!this.scene.isActive()) return;
-      this.progress = progress;
+      this.progress = view.progress;
+      authorityText.setText(view.authority === 'GUEST_LOCAL'
+        ? '게스트 로컬 도감'
+        : view.authority === 'ACCOUNT_ONLINE'
+          ? '로그인 계정 · 서버 도감'
+          : '로그인 계정 · 오프라인 캐시 도감');
+      authorityText.setColor(view.authority === 'ACCOUNT_ONLINE' ? '#8ee3aa' : view.authority === 'ACCOUNT_OFFLINE_CACHE' ? '#f2d37c' : '#8f9aac');
       this.render();
+    }).catch((error: unknown) => {
+      if (!this.scene.isActive()) return;
+      authorityText.setText(error instanceof Error ? error.message : '도감 진행을 읽지 못했습니다.').setColor('#ff9a91');
     });
   }
 
