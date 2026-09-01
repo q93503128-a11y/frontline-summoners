@@ -118,12 +118,13 @@ test('sortie flow uses the shared collection hub and canonical normal/special cl
   assert.doesNotMatch(`${navigation}\n${result}\n${main}`, /SpecialStageSelectScene|special-select|협동 권장/);
 });
 
-test('manual deck scene uses active ownership authority and persists explicit 1-10 order', async () => {
+test('manual deck scene uses active ownership authority, filters owned roster, and persists explicit 1-10 order', async () => {
   const { deck } = await readRuntime();
   assert.match(deck, /private getOwnedSlots\(\): readonly PrototypeRosterSlot\[\]/);
   assert.match(deck, /const owned = new Set\(getOwnedCharacterIds\(this\.progress\)\);/);
   assert.match(deck, /return ALL_PLAYER_SLOTS\.filter\(\(slot\) => owned\.has\(slot\.slotId\)\);/);
-  assert.match(deck, /const visible = ownedSlots\.slice\(start, start \+ this\.pageSize\);/);
+  assert.match(deck, /const filteredSlots = this\.getFilteredSlots\(\);/);
+  assert.match(deck, /const visible = filteredSlots\.slice\(start, start \+ this\.pageSize\);/);
   assert.doesNotMatch(deck, /ALL_PLAYER_SLOTS\.slice\(start, start \+ this\.pageSize\)/);
   assert.match(deck, /this\.selectedIds = \[\.\.\.getEffectiveDeckSlotIds\(progress\)\];/);
   assert.match(deck, /MAX_DECK_SLOTS/);
@@ -133,7 +134,7 @@ test('manual deck scene uses active ownership authority and persists explicit 1-
   assert.doesNotMatch(deck, /recordGuestDeck\(this\.selectedIds\)/);
   assert.match(deck, /hotkeyLabel\(index\)/);
   assert.match(deck, /선택된 순서가 1~0 소환 순서/);
-  assert.match(deck, /미획득 캐릭터는 편성 목록에 나타나지 않는다/);
+  assert.match(deck, /보유 캐릭터만 표시/);
   assert.doesNotMatch(deck, /PLAYER_SLOTS\.forEach/);
 });
 
@@ -195,8 +196,8 @@ test('manual deck cards keep level, plus level, form, rarity, role, and combat i
   assert.match(deck, /slot\.role/);
   assert.match(deck, /selectedFormName\(this\.progress, slot\.slotId\)/);
   assert.match(deck, /buildCharacterCombatSlot\(slot, level, meta\?\.selectedFormId, plusLevel\)/);
-  assert.match(deck, /const ownedSlots = this\.getOwnedSlots\(\);/);
-  assert.match(deck, /미획득 캐릭터는 편성 목록에 나타나지 않는다/);
+  assert.match(deck, /const filteredSlots = this\.getFilteredSlots\(\);/);
+  assert.match(deck, /보유 캐릭터만 표시/);
   assert.doesNotMatch(deck, /모집 미획득|LOCK|미보유/);
 });
 
