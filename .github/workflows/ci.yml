@@ -20,6 +20,8 @@ jobs:
         run: |
           set -o pipefail
           npm run typecheck 2>&1 | tee "$RUNNER_TEMP/typecheck.log"
+      - name: Check production asset intake
+        run: npm run assets:production:check
       - name: Test content schema
         run: npm run test -w @frontline/content-schema
       - name: Test simulation
