@@ -1,5 +1,7 @@
 import Phaser from 'phaser';
 import { INTERNAL_HEIGHT, INTERNAL_WIDTH } from '@frontline/shared';
+import { loadActiveProgress, type ActiveProgressAuthority } from './active-progress';
+import { performActiveRecruitment, type ActiveRecruitmentPullResult } from './active-meta-progression';
 import {
   CRYPTO_RECRUITMENT_RANDOM_SOURCE,
   FIRST_RECRUITMENT_BANNER,
@@ -8,15 +10,10 @@ import {
   getRecruitmentBanner,
   type RecruitmentBanner,
 } from './recruitment';
-import {
-  performGuestRecruitmentWithDuplicateGrowth as performGuestRecruitment,
-  type RecruitmentPullGrowthResult,
-} from './recruitment-growth';
 import { getRecruitmentCost } from './meta-economy';
 import { getSlotById } from './prototype';
 import {
   getGuestResourceBalance,
-  loadGuestProgress,
   type DuplicatePolicy,
   type GuestProgress,
 } from './save';
@@ -33,6 +30,7 @@ const SERIES_TAB_LABELS = ['성휘', '거수', '제로'] as const;
 
 export class RecruitmentScene extends Phaser.Scene {
   private progress: GuestProgress = EMPTY_PROGRESS;
+  private authority: ActiveProgressAuthority = 'GUEST_LOCAL';
   private banner: RecruitmentBanner = FIRST_RECRUITMENT_BANNER;
   private duplicatePolicy: DuplicatePolicy = 'APPLY_PLUS';
   private statusText?: Phaser.GameObjects.Text;
@@ -96,11 +94,12 @@ export class RecruitmentScene extends Phaser.Scene {
     addButton(this, 1180, compact ? 526 : 520, 190, compact ? 76 : 60, `10회 · ${getRecruitmentCost(10)}`, () => { void this.performRecruitment(10); }, 0x8b6fb5);
     this.statusText = addText(this, 640, compact ? 660 : 650, '모집 기록을 불러오는 중…', compact ? 18 : 15, '#9eabbc', 'center').setOrigin(0.5);
 
-    void loadGuestProgress().then((progress) => {
+    void loadActiveProgress().then((view) => {
       if (!this.scene.isActive()) return;
-      this.progress = progress;
-      this.statusText?.setText('모집 준비 완료');
-      this.statusText?.setColor('#8ee3aa');
+      this.authority = view.authority;
+      this.progress = view.progress;
+      this.statusText?.setText(view.authority === 'ACCOUNT_OFFLINE_CACHE' ? '계정 기록을 읽기 전용으로 불러왔습니다. 모집하려면 온라인 연결이 필요합니다.' : '모집 준비 완료');
+      this.statusText?.setColor(view.authority === 'ACCOUNT_OFFLINE_CACHE' ? '#ffcf8a' : '#8ee3aa');
       this.refreshProgress();
     });
   }
@@ -135,11 +134,16 @@ export class RecruitmentScene extends Phaser.Scene {
     const ownedInBanner = bannerCharacterIds.filter((characterId) => owned.has(characterId)).length;
     const crystal = getGuestResourceBalance(this.progress, 'summon_crystal');
     const soul = getGuestResourceBalance(this.progress, 'soul_essence');
+    const historyLine = this.authority === 'GUEST_LOCAL'
+      ? `이 시리즈 ${bannerProgress.totalPulls}회`
+      : this.authority === 'ACCOUNT_ONLINE'
+        ? '계정 서버 저장'
+        : '계정 오프라인 · 읽기 전용';
     this.progressText?.setText([
       `모집 결정 ${crystal.toLocaleString('ko-KR')}`,
       `혼의 파편 ${soul.toLocaleString('ko-KR')}`,
       '',
-      `이 시리즈 ${bannerProgress.totalPulls}회`,
+      historyLine,
       `획득 ${ownedInBanner}/${bannerCharacterIds.length}종`,
       '보장 횟수 없음',
     ].join('\n'));
@@ -151,7 +155,7 @@ export class RecruitmentScene extends Phaser.Scene {
     this.statusText?.setText(`${count}회 모집 · 결정 ${getRecruitmentCost(count)} 확인 중…`);
     this.statusText?.setColor('#c7d0dd');
     try {
-      const result = await performGuestRecruitment(count, CRYPTO_RECRUITMENT_RANDOM_SOURCE, this.banner, this.duplicatePolicy);
+      const result = await performActiveRecruitment(count, CRYPTO_RECRUITMENT_RANDOM_SOURCE, this.banner, this.duplicatePolicy);
       this.progress = result.guestProgress;
       if (!this.scene.isActive()) return;
       this.refreshProgress();
@@ -172,7 +176,7 @@ export class RecruitmentScene extends Phaser.Scene {
     }
   }
 
-  private showResults(results: readonly RecruitmentPullGrowthResult[]): void {
+  private showResults(results: readonly ActiveRecruitmentPullResult[]): void {
     this.resultsLayer?.destroy(true);
     this.resultsLayer = this.add.container(0, 0).setDepth(40);
     const compact = isCompactMobileViewport();
