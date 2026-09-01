@@ -17,9 +17,7 @@ interface AccessibleFeedbackCamera extends Phaser.Cameras.Scene2D.Camera {
 }
 
 function scaleShakeArgument(value: CameraShakeArgs[1], factor: number): CameraShakeArgs[1] {
-  if (typeof value === 'number') return value * factor;
-  if (!value || factor === 1) return value;
-  return new Phaser.Math.Vector2(value.x * factor, value.y * factor) as CameraShakeArgs[1];
+  return typeof value === 'number' ? value * factor : value;
 }
 
 /**
