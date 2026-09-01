@@ -13,7 +13,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          fetch-depth: 20
+          fetch-depth: 2
       - name: Apply co-op hidden achievement attribution bundle
         run: python tools/dev-apply-coop-quirk-attribution.py
       - name: Normalize generated text endings
@@ -27,9 +27,9 @@ jobs:
               p = Path(name)
               p.write_text(p.read_text().rstrip() + '\n')
           PY
-      - name: Restore canonical CI and commit product changes
+      - name: Keep workflows unchanged and push product bundle
         run: |
-          git show f7dedc89045381339199723a53c1468498c9f121:.github/workflows/ci.yml > .github/workflows/ci.yml
+          git checkout HEAD -- .github/workflows/ci.yml .github/workflows/dev-apply-coop-quirk-attribution.yml
           git config user.name 'coworkaccount'
           git config user.email 'cyp1jhh2@gmail.com'
           git add -A
