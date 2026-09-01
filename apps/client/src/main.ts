@@ -30,6 +30,7 @@ import { RecordHubScene } from './record-hub-scene';
 import { RecordResultScene } from './record-result-scene';
 import { SocialScene } from './social-scene';
 import { StageHubScene } from './stage-hub-scene';
+import { StageSortieModeScene } from './stage-sortie-mode-scene';
 import { StoryStageSelectScene as StageSelectScene } from './story-stage-select-scene';
 import { ResultScene } from './result-scene';
 import { SettingsScene } from './settings-scene';
@@ -78,6 +79,7 @@ const game = new Phaser.Game({
   },
 });
 
+game.scene.add('sortie-mode', StageSortieModeScene, false);
 game.scene.add('recruitment', RecruitmentScene, false);
 game.scene.add('growth', GrowthScene, false);
 game.scene.add('coop-lobby', CoopLobbyScene, false);
