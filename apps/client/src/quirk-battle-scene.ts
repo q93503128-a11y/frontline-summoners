@@ -8,7 +8,7 @@ import { stepPlayableBattle, type PlayableBattleState } from '@frontline/sim/pla
 import type { AccountTrustedBattleStart } from './account-network.ts';
 import { recordGuestAchievementFact } from './achievement-profile.ts';
 import { loadActiveProgress } from './active-progress.ts';
-import { BattleScene } from './battle-scene.ts';
+import { AccessibleBattleScene as BattleScene } from './accessible-battle-scene.ts';
 import { addText } from './scene-ui.ts';
 import type { TrustedBattleTerminalProof } from './trusted-battle-result.ts';
 import { isPortraitMobileViewport } from './viewport.ts';
