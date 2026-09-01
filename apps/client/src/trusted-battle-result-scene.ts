@@ -8,6 +8,7 @@ import {
   completeAuthenticatedTrustedBattle,
 } from './account-network.ts';
 import { BATTLEFIELD_THEME_LABELS } from './battlefield';
+import { getClientSettings } from './client-settings';
 import { getPermanentRewardEffectText } from './permanent-reward-ui';
 import {
   STAGES,
@@ -19,6 +20,8 @@ import {
 } from './prototype';
 import { addButton, addText, COLORS, drawBackdrop } from './scene-ui';
 import { getStageCollectionForStage } from './stage-navigation';
+import { getPostStageStory } from './story-content';
+import { shouldPresentStory } from './story-progress';
 import { assertTrustedCompletionMatchesLocal, type TrustedBattleTerminalProof } from './trusted-battle-result.ts';
 import { isCompactMobileViewport } from './viewport';
 
@@ -75,6 +78,7 @@ export class TrustedBattleResultScene extends Phaser.Scene {
   private rewardText: Phaser.GameObjects.Text | undefined;
   private resultTitleText: Phaser.GameObjects.Text | undefined;
   private retryButton: Phaser.GameObjects.Container | undefined;
+  private postStoryId: string | undefined;
 
   constructor() { super('trusted-result'); }
 
@@ -88,6 +92,7 @@ export class TrustedBattleResultScene extends Phaser.Scene {
     this.rewardText = undefined;
     this.resultTitleText = undefined;
     this.retryButton = undefined;
+    this.postStoryId = undefined;
   }
 
   create(): void {
@@ -144,9 +149,9 @@ export class TrustedBattleResultScene extends Phaser.Scene {
 
     const guarded = (action: () => void): void => { if (!this.finalized) return; action(); };
     const resultButtonHeight = compact ? 84 : 68;
-    addButton(this, 380, compact ? 600 : 590, 260, resultButtonHeight, '다시 도전', () => guarded(() => this.scene.start('battle', { stageId: this.stage.id })), 0x6d88a7);
-    addButton(this, 640, compact ? 600 : 590, 220, resultButtonHeight, '스테이지', () => guarded(() => this.scene.start('stage-select', { collectionId: collection.id })), special ? 0x80659b : 0x667185);
-    addButton(this, 900, compact ? 600 : 590, 220, resultButtonHeight, '메인', () => guarded(() => this.scene.start('main-menu')), 0x667185);
+    addButton(this, 380, compact ? 600 : 590, 260, resultButtonHeight, '다시 도전', () => guarded(() => this.leaveResult('battle', { stageId: this.stage.id })), 0x6d88a7);
+    addButton(this, 640, compact ? 600 : 590, 220, resultButtonHeight, '스테이지', () => guarded(() => this.leaveResult('stage-select', { collectionId: collection.id })), special ? 0x80659b : 0x667185);
+    addButton(this, 900, compact ? 600 : 590, 220, resultButtonHeight, '메인', () => guarded(() => this.leaveResult('main-menu')), 0x667185);
 
     void this.finalizeTrustedResult();
   }
@@ -192,8 +197,13 @@ export class TrustedBattleResultScene extends Phaser.Scene {
           const slot = getSlotById(this.stage.unlockUnitId);
           if (slot) this.rewardText?.setText(`${this.rewardText.text}\n신규 동료 · ${slot.displayName}`);
         }
+        if (victory && !special && reward.firstClear) {
+          const postStory = getPostStageStory(this.stage.id);
+          if (postStory && shouldPresentStory(postStory, getClientSettings().autoSkipStory)) this.postStoryId = postStory.id;
+        }
       }
-      this.statusText?.setText(`서버 정본 저장 완료 · revision ${claim.revision}${claim.replayed ? ' · idempotent replay' : ''}`).setColor('#8ee3aa');
+      const storySuffix = this.postStoryId ? ' · 나갈 때 장 완료 연출' : '';
+      this.statusText?.setText(`서버 정본 저장 완료 · revision ${claim.revision}${claim.replayed ? ' · idempotent replay' : ''}${storySuffix}`).setColor('#8ee3aa');
       this.finalized = true;
     } catch (error) {
       if (!this.scene.isActive()) return;
@@ -204,6 +214,16 @@ export class TrustedBattleResultScene extends Phaser.Scene {
     } finally {
       this.finalizing = false;
     }
+  }
+
+  private leaveResult(nextScene: string, nextData?: object): void {
+    if (this.postStoryId) {
+      const storyId = this.postStoryId;
+      this.postStoryId = undefined;
+      this.scene.start('story', { storyId, nextScene, nextData });
+      return;
+    }
+    this.scene.start(nextScene, nextData);
   }
 }
 
