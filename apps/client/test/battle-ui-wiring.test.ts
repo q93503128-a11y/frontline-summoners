@@ -5,15 +5,17 @@ import test from 'node:test';
 const readSource = (relative: string): Promise<string> => readFile(new URL(relative, import.meta.url), 'utf8');
 
 async function readRuntime() {
-  const [main, navigation, deck, battle, result, ui] = await Promise.all([
+  const [main, navigation, stageHub, stageSelect, deck, battle, result, ui] = await Promise.all([
     readSource('../src/main.ts'),
     readSource('../src/navigation-scenes.ts'),
+    readSource('../src/stage-hub-scene.ts'),
+    readSource('../src/stage-select-scene.ts'),
     readSource('../src/deck-scene.ts'),
     readSource('../src/battle-scene.ts'),
     readSource('../src/result-scene.ts'),
     readSource('../src/scene-ui.ts'),
   ]);
-  return { main, navigation, deck, battle, result, ui };
+  return { main, navigation, stageHub, stageSelect, deck, battle, result, ui };
 }
 
 test('battle loop launches ranged visuals before deterministic damage step and then advances projectile views', async () => {
@@ -88,9 +90,10 @@ test('mouse and keyboard battle actions share quiet failure paths without camera
 });
 
 test('locked-stage and save-pending clicks are quiet; camera shake stays limited to combat impact paths', async () => {
-  const { navigation, result, battle } = await readRuntime();
-  assert.match(navigation, /if \(unlocked\) this\.scene\.start\('battle', \{ stageId: stage\.id \}\);/);
-  assert.doesNotMatch(navigation, /cameras\.main\.shake/);
+  const { stageSelect, result, battle } = await readRuntime();
+  assert.match(stageSelect, /if \(!unlocked\) return;/);
+  assert.match(stageSelect, /if \(!onlineWritable\) \{ this\.scene\.start\('account'\); return; \}/);
+  assert.doesNotMatch(stageSelect, /cameras\.main\.shake/);
   assert.match(result, /if \(!this\.resultRecorded\) return;/);
   assert.doesNotMatch(result, /cameras\.main\.shake/);
 
@@ -101,21 +104,22 @@ test('locked-stage and save-pending clicks are quiet; camera shake stays limited
   assert.match(battle, /private playBaseImpactFx[\s\S]*?cameras\.main\.shake/);
 });
 
-test('sortie flow uses the shared collection hub and canonical normal/special clear save authorities', async () => {
-  const { main, navigation, result } = await readRuntime();
+test('sortie flow uses the active collection hub and canonical normal/special clear save authorities', async () => {
+  const { main, navigation, stageHub, stageSelect, result } = await readRuntime();
   assert.match(navigation, /'출 정', \(\) => this\.scene\.start\('stage-hub'\)/);
-  assert.match(navigation, /export class StageHubScene extends Phaser\.Scene/);
-  assert.match(navigation, /STAGE_COLLECTIONS\.forEach\(\(collection, index\) =>/);
-  assert.match(navigation, /isStageCollectionUnlocked\(collection, this\.progress\.clearedStageIds\)/);
-  assert.match(navigation, /this\.scene\.start\('stage-select', \{ collectionId: collection\.id \}\)/);
-  assert.match(navigation, /isSortieStageUnlocked\(stage\.id, this\.progress\.clearedStageIds\)/);
-  assert.doesNotMatch(navigation, /isBattleStageUnlocked\(/);
+  assert.doesNotMatch(navigation, /export class StageHubScene|export class StageSelectScene/);
+  assert.match(stageHub, /export class StageHubScene extends Phaser\.Scene/);
+  assert.match(stageHub, /loadActiveProgress\(\)/);
+  assert.match(stageHub, /isStageCollectionUnlocked\(collection, this\.progress\.clearedStageIds\)/);
+  assert.match(stageHub, /this\.scene\.start\('stage-select', \{ collectionId: collection\.id \}\)/);
+  assert.match(stageSelect, /isSortieStageUnlocked\(stage\.id, this\.progress\.clearedStageIds, this\.progress\.specialClearedStageIds\)/);
+  assert.doesNotMatch(stageSelect, /isBattleStageUnlocked\(/);
   assert.match(result, /recordSpecialStageClear\(this\.stage\.id\)/);
   assert.match(result, /recordNormalStageClear\(this\.stage\.id, 'SOLO_BATTLE'\)/);
   assert.match(result, /getStageCollectionForStage\(this\.stage\.id\)/);
   assert.match(main, /scene: \[BootScene, MainMenuScene, StageHubScene, StageSelectScene, BaseWeaponScene, DeckScene, CatalogScene, BattleScene, ResultScene\]/);
   assert.match(main, /game\.scene\.add\('recruitment', RecruitmentScene, false\)/);
-  assert.doesNotMatch(`${navigation}\n${result}\n${main}`, /SpecialStageSelectScene|special-select|협동 권장/);
+  assert.doesNotMatch(`${navigation}\n${stageHub}\n${stageSelect}\n${result}\n${main}`, /SpecialStageSelectScene|special-select|협동 권장/);
 });
 
 test('manual deck scene uses active ownership authority, filters owned roster, and persists explicit 1-10 order', async () => {
@@ -166,10 +170,11 @@ test('compact mobile battle HUD uses shared viewport classification and keeps to
 });
 
 test('compact navigation and result controls remain finger-sized', async () => {
-  const { navigation, deck, battle, result } = await readRuntime();
-  assert.match(navigation, /compact \? 84 : 50/);
-  assert.match(navigation, /compact \? 84 : 60/);
-  assert.match(navigation, /compact \? 84 : 52/);
+  const { stageHub, stageSelect, deck, battle, result } = await readRuntime();
+  const stageNavigation = `${stageHub}\n${stageSelect}`;
+  assert.match(stageNavigation, /compact \? 84 : 50/);
+  assert.match(stageNavigation, /compact \? 84 : 52/);
+  assert.match(stageNavigation, /compact \? 82 : 52/);
   assert.match(deck, /compact \? 84 : 48/);
   assert.match(battle, /compact \? 84 : 42, '일시정지'/);
   assert.match(result, /const resultButtonHeight = compact \? 84 : 68;/);
@@ -177,16 +182,16 @@ test('compact navigation and result controls remain finger-sized', async () => {
 });
 
 test('stage cards expose permanent reward state for main stages and separate clear records for special stages', async () => {
-  const { navigation } = await readRuntime();
-  assert.match(navigation, /const special = this\.collection\.stageType === 'SPECIAL'/);
-  assert.match(navigation, /const rewardOwned = !special && stage\.permanentRewardId !== undefined && this\.progress\.permanentRewardIds\.includes\(stage\.permanentRewardId\);/);
-  assert.match(navigation, /const rewardText = getPermanentRewardEffectText\(stage\.permanentRewardId\);/);
-  assert.match(navigation, /'첫 NORMAL_CLEAR 영구 보상'/);
-  assert.match(navigation, /특수전 클리어 기록/);
-  assert.match(navigation, /BATTLEFIELD_THEME_LABELS\[stage\.theme\]/);
-  assert.match(navigation, /`전장 \$\{stage\.mapLength\}m`/);
-  assert.match(navigation, /동시 출격 \$\{effectiveCap\}기/);
-  assert.doesNotMatch(navigation, /확정 보물|stage\.treasure/);
+  const { stageSelect } = await readRuntime();
+  assert.match(stageSelect, /const special = this\.collection\.stageType === 'SPECIAL'/);
+  assert.match(stageSelect, /const rewardOwned = !special && stage\.permanentRewardId !== undefined && this\.progress\.permanentRewardIds\.includes\(stage\.permanentRewardId\);/);
+  assert.match(stageSelect, /const rewardText = getPermanentRewardEffectText\(stage\.permanentRewardId\);/);
+  assert.match(stageSelect, /'첫 NORMAL_CLEAR 영구 보상'/);
+  assert.match(stageSelect, /클리어 기록 완료|메인 진도와 별도 클리어 기록/);
+  assert.match(stageSelect, /BATTLEFIELD_THEME_LABELS\[stage\.theme\]/);
+  assert.match(stageSelect, /`전장 \$\{stage\.mapLength\}m`/);
+  assert.match(stageSelect, /동시 출격 \$\{effectiveCap\}기/);
+  assert.doesNotMatch(stageSelect, /확정 보물|stage\.treasure/);
 });
 
 test('manual deck cards keep level, plus level, form, rarity, role, and combat identity', async () => {
@@ -239,7 +244,7 @@ test('Phaser uses smooth filtering for current non-pixel-art character sheets', 
 });
 
 test('stage cards render the twelve-step difficulty scale without legacy five-star overflow', async () => {
-  const { navigation } = await readRuntime();
-  assert.match(navigation, /`난이도 \$\{stage\.difficulty\} \/ 12`/);
-  assert.doesNotMatch(navigation, /const stars = '★'\.repeat/);
+  const { stageSelect } = await readRuntime();
+  assert.match(stageSelect, /`난이도 \$\{stage\.difficulty\} \/ 12`/);
+  assert.doesNotMatch(stageSelect, /const stars = '★'\.repeat/);
 });
