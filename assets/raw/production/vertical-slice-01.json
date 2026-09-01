@@ -1,0 +1,180 @@
+{
+  "id": "frontline-production-vertical-slice-01",
+  "status": "DESIGN_TARGET",
+  "runtimePublicRoot": "apps/client/public/assets/production",
+  "notes": [
+    "This file is an intake/review contract, not final art.",
+    "AWAITING_ART entries may have no runtime files.",
+    "READY_FOR_REVIEW and APPROVED entries must provide complete runtime sprite metadata and real files.",
+    "Simulation hit frames below mirror current runtime data and must not be replaced by stale art-document numbers."
+  ],
+  "units": [
+    {
+      "assetId": "unit:militia:militia_f1",
+      "status": "AWAITING_ART",
+      "kind": "PLAYER_FORM",
+      "unitId": "militia",
+      "formId": "militia_f1",
+      "displayName": "징집병",
+      "runtimeRoot": "apps/client/public/assets/production/units/militia/militia_f1",
+      "battleScaleH": 0.9,
+      "silhouetteHooks": [
+        "짧고 실용적인 창 또는 몽둥이",
+        "머리보다 먼저 읽히는 사각 여행 배낭",
+        "느슨한 천·가죽 장비와 가벼운 폭"
+      ],
+      "differentiationAxes": [
+        "급조 장비의 불균일한 형태",
+        "직립에 가까운 기본 자세",
+        "F2보다 짧고 덜 정돈된 무기·배낭 구조"
+      ],
+      "motionDirection": {
+        "idle": "2.2초 안팎. 무기 손잡이를 고쳐 잡고 짧게 주변을 확인.",
+        "move": "작은 보폭의 빠른 행군. 배낭이 한 박자 늦게 흔들림.",
+        "attack": "짧은 실용 찌르기 또는 타격. contact가 과장된 잔상보다 먼저 읽힘.",
+        "knockback": "발이 뒤로 밀리고 배낭은 관성으로 앞으로 쏠림.",
+        "death": "무기를 놓치고 무릎이 먼저 꺾인 뒤 퇴장. 공용 회전 페이드 금지."
+      },
+      "simHitFrames": [5],
+      "requiredMotions": ["idle", "move", "attack", "knockback", "death"]
+    },
+    {
+      "assetId": "unit:militia:militia_f2",
+      "status": "AWAITING_ART",
+      "kind": "PLAYER_FORM",
+      "unitId": "militia",
+      "formId": "militia_f2",
+      "displayName": "정규보병",
+      "runtimeRoot": "apps/client/public/assets/production/units/militia/militia_f2",
+      "battleScaleH": 0.9,
+      "silhouetteHooks": [
+        "정돈된 사각 배낭",
+        "통일된 창날·허리띠·어깨 보호구",
+        "F1 체형을 유지하되 장비 선이 규칙적으로 정리된 실루엣"
+      ],
+      "differentiationAxes": [
+        "무기 구조 정돈",
+        "배낭 외곽 정돈",
+        "어깨 보호구와 허리 장비의 통일"
+      ],
+      "motionDirection": {
+        "idle": "F1보다 경계 자세가 안정적이며 불필요한 흔들림이 적음.",
+        "move": "정규 행군처럼 발과 상체 리듬이 정돈됨. 배낭 관성은 유지.",
+        "attack": "짧은 정석 찌르기. F1보다 궤적이 곧고 recovery가 안정적.",
+        "knockback": "밀린 뒤 자세를 빠르게 재정렬. 배낭과 어깨 보호구의 관성 차이를 보임.",
+        "death": "무기와 상체가 따로 무너지며 무릎이 먼저 꺾임."
+      },
+      "simHitFrames": [5],
+      "requiredMotions": ["idle", "move", "attack", "knockback", "death"]
+    },
+    {
+      "assetId": "unit:militia:militia_f3",
+      "status": "AWAITING_ART",
+      "kind": "PLAYER_FORM",
+      "unitId": "militia",
+      "formId": "militia_f3",
+      "displayName": "노련한 전선병",
+      "runtimeRoot": "apps/client/public/assets/production/units/militia/militia_f3",
+      "battleScaleH": 0.9,
+      "silhouetteHooks": [
+        "F2보다 다시 짧아진 실전형 무기",
+        "낮고 공격적인 전진 자세",
+        "새 장식 대신 흉터·수선 흔적이 남은 오래 쓴 장비"
+      ],
+      "differentiationAxes": [
+        "무기 길이 단축",
+        "직립형에서 낮은 전투 자세로 이동 자세 변경",
+        "깨끗한 정규 장비에서 마모·수선 재질로 변화"
+      ],
+      "motionDirection": {
+        "idle": "무게중심을 낮춘 채 짧게 전방을 확인. 베테랑성은 장식이 아니라 자세로 표현.",
+        "move": "짧은 보폭이지만 상체가 더 전방으로 실린 공격적 행군.",
+        "attack": "한 걸음 파고드는 빠른 찌르기. contact 후 긴 과장 없이 즉시 회수.",
+        "knockback": "밀려도 상체가 크게 열리지 않고 낮은 자세로 복귀.",
+        "death": "무기를 놓치기보다 지지에 쓰다 무릎이 꺾이고 마지막에 손에서 이탈."
+      },
+      "simHitFrames": [5],
+      "requiredMotions": ["idle", "move", "attack", "knockback", "death"]
+    },
+    {
+      "assetId": "unit:enemy-raider",
+      "status": "AWAITING_ART",
+      "kind": "ENEMY",
+      "unitId": "enemy-raider",
+      "displayName": "약탈병",
+      "runtimeRoot": "apps/client/public/assets/production/units/enemy-raider",
+      "battleScaleH": 0.9,
+      "silhouetteHooks": [
+        "한쪽에 크게 치우친 등짐 자루",
+        "작은 검보다 등짐이 먼저 읽히는 비대칭",
+        "징집병과 달리 행군 배낭이 아닌 훔친 물건이 삐져나온 불균형 덩어리"
+      ],
+      "differentiationAxes": [
+        "좌우 비대칭 등짐",
+        "적 방향으로 상체가 기운 약탈자 보행",
+        "깨진 생활도구·천 조각이 섞인 재질"
+      ],
+      "motionDirection": {
+        "idle": "등짐 무게 때문에 한쪽 어깨를 들썩이며 주변을 훑음.",
+        "move": "평균 속도의 불균형 보행. 자루가 몸과 반대 위상으로 흔들림.",
+        "attack": "작은 검 또는 몽둥이의 짧은 단일 타격. 기준 적답게 예고가 명료함.",
+        "knockback": "등짐이 먼저 쏠린 뒤 몸이 따라 밀림.",
+        "death": "등짐이 바닥에 먼저 떨어지고 본체가 끌려 내려가는 순서."
+      },
+      "simHitFrames": [12],
+      "requiredMotions": ["idle", "move", "attack", "knockback", "death"]
+    },
+    {
+      "assetId": "unit:enemy-boss",
+      "status": "AWAITING_ART",
+      "kind": "BOSS",
+      "unitId": "enemy-boss",
+      "displayName": "황금가면 사령술사",
+      "runtimeRoot": "apps/client/public/assets/production/units/enemy-boss",
+      "battleScaleH": 1.35,
+      "silhouetteHooks": [
+        "본체 얼굴보다 훨씬 큰 뒤쪽의 부유 황금가면",
+        "가면 아래 작게 읽히는 지휘자형 본체",
+        "중장거리 보스임을 보여주는 후방 중심 무게와 넓은 주문 전개 공간"
+      ],
+      "differentiationAxes": [
+        "본체와 독립된 대형 부유 가면",
+        "근접 전열이 아닌 후방 지휘 자세",
+        "금속 가면과 천·의식구의 재질 대비"
+      ],
+      "motionDirection": {
+        "idle": "본체보다 가면의 느린 미세 회전/호흡이 먼저 읽힘. 단순 bobbing 금지.",
+        "move": "0.8 이동속도에 맞는 매우 짧은 보행 또는 미끄러짐. 가면은 약간 늦게 추종.",
+        "attack": "긴 anticipation 동안 가면과 지휘 동작이 위험 영역을 예고하고 65F에 AREA contact.",
+        "knockback": "본체가 밀린 뒤 부유 가면이 관성으로 늦게 따라와 재정렬.",
+        "death": "가면의 부유가 먼저 끊기고 기울어진 뒤 본체의 지휘 자세가 붕괴. 공용 페이드 금지."
+      },
+      "simHitFrames": [65],
+      "requiredMotions": ["idle", "move", "attack", "knockback", "death"]
+    }
+  ],
+  "battlefields": [
+    {
+      "assetId": "battlefield:meadow",
+      "status": "AWAITING_ART",
+      "themeId": "meadow",
+      "displayName": "뒤집힌 초소 · 초원 전장 기준",
+      "runtimeRoot": "apps/client/public/assets/production/battlefields/meadow",
+      "stageAnchor": "main_01_001",
+      "visualDirection": [
+        "밝은 초원이어도 캐릭터 외곽선과 HP UI가 묻히지 않는 중간 명도 지면",
+        "국경 초소가 뒤집히고 급히 재점거된 흔적을 큰 구조 2~3개로 전달",
+        "전투선 중앙은 장식 밀도를 낮춰 작은 캐릭터 8~12기 중첩 가독성을 우선",
+        "가장 밝은 영역을 캐릭터 접지선 바로 뒤에 두지 않음",
+        "배경 장식은 실제 attack range나 장애물로 오인될 수 있는 수직 벽을 피함"
+      ],
+      "requiredDeliverables": [
+        "battlefield-base",
+        "foreground-low-density",
+        "background-landmarks",
+        "mobile-crop-check",
+        "bright-dark-readability-check"
+      ]
+    }
+  ]
+}
