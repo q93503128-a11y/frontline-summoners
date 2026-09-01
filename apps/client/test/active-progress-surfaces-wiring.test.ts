@@ -7,13 +7,20 @@ const readSource = (relative: string): Promise<string> => readFile(new URL(relat
 test('main menu progress summary uses active account or guest progress instead of guest-local state', async () => {
   const source = await readSource('../src/navigation-scenes.ts');
   const start = source.indexOf('export class MainMenuScene');
-  const end = source.indexOf('export class StageHubScene');
-  assert.ok(start >= 0 && end > start);
-  const mainMenu = source.slice(start, end);
+  assert.ok(start >= 0);
+  const mainMenu = source.slice(start);
   assert.match(mainMenu, /loadActiveProgress\(\)/);
   assert.doesNotMatch(mainMenu, /loadGuestProgress\(\)/);
   assert.match(mainMenu, /계정 지휘관 · 서버/);
   assert.match(mainMenu, /계정 지휘관 · 오프라인/);
+});
+
+test('navigation core no longer contains legacy guest-only stage hub or selector implementations', async () => {
+  const source = await readSource('../src/navigation-scenes.ts');
+  assert.doesNotMatch(source, /export class StageHubScene/);
+  assert.doesNotMatch(source, /export class StageSelectScene/);
+  assert.doesNotMatch(source, /loadGuestProgress/);
+  assert.doesNotMatch(source, /createPrototypeBattle/);
 });
 
 test('catalog reads active progress so account ownership, discovery and reward records cannot fall back to guest save', async () => {
@@ -24,11 +31,14 @@ test('catalog reads active progress so account ownership, discovery and reward r
   assert.match(catalog, /로그인 계정 · 오프라인 캐시 도감/);
 });
 
-test('actual sortie hub and stage selector already use active progress authority', async () => {
-  const [hub, select] = await Promise.all([
+test('actual sortie hub and stage selector use active progress authority', async () => {
+  const [hub, select, main] = await Promise.all([
     readSource('../src/stage-hub-scene.ts'),
     readSource('../src/stage-select-scene.ts'),
+    readSource('../src/main.ts'),
   ]);
+  assert.match(main, /import \{ StageHubScene \} from '\.\/stage-hub-scene'/);
+  assert.match(main, /StoryStageSelectScene as StageSelectScene/);
   assert.match(hub, /loadActiveProgress\(\)/);
   assert.match(select, /loadActiveProgress\(\)/);
   assert.doesNotMatch(hub, /loadGuestProgress\(\)/);
