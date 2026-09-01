@@ -5,6 +5,8 @@ import { COOP_QUICK_MESSAGE_IDS, COOP_QUICK_MESSAGE_LABELS } from '@frontline/sh
 import { createInitialAccountSave } from '../src/account-save-authority.ts';
 import { __accountCoopTestOnly } from '../src/account-coop-authority.ts';
 
+const readSource = (relative: string): Promise<string> => readFile(new URL(relative, import.meta.url), 'utf8');
+
 test('social graph migration stores relationships and invites without persisting coop join tokens', async () => {
   const sql = await readFile(new URL('../migrations/0011_social_graph.sql', import.meta.url), 'utf8');
   assert.match(sql, /CREATE TABLE IF NOT EXISTS social_profiles/);
