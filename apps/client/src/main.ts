@@ -55,7 +55,7 @@ class MainMenuScene extends BaseMainMenuScene {
     const y = compact ? 540 : 542;
     const width = 170;
     addButton(this, 105, y, width, h, '프로필·업적', () => this.scene.start('profile'), 0x7b6a91);
-    addButton(this, 320, y, width, h, '2인 협동', () => this.scene.start('coop-lobby'), 0x5f7897);
+    addButton(this, 320, y, width, h, '협동 출정', () => this.scene.start('stage-hub'), 0x5f7897);
     addButton(this, 535, y, width, h, 'PvP 대전', () => this.scene.start('pvp-hub'), 0x85634f);
     addButton(this, 750, y, width, h, '친구·초대', () => this.scene.start('social'), 0x6b628f);
     addButton(this, 965, y, width, h, '계 정', () => this.scene.start('account'), 0x6f7f96);
