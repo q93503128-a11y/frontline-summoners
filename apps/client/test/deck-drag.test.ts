@@ -34,7 +34,7 @@ test('deck drop math covers exactly ten top-row slots and rejects off-row drops'
   assert.equal(getDeckDropIndex(200, 140 + 59, true), undefined);
 });
 
-test('deck scene wires pointer and touch drag surfaces without removing tap selection or save authority', async () => {
+test('deck scene wires pointer and touch drag surfaces without removing tap selection or active save authority', async () => {
   const source = await readFile(new URL('../src/deck-scene.ts', import.meta.url), 'utf8');
   assert.match(source, /this\.input\.dragDistanceThreshold = compact \? 18 : 8/);
   assert.match(source, /this\.input\.setDraggable\(surface\)/);
@@ -44,6 +44,7 @@ test('deck scene wires pointer and touch drag surfaces without removing tap sele
   assert.match(source, /getDeckDropIndex\(dragX, dragY, isCompactMobileViewport\(\)\)/);
   assert.match(source, /placeCharacterAtDeckIndex\(this\.selectedIds, slotId, targetIndex, MAX_DECK_SLOTS\)/);
   assert.match(source, /if \(!dragged\) this\.toggleCharacter\(slotId\)/);
-  assert.match(source, /recordGuestDeck\(this\.selectedIds\)/);
+  assert.match(source, /recordActiveDeck\(this\.selectedIds\)/);
+  assert.doesNotMatch(source, /recordGuestDeck\(this\.selectedIds\)/);
   assert.match(source, /길게 끌어 상단 슬롯에 배치·교환/);
 });
