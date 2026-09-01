@@ -22,6 +22,7 @@ export interface ClientSettingsV1 {
   readonly screenShakePercent: ScreenShakePercent;
   readonly reduceFlashes: boolean;
   readonly reduceMotion: boolean;
+  readonly autoSkipStory: boolean;
   readonly graphicsPreset: GraphicsPreset;
   readonly vfxDensity: VfxDensity;
   readonly batterySaver: boolean;
@@ -38,6 +39,7 @@ export const DEFAULT_CLIENT_SETTINGS: ClientSettingsV1 = Object.freeze({
   screenShakePercent: 100,
   reduceFlashes: false,
   reduceMotion: false,
+  autoSkipStory: false,
   graphicsPreset: 'MEDIUM',
   vfxDensity: 'NORMAL',
   batterySaver: false,
@@ -92,6 +94,7 @@ export function normalizeClientSettings(value: unknown): ClientSettingsV1 {
     screenShakePercent: oneOf(raw.screenShakePercent, SCREEN_SHAKE_VALUES, DEFAULT_CLIENT_SETTINGS.screenShakePercent),
     reduceFlashes: boolean(raw.reduceFlashes, DEFAULT_CLIENT_SETTINGS.reduceFlashes),
     reduceMotion: boolean(raw.reduceMotion, DEFAULT_CLIENT_SETTINGS.reduceMotion),
+    autoSkipStory: boolean(raw.autoSkipStory, DEFAULT_CLIENT_SETTINGS.autoSkipStory),
     graphicsPreset: oneOf(raw.graphicsPreset, GRAPHICS_PRESETS, DEFAULT_CLIENT_SETTINGS.graphicsPreset),
     vfxDensity: oneOf(raw.vfxDensity, VFX_DENSITIES, DEFAULT_CLIENT_SETTINGS.vfxDensity),
     batterySaver: boolean(raw.batterySaver, DEFAULT_CLIENT_SETTINGS.batterySaver),
