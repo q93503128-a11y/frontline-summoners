@@ -43,7 +43,7 @@ test('worker actually routes authenticated social HTTP before anonymous match cr
 test('all authenticated social requests refresh presence ttl', async () => {
   const source = await readFile(new URL('../src/social-http.ts', import.meta.url), 'utf8');
   assert.match(source, /touchSocialPresence/);
-  assert.match(source, /await touchSocialPresence\(env\.DB, principal\.userId\)/);
+  assert.match(source, /await touchSocialPresence\(env\.DB, principal\.userId, nowMs\)/);
 });
 
 test('friend coop room binds accounts, rate-limits quick messages, tracks reconnect and settles server rewards', async () => {
@@ -96,7 +96,7 @@ test('blocking removes friendship, pending requests and direct invites', async (
 
 test('authenticated friend invite never returns seat token by friend code alone', async () => {
   const source = await readFile(new URL('../src/social-http.ts', import.meta.url), 'utf8');
-  assert.match(source, /resolveAuthSession\(env\.DB, request\.headers\.get\('authorization'\)\)/);
+  assert.match(source, /resolveAuthSession\(env\.DB, request\.headers\.get\('authorization'\), nowMs\)/);
   assert.match(source, /getPendingCoopInviteForInvitee/);
   assert.match(source, /https:\/\/battle-room\.internal\/seat-token/);
   assert.match(source, /body: JSON\.stringify\(\{ seatId: 'B', accountId: userId \}\)/);
