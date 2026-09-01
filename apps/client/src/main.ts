@@ -27,6 +27,7 @@ import { SocialScene } from './social-scene';
 import { StageHubScene } from './stage-hub-scene';
 import { StageSelectScene } from './stage-select-scene';
 import { ResultScene } from './result-scene';
+import { SettingsScene } from './settings-scene';
 import { TrustedBattleResultScene } from './trusted-battle-result-scene';
 import { addButton } from './scene-ui';
 import { isCompactMobileViewport } from './viewport';
@@ -44,11 +45,14 @@ class MainMenuScene extends BaseMainMenuScene {
     super.create();
     const compact = isCompactMobileViewport();
     const h = compact ? 84 : 60;
-    addButton(this, 135, compact ? 540 : 542, 190, h, '프로필·업적', () => this.scene.start('profile'), 0x7b6a91);
-    addButton(this, 385, compact ? 540 : 542, 190, h, '2인 협동', () => this.scene.start('coop-lobby'), 0x5f7897);
-    addButton(this, 635, compact ? 540 : 542, 190, h, 'PvP 대전', () => this.scene.start('pvp-hub'), 0x85634f);
-    addButton(this, 885, compact ? 540 : 542, 190, h, '친구·초대', () => this.scene.start('social'), 0x6b628f);
-    addButton(this, 1135, compact ? 540 : 542, 190, h, '계 정', () => this.scene.start('account'), 0x6f7f96);
+    const y = compact ? 540 : 542;
+    const width = 170;
+    addButton(this, 105, y, width, h, '프로필·업적', () => this.scene.start('profile'), 0x7b6a91);
+    addButton(this, 320, y, width, h, '2인 협동', () => this.scene.start('coop-lobby'), 0x5f7897);
+    addButton(this, 535, y, width, h, 'PvP 대전', () => this.scene.start('pvp-hub'), 0x85634f);
+    addButton(this, 750, y, width, h, '친구·초대', () => this.scene.start('social'), 0x6b628f);
+    addButton(this, 965, y, width, h, '계 정', () => this.scene.start('account'), 0x6f7f96);
+    addButton(this, 1180, y, width, h, '설 정', () => this.scene.start('settings'), 0x647783);
   }
 }
 
@@ -93,3 +97,4 @@ game.scene.add('trusted-result', TrustedBattleResultScene, false);
 game.scene.add('account', AccountScene, false);
 game.scene.add('profile', ProfileScene, false);
 game.scene.add('social', SocialScene, false);
+game.scene.add('settings', SettingsScene, false);
