@@ -54,6 +54,23 @@ test('unapproved production targets resolve to verified placeholder art without 
   assert.ok(strips.every((strip) => strip.url.startsWith('/assets/characters/')));
 });
 
+test('active visual-form mirror drives the shared production resolver when no explicit form is supplied', () => {
+  const f2 = EVOLUTION_FORMS.find((form) => form.characterId === 'militia' && form.formOrder === 2);
+  assert.ok(f2);
+  clearActiveVisualForms();
+  syncActiveVisualForms({ militia: { selectedFormId: f2.formId } });
+
+  const resolved = resolveUnitArt('militia');
+  assert.equal(resolved.resolvedFormId, f2.formId);
+  assert.equal(resolved.source, 'PLACEHOLDER');
+
+  clearActiveVisualForms();
+  const fallback = resolveUnitArt('militia');
+  const f1 = EVOLUTION_FORMS.find((form) => form.characterId === 'militia' && form.formOrder === 1);
+  assert.ok(f1);
+  assert.equal(fallback.resolvedFormId, f1.formId);
+});
+
 test('active visual-form mirror tracks save-selected form ids without mutating progression', () => {
   clearActiveVisualForms();
   syncActiveVisualForms({
