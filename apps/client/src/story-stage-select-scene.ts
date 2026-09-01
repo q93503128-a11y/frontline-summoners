@@ -28,11 +28,10 @@ export class StoryStageSelectScene extends StageSelectScene {
         const stageId = stageIdFromData(data);
         const story = stageId ? getPreStageStory(stageId) : undefined;
         if (story && shouldPresentStory(story, getClientSettings().autoSkipStory)) {
-          return originalStart('story', {
-            storyId: story.id,
-            nextScene: 'battle',
-            nextData: data,
-          });
+          const storyData = data === undefined
+            ? { storyId: story.id, nextScene: 'battle' }
+            : { storyId: story.id, nextScene: 'battle', nextData: data };
+          return originalStart('story', storyData);
         }
       }
       return originalStart(key, data);
