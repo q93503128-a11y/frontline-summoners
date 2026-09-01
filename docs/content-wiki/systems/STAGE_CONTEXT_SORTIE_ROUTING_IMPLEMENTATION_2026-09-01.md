@@ -1,6 +1,6 @@
 # 스테이지 문맥 출정 방식 라우팅 구현 — 2026-09-01
 
-상태: **DESIGN_TARGET / code-wired, integrated CI + human browser/multiplayer QA pending**
+상태: **DESIGN_TARGET / code-wired, final integrated CI rerun + human browser/multiplayer QA pending**
 
 상위 정본:
 
@@ -111,6 +111,19 @@ joinPublicCoopMatchmaking(currentStageId)
 - public matchmaking에 정확한 current stage id 사용
 - guest code coop에서 선택 stage 문맥 유지
 - 스테이지 목록 복귀 시 정확한 collection/page 유지
+
+## 통합 CI 1차 결과
+
+CI #904에서 다음은 통과했다.
+
+- simulation: PASS
+- server co-op protocol/tests: PASS
+- client diagnostics: PASS
+- client full suite: PASS
+
+Typecheck는 `StoryGuestCoopLobbyScene.init()`에 잘못 붙은 `override` 한 건만 실패했다. `CoopLobbyScene` 자체에는 `init` 선언이 없으므로 해당 modifier를 제거했고 회귀 테스트도 실제 선언에 맞췄다.
+
+따라서 기능 회귀가 추가로 발견된 것은 아니며, 수정 HEAD에서 typecheck와 production build까지 포함한 최종 통합 재검증을 진행한다.
 
 ## 의도적으로 하지 않은 것
 
