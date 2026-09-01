@@ -14,7 +14,7 @@ test('main menu opens the real catalog scene and the scene is registered', async
   assert.match(main, /scene:\s*\[[^\]]*CatalogScene[^\]]*\]/s);
 });
 
-test('catalog pages all allies, discovered enemies, permanent rewards, and separate special clear records without mixing axes', async () => {
+test('catalog pages active-authority allies, discovered enemies, permanent rewards, and separate special clear records without mixing axes', async () => {
   const source = await readSource('../src/catalog-scene.ts');
   assert.match(source, /const ALLY_PAGE_SIZE = 5/);
   assert.match(source, /const ENEMY_PAGE_SIZE = 5/);
@@ -25,7 +25,10 @@ test('catalog pages all allies, discovered enemies, permanent rewards, and separ
   assert.match(source, /`적 \$\{ENEMIES\.length\}종`/);
   assert.match(source, /`영구 보상 \$\{STAGES\.length\}개`/);
   assert.match(source, /`특수 기록 \$\{SPECIAL_STAGES\.length\}개`/);
-  assert.match(source, /loadGuestProgress\(\)/);
+  assert.match(source, /loadActiveProgress\(\)/);
+  assert.doesNotMatch(source, /loadGuestProgress\(\)/);
+  assert.match(source, /로그인 계정 · 서버 도감/);
+  assert.match(source, /로그인 계정 · 오프라인 캐시 도감/);
   assert.match(source, /new Set\(getOwnedCharacterIds\(this\.progress\)\)/);
   assert.match(source, /ALL_PLAYER_SLOTS\.slice\(start, start \+ ALLY_PAGE_SIZE\)/);
   assert.match(source, /owned \? slot\.displayName : '\?\?\?'/);
