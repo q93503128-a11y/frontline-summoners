@@ -1,6 +1,6 @@
 # 협동 진입 정본화 — 2026-09-01
 
-상태: **DESIGN_TARGET / code-wired, integrated CI + human browser/multiplayer QA pending**
+상태: **DESIGN_TARGET / code-wired, final integrated CI + human browser/multiplayer QA pending**
 
 상위 정본:
 
@@ -102,6 +102,10 @@ stage-agnostic `공개 협동` 버튼을 제거했다.
 갱신:
 
 - `apps/client/test/active-progress-surfaces-wiring.test.ts`
+- `apps/client/test/stage-enemy-codex-navigation.test.ts`
+- `apps/client/test/coop-client-runtime.test.ts`
+- `apps/client/test/coop-matchmaking.test.ts`
+- `apps/client/test/battle-ui-wiring.test.ts`
 
 검사 범위:
 
@@ -111,6 +115,34 @@ stage-agnostic `공개 협동` 버튼을 제거했다.
 - guest coop runtime은 guest code-coop 구현으로 계속 등록됨
 - `navigation-scenes.ts`에 legacy StageHub/StageSelect가 다시 생기지 않음
 - 실제 dedicated hub/select가 active progress를 사용함
+- 스테이지 적 도감/영구보상/난이도/모바일 hitbox 검사가 실제 `stage-select-scene.ts`를 검사함
+
+## 통합 CI 1차 결과
+
+CI #906에서 다음은 즉시 통과했다.
+
+- typecheck: PASS
+- content schema: PASS
+- simulation: PASS
+- server co-op protocol/tests: PASS
+
+client diagnostics는 네 테스트 파일이 실패했다.
+
+원인은 기능 회귀가 아니라 삭제한 구형 `navigation-scenes.ts`의 StageHub/StageSelect를 소스 검사 대상으로 계속 읽던 과거 테스트 계약이었다.
+
+- `stage-enemy-codex-navigation.test.ts`
+- `coop-client-runtime.test.ts`
+- `coop-matchmaking.test.ts`
+- `battle-ui-wiring.test.ts`
+
+테스트의 검증 의미는 유지한 채 실제 runtime source로 이동했다.
+
+- stage hub 검증 -> `stage-hub-scene.ts`
+- stage card/도감/보상/난이도 검증 -> `stage-select-scene.ts`
+- coop entry 검증 -> `stage-sortie-mode-scene.ts`
+- registry 검증 -> `main.ts`
+
+수정 HEAD에서 production build를 포함한 전체 CI를 다시 검증한다.
 
 ## TESTED 승격 조건
 
