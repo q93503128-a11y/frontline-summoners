@@ -79,7 +79,7 @@ test('all 43 contact-table rows match current F1/F2/F3 runtime hit frames', () =
 });
 
 test('production art bibles delegate exact contact timing and packet counts to the runtime-synced contact document', () => {
-  const exactTimingPattern = /(?:\b\d+F\b|\b\d+\s*hit\b|\b\d+\s*(?:\/|-)\s*\d+(?:\s*(?:\/|-)\s*\d+)*F?\b)/i;
+  const exactTimingPattern = /(?:\b\d+F\b|\b\d+\s*hit\b|(?<!F)\b\d+\s*(?:\/|-)\s*\d+(?:\s*(?:\/|-)\s*\d+)*F?\b)/i;
 
   for (const path of ART_BIBLE_PATHS) {
     const markdown = readFileSync(path, 'utf8');
