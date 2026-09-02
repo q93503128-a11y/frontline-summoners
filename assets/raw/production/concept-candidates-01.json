@@ -3,7 +3,8 @@
   "status": "DESIGN_TARGET",
   "notes": [
     "Concept candidates are review inputs, not runtime art or review evidence.",
-    "A rejected or revision-required candidate must never advance a target beyond AWAITING_ART."
+    "A rejected or revision-required candidate must never advance a target beyond AWAITING_ART.",
+    "SELECTED_FOR_DEVELOPMENT means the concept may inform the next art pass only; it does not imply runtime readiness, formal review evidence, human approval, or final art approval."
   ],
   "candidates": [
     {
@@ -34,6 +35,41 @@
         "F1 and F2 outer silhouettes remain too similar at small scale",
         "F1 improvised kit needs a less orderly outer contour than F2"
       ],
+      "mayBeRuntimeArt": false,
+      "maySatisfyReviewEvidence": false
+    },
+    {
+      "candidateId": "militia-raider-silhouette-v2",
+      "file": "assets/raw/production/review/vertical-slice-01/concepts/militia-raider-silhouette-candidate-v2.png",
+      "sha256": "9113fb29e05f72b5f9438f41facda0ef29f79f52c4e06ef5030ec80b8a4416a2",
+      "width": 1672,
+      "height": 941,
+      "productionMethod": "AI",
+      "generator": "OpenAI GPT-5.6 Sol procedural silhouette rendering with Pillow",
+      "createdAt": "2026-09-03",
+      "targets": [
+        "unit:militia:militia_f1",
+        "unit:militia:militia_f2",
+        "unit:militia:militia_f3",
+        "unit:enemy-raider"
+      ],
+      "comparedAgainst": "militia-raider-silhouette-v1",
+      "smallScaleCheck": {
+        "embeddedReductionScale": 0.25,
+        "colorMode": "GRAYSCALE",
+        "comparisonBasis": "v1 recorded small-scale grayscale failures versus v2 embedded 25% grayscale silhouettes"
+      },
+      "reviewDisposition": "SELECTED_FOR_DEVELOPMENT",
+      "passed": [
+        "four figures only and consistent side-view comparison retained",
+        "F1 weapon shortened and improvised backpack/cloth contour made compact and visibly irregular",
+        "F2 keeps the F1 body mass while using a squared backpack, regular shoulder guard, and orderly short spear geometry",
+        "F1 and F2 remain distinguishable in the embedded 25% grayscale reduction without relying on color",
+        "F3 retains the low forward combat posture and short practical weapon without added armor mass or decorative prestige",
+        "raider keeps the one-sided oversized loot sack as the first-read shape while the hand weapon remains small",
+        "grayscale silhouette-first treatment retained"
+      ],
+      "failed": [],
       "mayBeRuntimeArt": false,
       "maySatisfyReviewEvidence": false
     }
