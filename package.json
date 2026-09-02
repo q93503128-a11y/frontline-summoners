@@ -12,7 +12,9 @@
     "build": "npm run build --workspaces --if-present",
     "typecheck": "npm run typecheck --workspaces --if-present",
     "test": "npm run test --workspaces --if-present",
-    "assets:production:check": "node tools/validate-production-vertical-slice.mjs"
+    "assets:production:intake:check": "node tools/validate-production-vertical-slice.mjs",
+    "assets:production:review:check": "node tools/validate-production-review-package.mjs",
+    "assets:production:check": "npm run assets:production:intake:check && npm run assets:production:review:check"
   },
   "devDependencies": {
     "typescript": "7.0.2"
