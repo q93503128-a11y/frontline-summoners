@@ -30,7 +30,11 @@
 - 런타임 URL: `/assets/production/...`
 - Vite public 실제 파일: `apps/client/public/assets/production/...`
 - 첫 제작 인입 계약: `assets/raw/production/vertical-slice-01.json`
-- 자동 검증: `npm run assets:production:check`
+- 첫 visual review 계약: `assets/raw/production/review-package-01.json`
+- review evidence root: `assets/raw/production/review/vertical-slice-01/...`
+- 통합 자동 검증: `npm run assets:production:check`
+- intake validator: `tools/validate-production-vertical-slice.mjs`
+- review validator: `tools/validate-production-review-package.mjs`
 
 첫 visual vertical slice는 다음을 대상으로 한다.
 
@@ -52,7 +56,12 @@
 - 원본 master 위치와 런타임 변환 파일
 - 사용자 검수 여부
 
-`READY_FOR_REVIEW`와 `APPROVED`는 파일 존재만으로 올릴 수 없다. `tools/validate-production-vertical-slice.mjs`가 5개 필수 sprite motion, PNG sheet metadata, runtime 경로를 검사하며 `APPROVED`에는 `humanReviewComplete=true`를 요구한다.
+`READY_FOR_REVIEW`와 `APPROVED`는 파일 존재만으로 올릴 수 없다.
+
+- vertical-slice validator는 5개 필수 sprite motion, PNG sheet metadata, runtime 경로를 검사한다.
+- review validator는 제출 evidence, landscape viewport capture, provenance, target status 동기화와 사람 검수 lifecycle을 검사한다.
+- `390×844`/`360×640`은 모바일 기기 클래스 수치이며 실제 가로 review capture는 각각 `844×390`/`640×360` CSS viewport를 사용한다.
+- `APPROVED`는 review package의 완료된 사람 checklist와 vertical-slice의 `humanReviewComplete=true`를 모두 요구한다.
 
 ## 운영 원칙
 
