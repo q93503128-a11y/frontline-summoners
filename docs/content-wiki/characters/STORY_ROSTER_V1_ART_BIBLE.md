@@ -7,6 +7,8 @@ contact: `../systems/ANIMATION_CONTACT_FRAME_TARGETS.md`
 
 목표: 스토리 10종이 단순한 튜토리얼용 저등급 병사 묶음처럼 보이지 않고, 각자 후반까지 기억되는 실루엣과 공격 언어를 갖게 한다.
 
+정확한 simulation contact frame과 damage packet 수는 이 문서에 복제하지 않는다. 제작 시 반드시 `ANIMATION_CONTACT_FRAME_TARGETS.md`의 현재 runtime 동기화 표를 사용하며, 이 문서는 자세·궤적·재질·시각 언어만 정의한다.
+
 ---
 
 # 01 징집병
@@ -27,7 +29,7 @@ characterId: `char_story_militia`
 ## 모션
 - Idle: 무기 손잡이를 고쳐 잡고 짧게 주변을 보는 2.2초 루프.
 - Move: 작은 보폭의 빠른 행군. 배낭이 한 박자 늦게 흔들림.
-- Attack: F1 12F / F2 13F / F3 9F contact. F3는 한 걸음 파고드는 빠른 찌르기.
+- Attack: 정확한 contact는 contact 정본을 따른다. F3는 한 걸음 파고드는 빠른 찌르기이며 짧은 실제 선딜에 맞게 anticipation을 압축한다.
 - KB: 발이 뒤로 밀리고 배낭이 앞으로 쏠림.
 - Death: 무기를 놓치고 무릎이 먼저 꺾인 뒤 퇴장.
 
@@ -58,7 +60,7 @@ characterId: `char_story_guard`
 ## 모션
 - Idle: 방패에 체중을 싣고 어깨로 버팀.
 - Move: 방패를 밀며 짧게 전진. 발이 거의 보이지 않아도 됨.
-- Attack: 24/28/34F contact. 방패 뒤에서 짧은 밀치기/둔기. 공격보다 버티는 모션 강조.
+- Attack: 정확한 contact는 contact 정본을 따른다. 방패 뒤에서 짧게 밀치거나 둔기로 치며 공격보다 버티는 모션을 강조한다.
 - KB: 방패가 뒤로 기울며 지면을 긁음.
 - Death: 방패가 먼저 쓰러져 시야를 가린 뒤 본체 퇴장.
 
@@ -88,7 +90,7 @@ characterId: `char_story_hunter`
 ## 모션
 - Idle: 창끝을 낮게 두고 적 거리를 재는 자세.
 - Move: 창을 뒤로 수평 유지해 실루엣 길이 보존.
-- Attack: 17/21/24F contact. 창끝이 최대 신장점에 닿는 순간 hit.
+- Attack: 정확한 contact는 contact 정본을 따른다. 창끝이 실제 판정 지점에 도달하는 순간과 시각 contact를 맞춘다.
 - KB: 창을 지면에 찍어 넘어지지 않고 밀림.
 - Death: 창대가 먼저 부러지거나 떨어지고 몸이 주저앉음.
 
@@ -115,7 +117,7 @@ characterId: `char_story_duelist`
 ## 모션
 - Idle: 손목으로 칼끝만 미세 조정.
 - Move: 상체 흔들림 적은 빠른 보행.
-- Attack: F1 8F, F2 7F, F3 8F contact. F3는 1~5F 거의 정지 → 6~8F 순간 일섬 → 긴 recovery.
+- Attack: 정확한 contact는 contact 정본을 따른다. F3는 아주 짧은 정지 뒤 순간 일섬으로 진입하고 긴 recovery로 단발의 무게를 남긴다.
 - KB: 한 발 미끄러지며 균형 회복.
 - Death: 무릎을 굽히며 검끝이 지면에 닿고 퇴장.
 
@@ -143,7 +145,7 @@ characterId: `char_story_blue_lancer`
 ## 모션
 - Idle: 창대를 몸 옆에 고정.
 - Move: F2는 느린 전진, 창끝 높이 거의 고정.
-- Attack: 21/25/19F. F1/F2 찌르기, F3는 짧은 전방 횡쓸기.
+- Attack: 정확한 contact는 contact 정본을 따른다. F1/F2는 찌르기, F3는 짧은 전방 횡쓸기로 모양을 분리한다.
 - KB: 창자루를 바닥에 끌며 밀림.
 - Death: 깃발이 먼저 꺾이며 몸이 옆으로 무너짐.
 
@@ -170,7 +172,7 @@ characterId: `char_story_battlemage`
 ## 모션
 - Idle: 주문판이 약하게 켜졌다 꺼짐.
 - Move: F3는 등 프레임을 접은 채 느리게 이동.
-- Attack: 28/25/48F contact. F1/2 손앞 폭발, F3는 전방 원거리 지점에 문양 생성 후 착탄.
+- Attack: 정확한 contact는 contact 정본을 따른다. F1/2는 손앞 폭발, F3는 전방 원거리 지점에 문양을 만들어 실제 판정 완성 순간과 맞춘다.
 - KB: 주문판이 깨졌다 즉시 재조립되는 짧은 연출.
 - Death: 마법판 빛이 꺼지고 장비가 지면에 떨어짐.
 
@@ -197,7 +199,7 @@ characterId: `char_story_pyromancer`
 ## 모션
 - Idle: 화로 뚜껑/틈에서 작은 불씨.
 - Move: 화로 무게 때문에 F1/2는 상체 앞기울기.
-- Attack: 46/50/66F. 손에서 불을 던지는 게 아니라 `압축 → 방출 → 범위 완성`이 읽혀야 함.
+- Attack: 정확한 contact는 contact 정본을 따른다. 손에서 불을 던지는 대신 `압축 → 방출 → 범위 완성`이 읽혀야 한다.
 - KB: 화로 불이 순간 꺼졌다 다시 붙음.
 - Death: 화로가 꺼지고 검은 연기만 남음.
 
@@ -224,7 +226,7 @@ characterId: `char_story_royal_knight`
 ## 모션
 - Idle: 대검 손잡이에 양손을 올려놓음.
 - Move: 무게감 있는 2박자 보행.
-- Attack: 26/30/21F. F1/2 내려찍기, F3 전방 대각 횡베기.
+- Attack: 정확한 contact는 contact 정본을 따른다. F1/2는 내려찍기, F3는 전방 대각 횡베기로 구분한다.
 - KB: 한쪽 무릎을 굽히며 검을 지면에 박아 버팀.
 - Death: 대검이 먼저 떨어지고 무릎을 꿇음.
 
@@ -252,7 +254,7 @@ characterId: `char_story_heretic`
 ## 모션
 - Idle: 부적이 바람 없이도 반대 방향으로 미세 흔들림.
 - Move: F1/2는 거의 미끄러지듯, F3는 일반 보행에 가까움.
-- Attack: 52/61/31F. 원거리 판정 위치의 문양이 완성/붕괴되는 순간 hit.
+- Attack: 정확한 contact는 contact 정본을 따른다. 원거리 또는 근거리 판정 위치의 문양이 실제 피해 순간에 완성·붕괴되도록 맞춘다.
 - KB: 가면이 잠깐 어긋나고 부적이 흩어졌다 복귀.
 - Death: 부적 실이 끊어져 바닥에 떨어진 뒤 본체가 어둡게 사라짐.
 
@@ -274,12 +276,12 @@ characterId: `char_story_void_sage`
 ## F1/F2/F3
 - F1 공허현자: 검은 판 3개가 불규칙 궤도.
 - F2 틈새의 현자: 판이 4~5개로 늘고 일부가 몸을 관통하는 것처럼 보이는 착시. 더 긴 사거리 방향.
-- F3 공허를 본 자: 본체 의상 장식은 줄고 주변 공간 조각이 6개 이상으로 커짐. 공격 시 조각이 세 단계로 정렬되어 3hit를 시각화.
+- F3 공허를 본 자: 본체 의상 장식은 줄고 주변 공간 조각이 6개 이상으로 커짐. 공격 시 조각들이 한 번의 결정적 공간 붕괴를 향해 정렬된다.
 
 ## 모션
 - Idle: 몸은 거의 정지, 주변 판만 느리게 비동기 회전.
 - Move: 걷기보다 한 발씩 공간이 접히며 미세 이동. 실제 이동속도와 맞도록 과한 순간이동 금지.
-- Attack: F1 72F / F2 80F / F3 74/84/98F. F3 각 hit마다 서로 다른 공간 파열 contact가 보임.
+- Attack: 정확한 contact와 damage packet 수는 contact 정본을 따른다. 장식성 파열이 추가 피해처럼 보이지 않게 실제 판정 순간을 하나의 명확한 중심 붕괴로 읽히게 한다.
 - KB: 본체가 튕기지 않고 순간적으로 조각난 뒤 뒤쪽 위치에서 재결합.
 - Death: 몸보다 주변 공간 구조가 먼저 붕괴하고 중심이 꺼짐.
 
