@@ -150,6 +150,10 @@ F1→F2→F3는 최소 `무기 구조`, `자세`, `재질/장비 상태` 축에�
 
 첫 vertical slice manifest는 별도 validator가 runtime JSON을 직접 읽으므로 global contact table과 함께 이중으로 drift를 막는다.
 
+또한 production 아트 바이블 3종(`STORY_ROSTER_V1_ART_BIBLE.md`, `COMMON_POOL_V1_ART_BIBLE.md`, `INITIAL_SERIES_01_03_ART_BIBLE.md`)에서는 정확한 contact frame과 damage packet 수를 모두 제거했다. 이 문서들은 자세·궤적·실루엣·재질만 소유하며 정확한 타이밍/packet 수의 유일한 문서 권위는 `ANIMATION_CONTACT_FRAME_TARGETS.md`다.
+
+같은 client test가 세 바이블의 `Attack:` 항목에 exact frame timeline이나 숫자 hit count가 다시 들어오면 실패하도록 막는다. 이 정리에서 공허현자 F3, 등불나방 F3, NANA-04 F3, 수정벌레 크리크 등 과거 multi-hit 가정도 현재 runtime packet 구조에 종속되도록 교정했다.
+
 ## 7. 자동 인입 validator
 
 `tools/validate-production-vertical-slice.mjs`
@@ -228,6 +232,21 @@ CI #918 / run `33568943788`에서 새 `Check production asset intake` 단계를 
 
 `8c3c4e6d5cb60198abc4ceb47d6be01d6954fe02`
 
+### Production art bible contact authority gate
+
+CI #925 / run `33626172864`에서 production 아트 바이블 3종의 exact timing/packet duplication 방지 테스트를 포함한 전체 파이프라인이 GREEN이었다.
+
+검증된 code HEAD:
+
+`0bc2c9ee283435a64a36b53a624d808ba003c47c`
+
+이 gate는 다음을 고정한다.
+
+- 아트 바이블 3종이 canonical contact 문서를 참조
+- exact simulation frame을 `Attack:` 제작 지시에 복제하지 않음
+- 숫자 hit count 또는 오래된 timeline을 `Attack:` 제작 지시에 복제하지 않음
+- 기존 43×3 runtime contact sync도 계속 통과
+
 PASS 범위:
 
 - install
@@ -236,7 +255,7 @@ PASS 범위:
 - content schema
 - simulation
 - server co-op protocol
-- client individual diagnostics — 43×3 contact 전수 sync 포함
+- client individual diagnostics — 43×3 contact 전수 sync 및 art-bible authority gate 포함
 - client full suite
 - production build
 
