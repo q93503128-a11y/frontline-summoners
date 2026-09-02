@@ -118,19 +118,28 @@ F1→F2→F3는 최소 `무기 구조`, `자세`, `재질/장비 상태` 축에�
 - 배경 수직 구조물이 실제 벽/장애물처럼 오인되지 않게 함
 - 8~12기 중첩, 2배속, 밝은/어두운 캐릭터 모두 판독 가능해야 함
 
-## 6. Contact frame 정합성 발견
+## 6. Contact frame 정합성
 
-이번 인입 계약을 만들면서 기존 art/contact 문서와 현재 runtime 사이의 실제 drift를 발견했다.
+첫 인입 계약을 만들면서 징집병의 오래된 art/contact 숫자와 현재 runtime 사이 drift를 발견했다.
 
-기존 문서에는 징집병 F1/F2/F3 simulation contact가 `12F / 13F / 9F`로 남아 있다.
-
-하지만 현재 runtime 정본은 다음이다.
+과거 문서에는 징집병 F1/F2/F3 simulation contact가 `12F / 13F / 9F`로 남아 있었지만 현재 runtime 정본은 다음이다.
 
 - F1 `content/units/chapter-01.json` → hit `[5]`
 - F2 `content/evolution/story-01-overrides.json` → hit `[5]`
 - F3 `content/evolution/story-01-overrides.json` → hit `[5]`
 
-따라서 **첫 vertical slice 제작에서는 현재 runtime의 5F가 권위**다.
+이 발견 이후 `ANIMATION_CONTACT_FRAME_TARGETS.md`의 43명 × 3형태 = 129 form 전체를 실제 `buildCharacterCombatSlot()` 결과와 전수 대조해 현재 runtime 값으로 동기화했다.
+
+`apps/client/test/animation-contact-runtime-sync.test.ts`가 이제 다음을 영구 gate로 고정한다.
+
+- contact table 43행 존재
+- 현재 roster 43명과 1:1 대응
+- 각 캐릭터 F1/F2/F3 정확히 3형태
+- 129 form의 `attackTiming.hitFrames` 배열 전체 일치
+- 단일↔멀티히트 packet 수 drift 감지
+- 빠진 캐릭터/중복 캐릭터 감지
+
+따라서 앞으로 runtime contact가 바뀌고 표가 그대로 남거나, 반대로 문서만 임의 변경되면 client CI가 실패한다.
 
 이 문서에서 말하는 simulation hit frame과 production sprite metadata의 `attackContactFrame`은 서로 다른 숫자다.
 
@@ -139,7 +148,7 @@ F1→F2→F3는 최소 `무기 구조`, `자세`, `재질/장비 상태` 축에�
 
 사람 QA에서는 둘이 실제 화면 시간상 ±1 render frame 안에서 맞는지 확인한다.
 
-기존 `ANIMATION_CONTACT_FRAME_TARGETS.md`의 전체 표는 별도 전수 정합 감사가 필요하다. 첫 세트는 새 validator가 runtime JSON을 직접 읽으므로 오래된 표 숫자가 production manifest로 다시 유입될 수 없다.
+첫 vertical slice manifest는 별도 validator가 runtime JSON을 직접 읽으므로 global contact table과 함께 이중으로 drift를 막는다.
 
 ## 7. 자동 인입 validator
 
@@ -203,11 +212,21 @@ GitHub Actions `CI`의 Typecheck 직후 별도 gate로 실행한다.
 
 ## 10. 자동 검증 결과
 
+### Production intake gate
+
 CI #918 / run `33568943788`에서 새 `Check production asset intake` 단계를 포함한 전체 파이프라인이 GREEN이었다.
 
 검증된 코드 HEAD:
 
 `a66f4897c7aa31c0ceb2e67d439e5842596fed5b`
+
+### 129-form contact synchronization gate
+
+최초 전수 감사 CI #919는 의도대로 오래된 contact 표 drift를 검출해 실패했다. 이를 실제 runtime 값으로 모두 수정한 뒤 CI #920 / run `33613875726`이 전체 GREEN으로 종료됐다.
+
+검증된 code/doc HEAD:
+
+`8c3c4e6d5cb60198abc4ceb47d6be01d6954fe02`
 
 PASS 범위:
 
@@ -217,8 +236,8 @@ PASS 범위:
 - content schema
 - simulation
 - server co-op protocol
-- client individual diagnostics
+- client individual diagnostics — 43×3 contact 전수 sync 포함
 - client full suite
 - production build
 
-이는 사람의 캐릭터 디자인 승인, 실제 PNG 품질 승인, 브라우저 silhouette/contact QA를 대체하지 않는다.
+이 자동 검증은 사람의 캐릭터 디자인 승인, 실제 PNG 품질 승인, 브라우저 silhouette/contact QA를 대체하지 않는다.
