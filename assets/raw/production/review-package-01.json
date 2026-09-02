@@ -1,0 +1,258 @@
+{
+  "id": "frontline-production-review-package-01",
+  "status": "DESIGN_TARGET",
+  "verticalSliceId": "frontline-production-vertical-slice-01",
+  "orientation": "landscape",
+  "reviewAssetRoot": "assets/raw/production/review/vertical-slice-01",
+  "notes": [
+    "This package defines submission and human-review evidence; it does not approve any art.",
+    "Device-class labels such as 390x844 and 360x640 are portrait metrics. Landscape review captures use 844x390 and 640x360 CSS viewports.",
+    "AWAITING_ART targets must not carry invented evidence, provenance, or completed review data.",
+    "READY_FOR_REVIEW requires committed evidence and provenance. APPROVED additionally requires completed human review."
+  ],
+  "viewportProfiles": [
+    {
+      "id": "desktop-1280x720",
+      "deviceClass": "desktop",
+      "sourceDevice": { "width": 1280, "height": 720 },
+      "cssViewport": { "width": 1280, "height": 720 }
+    },
+    {
+      "id": "mobile-390x844-landscape",
+      "deviceClass": "390x844",
+      "sourceDevice": { "width": 390, "height": 844 },
+      "cssViewport": { "width": 844, "height": 390 }
+    },
+    {
+      "id": "mobile-360x640-landscape",
+      "deviceClass": "360x640",
+      "sourceDevice": { "width": 360, "height": 640 },
+      "cssViewport": { "width": 640, "height": 360 }
+    }
+  ],
+  "captureScenarios": [
+    {
+      "id": "silhouette-comparison",
+      "viewportId": "desktop-1280x720",
+      "grayscaleRequired": true,
+      "description": "Name and color are insufficient; target silhouette must remain distinguishable from its nearest comparison set."
+    },
+    {
+      "id": "mobile-wide-standard",
+      "viewportId": "mobile-390x844-landscape",
+      "grayscaleRequired": false,
+      "description": "Normal battle-scale readability in the 390x844 device class after landscape rotation."
+    },
+    {
+      "id": "mobile-small-standard",
+      "viewportId": "mobile-360x640-landscape",
+      "grayscaleRequired": false,
+      "description": "Smallest first-slice mobile battle-scale readability target."
+    },
+    {
+      "id": "overlap-8-12",
+      "viewportId": "mobile-390x844-landscape",
+      "grayscaleRequired": false,
+      "minimumVisibleUnits": 8,
+      "maximumVisibleUnits": 12,
+      "description": "Crowded combat readability with 8 to 12 visible units."
+    },
+    {
+      "id": "bright-background",
+      "viewportId": "mobile-360x640-landscape",
+      "grayscaleRequired": false,
+      "description": "Silhouette, weapon direction and HUD readability against a bright battlefield region."
+    },
+    {
+      "id": "dark-background",
+      "viewportId": "mobile-360x640-landscape",
+      "grayscaleRequired": false,
+      "description": "Silhouette, weapon direction and HUD readability against a dark battlefield region."
+    },
+    {
+      "id": "contact-alignment",
+      "viewportId": "desktop-1280x720",
+      "grayscaleRequired": false,
+      "description": "Attack contact pose/impact evidence aligned to the simulation hit timing, not merely to a decorative swing frame."
+    },
+    {
+      "id": "boss-small-screen",
+      "viewportId": "mobile-360x640-landscape",
+      "grayscaleRequired": false,
+      "description": "Boss mask/body relationship and attack warning remain legible on the smallest first-slice viewport."
+    }
+  ],
+  "reviewProfiles": {
+    "PLAYER_FORM": {
+      "requiredEvidence": [
+        "turnaround-reference",
+        "silhouette-comparison",
+        "motion-key-poses",
+        "contact-board",
+        "scale-sheet",
+        "closest-three-differences"
+      ],
+      "requiredCaptures": [
+        "silhouette-comparison",
+        "mobile-wide-standard",
+        "mobile-small-standard",
+        "overlap-8-12",
+        "bright-background",
+        "dark-background",
+        "contact-alignment"
+      ],
+      "requiredChecks": [
+        "silhouetteReadable",
+        "f1f2f3DistinctWithoutColor",
+        "nearestNeighborDistinct",
+        "motionReadable",
+        "contactAligned",
+        "knockbackDeathAuthored",
+        "mobileReadable",
+        "overlapReadable",
+        "brightDarkReadable"
+      ]
+    },
+    "ENEMY": {
+      "requiredEvidence": [
+        "turnaround-reference",
+        "silhouette-comparison",
+        "motion-key-poses",
+        "contact-board",
+        "scale-sheet",
+        "closest-three-differences"
+      ],
+      "requiredCaptures": [
+        "silhouette-comparison",
+        "mobile-wide-standard",
+        "mobile-small-standard",
+        "overlap-8-12",
+        "bright-background",
+        "dark-background",
+        "contact-alignment"
+      ],
+      "requiredChecks": [
+        "silhouetteReadable",
+        "nearestNeighborDistinct",
+        "motionReadable",
+        "contactAligned",
+        "knockbackDeathAuthored",
+        "mobileReadable",
+        "overlapReadable",
+        "brightDarkReadable"
+      ]
+    },
+    "BOSS": {
+      "requiredEvidence": [
+        "turnaround-reference",
+        "silhouette-comparison",
+        "motion-key-poses",
+        "contact-board",
+        "scale-sheet",
+        "closest-three-differences"
+      ],
+      "requiredCaptures": [
+        "silhouette-comparison",
+        "mobile-wide-standard",
+        "mobile-small-standard",
+        "overlap-8-12",
+        "bright-background",
+        "dark-background",
+        "contact-alignment",
+        "boss-small-screen"
+      ],
+      "requiredChecks": [
+        "silhouetteReadable",
+        "nearestNeighborDistinct",
+        "motionReadable",
+        "contactAligned",
+        "knockbackDeathAuthored",
+        "mobileReadable",
+        "overlapReadable",
+        "brightDarkReadable",
+        "bossMaskBodyReadable",
+        "warningReadable"
+      ]
+    },
+    "BATTLEFIELD": {
+      "requiredEvidence": [
+        "battlefield-base",
+        "foreground-low-density",
+        "background-landmarks",
+        "crop-guide",
+        "readability-board"
+      ],
+      "requiredCaptures": [
+        "mobile-wide-standard",
+        "mobile-small-standard",
+        "overlap-8-12",
+        "bright-background",
+        "dark-background"
+      ],
+      "requiredChecks": [
+        "mobileReadable",
+        "overlapReadable",
+        "brightDarkReadable",
+        "combatLineLowDensity",
+        "backgroundDoesNotImplyCollision",
+        "hudReadable"
+      ]
+    }
+  },
+  "targets": [
+    {
+      "assetId": "unit:militia:militia_f1",
+      "status": "AWAITING_ART",
+      "reviewProfile": "PLAYER_FORM",
+      "evidence": null,
+      "captures": null,
+      "provenance": null,
+      "humanReview": { "status": "PENDING", "reviewer": null, "reviewedAt": null, "checklist": null }
+    },
+    {
+      "assetId": "unit:militia:militia_f2",
+      "status": "AWAITING_ART",
+      "reviewProfile": "PLAYER_FORM",
+      "evidence": null,
+      "captures": null,
+      "provenance": null,
+      "humanReview": { "status": "PENDING", "reviewer": null, "reviewedAt": null, "checklist": null }
+    },
+    {
+      "assetId": "unit:militia:militia_f3",
+      "status": "AWAITING_ART",
+      "reviewProfile": "PLAYER_FORM",
+      "evidence": null,
+      "captures": null,
+      "provenance": null,
+      "humanReview": { "status": "PENDING", "reviewer": null, "reviewedAt": null, "checklist": null }
+    },
+    {
+      "assetId": "unit:enemy-raider",
+      "status": "AWAITING_ART",
+      "reviewProfile": "ENEMY",
+      "evidence": null,
+      "captures": null,
+      "provenance": null,
+      "humanReview": { "status": "PENDING", "reviewer": null, "reviewedAt": null, "checklist": null }
+    },
+    {
+      "assetId": "unit:enemy-boss",
+      "status": "AWAITING_ART",
+      "reviewProfile": "BOSS",
+      "evidence": null,
+      "captures": null,
+      "provenance": null,
+      "humanReview": { "status": "PENDING", "reviewer": null, "reviewedAt": null, "checklist": null }
+    },
+    {
+      "assetId": "battlefield:meadow",
+      "status": "AWAITING_ART",
+      "reviewProfile": "BATTLEFIELD",
+      "evidence": null,
+      "captures": null,
+      "provenance": null,
+      "humanReview": { "status": "PENDING", "reviewer": null, "reviewedAt": null, "checklist": null }
+    }
+  ]
+}
