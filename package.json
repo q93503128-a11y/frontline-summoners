@@ -14,7 +14,8 @@
     "test": "npm run test --workspaces --if-present",
     "assets:production:intake:check": "node tools/validate-production-vertical-slice.mjs",
     "assets:production:review:check": "node tools/validate-production-review-package.mjs",
-    "assets:production:check": "npm run assets:production:intake:check && npm run assets:production:review:check"
+    "assets:production:concept:check": "node tools/validate-production-concept-candidates.mjs",
+    "assets:production:check": "npm run assets:production:intake:check && npm run assets:production:review:check && npm run assets:production:concept:check"
   },
   "devDependencies": {
     "typescript": "7.0.2"

@@ -31,10 +31,12 @@
 - Vite public 실제 파일: `apps/client/public/assets/production/...`
 - 첫 제작 인입 계약: `assets/raw/production/vertical-slice-01.json`
 - 첫 visual review 계약: `assets/raw/production/review-package-01.json`
+- 첫 concept candidate manifest: `assets/raw/production/concept-candidates-01.json`
 - review evidence root: `assets/raw/production/review/vertical-slice-01/...`
 - 통합 자동 검증: `npm run assets:production:check`
 - intake validator: `tools/validate-production-vertical-slice.mjs`
 - review validator: `tools/validate-production-review-package.mjs`
+- concept candidate validator: `tools/validate-production-concept-candidates.mjs`
 
 첫 visual vertical slice는 다음을 대상으로 한다.
 
@@ -46,6 +48,8 @@
 - `battlefield:meadow`
 
 현재 위 항목은 모두 `AWAITING_ART`이며 최종 제작 파일이 아직 Registry에 등록된 상태가 아니다.
+
+검토용 concept candidate는 같은 review root 아래 `concepts/`에 둘 수 있지만 runtime 자산이나 정식 review evidence로 간주하지 않는다. 첫 v1 비교판은 AI 생성 후보이며 `REVISION_REQUIRED`로 기록되어 있다.
 
 실제 파일이 들어올 때에는 각 production asset에 대해 최소 다음 provenance를 이 Registry 또는 연결된 production provenance 문서에 기록한다.
 

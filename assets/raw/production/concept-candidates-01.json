@@ -1,0 +1,41 @@
+{
+  "id": "frontline-production-concept-candidates-01",
+  "status": "DESIGN_TARGET",
+  "notes": [
+    "Concept candidates are review inputs, not runtime art or review evidence.",
+    "A rejected or revision-required candidate must never advance a target beyond AWAITING_ART."
+  ],
+  "candidates": [
+    {
+      "candidateId": "militia-raider-silhouette-v1",
+      "file": "assets/raw/production/review/vertical-slice-01/concepts/militia-raider-silhouette-candidate-v1.png",
+      "sha256": "e3ca9f2e5d54ffb3e71de4b533b228ad760b46b3ed3044c7bc9cbeb93d746ed7",
+      "width": 1672,
+      "height": 941,
+      "productionMethod": "AI",
+      "generator": "OpenAI built-in image generation",
+      "createdAt": "2026-09-02",
+      "targets": [
+        "unit:militia:militia_f1",
+        "unit:militia:militia_f2",
+        "unit:militia:militia_f3",
+        "unit:enemy-raider"
+      ],
+      "reviewDisposition": "REVISION_REQUIRED",
+      "passed": [
+        "four figures only",
+        "consistent side-view comparison",
+        "F3 low aggressive posture",
+        "raider one-sided oversized loot sack",
+        "grayscale silhouette-first treatment"
+      ],
+      "failed": [
+        "F1 and F2 weapons are longer than the short practical weapon direction",
+        "F1 and F2 outer silhouettes remain too similar at small scale",
+        "F1 improvised kit needs a less orderly outer contour than F2"
+      ],
+      "mayBeRuntimeArt": false,
+      "maySatisfyReviewEvidence": false
+    }
+  ]
+}
