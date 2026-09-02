@@ -6,6 +6,11 @@ import { buildCharacterCombatSlot, EVOLUTION_FORMS } from '../src/character-grow
 import { ALL_PLAYER_SLOTS } from '../src/prototype.ts';
 
 const DOC_PATH = fileURLToPath(new URL('../../../docs/content-wiki/systems/ANIMATION_CONTACT_FRAME_TARGETS.md', import.meta.url));
+const ART_BIBLE_PATHS = [
+  fileURLToPath(new URL('../../../docs/content-wiki/characters/STORY_ROSTER_V1_ART_BIBLE.md', import.meta.url)),
+  fileURLToPath(new URL('../../../docs/content-wiki/recruitment/COMMON_POOL_V1_ART_BIBLE.md', import.meta.url)),
+  fileURLToPath(new URL('../../../docs/content-wiki/recruitment/INITIAL_SERIES_01_03_ART_BIBLE.md', import.meta.url)),
+] as const;
 
 function parseFrameCell(value: string): readonly number[] {
   const cleaned = value.replaceAll('**', '').trim();
@@ -71,4 +76,22 @@ test('all 43 contact-table rows match current F1/F2/F3 runtime hit frames', () =
     if (!seenSlotIds.has(slot.slotId)) mismatches.push(`${slot.displayName}: missing contact row for ${slot.slotId}`);
   }
   assert.deepEqual(mismatches, []);
+});
+
+test('production art bibles delegate exact contact timing and packet counts to the runtime-synced contact document', () => {
+  const exactTimingPattern = /(?:\b\d+F\b|\b\d+\s*hit\b|\b\d+\s*(?:\/|-)\s*\d+(?:\s*(?:\/|-)\s*\d+)*F?\b)/i;
+
+  for (const path of ART_BIBLE_PATHS) {
+    const markdown = readFileSync(path, 'utf8');
+    assert.match(markdown, /contact: `\.\.\/systems\/ANIMATION_CONTACT_FRAME_TARGETS\.md`/);
+    assert.match(markdown, /정확한 simulation contact frame과 damage packet 수는 이 문서에 복제하지 않는다\./);
+
+    const attackLines = markdown
+      .split(/\r?\n/)
+      .filter((line) => /^\s*- Attack:/.test(line));
+    assert.ok(attackLines.length > 0, `${path} must contain production Attack guidance`);
+
+    const offenders = attackLines.filter((line) => exactTimingPattern.test(line));
+    assert.deepEqual(offenders, [], `${path} must not duplicate exact frame timelines or hit counts in Attack guidance`);
+  }
 });
