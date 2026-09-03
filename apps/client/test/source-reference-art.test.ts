@@ -1,27 +1,52 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
+import { clearActiveVisualForms } from '../src/active-visual-forms.ts';
 import { resolveUnitArt } from '../src/production-assets.ts';
-import { SOURCE_REFERENCE_ART_BY_ID } from '../src/source-reference-art.ts';
+import { PLAYER_SLOTS } from '../src/prototype.ts';
+import { SOURCE_REFERENCE_ART_BY_ID, SOURCE_REFERENCE_ART_FAMILIES } from '../src/source-reference-art.ts';
 
-test('first-slice source-reference families expose authored hit and death strips', () => {
-  const expected = new Map([
-    ['warrior-3', { hit: 3, death: 9 }],
-    ['hero-knight-2', { hit: 4, death: 9 }],
-    ['warrior-1', { hit: 3, death: 9 }],
-    ['warrior', { hit: 4, death: 6 }],
-    ['evil-wizard', { hit: 4, death: 5 }],
-  ] as const);
+const EXPECTED_REACTIONS = new Map<string, readonly [number, number]>([
+  ['hero-knight', [4, 11]],
+  ['hero-knight-2', [4, 9]],
+  ['fantasy-warrior', [3, 7]],
+  ['wizard', [4, 7]],
+  ['warrior', [4, 6]],
+  ['warrior-3', [3, 9]],
+  ['huntress', [3, 8]],
+  ['evil-wizard', [4, 5]],
+  ['warrior-1', [3, 9]],
+]);
 
-  for (const [familyId, frames] of expected) {
+test('every pinned source-reference family exposes authored hit and death strips', () => {
+  assert.equal(SOURCE_REFERENCE_ART_FAMILIES.length, EXPECTED_REACTIONS.size);
+  assert.equal(new Set(SOURCE_REFERENCE_ART_FAMILIES.map((family) => family.id)).size, SOURCE_REFERENCE_ART_FAMILIES.length);
+
+  for (const [familyId, [hitFrames, deathFrames]] of EXPECTED_REACTIONS) {
     const family = SOURCE_REFERENCE_ART_BY_ID[familyId];
     assert.ok(family, `missing source-reference family: ${familyId}`);
-    assert.ok(family.knockback, `${familyId} must expose authored hit motion`);
-    assert.ok(family.death, `${familyId} must expose authored death motion`);
-    assert.equal(family.knockback.frames, frames.hit);
-    assert.equal(family.death.frames, frames.death);
+    assert.ok(family.knockback, `${familyId} must expose an authored hit strip`);
+    assert.ok(family.death, `${familyId} must expose an authored death strip`);
+    assert.equal(family.knockback.frames, hitFrames, `${familyId} hit frame count drifted`);
+    assert.equal(family.death.frames, deathFrames, `${familyId} death frame count drifted`);
     assert.match(family.knockback.url, /^\/assets\/characters\//);
     assert.match(family.death.url, /^\/assets\/characters\//);
   }
+});
+
+test('all ten chapter-one story units resolve to complete five-motion placeholder families', () => {
+  assert.equal(PLAYER_SLOTS.length, 10);
+  clearActiveVisualForms();
+
+  for (const slot of PLAYER_SLOTS) {
+    const art = resolveUnitArt(slot.slotId);
+    assert.equal(art.source, 'PLACEHOLDER', `${slot.slotId} must remain unapproved source-reference art`);
+    assert.equal(art.productionAssetId, undefined);
+    assert.ok(art.family.knockback, `${slot.slotId} must have an authored placeholder hit reaction`);
+    assert.ok(art.family.death, `${slot.slotId} must have an authored placeholder death motion`);
+    assert.ok(EXPECTED_REACTIONS.has(art.family.id), `${slot.slotId} resolved to an unverified reaction family: ${art.family.id}`);
+  }
+
+  clearActiveVisualForms();
 });
 
 test('golden-mask boss reservation remains placeholder while using complete Evil Wizard source motion', () => {
