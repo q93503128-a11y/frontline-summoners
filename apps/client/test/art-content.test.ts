@@ -55,7 +55,8 @@ test('canonical recruitment ids no longer fall back to legacy prototype ids', ()
 });
 
 test('all sprite strips are local deploy assets with coherent frame metadata', () => {
-  assert.equal(ART_FAMILIES.length, 7);
+  assert.ok(ART_FAMILIES.length >= 8, 'the distinct militia source-reference family must remain in the verified placeholder catalog');
+  assert.equal(new Set(ART_FAMILIES.map((family) => family.id)).size, ART_FAMILIES.length);
   for (const family of ART_FAMILIES) {
     for (const strip of [family.idle, family.run, family.attack]) {
       assert.match(strip.url, /^\/assets\/characters\//);
@@ -68,6 +69,7 @@ test('all sprite strips are local deploy assets with coherent frame metadata', (
   assert.ok(hero);
   assert.equal(hero.idle.frameWidth, 180);
   assert.equal(hero.idle.frames, 11);
+  assert.ok(ART_BY_ID['warrior-3'], 'militia source-reference family must be registered');
 });
 
 test('chapter one avoids a single repeated visual family for all player units', () => {
