@@ -90,6 +90,28 @@ const KING_2: SourceReferenceArtFamily = {
   death: { key: 'king-2-death', url: `${LOCAL}/king-2/death.png`, frameWidth: 160, frameHeight: 111, frames: 6 },
 };
 
+const MARTIAL_HERO_2: SourceReferenceArtFamily = {
+  id: 'martial-hero-2',
+  displayHeight: 190,
+  attackContactFrame: 2,
+  idle: { key: 'martial-hero-2-idle', url: `${LOCAL}/martial-hero-2/idle.png`, frameWidth: 200, frameHeight: 200, frames: 4 },
+  run: { key: 'martial-hero-2-run', url: `${LOCAL}/martial-hero-2/run.png`, frameWidth: 200, frameHeight: 200, frames: 8 },
+  attack: { key: 'martial-hero-2-attack', url: `${LOCAL}/martial-hero-2/attack.png`, frameWidth: 200, frameHeight: 200, frames: 4 },
+  knockback: { key: 'martial-hero-2-knockback', url: `${LOCAL}/martial-hero-2/hit.png`, frameWidth: 200, frameHeight: 200, frames: 3 },
+  death: { key: 'martial-hero-2-death', url: `${LOCAL}/martial-hero-2/death.png`, frameWidth: 200, frameHeight: 200, frames: 7 },
+};
+
+const EVIL_WIZARD_2: SourceReferenceArtFamily = {
+  id: 'evil-wizard-2',
+  displayHeight: 200,
+  attackContactFrame: 4,
+  idle: { key: 'evil-wizard-2-idle', url: `${LOCAL}/evil-wizard-2/idle.png`, frameWidth: 250, frameHeight: 250, frames: 8 },
+  run: { key: 'evil-wizard-2-run', url: `${LOCAL}/evil-wizard-2/run.png`, frameWidth: 250, frameHeight: 250, frames: 8 },
+  attack: { key: 'evil-wizard-2-attack', url: `${LOCAL}/evil-wizard-2/attack.png`, frameWidth: 250, frameHeight: 250, frames: 8 },
+  knockback: { key: 'evil-wizard-2-knockback', url: `${LOCAL}/evil-wizard-2/hit.png`, frameWidth: 250, frameHeight: 250, frames: 3 },
+  death: { key: 'evil-wizard-2-death', url: `${LOCAL}/evil-wizard-2/death.png`, frameWidth: 250, frameHeight: 250, frames: 7 },
+};
+
 const overrides = new Map(WITH_AUTHORED_REACTIONS.map((family) => [family.id, family] as const));
 
 export const SOURCE_REFERENCE_ART_FAMILIES: readonly SourceReferenceArtFamily[] = [
@@ -97,6 +119,8 @@ export const SOURCE_REFERENCE_ART_FAMILIES: readonly SourceReferenceArtFamily[] 
   WARRIOR_1,
   HUNTRESS_2,
   KING_2,
+  MARTIAL_HERO_2,
+  EVIL_WIZARD_2,
 ];
 
 export const SOURCE_REFERENCE_ART_BY_ID: Readonly<Record<string, SourceReferenceArtFamily>> = Object.fromEntries(
