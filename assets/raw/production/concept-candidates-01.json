@@ -72,6 +72,67 @@
       "failed": [],
       "mayBeRuntimeArt": false,
       "maySatisfyReviewEvidence": false
+    },
+    {
+      "candidateId": "golden-mask-necromancer-silhouette-v1",
+      "file": "assets/raw/production/review/vertical-slice-01/concepts/golden-mask-necromancer-silhouette-candidate-v1.png",
+      "sha256": "0b16adc2372e0695dfacd0648784f197f6e6144244b5b626ecb0644dbaeca9ed",
+      "width": 1200,
+      "height": 700,
+      "productionMethod": "AI",
+      "generator": "OpenAI GPT-5.6 Sol procedural silhouette rendering with Pillow",
+      "createdAt": "2026-09-03",
+      "targets": [
+        "unit:enemy-boss"
+      ],
+      "smallScaleCheck": {
+        "embeddedReductionScale": 0.25,
+        "colorMode": "GRAYSCALE",
+        "comparisonBasis": "embedded 25% reduction checks whether the floating mask remains the first-read mass before the conductor body"
+      },
+      "reviewDisposition": "SELECTED_FOR_DEVELOPMENT",
+      "passed": [
+        "floating mask is substantially larger than the body and remains the primary first-read silhouette",
+        "small conductor body reads below and forward of the independently floating mask rather than as a front-line brute",
+        "rear-weighted composition leaves a broad forward ritual space suitable for a long-anticipation AREA attack language",
+        "mask and body remain compositionally distinct in the embedded 25% grayscale reduction without color dependency",
+        "concept does not add melee armor mass or a giant hand weapon that would contradict the rear-line commander role"
+      ],
+      "failed": [],
+      "mayBeRuntimeArt": false,
+      "maySatisfyReviewEvidence": false
+    },
+    {
+      "candidateId": "meadow-battlefield-composition-v1",
+      "file": "assets/raw/production/review/vertical-slice-01/concepts/meadow-battlefield-concept-v1.png",
+      "sha256": "ffd71f2b6efbd2f92bc2eed769c9b6c3e9827faaa10a2e383c1eabc85bc1dca5",
+      "width": 1400,
+      "height": 800,
+      "productionMethod": "AI",
+      "generator": "OpenAI GPT-5.6 Sol procedural composition rendering with Pillow",
+      "createdAt": "2026-09-03",
+      "targets": [
+        "battlefield:meadow"
+      ],
+      "layoutCheck": {
+        "landscapeGuides": [
+          "844x390",
+          "640x360"
+        ],
+        "combatBand": "center kept intentionally low-density for 8-12 overlapping small units",
+        "brightnessRule": "brightest sky patch is kept away from the ground contact line"
+      },
+      "reviewDisposition": "SELECTED_FOR_DEVELOPMENT",
+      "passed": [
+        "mid-value ground and combat band avoid placing the brightest region directly behind the unit contact line",
+        "overturned checkpoint, broken route sign, and low reoccupation stores communicate the border-post story with three large landmark groups",
+        "central combat band is intentionally low-density while decorative tufts and stones are pushed to the edges",
+        "landmarks avoid a continuous vertical wall silhouette that could be mistaken for collision or attack-range geometry",
+        "both required landscape mobile crop classes are represented by explicit composition guides"
+      ],
+      "failed": [],
+      "mayBeRuntimeArt": false,
+      "maySatisfyReviewEvidence": false
     }
   ]
 }
