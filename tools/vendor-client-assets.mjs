@@ -29,7 +29,7 @@ const files = [
   ['warrior/attack3.png', `${NQM}/Medieval%20Warrior%20Pack%202/Sprites/Attack3.png`, 600, 150],
   ['warrior/attack4.png', `${NQM}/Medieval%20Warrior%20Pack%202/Sprites/Attack4.png`, 600, 150],
   ['warrior/hit.png', `${NQM}/Medieval%20Warrior%20Pack%202/Sprites/Take%20Hit.png`, 600, 150],
-  ['warrior/death.png', `${NQM}/Medieval%20Warrior%20Pack%202/Sprites/Death.png`, 1350, 150],
+  ['warrior/death.png', `${NQM}/Medieval%20Warrior%20Pack%202/Sprites/Death.png`, 900, 150],
   ['warrior-3/idle.png', `${CLICKER_MW3}/Idle.png`, 1350, 135],
   ['warrior-3/run.png', `${CLICKER_MW3}/Run.png`, 810, 135],
   ['warrior-3/attack.png', `${CLICKER_MW3}/Attack1.png`, 540, 135],
