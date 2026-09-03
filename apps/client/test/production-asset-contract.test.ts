@@ -89,6 +89,36 @@ test('militia evolution forms use distinct complete source-reference motion sets
   }
 });
 
+test('story magic evolutions use three distinct complete source-reference silhouettes without claiming production approval', () => {
+  const progressions = [
+    ['battlemage', ['wizard', 'fantasy-warrior', 'evil-wizard-2'], 'MAGIC'],
+    ['pyromancer', ['wizard', 'evil-wizard', 'evil-wizard-2'], 'FIRE'],
+    ['voidsage', ['evil-wizard', 'wizard', 'evil-wizard-2'], 'VOID'],
+  ] as const;
+
+  for (const [unitId, expectedFamilies, expectedFx] of progressions) {
+    const forms = [1, 2, 3].map((order) => resolveUnitArt(unitId, `${unitId}_f${order}`));
+    assert.deepEqual(forms.map((art) => art.family.id), expectedFamilies, `${unitId} F1/F2/F3 family progression drifted`);
+    assert.equal(new Set(forms.map((art) => art.family.id)).size, 3, `${unitId} must read as three distinct evolution silhouettes`);
+    assert.ok(forms.every((art) => art.source === 'PLACEHOLDER'));
+    assert.ok(forms.every((art) => art.productionAssetId === undefined));
+    assert.ok(forms.every((art) => art.attackFx === expectedFx));
+    assert.ok(forms.every((art) => art.family.knockback && art.family.death));
+  }
+});
+
+test('guard and blue lancer keep custom-silhouette debt explicit instead of faking F3 with unrelated free art', () => {
+  const guardForms = [1, 2, 3].map((order) => resolveUnitArt('guard', `guard_f${order}`));
+  const lancerForms = [1, 2, 3].map((order) => resolveUnitArt('blue_lancer', `blue_lancer_f${order}`));
+
+  assert.deepEqual(guardForms.map((art) => art.family.id), ['hero-knight-2', 'hero-knight-2', 'hero-knight-2']);
+  assert.deepEqual(lancerForms.map((art) => art.family.id), ['huntress', 'huntress', 'huntress']);
+  assert.ok([...guardForms, ...lancerForms].every((art) => art.source === 'PLACEHOLDER'));
+  assert.ok([...guardForms, ...lancerForms].every((art) => art.productionAssetId === undefined));
+  assert.ok(guardForms.every((art) => art.family.knockback && art.family.death));
+  assert.ok(lancerForms.every((art) => art.family.knockback && art.family.death));
+});
+
 test('active visual-form mirror drives the shared production resolver when no explicit form is supplied', () => {
   const f2 = EVOLUTION_FORMS.find((form) => form.characterId === 'militia' && form.formOrder === 2);
   assert.ok(f2);
