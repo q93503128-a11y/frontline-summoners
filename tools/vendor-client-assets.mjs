@@ -50,6 +50,8 @@ const files = [
   ['evil-wizard/idle.png', `${NQM}/Evil%20Wizard/Sprites/Idle.png`, 1200, 150],
   ['evil-wizard/run.png', `${NQM}/Evil%20Wizard/Sprites/Move.png`, 1200, 150],
   ['evil-wizard/attack.png', `${NQM}/Evil%20Wizard/Sprites/Attack.png`, 1200, 150],
+  ['evil-wizard/hit.png', `${NQM}/Evil%20Wizard/Sprites/Take%20Hit.png`, 600, 150],
+  ['evil-wizard/death.png', `${NQM}/Evil%20Wizard/Sprites/Death.png`, 750, 150],
 ];
 
 function pngDimensions(bytes, url) {
