@@ -25,8 +25,9 @@ function attachOverlay(scene: Phaser.Scene, unit: BattleUnit, view: CoreUnitView
   const sync = (): void => {
     if (!view.sprite.active || !overlay.active) return;
     const direction = view.sprite.flipX ? -1 : 1;
+    const reachesForward = spec.kind === 'LANCER_SPEAR' || spec.kind === 'HUNTER_POLEARM';
     const attackPush = unit.state === UnitState.Foreswing
-      ? Math.min(spec.kind === 'LANCER_SPEAR' ? 8 : 4, Math.max(0, unit.stateFrame) * 0.8)
+      ? Math.min(reachesForward ? 8 : 4, Math.max(0, unit.stateFrame) * 0.8)
       : 0;
     const deathAlpha = unit.state === UnitState.Dying
       ? Math.max(0, 1 - unit.stateFrame / Math.max(1, unit.definition.deathFrames))
@@ -53,7 +54,7 @@ function attachOverlay(scene: Phaser.Scene, unit: BattleUnit, view: CoreUnitView
 }
 
 /**
- * Adds presentation-only shield/polearm silhouettes without changing BattleScene's canonical source
+ * Adds presentation-only story-form silhouettes without changing BattleScene's canonical source
  * or production-art approval state. Installed per scene instance so subclasses and replay wrappers
  * keep the exact same deterministic combat implementation.
  */
