@@ -1,5 +1,5 @@
 import { getActiveVisualFormId } from './active-visual-forms.ts';
-import { ART_BY_ID, ART_FAMILIES, UNIT_ART, type ArtFamily, type AttackFxStyle, type SpriteStrip } from './assets.ts';
+import { ART_BY_ID, ART_FAMILIES, UNIT_ART, type ArtFamily, type AttackFxStyle, type SpriteStrip, type UnitArtVariant } from './assets.ts';
 import { EVOLUTION_FORMS } from './character-growth.ts';
 import { ALL_PLAYER_SLOTS, ALL_STAGES, ENEMIES } from './prototype.ts';
 
@@ -71,6 +71,17 @@ const FORM_BY_ID = new Map(EVOLUTION_FORMS.map((form) => [form.formId, form] as 
 const F1_FORM_BY_CHARACTER = new Map(
   EVOLUTION_FORMS.filter((form) => form.formOrder === 1).map((form) => [form.characterId, form.formId] as const),
 );
+
+/**
+ * Source-reference-only form silhouettes used while production art remains unapproved.
+ * These entries must never be promoted to production evidence; they only let the runtime
+ * preserve evolution-form readability during the art pass.
+ */
+const PLACEHOLDER_PLAYER_FORM_ART: Readonly<Record<string, UnitArtVariant>> = {
+  militia_f1: { familyId: 'warrior-3', tint: 0xffffff, attackFx: 'SLASH' },
+  militia_f2: { familyId: 'hero-knight-2', tint: 0xffffff, attackFx: 'SLASH' },
+  militia_f3: { familyId: 'fantasy-warrior', tint: 0xffffff, displayScale: 1.04, attackFx: 'SLASH' },
+};
 
 function productionUnitRoot(unitId: string, formId?: string): string {
   return formId
@@ -235,7 +246,9 @@ export function resolveUnitArt(unitId: string, selectedFormId?: string): Resolve
     };
   }
 
-  const placeholder = UNIT_ART[unitId] ?? { familyId: 'warrior', tint: 0xffffff, attackFx: 'SLASH' as const };
+  const placeholder = (resolvedFormId === undefined ? undefined : PLACEHOLDER_PLAYER_FORM_ART[resolvedFormId])
+    ?? UNIT_ART[unitId]
+    ?? { familyId: 'warrior', tint: 0xffffff, attackFx: 'SLASH' as const };
   const family = (ART_BY_ID[placeholder.familyId] ?? ART_FAMILIES[0]!) as RuntimeArtFamily;
   return {
     family,
