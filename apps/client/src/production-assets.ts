@@ -86,6 +86,12 @@ const PLACEHOLDER_PLAYER_FORM_ART: Readonly<Record<string, UnitArtVariant>> = {
   duelist_f3: { familyId: 'martial-hero-2', tint: 0xffffff, displayScale: 1.03, attackFx: 'SLASH' },
   royal_f3: { familyId: 'king-2', tint: 0xffffff, displayScale: 1.08, attackFx: 'SLASH' },
   heretic_f3: { familyId: 'evil-wizard-2', tint: 0xffffff, displayScale: 1.06, attackFx: 'VOID' },
+  battlemage_f2: { familyId: 'fantasy-warrior', tint: 0xffffff, displayScale: 1.02, attackFx: 'MAGIC' },
+  battlemage_f3: { familyId: 'evil-wizard-2', tint: 0xffffff, displayScale: 1.06, attackFx: 'MAGIC' },
+  pyromancer_f2: { familyId: 'evil-wizard', tint: 0xffffff, displayScale: 1.02, attackFx: 'FIRE' },
+  pyromancer_f3: { familyId: 'evil-wizard-2', tint: 0xffffff, displayScale: 1.05, attackFx: 'FIRE' },
+  voidsage_f2: { familyId: 'wizard', tint: 0xffffff, displayScale: 1.02, attackFx: 'VOID' },
+  voidsage_f3: { familyId: 'evil-wizard-2', tint: 0xffffff, displayScale: 1.04, attackFx: 'VOID' },
 };
 
 function productionUnitRoot(unitId: string, formId?: string): string {
