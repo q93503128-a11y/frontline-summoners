@@ -105,9 +105,9 @@
     {
       "candidateId": "meadow-battlefield-composition-v1",
       "file": "assets/raw/production/review/vertical-slice-01/concepts/meadow-battlefield-concept-v1.png",
-      "sha256": "ffd71f2b6efbd2f92bc2eed769c9b6c3e9827faaa10a2e383c1eabc85bc1dca5",
-      "width": 1400,
-      "height": 800,
+      "sha256": "915517b1f94cc58fbd86bfb39502cecff9e4b17f71bb9c4ab77873afaa2645a8",
+      "width": 400,
+      "height": 225,
       "productionMethod": "AI",
       "generator": "OpenAI GPT-5.6 Sol procedural composition rendering with Pillow",
       "createdAt": "2026-09-03",
