@@ -10,7 +10,7 @@
 | `luizmelo-wizard-pack` | `https://luizmelo.itch.io/wizard-pack` | LuizMelo | CC0 1.0 | Idle, Run, Attack1 | 코드상 tint/scale만 | 고정 커밋 `vlee489/AC31009-Client`에서 빌드 시 검증·복사 |
 | `luizmelo-medieval-warrior-2` | `https://luizmelo.itch.io/medieval-warrior-pack-2` | LuizMelo | CC0 1.0 | Idle, Run, Attack1 | 코드상 tint/scale만 | 고정 커밋 `NQM765/IngeSoft1`에서 빌드 시 검증·복사 |
 | `luizmelo-huntress` | `https://luizmelo.itch.io/huntress` | LuizMelo | CC0 1.0 | Idle, Run, Attack1 | 코드상 tint/scale만 | 고정 커밋 `NQM765/IngeSoft1`에서 빌드 시 검증·복사 |
-| `luizmelo-evil-wizard` | `https://luizmelo.itch.io/evil-wizard-pack` | LuizMelo | CC0 1.0 | Idle, Move, Attack | 코드상 tint/scale만 | 고정 커밋 `NQM765/IngeSoft1`에서 빌드 시 검증·복사 |
+| `luizmelo-evil-wizard` | `https://luizmelo.itch.io/evil-wizard` | LuizMelo | CC0 1.0 | Idle, Move, Attack | 코드상 tint/scale만 | 고정 커밋 `NQM765/IngeSoft1`에서 빌드 시 검증·복사 |
 
 ## 현재 배포 방식
 
