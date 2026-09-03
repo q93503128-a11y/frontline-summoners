@@ -65,11 +65,21 @@ const files = [
   ['king-2/attack.png', `${NQM}/Medieval%20King%20Pack%202/Sprites/Attack1.png`, 640, 111],
   ['king-2/hit.png', `${NQM}/Medieval%20King%20Pack%202/Sprites/Take%20Hit.png`, 640, 111],
   ['king-2/death.png', `${NQM}/Medieval%20King%20Pack%202/Sprites/Death.png`, 960, 111],
+  ['martial-hero-2/idle.png', `${NQM}/Martial%20Hero%202/Sprites/Idle.png`, 800, 200],
+  ['martial-hero-2/run.png', `${NQM}/Martial%20Hero%202/Sprites/Run.png`, 1600, 200],
+  ['martial-hero-2/attack.png', `${NQM}/Martial%20Hero%202/Sprites/Attack1.png`, 800, 200],
+  ['martial-hero-2/hit.png', `${NQM}/Martial%20Hero%202/Sprites/Take%20hit.png`, 600, 200],
+  ['martial-hero-2/death.png', `${NQM}/Martial%20Hero%202/Sprites/Death.png`, 1400, 200],
   ['evil-wizard/idle.png', `${NQM}/Evil%20Wizard/Sprites/Idle.png`, 1200, 150],
   ['evil-wizard/run.png', `${NQM}/Evil%20Wizard/Sprites/Move.png`, 1200, 150],
   ['evil-wizard/attack.png', `${NQM}/Evil%20Wizard/Sprites/Attack.png`, 1200, 150],
   ['evil-wizard/hit.png', `${NQM}/Evil%20Wizard/Sprites/Take%20Hit.png`, 600, 150],
   ['evil-wizard/death.png', `${NQM}/Evil%20Wizard/Sprites/Death.png`, 750, 150],
+  ['evil-wizard-2/idle.png', `${NQM}/EVil%20Wizard%202/Sprites/Idle.png`, 2000, 250],
+  ['evil-wizard-2/run.png', `${NQM}/EVil%20Wizard%202/Sprites/Run.png`, 2000, 250],
+  ['evil-wizard-2/attack.png', `${NQM}/EVil%20Wizard%202/Sprites/Attack1.png`, 2000, 250],
+  ['evil-wizard-2/hit.png', `${NQM}/EVil%20Wizard%202/Sprites/Take%20hit.png`, 750, 250],
+  ['evil-wizard-2/death.png', `${NQM}/EVil%20Wizard%202/Sprites/Death.png`, 1750, 250],
 ];
 
 function pngDimensions(bytes, url) {
