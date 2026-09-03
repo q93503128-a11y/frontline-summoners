@@ -17,6 +17,8 @@ const EXPECTED_REACTIONS = new Map<string, readonly [number, number]>([
   ['warrior-1', [3, 9]],
   ['huntress-2', [3, 10]],
   ['king-2', [4, 6]],
+  ['martial-hero-2', [3, 7]],
+  ['evil-wizard-2', [3, 7]],
 ]);
 
 test('every pinned source-reference family exposes authored hit and death strips', () => {
@@ -51,20 +53,29 @@ test('all ten chapter-one story units resolve to complete five-motion placeholde
   clearActiveVisualForms();
 });
 
-test('verified CC0 references distinguish hunter and royal final forms without claiming production approval', () => {
+test('verified CC0 references distinguish selected story final forms without claiming production approval', () => {
   const hunterF1 = resolveUnitArt('hunter', 'hunter_f1');
   const hunterF3 = resolveUnitArt('hunter', 'hunter_f3');
+  const duelistF1 = resolveUnitArt('duelist', 'duelist_f1');
+  const duelistF3 = resolveUnitArt('duelist', 'duelist_f3');
   const royalF1 = resolveUnitArt('royal', 'royal_f1');
   const royalF3 = resolveUnitArt('royal', 'royal_f3');
+  const hereticF1 = resolveUnitArt('heretic', 'heretic_f1');
+  const hereticF3 = resolveUnitArt('heretic', 'heretic_f3');
 
   assert.equal(hunterF1.family.id, 'huntress');
   assert.equal(hunterF3.family.id, 'huntress-2');
+  assert.equal(duelistF1.family.id, 'fantasy-warrior');
+  assert.equal(duelistF3.family.id, 'martial-hero-2');
   assert.equal(royalF1.family.id, 'hero-knight');
   assert.equal(royalF3.family.id, 'king-2');
-  assert.ok([hunterF1, hunterF3, royalF1, royalF3].every((art) => art.source === 'PLACEHOLDER'));
-  assert.ok([hunterF1, hunterF3, royalF1, royalF3].every((art) => art.productionAssetId === undefined));
-  assert.ok(hunterF3.family.knockback && hunterF3.family.death);
-  assert.ok(royalF3.family.knockback && royalF3.family.death);
+  assert.equal(hereticF1.family.id, 'evil-wizard');
+  assert.equal(hereticF3.family.id, 'evil-wizard-2');
+
+  const resolved = [hunterF1, hunterF3, duelistF1, duelistF3, royalF1, royalF3, hereticF1, hereticF3];
+  assert.ok(resolved.every((art) => art.source === 'PLACEHOLDER'));
+  assert.ok(resolved.every((art) => art.productionAssetId === undefined));
+  assert.ok(resolved.every((art) => art.family.knockback && art.family.death));
 });
 
 test('golden-mask boss reservation remains placeholder while using complete Evil Wizard source motion', () => {
