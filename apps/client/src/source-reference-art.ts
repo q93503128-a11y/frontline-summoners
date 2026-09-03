@@ -30,6 +30,11 @@ const WITH_AUTHORED_REACTIONS: readonly SourceReferenceArtFamily[] = [
     knockback: { key: 'warrior-3-knockback', url: `${LOCAL}/warrior-3/hit.png`, frameWidth: 135, frameHeight: 135, frames: 3 },
     death: { key: 'warrior-3-death', url: `${LOCAL}/warrior-3/death.png`, frameWidth: 135, frameHeight: 135, frames: 9 },
   },
+  {
+    ...base('evil-wizard'),
+    knockback: { key: 'evil-wizard-knockback', url: `${LOCAL}/evil-wizard/hit.png`, frameWidth: 150, frameHeight: 150, frames: 4 },
+    death: { key: 'evil-wizard-death', url: `${LOCAL}/evil-wizard/death.png`, frameWidth: 150, frameHeight: 150, frames: 5 },
+  },
 ];
 
 const WARRIOR_1: SourceReferenceArtFamily = {
