@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
 import { clearActiveVisualForms, getActiveVisualFormId, syncActiveVisualForms } from '../src/active-visual-forms.ts';
+import { ART_FAMILIES } from '../src/assets.ts';
 import { EVOLUTION_FORMS } from '../src/character-growth.ts';
 import {
   PRODUCTION_AUDIO_REQUIREMENTS,
@@ -50,8 +51,25 @@ test('unapproved production targets resolve to verified placeholder art without 
   assert.match(resolved.family.idle.url, /^\/assets\/characters\//);
 
   const strips = getRuntimeSpriteStrips();
-  assert.equal(strips.length, 21, 'with no approved production candidates only seven placeholder families preload');
+  assert.equal(strips.length, ART_FAMILIES.length * 3, 'unapproved placeholder families preload exactly idle, run, and attack strips');
   assert.ok(strips.every((strip) => strip.url.startsWith('/assets/characters/')));
+});
+
+test('militia evolution forms use three distinct source-reference silhouettes while raider stays separate', () => {
+  const f1 = resolveUnitArt('militia', 'militia_f1');
+  const f2 = resolveUnitArt('militia', 'militia_f2');
+  const f3 = resolveUnitArt('militia', 'militia_f3');
+  const raider = resolveUnitArt('enemy-raider');
+
+  assert.deepEqual(
+    [f1.family.id, f2.family.id, f3.family.id],
+    ['warrior-3', 'hero-knight-2', 'fantasy-warrior'],
+    'militia F1/F2/F3 source references should read as recruit, regular infantry, and veteran progression',
+  );
+  assert.equal(new Set([f1.family.id, f2.family.id, f3.family.id]).size, 3);
+  assert.equal(raider.family.id, 'warrior');
+  assert.ok(!new Set([f1.family.id, f2.family.id, f3.family.id]).has(raider.family.id));
+  assert.ok([f1, f2, f3, raider].every((art) => art.source === 'PLACEHOLDER'));
 });
 
 test('active visual-form mirror drives the shared production resolver when no explicit form is supplied', () => {
@@ -62,6 +80,7 @@ test('active visual-form mirror drives the shared production resolver when no ex
 
   const resolved = resolveUnitArt('militia');
   assert.equal(resolved.resolvedFormId, f2.formId);
+  assert.equal(resolved.family.id, 'hero-knight-2');
   assert.equal(resolved.source, 'PLACEHOLDER');
 
   clearActiveVisualForms();
@@ -69,6 +88,7 @@ test('active visual-form mirror drives the shared production resolver when no ex
   const f1 = EVOLUTION_FORMS.find((form) => form.characterId === 'militia' && form.formOrder === 1);
   assert.ok(f1);
   assert.equal(fallback.resolvedFormId, f1.formId);
+  assert.equal(fallback.family.id, 'warrior-3');
 });
 
 test('active visual-form mirror tracks save-selected form ids without mutating progression', () => {
