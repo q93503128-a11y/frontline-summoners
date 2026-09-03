@@ -107,9 +107,9 @@ test('story magic evolutions use three distinct complete source-reference silhou
   }
 });
 
-test('guard and blue lancer keep custom-silhouette debt explicit instead of faking F3 with unrelated free art', () => {
+test('guard and lancer keep custom-silhouette debt explicit instead of faking F3 with unrelated free art', () => {
   const guardForms = [1, 2, 3].map((order) => resolveUnitArt('guard', `guard_f${order}`));
-  const lancerForms = [1, 2, 3].map((order) => resolveUnitArt('blue_lancer', `blue_lancer_f${order}`));
+  const lancerForms = [1, 2, 3].map((order) => resolveUnitArt('lancer', `lancer_f${order}`));
 
   assert.deepEqual(guardForms.map((art) => art.family.id), ['hero-knight-2', 'hero-knight-2', 'hero-knight-2']);
   assert.deepEqual(lancerForms.map((art) => art.family.id), ['huntress', 'huntress', 'huntress']);
