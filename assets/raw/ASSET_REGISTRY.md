@@ -4,27 +4,29 @@
 
 | assetId | 원출처 | 제작자 | 라이선스 | 사용 파일 | 수정 여부 | 배포 방식 |
 | --- | --- | --- | --- | --- | --- | --- |
-| `luizmelo-hero-knight` | `https://luizmelo.itch.io/hero-knight` | LuizMelo | CC0 1.0 | Idle, Run, Attack1 | 코드상 tint/scale만 | 고정 커밋 `vlee489/AC31009-Client`에서 빌드 시 검증·복사 |
-| `luizmelo-hero-knight-2` | `https://luizmelo.itch.io/hero-knight-2` | LuizMelo | CC0 1.0 | Idle, Run, Attack | 코드상 tint/scale만 | 고정 커밋 `NQM765/IngeSoft1`에서 빌드 시 검증·복사 |
-| `luizmelo-fantasy-warrior` | `https://luizmelo.itch.io/fantasy-warrior` | LuizMelo | CC0 1.0 | Idle, Run, Attack1 | 코드상 tint/scale만 | 고정 커밋 `NQM765/IngeSoft1`에서 빌드 시 검증·복사 |
-| `luizmelo-wizard-pack` | `https://luizmelo.itch.io/wizard-pack` | LuizMelo | CC0 1.0 | Idle, Run, Attack1 | 코드상 tint/scale만 | 고정 커밋 `vlee489/AC31009-Client`에서 빌드 시 검증·복사 |
+| `luizmelo-hero-knight` | `https://luizmelo.itch.io/hero-knight` | LuizMelo | CC0 1.0 | Idle, Run, Attack1, Take Hit, Death | source reference only; final production rework required | 고정 커밋 `vlee489/AC31009-Client@71252f38c7bf4426ff84676cad517f66c3e6cb65`에서 빌드 시 검증·복사 |
+| `luizmelo-hero-knight-2` | `https://luizmelo.itch.io/hero-knight-2` | LuizMelo | CC0 1.0 | Idle, Run, Attack, Take Hit, Death | source reference only; final production rework required | 고정 커밋 `NQM765/IngeSoft1@84594e5d3da7472615660f453bdb457da13cca2f`에서 빌드 시 검증·복사 |
+| `luizmelo-fantasy-warrior` | `https://luizmelo.itch.io/fantasy-warrior` | LuizMelo | CC0 1.0 | Idle, Run, Attack1, Take hit, Death | source reference only; final production rework required | 고정 커밋 `NQM765/IngeSoft1@84594e5d3da7472615660f453bdb457da13cca2f`에서 빌드 시 검증·복사 |
+| `luizmelo-wizard-pack` | `https://luizmelo.itch.io/wizard-pack` | LuizMelo | CC0 1.0 | Idle, Run, Attack1, Hit, Death | source reference only; final production rework required | 고정 커밋 `vlee489/AC31009-Client@71252f38c7bf4426ff84676cad517f66c3e6cb65`에서 빌드 시 검증·복사 |
 | `luizmelo-medieval-warrior-2` | `https://luizmelo.itch.io/medieval-warrior-pack-2` | LuizMelo | CC0 1.0 | Idle, Run, Attack1-4, Take Hit, Death | source reference only; final production rework required | 고정 커밋 `NQM765/IngeSoft1@84594e5d3da7472615660f453bdb457da13cca2f`에서 빌드 시 검증·복사 |
 | `luizmelo-medieval-warrior-3` | `https://luizmelo.itch.io/medieval-warrior-pack-3` | LuizMelo | CC0 1.0 | Idle, Run, Attack1-3, Get Hit, Death | source reference only; final production rework required | 고정 커밋 `chaurunda/ClickerGodot@c425114bfa522b1e57f0cfc4f486580a3210f36d`에서 빌드 시 검증·복사 |
-| `luizmelo-huntress` | `https://luizmelo.itch.io/huntress` | LuizMelo | CC0 1.0 | Idle, Run, Attack1 | 코드상 tint/scale만 | 고정 커밋 `NQM765/IngeSoft1`에서 빌드 시 검증·복사 |
-| `luizmelo-evil-wizard` | `https://luizmelo.itch.io/evil-wizard` | LuizMelo | CC0 1.0 | Idle, Move, Attack | 코드상 tint/scale만 | 고정 커밋 `NQM765/IngeSoft1`에서 빌드 시 검증·복사 |
+| `luizmelo-medieval-warrior-1` | `https://luizmelo.itch.io/medieval-warrior-pack` | LuizMelo | CC0 1.0 | Idle, Run, Attack1, Hit, Death | source reference only; final production rework required | 고정 커밋 `NQM765/IngeSoft1@84594e5d3da7472615660f453bdb457da13cca2f`에서 빌드 시 검증·복사 |
+| `luizmelo-huntress` | `https://luizmelo.itch.io/huntress` | LuizMelo | CC0 1.0 | Idle, Run, Attack1, Take hit, Death | source reference only; final production rework required | 고정 커밋 `NQM765/IngeSoft1@84594e5d3da7472615660f453bdb457da13cca2f`에서 빌드 시 검증·복사 |
+| `luizmelo-huntress-2` | `https://luizmelo.itch.io/huntress-2` | LuizMelo | CC0 1.0 | Idle, Run, Attack, Get Hit, Death | source reference only; `hunter_f3` placeholder | 고정 커밋 `NQM765/IngeSoft1@84594e5d3da7472615660f453bdb457da13cca2f`에서 빌드 시 검증·복사 |
+| `luizmelo-medieval-king-2` | `https://luizmelo.itch.io/medieval-king-pack-2` | LuizMelo | CC0 1.0 | Idle, Run, Attack1, Take Hit, Death | source reference only; `royal_f3` placeholder | 고정 커밋 `NQM765/IngeSoft1@84594e5d3da7472615660f453bdb457da13cca2f`에서 빌드 시 검증·복사 |
+| `luizmelo-evil-wizard` | `https://luizmelo.itch.io/evil-wizard` | LuizMelo | CC0 1.0 | Idle, Move, Attack, Take Hit, Death | source reference only; final production rework required | 고정 커밋 `NQM765/IngeSoft1@84594e5d3da7472615660f453bdb457da13cca2f`에서 빌드 시 검증·복사 |
+| `luizmelo-martial-hero-2` | `https://luizmelo.itch.io/martial-hero-2` | LuizMelo | CC0 1.0 | Idle, Run, Attack1, Take hit, Death | source reference only; `duelist_f3` placeholder | 고정 커밋 `NQM765/IngeSoft1@84594e5d3da7472615660f453bdb457da13cca2f`에서 빌드 시 검증·복사 |
+| `luizmelo-evil-wizard-2` | `https://luizmelo.itch.io/evil-wizard-2` | LuizMelo | CC0 1.0 | Idle, Run, Attack1, Take hit, Death | source reference only; `heretic_f3` placeholder | 고정 커밋 `NQM765/IngeSoft1@84594e5d3da7472615660f453bdb457da13cca2f`에서 빌드 시 검증·복사 |
 
 ## 검증된 무료 source candidate
 
-아래 항목은 2026-09-03에 원출처 페이지의 현재 무료 다운로드 여부와 CC0 표기를 확인한 **source candidate**다. production runtime asset으로 채택된 것이 아니며 production review 상태에도 영향을 주지 않는다. `luizmelo-medieval-warrior-3`은 source candidate 검증 후 build-time reference까지 핀 고정했으므로 위 vendored source 표로 승격했고 이 중복 후보 표에서는 제거했다.
+아래 항목은 2026-09-03에 원출처 페이지의 현재 무료 다운로드 여부와 CC0 표기를 확인한 **source candidate**다. production runtime asset으로 채택된 것이 아니며 production review 상태에도 영향을 주지 않는다. 실제 build-time source reference로 핀 고정된 pack은 위 vendored source 표로 승격하고 이 후보 표에서는 제거한다.
 
 | assetId | 원출처 | 제작자 | 라이선스 | 현재 상태 | 우선 용도 |
 | --- | --- | --- | --- | --- | --- |
-| `luizmelo-medieval-warrior-1-candidate` | `https://luizmelo.itch.io/medieval-warrior-pack` | LuizMelo | CC0 1.0 | `SOURCE_CANDIDATE` | 일반 인간형/창병/병사 재가공 |
-| `luizmelo-huntress-2-candidate` | `https://luizmelo.itch.io/huntress-2` | LuizMelo | CC0 1.0 | `SOURCE_CANDIDATE` | 경량 인간형의 달리기/공격 모션 참고 |
 | `luizmelo-monsters-creatures-fantasy-1-candidate` | `https://luizmelo.itch.io/monsters-creatures-fantasy` | LuizMelo | CC0 1.0 | `SOURCE_CANDIDATE` | Skeleton/Goblin/Mushroom/Flying Eye 기반 또는 모션 참고 |
 | `luizmelo-monsters-creatures-fantasy-2-candidate` | `https://luizmelo.itch.io/monsters-creatures-fantasy-2` | LuizMelo | CC0 1.0 | `SOURCE_CANDIDATE` | Mimic/Rat/Slime/Bat 모션 참고 |
 | `luizmelo-medieval-king-1-candidate` | `https://luizmelo.itch.io/medieval-king-pack` | LuizMelo | CC0 1.0 | `SOURCE_CANDIDATE` | 왕실기사/장의사 계열 인간형 재가공 |
-| `luizmelo-medieval-king-2-candidate` | `https://luizmelo.itch.io/medieval-king-pack-2` | LuizMelo | CC0 1.0 | `SOURCE_CANDIDATE` | 중량 인간형 모션/장비 참고 |
 
 현재 유료 결제가 필요한 pack은 라이선스가 CC0이더라도 이 `무료 source candidate` 목록에는 넣지 않는다. 실제 binary 인입 시에는 다시 원출처를 확인하고 master/runtime 파일의 checksum과 provenance를 별도로 기록한다.
 
@@ -33,10 +35,14 @@
 ## 현재 배포 방식
 
 - 게임 런타임은 `raw.githubusercontent.com`을 직접 읽지 않는다.
-- `tools/vendor-client-assets.mjs`가 `prebuild`에서 고정 커밋의 **33개 PNG**를 내려받아 `apps/client/public/assets/characters/`에 생성한다.
-- Medieval Warrior Pack 2/3는 징집병 F1/F2/F3 production 재작업에 사용할 **source reference motion set**을 확보하기 위해 Idle/Run/Attack/Hit/Death 계열까지 포함한다. 이 파일 자체가 production 승인 아트는 아니다.
+- `tools/vendor-client-assets.mjs`가 `prebuild`에서 고정 커밋의 **70개 PNG**를 내려받아 `apps/client/public/assets/characters/`에 생성한다.
+- 현재 runtime source-reference catalog는 **13개 family**이며 각 family는 Idle/Run/Attack/Hit/Death에 해당하는 완전 5모션 세트를 갖는다.
+- `warrior-1`, `huntress-2`, `king-2`, `martial-hero-2`, `evil-wizard-2`는 기존 `ART_FAMILIES` 밖에서 source-reference 전용 family로 추가한 항목이며 production 승인 아트가 아니다.
+- 진화형 placeholder 차별화는 현재 `militia_f1/f2/f3`, `hunter_f3`, `duelist_f3`, `royal_f3`, `heretic_f3`에만 명시적으로 적용한다. 직업 정합성이 부족한 무료 원본을 수량 채우기 목적으로 연결하지 않는다.
 - 각 다운로드는 타임아웃과 재시도를 사용하고 PNG 시그니처 및 기대 가로·세로 크기를 검사한다.
 - MW3는 135×135 프레임 캔버스를 사용하며 현재 검증 규격은 Idle `1350×135`(10), Run `810×135`(6), Attack1/2 `540×135`(4), Attack3 `675×135`(5), Get Hit `405×135`(3), Death `1215×135`(9)다.
+- Martial Hero 2는 200×200 프레임 캔버스이며 사용 규격은 Idle `800×200`(4), Run `1600×200`(8), Attack1 `800×200`(4), Take hit `600×200`(3), Death `1400×200`(7)다.
+- Evil Wizard 2는 250×250 프레임 캔버스이며 사용 규격은 Idle `2000×250`(8), Run `2000×250`(8), Attack1 `2000×250`(8), Take hit `750×250`(3), Death `1750×250`(7)다.
 - 한 파일이라도 누락되거나 원본 시트 크기가 바뀌면 빌드를 실패시켜 캐릭터가 빠진 Pages 배포를 막는다.
 - Vite 빌드 결과에는 위 파일이 로컬 `/assets/characters/...` 경로로 포함되므로 실제 플레이 중 외부 미러 장애에 영향을 받지 않는다.
 - 생성 산출물 폴더는 Git에 직접 중복 저장하지 않고 `.gitignore`한다. 원출처/핀 SHA/검증 규칙은 스크립트와 이 Registry가 정본이다.
