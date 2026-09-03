@@ -16,9 +16,24 @@ function base(id: string): ArtFamily {
 
 const WITH_AUTHORED_REACTIONS: readonly SourceReferenceArtFamily[] = [
   {
+    ...base('hero-knight'),
+    knockback: { key: 'hero-knight-knockback', url: `${LOCAL}/hero-knight/hit.png`, frameWidth: 180, frameHeight: 180, frames: 4 },
+    death: { key: 'hero-knight-death', url: `${LOCAL}/hero-knight/death.png`, frameWidth: 180, frameHeight: 180, frames: 11 },
+  },
+  {
     ...base('hero-knight-2'),
     knockback: { key: 'hero-knight-2-knockback', url: `${LOCAL}/hero-knight-2/hit.png`, frameWidth: 140, frameHeight: 140, frames: 4 },
     death: { key: 'hero-knight-2-death', url: `${LOCAL}/hero-knight-2/death.png`, frameWidth: 140, frameHeight: 140, frames: 9 },
+  },
+  {
+    ...base('fantasy-warrior'),
+    knockback: { key: 'fantasy-warrior-knockback', url: `${LOCAL}/fantasy-warrior/hit.png`, frameWidth: 162, frameHeight: 162, frames: 3 },
+    death: { key: 'fantasy-warrior-death', url: `${LOCAL}/fantasy-warrior/death.png`, frameWidth: 162, frameHeight: 162, frames: 7 },
+  },
+  {
+    ...base('wizard'),
+    knockback: { key: 'wizard-knockback', url: `${LOCAL}/wizard/hit.png`, frameWidth: 231, frameHeight: 190, frames: 4 },
+    death: { key: 'wizard-death', url: `${LOCAL}/wizard/death.png`, frameWidth: 231, frameHeight: 190, frames: 7 },
   },
   {
     ...base('warrior'),
@@ -29,6 +44,11 @@ const WITH_AUTHORED_REACTIONS: readonly SourceReferenceArtFamily[] = [
     ...base('warrior-3'),
     knockback: { key: 'warrior-3-knockback', url: `${LOCAL}/warrior-3/hit.png`, frameWidth: 135, frameHeight: 135, frames: 3 },
     death: { key: 'warrior-3-death', url: `${LOCAL}/warrior-3/death.png`, frameWidth: 135, frameHeight: 135, frames: 9 },
+  },
+  {
+    ...base('huntress'),
+    knockback: { key: 'huntress-knockback', url: `${LOCAL}/huntress/hit.png`, frameWidth: 150, frameHeight: 150, frames: 3 },
+    death: { key: 'huntress-death', url: `${LOCAL}/huntress/death.png`, frameWidth: 150, frameHeight: 150, frames: 8 },
   },
   {
     ...base('evil-wizard'),
