@@ -10,7 +10,7 @@
 | `luizmelo-wizard-pack` | `https://luizmelo.itch.io/wizard-pack` | LuizMelo | CC0 1.0 | Idle, Run, Attack1 | 코드상 tint/scale만 | 고정 커밋 `vlee489/AC31009-Client`에서 빌드 시 검증·복사 |
 | `luizmelo-medieval-warrior-2` | `https://luizmelo.itch.io/medieval-warrior-pack-2` | LuizMelo | CC0 1.0 | Idle, Run, Attack1 | 코드상 tint/scale만 | 고정 커밋 `NQM765/IngeSoft1`에서 빌드 시 검증·복사 |
 | `luizmelo-huntress` | `https://luizmelo.itch.io/huntress` | LuizMelo | CC0 1.0 | Idle, Run, Attack1 | 코드상 tint/scale만 | 고정 커밋 `NQM765/IngeSoft1`에서 빌드 시 검증·복사 |
-| `luizmelo-evil-wizard` | `https://luizmelo.itch.io/evil-wizard` | LuizMelo | CC0 1.0 | Idle, Move, Attack | 코드상 tint/scale만 | 고정 커밋 `NQM765/IngeSoft1`에서 빌드 시 검증·복사 |
+| `luizmelo-evil-wizard` | `https://luizmelo.itch.io/evil-wizard-pack` | LuizMelo | CC0 1.0 | Idle, Move, Attack | 코드상 tint/scale만 | 고정 커밋 `NQM765/IngeSoft1`에서 빌드 시 검증·복사 |
 
 ## 현재 배포 방식
 
@@ -32,6 +32,7 @@
 - 첫 제작 인입 계약: `assets/raw/production/vertical-slice-01.json`
 - 첫 visual review 계약: `assets/raw/production/review-package-01.json`
 - 첫 concept candidate manifest: `assets/raw/production/concept-candidates-01.json`
+- 2차 concept 기록: `docs/content-wiki/systems/SECOND_PRODUCTION_CONCEPT_CANDIDATES_2026-09-03.md`
 - review evidence root: `assets/raw/production/review/vertical-slice-01/...`
 - 통합 자동 검증: `npm run assets:production:check`
 - intake validator: `tools/validate-production-vertical-slice.mjs`
@@ -49,7 +50,7 @@
 
 현재 위 항목은 모두 `AWAITING_ART`이며 최종 제작 파일이 아직 Registry에 등록된 상태가 아니다.
 
-검토용 concept candidate는 같은 review root 아래 `concepts/`에 둘 수 있지만 runtime 자산이나 정식 review evidence로 간주하지 않는다. 첫 v1 비교판은 AI 생성 후보이며 `REVISION_REQUIRED`로 기록되어 있다.
+검토용 concept candidate는 같은 review root 아래 `concepts/`에 둘 수 있지만 runtime 자산이나 정식 review evidence로 간주하지 않는다. `militia-raider-silhouette-v1`은 `REVISION_REQUIRED` 이력을 보존하며, `militia-raider-silhouette-v2`, `golden-mask-necromancer-silhouette-v1`, `meadow-battlefield-composition-v1`은 모두 concept 수준의 `SELECTED_FOR_DEVELOPMENT`일 뿐이다. 이 상태는 어떤 production target도 `AWAITING_ART`에서 승격하지 않는다.
 
 실제 파일이 들어올 때에는 각 production asset에 대해 최소 다음 provenance를 이 Registry 또는 연결된 production provenance 문서에 기록한다.
 
