@@ -1,15 +1,16 @@
 import { getActiveVisualFormId } from './active-visual-forms.ts';
-import { ART_BY_ID, ART_FAMILIES, UNIT_ART, type ArtFamily, type AttackFxStyle, type SpriteStrip, type UnitArtVariant } from './assets.ts';
+import { UNIT_ART, type ArtFamily, type AttackFxStyle, type SpriteStrip, type UnitArtVariant } from './assets.ts';
 import { EVOLUTION_FORMS } from './character-growth.ts';
 import { ALL_PLAYER_SLOTS, ALL_STAGES, ENEMIES } from './prototype.ts';
+import { SOURCE_REFERENCE_ART_BY_ID, SOURCE_REFERENCE_ART_FAMILIES } from './source-reference-art.ts';
 
 export const PRODUCTION_ASSET_STATUSES = ['AWAITING_ART', 'READY_FOR_REVIEW', 'APPROVED'] as const;
 export type ProductionAssetStatus = (typeof PRODUCTION_ASSET_STATUSES)[number];
 
 export interface RuntimeArtFamily extends ArtFamily {
-  /** Production-only natural knockback motion. Placeholder families may omit it. */
+  /** Production or source-reference natural knockback motion when an authored strip exists. */
   readonly knockback?: SpriteStrip;
-  /** Production-only death motion. Placeholder families may omit it. */
+  /** Production or source-reference death motion when an authored strip exists. */
   readonly death?: SpriteStrip;
 }
 
@@ -80,7 +81,7 @@ const F1_FORM_BY_CHARACTER = new Map(
 const PLACEHOLDER_PLAYER_FORM_ART: Readonly<Record<string, UnitArtVariant>> = {
   militia_f1: { familyId: 'warrior-3', tint: 0xffffff, attackFx: 'SLASH' },
   militia_f2: { familyId: 'hero-knight-2', tint: 0xffffff, attackFx: 'SLASH' },
-  militia_f3: { familyId: 'fantasy-warrior', tint: 0xffffff, displayScale: 1.04, attackFx: 'SLASH' },
+  militia_f3: { familyId: 'warrior-1', tint: 0xffffff, displayScale: 1.04, attackFx: 'SLASH' },
 };
 
 function productionUnitRoot(unitId: string, formId?: string): string {
@@ -249,7 +250,7 @@ export function resolveUnitArt(unitId: string, selectedFormId?: string): Resolve
   const placeholder = (resolvedFormId === undefined ? undefined : PLACEHOLDER_PLAYER_FORM_ART[resolvedFormId])
     ?? UNIT_ART[unitId]
     ?? { familyId: 'warrior', tint: 0xffffff, attackFx: 'SLASH' as const };
-  const family = (ART_BY_ID[placeholder.familyId] ?? ART_FAMILIES[0]!) as RuntimeArtFamily;
+  const family = SOURCE_REFERENCE_ART_BY_ID[placeholder.familyId] ?? SOURCE_REFERENCE_ART_FAMILIES[0]!;
   return {
     family,
     tint: placeholder.tint,
@@ -261,7 +262,7 @@ export function resolveUnitArt(unitId: string, selectedFormId?: string): Resolve
 }
 
 export function getRuntimeArtFamilies(): readonly RuntimeArtFamily[] {
-  const families = new Map<string, RuntimeArtFamily>(ART_FAMILIES.map((family) => [family.id, family as RuntimeArtFamily]));
+  const families = new Map<string, RuntimeArtFamily>(SOURCE_REFERENCE_ART_FAMILIES.map((family) => [family.id, family]));
   for (const candidate of PRODUCTION_UNIT_ART_CANDIDATES) {
     if (candidate.status === 'APPROVED') families.set(candidate.family.id, candidate.family);
   }
