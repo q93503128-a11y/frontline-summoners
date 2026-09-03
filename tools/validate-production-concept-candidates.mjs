@@ -43,7 +43,8 @@ for (const candidate of manifest.candidates) {
   const buffer = readFileSync(absolute);
   const dimensions = pngDimensions(buffer);
   invariant(dimensions.width === candidate.width && dimensions.height === candidate.height, `${candidate.candidateId} dimensions drifted`);
-  invariant(createHash('sha256').update(buffer).digest('hex') === candidate.sha256, `${candidate.candidateId} sha256 drifted`);
+  const actualSha256 = createHash('sha256').update(buffer).digest('hex');
+  invariant(actualSha256 === candidate.sha256, `${candidate.candidateId} sha256 drifted: expected ${candidate.sha256}, actual ${actualSha256}`);
   seenCandidateIds.add(candidate.candidateId);
 }
 
