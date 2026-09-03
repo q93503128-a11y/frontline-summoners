@@ -12,6 +12,8 @@ import {
   StoryFriendCoopLobbyScene as FriendCoopLobbyScene,
   StoryPublicCoopLobbyScene as PublicCoopLobbyScene,
 } from './coop-story-scenes';
+import { DeckScene } from './deck-scene';
+import { GrowthScene } from './growth-scene';
 import { RecruitmentScene } from './recruitment-scene';
 import { BootScene as BaseBootScene, MainMenuScene as BaseMainMenuScene } from './navigation-scenes';
 import { ProfileScene } from './profile-scene';
@@ -32,10 +34,7 @@ import { StageSortieModeScene } from './stage-sortie-mode-scene';
 import { StoryStageSelectScene as StageSelectScene } from './story-stage-select-scene';
 import { ResultScene } from './result-scene';
 import { SettingsScene } from './settings-scene';
-import {
-  StorySilhouetteDeckScene as DeckScene,
-  StorySilhouetteGrowthScene as GrowthScene,
-} from './story-silhouette-preview-scenes.ts';
+import { installStorySilhouetteScenePreviews } from './story-silhouette-preview-scenes.ts';
 import { StoryScene } from './story-scene';
 import { TrustedBattleResultScene } from './trusted-battle-result-scene';
 import { addButton } from './scene-ui';
@@ -64,6 +63,8 @@ class MainMenuScene extends BaseMainMenuScene {
     addButton(this, 1180, y, width, h, '설 정', () => this.scene.start('settings'), 0x647783);
   }
 }
+
+installStorySilhouetteScenePreviews();
 
 const game = new Phaser.Game({
   type: Phaser.AUTO,

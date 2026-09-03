@@ -1,6 +1,6 @@
 import Phaser from 'phaser';
-import { DeckScene as BaseDeckScene } from './deck-scene.ts';
-import { GrowthScene as BaseGrowthScene } from './growth-scene.ts';
+import { DeckScene } from './deck-scene.ts';
+import { GrowthScene } from './growth-scene.ts';
 import { resolveUnitArt } from './production-assets.ts';
 import { getSlotById, type PrototypeRosterSlot } from './prototype.ts';
 import type { GuestProgress } from './save.ts';
@@ -27,11 +27,15 @@ interface GrowthSceneRuntime {
   renderDetail(): void;
 }
 
-const DECK_INSTALL_MARKER = Symbol('story-silhouette-deck-preview-installed');
-const GROWTH_INSTALL_MARKER = Symbol('story-silhouette-growth-preview-installed');
+const DECK_INSTANCE_MARKER = Symbol('story-silhouette-deck-preview-installed');
+const GROWTH_INSTANCE_MARKER = Symbol('story-silhouette-growth-preview-installed');
+const DECK_CLASS_MARKER = Symbol('story-silhouette-deck-class-installed');
+const GROWTH_CLASS_MARKER = Symbol('story-silhouette-growth-class-installed');
 
-type DeckInstallable = DeckSceneRuntime & { [DECK_INSTALL_MARKER]?: boolean };
-type GrowthInstallable = GrowthSceneRuntime & { [GROWTH_INSTALL_MARKER]?: boolean };
+type DeckInstallable = DeckSceneRuntime & { [DECK_INSTANCE_MARKER]?: boolean };
+type GrowthInstallable = GrowthSceneRuntime & { [GROWTH_INSTANCE_MARKER]?: boolean };
+type DeckPrototype = DeckScene & { [DECK_CLASS_MARKER]?: boolean };
+type GrowthPrototype = GrowthScene & { [GROWTH_CLASS_MARKER]?: boolean };
 
 function insertOverlayAfterPortrait(
   container: Phaser.GameObjects.Container,
@@ -106,40 +110,55 @@ function decorateGrowthDetail(scene: Phaser.Scene, host: GrowthSceneRuntime): vo
   insertOverlayAfterPortrait(layer, overlay, portraitX, portraitY);
 }
 
-function installDeckPreview(scene: BaseDeckScene): void {
+function installDeckPreview(scene: DeckScene): void {
   const host = scene as unknown as DeckInstallable;
-  if (host[DECK_INSTALL_MARKER]) return;
+  if (host[DECK_INSTANCE_MARKER]) return;
   const original = host.renderCards.bind(scene);
-  host[DECK_INSTALL_MARKER] = true;
+  host[DECK_INSTANCE_MARKER] = true;
   host.renderCards = (): void => {
     original();
     decorateDeckCards(scene, host);
   };
 }
 
-function installGrowthPreview(scene: BaseGrowthScene): void {
+function installGrowthPreview(scene: GrowthScene): void {
   const host = scene as unknown as GrowthInstallable;
-  if (host[GROWTH_INSTALL_MARKER]) return;
+  if (host[GROWTH_INSTANCE_MARKER]) return;
   const original = host.renderDetail.bind(scene);
-  host[GROWTH_INSTALL_MARKER] = true;
+  host[GROWTH_INSTANCE_MARKER] = true;
   host.renderDetail = (): void => {
     original();
     decorateGrowthDetail(scene, host);
   };
 }
 
-/** Presentation-only wrapper; deck persistence, filtering, drag/drop, and save authority stay in DeckScene. */
-export class StorySilhouetteDeckScene extends BaseDeckScene {
-  override create(): void {
+function installDeckClassPreview(): void {
+  const prototype = DeckScene.prototype as DeckPrototype;
+  if (prototype[DECK_CLASS_MARKER]) return;
+  const originalCreate = prototype.create;
+  prototype[DECK_CLASS_MARKER] = true;
+  prototype.create = function createWithStorySilhouettePreview(this: DeckScene): void {
     installDeckPreview(this);
-    super.create();
-  }
+    originalCreate.call(this);
+  };
 }
 
-/** Presentation-only wrapper; growth costs, unlocks, form selection, and save authority stay in GrowthScene. */
-export class StorySilhouetteGrowthScene extends BaseGrowthScene {
-  override create(): void {
+function installGrowthClassPreview(): void {
+  const prototype = GrowthScene.prototype as GrowthPrototype;
+  if (prototype[GROWTH_CLASS_MARKER]) return;
+  const originalCreate = prototype.create;
+  prototype[GROWTH_CLASS_MARKER] = true;
+  prototype.create = function createWithStorySilhouettePreview(this: GrowthScene): void {
     installGrowthPreview(this);
-    super.create();
-  }
+    originalCreate.call(this);
+  };
+}
+
+/**
+ * Presentation-only installation. Canonical DeckScene/GrowthScene imports and all persistence,
+ * growth-cost, filtering, drag/drop, and save-authority behavior remain untouched.
+ */
+export function installStorySilhouetteScenePreviews(): void {
+  installDeckClassPreview();
+  installGrowthClassPreview();
 }
