@@ -52,13 +52,13 @@ Concept intent:
 - Keep the center battle line deliberately sparse for 8–12 overlapping small units.
 - Keep the brightest patch away from the unit contact line.
 - Avoid a continuous vertical wall or other background shape that could imply collision.
-- Verify the broad composition against both required landscape mobile classes.
+- Author the broad composition against both required landscape mobile classes; actual capture evidence is a later review gate.
 
 Recorded concept-level result:
 - PASS: central combat band stays low-density.
 - PASS: three landmark groups communicate the checkpoint/reoccupation story without filling the combat lane.
 - PASS: the brightest sky patch does not sit behind the ground contact line.
-- PASS: 844x390 and 640x360 landscape crop guides are represented.
+- PASS: composition is targeted to the 844x390 and 640x360 landscape classes; no formal viewport capture is claimed at concept stage.
 - PASS: background structures do not form a continuous wall.
 
 This is a composition blockout only. It is not `battlefield-base`, foreground/background production separation, a runtime crop export, or formal bright/dark readability evidence.

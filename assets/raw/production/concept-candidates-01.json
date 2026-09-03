@@ -105,7 +105,7 @@
     {
       "candidateId": "meadow-battlefield-composition-v1",
       "file": "assets/raw/production/review/vertical-slice-01/concepts/meadow-battlefield-concept-v1.png",
-      "sha256": "915517b1f94cc58fbd86bfb39502cecff9e4b17f71bb9c4ab77873afaa2645a8",
+      "sha256": "60fc1a6f8faaff1038ca06f8dc3bacec5f3c2cd2f4e50c09d5d34e5d36407bf8",
       "width": 400,
       "height": 225,
       "productionMethod": "AI",
@@ -128,7 +128,7 @@
         "overturned checkpoint, broken route sign, and low reoccupation stores communicate the border-post story with three large landmark groups",
         "central combat band is intentionally low-density while decorative tufts and stones are pushed to the edges",
         "landmarks avoid a continuous vertical wall silhouette that could be mistaken for collision or attack-range geometry",
-        "both required landscape mobile crop classes are represented by explicit composition guides"
+        "composition is authored against the required 844x390 and 640x360 landscape classes recorded in layoutCheck; formal capture evidence does not yet exist"
       ],
       "failed": [],
       "mayBeRuntimeArt": false,
