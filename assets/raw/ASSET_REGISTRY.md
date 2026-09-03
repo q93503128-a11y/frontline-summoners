@@ -12,6 +12,24 @@
 | `luizmelo-huntress` | `https://luizmelo.itch.io/huntress` | LuizMelo | CC0 1.0 | Idle, Run, Attack1 | 코드상 tint/scale만 | 고정 커밋 `NQM765/IngeSoft1`에서 빌드 시 검증·복사 |
 | `luizmelo-evil-wizard` | `https://luizmelo.itch.io/evil-wizard` | LuizMelo | CC0 1.0 | Idle, Move, Attack | 코드상 tint/scale만 | 고정 커밋 `NQM765/IngeSoft1`에서 빌드 시 검증·복사 |
 
+## 검증된 무료 source candidate
+
+아래 항목은 2026-09-03에 원출처 페이지의 현재 무료 다운로드 여부와 CC0 표기를 확인한 **source candidate**다. 아직 repo에 binary를 인입하거나 runtime asset으로 채택한 것이 아니며, production review 상태에도 영향을 주지 않는다.
+
+| assetId | 원출처 | 제작자 | 라이선스 | 현재 상태 | 우선 용도 |
+| --- | --- | --- | --- | --- | --- |
+| `luizmelo-medieval-warrior-1-candidate` | `https://luizmelo.itch.io/medieval-warrior-pack` | LuizMelo | CC0 1.0 | `SOURCE_CANDIDATE` | 일반 인간형/창병/병사 재가공 |
+| `luizmelo-medieval-warrior-3-candidate` | `https://luizmelo.itch.io/medieval-warrior-pack-3` | LuizMelo | CC0 1.0 | `SOURCE_CANDIDATE` | 작은 인간형/스토리 병사 재가공 |
+| `luizmelo-huntress-2-candidate` | `https://luizmelo.itch.io/huntress-2` | LuizMelo | CC0 1.0 | `SOURCE_CANDIDATE` | 경량 인간형의 달리기/공격 모션 참고 |
+| `luizmelo-monsters-creatures-fantasy-1-candidate` | `https://luizmelo.itch.io/monsters-creatures-fantasy` | LuizMelo | CC0 1.0 | `SOURCE_CANDIDATE` | Skeleton/Goblin/Mushroom/Flying Eye 기반 또는 모션 참고 |
+| `luizmelo-monsters-creatures-fantasy-2-candidate` | `https://luizmelo.itch.io/monsters-creatures-fantasy-2` | LuizMelo | CC0 1.0 | `SOURCE_CANDIDATE` | Mimic/Rat/Slime/Bat 모션 참고 |
+| `luizmelo-medieval-king-1-candidate` | `https://luizmelo.itch.io/medieval-king-pack` | LuizMelo | CC0 1.0 | `SOURCE_CANDIDATE` | 왕실기사/장의사 계열 인간형 재가공 |
+| `luizmelo-medieval-king-2-candidate` | `https://luizmelo.itch.io/medieval-king-pack-2` | LuizMelo | CC0 1.0 | `SOURCE_CANDIDATE` | 중량 인간형 모션/장비 참고 |
+
+현재 유료 결제가 필요한 pack은 라이선스가 CC0이더라도 이 `무료 source candidate` 목록에는 넣지 않는다. 실제 binary 인입 시에는 다시 원출처를 확인하고 master/runtime 파일의 checksum과 provenance를 별도로 기록한다.
+
+43인 source/base/custom 분류 정본은 `docs/content-wiki/systems/FREE_SPRITE_SOURCE_MAPPING_V1.md`다.
+
 ## 현재 배포 방식
 
 - 게임 런타임은 `raw.githubusercontent.com`을 직접 읽지 않는다.
@@ -23,7 +41,7 @@
 
 ## 정식 제작 자산 인입
 
-현재 LuizMelo 자산은 시스템 개발용 placeholder이며 production 승인으로 간주하지 않는다.
+현재 LuizMelo 자산은 시스템 개발용 placeholder이며 production 승인으로 간주하지 않는다. `SOURCE_CANDIDATE`로 추가 기록된 pack도 같은 원칙을 적용한다.
 
 정식 제작 자산은 다음 경로를 사용한다.
 
@@ -70,9 +88,10 @@
 
 ## 운영 원칙
 
-- 기준 화풍은 현재 placeholder 기준으로 LuizMelo 계열 CC0 횡스크롤 픽셀아트를 사용하지만, 정식 production 디자인은 캐릭터 아트 바이블과 별도 사람 검수 기준이 우선한다.
-- 다른 화풍의 무료 에셋을 단순히 수량 채우기 목적으로 섞지 않는다.
+- BASELINE은 LuizMelo 계열 CC0 횡스크롤 픽셀아트를 기준으로 하지만, S/SS·시리즈 간판은 `PREMIUM_CHARACTER_ART_DIRECTION.md`에 따라 의도적으로 다른 프리미엄 화풍/렌더링 밀도를 사용할 수 있다.
+- 다른 화풍의 무료 에셋을 단순히 수량 채우기 목적으로 섞지 않는다. 화풍 차이는 희귀도/시리즈 언어로 설명 가능해야 한다.
 - 원본 에셋의 프레임 시트 크기와 코드의 `frameWidth × frames`가 반드시 일치해야 한다.
 - Hero Knight Idle은 원본 1980×180 / 11프레임이므로 프레임 폭 180으로 고정한다.
 - Hit/Take Hit 스프라이트가 있더라도 일반 피격마다 사용하지 않는다. 필요하면 자연 KB 연출에 맞게 재해석한다.
 - production 자산은 `같은 인간형 + tint` 방식으로 기존 placeholder를 그대로 승격하지 않는다.
+- 무료 원본이 캐릭터 바이블의 실루엣을 훼손한다면 무료 원본을 버리고 전용 제작한다.
