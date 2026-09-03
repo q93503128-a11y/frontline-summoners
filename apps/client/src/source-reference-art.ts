@@ -68,11 +68,35 @@ const WARRIOR_1: SourceReferenceArtFamily = {
   death: { key: 'warrior-1-death', url: `${LOCAL}/warrior-1/death.png`, frameWidth: 184, frameHeight: 137, frames: 9 },
 };
 
+const HUNTRESS_2: SourceReferenceArtFamily = {
+  id: 'huntress-2',
+  displayHeight: 180,
+  attackContactFrame: 3,
+  idle: { key: 'huntress-2-idle', url: `${LOCAL}/huntress-2/idle.png`, frameWidth: 100, frameHeight: 100, frames: 10 },
+  run: { key: 'huntress-2-run', url: `${LOCAL}/huntress-2/run.png`, frameWidth: 100, frameHeight: 100, frames: 8 },
+  attack: { key: 'huntress-2-attack', url: `${LOCAL}/huntress-2/attack.png`, frameWidth: 100, frameHeight: 100, frames: 6 },
+  knockback: { key: 'huntress-2-knockback', url: `${LOCAL}/huntress-2/hit.png`, frameWidth: 100, frameHeight: 100, frames: 3 },
+  death: { key: 'huntress-2-death', url: `${LOCAL}/huntress-2/death.png`, frameWidth: 100, frameHeight: 100, frames: 10 },
+};
+
+const KING_2: SourceReferenceArtFamily = {
+  id: 'king-2',
+  displayHeight: 196,
+  attackContactFrame: 2,
+  idle: { key: 'king-2-idle', url: `${LOCAL}/king-2/idle.png`, frameWidth: 160, frameHeight: 111, frames: 8 },
+  run: { key: 'king-2-run', url: `${LOCAL}/king-2/run.png`, frameWidth: 160, frameHeight: 111, frames: 8 },
+  attack: { key: 'king-2-attack', url: `${LOCAL}/king-2/attack.png`, frameWidth: 160, frameHeight: 111, frames: 4 },
+  knockback: { key: 'king-2-knockback', url: `${LOCAL}/king-2/hit.png`, frameWidth: 160, frameHeight: 111, frames: 4 },
+  death: { key: 'king-2-death', url: `${LOCAL}/king-2/death.png`, frameWidth: 160, frameHeight: 111, frames: 6 },
+};
+
 const overrides = new Map(WITH_AUTHORED_REACTIONS.map((family) => [family.id, family] as const));
 
 export const SOURCE_REFERENCE_ART_FAMILIES: readonly SourceReferenceArtFamily[] = [
   ...ART_FAMILIES.map((family) => overrides.get(family.id) ?? family),
   WARRIOR_1,
+  HUNTRESS_2,
+  KING_2,
 ];
 
 export const SOURCE_REFERENCE_ART_BY_ID: Readonly<Record<string, SourceReferenceArtFamily>> = Object.fromEntries(
