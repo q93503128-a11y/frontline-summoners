@@ -1,6 +1,8 @@
 import Phaser from 'phaser';
 import { getSignatureSilhouetteOverlaySpec } from './common-silhouette-overlays.ts';
 import { createSignatureSilhouetteOverlayGraphics } from './common-silhouette-renderer.ts';
+import { getLateEnemySilhouetteSpec } from './late-enemy-silhouette-overlays.ts';
+import { createLateEnemySilhouetteGraphics } from './late-enemy-silhouette-renderer.ts';
 import {
   createStorySilhouetteOverlayGraphics,
   getStorySilhouettePreviewScale,
@@ -14,7 +16,7 @@ export interface UnitSilhouettePresentation {
 
 /**
  * Resolves presentation-only silhouette scaffolding across story forms, common recruitment units,
- * and chapter 1-2 enemy identities. Production-art authority remains in production-assets.ts.
+ * and campaign/special enemy identities. Production-art authority remains in production-assets.ts.
  */
 export function createUnitSilhouettePresentation(
   scene: Phaser.Scene,
@@ -30,10 +32,18 @@ export function createUnitSilhouettePresentation(
   }
 
   const signature = getSignatureSilhouetteOverlaySpec(unitId, resolvedFormId);
-  if (!signature) return undefined;
+  if (signature) {
+    return {
+      graphics: createSignatureSilhouetteOverlayGraphics(scene, signature),
+      attackPushMax: signature.attackPushMax,
+    };
+  }
+
+  const lateEnemy = getLateEnemySilhouetteSpec(unitId);
+  if (!lateEnemy) return undefined;
   return {
-    graphics: createSignatureSilhouetteOverlayGraphics(scene, signature),
-    attackPushMax: signature.attackPushMax,
+    graphics: createLateEnemySilhouetteGraphics(scene, lateEnemy),
+    attackPushMax: lateEnemy.attackPushMax,
   };
 }
 
