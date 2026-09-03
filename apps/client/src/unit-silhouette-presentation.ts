@@ -3,6 +3,8 @@ import { getSignatureSilhouetteOverlaySpec } from './common-silhouette-overlays.
 import { createSignatureSilhouetteOverlayGraphics } from './common-silhouette-renderer.ts';
 import { getLateEnemySilhouetteSpec } from './late-enemy-silhouette-overlays.ts';
 import { createLateEnemySilhouetteGraphics } from './late-enemy-silhouette-renderer.ts';
+import { getPremiumRecruitSilhouetteSpec } from './premium-recruit-silhouette-overlays.ts';
+import { createPremiumRecruitSilhouetteGraphics } from './premium-recruit-silhouette-renderer.ts';
 import {
   createStorySilhouetteOverlayGraphics,
   getStorySilhouettePreviewScale,
@@ -15,7 +17,7 @@ export interface UnitSilhouettePresentation {
 }
 
 /**
- * Resolves presentation-only silhouette scaffolding across story forms, common recruitment units,
+ * Resolves presentation-only silhouette scaffolding across story forms, recruitment tiers,
  * and campaign/special enemy identities. Production-art authority remains in production-assets.ts.
  */
 export function createUnitSilhouettePresentation(
@@ -36,6 +38,14 @@ export function createUnitSilhouettePresentation(
     return {
       graphics: createSignatureSilhouetteOverlayGraphics(scene, signature),
       attackPushMax: signature.attackPushMax,
+    };
+  }
+
+  const premiumRecruit = getPremiumRecruitSilhouetteSpec(unitId, resolvedFormId);
+  if (premiumRecruit) {
+    return {
+      graphics: createPremiumRecruitSilhouetteGraphics(scene, premiumRecruit),
+      attackPushMax: premiumRecruit.attackPushMax,
     };
   }
 
