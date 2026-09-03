@@ -52,6 +52,12 @@ export const ART_FAMILIES: readonly ArtFamily[] = [
     attack: { key: 'warrior-attack', url: `${LOCAL}/warrior/attack.png`, frameWidth: 150, frameHeight: 150, frames: 4 },
   },
   {
+    id: 'warrior-3', displayHeight: 174, attackContactFrame: 2,
+    idle: { key: 'warrior-3-idle', url: `${LOCAL}/warrior-3/idle.png`, frameWidth: 135, frameHeight: 135, frames: 10 },
+    run: { key: 'warrior-3-run', url: `${LOCAL}/warrior-3/run.png`, frameWidth: 135, frameHeight: 135, frames: 6 },
+    attack: { key: 'warrior-3-attack', url: `${LOCAL}/warrior-3/attack.png`, frameWidth: 135, frameHeight: 135, frames: 4 },
+  },
+  {
     id: 'huntress', displayHeight: 182, attackContactFrame: 3,
     idle: { key: 'huntress-idle', url: `${LOCAL}/huntress/idle.png`, frameWidth: 150, frameHeight: 150, frames: 8 },
     run: { key: 'huntress-run', url: `${LOCAL}/huntress/run.png`, frameWidth: 150, frameHeight: 150, frames: 8 },
@@ -73,7 +79,7 @@ export interface UnitArtVariant {
 }
 
 export const UNIT_ART: Readonly<Record<string, UnitArtVariant>> = {
-  militia: { familyId: 'warrior', tint: 0xffffff, attackFx: 'SLASH' },
+  militia: { familyId: 'warrior-3', tint: 0xffffff, attackFx: 'SLASH' },
   guard: { familyId: 'hero-knight-2', tint: 0xffffff, attackFx: 'BLUNT' },
   hunter: { familyId: 'huntress', tint: 0xffffff, attackFx: 'PIERCE' },
   duelist: { familyId: 'fantasy-warrior', tint: 0xffffff, attackFx: 'SLASH' },
