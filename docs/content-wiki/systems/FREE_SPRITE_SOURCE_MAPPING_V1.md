@@ -83,7 +83,7 @@
 
 # C. SERIES 01 — 성휘의 기사단 6종
 
-**전원 `CUSTOM_PREMIUM`.** 무료 sprite를 최종 얼굴/몸체로 승격하지 않는다. 여섯 캐릭터 모두 명확한 성인 여성로 제작하며 `PREMIUM_CHARACTER_ART_DIRECTION.md`의 상품성 규칙을 적용한다.
+**전원 `CUSTOM_PREMIUM`.** 무료 sprite를 최종 얼굴/몸체로 승격하지 않는다. 여섯 캐릭터 모두 명확한 성인 여성으로 제작하며 `PREMIUM_CHARACTER_ART_DIRECTION.md`의 상품성 규칙을 적용한다.
 
 | characterId | 캐릭터 | 분류 | 모션 참고 후보 | 프리미엄 핵심 |
 | --- | --- | --- | --- | --- |
@@ -139,12 +139,12 @@ LuizMelo 판타지 인간형에 기계 색만 입히는 방식은 금지한다. 
 
 제작 전략 집계:
 
-- 무료 sprite를 실제 출발점으로 쓸 수 있는 `BASE_REWORK`: 12
+- 무료 sprite를 실제 출발점으로 쓸 수 있는 `BASE_REWORK`: 14
 - 동작만 참고하는 `MOTION_REFERENCE`: 3
-- 고유 생물 `CUSTOM_CREATURE`: 10
+- 고유 생물 `CUSTOM_CREATURE`: 13
 - 프리미엄 전용 `CUSTOM_PREMIUM`: 9
-- SF 전용 `CUSTOM_TECH`: 5
-- 나머지 4는 위 표에서 복합 고유 제작/프리미엄 분류에 포함되며, 실제 인입 시 source provenance를 캐릭터 단위로 확정한다.
+- SF 전용 `CUSTOM_TECH`: 4
+- **합계: 43**
 
 > 숫자보다 중요한 규칙: 무료 sprite가 디자인을 결정하지 않는다. 무료 원본이 바이블에 안 맞으면 해당 캐릭터는 즉시 전용 제작으로 올린다.
 
