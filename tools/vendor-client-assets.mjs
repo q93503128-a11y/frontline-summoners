@@ -7,6 +7,7 @@ const outputRoot = resolve(root, 'apps/client/public/assets/characters');
 
 const VLEE = 'https://raw.githubusercontent.com/vlee489/AC31009-Client/71252f38c7bf4426ff84676cad517f66c3e6cb65/assets/Sprites';
 const NQM = 'https://raw.githubusercontent.com/NQM765/IngeSoft1/84594e5d3da7472615660f453bdb457da13cca2f/Proyecto/Scrum%27s_Castle/Assets/Characters';
+const CLICKER_MW3 = 'https://raw.githubusercontent.com/chaurunda/ClickerGodot/c425114bfa522b1e57f0cfc4f486580a3210f36d/assets/Medieval%20Warrior%20Pack%203/Sprites';
 
 const files = [
   ['hero-knight/idle.png', `${VLEE}/HeroKnight/Idle.png`, 1980, 180],
@@ -29,6 +30,13 @@ const files = [
   ['warrior/attack4.png', `${NQM}/Medieval%20Warrior%20Pack%202/Sprites/Attack4.png`, 600, 150],
   ['warrior/hit.png', `${NQM}/Medieval%20Warrior%20Pack%202/Sprites/Take%20Hit.png`, 450, 150],
   ['warrior/death.png', `${NQM}/Medieval%20Warrior%20Pack%202/Sprites/Death.png`, 1350, 150],
+  ['warrior-3/idle.png', `${CLICKER_MW3}/Idle.png`, 1350, 135],
+  ['warrior-3/run.png', `${CLICKER_MW3}/Run.png`, 810, 135],
+  ['warrior-3/attack.png', `${CLICKER_MW3}/Attack1.png`, 540, 135],
+  ['warrior-3/attack2.png', `${CLICKER_MW3}/Attack2.png`, 540, 135],
+  ['warrior-3/attack3.png', `${CLICKER_MW3}/Attack3.png`, 675, 135],
+  ['warrior-3/hit.png', `${CLICKER_MW3}/Get%20Hit.png`, 405, 135],
+  ['warrior-3/death.png', `${CLICKER_MW3}/Death.png`, 1215, 135],
   ['huntress/idle.png', `${NQM}/Huntress/Sprites/Idle.png`, 1200, 150],
   ['huntress/run.png', `${NQM}/Huntress/Sprites/Run.png`, 1200, 150],
   ['huntress/attack.png', `${NQM}/Huntress/Sprites/Attack1.png`, 750, 150],
