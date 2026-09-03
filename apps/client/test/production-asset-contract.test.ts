@@ -1,7 +1,6 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
 import { clearActiveVisualForms, getActiveVisualFormId, syncActiveVisualForms } from '../src/active-visual-forms.ts';
-import { ART_FAMILIES } from '../src/assets.ts';
 import { EVOLUTION_FORMS } from '../src/character-growth.ts';
 import {
   PRODUCTION_AUDIO_REQUIREMENTS,
@@ -11,6 +10,7 @@ import {
   PRODUCTION_UNIT_ART_CANDIDATES,
   PRODUCTION_UNIT_REQUIREMENTS,
   PRODUCTION_VERTICAL_SLICE,
+  getRuntimeArtFamilies,
   getRuntimeSpriteStrips,
   resolveUnitArt,
 } from '../src/production-assets.ts';
@@ -42,7 +42,7 @@ test('production contract covers every current enemy and keeps approval separate
   assert.ok(PRODUCTION_VERTICAL_SLICE.every((entry) => entry.status !== 'APPROVED'));
 });
 
-test('unapproved production targets resolve to verified placeholder art without losing selected form identity', () => {
+test('unapproved production targets resolve to verified source-reference art without losing selected form identity', () => {
   const f3 = EVOLUTION_FORMS.find((form) => form.characterId === 'militia' && form.formOrder === 3);
   assert.ok(f3);
   const resolved = resolveUnitArt('militia', f3.formId);
@@ -51,11 +51,12 @@ test('unapproved production targets resolve to verified placeholder art without 
   assert.match(resolved.family.idle.url, /^\/assets\/characters\//);
 
   const strips = getRuntimeSpriteStrips();
-  assert.equal(strips.length, ART_FAMILIES.length * 3, 'unapproved placeholder families preload exactly idle, run, and attack strips');
+  const families = getRuntimeArtFamilies();
+  assert.ok(strips.length >= families.length * 3, 'source-reference families preload core strips plus authored reaction strips when available');
   assert.ok(strips.every((strip) => strip.url.startsWith('/assets/characters/')));
 });
 
-test('militia evolution forms use three distinct source-reference silhouettes while raider stays separate', () => {
+test('militia evolution forms use distinct complete source-reference motion sets while raider stays separate', () => {
   const f1 = resolveUnitArt('militia', 'militia_f1');
   const f2 = resolveUnitArt('militia', 'militia_f2');
   const f3 = resolveUnitArt('militia', 'militia_f3');
@@ -63,13 +64,29 @@ test('militia evolution forms use three distinct source-reference silhouettes wh
 
   assert.deepEqual(
     [f1.family.id, f2.family.id, f3.family.id],
-    ['warrior-3', 'hero-knight-2', 'fantasy-warrior'],
+    ['warrior-3', 'hero-knight-2', 'warrior-1'],
     'militia F1/F2/F3 source references should read as recruit, regular infantry, and veteran progression',
   );
   assert.equal(new Set([f1.family.id, f2.family.id, f3.family.id]).size, 3);
   assert.equal(raider.family.id, 'warrior');
   assert.ok(!new Set([f1.family.id, f2.family.id, f3.family.id]).has(raider.family.id));
   assert.ok([f1, f2, f3, raider].every((art) => art.source === 'PLACEHOLDER'));
+
+  const expectedReactionFrames = new Map([
+    ['warrior-3', [3, 9]],
+    ['hero-knight-2', [4, 9]],
+    ['warrior-1', [3, 9]],
+    ['warrior', [4, 6]],
+  ] as const);
+  for (const art of [f1, f2, f3, raider]) {
+    assert.ok(art.family.knockback, `${art.family.id} must expose its authored hit strip`);
+    assert.ok(art.family.death, `${art.family.id} must expose its authored death strip`);
+    assert.deepEqual(
+      [art.family.knockback.frames, art.family.death.frames],
+      expectedReactionFrames.get(art.family.id),
+      `${art.family.id} reaction frame metadata must stay aligned to the pinned source sheets`,
+    );
+  }
 });
 
 test('active visual-form mirror drives the shared production resolver when no explicit form is supplied', () => {
