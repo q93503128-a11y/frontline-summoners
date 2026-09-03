@@ -5,10 +5,9 @@ import { resolveUnitArt } from './production-assets.ts';
 import { getSlotById, type PrototypeRosterSlot } from './prototype.ts';
 import type { GuestProgress } from './save.ts';
 import {
-  createStorySilhouetteOverlayGraphics,
-  getStorySilhouettePreviewScale,
-} from './story-silhouette-renderer.ts';
-import { getStorySilhouetteOverlaySpec } from './story-silhouette-overlays.ts';
+  createUnitSilhouettePresentation,
+  getUnitSilhouettePreviewScale,
+} from './unit-silhouette-presentation.ts';
 import { isCompactMobileViewport } from './viewport.ts';
 
 interface DeckSceneRuntime {
@@ -75,8 +74,8 @@ function decorateDeckCards(scene: Phaser.Scene, host: DeckSceneRuntime): void {
   visible.forEach((slot, localIndex) => {
     const meta = host.progress.characterProgressById?.[slot.slotId];
     const art = resolveUnitArt(slot.definition.id, meta?.selectedFormId);
-    const spec = getStorySilhouetteOverlaySpec(slot.definition.id, art.resolvedFormId);
-    if (!spec) return;
+    const presentation = createUnitSilhouettePresentation(scene, slot.definition.id, art.resolvedFormId);
+    if (!presentation) return;
 
     const col = localIndex % columns;
     const row = Math.floor(localIndex / columns);
@@ -84,9 +83,9 @@ function decorateDeckCards(scene: Phaser.Scene, host: DeckSceneRuntime): void {
     const y = startY + row * yGap;
     const portraitX = x - cardWidth / 2 + (compact ? 54 : 48);
     const portraitY = y - 8;
-    const overlay = createStorySilhouetteOverlayGraphics(scene, spec)
+    const overlay = presentation.graphics
       .setPosition(portraitX, portraitY)
-      .setScale(getStorySilhouettePreviewScale(art.family.displayHeight, targetHeight));
+      .setScale(getUnitSilhouettePreviewScale(art.family.displayHeight, targetHeight));
     insertOverlayAfterPortrait(layer, overlay, portraitX, portraitY, art.family.idle.key);
   });
 }
@@ -99,14 +98,14 @@ function decorateGrowthDetail(scene: Phaser.Scene, host: GrowthSceneRuntime): vo
   if (!slot) return;
   const meta = host.progress.characterProgressById?.[characterId];
   const art = resolveUnitArt(slot.definition.id, meta?.selectedFormId);
-  const spec = getStorySilhouetteOverlaySpec(slot.definition.id, art.resolvedFormId);
-  if (!spec) return;
+  const presentation = createUnitSilhouettePresentation(scene, slot.definition.id, art.resolvedFormId);
+  if (!presentation) return;
 
   const portraitX = 610;
   const portraitY = 235;
-  const overlay = createStorySilhouetteOverlayGraphics(scene, spec)
+  const overlay = presentation.graphics
     .setPosition(portraitX, portraitY)
-    .setScale(getStorySilhouettePreviewScale(art.family.displayHeight, 110));
+    .setScale(getUnitSilhouettePreviewScale(art.family.displayHeight, 110));
   insertOverlayAfterPortrait(layer, overlay, portraitX, portraitY);
 }
 

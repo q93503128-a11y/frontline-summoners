@@ -1,8 +1,7 @@
 import Phaser from 'phaser';
 import { UnitState, type BattleUnit } from '@frontline/sim';
 import { familyForUnit } from './scene-ui';
-import { createStorySilhouetteOverlayGraphics } from './story-silhouette-renderer.ts';
-import { getStorySilhouetteOverlaySpec } from './story-silhouette-overlays.ts';
+import { createUnitSilhouettePresentation } from './unit-silhouette-presentation.ts';
 
 interface CoreUnitView {
   readonly sprite: Phaser.GameObjects.Sprite;
@@ -12,22 +11,21 @@ interface UnitViewFactoryHost {
   createUnitView(unit: BattleUnit): CoreUnitView;
 }
 
-const INSTALL_MARKER = Symbol('story-silhouette-overlay-installed');
+const INSTALL_MARKER = Symbol('unit-silhouette-overlay-installed');
 type InstallableScene = Phaser.Scene & UnitViewFactoryHost & { [INSTALL_MARKER]?: boolean };
 
 function attachOverlay(scene: Phaser.Scene, unit: BattleUnit, view: CoreUnitView): void {
   const art = familyForUnit(unit.definition.id);
-  const spec = getStorySilhouetteOverlaySpec(unit.definition.id, art.resolvedFormId);
-  if (!spec) return;
+  const presentation = createUnitSilhouettePresentation(scene, unit.definition.id, art.resolvedFormId);
+  if (!presentation) return;
 
-  const overlay = createStorySilhouetteOverlayGraphics(scene, spec);
+  const overlay = presentation.graphics;
   let cleaned = false;
   const sync = (): void => {
     if (!view.sprite.active || !overlay.active) return;
     const direction = view.sprite.flipX ? -1 : 1;
-    const reachesForward = spec.kind === 'LANCER_SPEAR' || spec.kind === 'HUNTER_POLEARM';
     const attackPush = unit.state === UnitState.Foreswing
-      ? Math.min(reachesForward ? 8 : 4, Math.max(0, unit.stateFrame) * 0.8)
+      ? Math.min(presentation.attackPushMax, Math.max(0, unit.stateFrame) * 0.8)
       : 0;
     const deathAlpha = unit.state === UnitState.Dying
       ? Math.max(0, 1 - unit.stateFrame / Math.max(1, unit.definition.deathFrames))
@@ -54,7 +52,7 @@ function attachOverlay(scene: Phaser.Scene, unit: BattleUnit, view: CoreUnitView
 }
 
 /**
- * Adds presentation-only story-form silhouettes without changing BattleScene's canonical source
+ * Adds presentation-only identity silhouettes without changing BattleScene's canonical source
  * or production-art approval state. Installed per scene instance so subclasses and replay wrappers
  * keep the exact same deterministic combat implementation.
  */
@@ -62,7 +60,7 @@ export function installStorySilhouetteOverlayRuntime(scene: Phaser.Scene): void 
   const host = scene as InstallableScene;
   if (host[INSTALL_MARKER]) return;
   const originalCreateUnitView = host.createUnitView;
-  if (typeof originalCreateUnitView !== 'function') throw new Error('story silhouette runtime requires BattleScene.createUnitView');
+  if (typeof originalCreateUnitView !== 'function') throw new Error('unit silhouette runtime requires BattleScene.createUnitView');
   host[INSTALL_MARKER] = true;
   host.createUnitView = (unit: BattleUnit): CoreUnitView => {
     const view = originalCreateUnitView.call(scene, unit);
