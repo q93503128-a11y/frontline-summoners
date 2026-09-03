@@ -41,9 +41,9 @@
     {
       "candidateId": "militia-raider-silhouette-v2",
       "file": "assets/raw/production/review/vertical-slice-01/concepts/militia-raider-silhouette-candidate-v2.png",
-      "sha256": "9113fb29e05f72b5f9438f41facda0ef29f79f52c4e06ef5030ec80b8a4416a2",
-      "width": 1672,
-      "height": 941,
+      "sha256": "546e6b66ee1e817a0f0fcc0e608df43e67a1cd8e3b5b76bd34e64dc8170780f8",
+      "width": 1200,
+      "height": 650,
       "productionMethod": "AI",
       "generator": "OpenAI GPT-5.6 Sol procedural silhouette rendering with Pillow",
       "createdAt": "2026-09-03",
