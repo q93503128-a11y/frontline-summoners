@@ -15,7 +15,8 @@
     "assets:production:intake:check": "node tools/validate-production-vertical-slice.mjs",
     "assets:production:review:check": "node tools/validate-production-review-package.mjs",
     "assets:production:concept:check": "node tools/validate-production-concept-candidates.mjs",
-    "assets:production:check": "npm run assets:production:intake:check && npm run assets:production:review:check && npm run assets:production:concept:check"
+    "assets:production:rework:check": "node tools/validate-production-rework-plan.mjs",
+    "assets:production:check": "npm run assets:production:intake:check && npm run assets:production:review:check && npm run assets:production:concept:check && npm run assets:production:rework:check"
   },
   "devDependencies": {
     "typescript": "7.0.2"

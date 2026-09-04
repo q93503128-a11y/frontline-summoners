@@ -1,4 +1,6 @@
 import Phaser from 'phaser';
+import { createFirstSliceReworkOverlayGraphics } from './first-slice-rework-renderer.ts';
+import { getFirstSliceReworkOverlaySpec } from './first-slice-rework-overlays.ts';
 import { getSignatureSilhouetteOverlaySpec } from './common-silhouette-overlays.ts';
 import { createSignatureSilhouetteOverlayGraphics } from './common-silhouette-renderer.ts';
 import { getLateEnemySilhouetteSpec } from './late-enemy-silhouette-overlays.ts';
@@ -17,14 +19,22 @@ export interface UnitSilhouettePresentation {
 }
 
 /**
- * Resolves presentation-only silhouette scaffolding across story forms, recruitment tiers,
- * and campaign/special enemy identities. Production-art authority remains in production-assets.ts.
+ * Resolves presentation-only silhouette scaffolding across the first production slice, story forms,
+ * recruitment units, and campaign/special enemies. Production-art authority remains in production-assets.ts.
  */
 export function createUnitSilhouettePresentation(
   scene: Phaser.Scene,
   unitId: string,
   resolvedFormId?: string,
 ): UnitSilhouettePresentation | undefined {
+  const firstSlice = getFirstSliceReworkOverlaySpec(unitId, resolvedFormId);
+  if (firstSlice) {
+    return {
+      graphics: createFirstSliceReworkOverlayGraphics(scene, firstSlice),
+      attackPushMax: firstSlice.attackPushMax,
+    };
+  }
+
   const story = getStorySilhouetteOverlaySpec(unitId, resolvedFormId);
   if (story) {
     return {
@@ -33,19 +43,19 @@ export function createUnitSilhouettePresentation(
     };
   }
 
+  const premium = getPremiumRecruitSilhouetteSpec(unitId, resolvedFormId);
+  if (premium) {
+    return {
+      graphics: createPremiumRecruitSilhouetteGraphics(scene, premium),
+      attackPushMax: premium.attackPushMax,
+    };
+  }
+
   const signature = getSignatureSilhouetteOverlaySpec(unitId, resolvedFormId);
   if (signature) {
     return {
       graphics: createSignatureSilhouetteOverlayGraphics(scene, signature),
       attackPushMax: signature.attackPushMax,
-    };
-  }
-
-  const premiumRecruit = getPremiumRecruitSilhouetteSpec(unitId, resolvedFormId);
-  if (premiumRecruit) {
-    return {
-      graphics: createPremiumRecruitSilhouetteGraphics(scene, premiumRecruit),
-      attackPushMax: premiumRecruit.attackPushMax,
     };
   }
 

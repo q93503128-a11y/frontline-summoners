@@ -1,0 +1,84 @@
+{
+  "id": "frontline-first-slice-rework-01",
+  "status": "WORKBENCH",
+  "notes": [
+    "This manifest defines deterministic rework inputs and silhouette requirements only; it is not runtime production approval.",
+    "All targets remain AWAITING_ART until complete runtime files, evidence, provenance, captures, and human review exist.",
+    "Source-reference sheets are CC0 rework bases and motion references. Unchanged source art or tint-only variants may not be promoted as production art."
+  ],
+  "requiredMotions": ["idle", "move", "attack", "knockback", "death"],
+  "targets": [
+    {
+      "assetId": "unit:militia:militia_f1",
+      "sourceFamily": "warrior-3",
+      "license": "CC0-1.0",
+      "sourceRole": "REWORK_BASE_AND_MOTION_REFERENCE",
+      "runtimeStatus": "AWAITING_ART",
+      "mustReadWithoutColor": ["irregular rectangular travel pack", "short improvised weapon", "upright novice stance"],
+      "mustNotReadAs": ["shield infantry", "long-lance specialist", "clean regular-army kit"],
+      "motionLocks": {
+        "idle": "pack and weapon grip visibly settle independently",
+        "move": "small marching stride with delayed pack inertia",
+        "attack": "short practical thrust or strike; contact first, no decorative overswing",
+        "knockback": "pack pitches forward after feet slide back",
+        "death": "knees fail before body exit; no generic spin-fade"
+      }
+    },
+    {
+      "assetId": "unit:militia:militia_f2",
+      "sourceFamily": "hero-knight-2",
+      "license": "CC0-1.0",
+      "sourceRole": "REWORK_BASE_AND_MOTION_REFERENCE",
+      "runtimeStatus": "AWAITING_ART",
+      "mustReadWithoutColor": ["square orderly pack", "regular spearhead", "uniform shoulder and belt lines"],
+      "mustNotReadAs": ["F1 irregular conscript", "oversized elite knight", "F3 crouched veteran"],
+      "motionLocks": {
+        "idle": "stable guard with reduced idle wobble",
+        "move": "disciplined marching rhythm while pack inertia remains visible",
+        "attack": "straight orthodox thrust with clean recovery",
+        "knockback": "fast stance recovery after displacement",
+        "death": "weapon and torso collapse on separate beats"
+      }
+    },
+    {
+      "assetId": "unit:militia:militia_f3",
+      "sourceFamily": "warrior-1",
+      "license": "CC0-1.0",
+      "sourceRole": "REWORK_BASE_AND_MOTION_REFERENCE",
+      "runtimeStatus": "AWAITING_ART",
+      "mustReadWithoutColor": ["shortest practical weapon", "low forward veteran stance", "worn repaired equipment"],
+      "mustNotReadAs": ["bigger shinier F2 armor", "ceremonial elite", "long-spear specialist"],
+      "motionLocks": {
+        "idle": "low center of gravity with short forward checks",
+        "move": "upper body leans into compact aggressive march",
+        "attack": "one-step fast thrust and immediate recovery",
+        "knockback": "body stays compact and returns low",
+        "death": "weapon is used as support before final release"
+      }
+    },
+    {
+      "assetId": "unit:enemy-raider",
+      "sourceFamily": "warrior",
+      "license": "CC0-1.0",
+      "sourceRole": "REWORK_BASE_AND_MOTION_REFERENCE",
+      "runtimeStatus": "AWAITING_ART",
+      "mustReadWithoutColor": ["one-sided oversized loot sack", "small secondary hand weapon", "forward-leaning uneven gait"],
+      "mustNotReadAs": ["militia backpack", "symmetrical soldier loadout", "large primary sword silhouette"],
+      "motionLocks": {
+        "idle": "one shoulder compensates for loot weight",
+        "move": "loot sack swings out of phase with torso",
+        "attack": "short readable single hit with small weapon",
+        "knockback": "loot mass pitches before torso follows",
+        "death": "loot sack lands before body is dragged down"
+      }
+    }
+  ],
+  "promotionGate": {
+    "minimumRuntimeFilesPerTarget": 5,
+    "requiresCommittedProvenance": true,
+    "requiresCommittedReviewEvidence": true,
+    "requiresHumanReviewForApproved": true,
+    "forbidTintOnlyFinal": true,
+    "forbidUnchangedSourceFinal": true
+  }
+}
