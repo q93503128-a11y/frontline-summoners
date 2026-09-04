@@ -1,0 +1,393 @@
+{
+  "schemaVersion": 2,
+  "batchId": "chapter-04-production-01",
+  "generator": "tools/materialize-chapter-04-production-art.mjs",
+  "generatorVersion": 1,
+  "status": "UNREVIEWED_RUNTIME_FILES",
+  "humanReview": "PENDING",
+  "normalRuntimeAuthoritative": false,
+  "generativeAiUsed": false,
+  "sourcePolicy": "PROJECT_AUTHORED_DETERMINISTIC_ONLY",
+  "targets": {
+    "enemy_ch4_sawbird": {
+      "assetId": "unit:enemy_ch4_sawbird",
+      "sourceFamily": "project-authored-machine-sawbird",
+      "projectAuthoredDeterministic": true,
+      "structuralRework": false,
+      "reviewStatus": "UNREVIEWED_RUNTIME_FILES",
+      "frameWidth": 220,
+      "frameHeight": 180,
+      "displayHeight": 164,
+      "attackContactFrame": 2,
+      "motions": {
+        "idle": {
+          "frames": 6,
+          "bytes": 5016,
+          "sha256": "2357008c093c8b60f93f607d0dcf610ec1135a41c20296a464b45f31d6223565"
+        },
+        "move": {
+          "frames": 8,
+          "bytes": 6267,
+          "sha256": "f9135a8fca104aecfa16c7c7b3a578fc0520197f4cf667a3dbf282ce7cb38246"
+        },
+        "attack": {
+          "frames": 6,
+          "bytes": 4859,
+          "sha256": "401842b5e84b0a4503cb51554c95e76bb7f71850872fc176d2a0e4beef0a4f3e"
+        },
+        "knockback": {
+          "frames": 4,
+          "bytes": 3456,
+          "sha256": "d80ed0956aee11a02b98ac85c4c5c808428878a5c282b978ecfbc6a730b60b39"
+        },
+        "death": {
+          "frames": 6,
+          "bytes": 7372,
+          "sha256": "751e80a9d325a6988bb354fa25edfa9d313b438c75c605409311660c4d9ed8a9"
+        }
+      }
+    },
+    "enemy_ch4_magnet_spider": {
+      "assetId": "unit:enemy_ch4_magnet_spider",
+      "sourceFamily": "project-authored-machine-magnet-spider",
+      "projectAuthoredDeterministic": true,
+      "structuralRework": false,
+      "reviewStatus": "UNREVIEWED_RUNTIME_FILES",
+      "frameWidth": 240,
+      "frameHeight": 190,
+      "displayHeight": 176,
+      "attackContactFrame": 3,
+      "motions": {
+        "idle": {
+          "frames": 6,
+          "bytes": 3874,
+          "sha256": "0c2736cd041b00ddd734047f11ed2c47bac19353ace58ccc2b47c6c45fb65b92"
+        },
+        "move": {
+          "frames": 8,
+          "bytes": 5220,
+          "sha256": "8931407ad2ab9ca881af8b489d41feb96c692b7cd5939386873f35710519b984"
+        },
+        "attack": {
+          "frames": 7,
+          "bytes": 11129,
+          "sha256": "abb13f834005e9bdab96aa312b856654cd3402c81d352b5170075d2ee0194f67"
+        },
+        "knockback": {
+          "frames": 4,
+          "bytes": 2707,
+          "sha256": "eb6532e98742497b680a2b2ec5587b90b0e72129c28c452241d0ccb39694cc1e"
+        },
+        "death": {
+          "frames": 6,
+          "bytes": 6519,
+          "sha256": "9bd93f4d8f425076e846d59be6c86418a6a231fb197d771596eb19baad6dad3a"
+        }
+      }
+    },
+    "enemy_ch4_railworm": {
+      "assetId": "unit:enemy_ch4_railworm",
+      "sourceFamily": "project-authored-machine-rail-artillery",
+      "projectAuthoredDeterministic": true,
+      "structuralRework": false,
+      "reviewStatus": "UNREVIEWED_RUNTIME_FILES",
+      "frameWidth": 360,
+      "frameHeight": 210,
+      "displayHeight": 194,
+      "attackContactFrame": 6,
+      "motions": {
+        "idle": {
+          "frames": 6,
+          "bytes": 5262,
+          "sha256": "3c156a651aa28c52bd56a9c7a584781a35a1c4054cbe35f11b37459045aa35ab"
+        },
+        "move": {
+          "frames": 7,
+          "bytes": 7151,
+          "sha256": "6c280d96c19e209e787ca7f627a7be1c8457693da7ecf222981eeb02d45816e6"
+        },
+        "attack": {
+          "frames": 9,
+          "bytes": 9527,
+          "sha256": "92c15f425f52f8599e1198ccb2a1364b2d9f31610e106cae53646cd6ec20d544"
+        },
+        "knockback": {
+          "frames": 4,
+          "bytes": 3529,
+          "sha256": "bc37e8a7fc08a80030640c57d561fa10db395af30ad3835c485ac8ab008ff223"
+        },
+        "death": {
+          "frames": 7,
+          "bytes": 8215,
+          "sha256": "c7450eaa7b0bb33b813da703d3e53a4483d8d1059e2683001c6429acca0dcd9f"
+        }
+      }
+    },
+    "enemy_ch4_furnace_golem": {
+      "assetId": "unit:enemy_ch4_furnace_golem",
+      "sourceFamily": "project-authored-machine-furnace-golem",
+      "projectAuthoredDeterministic": true,
+      "structuralRework": false,
+      "reviewStatus": "UNREVIEWED_RUNTIME_FILES",
+      "frameWidth": 300,
+      "frameHeight": 280,
+      "displayHeight": 258,
+      "attackContactFrame": 4,
+      "motions": {
+        "idle": {
+          "frames": 7,
+          "bytes": 10268,
+          "sha256": "2f9e19932d321182aa01b51b4c77e2e68597b049e9444efd50e047e349d9f20c"
+        },
+        "move": {
+          "frames": 8,
+          "bytes": 12548,
+          "sha256": "fa6b915f6560d255bb1cdddfc7db77d9d0070943b8851378ad2be0ad3432eeac"
+        },
+        "attack": {
+          "frames": 8,
+          "bytes": 12674,
+          "sha256": "b717b95820418c077c4b8724b30d5262f62bd5ba9a3befb2676799cb1d7c491b"
+        },
+        "knockback": {
+          "frames": 4,
+          "bytes": 6100,
+          "sha256": "fc5f87d4066bf635dcad6e980e92a5fe29c1caf38f345dc287a287eac8d0500d"
+        },
+        "death": {
+          "frames": 8,
+          "bytes": 21786,
+          "sha256": "3f3919cd2d4eeba9dd4323db87c04671731ebd36664e42e8f469259394228b51"
+        }
+      }
+    },
+    "enemy_ch4_folded_soldier": {
+      "assetId": "unit:enemy_ch4_folded_soldier",
+      "sourceFamily": "project-authored-anomaly-folded-form",
+      "projectAuthoredDeterministic": true,
+      "structuralRework": false,
+      "reviewStatus": "UNREVIEWED_RUNTIME_FILES",
+      "frameWidth": 230,
+      "frameHeight": 240,
+      "displayHeight": 220,
+      "attackContactFrame": 2,
+      "motions": {
+        "idle": {
+          "frames": 6,
+          "bytes": 5105,
+          "sha256": "d2e15296004a9a9b08b09ca5203dd6d7c88df9d8ab03f609c1d6b3d808db5c07"
+        },
+        "move": {
+          "frames": 8,
+          "bytes": 7058,
+          "sha256": "969cd900cb2ebcefb6adf6c7f7b77f182be5696ba09c150b555d27d20497a364"
+        },
+        "attack": {
+          "frames": 6,
+          "bytes": 5698,
+          "sha256": "7953d9153ed3bbc837caca790db748a5e4f2004aa670fa6c5c26a611312ac55a"
+        },
+        "knockback": {
+          "frames": 4,
+          "bytes": 3490,
+          "sha256": "ae4508724a010230e84e041a74ced4e785af78a498f0a6a7ddae7ecc0420025f"
+        },
+        "death": {
+          "frames": 7,
+          "bytes": 14381,
+          "sha256": "2904ef59124518917721fc96a36379248d5e6869a335c693b5801c692484e6af"
+        }
+      }
+    },
+    "enemy_ch4_error_mass": {
+      "assetId": "unit:enemy_ch4_error_mass",
+      "sourceFamily": "project-authored-anomaly-error-mass",
+      "projectAuthoredDeterministic": true,
+      "structuralRework": false,
+      "reviewStatus": "UNREVIEWED_RUNTIME_FILES",
+      "frameWidth": 260,
+      "frameHeight": 220,
+      "displayHeight": 204,
+      "attackContactFrame": 2,
+      "motions": {
+        "idle": {
+          "frames": 7,
+          "bytes": 7808,
+          "sha256": "d637d01070ad634f7689877f207e116ab7794bbf0d9273d29a08363148b3e91d"
+        },
+        "move": {
+          "frames": 8,
+          "bytes": 10936,
+          "sha256": "d39464a5fb7bbfd5ad5f12e1d0afa71898d9ac02cb090e6df77538ad41576de2"
+        },
+        "attack": {
+          "frames": 8,
+          "bytes": 13719,
+          "sha256": "c1bb6218f912f24118527bd4f5eaa1967e07641ae58ac65f16789ea1e400f9af"
+        },
+        "knockback": {
+          "frames": 4,
+          "bytes": 5438,
+          "sha256": "904cca8d06955ac28594c8d0b19b7c2d3bd360edc88e0344fc08d8235f9edb36"
+        },
+        "death": {
+          "frames": 7,
+          "bytes": 16230,
+          "sha256": "03756a1d30511cab080558dcee7a7abb7eebe4e3109142936bb10f49d85795a3"
+        }
+      }
+    },
+    "enemy_ch4_void_lens": {
+      "assetId": "unit:enemy_ch4_void_lens",
+      "sourceFamily": "project-authored-anomaly-void-lens",
+      "projectAuthoredDeterministic": true,
+      "structuralRework": false,
+      "reviewStatus": "UNREVIEWED_RUNTIME_FILES",
+      "frameWidth": 280,
+      "frameHeight": 240,
+      "displayHeight": 222,
+      "attackContactFrame": 5,
+      "motions": {
+        "idle": {
+          "frames": 7,
+          "bytes": 9038,
+          "sha256": "29153351e5571a75c03397dd6c099cd6937cd3b0b12206fc9a11aa661b400f97"
+        },
+        "move": {
+          "frames": 8,
+          "bytes": 12648,
+          "sha256": "5b095ffe4465c69d8f695890360f10868d4507973972a8ea802e6300632e99c6"
+        },
+        "attack": {
+          "frames": 8,
+          "bytes": 15269,
+          "sha256": "feb7a1ee18d5401dc4c7608b8f259f1ef0ca80b8ca7a20421fa1a15908aeb62d"
+        },
+        "knockback": {
+          "frames": 4,
+          "bytes": 5117,
+          "sha256": "0251a9bdcc365cecc1f1326cc73cd728033111591ecd058f15f966d4fe3572f4"
+        },
+        "death": {
+          "frames": 7,
+          "bytes": 12843,
+          "sha256": "43b28299c766b7afd74e31fccaa56d4e67f2b82af9f4dee9b87ee90944ef2ed1"
+        }
+      }
+    },
+    "enemy_ch4_fusion_cavalry": {
+      "assetId": "unit:enemy_ch4_fusion_cavalry",
+      "sourceFamily": "project-authored-machine-anomaly-fusion",
+      "projectAuthoredDeterministic": true,
+      "structuralRework": false,
+      "reviewStatus": "UNREVIEWED_RUNTIME_FILES",
+      "frameWidth": 320,
+      "frameHeight": 250,
+      "displayHeight": 230,
+      "attackContactFrame": 2,
+      "motions": {
+        "idle": {
+          "frames": 7,
+          "bytes": 7838,
+          "sha256": "3543365d9a520c7c825e3dc8c362a9efd9949bfb1a92534857a62a25cb3efc4c"
+        },
+        "move": {
+          "frames": 8,
+          "bytes": 10063,
+          "sha256": "76347768de3a94ecbe323e39f0f376d9b3b98998fd2e9a4d008075126c1d1601"
+        },
+        "attack": {
+          "frames": 7,
+          "bytes": 11693,
+          "sha256": "03b3256d82ae4e874e1b1f1b545e78e346091af8611b657f82060cc3a812eb91"
+        },
+        "knockback": {
+          "frames": 4,
+          "bytes": 4949,
+          "sha256": "7dd23d9ae7960f9d93ededf4c62a3bcb14e1695a60a04ee57557d5ab265e3dde"
+        },
+        "death": {
+          "frames": 8,
+          "bytes": 16971,
+          "sha256": "2983de8d0797579ef353834b0e57439f878242beb82388fdafc703b5a63291ae"
+        }
+      }
+    },
+    "boss_ch4_moving_throne": {
+      "assetId": "unit:boss_ch4_moving_throne",
+      "sourceFamily": "project-authored-machine-throne-boss",
+      "projectAuthoredDeterministic": true,
+      "structuralRework": false,
+      "reviewStatus": "UNREVIEWED_RUNTIME_FILES",
+      "frameWidth": 410,
+      "frameHeight": 330,
+      "displayHeight": 300,
+      "attackContactFrame": 5,
+      "motions": {
+        "idle": {
+          "frames": 8,
+          "bytes": 18867,
+          "sha256": "d73288875f68298686ecbecc8de26daedc864a2c3af9f3d2ce4b45478afcbd57"
+        },
+        "move": {
+          "frames": 8,
+          "bytes": 20417,
+          "sha256": "e2fb4a9239116e1d11ac379cbd4d227163f9053c92a1b74a75e44b55d0887794"
+        },
+        "attack": {
+          "frames": 9,
+          "bytes": 22295,
+          "sha256": "fc16e24b8f45849039cfe3c6c97858e6c1345b2fe2fa3427bcb5565acbcb4d7e"
+        },
+        "knockback": {
+          "frames": 4,
+          "bytes": 9481,
+          "sha256": "c52f0546ff9d4a870f29aa5a0d9a0dfd32d4b3914aa44b22a94113d3341091a9"
+        },
+        "death": {
+          "frames": 8,
+          "bytes": 26476,
+          "sha256": "dd1a51f03af055566325aa9f4e8232b778506fe34c1faa0fa01509ad6ee3618a"
+        }
+      }
+    },
+    "boss_ch4_zero_engine": {
+      "assetId": "unit:boss_ch4_zero_engine",
+      "sourceFamily": "project-authored-machine-anomaly-zero-engine",
+      "projectAuthoredDeterministic": true,
+      "structuralRework": false,
+      "reviewStatus": "UNREVIEWED_RUNTIME_FILES",
+      "frameWidth": 420,
+      "frameHeight": 340,
+      "displayHeight": 310,
+      "attackContactFrame": 4,
+      "motions": {
+        "idle": {
+          "frames": 8,
+          "bytes": 19852,
+          "sha256": "87055462b57a6feab0e9ec1e738984662ab432431649caae1f53077f86740b03"
+        },
+        "move": {
+          "frames": 8,
+          "bytes": 23091,
+          "sha256": "c571eba8d1bbbfc49164abc05d1e070baeb123aaed8319476bc02d2c579bdecd"
+        },
+        "attack": {
+          "frames": 11,
+          "bytes": 57314,
+          "sha256": "ebdf875f5d49a7be712bde0f2df4354b9ee98be8c64712766197c602a87b803e"
+        },
+        "knockback": {
+          "frames": 4,
+          "bytes": 9653,
+          "sha256": "9cedd5183d0bb1211f9da300f17286584ec44e3ab4d0cc95525480dcbc034a32"
+        },
+        "death": {
+          "frames": 9,
+          "bytes": 38282,
+          "sha256": "863617deb8f8effc1e2d42d02bae84600d92f2f04d70d0c799518fea2d08d69f"
+        }
+      }
+    }
+  }
+}
