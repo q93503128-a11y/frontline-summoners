@@ -100,7 +100,10 @@ export function getFirstSliceReviewSpriteStrips(): readonly SpriteStrip[] {
 }
 
 function reviewKeyForUnit(unitId: string): FirstSliceReviewFamilyKey | undefined {
-  if (unitId === 'militia') return forcedMilitiaReviewForm ?? getActiveVisualFormId('militia') as MilitiaReviewForm | undefined ?? 'militia_f1';
+  if (unitId === 'militia') {
+    const active = parseMilitiaReviewForm(getActiveVisualFormId('militia') ?? null);
+    return forcedMilitiaReviewForm ?? active ?? 'militia_f1';
+  }
   if (unitId === 'enemy-raider' || unitId === 'enemy-boss') return unitId;
   return undefined;
 }
