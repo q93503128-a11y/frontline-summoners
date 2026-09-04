@@ -1,5 +1,6 @@
 import Phaser from 'phaser';
 import { INTERNAL_HEIGHT, INTERNAL_WIDTH } from '@frontline/shared';
+import { drawFirstSliceReviewContactPreview } from './first-slice-production-review-contact-vfx.ts';
 import { FIRST_SLICE_REVIEW_MEADOW_KEY, isFirstSliceProductionReviewMode } from './first-slice-production-review-runtime.ts';
 
 const FONT = '"Malgun Gothic", "Apple SD Gothic Neo", sans-serif';
@@ -260,15 +261,15 @@ export class FirstSliceProductionCaptureScene extends Phaser.Scene {
     keys.forEach((key, index) => {
       const actor = this.addActor(key, 'attack', xs[index]!, 515, 0, key === 'enemy-boss' ? 0.9 : 0.92);
       actor.sprite.setFrame(Math.min(actor.family.attackContactFrame, actor.strip.frames - 1));
-      const dir = actor.family.enemy ? -1 : 1;
-      const markerX = actor.sprite.x + dir * (key === 'enemy-boss' ? 92 : key === 'militia_f2' ? 84 : 68);
-      const markerY = actor.sprite.y - (key === 'enemy-boss' ? 108 : 86);
-      const ring = this.add.circle(markerX, markerY, 15, 0x000000, 0).setStrokeStyle(3, key === 'enemy-boss' ? 0xf0c967 : 0xff7069, 0.96).setDepth(14);
-      const h = this.add.rectangle(markerX, markerY, 42, 2, key === 'enemy-boss' ? 0xf0c967 : 0xff7069, 0.9).setDepth(14);
-      const v = this.add.rectangle(markerX, markerY, 2, 42, key === 'enemy-boss' ? 0xf0c967 : 0xff7069, 0.9).setDepth(14);
-      this.captureObjects.push(ring, h, v);
+      const dir: 1 | -1 = actor.family.enemy ? -1 : 1;
+      const distance = key === 'militia_f2' ? 46 : key === 'militia_f3' ? 34 : key === 'enemy-boss' ? 42 : 36;
+      const fxX = actor.sprite.x + dir * distance;
+      const fxY = actor.sprite.y - (key === 'enemy-boss' ? 34 : 8);
+      const preview = drawFirstSliceReviewContactPreview(this, key, fxX, fxY, dir);
+      const anchor = this.add.circle(fxX, fxY, 3, key === 'enemy-boss' ? 0xffdf8c : 0xff8178, 0.95).setDepth(17);
+      this.captureObjects.push(...preview, anchor);
     });
-    this.captureObjects.push(this.add.text(640, 118, 'ATTACK CONTACT · 각 runtime strip의 고정 contact frame', {
+    this.captureObjects.push(this.add.text(640, 118, 'ATTACK CONTACT · 실제 review 전용 시그니처 + 고정 contact frame', {
       fontFamily: FONT, fontSize: '22px', color: '#f6e7c0', stroke: '#17202a', strokeThickness: 6,
     }).setOrigin(0.5).setDepth(12));
   }
