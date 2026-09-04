@@ -1,0 +1,22 @@
+{
+  "schemaVersion": 1,
+  "assetId": "battlefield:ruins:main_01_003",
+  "stageAnchor": "main_01_003",
+  "theme": "ruins",
+  "reviewStatus": "UNREVIEWED_RUNTIME_FILES",
+  "authorship": "ORIGINAL_PROJECT_VECTOR_COMPOSITION",
+  "generativeAiUsed": false,
+  "layers": [
+    "/assets/production/battlefields/ruins/battlefield-base.svg",
+    "/assets/production/battlefields/ruins/background-landmarks.svg",
+    "/assets/production/battlefields/ruins/foreground-low-density.svg"
+  ],
+  "compositionRules": [
+    "broken border masonry identity",
+    "collapsed arch landmarks stay at side thirds",
+    "long-spear combat corridor remains clear",
+    "foreground rubble stays below unit torso readability zone"
+  ],
+  "humanReview": { "status": "PENDING", "reviewer": null, "reviewedAt": null },
+  "captures": null
+}
