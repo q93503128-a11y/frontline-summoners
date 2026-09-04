@@ -1,0 +1,73 @@
+{
+  "schemaVersion": 1,
+  "generatorVersion": 1,
+  "reviewStatus": "UNREVIEWED_RUNTIME_FILES",
+  "authorship": "ORIGINAL_DETERMINISTIC_SYNTHESIS",
+  "generativeAiUsed": false,
+  "sampleRate": 22050,
+  "assets": {
+    "music:chapter-01": {
+      "bus": "MUSIC",
+      "runtimeUrl": "/assets/production/audio/music/chapter-01/battle-loop.wav",
+      "durationSeconds": 16,
+      "bytes": 705644,
+      "sha256": "dc2ad01774b64aa7d64ee2fad9ed0b1eaecee8ea9210f75a385ed3b0a88bbb70",
+      "intent": "초반 전선의 긴장감은 유지하되 캐릭터/피격 SFX를 덮지 않는 저중역 중심의 짧은 전투 루프"
+    },
+    "sfx:battle-core:slash-contact": {
+      "bus": "BATTLE_SFX",
+      "runtimeUrl": "/assets/production/audio/sfx/battle-core/slash-contact.wav",
+      "durationSeconds": 0.24,
+      "bytes": 10628,
+      "sha256": "cd2ae89c56176177bb4d56cd87405f7f83b93b9a531b0b940489b0bdf4010868",
+      "intent": "F1/약탈병의 짧은 베기 접촉음"
+    },
+    "sfx:battle-core:pierce-contact": {
+      "bus": "BATTLE_SFX",
+      "runtimeUrl": "/assets/production/audio/sfx/battle-core/pierce-contact.wav",
+      "durationSeconds": 0.22,
+      "bytes": 9746,
+      "sha256": "19e29c625c0c3a817ab1926142be296032a558adaf1db42aaf95f031c77b6229",
+      "intent": "F2/F3 창끝과 짧은 무기의 명확한 찌르기 접촉음"
+    },
+    "sfx:battle-core:impact-light": {
+      "bus": "BATTLE_SFX",
+      "runtimeUrl": "/assets/production/audio/sfx/battle-core/impact-light.wav",
+      "durationSeconds": 0.18,
+      "bytes": 7982,
+      "sha256": "1cd7d463a0a69e2e255f93f55ef10e87f5836b0dae4ecad3dcf8f271d9ab8b23",
+      "intent": "일반 유닛 피격의 짧은 천/가죽+둔탁 접촉음"
+    },
+    "sfx:battle-core:impact-heavy": {
+      "bus": "BATTLE_SFX",
+      "runtimeUrl": "/assets/production/audio/sfx/battle-core/impact-heavy.wav",
+      "durationSeconds": 0.34,
+      "bytes": 15038,
+      "sha256": "1ec6a740ac5d630ed85b821291f3f123f62dc0b42fc473f29ca03c458502fcd2",
+      "intent": "보스/강한 넉백의 저역 중심 중량 피격음"
+    },
+    "sfx:battle-core:boss-warning": {
+      "bus": "BATTLE_SFX",
+      "runtimeUrl": "/assets/production/audio/sfx/battle-core/boss-warning.wav",
+      "durationSeconds": 1.05,
+      "bytes": 46348,
+      "sha256": "f4659649da34a0c0bb6c4cece57103f8be9281b50fa489f2865ceaddcb9e15e7",
+      "intent": "황금가면 사령술사 등장 경고. 낮은 두 번의 종성 타격 뒤 얇은 금속성 잔향"
+    },
+    "sfx:battle-core:boss-void-cast": {
+      "bus": "BATTLE_SFX",
+      "runtimeUrl": "/assets/production/audio/sfx/battle-core/boss-void-cast.wav",
+      "durationSeconds": 0.72,
+      "bytes": 31796,
+      "sha256": "5be4fc4d8a687af0544eaa5c8ec8ff8888d9f6e8857877deed744a7bf3009acd",
+      "intent": "보스 공격 contact 직전의 역상승 후 저역 붕괴감을 주는 마법 타격음"
+    }
+  },
+  "evidence": null,
+  "captures": null,
+  "humanReview": {
+    "status": "PENDING",
+    "reviewer": null,
+    "reviewedAt": null
+  }
+}
