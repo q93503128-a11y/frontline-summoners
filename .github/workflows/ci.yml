@@ -86,7 +86,7 @@ jobs:
       - name: Build
         if: success()
         run: npm run build
-      - name: Persist validated first-slice runtime assets
+      - name: Persist validated production runtime assets
         if: success() && github.event_name == 'push' && github.ref == 'refs/heads/main'
         shell: bash
         run: |
@@ -96,6 +96,7 @@ jobs:
 
           generated_paths=(
             apps/client/public/assets/production/units
+            apps/client/public/assets/production/battlefields
             apps/client/public/assets/production/audio
             apps/client/public/assets/production/review/vertical-slice-01/preflight
             assets/raw/production/review/vertical-slice-01/preflight
@@ -109,11 +110,11 @@ jobs:
           done
 
           if git diff --cached --quiet; then
-            echo "Generated first-slice runtime/preflight assets are already current."
+            echo "Generated production runtime/review assets are already current."
             exit 0
           fi
 
-          git commit -m "chore(art): persist first-slice runtime and preflight assets [skip ci]"
+          git commit -m "chore(art): persist production runtime and review assets [skip ci]"
           git fetch origin main
           remote_head="$(git rev-parse origin/main)"
           if [[ "$remote_head" != "$GITHUB_SHA" ]]; then
