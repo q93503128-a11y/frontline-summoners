@@ -1,0 +1,33 @@
+{
+  "schemaVersion": 1,
+  "batchId": "chapter-03-production-01",
+  "chapterId": "chapter-03",
+  "chapterName": "제3장 · 마도도시 세라페",
+  "stageRange": ["main_03_001", "main_03_020"],
+  "status": "AWAITING_ART",
+  "reviewStatus": "PENDING",
+  "normalRuntimeAuthoritative": false,
+  "generativeAiUsed": false,
+  "sourcePolicy": "PROJECT_AUTHORED_DETERMINISTIC_ONLY",
+  "targets": [
+    {"assetId":"unit:enemy_ch3_glasseye","unitId":"enemy_ch3_glasseye","displayName":"유리눈 마도체","visualAnchor":"몸 없이 큰 유리 안구와 얇은 삼각 다리 3개"},
+    {"assetId":"unit:enemy_ch3_spellbug","unitId":"enemy_ch3_spellbug","displayName":"주문먹는 벌레","visualAnchor":"찢긴 책장과 두루마리를 물고 달리는 작은 턱벌레"},
+    {"assetId":"unit:enemy_ch3_floating_library","unitId":"enemy_ch3_floating_library","displayName":"떠다니는 서고","visualAnchor":"원형으로 떠 있는 책장과 중앙의 빈 의자"},
+    {"assetId":"unit:enemy_ch3_inkdemon","unitId":"enemy_ch3_inkdemon","displayName":"잉크마귀","visualAnchor":"납작한 먹물 웅덩이에서 팔과 뿔만 솟는 낮은 실루엣"},
+    {"assetId":"unit:enemy_ch3_chain_demon","unitId":"enemy_ch3_chain_demon","displayName":"사슬악마","visualAnchor":"팔 대신 긴 사슬 고리를 단 마른 악마"},
+    {"assetId":"unit:enemy_ch3_contract_enforcer","unitId":"enemy_ch3_contract_enforcer","displayName":"계약집행관","visualAnchor":"거대한 계약서 판이 갑옷처럼 몸을 감싼 전열"},
+    {"assetId":"unit:enemy_ch3_arcane_battery","unitId":"enemy_ch3_arcane_battery","displayName":"마도포대","visualAnchor":"네 다리 위 거대한 마법진 포신만 있는 구조물"},
+    {"assetId":"unit:enemy_ch3_torn_mirror","unitId":"enemy_ch3_torn_mirror","displayName":"찢어진 거울수","visualAnchor":"몸 없이 깨진 거울 조각들이 사람 형상을 대충 이루는 변칙체"},
+    {"assetId":"unit:boss_ch3_archmagus","unitId":"boss_ch3_archmagus","displayName":"제7첨탑의 대마도장","visualAnchor":"중앙 마도핵을 둘러싼 7개 첨탑이 순차 점등되는 초장거리 보스"},
+    {"assetId":"unit:boss_ch3_belzar","unitId":"boss_ch3_belzar","displayName":"계약대공 벨자르","visualAnchor":"계약 인장 갑주와 세 갈래 집행 칼날을 쓰는 중근거리 대공"}
+  ],
+  "battlefields": [],
+  "reusedBattlefieldThemes": ["golden", "ruins", "moon", "fortress", "canyon", "burning"],
+  "reviewRoute": "?productionReview=chapter-03",
+  "notes": [
+    "Chapter 03 is materialized as one chapter-sized production batch rather than small stage slices.",
+    "All ten targets are deterministic project-authored silhouettes; no external sprite or generative image is used.",
+    "Existing production battlefield themes are reused; no redundant chapter-specific background copies are authored.",
+    "Files remain non-authoritative until legitimate human review and approval."
+  ]
+}
