@@ -13,9 +13,15 @@ import {
   isFirstSliceProductionReviewMode,
   renderFirstSliceProductionReviewLayer,
 } from './first-slice-production-review-runtime.ts';
+import { renderSecondSliceProductionReviewBattlefields } from './second-slice-production-review-battlefields.ts';
+import {
+  installSecondSliceProductionReviewRuntime,
+  isSecondSliceProductionReviewMode,
+  renderSecondSliceProductionReviewLayer,
+} from './second-slice-production-review-runtime.ts';
 
 /**
- * Presentation-only bridge for camera/VFX accessibility plus the integrated first-slice review presentation.
+ * Presentation-only bridge for camera/VFX accessibility plus production review presentation.
  * Deterministic simulation, progression, and trusted command logging remain in BattleScene unchanged.
  */
 export class AccessibleBattleScene extends BattleScene {
@@ -26,6 +32,8 @@ export class AccessibleBattleScene extends BattleScene {
       installFirstSliceProductionReviewRuntime(this);
       installFirstSliceProductionReviewAudio(this);
       installFirstSliceProductionReviewHud(this);
+    } else if (isSecondSliceProductionReviewMode()) {
+      installSecondSliceProductionReviewRuntime(this);
     } else {
       installStorySilhouetteOverlayRuntime(this);
     }
@@ -33,5 +41,7 @@ export class AccessibleBattleScene extends BattleScene {
     renderFirstSliceProductionReviewLayer(this);
     renderFirstSliceProductionReviewMeadowLayers(this);
     startFirstSliceProductionReviewMusic(this);
+    renderSecondSliceProductionReviewLayer(this);
+    renderSecondSliceProductionReviewBattlefields(this);
   }
 }
