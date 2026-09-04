@@ -1,7 +1,7 @@
 import Phaser from 'phaser';
 import type { BattleUnit } from '@frontline/sim';
 import type { PlayableBattleState } from '@frontline/sim/playable';
-import type { SpriteStrip } from './assets.ts';
+import type { AttackFxStyle, SpriteStrip } from './assets.ts';
 import { getActiveVisualFormId } from './active-visual-forms.ts';
 import { getRuntimeMotionFrame, selectRuntimeMotionStrip } from './production-motion.ts';
 import type { RuntimeArtFamily } from './production-assets.ts';
@@ -9,8 +9,11 @@ import type { RuntimeArtFamily } from './production-assets.ts';
 const ROOT = '/assets/production/units';
 const REVIEW_QUERY_KEY = 'productionReview';
 const REVIEW_QUERY_VALUE = 'first-slice';
+const MILITIA_FORM_QUERY_KEY = 'militiaForm';
 export const FIRST_SLICE_REVIEW_MEADOW_KEY = 'production-review-meadow';
 export const FIRST_SLICE_REVIEW_MEADOW_URL = '/assets/production/battlefields/meadow/battlefield-base.svg';
+
+type MilitiaReviewForm = 'militia_f1' | 'militia_f2' | 'militia_f3';
 
 function strip(key: string, url: string, frameWidth: number, frameHeight: number, frames: number): SpriteStrip {
   return { key, url, frameWidth, frameHeight, frames };
@@ -59,9 +62,28 @@ const REVIEW_FAMILIES: Readonly<Record<string, RuntimeArtFamily>> = {
   },
 };
 
+const REVIEW_ATTACK_FX: Readonly<Record<string, AttackFxStyle>> = {
+  militia_f1: 'SLASH',
+  militia_f2: 'PIERCE',
+  militia_f3: 'PIERCE',
+  'enemy-raider': 'SLASH',
+  'enemy-boss': 'VOID',
+};
+
 function allStrips(family: RuntimeArtFamily): readonly SpriteStrip[] {
   return [family.idle, family.run, family.attack, ...(family.knockback ? [family.knockback] : []), ...(family.death ? [family.death] : [])];
 }
+
+function parseMilitiaReviewForm(value: string | null): MilitiaReviewForm | undefined {
+  if (value === 'f1' || value === 'militia_f1') return 'militia_f1';
+  if (value === 'f2' || value === 'militia_f2') return 'militia_f2';
+  if (value === 'f3' || value === 'militia_f3') return 'militia_f3';
+  return undefined;
+}
+
+let forcedMilitiaReviewForm: MilitiaReviewForm | undefined = typeof window === 'undefined'
+  ? undefined
+  : parseMilitiaReviewForm(new URLSearchParams(window.location.search).get(MILITIA_FORM_QUERY_KEY));
 
 export function isFirstSliceProductionReviewMode(): boolean {
   if (typeof window === 'undefined') return false;
@@ -72,22 +94,25 @@ export function getFirstSliceReviewSpriteStrips(): readonly SpriteStrip[] {
   return Object.values(REVIEW_FAMILIES).flatMap((family) => [...allStrips(family)]);
 }
 
+function reviewKeyForUnit(unitId: string): string | undefined {
+  if (unitId === 'militia') return forcedMilitiaReviewForm ?? getActiveVisualFormId('militia') ?? 'militia_f1';
+  return REVIEW_FAMILIES[unitId] ? unitId : undefined;
+}
+
 function reviewFamilyForUnit(unitId: string): RuntimeArtFamily | undefined {
-  if (unitId === 'militia') {
-    return REVIEW_FAMILIES[getActiveVisualFormId('militia') ?? 'militia_f1'] ?? REVIEW_FAMILIES.militia_f1;
-  }
-  return REVIEW_FAMILIES[unitId];
+  const key = reviewKeyForUnit(unitId);
+  return key ? REVIEW_FAMILIES[key] : undefined;
 }
 
 interface ReviewUnitView {
   readonly sprite: Phaser.GameObjects.Sprite;
-  stateKey: string;
 }
 
 interface ReviewHost {
   state: PlayableBattleState;
   views: Map<number, ReviewUnitView>;
   syncUnits(): void;
+  playAttackFx(unit: BattleUnit, view: ReviewUnitView, style: AttackFxStyle): void;
 }
 
 const INSTALL_MARKER = Symbol('first-slice-production-review-runtime');
@@ -97,11 +122,19 @@ export function installFirstSliceProductionReviewRuntime(scene: Phaser.Scene): v
   if (!isFirstSliceProductionReviewMode()) return;
   const host = scene as InstallableScene;
   if (host[INSTALL_MARKER]) return;
-  const original = host.syncUnits;
-  if (typeof original !== 'function') throw new Error('first-slice review runtime requires BattleScene.syncUnits');
+  const originalSyncUnits = host.syncUnits;
+  const originalPlayAttackFx = host.playAttackFx;
+  if (typeof originalSyncUnits !== 'function') throw new Error('first-slice review runtime requires BattleScene.syncUnits');
+  if (typeof originalPlayAttackFx !== 'function') throw new Error('first-slice review runtime requires BattleScene.playAttackFx');
   host[INSTALL_MARKER] = true;
+
+  host.playAttackFx = (unit: BattleUnit, view: ReviewUnitView, style: AttackFxStyle): void => {
+    const key = reviewKeyForUnit(unit.definition.id);
+    originalPlayAttackFx.call(scene, unit, view, (key && REVIEW_ATTACK_FX[key]) || style);
+  };
+
   host.syncUnits = (): void => {
-    original.call(scene);
+    originalSyncUnits.call(scene);
     const tick = host.state?.battle?.tick ?? 0;
     for (const unit of host.state?.battle?.units ?? []) {
       const family = reviewFamilyForUnit(unit.definition.id);
@@ -110,11 +143,16 @@ export function installFirstSliceProductionReviewRuntime(scene: Phaser.Scene): v
       if (!view?.sprite?.active) continue;
       const motion = selectRuntimeMotionStrip(family, unit.state);
       if (view.sprite.texture.key !== motion.key) view.sprite.setTexture(motion.key, 0);
-      const frame = getRuntimeMotionFrame(family, motion, unit as BattleUnit, tick);
+      const frame = getRuntimeMotionFrame(family, motion, unit, tick);
       if (frame >= 0 && frame < motion.frames) view.sprite.setFrame(frame);
       view.sprite.setScale(family.displayHeight / motion.frameHeight);
+      view.sprite.clearTint();
     }
   };
+}
+
+function formLabel(form: MilitiaReviewForm | undefined): string {
+  return form === 'militia_f2' ? 'F2' : form === 'militia_f3' ? 'F3' : form === 'militia_f1' ? 'F1' : 'AUTO';
 }
 
 export function renderFirstSliceProductionReviewLayer(scene: Phaser.Scene): void {
@@ -123,8 +161,27 @@ export function renderFirstSliceProductionReviewLayer(scene: Phaser.Scene): void
   if (stage?.theme === 'meadow' && scene.textures.exists(FIRST_SLICE_REVIEW_MEADOW_KEY)) {
     scene.add.image(640, 360, FIRST_SLICE_REVIEW_MEADOW_KEY).setDisplaySize(1280, 720).setDepth(0);
   }
-  scene.add.rectangle(640, 24, 560, 36, 0x17120d, 0.88).setStrokeStyle(2, 0xf0c967, 0.9).setDepth(190);
-  scene.add.text(640, 24, 'PRODUCTION ART REVIEW · UNAPPROVED', {
+
+  scene.add.rectangle(640, 24, 760, 38, 0x17120d, 0.9).setStrokeStyle(2, 0xf0c967, 0.9).setDepth(190);
+  scene.add.text(430, 24, 'PRODUCTION ART REVIEW · UNAPPROVED', {
     fontFamily: '"Malgun Gothic", sans-serif', fontSize: '17px', color: '#ffe39a',
   }).setOrigin(0.5).setDepth(191);
+
+  const current = scene.add.text(700, 24, `MILITIA ${formLabel(forcedMilitiaReviewForm)}`, {
+    fontFamily: '"Malgun Gothic", sans-serif', fontSize: '14px', color: '#c9d8ea',
+  }).setOrigin(0.5).setDepth(191);
+
+  const choices: readonly [string, MilitiaReviewForm | undefined][] = [
+    ['AUTO', undefined], ['F1', 'militia_f1'], ['F2', 'militia_f2'], ['F3', 'militia_f3'],
+  ];
+  choices.forEach(([label, value], index) => {
+    const button = scene.add.text(810 + index * 58, 24, label, {
+      fontFamily: '"Malgun Gothic", sans-serif', fontSize: '14px', color: '#fff1b6',
+      backgroundColor: '#3b3120', padding: { x: 7, y: 3 },
+    }).setOrigin(0.5).setDepth(192).setInteractive({ useHandCursor: true });
+    button.on('pointerdown', () => {
+      forcedMilitiaReviewForm = value;
+      current.setText(`MILITIA ${formLabel(value)}`);
+    });
+  });
 }
