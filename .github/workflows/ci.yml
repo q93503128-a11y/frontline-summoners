@@ -101,5 +101,18 @@ jobs:
             echo "Generated first-slice runtime/preflight assets are already current."
           else
             git commit -m "chore(art): persist first-slice runtime and preflight assets [skip ci]"
-            git push
+            for attempt in 1 2 3; do
+              git fetch origin main
+              if ! git rebase origin/main; then
+                git rebase --abort || true
+                echo "Generated asset persistence rebase conflicted; refusing automatic overwrite."
+                exit 1
+              fi
+              if git push origin HEAD:main; then
+                exit 0
+              fi
+              echo "main advanced during generated asset persistence; retrying ($attempt/3)."
+            done
+            echo "Generated asset persistence could not fast-forward main after 3 attempts."
+            exit 1
           fi
