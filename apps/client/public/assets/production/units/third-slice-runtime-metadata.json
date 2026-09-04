@@ -1,0 +1,482 @@
+{
+  "schemaVersion": 1,
+  "generator": "materialize-third-slice-production-art.mjs",
+  "generatorVersion": 1,
+  "status": "UNREVIEWED_RUNTIME_FILES",
+  "humanReview": "PENDING",
+  "generativeAiUsed": false,
+  "contract": "assets/raw/production/third-slice-mid-wave-03.json",
+  "targets": {
+    "duelist/duelist_f1": {
+      "assetId": "unit:duelist:duelist_f1",
+      "sourceFamily": "martial-hero-2",
+      "displayHeight": 190,
+      "attackContactFrame": 2,
+      "frameWidth": 230,
+      "frameHeight": 210,
+      "structuralRework": true,
+      "reviewStatus": "UNREVIEWED_RUNTIME_FILES",
+      "motions": {
+        "idle": {
+          "file": "apps/client/public/assets/production/units/duelist/duelist_f1/idle.png",
+          "frames": 4,
+          "bytes": 2682,
+          "sha256": "53af6fc9a0595ba4db7647d20614c408988a0c86e3b3658e88911412ee91d1f5",
+          "sourceUrl": "https://raw.githubusercontent.com/NQM765/IngeSoft1/84594e5d3da7472615660f453bdb457da13cca2f/Proyecto/Scrum%27s_Castle/Assets/Characters/Martial%20Hero%202/Sprites/Idle.png"
+        },
+        "move": {
+          "file": "apps/client/public/assets/production/units/duelist/duelist_f1/move.png",
+          "frames": 8,
+          "bytes": 4714,
+          "sha256": "dea028c557c118a2f0f512bd13ef219e602bfa732ad65af60892a85b6bbd23c3",
+          "sourceUrl": "https://raw.githubusercontent.com/NQM765/IngeSoft1/84594e5d3da7472615660f453bdb457da13cca2f/Proyecto/Scrum%27s_Castle/Assets/Characters/Martial%20Hero%202/Sprites/Run.png"
+        },
+        "attack": {
+          "file": "apps/client/public/assets/production/units/duelist/duelist_f1/attack.png",
+          "frames": 4,
+          "bytes": 3369,
+          "sha256": "f5b9b144d49d5aee7dafebc658b483de6007c3d1be2eb44e4f9a0d8607c3140c",
+          "sourceUrl": "https://raw.githubusercontent.com/NQM765/IngeSoft1/84594e5d3da7472615660f453bdb457da13cca2f/Proyecto/Scrum%27s_Castle/Assets/Characters/Martial%20Hero%202/Sprites/Attack1.png"
+        },
+        "knockback": {
+          "file": "apps/client/public/assets/production/units/duelist/duelist_f1/knockback.png",
+          "frames": 3,
+          "bytes": 2482,
+          "sha256": "58a46d9148789b0eb7805cd1a5c33b02036f036e2c745b8160e11ae0012ed349",
+          "sourceUrl": "https://raw.githubusercontent.com/NQM765/IngeSoft1/84594e5d3da7472615660f453bdb457da13cca2f/Proyecto/Scrum%27s_Castle/Assets/Characters/Martial%20Hero%202/Sprites/Take%20hit.png"
+        },
+        "death": {
+          "file": "apps/client/public/assets/production/units/duelist/duelist_f1/death.png",
+          "frames": 7,
+          "bytes": 5332,
+          "sha256": "1666ecaf82495375e9fedcc48b8b0f4a981d9e7961e24e165d3e85880d8da305",
+          "sourceUrl": "https://raw.githubusercontent.com/NQM765/IngeSoft1/84594e5d3da7472615660f453bdb457da13cca2f/Proyecto/Scrum%27s_Castle/Assets/Characters/Martial%20Hero%202/Sprites/Death.png"
+        }
+      }
+    },
+    "duelist/duelist_f2": {
+      "assetId": "unit:duelist:duelist_f2",
+      "sourceFamily": "martial-hero-2",
+      "displayHeight": 194,
+      "attackContactFrame": 2,
+      "frameWidth": 230,
+      "frameHeight": 210,
+      "structuralRework": true,
+      "reviewStatus": "UNREVIEWED_RUNTIME_FILES",
+      "motions": {
+        "idle": {
+          "file": "apps/client/public/assets/production/units/duelist/duelist_f2/idle.png",
+          "frames": 4,
+          "bytes": 3073,
+          "sha256": "76381ec23c3372145fc1b0bdd3422fdea31f4d390aea48f4249d01a9d7925298",
+          "sourceUrl": "https://raw.githubusercontent.com/NQM765/IngeSoft1/84594e5d3da7472615660f453bdb457da13cca2f/Proyecto/Scrum%27s_Castle/Assets/Characters/Martial%20Hero%202/Sprites/Idle.png"
+        },
+        "move": {
+          "file": "apps/client/public/assets/production/units/duelist/duelist_f2/move.png",
+          "frames": 8,
+          "bytes": 5626,
+          "sha256": "e721a4b7d468561ad245239c94f701bc28975a7e0e67cf3099aaa156c887ab79",
+          "sourceUrl": "https://raw.githubusercontent.com/NQM765/IngeSoft1/84594e5d3da7472615660f453bdb457da13cca2f/Proyecto/Scrum%27s_Castle/Assets/Characters/Martial%20Hero%202/Sprites/Run.png"
+        },
+        "attack": {
+          "file": "apps/client/public/assets/production/units/duelist/duelist_f2/attack.png",
+          "frames": 4,
+          "bytes": 3823,
+          "sha256": "7d6b4ac7f160658ea9013661361535c2e1717a41d53f3b9b83d0b607676d475b",
+          "sourceUrl": "https://raw.githubusercontent.com/NQM765/IngeSoft1/84594e5d3da7472615660f453bdb457da13cca2f/Proyecto/Scrum%27s_Castle/Assets/Characters/Martial%20Hero%202/Sprites/Attack1.png"
+        },
+        "knockback": {
+          "file": "apps/client/public/assets/production/units/duelist/duelist_f2/knockback.png",
+          "frames": 3,
+          "bytes": 2910,
+          "sha256": "403a456e39754f1df3580e381cd26acca54798e64f67ecf8bce6242a6d796e43",
+          "sourceUrl": "https://raw.githubusercontent.com/NQM765/IngeSoft1/84594e5d3da7472615660f453bdb457da13cca2f/Proyecto/Scrum%27s_Castle/Assets/Characters/Martial%20Hero%202/Sprites/Take%20hit.png"
+        },
+        "death": {
+          "file": "apps/client/public/assets/production/units/duelist/duelist_f2/death.png",
+          "frames": 7,
+          "bytes": 6071,
+          "sha256": "48ea4679febc0623e8c3edde3ed37e306ff99524b7370899b253afc5de94bc39",
+          "sourceUrl": "https://raw.githubusercontent.com/NQM765/IngeSoft1/84594e5d3da7472615660f453bdb457da13cca2f/Proyecto/Scrum%27s_Castle/Assets/Characters/Martial%20Hero%202/Sprites/Death.png"
+        }
+      }
+    },
+    "duelist/duelist_f3": {
+      "assetId": "unit:duelist:duelist_f3",
+      "sourceFamily": "martial-hero-2",
+      "displayHeight": 198,
+      "attackContactFrame": 2,
+      "frameWidth": 230,
+      "frameHeight": 210,
+      "structuralRework": true,
+      "reviewStatus": "UNREVIEWED_RUNTIME_FILES",
+      "motions": {
+        "idle": {
+          "file": "apps/client/public/assets/production/units/duelist/duelist_f3/idle.png",
+          "frames": 4,
+          "bytes": 2995,
+          "sha256": "e6fb98e6fb1f658d9ae2adbaf083ed453f913b1c2ed933cccb705e59bee9635b",
+          "sourceUrl": "https://raw.githubusercontent.com/NQM765/IngeSoft1/84594e5d3da7472615660f453bdb457da13cca2f/Proyecto/Scrum%27s_Castle/Assets/Characters/Martial%20Hero%202/Sprites/Idle.png"
+        },
+        "move": {
+          "file": "apps/client/public/assets/production/units/duelist/duelist_f3/move.png",
+          "frames": 8,
+          "bytes": 5202,
+          "sha256": "2833aa66488828b770aaca26bea163b557c9bb82440b41940fb319026a580ee4",
+          "sourceUrl": "https://raw.githubusercontent.com/NQM765/IngeSoft1/84594e5d3da7472615660f453bdb457da13cca2f/Proyecto/Scrum%27s_Castle/Assets/Characters/Martial%20Hero%202/Sprites/Run.png"
+        },
+        "attack": {
+          "file": "apps/client/public/assets/production/units/duelist/duelist_f3/attack.png",
+          "frames": 4,
+          "bytes": 3738,
+          "sha256": "773fd33160a90b712d96665e0cbbdd705e4ebf00136f0778be2c632870e30d09",
+          "sourceUrl": "https://raw.githubusercontent.com/NQM765/IngeSoft1/84594e5d3da7472615660f453bdb457da13cca2f/Proyecto/Scrum%27s_Castle/Assets/Characters/Martial%20Hero%202/Sprites/Attack1.png"
+        },
+        "knockback": {
+          "file": "apps/client/public/assets/production/units/duelist/duelist_f3/knockback.png",
+          "frames": 3,
+          "bytes": 2723,
+          "sha256": "a99f59665fa62fb69de3c3a3511c5ac3b66a969209c26ff2558db31ff9875cb3",
+          "sourceUrl": "https://raw.githubusercontent.com/NQM765/IngeSoft1/84594e5d3da7472615660f453bdb457da13cca2f/Proyecto/Scrum%27s_Castle/Assets/Characters/Martial%20Hero%202/Sprites/Take%20hit.png"
+        },
+        "death": {
+          "file": "apps/client/public/assets/production/units/duelist/duelist_f3/death.png",
+          "frames": 7,
+          "bytes": 5754,
+          "sha256": "ba876d53b7d2074528e1d512065522f74a19999bf4470782bd95a0564b1f069a",
+          "sourceUrl": "https://raw.githubusercontent.com/NQM765/IngeSoft1/84594e5d3da7472615660f453bdb457da13cca2f/Proyecto/Scrum%27s_Castle/Assets/Characters/Martial%20Hero%202/Sprites/Death.png"
+        }
+      }
+    },
+    "lancer/lancer_f1": {
+      "assetId": "unit:lancer:lancer_f1",
+      "sourceFamily": "warrior",
+      "displayHeight": 190,
+      "attackContactFrame": 2,
+      "frameWidth": 240,
+      "frameHeight": 170,
+      "structuralRework": true,
+      "reviewStatus": "UNREVIEWED_RUNTIME_FILES",
+      "motions": {
+        "idle": {
+          "file": "apps/client/public/assets/production/units/lancer/lancer_f1/idle.png",
+          "frames": 8,
+          "bytes": 3705,
+          "sha256": "d5d2b35c131886714fe25a983aab00c5077da7db97146a310409bee4839fccfb",
+          "sourceUrl": "https://raw.githubusercontent.com/NQM765/IngeSoft1/84594e5d3da7472615660f453bdb457da13cca2f/Proyecto/Scrum%27s_Castle/Assets/Characters/Medieval%20Warrior%20Pack%202/Sprites/Idle.png"
+        },
+        "move": {
+          "file": "apps/client/public/assets/production/units/lancer/lancer_f1/move.png",
+          "frames": 8,
+          "bytes": 4510,
+          "sha256": "540f78c7066edb089ed7a5dfd7292f859d43b8f982263c92674da04eca1ea8df",
+          "sourceUrl": "https://raw.githubusercontent.com/NQM765/IngeSoft1/84594e5d3da7472615660f453bdb457da13cca2f/Proyecto/Scrum%27s_Castle/Assets/Characters/Medieval%20Warrior%20Pack%202/Sprites/Run.png"
+        },
+        "attack": {
+          "file": "apps/client/public/assets/production/units/lancer/lancer_f1/attack.png",
+          "frames": 4,
+          "bytes": 2991,
+          "sha256": "017cb2ff9a936a4337ef534e67377978d61c2e1275cd61303c3148522e61f501",
+          "sourceUrl": "https://raw.githubusercontent.com/NQM765/IngeSoft1/84594e5d3da7472615660f453bdb457da13cca2f/Proyecto/Scrum%27s_Castle/Assets/Characters/Medieval%20Warrior%20Pack%202/Sprites/Attack1.png"
+        },
+        "knockback": {
+          "file": "apps/client/public/assets/production/units/lancer/lancer_f1/knockback.png",
+          "frames": 4,
+          "bytes": 2611,
+          "sha256": "cc1f6705848cf4de74b06518e52abc757bbe1f824c3444f84c2888fa24ed7ebc",
+          "sourceUrl": "https://raw.githubusercontent.com/NQM765/IngeSoft1/84594e5d3da7472615660f453bdb457da13cca2f/Proyecto/Scrum%27s_Castle/Assets/Characters/Medieval%20Warrior%20Pack%202/Sprites/Take%20Hit.png"
+        },
+        "death": {
+          "file": "apps/client/public/assets/production/units/lancer/lancer_f1/death.png",
+          "frames": 6,
+          "bytes": 4214,
+          "sha256": "5c5ee3ffdb3a4c72e6e6381f0f2dbec8406eefd875b6c082e89246ab92531cdc",
+          "sourceUrl": "https://raw.githubusercontent.com/NQM765/IngeSoft1/84594e5d3da7472615660f453bdb457da13cca2f/Proyecto/Scrum%27s_Castle/Assets/Characters/Medieval%20Warrior%20Pack%202/Sprites/Death.png"
+        }
+      }
+    },
+    "lancer/lancer_f2": {
+      "assetId": "unit:lancer:lancer_f2",
+      "sourceFamily": "warrior",
+      "displayHeight": 198,
+      "attackContactFrame": 2,
+      "frameWidth": 250,
+      "frameHeight": 170,
+      "structuralRework": true,
+      "reviewStatus": "UNREVIEWED_RUNTIME_FILES",
+      "motions": {
+        "idle": {
+          "file": "apps/client/public/assets/production/units/lancer/lancer_f2/idle.png",
+          "frames": 8,
+          "bytes": 3889,
+          "sha256": "127348c2f0e4b387e9bbf3306f902a1d7ddd02e0fbb72c30f2f651e4b4fa2b3b",
+          "sourceUrl": "https://raw.githubusercontent.com/NQM765/IngeSoft1/84594e5d3da7472615660f453bdb457da13cca2f/Proyecto/Scrum%27s_Castle/Assets/Characters/Medieval%20Warrior%20Pack%202/Sprites/Idle.png"
+        },
+        "move": {
+          "file": "apps/client/public/assets/production/units/lancer/lancer_f2/move.png",
+          "frames": 8,
+          "bytes": 4566,
+          "sha256": "871c4dd9114b316bd86a06809b6f81c7aa1255bca71fe8f7d8ba107b0e2b4e59",
+          "sourceUrl": "https://raw.githubusercontent.com/NQM765/IngeSoft1/84594e5d3da7472615660f453bdb457da13cca2f/Proyecto/Scrum%27s_Castle/Assets/Characters/Medieval%20Warrior%20Pack%202/Sprites/Run.png"
+        },
+        "attack": {
+          "file": "apps/client/public/assets/production/units/lancer/lancer_f2/attack.png",
+          "frames": 4,
+          "bytes": 3044,
+          "sha256": "dc8c2040f2ed70d5c9eac855a517e437b4482d5a5b009d228fde548edf50d31a",
+          "sourceUrl": "https://raw.githubusercontent.com/NQM765/IngeSoft1/84594e5d3da7472615660f453bdb457da13cca2f/Proyecto/Scrum%27s_Castle/Assets/Characters/Medieval%20Warrior%20Pack%202/Sprites/Attack1.png"
+        },
+        "knockback": {
+          "file": "apps/client/public/assets/production/units/lancer/lancer_f2/knockback.png",
+          "frames": 4,
+          "bytes": 2725,
+          "sha256": "a9ee2be27182ab9467f5297e8d7ab5f69dcb7d70cbe55f138ca07305366da51d",
+          "sourceUrl": "https://raw.githubusercontent.com/NQM765/IngeSoft1/84594e5d3da7472615660f453bdb457da13cca2f/Proyecto/Scrum%27s_Castle/Assets/Characters/Medieval%20Warrior%20Pack%202/Sprites/Take%20Hit.png"
+        },
+        "death": {
+          "file": "apps/client/public/assets/production/units/lancer/lancer_f2/death.png",
+          "frames": 6,
+          "bytes": 4275,
+          "sha256": "29d0190d1cfadae90d4085af5bfd201fc18b050eba214cb8ff4fc25dc98fe4c6",
+          "sourceUrl": "https://raw.githubusercontent.com/NQM765/IngeSoft1/84594e5d3da7472615660f453bdb457da13cca2f/Proyecto/Scrum%27s_Castle/Assets/Characters/Medieval%20Warrior%20Pack%202/Sprites/Death.png"
+        }
+      }
+    },
+    "lancer/lancer_f3": {
+      "assetId": "unit:lancer:lancer_f3",
+      "sourceFamily": "warrior",
+      "displayHeight": 194,
+      "attackContactFrame": 2,
+      "frameWidth": 240,
+      "frameHeight": 170,
+      "structuralRework": true,
+      "reviewStatus": "UNREVIEWED_RUNTIME_FILES",
+      "motions": {
+        "idle": {
+          "file": "apps/client/public/assets/production/units/lancer/lancer_f3/idle.png",
+          "frames": 8,
+          "bytes": 3810,
+          "sha256": "fb7bba3b5851608839c43fa38c41c5aa2beae452b1ac52b549146f25fc5efc46",
+          "sourceUrl": "https://raw.githubusercontent.com/NQM765/IngeSoft1/84594e5d3da7472615660f453bdb457da13cca2f/Proyecto/Scrum%27s_Castle/Assets/Characters/Medieval%20Warrior%20Pack%202/Sprites/Idle.png"
+        },
+        "move": {
+          "file": "apps/client/public/assets/production/units/lancer/lancer_f3/move.png",
+          "frames": 8,
+          "bytes": 4642,
+          "sha256": "c5728f37e25278bb1ad63773a0d786f6102a807fef654774f5774ac8b5d2462f",
+          "sourceUrl": "https://raw.githubusercontent.com/NQM765/IngeSoft1/84594e5d3da7472615660f453bdb457da13cca2f/Proyecto/Scrum%27s_Castle/Assets/Characters/Medieval%20Warrior%20Pack%202/Sprites/Run.png"
+        },
+        "attack": {
+          "file": "apps/client/public/assets/production/units/lancer/lancer_f3/attack.png",
+          "frames": 4,
+          "bytes": 3399,
+          "sha256": "46f26bcda8c6e06900141a7d25bb63007aee87f646af451fc04e244f61324d5f",
+          "sourceUrl": "https://raw.githubusercontent.com/NQM765/IngeSoft1/84594e5d3da7472615660f453bdb457da13cca2f/Proyecto/Scrum%27s_Castle/Assets/Characters/Medieval%20Warrior%20Pack%202/Sprites/Attack1.png"
+        },
+        "knockback": {
+          "file": "apps/client/public/assets/production/units/lancer/lancer_f3/knockback.png",
+          "frames": 4,
+          "bytes": 2680,
+          "sha256": "3c7022bed4e3e9a3d2c2b05c1a3f9b9bed175b32fecebead3250f4b624ce5a53",
+          "sourceUrl": "https://raw.githubusercontent.com/NQM765/IngeSoft1/84594e5d3da7472615660f453bdb457da13cca2f/Proyecto/Scrum%27s_Castle/Assets/Characters/Medieval%20Warrior%20Pack%202/Sprites/Take%20Hit.png"
+        },
+        "death": {
+          "file": "apps/client/public/assets/production/units/lancer/lancer_f3/death.png",
+          "frames": 6,
+          "bytes": 4304,
+          "sha256": "60b825346f47d757b41b5acd7419b5181aa46f0df0ebb0da37f5b93ec3323220",
+          "sourceUrl": "https://raw.githubusercontent.com/NQM765/IngeSoft1/84594e5d3da7472615660f453bdb457da13cca2f/Proyecto/Scrum%27s_Castle/Assets/Characters/Medieval%20Warrior%20Pack%202/Sprites/Death.png"
+        }
+      }
+    },
+    "battlemage/battlemage_f1": {
+      "assetId": "unit:battlemage:battlemage_f1",
+      "sourceFamily": "wizard",
+      "displayHeight": 184,
+      "attackContactFrame": 4,
+      "frameWidth": 280,
+      "frameHeight": 205,
+      "structuralRework": true,
+      "reviewStatus": "UNREVIEWED_RUNTIME_FILES",
+      "motions": {
+        "idle": {
+          "file": "apps/client/public/assets/production/units/battlemage/battlemage_f1/idle.png",
+          "frames": 6,
+          "bytes": 5966,
+          "sha256": "8f04df25b8f1af0cafd255bd2632e2999540693cd933bcce3716616059090422",
+          "sourceUrl": "https://raw.githubusercontent.com/vlee489/AC31009-Client/71252f38c7bf4426ff84676cad517f66c3e6cb65/assets/Sprites/WizardPack/Idle.png"
+        },
+        "move": {
+          "file": "apps/client/public/assets/production/units/battlemage/battlemage_f1/move.png",
+          "frames": 8,
+          "bytes": 9898,
+          "sha256": "0eea4b8e14bc9fe57bebb9b83fccab9df9f3f8a51c53ac08a8fe0f1553f37960",
+          "sourceUrl": "https://raw.githubusercontent.com/vlee489/AC31009-Client/71252f38c7bf4426ff84676cad517f66c3e6cb65/assets/Sprites/WizardPack/Run.png"
+        },
+        "attack": {
+          "file": "apps/client/public/assets/production/units/battlemage/battlemage_f1/attack.png",
+          "frames": 8,
+          "bytes": 12620,
+          "sha256": "fbef3a774a944561091bde724332532ba8c0cffbd4fe68f7cc08dce956195198",
+          "sourceUrl": "https://raw.githubusercontent.com/vlee489/AC31009-Client/71252f38c7bf4426ff84676cad517f66c3e6cb65/assets/Sprites/WizardPack/Attack1.png"
+        },
+        "knockback": {
+          "file": "apps/client/public/assets/production/units/battlemage/battlemage_f1/knockback.png",
+          "frames": 4,
+          "bytes": 6101,
+          "sha256": "ff61304075923361359f9ecfe42b136b5858fe1489c9d34907dc65c278a62f8d",
+          "sourceUrl": "https://raw.githubusercontent.com/vlee489/AC31009-Client/71252f38c7bf4426ff84676cad517f66c3e6cb65/assets/Sprites/WizardPack/Hit.png"
+        },
+        "death": {
+          "file": "apps/client/public/assets/production/units/battlemage/battlemage_f1/death.png",
+          "frames": 7,
+          "bytes": 9969,
+          "sha256": "477e8da81f7ed7542dc1730a2ebd69e4d2a2334f903079d400a57188d236c21c",
+          "sourceUrl": "https://raw.githubusercontent.com/vlee489/AC31009-Client/71252f38c7bf4426ff84676cad517f66c3e6cb65/assets/Sprites/WizardPack/Death.png"
+        }
+      }
+    },
+    "battlemage/battlemage_f2": {
+      "assetId": "unit:battlemage:battlemage_f2",
+      "sourceFamily": "wizard",
+      "displayHeight": 190,
+      "attackContactFrame": 4,
+      "frameWidth": 280,
+      "frameHeight": 205,
+      "structuralRework": true,
+      "reviewStatus": "UNREVIEWED_RUNTIME_FILES",
+      "motions": {
+        "idle": {
+          "file": "apps/client/public/assets/production/units/battlemage/battlemage_f2/idle.png",
+          "frames": 6,
+          "bytes": 6718,
+          "sha256": "f881f0876b55799dbb076eb1f60cf6870e4575d39340ccc28274071c0296c6ef",
+          "sourceUrl": "https://raw.githubusercontent.com/vlee489/AC31009-Client/71252f38c7bf4426ff84676cad517f66c3e6cb65/assets/Sprites/WizardPack/Idle.png"
+        },
+        "move": {
+          "file": "apps/client/public/assets/production/units/battlemage/battlemage_f2/move.png",
+          "frames": 8,
+          "bytes": 10856,
+          "sha256": "3adeceeebce7af7f5c267fa5cd2836838f74d1d14e4573f8b27506cb007aede4",
+          "sourceUrl": "https://raw.githubusercontent.com/vlee489/AC31009-Client/71252f38c7bf4426ff84676cad517f66c3e6cb65/assets/Sprites/WizardPack/Run.png"
+        },
+        "attack": {
+          "file": "apps/client/public/assets/production/units/battlemage/battlemage_f2/attack.png",
+          "frames": 8,
+          "bytes": 13608,
+          "sha256": "09c0177d38174590838d077442cb6088eb1be2cf72dcae3b921dd41d05f60be6",
+          "sourceUrl": "https://raw.githubusercontent.com/vlee489/AC31009-Client/71252f38c7bf4426ff84676cad517f66c3e6cb65/assets/Sprites/WizardPack/Attack1.png"
+        },
+        "knockback": {
+          "file": "apps/client/public/assets/production/units/battlemage/battlemage_f2/knockback.png",
+          "frames": 4,
+          "bytes": 6785,
+          "sha256": "f91e8b07f6e32a068af2c7d80b28124a39281b66d7112206850363da83aa6203",
+          "sourceUrl": "https://raw.githubusercontent.com/vlee489/AC31009-Client/71252f38c7bf4426ff84676cad517f66c3e6cb65/assets/Sprites/WizardPack/Hit.png"
+        },
+        "death": {
+          "file": "apps/client/public/assets/production/units/battlemage/battlemage_f2/death.png",
+          "frames": 7,
+          "bytes": 10731,
+          "sha256": "0533a7fd7af78236b9da941184c65e8c14263e6f4cf44d54d1a598c521f8484a",
+          "sourceUrl": "https://raw.githubusercontent.com/vlee489/AC31009-Client/71252f38c7bf4426ff84676cad517f66c3e6cb65/assets/Sprites/WizardPack/Death.png"
+        }
+      }
+    },
+    "battlemage/battlemage_f3": {
+      "assetId": "unit:battlemage:battlemage_f3",
+      "sourceFamily": "wizard",
+      "displayHeight": 202,
+      "attackContactFrame": 4,
+      "frameWidth": 290,
+      "frameHeight": 210,
+      "structuralRework": true,
+      "reviewStatus": "UNREVIEWED_RUNTIME_FILES",
+      "motions": {
+        "idle": {
+          "file": "apps/client/public/assets/production/units/battlemage/battlemage_f3/idle.png",
+          "frames": 6,
+          "bytes": 7166,
+          "sha256": "5f82cec8e8f44e940238ed323b2edb482175bc5117fdd0c3f0b9ba9d4f734a67",
+          "sourceUrl": "https://raw.githubusercontent.com/vlee489/AC31009-Client/71252f38c7bf4426ff84676cad517f66c3e6cb65/assets/Sprites/WizardPack/Idle.png"
+        },
+        "move": {
+          "file": "apps/client/public/assets/production/units/battlemage/battlemage_f3/move.png",
+          "frames": 8,
+          "bytes": 11644,
+          "sha256": "34311c0fb7c5b76dd5789f495386220a3007307c3a8c584112324faf7064ce0a",
+          "sourceUrl": "https://raw.githubusercontent.com/vlee489/AC31009-Client/71252f38c7bf4426ff84676cad517f66c3e6cb65/assets/Sprites/WizardPack/Run.png"
+        },
+        "attack": {
+          "file": "apps/client/public/assets/production/units/battlemage/battlemage_f3/attack.png",
+          "frames": 8,
+          "bytes": 17130,
+          "sha256": "3774aeefadf8f55fca8f4c115aac6f46f7b24e909919f32638f1c3adf8e2b2b2",
+          "sourceUrl": "https://raw.githubusercontent.com/vlee489/AC31009-Client/71252f38c7bf4426ff84676cad517f66c3e6cb65/assets/Sprites/WizardPack/Attack1.png"
+        },
+        "knockback": {
+          "file": "apps/client/public/assets/production/units/battlemage/battlemage_f3/knockback.png",
+          "frames": 4,
+          "bytes": 7558,
+          "sha256": "988f962480e2c0ac53ae9107194b88a4b5f08e5dfed46b119017c414457d06e8",
+          "sourceUrl": "https://raw.githubusercontent.com/vlee489/AC31009-Client/71252f38c7bf4426ff84676cad517f66c3e6cb65/assets/Sprites/WizardPack/Hit.png"
+        },
+        "death": {
+          "file": "apps/client/public/assets/production/units/battlemage/battlemage_f3/death.png",
+          "frames": 7,
+          "bytes": 12199,
+          "sha256": "68343475ab30db324dafcbcd85fabbd7e8e0c6cec50104ee4856988e595cd9fb",
+          "sourceUrl": "https://raw.githubusercontent.com/vlee489/AC31009-Client/71252f38c7bf4426ff84676cad517f66c3e6cb65/assets/Sprites/WizardPack/Death.png"
+        }
+      }
+    },
+    "enemy-sniper": {
+      "assetId": "unit:enemy-sniper",
+      "sourceFamily": "huntress",
+      "displayHeight": 184,
+      "attackContactFrame": 3,
+      "frameWidth": 255,
+      "frameHeight": 170,
+      "structuralRework": true,
+      "reviewStatus": "UNREVIEWED_RUNTIME_FILES",
+      "motions": {
+        "idle": {
+          "file": "apps/client/public/assets/production/units/enemy-sniper/idle.png",
+          "frames": 8,
+          "bytes": 3775,
+          "sha256": "8472929a7af3df7fbe3cb6d8fd8f2ef9922bd6c2021baacd77e1b4346710c49d",
+          "sourceUrl": "https://raw.githubusercontent.com/NQM765/IngeSoft1/84594e5d3da7472615660f453bdb457da13cca2f/Proyecto/Scrum%27s_Castle/Assets/Characters/Huntress/Sprites/Idle.png"
+        },
+        "move": {
+          "file": "apps/client/public/assets/production/units/enemy-sniper/move.png",
+          "frames": 8,
+          "bytes": 4065,
+          "sha256": "4e00931bcc39d3a273869047dd31183cb225868e7da8cb45f61ea3ed85914416",
+          "sourceUrl": "https://raw.githubusercontent.com/NQM765/IngeSoft1/84594e5d3da7472615660f453bdb457da13cca2f/Proyecto/Scrum%27s_Castle/Assets/Characters/Huntress/Sprites/Run.png"
+        },
+        "attack": {
+          "file": "apps/client/public/assets/production/units/enemy-sniper/attack.png",
+          "frames": 5,
+          "bytes": 3522,
+          "sha256": "afae3fadd4b72633ade224f8d414797a4d11f1eb7dba0759fa3349630a8f201a",
+          "sourceUrl": "https://raw.githubusercontent.com/NQM765/IngeSoft1/84594e5d3da7472615660f453bdb457da13cca2f/Proyecto/Scrum%27s_Castle/Assets/Characters/Huntress/Sprites/Attack1.png"
+        },
+        "knockback": {
+          "file": "apps/client/public/assets/production/units/enemy-sniper/knockback.png",
+          "frames": 3,
+          "bytes": 2054,
+          "sha256": "3631727c7fde9177d22e9b91934baec69928a12e55083c8c9f9895cce519c49d",
+          "sourceUrl": "https://raw.githubusercontent.com/NQM765/IngeSoft1/84594e5d3da7472615660f453bdb457da13cca2f/Proyecto/Scrum%27s_Castle/Assets/Characters/Huntress/Sprites/Take%20hit.png"
+        },
+        "death": {
+          "file": "apps/client/public/assets/production/units/enemy-sniper/death.png",
+          "frames": 8,
+          "bytes": 4683,
+          "sha256": "0f9fc5d1ce984c363be14a09ea7c27f4c7329c46ee3d2ea90948d71b7b955f07",
+          "sourceUrl": "https://raw.githubusercontent.com/NQM765/IngeSoft1/84594e5d3da7472615660f453bdb457da13cca2f/Proyecto/Scrum%27s_Castle/Assets/Characters/Huntress/Sprites/Death.png"
+        }
+      }
+    }
+  },
+  "assemblyPass": "HORIZONTAL_SCANLINE_STRIP_V1"
+}

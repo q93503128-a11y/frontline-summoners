@@ -1,0 +1,35 @@
+{
+  "schemaVersion": 1,
+  "status": "UNREVIEWED_RUNTIME_FILES",
+  "authorship": "ORIGINAL_PROJECT_VECTOR_COMPOSITION",
+  "generativeAiUsed": false,
+  "humanReview": "PENDING",
+  "reviewer": null,
+  "reviewedAt": null,
+  "themes": {
+    "fortress": {
+      "stageAnchor": "main_01_004",
+      "files": [
+        "apps/client/public/assets/production/battlefields/fortress/battlefield-base.svg",
+        "apps/client/public/assets/production/battlefields/fortress/background-landmarks.svg",
+        "apps/client/public/assets/production/battlefields/fortress/foreground-low-density.svg"
+      ]
+    },
+    "burning": {
+      "stageAnchor": "main_01_005",
+      "files": [
+        "apps/client/public/assets/production/battlefields/burning/battlefield-base.svg",
+        "apps/client/public/assets/production/battlefields/burning/background-landmarks.svg",
+        "apps/client/public/assets/production/battlefields/burning/foreground-low-density.svg"
+      ]
+    },
+    "moon": {
+      "stageAnchor": "main_01_007",
+      "files": [
+        "apps/client/public/assets/production/battlefields/moon/battlefield-base.svg",
+        "apps/client/public/assets/production/battlefields/moon/background-landmarks.svg",
+        "apps/client/public/assets/production/battlefields/moon/foreground-low-density.svg"
+      ]
+    }
+  }
+}
