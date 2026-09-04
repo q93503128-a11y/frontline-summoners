@@ -1,0 +1,22 @@
+{
+  "schemaVersion": 1,
+  "assetId": "battlefield:canyon:main_01_002",
+  "stageAnchor": "main_01_002",
+  "theme": "canyon",
+  "reviewStatus": "UNREVIEWED_RUNTIME_FILES",
+  "authorship": "ORIGINAL_PROJECT_VECTOR_COMPOSITION",
+  "generativeAiUsed": false,
+  "layers": [
+    "/assets/production/battlefields/canyon/battlefield-base.svg",
+    "/assets/production/battlefields/canyon/background-landmarks.svg",
+    "/assets/production/battlefields/canyon/foreground-low-density.svg"
+  ],
+  "compositionRules": [
+    "dust-road pursuit identity",
+    "large canyon masses stay on edges",
+    "center combat corridor stays low-clutter",
+    "no vertical structure should read as a gameplay range wall"
+  ],
+  "humanReview": { "status": "PENDING", "reviewer": null, "reviewedAt": null },
+  "captures": null
+}
