@@ -109,11 +109,7 @@ export function installFirstSliceProductionReviewRuntime(scene: Phaser.Scene): v
       const view = host.views.get(unit.simulationId);
       if (!view?.sprite?.active) continue;
       const motion = selectRuntimeMotionStrip(family, unit.state);
-      const stateKey = `review:${motion.key}:${unit.state}`;
-      if (view.stateKey !== stateKey) {
-        view.sprite.setTexture(motion.key, 0);
-        view.stateKey = stateKey;
-      }
+      if (view.sprite.texture.key !== motion.key) view.sprite.setTexture(motion.key, 0);
       const frame = getRuntimeMotionFrame(family, motion, unit as BattleUnit, tick);
       if (frame >= 0 && frame < motion.frames) view.sprite.setFrame(frame);
       view.sprite.setScale(family.displayHeight / motion.frameHeight);
