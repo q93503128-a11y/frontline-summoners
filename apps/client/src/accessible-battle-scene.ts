@@ -15,8 +15,8 @@ import {
 } from './first-slice-production-review-runtime.ts';
 
 /**
- * Presentation-only bridge for legacy battle VFX that still call camera feedback directly.
- * Deterministic simulation and trusted command logging remain in BattleScene unchanged.
+ * Presentation-only bridge for camera/VFX accessibility plus the integrated first-slice review presentation.
+ * Deterministic simulation, progression, and trusted command logging remain in BattleScene unchanged.
  */
 export class AccessibleBattleScene extends BattleScene {
   override create(): void {
