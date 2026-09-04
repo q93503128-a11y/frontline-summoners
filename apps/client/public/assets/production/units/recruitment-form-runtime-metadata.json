@@ -33,29 +33,35 @@
       "motions": {
         "idle": {
           "frames": 6,
-          "bytes": 4357,
-          "sha256": "bd11614a2f2354a4e354cfcaaad34a12db0a41a6034b76ec09157014c27d75ed"
+          "bytes": 4709,
+          "sha256": "f58c29e0d3ca55759dde917ea151bd0439e67d12c0296fc8c68ab5628d1508fd"
         },
         "move": {
           "frames": 8,
-          "bytes": 5798,
-          "sha256": "dcf58ad882e2c3d69eff91278b71b3d3c80c37ae8acf4b0f424dbcc1b8cc16b6"
+          "bytes": 6271,
+          "sha256": "1984e9a37e8610a615961bf8d0288600d9c4d68125a24f0d6aaab1e4043c1009"
         },
         "attack": {
           "frames": 6,
-          "bytes": 4267,
-          "sha256": "d98b1c0885e313bbcc8b1da8819bc6cdb322d2bd0eda5d5a505ca6d0a98d0a90"
+          "bytes": 4866,
+          "sha256": "efd0461c37a1e19559a520f6406794cf180ba639b30dbd9173e373fea31ccf81"
         },
         "knockback": {
           "frames": 4,
-          "bytes": 2871,
-          "sha256": "6bb133510225dffcfe912cd3fec99f843c26220f140b40e89f3480d84373e635"
+          "bytes": 3828,
+          "sha256": "30c107649ac29028dc9f1a4b9a841827e5e6bbc4c79dbc15a735fb4e461175d5"
         },
         "death": {
           "frames": 6,
-          "bytes": 8722,
-          "sha256": "4ac6c4fcc2c4a0643c583f19724b7b85aa9c68fbce1f1560ab817289bc0a55df"
+          "bytes": 9840,
+          "sha256": "13edcb2bc35b656e400b8a14956839954b6a950daf90d928e349e37da054142d"
         }
+      },
+      "visualPolish": {
+        "version": 1,
+        "kind": "RECRUITMENT_FORM_SILHOUETTE_DIFFERENTIATION_PASS",
+        "reviewStatus": "UNREVIEWED_RUNTIME_FILES",
+        "normalRuntimeAuthoritative": false
       }
     },
     "char_common_c_turnip_rider_f2": {
@@ -79,29 +85,35 @@
       "motions": {
         "idle": {
           "frames": 6,
-          "bytes": 5366,
-          "sha256": "b930340aa0f0bd7c55ee95fe9cbe813ab1f52292697a5c3813a00905676c4cb2"
+          "bytes": 6544,
+          "sha256": "7d3007b59d279faae41c5eb65b9a73d4d97e8a965830a8e87da9872e791815ed"
         },
         "move": {
           "frames": 8,
-          "bytes": 7265,
-          "sha256": "db002404adc44ed6733db2b9b0649463c27f4d5a9e1f50af4b409660c3e2f7af"
+          "bytes": 8789,
+          "sha256": "2faaa127f74316f50d606652f394fda3a0bbf1f41a1d358633ea937e586ae641"
         },
         "attack": {
           "frames": 6,
-          "bytes": 5024,
-          "sha256": "fbcf7298312299d19fd42adfa012b6f1649e5f2933d011287583be76c6defe0c"
+          "bytes": 6948,
+          "sha256": "8771afb87e7184d478d22200edfb942ee4559f67e3648841c391c1d03c371b66"
         },
         "knockback": {
           "frames": 4,
-          "bytes": 3473,
-          "sha256": "fcb17888635c18a86881b214d7896e09d223f2bd32a5847a421a4b468b3956e9"
+          "bytes": 6477,
+          "sha256": "5c130f09ffa568c12d555b4d3f7cc6dcc96f0ff14ad4dd382120d5843b5acd24"
         },
         "death": {
           "frames": 6,
-          "bytes": 11817,
-          "sha256": "2f5e4eeb988d074eb357d663fc4249099f468b9bc72164a596f012d73c1464e8"
+          "bytes": 14693,
+          "sha256": "c1552a33e05f6cdb81f2eb54c31624d48f8ff51c0e919cf1d79728975632eaf0"
         }
+      },
+      "visualPolish": {
+        "version": 1,
+        "kind": "RECRUITMENT_FORM_SILHOUETTE_DIFFERENTIATION_PASS",
+        "reviewStatus": "UNREVIEWED_RUNTIME_FILES",
+        "normalRuntimeAuthoritative": false
       }
     },
     "char_common_c_turnip_rider_f3": {
@@ -125,29 +137,35 @@
       "motions": {
         "idle": {
           "frames": 6,
-          "bytes": 7393,
-          "sha256": "982ca99e89b4db35ada96156545325d0f0244e77d15314d3780bad63083c9445"
+          "bytes": 10262,
+          "sha256": "6cfa8261307e1f44c8274f3c9f36012a1c590d60ca3ee0238616a194a1c0381e"
         },
         "move": {
           "frames": 8,
-          "bytes": 10002,
-          "sha256": "d42156deca731185cad347523fc269c4c51eb1a2d0c0a8a9669fc0297c6be6de"
+          "bytes": 13905,
+          "sha256": "474e060be2e9ce223d50345d2bfceec1dc1144f0d3fdd1945d8e36708897f2b7"
         },
         "attack": {
           "frames": 7,
-          "bytes": 7913,
-          "sha256": "e616db61758454c1b9d87b20bccf08bccffffcb06239fd1b54a56c24c5ac1746"
+          "bytes": 12936,
+          "sha256": "75c154f0c2a2f5539275d4f27a751a10722a9a4a0f1a4165ea0bd0779e47e81a"
         },
         "knockback": {
           "frames": 4,
-          "bytes": 4881,
-          "sha256": "2295db0d845f387337851043e7a9b2ac3f905eb496ccbc6aaf68539f1c5ddc43"
+          "bytes": 10668,
+          "sha256": "35c0231fe7b0f1bc2cab38528abb8e4957fe4afabf466db25da7bb64a3d50367"
         },
         "death": {
           "frames": 6,
-          "bytes": 14003,
-          "sha256": "e14fedd436d9ac2fe118c910a9eab54866a4f32e5be51ff9c3a1846b3066005f"
+          "bytes": 20192,
+          "sha256": "465f4be74548112ce91925d3693800a8ebf8111e684be362a8cd18cd6005145a"
         }
+      },
+      "visualPolish": {
+        "version": 1,
+        "kind": "RECRUITMENT_FORM_SILHOUETTE_DIFFERENTIATION_PASS",
+        "reviewStatus": "UNREVIEWED_RUNTIME_FILES",
+        "normalRuntimeAuthoritative": false
       }
     },
     "char_common_c_tin_squire_f1": {
@@ -171,29 +189,35 @@
       "motions": {
         "idle": {
           "frames": 6,
-          "bytes": 4564,
-          "sha256": "997f89103307aadb3db4c9d5361f310ac17fab5a769d051a06362bbc9d9ba569"
+          "bytes": 5345,
+          "sha256": "0872d255c2a543e1151bcd38a2c9c80ad6f2fc9163de1392f4fd2b839d95e97c"
         },
         "move": {
           "frames": 8,
-          "bytes": 6187,
-          "sha256": "768864ebc40cafa12241470e52a1714735c143f9c5275c84a7f9f8e3acf123e8"
+          "bytes": 7091,
+          "sha256": "c09d96eb47833d9f9edc2e9bbcfda1973458756c4f2e1f344bcc3b05c13e2ea4"
         },
         "attack": {
           "frames": 6,
-          "bytes": 4425,
-          "sha256": "3c8b28c85711e831c312be4036be4e7656031da5d6c8de06d1b9c54d7ab3abc2"
+          "bytes": 5019,
+          "sha256": "1e13b48316666050ec37f9705cab53501b2e42adaf7991f7b4dc2fe56d769edf"
         },
         "knockback": {
           "frames": 4,
-          "bytes": 2994,
-          "sha256": "2e8c5bbd1bff25df8f3a46936ecf236aee8e04146eb9e5c579065619598dfefe"
+          "bytes": 3657,
+          "sha256": "3234d69ca176d4eb01112be0572c41f91e4055c82753887db43b35ec0f1b034d"
         },
         "death": {
           "frames": 6,
-          "bytes": 8938,
-          "sha256": "e6ac0752a299f76ef69e908e4784550a637d7d8af0dfb384ebb6db18072a9c36"
+          "bytes": 10366,
+          "sha256": "7d8598706489f665c634a5f466f5a241250865ea94392c1006400f291c3ddfbe"
         }
+      },
+      "visualPolish": {
+        "version": 1,
+        "kind": "RECRUITMENT_FORM_SILHOUETTE_DIFFERENTIATION_PASS",
+        "reviewStatus": "UNREVIEWED_RUNTIME_FILES",
+        "normalRuntimeAuthoritative": false
       }
     },
     "char_common_c_tin_squire_f2": {
@@ -217,29 +241,35 @@
       "motions": {
         "idle": {
           "frames": 6,
-          "bytes": 5312,
-          "sha256": "5d7a588989d74fe05f9e9abea9b9444fa24df9738743804fef7f08c1b56bf036"
+          "bytes": 6541,
+          "sha256": "9794749fb5d1a409b41bfa51e3304688b07b3d4dd1e06903899e8474bc0ad5e3"
         },
         "move": {
           "frames": 8,
-          "bytes": 7224,
-          "sha256": "ef57617ed51632a8f79baf7f6a174d780dae82c226bf19203bebeab82832e8d6"
+          "bytes": 8726,
+          "sha256": "e5c599ac911e4be55c741c69277447f36ff60776c23e9dc386b03ad1f29f8a98"
         },
         "attack": {
           "frames": 6,
-          "bytes": 5075,
-          "sha256": "7a962cc434f305cfa81aebc36175d3d459a1c1996de5273d7306b67b9eed073d"
+          "bytes": 6600,
+          "sha256": "0732df122aee15db46c76e5454c3094b78ff45acecbc887c8daaa7d6497e54cf"
         },
         "knockback": {
           "frames": 4,
-          "bytes": 3508,
-          "sha256": "f6eb3e3848961edd216891009373a2d6874162028471bad7e338035abe1e3acc"
+          "bytes": 5685,
+          "sha256": "ab3cefde4df87eeaa157dfb40c7cab0b207d1e7492d64e84f994a3ecc7c9c478"
         },
         "death": {
           "frames": 6,
-          "bytes": 11455,
-          "sha256": "b0d96ac1d84c32fef023c9c17e4628c7e1c79cb0776b7b1c2c71f878ba9a714f"
+          "bytes": 14187,
+          "sha256": "56649f3ed77b035208463194d4193d41e2af855fc1a810f6082344c23ef03c6b"
         }
+      },
+      "visualPolish": {
+        "version": 1,
+        "kind": "RECRUITMENT_FORM_SILHOUETTE_DIFFERENTIATION_PASS",
+        "reviewStatus": "UNREVIEWED_RUNTIME_FILES",
+        "normalRuntimeAuthoritative": false
       }
     },
     "char_common_c_tin_squire_f3": {
@@ -263,29 +293,35 @@
       "motions": {
         "idle": {
           "frames": 6,
-          "bytes": 7355,
-          "sha256": "4820cec70f01d2fe05ee7a01b32aa0b427ee23b3e73c5df252b83b76e99789c9"
+          "bytes": 9457,
+          "sha256": "121d4019026799ba602b42375e26bb3e31d51d430e7e5ff9b7180339ff97e451"
         },
         "move": {
           "frames": 8,
-          "bytes": 9796,
-          "sha256": "381c4faded25686991eac3cb13afa96af139aeec191480f3774e06bdc94e94ab"
+          "bytes": 12584,
+          "sha256": "2d54b70a77eda56c93e3e7268bd3b59ae8ccbbd8cae13bbb60add6a37ec2e9f9"
         },
         "attack": {
           "frames": 7,
-          "bytes": 7927,
-          "sha256": "ebe28d9ec3fd249d67de93e49d568aa125ba2ee2a26d6662573410a742464d23"
+          "bytes": 10735,
+          "sha256": "5aa63a41e92cd3dab298b1eeddbd3589530b6b4c2280a5fbf5fe4defe32333c6"
         },
         "knockback": {
           "frames": 4,
-          "bytes": 4899,
-          "sha256": "30b5d5c107fec01cdc7afde0edd7b73b1e9481731d878b6cf2fcbd94fd57c26b"
+          "bytes": 8083,
+          "sha256": "210699293d443899e44a1024e5afdcbb2e9d22ce6f57e41132ce3385082d19e1"
         },
         "death": {
           "frames": 6,
-          "bytes": 13465,
-          "sha256": "7dc89253527f3296ba5abfce21eaad0fc0dfa89124b65e0a20056c7cbe3c2505"
+          "bytes": 17725,
+          "sha256": "306589b8b539f098b709074b56c9400402ea0936044c39365fa2c19c05e82122"
         }
+      },
+      "visualPolish": {
+        "version": 1,
+        "kind": "RECRUITMENT_FORM_SILHOUETTE_DIFFERENTIATION_PASS",
+        "reviewStatus": "UNREVIEWED_RUNTIME_FILES",
+        "normalRuntimeAuthoritative": false
       }
     },
     "char_common_c_slinger_f1": {
@@ -309,29 +345,35 @@
       "motions": {
         "idle": {
           "frames": 6,
-          "bytes": 3792,
-          "sha256": "b3bfda3bc99755cbf7aa49ff91e36b78aedb2dc3a7d2681033e592c8ca7fec59"
+          "bytes": 4420,
+          "sha256": "eec04a3d9c33e8af69a8cdc48cdda41e479dad828eab3a214c32938377a72a70"
         },
         "move": {
           "frames": 8,
-          "bytes": 5110,
-          "sha256": "cc340c0f2227674422ff5fc2f846305726aaf8195bcd2b508be0a90af3731e6e"
+          "bytes": 5966,
+          "sha256": "8c0939ff668370322a0be395291a01c2dc760fdc9168672d8c3f5bb7c22f14a6"
         },
         "attack": {
           "frames": 6,
-          "bytes": 3579,
-          "sha256": "a64b03850e0af8a32220865e4fa2b35a301c8b73544781d2a1bdbc4d32b647a2"
+          "bytes": 4219,
+          "sha256": "bdc05688c66d4e3282799d30dc17661226dfeeaeadb330bb75e0cbcaf54b33cc"
         },
         "knockback": {
           "frames": 4,
-          "bytes": 2488,
-          "sha256": "fe79487924d25379bb913f5fb99d2623a3d31e2893b905f47caa3f5f9410c220"
+          "bytes": 3067,
+          "sha256": "3d993a1e5c1027b1f0b91de3dae6a0564537480d92f26e53f26250b563bece0a"
         },
         "death": {
           "frames": 6,
-          "bytes": 7553,
-          "sha256": "5625693a16bf365eab7ec6629e80f562edfea800539acdf3af1a87c593a9c935"
+          "bytes": 8823,
+          "sha256": "e8747c5ac7b4857a4e745d8c39c9a017bd5318241b1e76404cc087b36e5b8624"
         }
+      },
+      "visualPolish": {
+        "version": 1,
+        "kind": "RECRUITMENT_FORM_SILHOUETTE_DIFFERENTIATION_PASS",
+        "reviewStatus": "UNREVIEWED_RUNTIME_FILES",
+        "normalRuntimeAuthoritative": false
       }
     },
     "char_common_c_slinger_f2": {
@@ -355,29 +397,35 @@
       "motions": {
         "idle": {
           "frames": 6,
-          "bytes": 4699,
-          "sha256": "bc702bd2201c9027223ce20c624047ef675b6c29aa84fc33887e7d3cd0b4f6fb"
+          "bytes": 6508,
+          "sha256": "1bef00f7cae7cded6fe9aa5ce81c5c2f6e8fcd0e346012f89a466b60a75790b5"
         },
         "move": {
           "frames": 8,
-          "bytes": 6163,
-          "sha256": "1d83025239801f0209730f9e4fcea30f870d937f4b71b08f7e6c9f54eb2cdf3a"
+          "bytes": 8579,
+          "sha256": "0cef5363870c2518c7d5275e2fb66c05412a7111408f43f2f0b8f26dbc4eefd2"
         },
         "attack": {
           "frames": 6,
-          "bytes": 4222,
-          "sha256": "634dd70beaf858f6c977fc6874ef7b60648752b377de4038c233c1c7e4fdd1ae"
+          "bytes": 6769,
+          "sha256": "e35135b2088e70e272245191684855eac906d943995378fd6490b7710b6208d3"
         },
         "knockback": {
           "frames": 4,
-          "bytes": 3073,
-          "sha256": "e2cdf7f37a87ef787d1076252c4aa936b64c069e7c8e43c023710eb5f7aeff4d"
+          "bytes": 5725,
+          "sha256": "6292972278db0bb9ccdaa60082fb76188f4e1212f8153130a5f4686a86b7baed"
         },
         "death": {
           "frames": 6,
-          "bytes": 10396,
-          "sha256": "52c6983768045372f9aa68d71e16ee65b62e0d364c3e32c77f6d92cbe3de69bb"
+          "bytes": 13598,
+          "sha256": "6da9fd1880de7144790f5ac0d9f109adbb9e7f9bcb1af89747d3c7300e43c3c3"
         }
+      },
+      "visualPolish": {
+        "version": 1,
+        "kind": "RECRUITMENT_FORM_SILHOUETTE_DIFFERENTIATION_PASS",
+        "reviewStatus": "UNREVIEWED_RUNTIME_FILES",
+        "normalRuntimeAuthoritative": false
       }
     },
     "char_common_c_slinger_f3": {
@@ -401,29 +449,35 @@
       "motions": {
         "idle": {
           "frames": 6,
-          "bytes": 6836,
-          "sha256": "0dfd2422cec903efa46905d97deeecb9215974cc397369c4aae74777a0f9f484"
+          "bytes": 9500,
+          "sha256": "ea9b6bf076e05195960028f565377e76e616aa65e022186868ed0a5d6dd16873"
         },
         "move": {
           "frames": 8,
-          "bytes": 9049,
-          "sha256": "43146e32e642775eedc1e7fe6a506cb9702cd0ad418a82e47cc6c8c6d435c0a4"
+          "bytes": 12635,
+          "sha256": "04e4d75b9d25137e561d82e8b25563c74df0c07439678719655ad104df499afc"
         },
         "attack": {
           "frames": 7,
-          "bytes": 7061,
-          "sha256": "cb39f598793a73f6b7205dad88d563f9fb0b3b442d737dca4d6bcdf08f837d24"
+          "bytes": 10802,
+          "sha256": "f360ec1a2ccd6d48787f4d96f588ed30b4e3a02ca5b6214a16a1a0f0237028a8"
         },
         "knockback": {
           "frames": 4,
-          "bytes": 4456,
-          "sha256": "bbe377bc8c902cf0756c3c6e21d890c497bb63f0e9cfbe43650f09d08d279cb7"
+          "bytes": 8554,
+          "sha256": "17c119c7a3a5b4641f0c2b7a0fd8fa436ea10833fd052cac6fc50a96b968b2ae"
         },
         "death": {
           "frames": 6,
-          "bytes": 12936,
-          "sha256": "99b8e7ead33d967e7055ee65ff77aed4957f618d0cc20f4e8fae232d2aba277e"
+          "bytes": 17833,
+          "sha256": "a0f8a3281744e96b5f830eab7294eed178bd4bfe82cf96791c24ba6e824ac4ce"
         }
+      },
+      "visualPolish": {
+        "version": 1,
+        "kind": "RECRUITMENT_FORM_SILHOUETTE_DIFFERENTIATION_PASS",
+        "reviewStatus": "UNREVIEWED_RUNTIME_FILES",
+        "normalRuntimeAuthoritative": false
       }
     },
     "char_common_c_bell_crab_f1": {
@@ -447,29 +501,35 @@
       "motions": {
         "idle": {
           "frames": 6,
-          "bytes": 3725,
-          "sha256": "bc28b291b44111e699d3012760b08a41426d894d59b350f942103b48d06e6e5e"
+          "bytes": 4166,
+          "sha256": "86f2bf518075869f98f473e6cebbaaf03adef5c71abd4cd72d6365b3c8a03d23"
         },
         "move": {
           "frames": 8,
-          "bytes": 5059,
-          "sha256": "03a53b055a27dc458dd59f95e9139e095b0a6042fe91bd2e4bda925e3460a84c"
+          "bytes": 5596,
+          "sha256": "01a17d581fa9f731be48f155121830e8746a5c5c3695e6dfadfbe56d49d4e651"
         },
         "attack": {
           "frames": 6,
-          "bytes": 4151,
-          "sha256": "a3f55abb7f58d05c98205ed9f0a1c41085719e9cb3449b1a56282333fe72131f"
+          "bytes": 4556,
+          "sha256": "cdaf4716458d94aa79368f214424f0005d4db32a104962814e2cb03d59743ff1"
         },
         "knockback": {
           "frames": 4,
-          "bytes": 2423,
-          "sha256": "4da7d7e5f34fb3d7591c34c4a2df13d1b3bc6be42a34536b15cce8aff1b4ff2c"
+          "bytes": 2893,
+          "sha256": "8eb1e263e06a007523c6ac632576867689197778aba8b0a2e3ebc5ac91593f67"
         },
         "death": {
           "frames": 6,
-          "bytes": 6899,
-          "sha256": "57983a6c1679ddf9aea21f8350fcbe8c7cd7f1ac0beb33494b92ac4016e1c167"
+          "bytes": 7900,
+          "sha256": "f622d6a2383c1add23017a37e5a7ca28644e36f9019b4d720e2112804028ba7f"
         }
+      },
+      "visualPolish": {
+        "version": 1,
+        "kind": "RECRUITMENT_FORM_SILHOUETTE_DIFFERENTIATION_PASS",
+        "reviewStatus": "UNREVIEWED_RUNTIME_FILES",
+        "normalRuntimeAuthoritative": false
       }
     },
     "char_common_c_bell_crab_f2": {
@@ -493,29 +553,35 @@
       "motions": {
         "idle": {
           "frames": 6,
-          "bytes": 5078,
-          "sha256": "186df2d3024c320d28914d4cb999305b9cb21643598473619fb28e99f9df5d07"
+          "bytes": 6254,
+          "sha256": "4d4ca47b19cdbf3dc3cdb263c5af86f9d9b31e5b9081928eb5b95a4432d9ecca"
         },
         "move": {
           "frames": 8,
-          "bytes": 6933,
-          "sha256": "66b97f6cc77d77aa0d63cbe153a970359e8d654354276c3ced7e619be40f9387"
+          "bytes": 8386,
+          "sha256": "ca789d99819f530addc9769eed298d69dfb85786d5458af79b6f9aa559275c2d"
         },
         "attack": {
           "frames": 6,
-          "bytes": 5259,
-          "sha256": "4b763d3abb0bfa8cbc792613ceeb38206892f58e6718bb27f83c76a3f447adae"
+          "bytes": 7180,
+          "sha256": "bdeff2c7b396621eb67231ee8f41345d1d6a42237f818d8dac31b61477d610f8"
         },
         "knockback": {
           "frames": 4,
-          "bytes": 3333,
-          "sha256": "cf8f8f5aa5a9616513d96c3e14057084b11fc1087d231cdea089063e6f408b04"
+          "bytes": 6050,
+          "sha256": "e40eadd800767387daa80ee1c1b0d9db58c438c65e69101eb8ef713baa17a80d"
         },
         "death": {
           "frames": 6,
-          "bytes": 11185,
-          "sha256": "2ce3bcfcc32aea59fa0f86fcbc83a68757af2594d1a46f31192bf44ecc8951fb"
+          "bytes": 13532,
+          "sha256": "90e1acb38945c7429270ed790f87918ac159e5be5da0327b76d3fbb6d08d5517"
         }
+      },
+      "visualPolish": {
+        "version": 1,
+        "kind": "RECRUITMENT_FORM_SILHOUETTE_DIFFERENTIATION_PASS",
+        "reviewStatus": "UNREVIEWED_RUNTIME_FILES",
+        "normalRuntimeAuthoritative": false
       }
     },
     "char_common_c_bell_crab_f3": {
@@ -539,29 +605,35 @@
       "motions": {
         "idle": {
           "frames": 6,
-          "bytes": 6854,
-          "sha256": "d582cfa128d65aa758dbb75022a5b55dd748e16f2f36ff6909db76eadf7d9181"
+          "bytes": 8742,
+          "sha256": "5e0ae2384b720669e5fb0f94de7b3e51a7236f2c41ac3ff8b411a43e333ae22a"
         },
         "move": {
           "frames": 8,
-          "bytes": 9551,
-          "sha256": "0a7b3ba56070e7d5c4acbed0bcaf7666577e5704b77eb2f4e7ed4ede76d72d9c"
+          "bytes": 12177,
+          "sha256": "eef62eaca07bfc017ecfbf7e8adabd1241baf9461d9b580b40a9ee16c5171feb"
         },
         "attack": {
           "frames": 7,
-          "bytes": 8032,
-          "sha256": "11a6bfa63ac782d24c5b1323a6002ce5173a3ac3e1994bba905649b1dfa0114c"
+          "bytes": 11603,
+          "sha256": "989d5383571a4da91fa7719f7c43e0a5f33e01b0135c192352196aa3e25fcf5d"
         },
         "knockback": {
           "frames": 4,
-          "bytes": 4477,
-          "sha256": "3b1c9f29fc6ca42724570c942ea9a34004ec36f473c2ebf1464063ef20593091"
+          "bytes": 8233,
+          "sha256": "2ff26ccd151f4a7069b746165615571bf9875179148fabb0ee2ae1a9011b0670"
         },
         "death": {
           "frames": 6,
-          "bytes": 13522,
-          "sha256": "a8141f98b7c67207fb5a4df69c40a4a5b04ec87605a0aa76cd9386a2237771c6"
+          "bytes": 17224,
+          "sha256": "ed4578ce30c23dfb043ec02b19863e930679f9d244994fbdce924cd4a7ec6fea"
         }
+      },
+      "visualPolish": {
+        "version": 1,
+        "kind": "RECRUITMENT_FORM_SILHOUETTE_DIFFERENTIATION_PASS",
+        "reviewStatus": "UNREVIEWED_RUNTIME_FILES",
+        "normalRuntimeAuthoritative": false
       }
     },
     "char_common_c_lantern_moth_f1": {
@@ -585,29 +657,35 @@
       "motions": {
         "idle": {
           "frames": 6,
-          "bytes": 4996,
-          "sha256": "ef30a9868a61cb60b99154430503ad3fb23730142d7580dd6066623d09179007"
+          "bytes": 5907,
+          "sha256": "8000c45864966bc5bec42c7ec926eda537fb5c304ddd8d6f4e001ff368d8f2ea"
         },
         "move": {
           "frames": 8,
-          "bytes": 6619,
-          "sha256": "ef6ca2acdc1046ef22a33a6044fbc871cfe117b96ec191412ca690c4b9a5da95"
+          "bytes": 7701,
+          "sha256": "dfd25770a6c8aa20f4070b28b7c45ca08bbdf87ee931a6a8f8d23a0644f6e24d"
         },
         "attack": {
           "frames": 6,
-          "bytes": 4780,
-          "sha256": "37684ee3dc0f84e253a0778e968f374c87f216d6cb82a3d57ea7cf8359e5cbc2"
+          "bytes": 5442,
+          "sha256": "bb17fceae573ce7748839dfd40037b29f010b7501cf2bbf59e369b32900acb7b"
         },
         "knockback": {
           "frames": 4,
-          "bytes": 3236,
-          "sha256": "f97a57a438d84038f3c149d592cf85a5e0e9d42338aa76ba9085ae87f0cf51bd"
+          "bytes": 3722,
+          "sha256": "42d3d65affc7a1c2d91d85c581d425f14edcc7f5e6a2f026ebbf598728bd0182"
         },
         "death": {
           "frames": 6,
-          "bytes": 8279,
-          "sha256": "7740ccb17a575a2e3539f69bed01925cff5b0cecc2274a2c53b78801fba6e210"
+          "bytes": 9760,
+          "sha256": "713e8c0fb90f416b0145e63a10f2faf8c8c9ac749f0034173e5eb3c3119027c4"
         }
+      },
+      "visualPolish": {
+        "version": 1,
+        "kind": "RECRUITMENT_FORM_SILHOUETTE_DIFFERENTIATION_PASS",
+        "reviewStatus": "UNREVIEWED_RUNTIME_FILES",
+        "normalRuntimeAuthoritative": false
       }
     },
     "char_common_c_lantern_moth_f2": {
@@ -631,29 +709,35 @@
       "motions": {
         "idle": {
           "frames": 6,
-          "bytes": 5982,
-          "sha256": "5769f0a8b60b807ad3560de4032778e46463cbda95e12c9bc777a97c7283dbad"
+          "bytes": 7559,
+          "sha256": "451a3e5a97d42f457b3f5a7954ee687de03437be288122d2a7146929d0dbd9f0"
         },
         "move": {
           "frames": 8,
-          "bytes": 8095,
-          "sha256": "ca77afc0bde3e0ac341ad93eec0c1a6fe0d70757b6bb370e4c2cd25bdbdd69ca"
+          "bytes": 10116,
+          "sha256": "6d14cc61260e5335b7c733419992139dd7a1202c23a5c1512aa52c44a03e7846"
         },
         "attack": {
           "frames": 6,
-          "bytes": 5653,
-          "sha256": "3046446e65bc41c2dd04f27bb298b347bd150c4fb83010bcdae5392df1fe1a84"
+          "bytes": 8330,
+          "sha256": "c6ca1e39a41ae4bd2c9cdd630a341286a93695b4fa7407207b2f20c99befa1c4"
         },
         "knockback": {
           "frames": 4,
-          "bytes": 4019,
-          "sha256": "80e5564976021f2293973257eb57cec395ef78c52e23b8da1353a84d479217b1"
+          "bytes": 7394,
+          "sha256": "43e8cfc14d431df590893bd6de6c7ce8030df75de3874e20b627e9ef9be7f74a"
         },
         "death": {
           "frames": 6,
-          "bytes": 11982,
-          "sha256": "ac01d3770544b4ea8aaa406b1b72b59ed6e98cca0e38c916938c68b8cbeeb0ba"
+          "bytes": 15218,
+          "sha256": "9997ea8ff3f2861af46a84bc502c7718612c0f1ac28a06b76fba97eec7240baf"
         }
+      },
+      "visualPolish": {
+        "version": 1,
+        "kind": "RECRUITMENT_FORM_SILHOUETTE_DIFFERENTIATION_PASS",
+        "reviewStatus": "UNREVIEWED_RUNTIME_FILES",
+        "normalRuntimeAuthoritative": false
       }
     },
     "char_common_c_lantern_moth_f3": {
@@ -677,29 +761,35 @@
       "motions": {
         "idle": {
           "frames": 6,
-          "bytes": 7661,
-          "sha256": "d9c37a67382b1e43f4f6f12d5aa1b7eb4440f483cbd87c16f5fdff4520b0e63b"
+          "bytes": 11544,
+          "sha256": "6dc706f18677795737637f053e3d36dcc726b2363446505546c702c4782a2a0c"
         },
         "move": {
           "frames": 8,
-          "bytes": 10555,
-          "sha256": "77111ee563f261cd91dc757841bbd5972a26f9b8f73cfbedd46273daed155c80"
+          "bytes": 15876,
+          "sha256": "afd603039a8a07c85524ff31a516136eb742e290abc93f00540cd2e26af57449"
         },
         "attack": {
           "frames": 7,
-          "bytes": 8356,
-          "sha256": "9fccf51ec0e5b8cbd9ce1466d598077ebbb195e849b01cc4b49943660d28d307"
+          "bytes": 13785,
+          "sha256": "27181076d7f68d022315c261ecb7687e304fb7457c409283582610c79c8ee8bf"
         },
         "knockback": {
           "frames": 4,
-          "bytes": 5072,
-          "sha256": "aa762bd8b69995f80f21bddb89b1c057e8b2cb3d37ab6a3e06eda2d40b179cde"
+          "bytes": 11049,
+          "sha256": "7bed0c637986bde9f9919f9eadfd9f638a5439770f968b438737de8cacee0a27"
         },
         "death": {
           "frames": 6,
-          "bytes": 14106,
-          "sha256": "1ef3457557dac807fcffd536d304a384cfab04c9ac7836b0bfe19057a8b97632"
+          "bytes": 20847,
+          "sha256": "77c94e11fa035050a725e406f3e4c499f84265355865ea797c3ce048346b5c05"
         }
+      },
+      "visualPolish": {
+        "version": 1,
+        "kind": "RECRUITMENT_FORM_SILHOUETTE_DIFFERENTIATION_PASS",
+        "reviewStatus": "UNREVIEWED_RUNTIME_FILES",
+        "normalRuntimeAuthoritative": false
       }
     },
     "char_common_b_lantern_witch_f1": {
@@ -723,29 +813,35 @@
       "motions": {
         "idle": {
           "frames": 7,
-          "bytes": 4798,
-          "sha256": "c6b34edd196d57eecb4ef14416cfe2c242055e25cc67067cbdc20724a2014ab4"
+          "bytes": 5685,
+          "sha256": "d28fd586f12dff4cf1b0c894c51f07f7914c7b4643a02a7f56819d6371511054"
         },
         "move": {
           "frames": 8,
-          "bytes": 5600,
-          "sha256": "8a6d8f8c5aead765140951f9d78468682960c89c9b1975ebd52716618f69a6e9"
+          "bytes": 6549,
+          "sha256": "78a49c917de23a4f2cc0dfddcc147ce4e3f63d184490dc9eb6855e4e479a8a9a"
         },
         "attack": {
           "frames": 7,
-          "bytes": 5084,
-          "sha256": "a90f6aca189733b433ac1b8753f3defa3e5a4684405909666654f2f2a5b69e00"
+          "bytes": 6069,
+          "sha256": "0d3554daff60553142369f12355da945fdda18dc774cbdc494c215bdae3473dc"
         },
         "knockback": {
           "frames": 4,
-          "bytes": 2731,
-          "sha256": "7d7be76302c4e9bf289709863388c940a469314334ad999418dc787234532216"
+          "bytes": 3779,
+          "sha256": "a40351449e6d8b47f599589df13587106aa323571270ed67a7588bee5deb5810"
         },
         "death": {
           "frames": 7,
-          "bytes": 8905,
-          "sha256": "237070d5905584e444a77adab97762ae67da861d5dad9fe9aa30d8710fc7d0ae"
+          "bytes": 11062,
+          "sha256": "34c3c43f8df7c5d6d389d5063b64a57ceb4eba8a6ba533d9710c09acaf4d1844"
         }
+      },
+      "visualPolish": {
+        "version": 1,
+        "kind": "RECRUITMENT_FORM_SILHOUETTE_DIFFERENTIATION_PASS",
+        "reviewStatus": "UNREVIEWED_RUNTIME_FILES",
+        "normalRuntimeAuthoritative": false
       }
     },
     "char_common_b_lantern_witch_f2": {
@@ -769,29 +865,35 @@
       "motions": {
         "idle": {
           "frames": 7,
-          "bytes": 5651,
-          "sha256": "1b5ac94e88d8ba1531f5d646853dfba7a2ab5b80277975bfe7c1915cad9cca8a"
+          "bytes": 7028,
+          "sha256": "c838beb32362cc595e63db59ef598b032ce21d3da4b3fc5b183dc31cc2b063f0"
         },
         "move": {
           "frames": 8,
-          "bytes": 6597,
-          "sha256": "7a8778d18ab28bf34222841a0107d6117af284fd46dbab298b89c1efde15885e"
+          "bytes": 8275,
+          "sha256": "036b7c272fe18784d5df27c75c0a02ae6adcfadd25c70c6f31b3ac8ed3063c1e"
         },
         "attack": {
           "frames": 7,
-          "bytes": 5817,
-          "sha256": "590947e66d44f4e8189c56a61bd3ce939cb0700a11b55f55eefdd2678d3f39d8"
+          "bytes": 8131,
+          "sha256": "95ddf97574d8a9631b4576c4c9a2bf89537a055a541ab5863a19efefdd440eba"
         },
         "knockback": {
           "frames": 4,
-          "bytes": 3377,
-          "sha256": "ddc5ad85176867e7ec06e8985a992db0f3facbad42cdc24f879955186f2e1e6e"
+          "bytes": 6249,
+          "sha256": "93bf6b395e04acec1847d589c9d253833f1a256afa571523971b659f276b11cb"
         },
         "death": {
           "frames": 7,
-          "bytes": 12048,
-          "sha256": "4af36f88d7c1be35d3718509abbefc6f00d7853e86edfa2664439dd7376d58d3"
+          "bytes": 15097,
+          "sha256": "b0d3bd0be21988106f4860e36d1d8b3f720539c2242d24001c6c54367dad594a"
         }
+      },
+      "visualPolish": {
+        "version": 1,
+        "kind": "RECRUITMENT_FORM_SILHOUETTE_DIFFERENTIATION_PASS",
+        "reviewStatus": "UNREVIEWED_RUNTIME_FILES",
+        "normalRuntimeAuthoritative": false
       }
     },
     "char_common_b_lantern_witch_f3": {
@@ -815,29 +917,35 @@
       "motions": {
         "idle": {
           "frames": 7,
-          "bytes": 8159,
-          "sha256": "4fcf1f71eef95c1f1c12b14eec499dcbcf122a6723a4e89e43d2dd6aabc7a488"
+          "bytes": 11007,
+          "sha256": "2cc82bec3ba49220a7eacf7bfeba0476fa853aecc7ceb809cb617011403a58cf"
         },
         "move": {
           "frames": 8,
-          "bytes": 9632,
-          "sha256": "3fab3594bf5cc213a35183a568e78fe60cbe644dd898dc7b83a964b8441459ac"
+          "bytes": 13330,
+          "sha256": "c51c0b69ce4c3b8d8297256e3347de9ff889ccb84c5a311b5e190a046e25568a"
         },
         "attack": {
           "frames": 8,
-          "bytes": 9050,
-          "sha256": "1aa11d3eeac5926f7c5272ef17b40c0904e2aa99d38ff57c90a0b6536b3e437b"
+          "bytes": 13936,
+          "sha256": "d563c8899cf5ba591b993f34fda19654d3ff85b38fbec23460b462d7a3ff5cd7"
         },
         "knockback": {
           "frames": 4,
-          "bytes": 4808,
-          "sha256": "fd862b695afbb59e4404dda693de681b9b1c2cee28b585be48e97d049c49f218"
+          "bytes": 9197,
+          "sha256": "dad7f9ff96fa48d2433c93a8498906081c36ba770cb62feb68362202f452498e"
         },
         "death": {
           "frames": 7,
-          "bytes": 15118,
-          "sha256": "0124ed7885d1075dba10449117b08606242e266e721bd084a29c9362bf6dd268"
+          "bytes": 20352,
+          "sha256": "2a0c209fed07309102b27e660594374c17c275fd83a017c0fa84f156dfd31066"
         }
+      },
+      "visualPolish": {
+        "version": 1,
+        "kind": "RECRUITMENT_FORM_SILHOUETTE_DIFFERENTIATION_PASS",
+        "reviewStatus": "UNREVIEWED_RUNTIME_FILES",
+        "normalRuntimeAuthoritative": false
       }
     },
     "char_common_b_clockduck_f1": {
@@ -861,29 +969,35 @@
       "motions": {
         "idle": {
           "frames": 7,
-          "bytes": 4623,
-          "sha256": "032b64008fda25e2c4e47df639c440991efdc854f3d8ab431f71bf114fe4a055"
+          "bytes": 5565,
+          "sha256": "38d262cac3e2533c6461df7021a245e10330b3d995f6624dd4b7c604e109bcb6"
         },
         "move": {
           "frames": 8,
-          "bytes": 5443,
-          "sha256": "41bfe94265a90ed64864f42594191a38646b095145be350c369f898cf6e46b8c"
+          "bytes": 6537,
+          "sha256": "d2965cc05cb89d432de7480c254ffa6efa8a6867586a6499970ac16b18560ce9"
         },
         "attack": {
           "frames": 7,
-          "bytes": 4501,
-          "sha256": "6aa3f12dd3d771058c796bf3ec79f75131f7e69f5e019493d6d7d56cfc0a63b9"
+          "bytes": 5517,
+          "sha256": "c37fe8a95f4f3ea8eca8ce57a214878d18b57b9e7a54d93579de0c51d4aa2827"
         },
         "knockback": {
           "frames": 4,
-          "bytes": 2651,
-          "sha256": "a8344dc8a44669f89f5dca3ca6128b776f33d10604e5ce77668d198343df2bb6"
+          "bytes": 3829,
+          "sha256": "ba07576f735a948f0fed18156e791cd252d54bb67f70288b75b137ecbb8b6c11"
         },
         "death": {
           "frames": 7,
-          "bytes": 8955,
-          "sha256": "c7698e4a46fc98b2dd2e48bf359c14c4f2662b1edb0890077161fd02782e2d54"
+          "bytes": 11249,
+          "sha256": "c910f840a689c3ab0242836f2d2a3ae7ebc71e320b89ac0f89f51a5c3860efa6"
         }
+      },
+      "visualPolish": {
+        "version": 1,
+        "kind": "RECRUITMENT_FORM_SILHOUETTE_DIFFERENTIATION_PASS",
+        "reviewStatus": "UNREVIEWED_RUNTIME_FILES",
+        "normalRuntimeAuthoritative": false
       }
     },
     "char_common_b_clockduck_f2": {
@@ -907,29 +1021,35 @@
       "motions": {
         "idle": {
           "frames": 7,
-          "bytes": 5536,
-          "sha256": "e9a14eee833c8b566e9e7125f4df7c4a342536537880f3510710dc500e8b5e89"
+          "bytes": 7166,
+          "sha256": "ce6de0f51b12acfe87c9c2619477e06ab7ac492aa35cfca9196fb4951667726d"
         },
         "move": {
           "frames": 8,
-          "bytes": 6551,
-          "sha256": "8c15c195d6fe15efefba5425b4917a19a4039db4b851702a3811442469645771"
+          "bytes": 8528,
+          "sha256": "1687c04621c0df949660e56f164ba94cc810dccca5f7689a5b3fad4d7b649d70"
         },
         "attack": {
           "frames": 7,
-          "bytes": 5250,
-          "sha256": "8f173baf5e440473eb7d3f6164f7181e007986a1724b467bf1074450772f2bbe"
+          "bytes": 7479,
+          "sha256": "4f4aeefb5c6fbe5fb6f317f444b25cd540c3539209ff8457ed9fdecf040a04b0"
         },
         "knockback": {
           "frames": 4,
-          "bytes": 3344,
-          "sha256": "d4ef91986d450c7a922b7f9adf4f2393145114cce3d148ae24f17f03b9276543"
+          "bytes": 6096,
+          "sha256": "414cab429c04257d57e278d52fe5ac9a82f0ae9410fcb76f08e01a0659aa9a01"
         },
         "death": {
           "frames": 7,
-          "bytes": 12410,
-          "sha256": "471cfa506252f102060e515765b9bb2b1ba6ff42c441cc6e5bd3bf36eb8e646a"
+          "bytes": 15526,
+          "sha256": "69fa1dca0b54384ebb8c28844cb24182b172a03bf354694ede37e25c65c1af32"
         }
+      },
+      "visualPolish": {
+        "version": 1,
+        "kind": "RECRUITMENT_FORM_SILHOUETTE_DIFFERENTIATION_PASS",
+        "reviewStatus": "UNREVIEWED_RUNTIME_FILES",
+        "normalRuntimeAuthoritative": false
       }
     },
     "char_common_b_clockduck_f3": {
@@ -953,29 +1073,35 @@
       "motions": {
         "idle": {
           "frames": 7,
-          "bytes": 8004,
-          "sha256": "0757e04a4033663075e5a3113278d0da76d1d2f2dc163bff0ea199d8634a7849"
+          "bytes": 11062,
+          "sha256": "3de4ac63cf32cae6b449afec8deefd031fc2eb002d4d618a83fd7b29ea88e69d"
         },
         "move": {
           "frames": 8,
-          "bytes": 9468,
-          "sha256": "ff7fb33ed73cf3f1d89b53a86dba0925bbc65f143756cf1cf1534a1238b869e2"
+          "bytes": 13201,
+          "sha256": "c8ab909003f234b7007428f79c3e3cd194b3bd96cf2b8b9d1d01f728a1ae9375"
         },
         "attack": {
           "frames": 8,
-          "bytes": 8461,
-          "sha256": "25d45e339064b20f403e06269b31cff4c0e3293ecedc3f00fea6229dd6e7644e"
+          "bytes": 12411,
+          "sha256": "be1cd9734cb82bc35f6d4ca21529f34d6b3cf4173344cbe780825208b00b5678"
         },
         "knockback": {
           "frames": 4,
-          "bytes": 4703,
-          "sha256": "68d0c728a8bd6e751dfb85373e99ea6e0db12cdda3f1a3c3ac2ec50e63b1cd3f"
+          "bytes": 9481,
+          "sha256": "ea75dd8b55a1f38f968d599373809c74b5d01cf1e2aad84be3ed56e5a7895c1e"
         },
         "death": {
           "frames": 7,
-          "bytes": 15373,
-          "sha256": "1ef1d7ca6094317664f91d0c4574e549a9215e2fc39bc5bec486d25665fa4cb5"
+          "bytes": 21401,
+          "sha256": "4b21a4b0bb743b0f68056ffc28190e12e6c74554415de60f674b4c61f98b1308"
         }
+      },
+      "visualPolish": {
+        "version": 1,
+        "kind": "RECRUITMENT_FORM_SILHOUETTE_DIFFERENTIATION_PASS",
+        "reviewStatus": "UNREVIEWED_RUNTIME_FILES",
+        "normalRuntimeAuthoritative": false
       }
     },
     "char_common_b_coffin_merchant_f1": {
@@ -999,29 +1125,35 @@
       "motions": {
         "idle": {
           "frames": 7,
-          "bytes": 5749,
-          "sha256": "a0588c238ea822f3f359e28c39587f5ef7e845f2b380c45e58efc08c55c58326"
+          "bytes": 6111,
+          "sha256": "d79b2045550cab9e158dc3f3e3edfd9e0300f05b7662527cc4a86849697fa504"
         },
         "move": {
           "frames": 8,
-          "bytes": 6702,
-          "sha256": "8ca85259f0a995c607b8b27655397ad337306f4e7f778dc9bfbd9efaea1b3375"
+          "bytes": 7201,
+          "sha256": "23cde62c9d231cf849d8d03801911d2eeb8030718dec87361fd55ed52f12b0a0"
         },
         "attack": {
           "frames": 7,
-          "bytes": 5787,
-          "sha256": "e2db6a601aab2266922dd3171f0a2c46107b2879bbb51aa53d977eac703a7aec"
+          "bytes": 6663,
+          "sha256": "0a449f632a000b61f948f74fa335881e7be1d497ffc144caa2686958888ef3dc"
         },
         "knockback": {
           "frames": 4,
-          "bytes": 3296,
-          "sha256": "f2ec91c9f9065cdcc08ec4514c9c79055f48852b9c05a33a4c20cb99f686bd92"
+          "bytes": 3750,
+          "sha256": "48df52fe61ecda0e22b0460d7e0e51d6142a0b7d4ce8bcdda8e798ac4ce1a532"
         },
         "death": {
           "frames": 7,
-          "bytes": 10169,
-          "sha256": "135fbd350c8d6559d3e4b45330b507eaa61a278e4932f1652f9afe1682db986a"
+          "bytes": 10982,
+          "sha256": "6d8619dfa5afaec7885cb12e80704a8c227744dd91d03cb07b641499beac7c99"
         }
+      },
+      "visualPolish": {
+        "version": 1,
+        "kind": "RECRUITMENT_FORM_SILHOUETTE_DIFFERENTIATION_PASS",
+        "reviewStatus": "UNREVIEWED_RUNTIME_FILES",
+        "normalRuntimeAuthoritative": false
       }
     },
     "char_common_b_coffin_merchant_f2": {
@@ -1045,29 +1177,35 @@
       "motions": {
         "idle": {
           "frames": 7,
-          "bytes": 6398,
-          "sha256": "c2bd6b8503f67d418a57932abeeb540bc722b7177b860164a6a8504ab167f1c5"
+          "bytes": 7412,
+          "sha256": "cbe33365628c0d131d8832eaebc70eac327eaed1b54e343274d206e8e7e60150"
         },
         "move": {
           "frames": 8,
-          "bytes": 7653,
-          "sha256": "706832c16568fad1fe292468c44be23eb2ef9cb93fe6868bea3f62b61dfafb01"
+          "bytes": 8926,
+          "sha256": "9f3da78478477c127d4e529420495fa7db4fe618714d3b0acb9214f16bd31127"
         },
         "attack": {
           "frames": 7,
-          "bytes": 6254,
-          "sha256": "a87585ff0a4da7ac5114b6310df1240aed9db41d166b937d293542aa12fe128d"
+          "bytes": 8845,
+          "sha256": "237b8326eb15a2e0be8c31c0372681649e31449dc554cd90f0effc0bddb70df3"
         },
         "knockback": {
           "frames": 4,
-          "bytes": 3975,
-          "sha256": "0b029bc5fd2151f0e8157151f96a59297ce487755ad896c1edd6acd79866cedc"
+          "bytes": 6190,
+          "sha256": "bbda09f0d5c98ac578cf3c3123a8089449486632219322c2e7677c5fd0d7cea9"
         },
         "death": {
           "frames": 7,
-          "bytes": 12970,
-          "sha256": "5c41d1d4bcc29849cb30b0e969012a20af0d3a8023a92b82332f6628b7df9716"
+          "bytes": 14880,
+          "sha256": "70708ba7c9ef880b6e9722cf52c9c5e5b0763f21299de1a190a81a9f1255662a"
         }
+      },
+      "visualPolish": {
+        "version": 1,
+        "kind": "RECRUITMENT_FORM_SILHOUETTE_DIFFERENTIATION_PASS",
+        "reviewStatus": "UNREVIEWED_RUNTIME_FILES",
+        "normalRuntimeAuthoritative": false
       }
     },
     "char_common_b_coffin_merchant_f3": {
@@ -1091,29 +1229,35 @@
       "motions": {
         "idle": {
           "frames": 7,
-          "bytes": 8910,
-          "sha256": "b8e51cac13f5071291e17b41664c57a17097df081a9cb9c3e3a24f0d371af11b"
+          "bytes": 11121,
+          "sha256": "c3fb4760419d4e14b7b74bec8e58339a1c9a462cfd4db1b17ef7ee280101c825"
         },
         "move": {
           "frames": 8,
-          "bytes": 10635,
-          "sha256": "c925e61474290c812e5039f1981f8babb702f0fa84974c2d74d16707de622bef"
+          "bytes": 13278,
+          "sha256": "e9e16c900d7f82098ef11632260f18080c188e06a2c5a3dbadc529a5c208eb6e"
         },
         "attack": {
           "frames": 8,
-          "bytes": 9562,
-          "sha256": "33da1d50f9cf39db7148099b9e954bca9e7ca20452685981e27e51ca6178161f"
+          "bytes": 13118,
+          "sha256": "f342721592f8b9ff77913d0df0e7723d969942b56f98633da65c8d39dcd6f9af"
         },
         "knockback": {
           "frames": 4,
-          "bytes": 5417,
-          "sha256": "6d3357db404357a6d8867a625b7b3bb5d16e7705ac36fd5a51d18bf5d6662bb0"
+          "bytes": 9065,
+          "sha256": "7be4982aa8aff3853f0857972bcd69a5804c43ae5c4ea55f6287d08eff6d2bc3"
         },
         "death": {
           "frames": 7,
-          "bytes": 15934,
-          "sha256": "d9af133ac04507462e87715869060011425ea207dad6056a70d84e86bc497e5e"
+          "bytes": 20033,
+          "sha256": "f20b7ec54e5ce625414c1e4f3770181a95645f8ea1a8d623b564702fa9b4d7e9"
         }
+      },
+      "visualPolish": {
+        "version": 1,
+        "kind": "RECRUITMENT_FORM_SILHOUETTE_DIFFERENTIATION_PASS",
+        "reviewStatus": "UNREVIEWED_RUNTIME_FILES",
+        "normalRuntimeAuthoritative": false
       }
     },
     "char_common_b_moss_golem_f1": {
@@ -1137,29 +1281,35 @@
       "motions": {
         "idle": {
           "frames": 7,
-          "bytes": 7033,
-          "sha256": "9f4302413d781805fcfb8d53d21baa3dc4d986eb164d8587941172844d74f2e2"
+          "bytes": 7615,
+          "sha256": "bb1438c11ba0f82c77da1249f6367253a77c12d177de9fd7096ca059558bd621"
         },
         "move": {
           "frames": 8,
-          "bytes": 8045,
-          "sha256": "e4fe8120f47e0e7cd15deb7b5987eca1ab725b1103f1a7240b3513cb9f7be9ce"
+          "bytes": 8723,
+          "sha256": "c7517f7c72595f5ca77bd2addb6852c128b9110f7f2c4f1b4a58732b1ce57c6d"
         },
         "attack": {
           "frames": 7,
-          "bytes": 6660,
-          "sha256": "34d9c5f5bc8b5274cfacf0f6cfa00d08caceb98e0a834dd4d99322d14b2a402c"
+          "bytes": 7244,
+          "sha256": "2610a31025bcbd1b6f4f16799290ca0d62ba7eb608f531661942de12d79d2e36"
         },
         "knockback": {
           "frames": 4,
-          "bytes": 3987,
-          "sha256": "c2017245e2f012a2737b6989d9843cd064373377efa76e96645cfc2d41086a35"
+          "bytes": 4628,
+          "sha256": "c0abf538012d382ff0b41ce00a79e438cc00dda2d2e3f8a24b964598d213dade"
         },
         "death": {
           "frames": 7,
-          "bytes": 11646,
-          "sha256": "c4830db22e0a5bc46814f10afea510b348d603143766b1a88d6f3f3db6bb111d"
+          "bytes": 12709,
+          "sha256": "459354937aad311a96fc159b3d66f75db49c6020e40118845206a9b45f08d1e6"
         }
+      },
+      "visualPolish": {
+        "version": 1,
+        "kind": "RECRUITMENT_FORM_SILHOUETTE_DIFFERENTIATION_PASS",
+        "reviewStatus": "UNREVIEWED_RUNTIME_FILES",
+        "normalRuntimeAuthoritative": false
       }
     },
     "char_common_b_moss_golem_f2": {
@@ -1183,29 +1333,35 @@
       "motions": {
         "idle": {
           "frames": 7,
-          "bytes": 7865,
-          "sha256": "63858d520346661b379fe97dc5d0317101fad5a1255c5fbf893fd042fb498d90"
+          "bytes": 9105,
+          "sha256": "863f1933b8b4ac0c85766c61ccd81df9ced564d16dbc26f02867ad1921d2f4b1"
         },
         "move": {
           "frames": 8,
-          "bytes": 9366,
-          "sha256": "8465097caf255ce55879a63af3d3b1ee2f217e72cadc94808bec4fff2837e942"
+          "bytes": 10820,
+          "sha256": "47c4dd6468e80c36c6ac004bd81a6c49ade0933dad5139b12ec9981d392e3121"
         },
         "attack": {
           "frames": 7,
-          "bytes": 7524,
-          "sha256": "fc7c27f868385aaf6b37353abed77423b84c42ba966bfa07c546fc5170800ed1"
+          "bytes": 9426,
+          "sha256": "bc7a84998e02ea0dd03a60e9eaf7d0a127bc34f9c5f1346c99a0d978d4ff44fe"
         },
         "knockback": {
           "frames": 4,
-          "bytes": 4685,
-          "sha256": "ed4d26c8735e8f12e75fee7ee3f84619435ecf2341cff1502d49f4d3e691bb9b"
+          "bytes": 7644,
+          "sha256": "e71cb2854a080db0a73e5ce486f23efb22ba05ad12333360282884384aceac24"
         },
         "death": {
           "frames": 7,
-          "bytes": 15969,
-          "sha256": "703cad70df2a25897e59b47d8b8a0cd6d2ba513c486e983a6eb6272fa634c9ac"
+          "bytes": 18748,
+          "sha256": "c9b358852c15e9d3fda3d3a04e3582c4fe062bfa5cba471431e4b27b53250b1c"
         }
+      },
+      "visualPolish": {
+        "version": 1,
+        "kind": "RECRUITMENT_FORM_SILHOUETTE_DIFFERENTIATION_PASS",
+        "reviewStatus": "UNREVIEWED_RUNTIME_FILES",
+        "normalRuntimeAuthoritative": false
       }
     },
     "char_common_b_moss_golem_f3": {
@@ -1229,29 +1385,35 @@
       "motions": {
         "idle": {
           "frames": 7,
-          "bytes": 10165,
-          "sha256": "38640a052b1190102b7f2ae4c2570bc99716c4b1231613f78920cb58f49a3cad"
+          "bytes": 12780,
+          "sha256": "7ed7d51d91b831c6f34658b48c54877dd5a76750d7378ea3d862e06de0eb5939"
         },
         "move": {
           "frames": 8,
-          "bytes": 12306,
-          "sha256": "92aab2638200a4d10698b31a2e436b8ff19ce9b42d6d360882a48710991aca5b"
+          "bytes": 15596,
+          "sha256": "5ecd7b9871edf72f48af26942765bf3ed28239177b302ed413e867bb59aa9570"
         },
         "attack": {
           "frames": 8,
-          "bytes": 10973,
-          "sha256": "ea2f5f01d2268cb5f9282cef14bd28ff0436e4d4c07f1a5a942238a8fcdee769"
+          "bytes": 15245,
+          "sha256": "146b1e974d3d49d0cabfeb47afa3b65f9fd6ec00c5488eff9db14b4f571c4f9c"
         },
         "knockback": {
           "frames": 4,
-          "bytes": 5879,
-          "sha256": "4cefb14dad9fb24fbd74504e70a12c24cc7194b769700fb45b6e4ce727bf4b3c"
+          "bytes": 10208,
+          "sha256": "a6fb31a46e7cd6b94ee8739a2a889849867568b76c52c87481a25b3ebf6fca15"
         },
         "death": {
           "frames": 7,
-          "bytes": 19068,
-          "sha256": "9a2a502f6f2f61fba0c886d566915e16b6231acb3ae85e4e0d8c9b872c5c2dcb"
+          "bytes": 24000,
+          "sha256": "9eebedfc5d203cb7673ed7b2f8ab019c59136b8067a2fb1466634bae10ad7ae0"
         }
+      },
+      "visualPolish": {
+        "version": 1,
+        "kind": "RECRUITMENT_FORM_SILHOUETTE_DIFFERENTIATION_PASS",
+        "reviewStatus": "UNREVIEWED_RUNTIME_FILES",
+        "normalRuntimeAuthoritative": false
       }
     },
     "char_common_b_ink_raven_f1": {
@@ -1275,29 +1437,35 @@
       "motions": {
         "idle": {
           "frames": 7,
-          "bytes": 5978,
-          "sha256": "476e643e671db4e013829d7b21692e2c9c741fc4181839a49cadcd083a395a33"
+          "bytes": 6690,
+          "sha256": "c770d9de7f6da67ef00145f7a3ce252c07d019fa166de634781bbc8a6b60f75e"
         },
         "move": {
           "frames": 8,
-          "bytes": 6847,
-          "sha256": "13426adc50530fbd4092a4e60059f3be63302beea56e766dea5a67f244e5a3fe"
+          "bytes": 7798,
+          "sha256": "458f239554e9ca9d6bda7859c1fce1397a35da50f481869daf35b54fa5024c20"
         },
         "attack": {
           "frames": 7,
-          "bytes": 5751,
-          "sha256": "244fffc04f30383e48b8f2ad6fc42a326166769981069f14815541896adf089b"
+          "bytes": 6669,
+          "sha256": "c7d88d83faccd7076720db7a39d0139a8c38fc5947184aef77dd035a4da64bc6"
         },
         "knockback": {
           "frames": 4,
-          "bytes": 3388,
-          "sha256": "539c9faa6f29c6c67f8ff82c1bfd581e8e3cf8c2ec8b9d6eafcb8828b6f74abe"
+          "bytes": 4740,
+          "sha256": "88ef895406c7ff25bc762fabdb641e9dfd00ae16bff1fdf4fbe7722525686856"
         },
         "death": {
           "frames": 7,
-          "bytes": 9499,
-          "sha256": "a3790a9413b05648fee650d2cd0ad9c5ea8eaba1129fb11cd02f81e50917e2a0"
+          "bytes": 12021,
+          "sha256": "95808ca1cf16626319172611f9bad3bc389d9a574004329fd407f27656c78d4d"
         }
+      },
+      "visualPolish": {
+        "version": 1,
+        "kind": "RECRUITMENT_FORM_SILHOUETTE_DIFFERENTIATION_PASS",
+        "reviewStatus": "UNREVIEWED_RUNTIME_FILES",
+        "normalRuntimeAuthoritative": false
       }
     },
     "char_common_b_ink_raven_f2": {
@@ -1321,29 +1489,35 @@
       "motions": {
         "idle": {
           "frames": 7,
-          "bytes": 7039,
-          "sha256": "1e5e248c2244389acfd34280707da41f195dcb681a496c4bd51eeab72af62922"
+          "bytes": 9183,
+          "sha256": "16c27e2648dae478c8fedd9a0bbf1f43e6b929c3c6a1aaad21c6b588996782a6"
         },
         "move": {
           "frames": 8,
-          "bytes": 8300,
-          "sha256": "75a26921033dc415d7281cdb7e2a49ffe12e9eb3e2c7a08ad08da31643906093"
+          "bytes": 11185,
+          "sha256": "ad8a247ec2f7078f60ed4e6f3cd76652c929c93c7a4e6a6aa6f44881190883fa"
         },
         "attack": {
           "frames": 7,
-          "bytes": 6613,
-          "sha256": "729b1786eca0bb985c74692a634c7487cdce066b08eaa2dc464f1703771dcc82"
+          "bytes": 10389,
+          "sha256": "c08318dcb56bd7cfce6fe4202e653c8e7e01331c2b014451fc9c0039220616c2"
         },
         "knockback": {
           "frames": 4,
-          "bytes": 4262,
-          "sha256": "09c8d5494110d747d70e53e57eb5aa19849c454f4521d3ff0b4291cd99bd75fa"
+          "bytes": 8971,
+          "sha256": "b15ef6159be57c31b4d25910e49f3ded2bac6aa5344154dcbd04ad70757af1fe"
         },
         "death": {
           "frames": 7,
-          "bytes": 13717,
-          "sha256": "4daade6c69f534c1113c6f23c4af409247b8358f861fde156f57035282fdf19f"
+          "bytes": 18659,
+          "sha256": "1e07ead6a7bec63a00183bb554386501be63de99b1b96611321863d39e83bdcf"
         }
+      },
+      "visualPolish": {
+        "version": 1,
+        "kind": "RECRUITMENT_FORM_SILHOUETTE_DIFFERENTIATION_PASS",
+        "reviewStatus": "UNREVIEWED_RUNTIME_FILES",
+        "normalRuntimeAuthoritative": false
       }
     },
     "char_common_b_ink_raven_f3": {
@@ -1367,29 +1541,35 @@
       "motions": {
         "idle": {
           "frames": 7,
-          "bytes": 9039,
-          "sha256": "a22958a835a3ca2e69b510663351bbb5512687ff97a313bb221ca9cefa6b68e3"
+          "bytes": 11401,
+          "sha256": "4392c40be473b2e204a7c5a6884871fa6b56d791d819ea61e96785db1f1473c6"
         },
         "move": {
           "frames": 8,
-          "bytes": 10824,
-          "sha256": "e13518b0649c1763c76b2ce97e088bc42e60e2b03f85e64c083b8ace7d2d3f1b"
+          "bytes": 14157,
+          "sha256": "8df9868b37d297125d5c126e1fa2b90d2d97407fd5b2487524206429e22f1fc8"
         },
         "attack": {
           "frames": 8,
-          "bytes": 9658,
-          "sha256": "b9e8c3f6d4943a50d1a7d9ee35804ec63a616549833f35588c49fdc23217c3c2"
+          "bytes": 13955,
+          "sha256": "181e90b1aa2f94721b42afe8eedb454a9580b293b15f80ced5cca082c968a346"
         },
         "knockback": {
           "frames": 4,
-          "bytes": 5346,
-          "sha256": "3a0f5c00a94bc3ce4f386514ddb43186d4cbd5e9f100541a4f306d0d178ec8a0"
+          "bytes": 10416,
+          "sha256": "3b38c1e482b33eadc2d58992a10e42084d838ec0bc6d1353a7864e02e3252812"
         },
         "death": {
           "frames": 7,
-          "bytes": 16293,
-          "sha256": "e3bb0d9de4539354b9b318098d98116ba039483378a98282b442aa04511955f2"
+          "bytes": 21769,
+          "sha256": "10697fec96f6dd27474e577322b8d92cc2aaa5e9f90cfb2a825a78a9da70fe3b"
         }
+      },
+      "visualPolish": {
+        "version": 1,
+        "kind": "RECRUITMENT_FORM_SILHOUETTE_DIFFERENTIATION_PASS",
+        "reviewStatus": "UNREVIEWED_RUNTIME_FILES",
+        "normalRuntimeAuthoritative": false
       }
     },
     "char_common_a_glass_keeper_f1": {
@@ -1413,29 +1593,35 @@
       "motions": {
         "idle": {
           "frames": 7,
-          "bytes": 6452,
-          "sha256": "44f052db44b4ce328a1013987fa6c4083b055279d87ed45b251b1cdc54901d09"
+          "bytes": 6812,
+          "sha256": "ad770a9bbf488e13580d69d6422cae53c4ca411d5277c0913edbc03e36730a5a"
         },
         "move": {
           "frames": 8,
-          "bytes": 7464,
-          "sha256": "c5940f071e6e9cc8d2bbfc87754f851257c42b93b7756c3e511ef8f6f751ddf1"
+          "bytes": 7922,
+          "sha256": "7c8b6701387c3ae92c4f81c702a8fdc0bb6c91005e707a37d99679b6f6073fce"
         },
         "attack": {
           "frames": 8,
-          "bytes": 7340,
-          "sha256": "2e942cf7ff8f49b396f4227c7e87f65874548f48606faaedc00e6fc6ac340f70"
+          "bytes": 8194,
+          "sha256": "46dc87627259c86bc4d827cf1221ef6530d7e5b5e89b0f59919fa5d92fea5c2c"
         },
         "knockback": {
           "frames": 4,
-          "bytes": 3515,
-          "sha256": "9a458ecc3e2f3097817a547d70ffa421b52054a9280a10c38cb00770371b4ab3"
+          "bytes": 4028,
+          "sha256": "00a1ccc8a2c3c9e8b7a31beaac0e8a1847ed293dd0ce617e9b25f3a75ffae611"
         },
         "death": {
           "frames": 7,
-          "bytes": 9742,
-          "sha256": "48aad94af31770a045ef51ee1a705cad52d94f1127a874aae744c0ec57e133b8"
+          "bytes": 10491,
+          "sha256": "cf766b745f2db10d78e20a919ea17236c84708f4a1bbd8c932265f46ba9421fd"
         }
+      },
+      "visualPolish": {
+        "version": 1,
+        "kind": "RECRUITMENT_FORM_SILHOUETTE_DIFFERENTIATION_PASS",
+        "reviewStatus": "UNREVIEWED_RUNTIME_FILES",
+        "normalRuntimeAuthoritative": false
       }
     },
     "char_common_a_glass_keeper_f2": {
@@ -1459,29 +1645,35 @@
       "motions": {
         "idle": {
           "frames": 7,
-          "bytes": 7037,
-          "sha256": "f306e46ae444894adc2492bcd8c003ba356538e026bf411f131029aab0c72572"
+          "bytes": 8303,
+          "sha256": "65bc8c89c3bdbe3f21517259826a0df9f6fbf34201f6b87b60c56142d518b828"
         },
         "move": {
           "frames": 8,
-          "bytes": 8174,
-          "sha256": "a52e4613a4a996d908d4b5a660e9900b2e8840726a64a33d2f41794bff1f2478"
+          "bytes": 9841,
+          "sha256": "60667c37055476234b35ad7ada99e58238c2f38f70965f76f40081336f0d4e0f"
         },
         "attack": {
           "frames": 8,
-          "bytes": 7779,
-          "sha256": "09af9a5935b2e3f6580ce2d67d5098d8312fe4e4ebd979c026fa1698a6921797"
+          "bytes": 11038,
+          "sha256": "de73dcbc645b5f54d0c62be67858869bae32e008c2d76bf9609b0bbc942fc5ae"
         },
         "knockback": {
           "frames": 4,
-          "bytes": 4268,
-          "sha256": "629e162b697b035d02d83a5b3c8f4efa9cb85b74b98b86b386b86f15d19ec8ce"
+          "bytes": 7184,
+          "sha256": "3440aa6c9420b54b4046062666e90ab6b45913d58dd1d382d99cfd38cc2fa60b"
         },
         "death": {
           "frames": 7,
-          "bytes": 12859,
-          "sha256": "17022e37d33db00d6525b4e37dbd1fe8c34c82939e167f2a7f08fdfe4efb8fde"
+          "bytes": 15240,
+          "sha256": "de97ead146d7b4a4628836710d34bc4fc0774c5f1df7d82e20e97f9daeb0b3e3"
         }
+      },
+      "visualPolish": {
+        "version": 1,
+        "kind": "RECRUITMENT_FORM_SILHOUETTE_DIFFERENTIATION_PASS",
+        "reviewStatus": "UNREVIEWED_RUNTIME_FILES",
+        "normalRuntimeAuthoritative": false
       }
     },
     "char_common_a_glass_keeper_f3": {
@@ -1505,29 +1697,35 @@
       "motions": {
         "idle": {
           "frames": 7,
-          "bytes": 8919,
-          "sha256": "ada6966deaf5583bbed1009259b2459aecc77ba46e73599d8accde21e60b6ceb"
+          "bytes": 11387,
+          "sha256": "aed82a58392e92721a0cad5408c79474fe0edb9945a0a6d4c9b2d10948a77cfe"
         },
         "move": {
           "frames": 8,
-          "bytes": 10800,
-          "sha256": "6fbcc49e6bfe7d2ba9ee90bce47468ae2d02d437ad5ef717b826ca2c8e7e0bc4"
+          "bytes": 13865,
+          "sha256": "61a0d8e5f244c5b3cd5ccbf9575ac790d33e2fb19b9b83eab0c5361115feb79f"
         },
         "attack": {
           "frames": 9,
-          "bytes": 10994,
-          "sha256": "46c13e9e0d8474508f8224b03690f61f962ae4664f5c671c72563fc97ce0e813"
+          "bytes": 15756,
+          "sha256": "848a2b5678fece4567e1fe3271bd3d272c164ca8512e2abb4db3f7c6595efb30"
         },
         "knockback": {
           "frames": 4,
-          "bytes": 5143,
-          "sha256": "6f342c9b4165502d819d173980172106683945e77ea2d372f258c6f75ed36d0a"
+          "bytes": 9614,
+          "sha256": "b908c09cb1ce394ea7bd9ccbf4aa2c895a3b722362024135c4b3c704fd9ff930"
         },
         "death": {
           "frames": 7,
-          "bytes": 15485,
-          "sha256": "5aa9ad80a15b144a1d92c01e2979442a9657fc4143e60bdb9da4783132238c9b"
+          "bytes": 19762,
+          "sha256": "b5e8fbb583701dfa5af2ea43606186b4991ede30ba664be8882e69b56d3acd92"
         }
+      },
+      "visualPolish": {
+        "version": 1,
+        "kind": "RECRUITMENT_FORM_SILHOUETTE_DIFFERENTIATION_PASS",
+        "reviewStatus": "UNREVIEWED_RUNTIME_FILES",
+        "normalRuntimeAuthoritative": false
       }
     },
     "char_common_a_bonedrum_f1": {
@@ -1551,29 +1749,35 @@
       "motions": {
         "idle": {
           "frames": 7,
-          "bytes": 5425,
-          "sha256": "c3da0ac91e8b2a83c460ed43d852f9b4d9de9685f8f26e850ca44fec55198755"
+          "bytes": 5866,
+          "sha256": "43e14f4ac92601649caddd0d186cc4cc399691180ff0bb0cccdfb163bca2994c"
         },
         "move": {
           "frames": 8,
-          "bytes": 6422,
-          "sha256": "db790f79263775ae527c06b673bc003b6387addb9387a1796aad4bc79f75787e"
+          "bytes": 6929,
+          "sha256": "0d2fe6faa1aca2dd56b2e211f10bf3cab4911ece0231ebd7e95ed341b6e2e285"
         },
         "attack": {
           "frames": 8,
-          "bytes": 6368,
-          "sha256": "686b755deb200fda591375b6a4b0f478a274337cfad5e48dca664a554e507fda"
+          "bytes": 7344,
+          "sha256": "7ac8a480f8efd9ebe5f9aa9e202799aed6be0edb11f78752266c61416ed3b757"
         },
         "knockback": {
           "frames": 4,
-          "bytes": 2951,
-          "sha256": "69a0d76569d9a60de585c58d60bc554e5fb1191f50a1c46519d65aacb1eadc7a"
+          "bytes": 3498,
+          "sha256": "121d6b606b4591cd4217ccd5cf116dffed88d33c16a200d65592527dcf37a303"
         },
         "death": {
           "frames": 7,
-          "bytes": 9505,
-          "sha256": "591d1ff3789eb149002c31a3f7ff6b64fb9740c67326c7aec3d15760f117b34c"
+          "bytes": 10158,
+          "sha256": "d4a9bcd236ba0dbc9e41b5f34258059fa5182f7196418d767e6864332fa52f9e"
         }
+      },
+      "visualPolish": {
+        "version": 1,
+        "kind": "RECRUITMENT_FORM_SILHOUETTE_DIFFERENTIATION_PASS",
+        "reviewStatus": "UNREVIEWED_RUNTIME_FILES",
+        "normalRuntimeAuthoritative": false
       }
     },
     "char_common_a_bonedrum_f2": {
@@ -1597,29 +1801,35 @@
       "motions": {
         "idle": {
           "frames": 7,
-          "bytes": 6186,
-          "sha256": "0284654afc115afb4cb7b84b76c44ed3076fdfca521cd12bbc4e76630ff0dcfb"
+          "bytes": 7691,
+          "sha256": "09d57e1df1d9b6f1e70f8e566baeef280326e3a578100bac649d6816686b9300"
         },
         "move": {
           "frames": 8,
-          "bytes": 7301,
-          "sha256": "5b5c7d051b572d582ebf31fff096f4f50ffa1f52b43e10eece92dcfab90ad397"
+          "bytes": 9204,
+          "sha256": "db0c8a9450f2a075e2891c16fa91f59d8f6dc41fd3c45305802855479e828654"
         },
         "attack": {
           "frames": 8,
-          "bytes": 7156,
-          "sha256": "58279d5f863b1c0c5c5349393974b33f9820955ed2a5b50ae1683363c55a5809"
+          "bytes": 10559,
+          "sha256": "06a6d9e521e28cad46b58d66d731222a62cc82e6b2c2b3690316f7ab087705b9"
         },
         "knockback": {
           "frames": 4,
-          "bytes": 3734,
-          "sha256": "ef69efc6c8b556901b4b1e7e3edecd3e24b84cd8eee52e60b07cc013335004ec"
+          "bytes": 6309,
+          "sha256": "746858db03ea9da5bb886154bd89e5bced18c7a9a8fc2c7bbe8e36ec573076b5"
         },
         "death": {
           "frames": 7,
-          "bytes": 12803,
-          "sha256": "eaec85c8b5db8e528c73b41527dbbde2e29e58dbc58995ee68dc095b551dcca4"
+          "bytes": 15266,
+          "sha256": "4728afbb9baf22a6ab3c282ee7c725655c2fdfb3222da23a851068a6577ce701"
         }
+      },
+      "visualPolish": {
+        "version": 1,
+        "kind": "RECRUITMENT_FORM_SILHOUETTE_DIFFERENTIATION_PASS",
+        "reviewStatus": "UNREVIEWED_RUNTIME_FILES",
+        "normalRuntimeAuthoritative": false
       }
     },
     "char_common_a_bonedrum_f3": {
@@ -1643,29 +1853,35 @@
       "motions": {
         "idle": {
           "frames": 7,
-          "bytes": 8601,
-          "sha256": "e195665d62cdb6dafb60c48b0377add4c8f0bd681ba16a3da1b539d7e5342be8"
+          "bytes": 10748,
+          "sha256": "2d251a08b00104e5ed250467b0f3c020d312f9de4e72f18dd02698e6457c349e"
         },
         "move": {
           "frames": 8,
-          "bytes": 10299,
-          "sha256": "d5af4d3276b450b91c3952c4d13129e16a1861002a8af5727411c68cc90ad534"
+          "bytes": 12950,
+          "sha256": "a4d365d040fb489ef778b1dea0f3b58d4475a87b9f93d5e07526048f4e839713"
         },
         "attack": {
           "frames": 9,
-          "bytes": 10665,
-          "sha256": "c5fd7ea38f7d70658b7212ac725c5852e57787fb7763dc94d81cdaa54df3d48e"
+          "bytes": 14850,
+          "sha256": "aa3bd9ad14551849fcb4eda16b544d18bbb819ab916ab1df7e86e7cffa29e4be"
         },
         "knockback": {
           "frames": 4,
-          "bytes": 4979,
-          "sha256": "5dad1495cc780c5f0207b32a197524cf4062cbfda7e9c8e1fff342e6227d2072"
+          "bytes": 8091,
+          "sha256": "735a445f85109efc076cd15024b4c030b1469ac9e20b7f2ea4a941688c251410"
         },
         "death": {
           "frames": 7,
-          "bytes": 15690,
-          "sha256": "16111152662c8c3d434dcd71adafb376c65b418a0771ca5778806235e18e6799"
+          "bytes": 19418,
+          "sha256": "3a30431c6b3d03a239a45b0c8f2197908dd515d924569a6e0a4fcf32dad46570"
         }
+      },
+      "visualPolish": {
+        "version": 1,
+        "kind": "RECRUITMENT_FORM_SILHOUETTE_DIFFERENTIATION_PASS",
+        "reviewStatus": "UNREVIEWED_RUNTIME_FILES",
+        "normalRuntimeAuthoritative": false
       }
     },
     "char_common_a_paper_dragon_f1": {
@@ -1689,29 +1905,35 @@
       "motions": {
         "idle": {
           "frames": 7,
-          "bytes": 5157,
-          "sha256": "5b69de71a89ef269aa7c64aeab58f111b33344f594ad18bf2c40237d76a818c5"
+          "bytes": 6355,
+          "sha256": "e68a8c1b98f44ff96e3f19ec0c57012a31d4c162d16885f2434e8c94c3db13bd"
         },
         "move": {
           "frames": 8,
-          "bytes": 6013,
-          "sha256": "5d1eb6201173216eeeb796d003e2efa1e504e51d59f1f84ff31b35f9b2bf33e3"
+          "bytes": 7413,
+          "sha256": "b0d1fdad34b832c2be668fe039bfd770955df22ba1d2344f5927b805b62bef9c"
         },
         "attack": {
           "frames": 8,
-          "bytes": 6200,
-          "sha256": "93b477070cc0d3fb211d6d39ffdfcd238764309ed8fe2e6b3bc174df508988c1"
+          "bytes": 7367,
+          "sha256": "dbc24082cb92601b4a45513fd7d4b1b33ea1ce8d74118b20a7fd87b1f8aec587"
         },
         "knockback": {
           "frames": 4,
-          "bytes": 2888,
-          "sha256": "7094ec26a21efc14be0866d13290d02096894b8a505b8cf501a7ad0d9de94ab2"
+          "bytes": 3638,
+          "sha256": "2f8acae64006c982f7941c5231bd041d66d9c6af4c78e090e43e08e6e65d011d"
         },
         "death": {
           "frames": 7,
-          "bytes": 9537,
-          "sha256": "904d5661cf63c0b56aeb75866a926bdccf6f16a51a202ab90f080a6816d058f9"
+          "bytes": 11203,
+          "sha256": "d588613034960616849c1662b289f2cdc7afbbd55302a2c567175df96c0108c7"
         }
+      },
+      "visualPolish": {
+        "version": 1,
+        "kind": "RECRUITMENT_FORM_SILHOUETTE_DIFFERENTIATION_PASS",
+        "reviewStatus": "UNREVIEWED_RUNTIME_FILES",
+        "normalRuntimeAuthoritative": false
       }
     },
     "char_common_a_paper_dragon_f2": {
@@ -1735,29 +1957,35 @@
       "motions": {
         "idle": {
           "frames": 7,
-          "bytes": 6127,
-          "sha256": "8acd8e3c4c0393382d24881066cc34fa250e45716d98fe09edb7b5f2b01f9fc9"
+          "bytes": 8814,
+          "sha256": "49032d90bf0fca99e19c655f3a6b99936fb59d17450481a3ba49e885aa19a15e"
         },
         "move": {
           "frames": 8,
-          "bytes": 7238,
-          "sha256": "31ce493fc1c9710f929d6b9181eee10fdab599919abd9c74885966e0a565abd0"
+          "bytes": 10662,
+          "sha256": "d6a879ff4836a23c88980b9f085def87adcc0343c0cf676e71b8cf18de651bef"
         },
         "attack": {
           "frames": 8,
-          "bytes": 7227,
-          "sha256": "00b56857f7b714e71563e5ab1005fe5e045d1468f2de236808afcb8fd1b21a30"
+          "bytes": 11871,
+          "sha256": "cddca5682044b5c5c1af9bd71007448072f2d5d3f3bc76ad53e81ee1c01d0422"
         },
         "knockback": {
           "frames": 4,
-          "bytes": 3701,
-          "sha256": "e281b0d5d87a4cf07dd863cdf26b4f349dbab997a1c6ecfa33a6c9fd3e838803"
+          "bytes": 8497,
+          "sha256": "448b8637d8263bac9915ca023da648d332d20e090990ef5ae6e6209078c0bce6"
         },
         "death": {
           "frames": 7,
-          "bytes": 13623,
-          "sha256": "5ee0e6d029d62f62aaed130843cc8cc92ccc00c65e04db8fd1459251341f727b"
+          "bytes": 19235,
+          "sha256": "fafb67bd456dc2249bf61d12d57bbe77f4687eb5c32f913839eb7b1c0c7e0f66"
         }
+      },
+      "visualPolish": {
+        "version": 1,
+        "kind": "RECRUITMENT_FORM_SILHOUETTE_DIFFERENTIATION_PASS",
+        "reviewStatus": "UNREVIEWED_RUNTIME_FILES",
+        "normalRuntimeAuthoritative": false
       }
     },
     "char_common_a_paper_dragon_f3": {
@@ -1781,29 +2009,35 @@
       "motions": {
         "idle": {
           "frames": 7,
-          "bytes": 8101,
-          "sha256": "44e2d5bdfa6af658f6a053ca5cc143086d6417ad216c1e7d529c6469bc7da46f"
+          "bytes": 11232,
+          "sha256": "e0d6a10dc6de578eabbb1a95f67d257bd6524a37dd98511139c53565922bee41"
         },
         "move": {
           "frames": 8,
-          "bytes": 9857,
-          "sha256": "5d3770c25aed742221865aeb03ed3053d0e659a08a4e36baaa87839b6ec9e137"
+          "bytes": 14072,
+          "sha256": "fb6bb51717e51cc2c3832609308d975161e8b8cc5757c65810c4c456a3912d12"
         },
         "attack": {
           "frames": 9,
-          "bytes": 10371,
-          "sha256": "ba2439c48005b2ab85fecb43dd568cf9981ec0fdacd3983e9914e246e517bf8c"
+          "bytes": 16208,
+          "sha256": "7435d030d9031926c6c3b17d4591684ff858ff9d1c0e319d99866fef400272fd"
         },
         "knockback": {
           "frames": 4,
-          "bytes": 4806,
-          "sha256": "529910db91f133f6f665f53b01c0f3a4534fd49b0655f210972d1ac9bc1b5ebb"
+          "bytes": 10669,
+          "sha256": "8bb574f67c36730956135284825b246859d351abdc4f23312f7962a6128e9052"
         },
         "death": {
           "frames": 7,
-          "bytes": 16135,
-          "sha256": "d90d8dbeb112a7a1f760058b2942ea6c0eec68d7e75dcd126e31288f89c81e3c"
+          "bytes": 23009,
+          "sha256": "fd48ce6fbccdcabe68f22c5736316c9b35af03b664cd89678be27da2126970d9"
         }
+      },
+      "visualPolish": {
+        "version": 1,
+        "kind": "RECRUITMENT_FORM_SILHOUETTE_DIFFERENTIATION_PASS",
+        "reviewStatus": "UNREVIEWED_RUNTIME_FILES",
+        "normalRuntimeAuthoritative": false
       }
     },
     "char_common_a_meteor_cart_f1": {
@@ -1827,29 +2061,35 @@
       "motions": {
         "idle": {
           "frames": 7,
-          "bytes": 6638,
-          "sha256": "776e56056c9e167b96d52888b95d916cba9d4b9f187428a391b1c9e347bfb5de"
+          "bytes": 7858,
+          "sha256": "c9506b01076bb570ba29a70e8cd0ef5af96094f850948e6cde2fafbaad7d10a4"
         },
         "move": {
           "frames": 8,
-          "bytes": 7757,
-          "sha256": "cb59fc0c8984792c419e85407e01a0ac45a9ea2a5147e6900116a16ee418fcfd"
+          "bytes": 9198,
+          "sha256": "4b3e7f1f61d1f33da774a001c7ad22ee8a72cffed385d64acd92d7d0e299edc3"
         },
         "attack": {
           "frames": 8,
-          "bytes": 7733,
-          "sha256": "364c7e3ef6a614c374b1a74dd8b592877c339a426495b681d9188009c4e52dbc"
+          "bytes": 8960,
+          "sha256": "dc5f782b0136c2b37d676a4d579fa9d40903073b74f10f90749c8c8f0fc60d11"
         },
         "knockback": {
           "frames": 4,
-          "bytes": 3815,
-          "sha256": "cdf0ef4edd7c637eff98c6883947d295fa0953c9d28f1024a0cd5398722a5af1"
+          "bytes": 4462,
+          "sha256": "883f0d4702b37eb2acb53c6e2616509badba1c11a8370f7f2797be86a14bee54"
         },
         "death": {
           "frames": 7,
-          "bytes": 10723,
-          "sha256": "45652b474f42f886a53f0965169072a296b317be4450304aa6f396b345672b2a"
+          "bytes": 12580,
+          "sha256": "70bc3ff2c8214a934de9d0d30513a8f5e956aac37a264cb28264100df4f1e68c"
         }
+      },
+      "visualPolish": {
+        "version": 1,
+        "kind": "RECRUITMENT_FORM_SILHOUETTE_DIFFERENTIATION_PASS",
+        "reviewStatus": "UNREVIEWED_RUNTIME_FILES",
+        "normalRuntimeAuthoritative": false
       }
     },
     "char_common_a_meteor_cart_f2": {
@@ -1873,29 +2113,35 @@
       "motions": {
         "idle": {
           "frames": 7,
-          "bytes": 7434,
-          "sha256": "035a199d72d3be8f14a9bbcc9680d40e73a4bfefd414bf6fa2e7f3fb0aaf8732"
+          "bytes": 9362,
+          "sha256": "d18e1099c8708ca7626d9a2ed19a57ce0b95d18527023176b52c5e6b0fddf4e9"
         },
         "move": {
           "frames": 8,
-          "bytes": 8651,
-          "sha256": "104a04dbcc03d7823c907cb6e7204a1968f581c6aa4c9a179dd74530f1981645"
+          "bytes": 10880,
+          "sha256": "6ab84631b1000ee3714dbc79190c221dcd807696e7488a83e8f67d0853769894"
         },
         "attack": {
           "frames": 8,
-          "bytes": 8334,
-          "sha256": "30a2a165778527cd8175e6dae9c653e0fc7c3d2a93c26b2b1ff873f94fe74aff"
+          "bytes": 11528,
+          "sha256": "4211d49e2be60e207328fd0bd818a195478b8d1e68bef05546738e0af246044c"
         },
         "knockback": {
           "frames": 4,
-          "bytes": 4305,
-          "sha256": "cc097e059cfcab813c5e5100ab7823b4261b541709b1b3492f028b5e28823c5e"
+          "bytes": 7289,
+          "sha256": "1f9100d28bcd99532bf864b1c45fa1b20c0132de7f7ae6c7cdd39127909727f0"
         },
         "death": {
           "frames": 7,
-          "bytes": 14204,
-          "sha256": "00bd3c2fe5c90c4aa3d69b2d68f129d7fce543f530ca3f517f24903cd93abd2f"
+          "bytes": 17446,
+          "sha256": "5fb9b6f3f47b8f50979d58ad75ff7babd3a94139c85cdf9a2e9255da97eba2be"
         }
+      },
+      "visualPolish": {
+        "version": 1,
+        "kind": "RECRUITMENT_FORM_SILHOUETTE_DIFFERENTIATION_PASS",
+        "reviewStatus": "UNREVIEWED_RUNTIME_FILES",
+        "normalRuntimeAuthoritative": false
       }
     },
     "char_common_a_meteor_cart_f3": {
@@ -1919,29 +2165,35 @@
       "motions": {
         "idle": {
           "frames": 7,
-          "bytes": 9576,
-          "sha256": "bb39b2983d14173b4354f2701a34148279150cc88e0d6dbf2b0254db6d4bedd2"
+          "bytes": 12915,
+          "sha256": "b52b434a86905096991cfc6c67091c41695ee43fd14e748c1254d7592b544419"
         },
         "move": {
           "frames": 8,
-          "bytes": 11359,
-          "sha256": "84964534a43d2152fc7fa5c100abf4be26e12034911e8faabc9535cb804d5cbd"
+          "bytes": 15538,
+          "sha256": "b7e35f7d77f2f408c169216fec9cf95fac8f8fce2ce694cb1933fa0a37a6f4b5"
         },
         "attack": {
           "frames": 9,
-          "bytes": 11972,
-          "sha256": "3987674adcbf8bf1e4efcfdd75c4395651841b87e0eef10a3cb917a63fcd47e5"
+          "bytes": 17202,
+          "sha256": "502171dc0125e875e865067d741ea14b4679ead40022efb91ba897959f50630f"
         },
         "knockback": {
           "frames": 4,
-          "bytes": 5493,
-          "sha256": "924b6ae6c2895e7a5830313839a46113bc2bd862eb54a5e2343ea47c839aa44b"
+          "bytes": 10650,
+          "sha256": "50223eaeedb87f4ff8cc0e8f7a34a7422c8e74b2f20438d7453c97a4ae8c0d80"
         },
         "death": {
           "frames": 7,
-          "bytes": 16978,
-          "sha256": "43ae9e787ae142ba0c37bfc3822ecffb016fdb39806ce508b53ebfa643cc8ead"
+          "bytes": 22969,
+          "sha256": "2138176465a98f223573914e8ff83c3aed618cd82b6f34de0b99bed04b59681d"
         }
+      },
+      "visualPolish": {
+        "version": 1,
+        "kind": "RECRUITMENT_FORM_SILHOUETTE_DIFFERENTIATION_PASS",
+        "reviewStatus": "UNREVIEWED_RUNTIME_FILES",
+        "normalRuntimeAuthoritative": false
       }
     },
     "char_common_a_mirror_guide_f1": {
@@ -1965,29 +2217,35 @@
       "motions": {
         "idle": {
           "frames": 7,
-          "bytes": 8590,
-          "sha256": "628f829b85dc7a810dd792887da624d50510c21789dc138516a85056547123b8"
+          "bytes": 8931,
+          "sha256": "e8ef9ea1eeac19216c5be6661761eaa777102b877744b1bad8d84320ceace0d2"
         },
         "move": {
           "frames": 8,
-          "bytes": 10211,
-          "sha256": "c8f4e749ac40495e7d12133cfe172009738d66474d0220a947648312d151aa9f"
+          "bytes": 10679,
+          "sha256": "d27bb60b0b8a1cfeea64249af65b76346e7f7c614432db47d7c3575d0fc90ce6"
         },
         "attack": {
           "frames": 8,
-          "bytes": 9877,
-          "sha256": "4c56d52d5e7b957d6ddf3a004a6b8daf7cba6201fe3abf9156d97d66d7c813c7"
+          "bytes": 10490,
+          "sha256": "def7e9702a9018b159e4be488033e5044e4e669c8dd936b4fb13fbd55566cf92"
         },
         "knockback": {
           "frames": 4,
-          "bytes": 4748,
-          "sha256": "ad905011dc63d6c0ceda1b56eded3d6b5e15a631e54e22f3d1a288423e430bb9"
+          "bytes": 5026,
+          "sha256": "daca28210414a81ff77596986b1e0b14f6e4548047f13e58c04e3e09c822aacd"
         },
         "death": {
           "frames": 7,
-          "bytes": 12336,
-          "sha256": "f6ab14c16a72645837cc437003a73d669513320d6467de0d4c83463d2fc214ba"
+          "bytes": 12876,
+          "sha256": "0c42414518e83f99d124ca548781d0dd261de6dc16511e554ac2d9c14b4469d5"
         }
+      },
+      "visualPolish": {
+        "version": 1,
+        "kind": "RECRUITMENT_FORM_SILHOUETTE_DIFFERENTIATION_PASS",
+        "reviewStatus": "UNREVIEWED_RUNTIME_FILES",
+        "normalRuntimeAuthoritative": false
       }
     },
     "char_common_a_mirror_guide_f2": {
@@ -2011,29 +2269,35 @@
       "motions": {
         "idle": {
           "frames": 7,
-          "bytes": 12044,
-          "sha256": "d852e0939a45e93c1981609172565bb1a191cc987f0d3a72ec01ac928b1f124f"
+          "bytes": 13647,
+          "sha256": "5839826a35e6b21fbc139f0865c6ba3049df2575e043ca1194918c462554d63a"
         },
         "move": {
           "frames": 8,
-          "bytes": 14265,
-          "sha256": "523931ef3b09703b07a38bd1953eb2b9c30b5822b0530f1548c4b35288d7dcf2"
+          "bytes": 16348,
+          "sha256": "f08940a2a019f7520170fac4f51bb253cfabe7fb974d7bdab67dd8f38fe98074"
         },
         "attack": {
           "frames": 8,
-          "bytes": 13335,
-          "sha256": "d485367ef46f3becd4624544f9e8e6a649ea4226ebbfe65a3fe693268c4ff74d"
+          "bytes": 16284,
+          "sha256": "5c48ddeae1abce4e8f64c77ee10a901ddd6d4351927e7b2f48ed4667a2ec23f6"
         },
         "knockback": {
           "frames": 4,
-          "bytes": 6822,
-          "sha256": "c20af8d2e4a489dedc5841e8861d42274a24b3a47d7e1ca265d81698c4a27dbe"
+          "bytes": 9115,
+          "sha256": "7652a72502c06c30a5c0f3350fbdd350b7f8bcd3abdc42e56c423fb1ca499ab1"
         },
         "death": {
           "frames": 7,
-          "bytes": 17135,
-          "sha256": "128ba8d5236feb4e402f71e0a479523428172553faa60807826b657c2c20676a"
+          "bytes": 19464,
+          "sha256": "f3b7503526b9a0a062dcea23b3872be61a8ec06b56076eb6c05727c02db70d66"
         }
+      },
+      "visualPolish": {
+        "version": 1,
+        "kind": "RECRUITMENT_FORM_SILHOUETTE_DIFFERENTIATION_PASS",
+        "reviewStatus": "UNREVIEWED_RUNTIME_FILES",
+        "normalRuntimeAuthoritative": false
       }
     },
     "char_common_a_mirror_guide_f3": {
@@ -2057,29 +2321,35 @@
       "motions": {
         "idle": {
           "frames": 7,
-          "bytes": 15170,
-          "sha256": "6c1904f4cb38ae951aaf61b558f043bfeeb50f95d9ebc9bff5f13c00442f98cc"
+          "bytes": 18735,
+          "sha256": "fcb74e83d79d8e0d6270f8f2c9fcdf13a37909a1d6becce5d2b9bbf606315220"
         },
         "move": {
           "frames": 8,
-          "bytes": 18236,
-          "sha256": "d457946b4b4dc3c45d8b52d8fc3ba498938aa02db0a12e0cfc2fbf9eda4424f2"
+          "bytes": 22784,
+          "sha256": "87ddc2783694c3a38556f11e38bd2ceba110fff5c99207a2e707247330a28eb9"
         },
         "attack": {
           "frames": 9,
-          "bytes": 19200,
-          "sha256": "b67e15289c5494cadd1dd8681266852c6978a7126cc9217fd5333a7359d4eee3"
+          "bytes": 24366,
+          "sha256": "2173c96cb7d2ff9cc881a1deb39707dd9a42b808d184f9abf372028bbd6dd995"
         },
         "knockback": {
           "frames": 4,
-          "bytes": 8639,
-          "sha256": "d6f18617071a2a9a969d2ca55163ec9dcf787d22d5a32748dd3d7409f99a4b28"
+          "bytes": 12107,
+          "sha256": "7549ef6fbd69190f11b1b6d223cf254534ccace5fe2a8cafa9c6d079227436f5"
         },
         "death": {
           "frames": 7,
-          "bytes": 21059,
-          "sha256": "794b27df732063af1df3c7748e57ef6bb80a02d70b402a098238744074df84ff"
+          "bytes": 25337,
+          "sha256": "c544fd785dd9335348b14d88d8400a884b5b5079094bcbb4429d2f7cf15100ff"
         }
+      },
+      "visualPolish": {
+        "version": 1,
+        "kind": "RECRUITMENT_FORM_SILHOUETTE_DIFFERENTIATION_PASS",
+        "reviewStatus": "UNREVIEWED_RUNTIME_FILES",
+        "normalRuntimeAuthoritative": false
       }
     },
     "char_s01_elsia_f1": {
@@ -2103,29 +2373,35 @@
       "motions": {
         "idle": {
           "frames": 8,
-          "bytes": 5932,
-          "sha256": "5fb499cd0bef0bc5ac308dd76df0f51ab600089b6ca31a34a4d9675245b93a19"
+          "bytes": 6948,
+          "sha256": "3847d05f831590cc4222ab4096283e61265c4d804363722d2415649fb7de6535"
         },
         "move": {
           "frames": 8,
-          "bytes": 6262,
-          "sha256": "9af223eee5e433c2bba66393f9a7cdb3a2b0236546a77b0f0376643b47ec511e"
+          "bytes": 7291,
+          "sha256": "5ce2ad6b55cc19d67b88db348f008683f4e4c8b9ff9d53446b1117cf6a851c63"
         },
         "attack": {
           "frames": 9,
-          "bytes": 6270,
-          "sha256": "e0a2191a40674e186ca17ad281fe47547ab6f6597147ba06df1aea2f354c0270"
+          "bytes": 7384,
+          "sha256": "ebb12ffb035fc0e7b82a6115f52bb07f757d6cfdaa9ca52d9fcbba57d44ae86e"
         },
         "knockback": {
           "frames": 4,
-          "bytes": 3097,
-          "sha256": "5ad5b0634fc26facde3892f6933a96aa9a15120b8d365e619f7b374783a2bd53"
+          "bytes": 4031,
+          "sha256": "b34d63e495c7015fdc2f3d6e964b0122fd2f4a9056c55b809afe81aa808a3901"
         },
         "death": {
           "frames": 8,
-          "bytes": 11531,
-          "sha256": "0cb800f2f74d5ec5a21f3181cfc01eab2f5363633425fd3b4905023b965ffbbf"
+          "bytes": 14034,
+          "sha256": "8e8d556e77ef01758925e776ab303d4f8c6138d22be8638228917245990d8cc3"
         }
+      },
+      "visualPolish": {
+        "version": 1,
+        "kind": "RECRUITMENT_FORM_SILHOUETTE_DIFFERENTIATION_PASS",
+        "reviewStatus": "UNREVIEWED_RUNTIME_FILES",
+        "normalRuntimeAuthoritative": false
       }
     },
     "char_s01_elsia_f2": {
@@ -2149,29 +2425,35 @@
       "motions": {
         "idle": {
           "frames": 8,
-          "bytes": 7073,
-          "sha256": "2e3828e9af23524f9b8191b17e5b734d8bbd56e69de7b1e6e345e60a9b76e51d"
+          "bytes": 9141,
+          "sha256": "100adb9df66fcac741beb15edadcd29702ce5e150299e9d5cce853cc53ac8c0d"
         },
         "move": {
           "frames": 8,
-          "bytes": 7500,
-          "sha256": "c0be92560d507ae611bfac0acfa41ff9bbed5e8b570e288c919c932ad22e2db3"
+          "bytes": 10077,
+          "sha256": "a22e448be715e7e7b31199a7b4a7138c2df72b87730609a40030a53d9f7d3ad2"
         },
         "attack": {
           "frames": 9,
-          "bytes": 7254,
-          "sha256": "b33cd38e69c6b461dc5fd0dc08b7a9423c4bace33489c4df9a232b5ace9f4631"
+          "bytes": 10789,
+          "sha256": "5abf5e8200860c2e36775a036d583fa068c820dbdf14f67b369cc41f6a7822bb"
         },
         "knockback": {
           "frames": 4,
-          "bytes": 3692,
-          "sha256": "5b6c89dd5e6784bcc5f6a717cb511c14945d9bd562aabfa6c015733f9411adfc"
+          "bytes": 6860,
+          "sha256": "f7c86a020c9ae186d88d4c4327e224724ecfd2582b0cf91f50c8ca14a9761ffa"
         },
         "death": {
           "frames": 8,
-          "bytes": 15492,
-          "sha256": "b570600727106ad4c51aa1714a6911d266999500105a94715ae0ad9d7b439153"
+          "bytes": 19168,
+          "sha256": "6b55fb45498fb6160420bdd0daccaa32d82fe9fa4537e1e8c92974b3e26e4371"
         }
+      },
+      "visualPolish": {
+        "version": 1,
+        "kind": "RECRUITMENT_FORM_SILHOUETTE_DIFFERENTIATION_PASS",
+        "reviewStatus": "UNREVIEWED_RUNTIME_FILES",
+        "normalRuntimeAuthoritative": false
       }
     },
     "char_s01_elsia_f3": {
@@ -2195,29 +2477,35 @@
       "motions": {
         "idle": {
           "frames": 8,
-          "bytes": 9809,
-          "sha256": "8651b3ff0261a028aeb884b6d9d52bfd289b88905af967a73666417c94f36c02"
+          "bytes": 13290,
+          "sha256": "cf52499e1e6a507eba7835d2a433cf7ca8c1a02569bbbe7a51debc5260d5a2a0"
         },
         "move": {
           "frames": 8,
-          "bytes": 10462,
-          "sha256": "91ee0003d80063287c22670fc84cff8781eb235fe286d6a22bc224fa2809a6d8"
+          "bytes": 14615,
+          "sha256": "c24f5c0825015db3e38c4eb863093fe52a4b687fa97896850af8cdbc08a0899b"
         },
         "attack": {
           "frames": 10,
-          "bytes": 11087,
-          "sha256": "b75289c529527f708003831e849b01144d12b65ef4f1d8e877ab4e7b5786f0f5"
+          "bytes": 16007,
+          "sha256": "fcbd3cf76ff206fe0a3cbd0a43f32baadc2498345526bb674561ea750ae358e0"
         },
         "knockback": {
           "frames": 4,
-          "bytes": 5137,
-          "sha256": "17b01ea786d39f914c4c1bbac4827d76f11917989f135f43b2f6c91ced1a7426"
+          "bytes": 9567,
+          "sha256": "14995fc3e94c57d1e490623e36faf6e2f9042a46e8fd2613c989fb5fa665ab5e"
         },
         "death": {
           "frames": 8,
-          "bytes": 18818,
-          "sha256": "505df0630a8c65f37d6dd2625f8e61369b0f3d4634034f094444084898c17cb6"
+          "bytes": 24965,
+          "sha256": "729012178603a9d396822ddfe07664ec6d18218060049238d3b82e467c0ec00b"
         }
+      },
+      "visualPolish": {
+        "version": 1,
+        "kind": "RECRUITMENT_FORM_SILHOUETTE_DIFFERENTIATION_PASS",
+        "reviewStatus": "UNREVIEWED_RUNTIME_FILES",
+        "normalRuntimeAuthoritative": false
       }
     },
     "char_s01_riena_f1": {
@@ -2241,29 +2529,35 @@
       "motions": {
         "idle": {
           "frames": 8,
-          "bytes": 6167,
-          "sha256": "8e34ae60f2c94251e9967534e595f7f25e4a4fb7fb460673e4b4097ba28cff9c"
+          "bytes": 7156,
+          "sha256": "467eb2fc3014c67b3eb24e87b2815e95c298017aa9cc65a579fba4f166b9fce6"
         },
         "move": {
           "frames": 8,
-          "bytes": 6463,
-          "sha256": "2648e72a704068547c7677a2cbedf351318f29fffb822d528d3f7884ad5c2e41"
+          "bytes": 7486,
+          "sha256": "9318f842697961b698d59d8a5f2ee25c3551962e37eaac165c4b408ab6732a7d"
         },
         "attack": {
           "frames": 9,
-          "bytes": 7476,
-          "sha256": "6e5e7968c7e2370ca76a5ec2f27213d97b14a272c1279fec9b1d3cc6feeb3b40"
+          "bytes": 8708,
+          "sha256": "a94f8682992951309f23b761730e16292671d9dfdd1925c384a06be6760423f9"
         },
         "knockback": {
           "frames": 4,
-          "bytes": 3234,
-          "sha256": "4854c9c1a74af290a7db52b256f9a97b498d1a8f04029dea3768be4cda4bfc51"
+          "bytes": 4269,
+          "sha256": "866296f85c702c8494b9b0c87c24f7b2eb56761f216df7992bd0fd2ca6d8e379"
         },
         "death": {
           "frames": 8,
-          "bytes": 11717,
-          "sha256": "8fb96e65c70b4e310a2470485963070461ee146d98602588886fa12a86759910"
+          "bytes": 14395,
+          "sha256": "5ac2c7ebdc8b4cbf9a8e65ddd187489789fa23e43d4a62f46e50b947bfcb898b"
         }
+      },
+      "visualPolish": {
+        "version": 1,
+        "kind": "RECRUITMENT_FORM_SILHOUETTE_DIFFERENTIATION_PASS",
+        "reviewStatus": "UNREVIEWED_RUNTIME_FILES",
+        "normalRuntimeAuthoritative": false
       }
     },
     "char_s01_riena_f2": {
@@ -2287,29 +2581,35 @@
       "motions": {
         "idle": {
           "frames": 8,
-          "bytes": 7236,
-          "sha256": "d1ec6a881d27dffaded679822437cd9ee02947c1287693b51454575eb637f207"
+          "bytes": 8992,
+          "sha256": "cd812f4027a993759cba7f313c7bd6f349b73f1dbfddf62bfcffa568d226cd08"
         },
         "move": {
           "frames": 8,
-          "bytes": 7721,
-          "sha256": "2deebe7a45896d2897a72ce30d7964ebd69d7ebb3bcd76c558b4153834350d1d"
+          "bytes": 9879,
+          "sha256": "60b29452d4e49959bb5bbdeaee26d237073c213ef10cd3730edee691d4d33258"
         },
         "attack": {
           "frames": 9,
-          "bytes": 8390,
-          "sha256": "23fe7fc4941815f39aa8755eab53c9d1129981ab76db542537e9027d6c543b22"
+          "bytes": 11822,
+          "sha256": "f4fa814966ac888d1708863097bd276f3eb96d8910f067c5587f5b72ebcef101"
         },
         "knockback": {
           "frames": 4,
-          "bytes": 3762,
-          "sha256": "331503444e912294317e7407a7778bce7b4bfc925d19d94795ce7bd2d3a51e29"
+          "bytes": 7190,
+          "sha256": "2370d1842298173c193072ae16303b62ee0ff65642fcebe47e20dc52bd71cd87"
         },
         "death": {
           "frames": 8,
-          "bytes": 15695,
-          "sha256": "6461e410bf95dae1ecf37b19af47ff2d4de0561092abf384d17a9bbffdd35561"
+          "bytes": 19383,
+          "sha256": "751bd3769123ae9c1a9e8f80f53f36ac7fd8e137f1963b749b4d0b5d13f5d2ef"
         }
+      },
+      "visualPolish": {
+        "version": 1,
+        "kind": "RECRUITMENT_FORM_SILHOUETTE_DIFFERENTIATION_PASS",
+        "reviewStatus": "UNREVIEWED_RUNTIME_FILES",
+        "normalRuntimeAuthoritative": false
       }
     },
     "char_s01_riena_f3": {
@@ -2333,29 +2633,35 @@
       "motions": {
         "idle": {
           "frames": 8,
-          "bytes": 10069,
-          "sha256": "27fe04686dd1f97652a1f10a4f4bbecb95ea94b49f9da3aab3f47f5e51a45297"
+          "bytes": 12826,
+          "sha256": "0a57d3167862c3f202e7bc474817aa6e39a1c1d256ad766505da0a7307b05aa1"
         },
         "move": {
           "frames": 8,
-          "bytes": 10729,
-          "sha256": "af7669eb55bfa77d06d370ca7bd9638526214902d7d7bf42f834c60613c1aec7"
+          "bytes": 14042,
+          "sha256": "32b83735b844d5330939290b660dcbfcd5bf9691486275eb83a51485d363649a"
         },
         "attack": {
           "frames": 10,
-          "bytes": 12382,
-          "sha256": "3ff48e51dd331e429eb39f011550e42edf1da87ddfe330bc98782b26b457cc38"
+          "bytes": 17402,
+          "sha256": "fba35847b25496211540915bc4ce26cbff4c09913cb078ef5b388447411ba722"
         },
         "knockback": {
           "frames": 4,
-          "bytes": 5244,
-          "sha256": "3c862cb6506d071f10c2525fe6b3f6d6e1ebe4c58bc8d1fa02a4a4f6dbae3d77"
+          "bytes": 9477,
+          "sha256": "b6c59f4858567b895925e4bdffe542f456af1619d3e7ff7fbbd667c01ca94ca4"
         },
         "death": {
           "frames": 8,
-          "bytes": 19051,
-          "sha256": "20d739c70bad50f5444979972e47974e74107df9cc42236a74f095f2f067385f"
+          "bytes": 24417,
+          "sha256": "baa37e6dcfd71b4a55bffa7115fe2ef2ed5ac896af03d099927a0b285cdae0a3"
         }
+      },
+      "visualPolish": {
+        "version": 1,
+        "kind": "RECRUITMENT_FORM_SILHOUETTE_DIFFERENTIATION_PASS",
+        "reviewStatus": "UNREVIEWED_RUNTIME_FILES",
+        "normalRuntimeAuthoritative": false
       }
     },
     "char_s01_mireille_f1": {
@@ -2379,29 +2685,35 @@
       "motions": {
         "idle": {
           "frames": 8,
-          "bytes": 6149,
-          "sha256": "877a943e6a2730b0b1ae412890aabb4035dac45b11a43626850d266482544105"
+          "bytes": 6827,
+          "sha256": "0faf8d84d72c189ace8a5b310135a8c4bd10fa22e54eae0c78a49d4225a72529"
         },
         "move": {
           "frames": 8,
-          "bytes": 6475,
-          "sha256": "912796e603bafa4c3231e7c5eded398b2353173480ca737f4868cfb333537878"
+          "bytes": 7248,
+          "sha256": "6a9ee9cfd03cdbd80063d3fe9472a0e391bf8b13ec888b74ad8227267969bb30"
         },
         "attack": {
           "frames": 9,
-          "bytes": 7328,
-          "sha256": "2b1e5590e59c321910d2690d2771dd58c8f5650038bf8167e3ea810e4ca988f1"
+          "bytes": 8270,
+          "sha256": "bcb2f9c3891c68c9acdfb5e0bed17349ecac1748ba2d30110fb3c7c0e6e1fdec"
         },
         "knockback": {
           "frames": 4,
-          "bytes": 3225,
-          "sha256": "ca8e07896ce69440f60cdc0cd7f8b4119746f615511f57a8e98ae8c54b8f3cc5"
+          "bytes": 4147,
+          "sha256": "9b75ed94a9757290c7fbae1611f5e9ee5a7186dc4052ffc15ae12655b4c763ca"
         },
         "death": {
           "frames": 8,
-          "bytes": 11737,
-          "sha256": "984ad88b26779d8c4161d0018958edce6e0ac69991b25396670b63ba0808d0cc"
+          "bytes": 13529,
+          "sha256": "f2ebf7481656b6f63b433ea566c98966aa61498e540f4b009801dfe2bd945a87"
         }
+      },
+      "visualPolish": {
+        "version": 1,
+        "kind": "RECRUITMENT_FORM_SILHOUETTE_DIFFERENTIATION_PASS",
+        "reviewStatus": "UNREVIEWED_RUNTIME_FILES",
+        "normalRuntimeAuthoritative": false
       }
     },
     "char_s01_mireille_f2": {
@@ -2425,29 +2737,35 @@
       "motions": {
         "idle": {
           "frames": 8,
-          "bytes": 7267,
-          "sha256": "91d6d0c47e3e4cfdfff64ba7e69eada2be76f752a02889d6f0807ad9c4c5f6b2"
+          "bytes": 8542,
+          "sha256": "66e2d022dbfba2c061af9e3f008d4bde74dfac50bf2f52e41ecc9ff0d93cbac3"
         },
         "move": {
           "frames": 8,
-          "bytes": 7736,
-          "sha256": "3d5dad8fd341469b77feaaeecfabc9b376cbb20b2f9fdee6f828cb09d9f4fc56"
+          "bytes": 9479,
+          "sha256": "409327500050980200579da74fc1b1daf2b104c17e3364d62748c20226757522"
         },
         "attack": {
           "frames": 9,
-          "bytes": 8302,
-          "sha256": "b75ea34aeda44e0b68804d580d71a23d7a7ce41b9f2bd81aa8e9a9528e8ca817"
+          "bytes": 10988,
+          "sha256": "0c9f9594587e1465dd1e148bf99f23dfb9ce6472df5c0115373c6b328bd42d28"
         },
         "knockback": {
           "frames": 4,
-          "bytes": 3796,
-          "sha256": "03012353f2462c77ac873f84ab31a4463cde74fd0d9909d5e8b23b8835f1c865"
+          "bytes": 6505,
+          "sha256": "b573e431d09ea29646830cc1ec6c713577ee7867402f6356ce35de17d2b0e11e"
         },
         "death": {
           "frames": 8,
-          "bytes": 15816,
-          "sha256": "ff70947371edfd9f3d900935fbe8df1bed8e7dd76831456ef09a328bb44a7d47"
+          "bytes": 20039,
+          "sha256": "ac7fecb6c1b36c0c3c3cdd1ec0a6c235c9901739e9e08dc34b2e3ccb2b894ff2"
         }
+      },
+      "visualPolish": {
+        "version": 1,
+        "kind": "RECRUITMENT_FORM_SILHOUETTE_DIFFERENTIATION_PASS",
+        "reviewStatus": "UNREVIEWED_RUNTIME_FILES",
+        "normalRuntimeAuthoritative": false
       }
     },
     "char_s01_mireille_f3": {
@@ -2471,29 +2789,35 @@
       "motions": {
         "idle": {
           "frames": 8,
-          "bytes": 10132,
-          "sha256": "798ed671f889855a705e960474f08f516439ca73c6ea9b0c3103517f176877b0"
+          "bytes": 13509,
+          "sha256": "95bbca3f28ba2ab0ecd8fa8af9188160be597f9d8c8a2af2c20fd36fb7b727c7"
         },
         "move": {
           "frames": 8,
-          "bytes": 10849,
-          "sha256": "a777c3d00020ce03eeee977062766ecdc87b0766452489467f3fb3334b2f7bee"
+          "bytes": 15201,
+          "sha256": "b8dfc1eae2832b2a5cb8d4b525cfc3b7b72e6371ba3759b7ff0929e9511c8ff8"
         },
         "attack": {
           "frames": 10,
-          "bytes": 12383,
-          "sha256": "f00177c2ec3e3891c0c193d9b65b0389c31f43fa9e0d3a91abf6a23c52f10a9a"
+          "bytes": 18409,
+          "sha256": "24492f171f93afffe1d575e982c0417dd2bd774b2a57def1951cc0c880729a85"
         },
         "knockback": {
           "frames": 4,
-          "bytes": 5292,
-          "sha256": "15b6cb232986e36e89e30f547f866e0ecb8d04f9409f4f7c900cfc23a297d817"
+          "bytes": 11332,
+          "sha256": "795f6095d386b3ab79361b91b96a07fddc283b815a2b877a0b1bc8a564d45546"
         },
         "death": {
           "frames": 8,
-          "bytes": 19346,
-          "sha256": "25dcd20af18aaa0df48db89739f3af85f35a2a112c5ec23a18d7e5d75d7a6e27"
+          "bytes": 27499,
+          "sha256": "302f99696fdcac5a567fae28741f07f1fb60ed4dfe51243d4ca4d67dfe2fb4b1"
         }
+      },
+      "visualPolish": {
+        "version": 1,
+        "kind": "RECRUITMENT_FORM_SILHOUETTE_DIFFERENTIATION_PASS",
+        "reviewStatus": "UNREVIEWED_RUNTIME_FILES",
+        "normalRuntimeAuthoritative": false
       }
     },
     "char_s01_neria_f1": {
@@ -2517,29 +2841,35 @@
       "motions": {
         "idle": {
           "frames": 8,
-          "bytes": 5995,
-          "sha256": "2eff66c91b53c2ba6988482205b4cebb43e7563d2c6076123a7cfc3973b02675"
+          "bytes": 6959,
+          "sha256": "99677d19b4b734d142aef4096df87c82cf48a320f4e53a0604fa8d1c6802c7f7"
         },
         "move": {
           "frames": 8,
-          "bytes": 6297,
-          "sha256": "f107be369dbb68e5e5ea4663cdc804e5a4b8834ad2529450ff6c5699eac177e5"
+          "bytes": 7233,
+          "sha256": "8c366b315f7f99d346d7250a9a14a493a83893ad0310fbdf9340a7fb718cd564"
         },
         "attack": {
           "frames": 9,
-          "bytes": 6566,
-          "sha256": "2a4d193af4d8de77963553157f63150a06da4c4a72a77692d0a38515417f174b"
+          "bytes": 7484,
+          "sha256": "a1743112e70a98abb1381d1aae7735d115644d3337c37f231d3377c237f06306"
         },
         "knockback": {
           "frames": 4,
-          "bytes": 3121,
-          "sha256": "6c8b20ff24e677a68c06b696005d5044c74cc7b6b8d69c3292e38bb7ca6d150c"
+          "bytes": 3849,
+          "sha256": "f88a259d326ae850d779e7e16ad5f38bde594b5b29ee5c2b16431ee3699d84b9"
         },
         "death": {
           "frames": 8,
-          "bytes": 11785,
-          "sha256": "c703e3008e4ee3463a2d92b37e089078680817325bf8ab16db1e969baf190244"
+          "bytes": 13782,
+          "sha256": "13a2756fc4e57f9d595077047c56e445a5d83c0cdea4cc838f999679532073c8"
         }
+      },
+      "visualPolish": {
+        "version": 1,
+        "kind": "RECRUITMENT_FORM_SILHOUETTE_DIFFERENTIATION_PASS",
+        "reviewStatus": "UNREVIEWED_RUNTIME_FILES",
+        "normalRuntimeAuthoritative": false
       }
     },
     "char_s01_neria_f2": {
@@ -2563,29 +2893,35 @@
       "motions": {
         "idle": {
           "frames": 8,
-          "bytes": 7134,
-          "sha256": "41ff2371036b3324e0453e381f5acc0b831c9163a227221c1e0682c785791f87"
+          "bytes": 9037,
+          "sha256": "6b81e294da8064e9f8f51a9a5f484272a37367d2723ee42f901f54123e42d4bc"
         },
         "move": {
           "frames": 8,
-          "bytes": 7630,
-          "sha256": "d7d689e70dbafa314fa9cb946b7730669217f7a39ba13588fb30336f34a20be4"
+          "bytes": 9766,
+          "sha256": "10927b6de5af56ca4ae017e04207cd2262825b7178ddfcc39ab2ec448bf41485"
         },
         "attack": {
           "frames": 9,
-          "bytes": 7621,
-          "sha256": "711e0528c57f00d641329ff2a31917ab2c86a78d748ad82f824cb63c76717d19"
+          "bytes": 10151,
+          "sha256": "2798716d5689ca0a746c11e3a26a80341243eb359e0d96e0b800314720afa4d6"
         },
         "knockback": {
           "frames": 4,
-          "bytes": 3717,
-          "sha256": "6fcec2b5da8b96d156b560e3e748226230006d11c80977426979a57e24573765"
+          "bytes": 6369,
+          "sha256": "74a388c166512b25760e889a41fdf8dc80a63ce7201b6a0d8cb867a4a9ca2c8c"
         },
         "death": {
           "frames": 8,
-          "bytes": 15853,
-          "sha256": "db8990e2b59f9c2fd41e9c4e6d4ac6be50792ae83a1b596c07ab21a6bcd4c659"
+          "bytes": 19686,
+          "sha256": "d7770dc2a33d44b8283be57502ab5d10dd36ddfc106ff40b638432173345b5e7"
         }
+      },
+      "visualPolish": {
+        "version": 1,
+        "kind": "RECRUITMENT_FORM_SILHOUETTE_DIFFERENTIATION_PASS",
+        "reviewStatus": "UNREVIEWED_RUNTIME_FILES",
+        "normalRuntimeAuthoritative": false
       }
     },
     "char_s01_neria_f3": {
@@ -2609,29 +2945,35 @@
       "motions": {
         "idle": {
           "frames": 8,
-          "bytes": 9794,
-          "sha256": "2c83f2332c67f393f587a487a231c82bdd5a4a67acd9c6b8ce2ad4994f676d23"
+          "bytes": 12316,
+          "sha256": "4730230532bc9b2555d27f3b46008344289cb8d02a46a9d25d6978eb08b9dea8"
         },
         "move": {
           "frames": 8,
-          "bytes": 10491,
-          "sha256": "91efd75e3818a158e6d7d7c516f4d4fef79fb9dd50004e0d0a92c237b4549292"
+          "bytes": 13382,
+          "sha256": "64ed0b40467c27758176a552efc8b67e9945d9b15df1d0ad91e21e2a2389afe3"
         },
         "attack": {
           "frames": 10,
-          "bytes": 11511,
-          "sha256": "a5b8132af845fddac5d03931ca97b2f5f5137ce58f3a104fe338def715612d19"
+          "bytes": 16014,
+          "sha256": "b78e126e3a68ace432cf39e4b949bf81f655b760e048f2e3df41ae30799d14ad"
         },
         "knockback": {
           "frames": 4,
-          "bytes": 5160,
-          "sha256": "75d2212830ae2cb4308536a0f609bfa87fbd0a5bdf5d1b69993185c564970f22"
+          "bytes": 8205,
+          "sha256": "318d0532bb236b48181f37f266e6cdcdf3ae7269914eb0c02a828d5f687d7a6d"
         },
         "death": {
           "frames": 8,
-          "bytes": 19118,
-          "sha256": "cf45b97c02b885e1a1394874f0139626acb950167e35f143652052cec9706587"
+          "bytes": 24054,
+          "sha256": "f43f5734af99f68aea09a28c14dcd642c22c2b98601a5a4643c5022894c2cae2"
         }
+      },
+      "visualPolish": {
+        "version": 1,
+        "kind": "RECRUITMENT_FORM_SILHOUETTE_DIFFERENTIATION_PASS",
+        "reviewStatus": "UNREVIEWED_RUNTIME_FILES",
+        "normalRuntimeAuthoritative": false
       }
     },
     "char_s01_totoria_f1": {
@@ -2655,29 +2997,35 @@
       "motions": {
         "idle": {
           "frames": 8,
-          "bytes": 7368,
-          "sha256": "437fa4eccec3c360b610826a183018769293d34203e3c3e7a27a45a7b03d6435"
+          "bytes": 8468,
+          "sha256": "21ef85abb97c332f92ae698f308a4d48676db415a6a1a455c98bed484fcbbb8d"
         },
         "move": {
           "frames": 8,
-          "bytes": 7763,
-          "sha256": "3e29d87c80f89262d16fc5177f90b729e7d649ef9098d777fec39b2b116c866a"
+          "bytes": 8851,
+          "sha256": "47727ce4f6a06e6153a4ee7f78dd7c57ba4ee20aac6b6c074ce27beaec118d94"
         },
         "attack": {
           "frames": 9,
-          "bytes": 8084,
-          "sha256": "b8a719041be3fab835c336e97122fc8d1ddd127bc8a679619a6debb2c5e00fac"
+          "bytes": 9201,
+          "sha256": "50d48fc9b81411969584cb7b635ec6c95ef6e251a1627f47a515ed03d9995978"
         },
         "knockback": {
           "frames": 4,
-          "bytes": 3730,
-          "sha256": "94242738f2d060dbdad2dc121ba956f248981ff8b39d8e653a4b6ab55312c827"
+          "bytes": 4534,
+          "sha256": "8d5096a73181eada567142f11b8ac0512bb62cdaf652bbf0862b7eea761959fd"
         },
         "death": {
           "frames": 8,
-          "bytes": 12528,
-          "sha256": "ec79de0dbc890812e1854e4ca2b78fcd4a312be709e582dc1e1e33643dadfaf0"
+          "bytes": 14977,
+          "sha256": "5fdff1ad1234866c62a4e508d65b9d2679034241029b0ecd1ffe899c91339bb2"
         }
+      },
+      "visualPolish": {
+        "version": 1,
+        "kind": "RECRUITMENT_FORM_SILHOUETTE_DIFFERENTIATION_PASS",
+        "reviewStatus": "UNREVIEWED_RUNTIME_FILES",
+        "normalRuntimeAuthoritative": false
       }
     },
     "char_s01_totoria_f2": {
@@ -2701,29 +3049,35 @@
       "motions": {
         "idle": {
           "frames": 8,
-          "bytes": 8632,
-          "sha256": "f4718d902d89fc89bed57dec575992b2bcc002733c2034043d49dc73c31e7a5a"
+          "bytes": 10598,
+          "sha256": "14a8f84f71483bd16d054c2232e55cdb5d62014b0abf1079484a0e28471fb826"
         },
         "move": {
           "frames": 8,
-          "bytes": 9072,
-          "sha256": "62d6ea185841e835a0fdb29678273814977506a3e28105b9fca034716eadf87b"
+          "bytes": 11485,
+          "sha256": "a8c41b84d8cb967dc2610120c538de950ed7e84e7a616b29cf07aa0ca388e35f"
         },
         "attack": {
           "frames": 9,
-          "bytes": 9087,
-          "sha256": "8d2d963bc25308d0486b438f69be2bf766cd18230892e755356001b19725eb86"
+          "bytes": 12305,
+          "sha256": "d845806ca6c8b4db18bd824b674a0be1204675facbc912754f13967821408d6d"
         },
         "knockback": {
           "frames": 4,
-          "bytes": 4432,
-          "sha256": "b331c92a857f74576e703900d87a673d6bd26b41d00d679013617a2035f77694"
+          "bytes": 7225,
+          "sha256": "7503e0100eb2b42cd469f05313a1e5bbd3e05e09d05f4f9bc933bf23f92ca0a5"
         },
         "death": {
           "frames": 8,
-          "bytes": 16589,
-          "sha256": "1fac6f9fdbc351dcc5d9e64ec9db234af64040e63ff87e4cb4ffbc8f86b4ed30"
+          "bytes": 20010,
+          "sha256": "cc1962cde648c9aab1891882c1147e21414707977b6227f3aad8cf68672ca5bb"
         }
+      },
+      "visualPolish": {
+        "version": 1,
+        "kind": "RECRUITMENT_FORM_SILHOUETTE_DIFFERENTIATION_PASS",
+        "reviewStatus": "UNREVIEWED_RUNTIME_FILES",
+        "normalRuntimeAuthoritative": false
       }
     },
     "char_s01_totoria_f3": {
@@ -2747,29 +3101,35 @@
       "motions": {
         "idle": {
           "frames": 8,
-          "bytes": 11466,
-          "sha256": "700a02381f446c655335c43bc7e25f8fbdd5fe55211f8d722ef8052ced8dc4c3"
+          "bytes": 15175,
+          "sha256": "302d4bd11825a688eea1c54b6776a4e50b7c653a5a819ef13fee03acfca94b7d"
         },
         "move": {
           "frames": 8,
-          "bytes": 12074,
-          "sha256": "623d5c6f60a9bf095f2e977dfd08d4e9c04c275023e186a129fc4fe4eabb37c6"
+          "bytes": 16551,
+          "sha256": "8817e341fe95125aa62a9bbc74c26b56a6a8d6e7abced057b9b90b0346ab3463"
         },
         "attack": {
           "frames": 10,
-          "bytes": 13326,
-          "sha256": "3b49286e7aeb8b0b62fc835f5a762ff9f7b4be689484dc264b8ea45695ebe470"
+          "bytes": 18454,
+          "sha256": "4ab22f8f216bd7179c7f44343e594f4e972f9296a99706138b82593eec44723e"
         },
         "knockback": {
           "frames": 4,
-          "bytes": 5852,
-          "sha256": "e7f2231292685e64a56b2dbf71fd59f6b426c026fcae0763127bce22475fd912"
+          "bytes": 10102,
+          "sha256": "3bc968865cfab5d095221f841000ec0e6983a279ad0a8a6cfc687ae0419dd39b"
         },
         "death": {
           "frames": 8,
-          "bytes": 20009,
-          "sha256": "31811af83b4fb6a2df573dee4bdccd4d2586ebc0d1668cd69a547c3bf10f413c"
+          "bytes": 26231,
+          "sha256": "e04038805cd76e25af1d3ead6ec9913c5631babb02c0a67adbb8bd6d8bfe16c1"
         }
+      },
+      "visualPolish": {
+        "version": 1,
+        "kind": "RECRUITMENT_FORM_SILHOUETTE_DIFFERENTIATION_PASS",
+        "reviewStatus": "UNREVIEWED_RUNTIME_FILES",
+        "normalRuntimeAuthoritative": false
       }
     },
     "char_s01_arselia_f1": {
@@ -2793,29 +3153,35 @@
       "motions": {
         "idle": {
           "frames": 8,
-          "bytes": 7254,
-          "sha256": "b8c617a668956ad96842ba151a7254d8066056e5c3cffef0ce4c14215a916e7c"
+          "bytes": 8449,
+          "sha256": "65179fd29550b2f00efaf5c12390fddd2bbb7bb280013108c88da471fbd7b811"
         },
         "move": {
           "frames": 8,
-          "bytes": 7562,
-          "sha256": "723b318d8fcdfd06eb442893b8692c920adff7d250ca37d9e85f16a4ce29fab6"
+          "bytes": 8788,
+          "sha256": "46524e7925a3ad70312904a21d00ff0293214adfbc88cc6f2f52f38669db64b7"
         },
         "attack": {
           "frames": 11,
-          "bytes": 10026,
-          "sha256": "8b0a5b89d34a4918c0724e94a32d669cf6d0c79be879d4ca0eec7996f2e76622"
+          "bytes": 11379,
+          "sha256": "987be1e175e3775c8b1884d5169ae232b85defd61117ea0ef8ccdc6280fbb7af"
         },
         "knockback": {
           "frames": 4,
-          "bytes": 3778,
-          "sha256": "bd99d49be7f1a663e8eba0267bff613eb766c6e1bee16551fa518e71b58f736e"
+          "bytes": 4547,
+          "sha256": "e2ec373076da603d4f840a9b375af83065474a49b914bcc229caea355d170f4b"
         },
         "death": {
           "frames": 9,
-          "bytes": 14291,
-          "sha256": "c612e0fd67c7d7e7ca420566eb53ef0354790a2d2497cb1c2cc0d712f3f28013"
+          "bytes": 16714,
+          "sha256": "a477747c2bf0d68b450a6f15f974585294ae096c21b28114496afd48ea74897f"
         }
+      },
+      "visualPolish": {
+        "version": 1,
+        "kind": "RECRUITMENT_FORM_SILHOUETTE_DIFFERENTIATION_PASS",
+        "reviewStatus": "UNREVIEWED_RUNTIME_FILES",
+        "normalRuntimeAuthoritative": false
       }
     },
     "char_s01_arselia_f2": {
@@ -2839,29 +3205,35 @@
       "motions": {
         "idle": {
           "frames": 8,
-          "bytes": 8388,
-          "sha256": "fb6be5bc6d9f11e93a2bb700a01cde88ec6b7b680893759c5586a9a3ff26f65e"
+          "bytes": 11143,
+          "sha256": "600ea2f4954986ccf5472922590381ea1d8e44d547ece3a67eb0be4c8f4dcb5d"
         },
         "move": {
           "frames": 8,
-          "bytes": 8787,
-          "sha256": "7ad7e4e143025c8620aa55fd740d380c80771b700da9282a7b0929ecccf519bf"
+          "bytes": 11967,
+          "sha256": "b9a1344c22f33a91db381bcfeab77568b4d68d0f9ec753c00137d4d7458adb1a"
         },
         "attack": {
           "frames": 11,
-          "bytes": 11021,
-          "sha256": "d116dc87058dc5ea6f525d15dfc10c1dcac31e9ca3362d4e91c8dcb51062941f"
+          "bytes": 16018,
+          "sha256": "f99027b43231592ad43b331d6c65ace67e77403df0df030d2e870b4545168f2a"
         },
         "knockback": {
           "frames": 4,
-          "bytes": 4341,
-          "sha256": "0b7eb083a3797a0d22fc0907ed916b6bc9ac2f3409a649b8fd1869c19a003a78"
+          "bytes": 8637,
+          "sha256": "63e403738028cee8e599fec6776c5e61fc79d344952723690848c53365416d0e"
         },
         "death": {
           "frames": 9,
-          "bytes": 18887,
-          "sha256": "61d577e68cd0b6e66c98a3402f378ceccf16825d1cbe889442ec1c872a21faee"
+          "bytes": 25986,
+          "sha256": "b98cf4e94499454588b8a80b7d98e547eb3c680f62b2b396ef648d4020f6cc0a"
         }
+      },
+      "visualPolish": {
+        "version": 1,
+        "kind": "RECRUITMENT_FORM_SILHOUETTE_DIFFERENTIATION_PASS",
+        "reviewStatus": "UNREVIEWED_RUNTIME_FILES",
+        "normalRuntimeAuthoritative": false
       }
     },
     "char_s01_arselia_f3": {
@@ -2885,29 +3257,35 @@
       "motions": {
         "idle": {
           "frames": 8,
-          "bytes": 11329,
-          "sha256": "9b52028fc38ab62c064f317d04116d9c5378f6f6f98b3e9e7bc91638f0700f0f"
+          "bytes": 15251,
+          "sha256": "6eb1b1c8d3526ba32a3d34e096774fd7d93862fc92b53dad50db5191f4ec3c29"
         },
         "move": {
           "frames": 8,
-          "bytes": 11991,
-          "sha256": "0b98f5292cb76b65e3bb9ff58fb21146cfbb554304f4f416b19cd81102b3e9fb"
+          "bytes": 16812,
+          "sha256": "7c4570636b4761b711b00db4fde001c356e77fb7b5d6b223ffc25b8202d4c053"
         },
         "attack": {
           "frames": 12,
-          "bytes": 16063,
-          "sha256": "43f2a902aaa6e38b6df375c6252ad3ab1bfa82504ab03a20289af8838a62c3fe"
+          "bytes": 22483,
+          "sha256": "ff89dbe4ab1fc3e7c95355ea44d72eb04f890d521d1aa5eb03e54caddbfd6bb1"
         },
         "knockback": {
           "frames": 4,
-          "bytes": 5933,
-          "sha256": "3a4e390ec3c3292de7b3df59dad764fcff027e29545fc71cf9a07300ee82e5c9"
+          "bytes": 11552,
+          "sha256": "7e9a7fa0fcab8ac56c78a9c48477de9304b92b6ef3851df06d234b73d6e32e55"
         },
         "death": {
           "frames": 9,
-          "bytes": 22983,
-          "sha256": "6dd35225d52c3dd4de1f38a8571aa34b6e7b9a397ad1ac5b280f09a83cdf5795"
+          "bytes": 32863,
+          "sha256": "5b39f5ac66a1e9529c2ec6c08c0cdedbeabadcba3b97d1e35d2dcad9406b5439"
         }
+      },
+      "visualPolish": {
+        "version": 1,
+        "kind": "RECRUITMENT_FORM_SILHOUETTE_DIFFERENTIATION_PASS",
+        "reviewStatus": "UNREVIEWED_RUNTIME_FILES",
+        "normalRuntimeAuthoritative": false
       }
     },
     "char_s02_barga_f1": {
@@ -2931,29 +3309,35 @@
       "motions": {
         "idle": {
           "frames": 8,
-          "bytes": 8483,
-          "sha256": "1dad8eeda7e6f654e93d383b8528d9770b956f5bdeac9f9a71c8f78ad9f1043b"
+          "bytes": 11926,
+          "sha256": "90f9bfaa21b0fa8c08161c348fc890a4c2df9ce713e867c63caedda4155ccae1"
         },
         "move": {
           "frames": 8,
-          "bytes": 8745,
-          "sha256": "ed0bf700c61b2b8771e86942a3c79a462c3edfee1cced9f7afd91e643f72c13d"
+          "bytes": 12611,
+          "sha256": "d78578de875b88af66750aea0068412ff639cb7ab0676a2772df380a9d9857f2"
         },
         "attack": {
           "frames": 9,
-          "bytes": 9164,
-          "sha256": "3720a60fb54bf8e565cd728dbf4fb43650e3fbb66a73aaf227f5326161172060"
+          "bytes": 13109,
+          "sha256": "5e360248e6bc296c81e88cb41e6e24da8750507236237d0c5ed308654bd96546"
         },
         "knockback": {
           "frames": 4,
-          "bytes": 4314,
-          "sha256": "2dbaf5c89ba74539ad5db0b08d67c0509e2b79e2452d9bee1aa93b5c830f7e3f"
+          "bytes": 8182,
+          "sha256": "17ed29643d61ef40ef3e63dc59ae6abe56ed9546ccc197166a52ba8cc42a1b44"
         },
         "death": {
           "frames": 8,
-          "bytes": 14634,
-          "sha256": "d1a0d2b961fa35dbe3223b34a16a4c489adc908127cd8af1dd28d5cecedc6bea"
+          "bytes": 22561,
+          "sha256": "b97947b3eb36851b711310e19115f6c6ca18dd5f5f56a4ea1cf1de1327abddc7"
         }
+      },
+      "visualPolish": {
+        "version": 1,
+        "kind": "RECRUITMENT_FORM_SILHOUETTE_DIFFERENTIATION_PASS",
+        "reviewStatus": "UNREVIEWED_RUNTIME_FILES",
+        "normalRuntimeAuthoritative": false
       }
     },
     "char_s02_barga_f2": {
@@ -2977,29 +3361,35 @@
       "motions": {
         "idle": {
           "frames": 8,
-          "bytes": 9828,
-          "sha256": "cdedff1c9bcbf968206408e6fe7e97ce362675fc2af19cdb40ec8ad328901526"
+          "bytes": 13237,
+          "sha256": "b4efc0b6829dc6d4ce5ee728f6ae9381df3b3a7971593b310d21a4d99978212d"
         },
         "move": {
           "frames": 8,
-          "bytes": 10423,
-          "sha256": "9f9f0ae171818dca52b83106b6d86374b1cd0077ef360f413ddf16b95905a337"
+          "bytes": 14333,
+          "sha256": "38192f031b4e7e09d8c4ea4581cb5e9ce96d3e94462f5cf42501cf459d103a34"
         },
         "attack": {
           "frames": 9,
-          "bytes": 10375,
-          "sha256": "ef2135ca85b5fda8ee4ce2c37714a212c843500687bb6abf3de78e95058e5db1"
+          "bytes": 14907,
+          "sha256": "dd8a62ba177a21a27d589f8007502421e6b5e846bb96fffe876361a97d95e7a1"
         },
         "knockback": {
           "frames": 4,
-          "bytes": 5132,
-          "sha256": "3cf36e71c5c7b3b98a51af4ba23a4d44f2ee0232302b1f8d066fafd7dc27b183"
+          "bytes": 10033,
+          "sha256": "b2ba0c292335e3feaeef6786f9fdede67e58583d1e71e6bc8fb2dedf1829fdf4"
         },
         "death": {
           "frames": 8,
-          "bytes": 20050,
-          "sha256": "6d3f3ab4154884df450a6d29cf6fb803bf21c75ab4c21081978a346396d5d580"
+          "bytes": 27074,
+          "sha256": "63235932fc582c1a381054a617c81f89c314539863847c69ae64148902e32f96"
         }
+      },
+      "visualPolish": {
+        "version": 1,
+        "kind": "RECRUITMENT_FORM_SILHOUETTE_DIFFERENTIATION_PASS",
+        "reviewStatus": "UNREVIEWED_RUNTIME_FILES",
+        "normalRuntimeAuthoritative": false
       }
     },
     "char_s02_barga_f3": {
@@ -3023,29 +3413,35 @@
       "motions": {
         "idle": {
           "frames": 8,
-          "bytes": 12826,
-          "sha256": "00d44252a7e4e222bb04190c83109d3072054ff7fa7aa0665a1f681f966e26cf"
+          "bytes": 17243,
+          "sha256": "c15a196e1cbc69ee684ff28be9a68a35f1e7fde0f1a6ef5a8d72b8109bdb037f"
         },
         "move": {
           "frames": 8,
-          "bytes": 13916,
-          "sha256": "62e575ce735ef86cf00c56e04fa76367f52c0d9ecf4ac3de871b27b6c6728953"
+          "bytes": 19147,
+          "sha256": "d6cbff1b01bf6d884aaa71d2fb3b7b8dd162143bacedd5ad8fd52c636229bf4f"
         },
         "attack": {
           "frames": 10,
-          "bytes": 15294,
-          "sha256": "71c7c987fa9741ecd22cc270913b5f5230a3fa5ed1bc6ddbe832317b33a5d983"
+          "bytes": 21393,
+          "sha256": "2e153fe8ba166f16e29a1fe9700cf3870f592553489f683e9f4dd4fefbd950ec"
         },
         "knockback": {
           "frames": 4,
-          "bytes": 6701,
-          "sha256": "6c00b23e9bbb5c25b3f5266e347840644ae21b7be23633cf9502f88d8a560f67"
+          "bytes": 12694,
+          "sha256": "2dd31a6c58b239251f25b826f20a1bbf9b3c356684d5ece2a262da367d2bf350"
         },
         "death": {
           "frames": 8,
-          "bytes": 23477,
-          "sha256": "fee865cdaa589f3f3dce0ebc848337abcbb3fdd3a6ff42ae36aba367ad7bd773"
+          "bytes": 32108,
+          "sha256": "ea5ba5b354d461db7b829910b4253f43fcc24a489738de92d8ad7b0ab98ed0a8"
         }
+      },
+      "visualPolish": {
+        "version": 1,
+        "kind": "RECRUITMENT_FORM_SILHOUETTE_DIFFERENTIATION_PASS",
+        "reviewStatus": "UNREVIEWED_RUNTIME_FILES",
+        "normalRuntimeAuthoritative": false
       }
     },
     "char_s02_zirka_f1": {
@@ -3069,29 +3465,35 @@
       "motions": {
         "idle": {
           "frames": 8,
-          "bytes": 7384,
-          "sha256": "a7f9ff40cae5dd26752a31dee724b6a699d235fde0458d96dedf3100ca92b9b2"
+          "bytes": 8317,
+          "sha256": "d0f6cdb1337bf848ce616d702756f1a8b7b4e3d044c0f061def5f3e228eff3d4"
         },
         "move": {
           "frames": 8,
-          "bytes": 7852,
-          "sha256": "e3dbea3e11c8647b886c8b6f04d2927b6b735fb1ebabb4067ef776f919565113"
+          "bytes": 8894,
+          "sha256": "d07d9dbb9742b1b19c706011ee448d65a2725a9ce111c2edd0e0e4709b779a62"
         },
         "attack": {
           "frames": 9,
-          "bytes": 8013,
-          "sha256": "ccd4bc028fdcf7990ade5eebc4932a2d8beafffab70749fd64e3ff627d4323a5"
+          "bytes": 9296,
+          "sha256": "f83448a1b296fa95ce17f8ac4bba0a091c3beeab35a74c069c971783761917fb"
         },
         "knockback": {
           "frames": 4,
-          "bytes": 3834,
-          "sha256": "7e2f17eeb80445dc43b72ad051c345825380f872e950a92f833875c5eb02ddbd"
+          "bytes": 5177,
+          "sha256": "30ec137c05befe4cc13612a402ff0449e5a9c35ed6412250308672c0fc0b7588"
         },
         "death": {
           "frames": 8,
-          "bytes": 13562,
-          "sha256": "caf45d729effbe3816294d33c64e6a2a1cd1f50560ee3b1776251397393dbe24"
+          "bytes": 16518,
+          "sha256": "4c1ee355fba12b84c191b4c5e1e59e363a06b461dec83692cd9c11c8a67af509"
         }
+      },
+      "visualPolish": {
+        "version": 1,
+        "kind": "RECRUITMENT_FORM_SILHOUETTE_DIFFERENTIATION_PASS",
+        "reviewStatus": "UNREVIEWED_RUNTIME_FILES",
+        "normalRuntimeAuthoritative": false
       }
     },
     "char_s02_zirka_f2": {
@@ -3115,29 +3517,35 @@
       "motions": {
         "idle": {
           "frames": 8,
-          "bytes": 8666,
-          "sha256": "fe9d132903b7d10e29a25ff12dfdb5314c2ce580672089e60d9f8aed72a1eee6"
+          "bytes": 9918,
+          "sha256": "eeb4ece9ec0f1e02cbb06f67fae5a99d7c9d9500d411a7f1d7b8ff1096c11abe"
         },
         "move": {
           "frames": 8,
-          "bytes": 9497,
-          "sha256": "0deb3c4efa21c7d92dc775a1fb1c1460ecd40ca57e44cc7a24111096e0dfedac"
+          "bytes": 11084,
+          "sha256": "7c147f0b99710abc8e398e43b3064cee2e2fc847e6e43f7041a20d7e5d862c99"
         },
         "attack": {
           "frames": 9,
-          "bytes": 9208,
-          "sha256": "2ca649e7262d46eb190a93c31574b477855303c9fd2aebe6089999792e970f0e"
+          "bytes": 11688,
+          "sha256": "8fdfb208a1b7f3df630eaa03fac41472df63cfadd15acdab64b6850b0b04b6ae"
         },
         "knockback": {
           "frames": 4,
-          "bytes": 4672,
-          "sha256": "bc57e5b40c3a22e9b40bc908b959c2fdbe19f632f34c96e788c4b79d651b6a2f"
+          "bytes": 8212,
+          "sha256": "c432c8264da96fa32636d20e60fd1953311f0db57bec97e5dc78f340ca22a18c"
         },
         "death": {
           "frames": 8,
-          "bytes": 18944,
-          "sha256": "adb4d54213cccd07dac59f5f7cc5b5f7b0352e4df82c7dbed26016422c13c058"
+          "bytes": 23079,
+          "sha256": "cc4501a56423497d70ccdca910b75147298dba955d6741163c0761c6a2c097f7"
         }
+      },
+      "visualPolish": {
+        "version": 1,
+        "kind": "RECRUITMENT_FORM_SILHOUETTE_DIFFERENTIATION_PASS",
+        "reviewStatus": "UNREVIEWED_RUNTIME_FILES",
+        "normalRuntimeAuthoritative": false
       }
     },
     "char_s02_zirka_f3": {
@@ -3161,29 +3569,35 @@
       "motions": {
         "idle": {
           "frames": 8,
-          "bytes": 11552,
-          "sha256": "2112f1cc7b0ac1dff83a69d11747cf4d509bd41843e5475583dc23c84d7053df"
+          "bytes": 14783,
+          "sha256": "b5c6ec70a7b7f0ff4b9be98d9ffd74ffb402a2bb469c5c6643b898857055aff0"
         },
         "move": {
           "frames": 8,
-          "bytes": 12672,
-          "sha256": "3b26b9d9acc51a6fc11767664b193cd8efe105f3d44e5f67792f29f44fb31d96"
+          "bytes": 16825,
+          "sha256": "8429ad3a360411abe62558a01595534e8812214e81bfdbf322607de5dd681faa"
         },
         "attack": {
           "frames": 10,
-          "bytes": 13548,
-          "sha256": "43edf8aef5e61fc818ac17b436f616abb31314e6cddf887f62365ff2ad39a71f"
+          "bytes": 19095,
+          "sha256": "820720fdcbf8408bf7fcee2f9a97752986c18f7e79f91b6e2107c23470fc8ef7"
         },
         "knockback": {
           "frames": 4,
-          "bytes": 6020,
-          "sha256": "12a10cd1584fa872242d53f9948be1d366e417a5e4ab978fd2c93abba0e3df0f"
+          "bytes": 12773,
+          "sha256": "a29deaf8e92dfbd65a6c3819b765c7b3b5aabaf7745cfac38a03956dd3ef6092"
         },
         "death": {
           "frames": 8,
-          "bytes": 22289,
-          "sha256": "386aa7d59f73208ebeed7808ce6a2dd84f4db3f49ef2b0aa340c781edc07f471"
+          "bytes": 32392,
+          "sha256": "b5221d1daa1275880548c21002e18ec7297aff4218377f6012686eccd70b31d3"
         }
+      },
+      "visualPolish": {
+        "version": 1,
+        "kind": "RECRUITMENT_FORM_SILHOUETTE_DIFFERENTIATION_PASS",
+        "reviewStatus": "UNREVIEWED_RUNTIME_FILES",
+        "normalRuntimeAuthoritative": false
       }
     },
     "char_s02_mogu_f1": {
@@ -3207,29 +3621,35 @@
       "motions": {
         "idle": {
           "frames": 8,
-          "bytes": 9177,
-          "sha256": "95d894543ee0d23c811e72c15e09a487c0412bfeede239f681c0ccdeb736ffb9"
+          "bytes": 9391,
+          "sha256": "170646b800f759e86e6dd2d1b8e0d3d1712b86a8d224424bc6b842f41dad9397"
         },
         "move": {
           "frames": 8,
-          "bytes": 9655,
-          "sha256": "fa80e780239933b9708021a09d91a2df7cd0bfa0b5e9e7994054866fdb540b10"
+          "bytes": 9965,
+          "sha256": "aa0d3fb65b6165db72f0fcdb502390929d9e12030a154d1fb2ffa42f001567b9"
         },
         "attack": {
           "frames": 9,
-          "bytes": 9917,
-          "sha256": "663c06e3974f6bac9513cbf9cc1eed5800d2b0ee443c6c73032e99fed5e20255"
+          "bytes": 10429,
+          "sha256": "ae7549fce768d2431649474136e1437c526b2368c73ef95526d322f0c99990b1"
         },
         "knockback": {
           "frames": 4,
-          "bytes": 4717,
-          "sha256": "f869789e71ca36b835fa2f9cf0d08cf56c153c48eb3b523685d957ad20d5ea26"
+          "bytes": 5078,
+          "sha256": "5027b7cc7fe19a098a79cdaacdb65b59b629818c086d23829dca1ab6799b996e"
         },
         "death": {
           "frames": 8,
-          "bytes": 14693,
-          "sha256": "1de5c05ff6e7d9c369ffecf91260b3c52380c01c59f17fd8f8fcf2455292c15e"
+          "bytes": 15501,
+          "sha256": "35d48e0d2783ade16fc2d3f7383e2a84c094c76ea77632a1ff93833581b0b0ef"
         }
+      },
+      "visualPolish": {
+        "version": 1,
+        "kind": "RECRUITMENT_FORM_SILHOUETTE_DIFFERENTIATION_PASS",
+        "reviewStatus": "UNREVIEWED_RUNTIME_FILES",
+        "normalRuntimeAuthoritative": false
       }
     },
     "char_s02_mogu_f2": {
@@ -3253,29 +3673,35 @@
       "motions": {
         "idle": {
           "frames": 8,
-          "bytes": 10765,
-          "sha256": "5e9fa99cd4fc52329d5e4189cede0e0ce09ff21aff970d7676bb8ecc73563708"
+          "bytes": 12550,
+          "sha256": "50c0e51cf4293ddbb53da49d5ea5991bfe68342e751263f69e3783b3a3562cb8"
         },
         "move": {
           "frames": 8,
-          "bytes": 11623,
-          "sha256": "e65e922b8cf96349a26300f1eeb405351fe74759cae5358021e9512105d7d2ec"
+          "bytes": 14078,
+          "sha256": "93399fcb5c613cd3942c896508917c27265215668114d53afaafefafe8b60be4"
         },
         "attack": {
           "frames": 9,
-          "bytes": 11325,
-          "sha256": "0c11f5d04581d23b6c1b5bcfc23eaa91c3feb648e2b88dda5a38459afab8cd41"
+          "bytes": 15148,
+          "sha256": "a73e48605eb96b64905966ceef51912859f07e822d23ef3c6e3d23256d66edc7"
         },
         "knockback": {
           "frames": 4,
-          "bytes": 5607,
-          "sha256": "d17523ca2e48545c976259cfa7077a9ae1b1f674850ac56dbc5fb3eed3e17e82"
+          "bytes": 9772,
+          "sha256": "099d3930f40fa594d386febe8a6ca8bd5305fefc6a6018688ef1d6ddb45941ff"
         },
         "death": {
           "frames": 8,
-          "bytes": 20383,
-          "sha256": "0546a9c610bac49e0ae8ccf024d00e6864b759d348090fbf23a0427c0bf56cf7"
+          "bytes": 26094,
+          "sha256": "f2c56f10f574d82c44f7cb3bb4f0ce7e8c106e080ab9d6fcfcbd8ff8c9657224"
         }
+      },
+      "visualPolish": {
+        "version": 1,
+        "kind": "RECRUITMENT_FORM_SILHOUETTE_DIFFERENTIATION_PASS",
+        "reviewStatus": "UNREVIEWED_RUNTIME_FILES",
+        "normalRuntimeAuthoritative": false
       }
     },
     "char_s02_mogu_f3": {
@@ -3299,29 +3725,35 @@
       "motions": {
         "idle": {
           "frames": 8,
-          "bytes": 13851,
-          "sha256": "221bb86a96b2a86a38dbdad2d96afb0f867088c3e7806dcbd778b59a0a17fc60"
+          "bytes": 16058,
+          "sha256": "abaf2b444461945e0e06a749e1561c1c0b2587542f1c3990a6a521e660e4a058"
         },
         "move": {
           "frames": 8,
-          "bytes": 15036,
-          "sha256": "b9956654034f7f5edc12f4a4807b02201926d900e97044b562307c9980ca4bc4"
+          "bytes": 17666,
+          "sha256": "44c7bdc3bcc2f73d8863ab4b349ecce73ab0ef96d88cf91562527104f235b426"
         },
         "attack": {
           "frames": 10,
-          "bytes": 16144,
-          "sha256": "8677b26cf1ccdbf84a27347823c6783bab019f19cd1950f919927d705b078978"
+          "bytes": 20057,
+          "sha256": "e79d5ba218cd635bd32fb73fed8c680cf4d87a3aab23a2227f49eaffac7f3668"
         },
         "knockback": {
           "frames": 4,
-          "bytes": 7075,
-          "sha256": "8d8fb001af1ea575ecb538f666758eadebe5eb46fb597e714367c5329bdacb0b"
+          "bytes": 10805,
+          "sha256": "a76a351ea834b6a48a7c4021b389cfdefb8e891a63f4fa10dd606dfd0ef771f9"
         },
         "death": {
           "frames": 8,
-          "bytes": 23826,
-          "sha256": "129aa457f473bfb43ff1666af2debff550e8d358722cce67181a7a3ca8a9df4e"
+          "bytes": 29721,
+          "sha256": "bd9668878060e3596d391c4709aef50317f8ce8c76bd7afeabe7390e6c1983e4"
         }
+      },
+      "visualPolish": {
+        "version": 1,
+        "kind": "RECRUITMENT_FORM_SILHOUETTE_DIFFERENTIATION_PASS",
+        "reviewStatus": "UNREVIEWED_RUNTIME_FILES",
+        "normalRuntimeAuthoritative": false
       }
     },
     "char_s02_gardo_f1": {
@@ -3345,29 +3777,35 @@
       "motions": {
         "idle": {
           "frames": 8,
-          "bytes": 8604,
-          "sha256": "6d78b786d4f400728a17550bcfa4284286926b85f9aece258a6c220afd8aa0a3"
+          "bytes": 10078,
+          "sha256": "8ced2f743547802714872666a5f8334c61644e0a1f3b84f66ef6471c132997c0"
         },
         "move": {
           "frames": 8,
-          "bytes": 8895,
-          "sha256": "8374ee54600c57beef64b28beef7dabb60d6124e4268329a60d61310acaeda2a"
+          "bytes": 10362,
+          "sha256": "3c46cdc2f987871814d6c6dbb02d8c3eb732ef97184892670d2abcf2716cc743"
         },
         "attack": {
           "frames": 9,
-          "bytes": 10056,
-          "sha256": "55aaf9191f7de063f537f0f5cb6851cc9e4368818d9af103930958ad5dd3cb17"
+          "bytes": 11450,
+          "sha256": "d4321a68c15e3456b4e34108b30b7c33f73189b09eabeddf8f94cacdae793ae6"
         },
         "knockback": {
           "frames": 4,
-          "bytes": 4389,
-          "sha256": "250113de61706d5dfb2c3b83d880d7f045a6929d59f5c2fb30552e93354aa080"
+          "bytes": 5048,
+          "sha256": "844a0056c23988a582a229cf16afb0d7f08db04e2fbbc29ee18980a54da0e780"
         },
         "death": {
           "frames": 8,
-          "bytes": 15001,
-          "sha256": "e2b54a1935adc508562bf68b84e0e77f9b1c80affe66345e7fd9d1c9dadad21b"
+          "bytes": 17329,
+          "sha256": "a70fabd37965c80b546bd11a39f54084295619eec356e8106baf751de6aeb133"
         }
+      },
+      "visualPolish": {
+        "version": 1,
+        "kind": "RECRUITMENT_FORM_SILHOUETTE_DIFFERENTIATION_PASS",
+        "reviewStatus": "UNREVIEWED_RUNTIME_FILES",
+        "normalRuntimeAuthoritative": false
       }
     },
     "char_s02_gardo_f2": {
@@ -3391,29 +3829,35 @@
       "motions": {
         "idle": {
           "frames": 8,
-          "bytes": 9918,
-          "sha256": "f072128a62ccef0f996c662195ba1e33fdbe6eceff372f30f8d33b7501246f99"
+          "bytes": 12340,
+          "sha256": "bd250fa1c0eef867e35f863d2ec18982be89e09f0ceb30fd8375bb748c84f774"
         },
         "move": {
           "frames": 8,
-          "bytes": 10556,
-          "sha256": "67aa3d769d1f07b8e28a4dd75b8cd3869357f4e2ddcd9021d08f2b416e6eb936"
+          "bytes": 13004,
+          "sha256": "0ab2727604caed062ea3d714f91a31643811852de52a391d62680b53352a329f"
         },
         "attack": {
           "frames": 9,
-          "bytes": 11245,
-          "sha256": "7d12a6e3fbf2a7e85349efe0b08376132176fd590f95714f9771d6bca07fc19c"
+          "bytes": 14993,
+          "sha256": "3a67d56899e690218a5bd0fc11ba202b33fcd2d3c1ff71fdabb2763c69079034"
         },
         "knockback": {
           "frames": 4,
-          "bytes": 5202,
-          "sha256": "cccffd76649a5a3530b965f4a3546c419ef3f4daa60385c3b8f032e7da39aa88"
+          "bytes": 9023,
+          "sha256": "a98f2dc212a38285981dfeec63113b4c34bc0cbc5fffacae6ca2fdffc59c41ec"
         },
         "death": {
           "frames": 8,
-          "bytes": 20213,
-          "sha256": "5f672f10f84f1a70ec460c0ec286779b67f48eedf4bf98335996bfb92b950024"
+          "bytes": 25772,
+          "sha256": "503f9d9f24cfb33dcd2ae647b16d6b403fe4acbfc94044a476996aedb6cc1c92"
         }
+      },
+      "visualPolish": {
+        "version": 1,
+        "kind": "RECRUITMENT_FORM_SILHOUETTE_DIFFERENTIATION_PASS",
+        "reviewStatus": "UNREVIEWED_RUNTIME_FILES",
+        "normalRuntimeAuthoritative": false
       }
     },
     "char_s02_gardo_f3": {
@@ -3437,29 +3881,35 @@
       "motions": {
         "idle": {
           "frames": 8,
-          "bytes": 13032,
-          "sha256": "d71e4d47c317913c325e63ee23de1438c03d9cc473248ed3cf0d6fc051a2fbb4"
+          "bytes": 16989,
+          "sha256": "f9683d414d33b81b49a632ff12a9c85692c06f30aab5380cc29b78de5c2ddcd1"
         },
         "move": {
           "frames": 8,
-          "bytes": 14143,
-          "sha256": "9408bb31476b05cb776ca8274d6c3300316f3e74148267416d691594917aee6b"
+          "bytes": 18743,
+          "sha256": "ecb437a95898a0ef59e52318c0d91179d8f1b29ef9b61e5642f31578105064da"
         },
         "attack": {
           "frames": 10,
-          "bytes": 16395,
-          "sha256": "77c39e1844b05b62855c12ec1b23d20bda2c40f1637cc7c705e7f498391f1783"
+          "bytes": 22704,
+          "sha256": "6f5f1984d154248b74364ddbbe66d504130548ec8f89d2085355bfa87e6b08c9"
         },
         "knockback": {
           "frames": 4,
-          "bytes": 6788,
-          "sha256": "f59c46789a7bb8850a7f1fc36ac68d2db1acd6c20e2ce6fea507f611d64b30d2"
+          "bytes": 12154,
+          "sha256": "b4176d2bb62533d6e0b1366825463cf0a68fe78adfcef20f4bce297ad6b79ba3"
         },
         "death": {
           "frames": 8,
-          "bytes": 23628,
-          "sha256": "4d8c282078bc3a6585607dc30281f15fd8f330e96506e1b997d13ede6727d007"
+          "bytes": 32788,
+          "sha256": "47e5f53cfdf0efac328bd3dc1cbd3f615978e462486507b3672a0941c39576f5"
         }
+      },
+      "visualPolish": {
+        "version": 1,
+        "kind": "RECRUITMENT_FORM_SILHOUETTE_DIFFERENTIATION_PASS",
+        "reviewStatus": "UNREVIEWED_RUNTIME_FILES",
+        "normalRuntimeAuthoritative": false
       }
     },
     "char_s02_kreik_f1": {
@@ -3483,29 +3933,35 @@
       "motions": {
         "idle": {
           "frames": 8,
-          "bytes": 7357,
-          "sha256": "36831240b1394e92735d78de688601c9e493c09e6660f02007b8e7c459569396"
+          "bytes": 8597,
+          "sha256": "2ff171716d4ab34e34a60e763de0b32ed604ef4b085a58ada31976c7fccc221c"
         },
         "move": {
           "frames": 8,
-          "bytes": 7779,
-          "sha256": "71f8b0a02c1927d49b71cb12613dd25c74b5cd0fbb97c19cb2db011f22e1091f"
+          "bytes": 9098,
+          "sha256": "6efcf39604f1ddc397cc5c1cb813647a03cb2ee00883a7b3678a220e09fcb181"
         },
         "attack": {
           "frames": 9,
-          "bytes": 7755,
-          "sha256": "47e3e99aebc5c831d8406188c2218a782fb1dd12e61d72a3c41ea4f734b66156"
+          "bytes": 8922,
+          "sha256": "75edd9bdfc233bb03e3a449041dd7dc06d2f21bec80061bd4b39b8de9d622cf3"
         },
         "knockback": {
           "frames": 4,
-          "bytes": 3811,
-          "sha256": "27b0a5b38cf39df23caab523cf9f55419a500a1d1a33dfea8e7499db5dd0a067"
+          "bytes": 4412,
+          "sha256": "bba5e461c22c53b045d3fe6b6b9201b889cff9ecc90059a30bfec43a8dd75004"
         },
         "death": {
           "frames": 8,
-          "bytes": 13382,
-          "sha256": "01acf5f6365d573481f63e264a1073a33878911799010cbd01b953057df5c720"
+          "bytes": 15635,
+          "sha256": "65a5f7109ca3f0c0c6f6cd07f9d012a736291fa3bc2b8c2a64a8c49a0504ed1f"
         }
+      },
+      "visualPolish": {
+        "version": 1,
+        "kind": "RECRUITMENT_FORM_SILHOUETTE_DIFFERENTIATION_PASS",
+        "reviewStatus": "UNREVIEWED_RUNTIME_FILES",
+        "normalRuntimeAuthoritative": false
       }
     },
     "char_s02_kreik_f2": {
@@ -3529,29 +3985,35 @@
       "motions": {
         "idle": {
           "frames": 8,
-          "bytes": 8631,
-          "sha256": "25af7c239e43180c920566834d53ca8d4bab01eb27e66bca329fa2c1af0a3d07"
+          "bytes": 10730,
+          "sha256": "9ec3b46e3e0095032d6c3e08d1e2611e404768398b8abf8eafc66729dfdaf2d0"
         },
         "move": {
           "frames": 8,
-          "bytes": 9427,
-          "sha256": "e5e44baa4fdbfe0f6ef047d97d5989d93eaab74f28a01ebe9774013c7f945942"
+          "bytes": 12036,
+          "sha256": "463bb1c43dadf625e45914e90a393c9f1a0c985cc665d16d76464985f40b0982"
         },
         "attack": {
           "frames": 9,
-          "bytes": 8898,
-          "sha256": "9174235cbbb4a76a84648c5a9940a03de40915b4dc48ed309930070f80a6119d"
+          "bytes": 12685,
+          "sha256": "a1238d86d03069263b8e01403ef47eaaf4e732c08373f9051b8d306351b77d92"
         },
         "knockback": {
           "frames": 4,
-          "bytes": 4655,
-          "sha256": "9ab1292ae68026be4b15a869302134db52567bc6d732206068349cfd80793242"
+          "bytes": 8934,
+          "sha256": "0ef23dfc1620cab8fb077bfd99adee01cfe19d1e4475634bf7ed662416999e2b"
         },
         "death": {
           "frames": 8,
-          "bytes": 18787,
-          "sha256": "f3aea2a8c79e7e78ed217e07cccc67666dde47f72ab0c71e0657496cc03b8754"
+          "bytes": 25249,
+          "sha256": "2c6962669a81b683a17d72a45eef61fb2421b61f85593f5efb1eb097621b840d"
         }
+      },
+      "visualPolish": {
+        "version": 1,
+        "kind": "RECRUITMENT_FORM_SILHOUETTE_DIFFERENTIATION_PASS",
+        "reviewStatus": "UNREVIEWED_RUNTIME_FILES",
+        "normalRuntimeAuthoritative": false
       }
     },
     "char_s02_kreik_f3": {
@@ -3575,29 +4037,35 @@
       "motions": {
         "idle": {
           "frames": 8,
-          "bytes": 11587,
-          "sha256": "4137061e3f343da1165f0331d63fe07c2cd05dd4625c2144a99bd14827c771ac"
+          "bytes": 14551,
+          "sha256": "b9bf49e61ded8a5c739be41745b208949ed20d1e58c4146bd5ac04d8fb8f8103"
         },
         "move": {
           "frames": 8,
-          "bytes": 12681,
-          "sha256": "51b710254728fdbbbda9dcd8414cc5d62952bc57e507373b5b09916d78ddf2c1"
+          "bytes": 16175,
+          "sha256": "c6bb3879609870139373184368c20ed90c4949511d933b8b99e1c94056fa3209"
         },
         "attack": {
           "frames": 10,
-          "bytes": 13217,
-          "sha256": "bf70b4937554a622c806eba6905b2c62e19854ce4c9f79b8e6e3395963e32c95"
+          "bytes": 17929,
+          "sha256": "6583ff4fea59851790e45f8dc75cac615a2ba88fafb0578bfcf6b325d9d5a591"
         },
         "knockback": {
           "frames": 4,
-          "bytes": 5987,
-          "sha256": "9109cec2c997a8134a3903d0ec6fa297543351ca086a4f4ec8e5f17d70f66b6e"
+          "bytes": 10902,
+          "sha256": "ea376c3f37c8eb7c45a3dfb4a2fd9269512139e72855c41bba96cb3be1480ac7"
         },
         "death": {
           "frames": 8,
-          "bytes": 22051,
-          "sha256": "203025cd16b81e57a1c60e315be49a6d64884ca5b94287d5ffa88764ef3070a6"
+          "bytes": 29957,
+          "sha256": "345ddaec8329f47b94ed594f779194ddb0aab2b60b07a6845aa95832f43d0db9"
         }
+      },
+      "visualPolish": {
+        "version": 1,
+        "kind": "RECRUITMENT_FORM_SILHOUETTE_DIFFERENTIATION_PASS",
+        "reviewStatus": "UNREVIEWED_RUNTIME_FILES",
+        "normalRuntimeAuthoritative": false
       }
     },
     "char_s02_gormu_f1": {
@@ -3621,29 +4089,35 @@
       "motions": {
         "idle": {
           "frames": 8,
-          "bytes": 8480,
-          "sha256": "d6dde27752788ebe43cf7ec31d5a7539d8b38f48837e1c482461d2ed84988b6f"
+          "bytes": 11960,
+          "sha256": "ebd9e926ab5ab252c4bbe1ac6f3ea4b8175bb92dc11720516b9c4c90320b73c4"
         },
         "move": {
           "frames": 8,
-          "bytes": 8743,
-          "sha256": "0caacf308aff7984b0300d66127f4f33e09a920e187e67e805e57d72470ab7ec"
+          "bytes": 12366,
+          "sha256": "331edec0c1263e38797773604ace0ec4fd0b6efcd35cd8e8599526efc24b6bb5"
         },
         "attack": {
           "frames": 11,
-          "bytes": 10990,
-          "sha256": "50e623dbffb45f6cbd3fc9ec63c3092196da7491843d4516ab999d892933c3f9"
+          "bytes": 15724,
+          "sha256": "55560c4744eae0caf37a5e4e41e59c9bd8aa5b5867dfa197e3ce68b13e802ae7"
         },
         "knockback": {
           "frames": 4,
-          "bytes": 4312,
-          "sha256": "7d6aec42cbac9193ce4540e21429f3293b7e9026c0873e911c9bd715fc071ed2"
+          "bytes": 6469,
+          "sha256": "2be6b5e3b32a3866d50601d64060d7cae286eaae43bd62a3adda228a6c59c6bb"
         },
         "death": {
           "frames": 9,
-          "bytes": 16116,
-          "sha256": "19cec04796af3e8114e2daae05f586a148f2a3e0a706b0d5c1ba204acc6bd01b"
+          "bytes": 22981,
+          "sha256": "ff61fd495c0f36e4451b3fbcc02958655a5ee8973cbfb6ac8f3a4ac1f8c0003d"
         }
+      },
+      "visualPolish": {
+        "version": 1,
+        "kind": "RECRUITMENT_FORM_SILHOUETTE_DIFFERENTIATION_PASS",
+        "reviewStatus": "UNREVIEWED_RUNTIME_FILES",
+        "normalRuntimeAuthoritative": false
       }
     },
     "char_s02_gormu_f2": {
@@ -3667,29 +4141,35 @@
       "motions": {
         "idle": {
           "frames": 8,
-          "bytes": 9830,
-          "sha256": "73eceb2c18901a8ecf3d5071921b4fa935322bf90d86603c16ebb20cf964d5f3"
+          "bytes": 13974,
+          "sha256": "e34302ee31628a416edb3700b9cf792d8ce26fde69488af3250ccf271d7b90eb"
         },
         "move": {
           "frames": 8,
-          "bytes": 10424,
-          "sha256": "4570bdba0b8cd8ba584bcd37692cd4c917e560c6774eaa5992955373679a95d6"
+          "bytes": 15234,
+          "sha256": "ecd78caf9f9472e1e1577d27dcd2c58b6d61a32e32ccb258e3e78496614de00e"
         },
         "attack": {
           "frames": 11,
-          "bytes": 12288,
-          "sha256": "ff156b0a8bbd98740cf736622841e8b3b2f0684153f83cfabb49c55856eeeee3"
+          "bytes": 19693,
+          "sha256": "a2d3fc4a5989a0475624f31896bc0e77725fa0b73fa32db816935672a8db5552"
         },
         "knockback": {
           "frames": 4,
-          "bytes": 5135,
-          "sha256": "b3c5cfce52ee14b7e835cbbe5ab179616a70a1e5f1b2988a631fd3660dd779e5"
+          "bytes": 10413,
+          "sha256": "5e2b5f29fd23c476ceec7f1af97084eb1b67f6e75a6f1efc6df066a648fdb582"
         },
         "death": {
           "frames": 9,
-          "bytes": 21786,
-          "sha256": "afc413d2de2a2c688c0917eed263baa3cba5a95656c952ab648f043533011207"
+          "bytes": 31587,
+          "sha256": "f0e3e415500736fa644c3611594dacad25d330749199959e55cf18c6532764d5"
         }
+      },
+      "visualPolish": {
+        "version": 1,
+        "kind": "RECRUITMENT_FORM_SILHOUETTE_DIFFERENTIATION_PASS",
+        "reviewStatus": "UNREVIEWED_RUNTIME_FILES",
+        "normalRuntimeAuthoritative": false
       }
     },
     "char_s02_gormu_f3": {
@@ -3713,29 +4193,35 @@
       "motions": {
         "idle": {
           "frames": 8,
-          "bytes": 12830,
-          "sha256": "06cc735b65e7c0f7d87465b85ac0122613c17578a229b33a46eb2ff07f67df6b"
+          "bytes": 18196,
+          "sha256": "b13717e2ffaa207b1d13658e374c2e9c9c8fa59f89b4b53bdba3dab2cfefa470"
         },
         "move": {
           "frames": 8,
-          "bytes": 13918,
-          "sha256": "8e21466c7d3c28c56ccc4a1770b2624dcbc652db94ba8f1acdb7cfa4ba4c83f5"
+          "bytes": 20198,
+          "sha256": "532cd67cbf54f70582803c930e7f96682f1e31c3bba73445ee102a8b62223232"
         },
         "attack": {
           "frames": 12,
-          "bytes": 17910,
-          "sha256": "e75746f17dca99836d7bbacb68efb5a74cf0d6d71597c47c071d21c54ebe9be3"
+          "bytes": 27220,
+          "sha256": "9769c36bbeeb638b048aed985d4c584e3ef216c7d56d8c2467e1142e237ca8c8"
         },
         "knockback": {
           "frames": 4,
-          "bytes": 6705,
-          "sha256": "542add760496950d32d525a889fa8a9d8c3efae986dd0a85f1eaf7296387bd63"
+          "bytes": 13595,
+          "sha256": "8593a41bab80dd9ff9e47fce29e210cf8470278a1785a4fa0052d1fad97e9f1b"
         },
         "death": {
           "frames": 9,
-          "bytes": 25468,
-          "sha256": "78e40c810d4d986aadc92611d25f13fde121b3e0007e6c29c8f9d00721f59d6e"
+          "bytes": 37862,
+          "sha256": "88f08d0a64e0aeda4673465bb8d028ddf73174ba09d88fdf2ab983933ca66c9f"
         }
+      },
+      "visualPolish": {
+        "version": 1,
+        "kind": "RECRUITMENT_FORM_SILHOUETTE_DIFFERENTIATION_PASS",
+        "reviewStatus": "UNREVIEWED_RUNTIME_FILES",
+        "normalRuntimeAuthoritative": false
       }
     },
     "char_s03_k17_f1": {
@@ -3759,29 +4245,35 @@
       "motions": {
         "idle": {
           "frames": 8,
-          "bytes": 7536,
-          "sha256": "1a1670c6e67cf7ed6a29d76204ce1dc0bcb6e85c2dc060b0feb38796a0cedd6b"
+          "bytes": 8755,
+          "sha256": "a07f84f27e00dd8921ace739a76d2f7f4a5f0fe3ea621e1d8dfaf9ad24014c3c"
         },
         "move": {
           "frames": 8,
-          "bytes": 7831,
-          "sha256": "b69f81c0278123d3e931be4ffa98e031cc1e37a1b01d49889130772b6aa2ee60"
+          "bytes": 9319,
+          "sha256": "eeab40b260378f2d7d5cc7a1f4142f07ffeb9bf83c565c06f683fa19fa4dde2e"
         },
         "attack": {
           "frames": 9,
-          "bytes": 8030,
-          "sha256": "b73827b41bc0003b6e679ec48b59b6ec72f25a0bcb6eff197e7f1b0eceaee7e2"
+          "bytes": 10693,
+          "sha256": "7ab5e5a7b35e169531b27cc4ffecbf5ee6f3b3fb9c170842339ac157bcf30063"
         },
         "knockback": {
           "frames": 4,
-          "bytes": 3888,
-          "sha256": "efb79ebb8f650341dc4598321ca8ce99eae1693f30a29ad6050cc23611f51f06"
+          "bytes": 5317,
+          "sha256": "1857eb88aa958743c74062a705271d8b97a7ba8180f0f1100f247ce552f794a0"
         },
         "death": {
           "frames": 8,
-          "bytes": 14595,
-          "sha256": "3b1eeb94859a6600b259cf0db2d56e175e74d6c4205d547f0d426eb43c6c4414"
+          "bytes": 16714,
+          "sha256": "8b703d651bc0f81032dce03b3ebd4dbf4e95e0425fdf0dacc16952aa228a6308"
         }
+      },
+      "visualPolish": {
+        "version": 1,
+        "kind": "RECRUITMENT_FORM_SILHOUETTE_DIFFERENTIATION_PASS",
+        "reviewStatus": "UNREVIEWED_RUNTIME_FILES",
+        "normalRuntimeAuthoritative": false
       }
     },
     "char_s03_k17_f2": {
@@ -3805,29 +4297,35 @@
       "motions": {
         "idle": {
           "frames": 8,
-          "bytes": 8459,
-          "sha256": "ec9f5381a9f78e4b79a77a65542e6dc6bd055b3758f1f25e803fdc99c71d5b43"
+          "bytes": 10935,
+          "sha256": "9805cd55a6d946415d9e0de8723260f63cae5d34b56adc360d313d961113a0de"
         },
         "move": {
           "frames": 8,
-          "bytes": 9239,
-          "sha256": "4d021730e97b1279c2776dac629b8d10ceee0abb2f3e51c003a3f7f8e2fc7cbc"
+          "bytes": 12252,
+          "sha256": "064ada015bbb93cdb034669ce716d7544f79e95b9db798f7bf9d65c329f9dd18"
         },
         "attack": {
           "frames": 9,
-          "bytes": 8930,
-          "sha256": "53c77002837a38226b342b9cb9643b3e0b075a186a9f82ed05c40cde90462950"
+          "bytes": 14112,
+          "sha256": "e0ed34525c23474d5c556fe691f162642a4f747541e87e1b0d6c7c523e47bacd"
         },
         "knockback": {
           "frames": 4,
-          "bytes": 4640,
-          "sha256": "c75b6f190cf348125f088a853e1d3e0c096e4c9dd69bbe8e6d1d09f92683c23e"
+          "bytes": 9994,
+          "sha256": "9314c66760d8fc025f66660aaebda2b9ff6b2818af4d69c9de7429f311a6bd91"
         },
         "death": {
           "frames": 8,
-          "bytes": 19724,
-          "sha256": "ac9ba63fa110d03ebe7ca93a7bc0432feaff4d3e57c403e7e3cce78608ff8ef3"
+          "bytes": 25241,
+          "sha256": "589128bed68c2d61fab72a300a8704861b7b534dd86a4fe3130c2bc1da968de8"
         }
+      },
+      "visualPolish": {
+        "version": 1,
+        "kind": "RECRUITMENT_FORM_SILHOUETTE_DIFFERENTIATION_PASS",
+        "reviewStatus": "UNREVIEWED_RUNTIME_FILES",
+        "normalRuntimeAuthoritative": false
       }
     },
     "char_s03_k17_f3": {
@@ -3851,29 +4349,35 @@
       "motions": {
         "idle": {
           "frames": 8,
-          "bytes": 11184,
-          "sha256": "a9d4ffb7af32686e159c8cf7836dd8fe82aef1337281a3d9c972d1ac651734de"
+          "bytes": 14625,
+          "sha256": "097ec5e43e7d46aec31806d06dabe884ae43b899d9aabe953c925d8d273c2875"
         },
         "move": {
           "frames": 8,
-          "bytes": 12319,
-          "sha256": "5deebb53efda22073b6939099e25bef78a085ce86b29787e77977c8445e14b6b"
+          "bytes": 16862,
+          "sha256": "65e03b2b749e0d06b2a7a69ec60c9ae08f0def915aa0fdf0ec49d1b308c10ebf"
         },
         "attack": {
           "frames": 10,
-          "bytes": 13184,
-          "sha256": "6a5bc65cbc4d487e19d76587de480e0b82a4bff6b60e23445fa4512e6eae9135"
+          "bytes": 20302,
+          "sha256": "e35499b30d6048b5fcf6303eaafc434b9bb717f2dbaa13f6f74da86e4df7bc3d"
         },
         "knockback": {
           "frames": 4,
-          "bytes": 6019,
-          "sha256": "10058b3f5818757514197d7c04e144753c042e2884f67e3320839c3997a67313"
+          "bytes": 12633,
+          "sha256": "295a80ba5205f522879eed647e10a1239f54c180621d98a38940a2a1a6fe5a1b"
         },
         "death": {
           "frames": 8,
-          "bytes": 22749,
-          "sha256": "f6ee0ed0714e561abfc3803d2bf7efd8a4983152fa8f7d08da96d1d0d0862fd4"
+          "bytes": 29702,
+          "sha256": "164acc0b7d9b0a558e6fc131048f79af78b56036a3bb07df84d76bfd4061d9ae"
         }
+      },
+      "visualPolish": {
+        "version": 1,
+        "kind": "RECRUITMENT_FORM_SILHOUETTE_DIFFERENTIATION_PASS",
+        "reviewStatus": "UNREVIEWED_RUNTIME_FILES",
+        "normalRuntimeAuthoritative": false
       }
     },
     "char_s03_arc_railer_f1": {
@@ -3897,29 +4401,35 @@
       "motions": {
         "idle": {
           "frames": 8,
-          "bytes": 7835,
-          "sha256": "9c72c083d59ffd94e69bed07b7584d809fbc1fb135a6335eec4a9e927e2fceb8"
+          "bytes": 8612,
+          "sha256": "015619d5d97d2bb7114437d4bbf2454992ecdfca8f2dddcb34e671880408d3ff"
         },
         "move": {
           "frames": 8,
-          "bytes": 8149,
-          "sha256": "4ed782c3e9eeaf0a3bcdb34ab393adbc5c575fa5c0f45b8d413b493ec4b9241a"
+          "bytes": 9031,
+          "sha256": "093137db0af2c1aa09e0850275be670e157092884f3336e4294809be2a09d2c0"
         },
         "attack": {
           "frames": 9,
-          "bytes": 9085,
-          "sha256": "c16bc942d8ccb40b45a2ef3022c50eb7b8243f1adb31d1a8315d1210ce11bb63"
+          "bytes": 10541,
+          "sha256": "44564c1edc04063e5d1bb286f5edeb7314f9f7a3f7b5bc0484a1d62f3b9f1a6c"
         },
         "knockback": {
           "frames": 4,
-          "bytes": 4025,
-          "sha256": "01d378ab61970d9091e2450f4aeb4e81f39c410f4fa2ef32b542cb7c9c7b468c"
+          "bytes": 5592,
+          "sha256": "3e3f85dae9108916bd080837b7c77bb6eb8afa113e65e32f4a93a886937a70fa"
         },
         "death": {
           "frames": 8,
-          "bytes": 14929,
-          "sha256": "982c87b2441be5a3adeb69dac43f230caf0913c0bf8d34d0af4088c58159986c"
+          "bytes": 17127,
+          "sha256": "3295b3c21db265838a455dce889c21959e34a1dbe34196f5656bd3394fc8327b"
         }
+      },
+      "visualPolish": {
+        "version": 1,
+        "kind": "RECRUITMENT_FORM_SILHOUETTE_DIFFERENTIATION_PASS",
+        "reviewStatus": "UNREVIEWED_RUNTIME_FILES",
+        "normalRuntimeAuthoritative": false
       }
     },
     "char_s03_arc_railer_f2": {
@@ -3943,29 +4453,35 @@
       "motions": {
         "idle": {
           "frames": 8,
-          "bytes": 8795,
-          "sha256": "5fbb020fe0d78b234bf63187aca476a5ce425a6769960e837cb6c43d4d957f2e"
+          "bytes": 9866,
+          "sha256": "16fa888a6a117024d9f6b00066a3d1ba0d9b911f4ef9d7275ecbf20ade0ec47d"
         },
         "move": {
           "frames": 8,
-          "bytes": 9513,
-          "sha256": "0f0e61d2785d770ccc5e9c4523f7addabc6cedf95e6a6e7950cfaf99f6c5980b"
+          "bytes": 10921,
+          "sha256": "864caa139466d088a57feb7ab4eef18c5780902b4ad38110d41c6a18d01aa8c3"
         },
         "attack": {
           "frames": 9,
-          "bytes": 9842,
-          "sha256": "83d509340a6bb7d363efa48ce53f5a40404dc9b2331b028b9da115a0b01c8f64"
+          "bytes": 13394,
+          "sha256": "5055dd756f7f077539e14b402345b53323440f541f8deebc13e8d359ae867466"
         },
         "knockback": {
           "frames": 4,
-          "bytes": 4750,
-          "sha256": "5a1edeabc70f51de0b3f656cc212f6b0be4cefe9c3dab32070aa22e69526fd92"
+          "bytes": 8666,
+          "sha256": "f8fd672ad41675c5a98d154f535da3da3bd53b668d05842262289d0e34ff8cfd"
         },
         "death": {
           "frames": 8,
-          "bytes": 19563,
-          "sha256": "0bc0de88d7c82eb39ad32996aa06bffe7b6e78d4a9c339fd0c3f2e554234c8b5"
+          "bytes": 22587,
+          "sha256": "4c40506f149ad6c22b65af36eebf93672e05b7370ef09669e57c569b3a29b0f6"
         }
+      },
+      "visualPolish": {
+        "version": 1,
+        "kind": "RECRUITMENT_FORM_SILHOUETTE_DIFFERENTIATION_PASS",
+        "reviewStatus": "UNREVIEWED_RUNTIME_FILES",
+        "normalRuntimeAuthoritative": false
       }
     },
     "char_s03_arc_railer_f3": {
@@ -3989,29 +4505,35 @@
       "motions": {
         "idle": {
           "frames": 8,
-          "bytes": 11749,
-          "sha256": "fa0aa86313192b8854541e4821ff617d6fecf605a91441dabdbb74b92319ef93"
+          "bytes": 14547,
+          "sha256": "b58cb6dc557b55ecda13ec3bb2037166c74800e155031cf68aebd9b4ffb0abd1"
         },
         "move": {
           "frames": 8,
-          "bytes": 12877,
-          "sha256": "24a9bc2fdc8325220695c249b98a6223d9c256498b92ce118e36e384bbf052e7"
+          "bytes": 16148,
+          "sha256": "c2ff6b037935682a9bc44d7873fc754be213753555ff5cf359a61132fd77ae1c"
         },
         "attack": {
           "frames": 10,
-          "bytes": 14453,
-          "sha256": "783b31d1c9f5fa5b2abd7e2bad8f29eae973b7220ae36859792b884923f3360f"
+          "bytes": 19427,
+          "sha256": "6d8a2bfa3393dbdfef90f40cba3278275205a562eefddfc111739d0c654d43e3"
         },
         "knockback": {
           "frames": 4,
-          "bytes": 6251,
-          "sha256": "63eed4c92e3a3167b6de3f4d55454dc30f2a5810de8cb30f34abbd08aa3b78c9"
+          "bytes": 11454,
+          "sha256": "07fe7ff96b8da3adaaeeef2555ec06ec4320750b3a15f7a985996693ec87254f"
         },
         "death": {
           "frames": 8,
-          "bytes": 23260,
-          "sha256": "2d7bda397794571d2314d91d9cffd7ee64fa902e095857e1437dfcce9368c035"
+          "bytes": 28177,
+          "sha256": "f78c02e4ae3f367b0c0391178b90caccd901ed45a859ed1355f7c632bb44c976"
         }
+      },
+      "visualPolish": {
+        "version": 1,
+        "kind": "RECRUITMENT_FORM_SILHOUETTE_DIFFERENTIATION_PASS",
+        "reviewStatus": "UNREVIEWED_RUNTIME_FILES",
+        "normalRuntimeAuthoritative": false
       }
     },
     "char_s03_nana04_f1": {
@@ -4035,29 +4557,35 @@
       "motions": {
         "idle": {
           "frames": 8,
-          "bytes": 7404,
-          "sha256": "57197a9d68a73aec153154d48f62c19db265551d234a755e430c7374c7a8671c"
+          "bytes": 7637,
+          "sha256": "0de32d9b4b0a03b9835b647ce4f2f471208fead8a15b4abb4a4ca05a6d309688"
         },
         "move": {
           "frames": 8,
-          "bytes": 7641,
-          "sha256": "254a091541f5778e6bd651c866fecd099fd2f3a6e681245ff3da683009f54fe2"
+          "bytes": 7932,
+          "sha256": "1b36bb42a22e7ebec0c849c6c0d9e831689a680a494aab164ef2537aad98fee0"
         },
         "attack": {
           "frames": 9,
-          "bytes": 7668,
-          "sha256": "4a374087433a609168b07cc251bfca9c1e65fd9c1f55ae497665e8c36ddbb39f"
+          "bytes": 8273,
+          "sha256": "ad733b87b0cff129b56303367a666e4d9a969d3b862f8c56c591d91d310e7ce1"
         },
         "knockback": {
           "frames": 4,
-          "bytes": 3783,
-          "sha256": "e2257b1e06d57ea4dd1a3d056e493c655e1353ec384d0caf1b4cc43c2543f835"
+          "bytes": 4054,
+          "sha256": "82f22889663daf435680584d3a359c1be2790b0eddd9e583a2c5eed8df67dcf0"
         },
         "death": {
           "frames": 8,
-          "bytes": 13936,
-          "sha256": "d86b0c8360b43540032553a3b84267721a642f26ac9b83d9f116a22a32b14352"
+          "bytes": 14380,
+          "sha256": "c6b18078326589a38e0da60d76d93df95bf9d6688f6a18dde4b6c4faf1054cc6"
         }
+      },
+      "visualPolish": {
+        "version": 1,
+        "kind": "RECRUITMENT_FORM_SILHOUETTE_DIFFERENTIATION_PASS",
+        "reviewStatus": "UNREVIEWED_RUNTIME_FILES",
+        "normalRuntimeAuthoritative": false
       }
     },
     "char_s03_nana04_f2": {
@@ -4081,29 +4609,35 @@
       "motions": {
         "idle": {
           "frames": 8,
-          "bytes": 8396,
-          "sha256": "a7a7893b7acfe721a6f97e717f0e90030de59c31d2f96e6c6f6e2b3a7ec44212"
+          "bytes": 9674,
+          "sha256": "f447ccf19ed2abb8073128a601ad56367e0461dc032766983691226897303eaf"
         },
         "move": {
           "frames": 8,
-          "bytes": 9076,
-          "sha256": "fb3585f3a668a524521a7cdd57d538aa0b95a744b32d3533f920663ad0b6c53a"
+          "bytes": 10724,
+          "sha256": "6753d53ee99e3d190fac89c4d29b8627ba4c7f7545df78ab88d0b7be153151ba"
         },
         "attack": {
           "frames": 9,
-          "bytes": 8530,
-          "sha256": "08d730cada72adc2659f5e6233464eb6e271ce5f3f8061184fbc9ee985fcca6f"
+          "bytes": 12011,
+          "sha256": "3aa08f77ea6c590481b401e226f690082624310917417c299d4d86d906b166eb"
         },
         "knockback": {
           "frames": 4,
-          "bytes": 4540,
-          "sha256": "aa4f8469ada053fd50cdd1f07ddc52190529cb00d5a09baae50eda2cb276226e"
+          "bytes": 8232,
+          "sha256": "eb9befdb64aaed1f18bd72176c849e74c71c6e2ee0c3b1e4be8023316717456c"
         },
         "death": {
           "frames": 8,
-          "bytes": 19142,
-          "sha256": "57ca10eb0a636d8d5295eb406568e943352e3913a43ece7122e4d79263e7a701"
+          "bytes": 22239,
+          "sha256": "43da894242d697b4d2924da4033b4870a665110db3673bd243bf079ca7c490ed"
         }
+      },
+      "visualPolish": {
+        "version": 1,
+        "kind": "RECRUITMENT_FORM_SILHOUETTE_DIFFERENTIATION_PASS",
+        "reviewStatus": "UNREVIEWED_RUNTIME_FILES",
+        "normalRuntimeAuthoritative": false
       }
     },
     "char_s03_nana04_f3": {
@@ -4127,29 +4661,35 @@
       "motions": {
         "idle": {
           "frames": 8,
-          "bytes": 11179,
-          "sha256": "142932dc9daa465feba01a04e46dc51b9c049ed044dd9ad2482fae850c692d6a"
+          "bytes": 13794,
+          "sha256": "f09b364ca4619d1c91c2bf35166364561417665d46600d95b097670f8dfd040f"
         },
         "move": {
           "frames": 8,
-          "bytes": 12214,
-          "sha256": "2c173fe9152fa6b63201ce422f25be001bc88f0ff089951386556b63aafc1c07"
+          "bytes": 15410,
+          "sha256": "385d3065354e4b5bc2533a6f2a4273018e5d3a244162ed1423152310a311e6ac"
         },
         "attack": {
           "frames": 10,
-          "bytes": 12742,
-          "sha256": "8c8289ad2ae3a61ef4b90701710b1cd543e652dcb0a75a6640c6d1f3ee5b6232"
+          "bytes": 17682,
+          "sha256": "d74bc50a9786fb6b6740cc01d20d0b7927d3e9b73584807896d0de5572b742d1"
         },
         "knockback": {
           "frames": 4,
-          "bytes": 5945,
-          "sha256": "44d8b59fce6ee71d37dec5d32b5d77e001867a499ad61565132a502c03daf16e"
+          "bytes": 10817,
+          "sha256": "de8dac174dff797427cfd16c3df2555d2945370f2b765357fba50c4bf823d28b"
         },
         "death": {
           "frames": 8,
-          "bytes": 22199,
-          "sha256": "3787997ffec10664019c0ed1d3e3d754fbb6bba18c2ff8b5cca58645d7f659cd"
+          "bytes": 27285,
+          "sha256": "925ce838d576e1f6336aab09ef80ebbe4f2b6b293f693ba60cb2ab74b7812b13"
         }
+      },
+      "visualPolish": {
+        "version": 1,
+        "kind": "RECRUITMENT_FORM_SILHOUETTE_DIFFERENTIATION_PASS",
+        "reviewStatus": "UNREVIEWED_RUNTIME_FILES",
+        "normalRuntimeAuthoritative": false
       }
     },
     "char_s03_rxomega_f1": {
@@ -4173,29 +4713,35 @@
       "motions": {
         "idle": {
           "frames": 8,
-          "bytes": 8233,
-          "sha256": "ddf23b7b67ea1fc747dddc2fe02fdc89f024b44781f68037e194d8f98e8f258f"
+          "bytes": 8586,
+          "sha256": "72a1fed99158d85582102c0d857d164669e21dbdd6be3b024cc18c739a66bcbf"
         },
         "move": {
           "frames": 8,
-          "bytes": 8697,
-          "sha256": "faea89b65114e582c6e6f3c7db772f1c09860a9cb4c2978ad42b8b78818c5bb4"
+          "bytes": 9152,
+          "sha256": "3e36ec472fda7afe550ce59c018ec9352fa82741154431b1dbdc3785e1e62dc6"
         },
         "attack": {
           "frames": 9,
-          "bytes": 8843,
-          "sha256": "78d96be9ed5c32e89aa6aa19dfccf451f8ed223aa23fed1510cd67c3cd46fb54"
+          "bytes": 9833,
+          "sha256": "884ca19fddc7c27c1469d3cd6b7dd5f2db02c15128ac7a4bdb6945813412c1f5"
         },
         "knockback": {
           "frames": 4,
-          "bytes": 4298,
-          "sha256": "718027b8e34aad80852b9596069201c3f98c78dbcade4b0dd55a4b66c1af885c"
+          "bytes": 4808,
+          "sha256": "2af219e9e9d4f7808b96dbe8e84ed3ab28b8c4020492b1f7e49b8477c4319adc"
         },
         "death": {
           "frames": 8,
-          "bytes": 16377,
-          "sha256": "2abcb619f494edc27b10913ae751b96ed277474dc603269af8bc57e352320fd0"
+          "bytes": 17055,
+          "sha256": "d8bd3a732aef088191a5bcb95aba20d7d6cf2f398fdda49f77e9e81aefd9617b"
         }
+      },
+      "visualPolish": {
+        "version": 1,
+        "kind": "RECRUITMENT_FORM_SILHOUETTE_DIFFERENTIATION_PASS",
+        "reviewStatus": "UNREVIEWED_RUNTIME_FILES",
+        "normalRuntimeAuthoritative": false
       }
     },
     "char_s03_rxomega_f2": {
@@ -4219,29 +4765,35 @@
       "motions": {
         "idle": {
           "frames": 8,
-          "bytes": 9148,
-          "sha256": "1200dd999ac1b713804ee9561e313583fc2ca9cfd33c40c5f4eafd1830f9d2b5"
+          "bytes": 10284,
+          "sha256": "395934ddb42a5de5de55a8895d986cfe60e3f895ac740b8880502484e9fe7bf0"
         },
         "move": {
           "frames": 8,
-          "bytes": 9994,
-          "sha256": "e9fb8395a0bafb526f1f0fdfd8d9a9f5fce4e6012ad7988ae6fbcab4aae322df"
+          "bytes": 11619,
+          "sha256": "bfc1814cb371a27390299769c7dadc426cd507fc6ff498dc6a641e09ebb853ee"
         },
         "attack": {
           "frames": 9,
-          "bytes": 9704,
-          "sha256": "5bef0f2646980b9cc067c6b9eb9fa54b6cffe913abdeb69cdd0026911a27ffa0"
+          "bytes": 12964,
+          "sha256": "fc710f3b5868cf4944a31efd6d3d028881611029cdaa7d038c78ea4682a87ec9"
         },
         "knockback": {
           "frames": 4,
-          "bytes": 4987,
-          "sha256": "e728d45aaaa66f22155d3ffe6d3f1f0c660111ca1e07b1c9332348f94eeea6a6"
+          "bytes": 8871,
+          "sha256": "834e36d94e0f6610bf4c201dcc21f0d81ab3b5f00c216963fe6d6077516cd099"
         },
         "death": {
           "frames": 8,
-          "bytes": 20099,
-          "sha256": "cf66f9e4185fafa600baf635939373e932d859bdd1888c3b6dc130e35d49cba9"
+          "bytes": 23609,
+          "sha256": "a95ca9a6aeee399fa3c9d80f0faf6fd514e502df7f4261f864e4f7d5fef42ab8"
         }
+      },
+      "visualPolish": {
+        "version": 1,
+        "kind": "RECRUITMENT_FORM_SILHOUETTE_DIFFERENTIATION_PASS",
+        "reviewStatus": "UNREVIEWED_RUNTIME_FILES",
+        "normalRuntimeAuthoritative": false
       }
     },
     "char_s03_rxomega_f3": {
@@ -4265,29 +4817,35 @@
       "motions": {
         "idle": {
           "frames": 8,
-          "bytes": 11835,
-          "sha256": "2ce50d330483a04a015b10179093fe5f84df9571714ae479683aeb4e2545a7ab"
+          "bytes": 13824,
+          "sha256": "eab5add8deb5a2fc904623ade93d0d65e184f32b80b669c3c14720c52c279323"
         },
         "move": {
           "frames": 8,
-          "bytes": 13131,
-          "sha256": "08eb437de80373048e571861412c80bbc83a24d0f6851a5f79dc823244502a94"
+          "bytes": 15813,
+          "sha256": "bb80626b9377dfdc392581f5a53a19bcb0f126eda36b6f646cb43ff5c7ce8d91"
         },
         "attack": {
           "frames": 10,
-          "bytes": 13916,
-          "sha256": "9fb733a83d78a11fbc8d301ce22e3038b431adcfc7f157852956aa4d627cdcd5"
+          "bytes": 18073,
+          "sha256": "acb49ff1aa18d71eb1c01fc3259344d866104e5491ce45df3000db115e8b307c"
         },
         "knockback": {
           "frames": 4,
-          "bytes": 6435,
-          "sha256": "e870ed9accc8be454708d3b34894a8523ddad1d373ddc9996f8b18fa9b657a8e"
+          "bytes": 11171,
+          "sha256": "e7be36eaf8112092cffe9685e528d85b84184d693f64ec66800a857456dad5d5"
         },
         "death": {
           "frames": 8,
-          "bytes": 23068,
-          "sha256": "033fa62a95cade1d96dd22ddfc4447919b22ee3cf1862d91da8c96d029580898"
+          "bytes": 28576,
+          "sha256": "43cec2137bd7595af8cf03778863faade2d00f5e7d1ed35503ab368ef0572c43"
         }
+      },
+      "visualPolish": {
+        "version": 1,
+        "kind": "RECRUITMENT_FORM_SILHOUETTE_DIFFERENTIATION_PASS",
+        "reviewStatus": "UNREVIEWED_RUNTIME_FILES",
+        "normalRuntimeAuthoritative": false
       }
     },
     "char_s03_blade_hound_f1": {
@@ -4311,29 +4869,35 @@
       "motions": {
         "idle": {
           "frames": 8,
-          "bytes": 9285,
-          "sha256": "cb48ef9181c5df77c6c17a38d881fe1b87b2b93e77b772a8d2ba457e232d0138"
+          "bytes": 11409,
+          "sha256": "515e02f10470e25ec5af7000bd7e71b67f96f9d12c67760ff94df384f67a103e"
         },
         "move": {
           "frames": 8,
-          "bytes": 9716,
-          "sha256": "4381f9baf11ebbc61965ce7d93cf6f874d1694ae6a3e8c7afe3f01435221f9f6"
+          "bytes": 12013,
+          "sha256": "f9b7ecce8282f8867b2317a05c22aab842b943fb4ed392c3b37749e29e76e13d"
         },
         "attack": {
           "frames": 9,
-          "bytes": 9949,
-          "sha256": "6ac33e9033ba60fd75fd008a1e758152eae34787dfff4910f743543f707a677f"
+          "bytes": 11992,
+          "sha256": "6c8237010bfd1cb05ee15ec9b1ad87c90e4bb32724bc7424084409099024ebf2"
         },
         "knockback": {
           "frames": 4,
-          "bytes": 4719,
-          "sha256": "357e30f8892087c28bf6672d93b5b6fa31810ee5d37fbd1bb53ea4681941bb4d"
+          "bytes": 6212,
+          "sha256": "10b388876edc8ae9d0267fd41122c403265a1a9c4bdae3b20857eeee99eac9f1"
         },
         "death": {
           "frames": 8,
-          "bytes": 15319,
-          "sha256": "cc52de0f1eb165ace6cf41c75b73dc795b6442cf503bca9347fb9e07cd70befa"
+          "bytes": 19594,
+          "sha256": "479d137f8122228b86e5851a484abfc4d1dd606667a68bdc9eb6d9a71fdd97ac"
         }
+      },
+      "visualPolish": {
+        "version": 1,
+        "kind": "RECRUITMENT_FORM_SILHOUETTE_DIFFERENTIATION_PASS",
+        "reviewStatus": "UNREVIEWED_RUNTIME_FILES",
+        "normalRuntimeAuthoritative": false
       }
     },
     "char_s03_blade_hound_f2": {
@@ -4357,29 +4921,35 @@
       "motions": {
         "idle": {
           "frames": 8,
-          "bytes": 10602,
-          "sha256": "b2d5c4be1b4710e644658c2a5b402d2a8d64152932981221244d8ce6bc9a527c"
+          "bytes": 13723,
+          "sha256": "540a41ba4a8ad7cddf8fbbe65e85f5e64eefb73a8f9b8143c5bb93beacf51fd6"
         },
         "move": {
           "frames": 8,
-          "bytes": 11420,
-          "sha256": "c94e52ea79265a4d9c634274b31c0ec464f087ea65c495a182326e49109f8b4f"
+          "bytes": 15305,
+          "sha256": "3a5dcfd688435821d4064a575ef7c9150816910da1fd20bb0a4e97815c997fc2"
         },
         "attack": {
           "frames": 9,
-          "bytes": 11136,
-          "sha256": "34de545b9d5a2d34084796a0c6c89186261c39b774e3349dc8932b417ee255a2"
+          "bytes": 15624,
+          "sha256": "8f929e5ab1644497f63d4441411d21791fef237cc918bb7c2eb305fab30e2885"
         },
         "knockback": {
           "frames": 4,
-          "bytes": 5560,
-          "sha256": "7ed83d2922086fd2a6f3476b0a765fff0bd59d39e54c47c6f6c62a3eb0637d3f"
+          "bytes": 10950,
+          "sha256": "bb7d2089a497b591082a3bb57af726a2baf24d168675bdedbb78c045cc82858e"
         },
         "death": {
           "frames": 8,
-          "bytes": 20674,
-          "sha256": "0e9b7596ac2896e62760fb32390ea40216edeb599037761c7566cdcf0a942c2e"
+          "bytes": 27198,
+          "sha256": "61de46f4d5974e584187be3cbf94e89e66b14f80908a29092045b0f9e971f000"
         }
+      },
+      "visualPolish": {
+        "version": 1,
+        "kind": "RECRUITMENT_FORM_SILHOUETTE_DIFFERENTIATION_PASS",
+        "reviewStatus": "UNREVIEWED_RUNTIME_FILES",
+        "normalRuntimeAuthoritative": false
       }
     },
     "char_s03_blade_hound_f3": {
@@ -4403,29 +4973,35 @@
       "motions": {
         "idle": {
           "frames": 8,
-          "bytes": 13243,
-          "sha256": "e26a9450b0429c8b303ec6d74e8d0b455e43d22d46a75ed3a26555b9525dcaf8"
+          "bytes": 17295,
+          "sha256": "c4c7051a37709c6a411e8c9c52ef4c6554e44073c6ba2ec2517e30c9507b1aac"
         },
         "move": {
           "frames": 8,
-          "bytes": 14412,
-          "sha256": "3c7afa68ae971e00df54b3d3e09cb73fd8b2d74957662b5194d5f49c8a0f27e7"
+          "bytes": 19477,
+          "sha256": "2caa4173ff9fea6b7dab00e34c66bd542c7d1c45efeb41a7b77fd67b8a26554a"
         },
         "attack": {
           "frames": 10,
-          "bytes": 15507,
-          "sha256": "deeb2e45e63b39af7b84dafc37b8e6e7b5e2981867212649d0c2b6644f63b091"
+          "bytes": 21521,
+          "sha256": "ec334bfb65d9e7b5949a9483df9dce793f79f4adf4528a27e934930f168b0110"
         },
         "knockback": {
           "frames": 4,
-          "bytes": 6899,
-          "sha256": "942a2a137f26e6c22a715f92f3e13dd4124c02e571fde0794d22560168b89fa9"
+          "bytes": 12676,
+          "sha256": "9c6c931882c4fa7dbbb616f164c0d690b2d1631b74cd5821dd8fe29f42441cc0"
         },
         "death": {
           "frames": 8,
-          "bytes": 23706,
-          "sha256": "0f7a65f68510b3733c0d814e27321ff0858f791780340e8b79e14a48f2f0f352"
+          "bytes": 31176,
+          "sha256": "172b7c911e94fd5a148a91aec31be1776dcd0e3809f2afa0361d0d6d769953a6"
         }
+      },
+      "visualPolish": {
+        "version": 1,
+        "kind": "RECRUITMENT_FORM_SILHOUETTE_DIFFERENTIATION_PASS",
+        "reviewStatus": "UNREVIEWED_RUNTIME_FILES",
+        "normalRuntimeAuthoritative": false
       }
     },
     "char_s03_overlay_astra_f1": {
@@ -4449,29 +5025,35 @@
       "motions": {
         "idle": {
           "frames": 8,
-          "bytes": 12390,
-          "sha256": "c963a907c01958a9b3c4917d8d89afbb1c0f56e6beba665c121154fb921d6ed9"
+          "bytes": 12913,
+          "sha256": "e1bb9dec242b93dd858cc83f9b3a33a1370cdd0f639df0e9353dcc32d2a64d04"
         },
         "move": {
           "frames": 8,
-          "bytes": 12852,
-          "sha256": "b55e21945abb69307b083eab41e392a7cffae69e525de6eb40c14985db95d203"
+          "bytes": 13603,
+          "sha256": "7471df701b70640f1041c8eaf5da5495c161b3162f753143c2c8a8b026b9b411"
         },
         "attack": {
           "frames": 11,
-          "bytes": 16192,
-          "sha256": "6595645800873b2c00a2555c629451d8eb479a15ccc1757f2b38ba55696e95c1"
+          "bytes": 17145,
+          "sha256": "5b9d6ff9dd450c2ac3d677e7eae5026de77799be7873f895cbc57e44376686d9"
         },
         "knockback": {
           "frames": 4,
-          "bytes": 6227,
-          "sha256": "87b1cd8197285c565c96c06201824a3a3106c2a6792e1148ed1da04f1c7e9a3b"
+          "bytes": 7034,
+          "sha256": "88c5889762c901f58739d38e3b56cfa32fa81d9496ac255073728b51501a4d43"
         },
         "death": {
           "frames": 9,
-          "bytes": 20639,
-          "sha256": "177d888c6f54d17f48ac64af5d8b022e49124c5092ac2c477d4c9794529d1a32"
+          "bytes": 22334,
+          "sha256": "a2ce9e11db3a71a6783c0944719f1b104133f6ced7fcbd849cc73793548d5c01"
         }
+      },
+      "visualPolish": {
+        "version": 1,
+        "kind": "RECRUITMENT_FORM_SILHOUETTE_DIFFERENTIATION_PASS",
+        "reviewStatus": "UNREVIEWED_RUNTIME_FILES",
+        "normalRuntimeAuthoritative": false
       }
     },
     "char_s03_overlay_astra_f2": {
@@ -4495,29 +5077,35 @@
       "motions": {
         "idle": {
           "frames": 8,
-          "bytes": 15579,
-          "sha256": "8ff25fb3ea18fe7d3487d97856405b0b9be3deda4cfe0227f6dd3b1caa02b304"
+          "bytes": 17401,
+          "sha256": "784e72d6615b78cf2f4ba62147416c0aec24fb18ae2369cb7bf19defa139d462"
         },
         "move": {
           "frames": 8,
-          "bytes": 16791,
-          "sha256": "58af3a83e9db0d5550384142b03c07b57b09773779d7f902d3ce6846e8b615c7"
+          "bytes": 19153,
+          "sha256": "c8f91267d7ab86272ad5be6646baba9f2deb50a0cca7af56a98d0f17829a6d35"
         },
         "attack": {
           "frames": 11,
-          "bytes": 20518,
-          "sha256": "79e115c4964b77a85b5ce1aaa4a2ae6d28fe7b82f1304ea5cd8d9738ef726bce"
+          "bytes": 24620,
+          "sha256": "d9978e470ced21a8861bc1014f8fa06c0da46a79fc9b549f1d9382458e36ee3c"
         },
         "knockback": {
           "frames": 4,
-          "bytes": 7982,
-          "sha256": "ba9708d58aa11e02bf26fc8dd8694c9fcf36a71779c87b5fe1a2bc39c9221fe0"
+          "bytes": 11676,
+          "sha256": "f931dabd32b0fc1d1787ef8dd780cba2b617681b7e516b03b925a3c9eded0767"
         },
         "death": {
           "frames": 9,
-          "bytes": 27902,
-          "sha256": "6db2841999ad8465f8f533f99475c037ff6dfb87c92238074ae723b353667c26"
+          "bytes": 32405,
+          "sha256": "5e6c6a21f77639a070ab55ab41e08f2d2ed16c1e63d48410526bf6ac6e31513b"
         }
+      },
+      "visualPolish": {
+        "version": 1,
+        "kind": "RECRUITMENT_FORM_SILHOUETTE_DIFFERENTIATION_PASS",
+        "reviewStatus": "UNREVIEWED_RUNTIME_FILES",
+        "normalRuntimeAuthoritative": false
       }
     },
     "char_s03_overlay_astra_f3": {
@@ -4541,30 +5129,43 @@
       "motions": {
         "idle": {
           "frames": 8,
-          "bytes": 19879,
-          "sha256": "0edba0dce5d2f583f52147c2f174c163db984cbfe96803957148d4710e250d15"
+          "bytes": 23553,
+          "sha256": "93d653c2d87a56ea675274d00d19176a6f9a78980747170366ea7e68570e7a0a"
         },
         "move": {
           "frames": 8,
-          "bytes": 21210,
-          "sha256": "a99d75d3433b2959c4d6f7ecab3016feb768d8914d117a9c1ce7618916a38a34"
+          "bytes": 26104,
+          "sha256": "36990fdded8e76f2340f358ac2342a743c91dbb96d6ad82d3e6939ba4c4018a6"
         },
         "attack": {
           "frames": 12,
-          "bytes": 28334,
-          "sha256": "449fb875550c42a0be23a08043a635f411e858cf27f3e7442b1d0a971f6caacd"
+          "bytes": 34850,
+          "sha256": "294b102db9fc6e60a0fbfdc8fcd85a361899f89be7dce086a95cc3d61a9f5b3c"
         },
         "knockback": {
           "frames": 4,
-          "bytes": 10077,
-          "sha256": "5be540f18b5932d658775e60a144f23c0a76b95798262cfb4e7c4245816b827e"
+          "bytes": 15400,
+          "sha256": "bb106d2002a7be83cee034c1ba3c1d8fc9eacd5a802b03c7fd75b4ed62e34933"
         },
         "death": {
           "frames": 9,
-          "bytes": 33928,
-          "sha256": "a905c938c3b68fdf2cb8d71f2c712ef6021a5a6e3809753a01f853f0b11b602a"
+          "bytes": 40188,
+          "sha256": "8e451fb233b6a21cf86e7b8cfc07289455cf971e11766cb24402cbe61779144f"
         }
+      },
+      "visualPolish": {
+        "version": 1,
+        "kind": "RECRUITMENT_FORM_SILHOUETTE_DIFFERENTIATION_PASS",
+        "reviewStatus": "UNREVIEWED_RUNTIME_FILES",
+        "normalRuntimeAuthoritative": false
       }
     }
+  },
+  "visualPolish": {
+    "version": 1,
+    "kind": "RECRUITMENT_FORM_SILHOUETTE_DIFFERENTIATION_PASS",
+    "targetCount": 99,
+    "humanReview": "PENDING",
+    "normalRuntimeAuthoritative": false
   }
 }
