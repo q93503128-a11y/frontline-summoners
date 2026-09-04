@@ -23,11 +23,13 @@
     "assets:production:runtime:fourth-slice:check": "npm run assets:production:materialize:fourth-slice && node tools/validate-fourth-slice-runtime-files.mjs",
     "assets:production:materialize:fifth-slice": "node tools/materialize-fifth-slice-production-art.mjs",
     "assets:production:runtime:fifth-slice:check": "npm run assets:production:materialize:fifth-slice && node tools/validate-fifth-slice-runtime-files.mjs",
+    "assets:production:materialize:sixth-slice": "node tools/materialize-sixth-slice-production-art.mjs",
+    "assets:production:runtime:sixth-slice:check": "npm run assets:production:materialize:sixth-slice && node tools/validate-sixth-slice-runtime-files.mjs",
     "assets:production:intake:check": "node tools/validate-production-vertical-slice.mjs",
     "assets:production:review:check": "node tools/validate-production-review-package.mjs",
     "assets:production:concept:check": "node tools/validate-production-concept-candidates.mjs",
     "assets:production:rework:check": "node tools/validate-production-rework-plan.mjs",
-    "assets:production:check": "npm run assets:production:runtime:first-slice:check && npm run assets:production:runtime:second-slice:check && npm run assets:production:runtime:third-slice:check && npm run assets:production:runtime:fourth-slice:check && npm run assets:production:runtime:fifth-slice:check && npm run assets:production:intake:check && npm run assets:production:review:check && npm run assets:production:concept:check && npm run assets:production:rework:check"
+    "assets:production:check": "npm run assets:production:runtime:first-slice:check && npm run assets:production:runtime:second-slice:check && npm run assets:production:runtime:third-slice:check && npm run assets:production:runtime:fourth-slice:check && npm run assets:production:runtime:fifth-slice:check && npm run assets:production:runtime:sixth-slice:check && npm run assets:production:intake:check && npm run assets:production:review:check && npm run assets:production:concept:check && npm run assets:production:rework:check"
   },
   "devDependencies": {
     "typescript": "7.0.2"
