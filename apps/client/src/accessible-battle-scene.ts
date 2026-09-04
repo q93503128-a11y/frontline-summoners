@@ -25,6 +25,12 @@ import {
   isThirdSliceProductionReviewMode,
   renderThirdSliceProductionReviewLayer,
 } from './third-slice-production-review-runtime.ts';
+import { renderFourthSliceProductionReviewBattlefields } from './fourth-slice-production-review-battlefields.ts';
+import {
+  installFourthSliceProductionReviewRuntime,
+  isFourthSliceProductionReviewMode,
+  renderFourthSliceProductionReviewLayer,
+} from './fourth-slice-production-review-runtime.ts';
 
 /**
  * Presentation-only bridge for camera/VFX accessibility plus production review presentation.
@@ -42,6 +48,8 @@ export class AccessibleBattleScene extends BattleScene {
       installSecondSliceProductionReviewRuntime(this);
     } else if (isThirdSliceProductionReviewMode()) {
       installThirdSliceProductionReviewRuntime(this);
+    } else if (isFourthSliceProductionReviewMode()) {
+      installFourthSliceProductionReviewRuntime(this);
     } else {
       installStorySilhouetteOverlayRuntime(this);
     }
@@ -53,5 +61,7 @@ export class AccessibleBattleScene extends BattleScene {
     renderSecondSliceProductionReviewBattlefields(this);
     renderThirdSliceProductionReviewLayer(this);
     renderThirdSliceProductionReviewBattlefields(this);
+    renderFourthSliceProductionReviewLayer(this);
+    renderFourthSliceProductionReviewBattlefields(this);
   }
 }
