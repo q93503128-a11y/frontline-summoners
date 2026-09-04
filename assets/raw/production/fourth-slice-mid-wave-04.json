@@ -1,0 +1,98 @@
+{
+  "schemaVersion": 1,
+  "sliceId": "fourth-slice-mid-wave-04",
+  "scope": "chapter-01-st09-13",
+  "status": "AWAITING_ART",
+  "reviewStatus": "PENDING",
+  "normalRuntimeAuthoritative": false,
+  "generativeAiUsed": false,
+  "sourcePolicy": "PINNED_CC0_AND_PROJECT_AUTHORED_DETERMINISTIC_ONLY",
+  "stageAnchors": ["main_01_009", "main_01_010", "main_01_011", "main_01_012", "main_01_013"],
+  "targets": [
+    {
+      "assetId": "unit:pyromancer:pyromancer_f1",
+      "unitId": "pyromancer",
+      "displayName": "화염술사",
+      "form": 1,
+      "sourceFamily": "evil-wizard-2",
+      "visualContract": ["large cylindrical furnace backpack", "heat apron over long robe language", "ember compression between hands", "backpack reads before hand flame"]
+    },
+    {
+      "assetId": "unit:pyromancer:pyromancer_f2",
+      "unitId": "pyromancer",
+      "displayName": "화로지기",
+      "form": 2,
+      "sourceFamily": "evil-wizard-2",
+      "visualContract": ["lower wider furnace wraps torso", "forward-loaded stance", "close-survival silhouette", "furnace remains dominant"]
+    },
+    {
+      "assetId": "unit:pyromancer:pyromancer_f3",
+      "unitId": "pyromancer",
+      "displayName": "재앙의 화염술사",
+      "form": 3,
+      "sourceFamily": "evil-wizard-2",
+      "visualContract": ["floating cracked furnace ring behind body", "body appears smaller inside ring", "rear-artillery silhouette", "attack reads compression-release-area-complete"]
+    },
+    {
+      "assetId": "unit:royal:royal_f1",
+      "unitId": "royal",
+      "displayName": "왕실기사",
+      "form": 1,
+      "sourceFamily": "hero-knight",
+      "visualContract": ["tall 1.15H silhouette", "broad greatsword", "high plume", "no shield"]
+    },
+    {
+      "assetId": "unit:royal:royal_f2",
+      "unitId": "royal",
+      "displayName": "근위대장",
+      "form": 2,
+      "sourceFamily": "hero-knight",
+      "visualContract": ["broader shoulder and chest protection", "greatsword held upright in front", "defensive triangular silhouette", "no shield"]
+    },
+    {
+      "assetId": "unit:royal:royal_f3",
+      "unitId": "royal",
+      "displayName": "왕의 검",
+      "form": 3,
+      "sourceFamily": "hero-knight",
+      "visualContract": ["lighter armor than F2", "longer thinner greatsword", "forward attack posture", "single thin wind slash allowed"]
+    },
+    {
+      "assetId": "unit:enemy-berserker",
+      "unitId": "enemy-berserker",
+      "displayName": "철퇴 난동꾼",
+      "form": 1,
+      "sourceFamily": "fantasy-warrior",
+      "visualContract": ["oversized two-hand mace", "long anticipation before area impact", "front-heavy planted stance", "impact reads ground-first"]
+    },
+    {
+      "assetId": "unit:enemy-knight",
+      "unitId": "enemy-knight",
+      "displayName": "굴렁통 멧돼지",
+      "form": 1,
+      "sourceFamily": "project-authored-beast",
+      "visualContract": ["armored barrel-like boar body", "low charging silhouette", "tusks visible before armor details", "area hit reads shoulder-and-body collision"]
+    }
+  ],
+  "battlefields": [
+    {
+      "theme": "golden",
+      "stageAnchor": "main_01_011",
+      "displayName": "긴 시야 · 황금빛 국경로",
+      "layers": ["battlefield-base", "background-landmarks", "foreground-low-density"],
+      "visualContract": ["wide long-sight lane", "warm dry grass and pale gold light", "distant survey towers stay outside central combat corridor", "brightest region does not sit behind contact line"]
+    }
+  ],
+  "reusedBattlefields": [
+    {"theme": "meadow", "stageAnchor": "main_01_009", "fromSlice": "first-slice"},
+    {"theme": "fortress", "stageAnchor": "main_01_010", "fromSlice": "third-slice"},
+    {"theme": "canyon", "stageAnchor": "main_01_012", "fromSlice": "second-slice"},
+    {"theme": "moon", "stageAnchor": "main_01_013", "fromSlice": "third-slice"}
+  ],
+  "reviewConstraints": {
+    "humanCaptureRequiredForApproval": true,
+    "humanApprovalRequired": true,
+    "automatedMaterializationIsNotReviewEvidence": true,
+    "noRuntimeAuthorityBeforeApproval": true
+  }
+}
