@@ -1,0 +1,1432 @@
+{
+  "schemaVersion": 2,
+  "batchId": "recruitment-production-01",
+  "generator": "tools/materialize-recruitment-production-art.mjs",
+  "generatorVersion": 1,
+  "status": "UNREVIEWED_RUNTIME_FILES",
+  "humanReview": "PENDING",
+  "normalRuntimeAuthoritative": false,
+  "generativeAiUsed": false,
+  "sourcePolicy": "PROJECT_AUTHORED_DETERMINISTIC_ONLY",
+  "targets": {
+    "char_common_c_turnip_rider": {
+      "assetId": "unit:char_common_c_turnip_rider",
+      "displayName": "순무기수",
+      "rarity": "C",
+      "seriesId": "common_pool_v1",
+      "role": "물량",
+      "sourceFamily": "project-authored-recruitment-common",
+      "projectAuthoredDeterministic": true,
+      "structuralRework": false,
+      "reviewStatus": "UNREVIEWED_RUNTIME_FILES",
+      "frameWidth": 220,
+      "frameHeight": 200,
+      "displayHeight": 182,
+      "attackContactFrame": 2,
+      "simulationContactFrame": 9,
+      "motions": {
+        "idle": {
+          "frames": 6,
+          "bytes": 4606,
+          "sha256": "8f331844df04b169284ce670465ab451cbfb0ca61429568720e139d790dc7c82"
+        },
+        "move": {
+          "frames": 8,
+          "bytes": 6205,
+          "sha256": "87bc94db0f81c14e6d9c05dc00274cb1ed1de72ec8f4c91772efcfbd2acc0f3a"
+        },
+        "attack": {
+          "frames": 6,
+          "bytes": 4200,
+          "sha256": "5ef860274babd9ce0d99f8d6da5b01e11c3df79eedef48ccde5e96d048e725e9"
+        },
+        "knockback": {
+          "frames": 4,
+          "bytes": 3120,
+          "sha256": "e055d3d0ee73e768478e16fb774a3b02084a1c4ffee7ec0029c2794aff83dc2c"
+        },
+        "death": {
+          "frames": 6,
+          "bytes": 8862,
+          "sha256": "96b35a102f0764151d6f7c52d636ac6382d6be0906bd9cff0618ef4272984068"
+        }
+      }
+    },
+    "char_common_c_tin_squire": {
+      "assetId": "unit:char_common_c_tin_squire",
+      "displayName": "양철방패 시종",
+      "rarity": "C",
+      "seriesId": "common_pool_v1",
+      "role": "전열",
+      "sourceFamily": "project-authored-recruitment-common",
+      "projectAuthoredDeterministic": true,
+      "structuralRework": false,
+      "reviewStatus": "UNREVIEWED_RUNTIME_FILES",
+      "frameWidth": 220,
+      "frameHeight": 200,
+      "displayHeight": 182,
+      "attackContactFrame": 1,
+      "simulationContactFrame": 22,
+      "motions": {
+        "idle": {
+          "frames": 6,
+          "bytes": 4646,
+          "sha256": "35bdf45ce53b50dfd3cfd5b99cd7410e81f5645e3c9106b02dd3dcc880f28a79"
+        },
+        "move": {
+          "frames": 8,
+          "bytes": 6234,
+          "sha256": "0395d3cfc971290218647c1a8fa2ef32cba638c717678aa457cc61ceaf99e561"
+        },
+        "attack": {
+          "frames": 6,
+          "bytes": 4244,
+          "sha256": "bb7c6b6c09c5d38be645a94caa78d1b77d49964c407acb7fbc9afe6dde3d5c77"
+        },
+        "knockback": {
+          "frames": 4,
+          "bytes": 3008,
+          "sha256": "f400d93b7a1f622d6742eb11228e187be3a5a0ed861334f027be546b07ccfbbe"
+        },
+        "death": {
+          "frames": 6,
+          "bytes": 8781,
+          "sha256": "e7fd7c5f1b78ba1f28bb901e2bbd2a6dafb6ea3f293b6fdf354eb049087fcc11"
+        }
+      }
+    },
+    "char_common_c_slinger": {
+      "assetId": "unit:char_common_c_slinger",
+      "displayName": "목동 투석수",
+      "rarity": "C",
+      "seriesId": "common_pool_v1",
+      "role": "원거리",
+      "sourceFamily": "project-authored-recruitment-common",
+      "projectAuthoredDeterministic": true,
+      "structuralRework": false,
+      "reviewStatus": "UNREVIEWED_RUNTIME_FILES",
+      "frameWidth": 220,
+      "frameHeight": 200,
+      "displayHeight": 182,
+      "attackContactFrame": 2,
+      "simulationContactFrame": 24,
+      "motions": {
+        "idle": {
+          "frames": 6,
+          "bytes": 4292,
+          "sha256": "5f8632937854159124adcb80616133095fb86334023a33854d4c3ec2daa2691b"
+        },
+        "move": {
+          "frames": 8,
+          "bytes": 5697,
+          "sha256": "5bc6fef4ed66eaaa58f6bc6966cf5d236de2fb66f428388d627950bc400e6ee9"
+        },
+        "attack": {
+          "frames": 6,
+          "bytes": 3914,
+          "sha256": "201c466a107965533432998d9f196cea56f4fd8f5c355f151444c9bc389c6e34"
+        },
+        "knockback": {
+          "frames": 4,
+          "bytes": 2844,
+          "sha256": "c79e0ffc2367abb6f7f156b3ee7f31a10acacbbe86cc77a412f36c97b9d2720e"
+        },
+        "death": {
+          "frames": 6,
+          "bytes": 8141,
+          "sha256": "e76b9fa542087046698d2925d8fb50659ca96ba510b3ee31d7d9379da80dacff"
+        }
+      }
+    },
+    "char_common_c_bell_crab": {
+      "assetId": "unit:char_common_c_bell_crab",
+      "displayName": "종껍질 게",
+      "rarity": "C",
+      "seriesId": "common_pool_v1",
+      "role": "광역",
+      "sourceFamily": "project-authored-recruitment-common",
+      "projectAuthoredDeterministic": true,
+      "structuralRework": false,
+      "reviewStatus": "UNREVIEWED_RUNTIME_FILES",
+      "frameWidth": 220,
+      "frameHeight": 200,
+      "displayHeight": 182,
+      "attackContactFrame": 2,
+      "simulationContactFrame": 22,
+      "motions": {
+        "idle": {
+          "frames": 6,
+          "bytes": 5041,
+          "sha256": "9c462c166acfad58f3863eaa713ad179c23d76a236827f964dc30b5f533c3d38"
+        },
+        "move": {
+          "frames": 8,
+          "bytes": 6723,
+          "sha256": "676a01b640e8ba41b759bc2d55892b8f11bbf8a076ff8cc03629a4945541c5f3"
+        },
+        "attack": {
+          "frames": 6,
+          "bytes": 5293,
+          "sha256": "e5e7b2051e2906aaf8cf075ef211971e72988325e58f038160b950dafaac2b96"
+        },
+        "knockback": {
+          "frames": 4,
+          "bytes": 3320,
+          "sha256": "a28019f094a833f2f778818fd04f5484f1b0af2714c5883cc47d33f1dcde8885"
+        },
+        "death": {
+          "frames": 6,
+          "bytes": 9616,
+          "sha256": "3e2ea1dde8529fd0c6ffb63433bf8bfe8e73f2de94fe4c1dbde8a049627b6af1"
+        }
+      }
+    },
+    "char_common_c_lantern_moth": {
+      "assetId": "unit:char_common_c_lantern_moth",
+      "displayName": "등불나방",
+      "rarity": "C",
+      "seriesId": "common_pool_v1",
+      "role": "변칙",
+      "sourceFamily": "project-authored-recruitment-common",
+      "projectAuthoredDeterministic": true,
+      "structuralRework": false,
+      "reviewStatus": "UNREVIEWED_RUNTIME_FILES",
+      "frameWidth": 220,
+      "frameHeight": 220,
+      "displayHeight": 202,
+      "attackContactFrame": 1,
+      "simulationContactFrame": 10,
+      "motions": {
+        "idle": {
+          "frames": 6,
+          "bytes": 5352,
+          "sha256": "123eec4bcfee1c347c278ba4536ff0e1be67e43bcee2926c01b14c5a0b352000"
+        },
+        "move": {
+          "frames": 8,
+          "bytes": 7196,
+          "sha256": "aab01d98d7ea0aae06617de178fafc8caf0cf730008b2dd78ba2d82e333d720c"
+        },
+        "attack": {
+          "frames": 6,
+          "bytes": 5060,
+          "sha256": "a5a28845c808f322b4ae00b3b83dc027b898c7cce0599124cc8e0cf7344f2ae0"
+        },
+        "knockback": {
+          "frames": 4,
+          "bytes": 3533,
+          "sha256": "fa007f20e1d22bc72fc58da307651d1870ec60fd3ab63c0cb67f89152edd843f"
+        },
+        "death": {
+          "frames": 6,
+          "bytes": 9087,
+          "sha256": "b3324e7e3e365c73f75b999240513902d914c48e46f0b62c4845abb5a4fe22a9"
+        }
+      }
+    },
+    "char_common_b_lantern_witch": {
+      "assetId": "unit:char_common_b_lantern_witch",
+      "displayName": "등불마녀",
+      "rarity": "B",
+      "seriesId": "common_pool_v1",
+      "role": "광역",
+      "sourceFamily": "project-authored-recruitment-common",
+      "projectAuthoredDeterministic": true,
+      "structuralRework": false,
+      "reviewStatus": "UNREVIEWED_RUNTIME_FILES",
+      "frameWidth": 235,
+      "frameHeight": 220,
+      "displayHeight": 202,
+      "attackContactFrame": 2,
+      "simulationContactFrame": 20,
+      "motions": {
+        "idle": {
+          "frames": 7,
+          "bytes": 5261,
+          "sha256": "fd268ccaf9c8c136db61bef49fdd7a31f6ce41ce68cde340088d8926c2b81481"
+        },
+        "move": {
+          "frames": 8,
+          "bytes": 6178,
+          "sha256": "86a725795bf832675992db1897e363e0bbb656447b774bcadfc0f31ac2cbfccf"
+        },
+        "attack": {
+          "frames": 7,
+          "bytes": 5435,
+          "sha256": "8149f462aa6807302d865107e6ebc613a5f895663443c35fd57d6e373914a95d"
+        },
+        "knockback": {
+          "frames": 4,
+          "bytes": 3070,
+          "sha256": "2bcb4f24927b90e0e327262ff178999590b93e55f791167eeb73deec5c37c53a"
+        },
+        "death": {
+          "frames": 7,
+          "bytes": 10099,
+          "sha256": "1014f763cd0e8a98ff8dced2f58c519efbab737886765c455dde97b87314d7f4"
+        }
+      }
+    },
+    "char_common_b_clockduck": {
+      "assetId": "unit:char_common_b_clockduck",
+      "displayName": "태엽오리기사",
+      "rarity": "B",
+      "seriesId": "common_pool_v1",
+      "role": "전열",
+      "sourceFamily": "project-authored-recruitment-common",
+      "projectAuthoredDeterministic": true,
+      "structuralRework": false,
+      "reviewStatus": "UNREVIEWED_RUNTIME_FILES",
+      "frameWidth": 235,
+      "frameHeight": 220,
+      "displayHeight": 202,
+      "attackContactFrame": 2,
+      "simulationContactFrame": 12,
+      "motions": {
+        "idle": {
+          "frames": 7,
+          "bytes": 5599,
+          "sha256": "862a28888de40a14c0e93e2f4d3e08149abc03881bce66bf18cce131d969ec5d"
+        },
+        "move": {
+          "frames": 8,
+          "bytes": 6542,
+          "sha256": "daa987e58d5975fa5b70ee309861727a714f9ab680c51e40811c00c69ba1b732"
+        },
+        "attack": {
+          "frames": 7,
+          "bytes": 5119,
+          "sha256": "07b64107e653fc5cb94a4ddcdb4f77715016a36b6a3080d135f67a990a9b9b63"
+        },
+        "knockback": {
+          "frames": 4,
+          "bytes": 3264,
+          "sha256": "6b541dccdcf278c875f36b2544bd527ca65cb925cd6828f7c6c257acb4a3c448"
+        },
+        "death": {
+          "frames": 7,
+          "bytes": 10733,
+          "sha256": "f8f505e7520b438014ecb15b02bf7ee69224e713cb76efe2b58877468b65dc66"
+        }
+      }
+    },
+    "char_common_b_coffin_merchant": {
+      "assetId": "unit:char_common_b_coffin_merchant",
+      "displayName": "관짝 장사꾼",
+      "rarity": "B",
+      "seriesId": "common_pool_v1",
+      "role": "결정타",
+      "sourceFamily": "project-authored-recruitment-common",
+      "projectAuthoredDeterministic": true,
+      "structuralRework": false,
+      "reviewStatus": "UNREVIEWED_RUNTIME_FILES",
+      "frameWidth": 235,
+      "frameHeight": 220,
+      "displayHeight": 202,
+      "attackContactFrame": 3,
+      "simulationContactFrame": 42,
+      "motions": {
+        "idle": {
+          "frames": 7,
+          "bytes": 5540,
+          "sha256": "47132008462b9361f6f8b77998431b21eb76a2261fa354f52054a26fa7f133b2"
+        },
+        "move": {
+          "frames": 8,
+          "bytes": 6571,
+          "sha256": "955281fd1ccb11a49c9feede36ea284544baa14aa9dfdafe51c154726472584f"
+        },
+        "attack": {
+          "frames": 7,
+          "bytes": 5660,
+          "sha256": "cccd9f779ec021769e028bc744c3dcead15beae7456135191014777bf489c22c"
+        },
+        "knockback": {
+          "frames": 4,
+          "bytes": 3236,
+          "sha256": "3ee5713deffd620087bd5623c48c7542c4fbf763f2896b40f0b8d258eae542a8"
+        },
+        "death": {
+          "frames": 7,
+          "bytes": 10002,
+          "sha256": "7505a1270ffad8c1c725e6e3c9396af0cc9a33c5cd07b1a0164c7fbd778bfe6b"
+        }
+      }
+    },
+    "char_common_b_moss_golem": {
+      "assetId": "unit:char_common_b_moss_golem",
+      "displayName": "이끼골렘",
+      "rarity": "B",
+      "seriesId": "common_pool_v1",
+      "role": "전열",
+      "sourceFamily": "project-authored-recruitment-common",
+      "projectAuthoredDeterministic": true,
+      "structuralRework": false,
+      "reviewStatus": "UNREVIEWED_RUNTIME_FILES",
+      "frameWidth": 280,
+      "frameHeight": 265,
+      "displayHeight": 247,
+      "attackContactFrame": 2,
+      "simulationContactFrame": 28,
+      "motions": {
+        "idle": {
+          "frames": 7,
+          "bytes": 7259,
+          "sha256": "cb54e3f86d768a4c83567f61360cff3f28b562bec1b8999d4f891eb69a93ba07"
+        },
+        "move": {
+          "frames": 8,
+          "bytes": 8495,
+          "sha256": "43b2287e1655cab4fc4b508e99df3dfc0e721dd14b826d2345625cf33fcb2486"
+        },
+        "attack": {
+          "frames": 7,
+          "bytes": 6862,
+          "sha256": "e03829267923440ca7b810d9243375ad234b00082b649e13c99ad375d234053c"
+        },
+        "knockback": {
+          "frames": 4,
+          "bytes": 4210,
+          "sha256": "7de682c4b8349170704a6d01a01bcfb088d438fc10a7213ecbb85c21d59d699e"
+        },
+        "death": {
+          "frames": 7,
+          "bytes": 12400,
+          "sha256": "3420594733a05f71220f98b6b3830d9286d5d916c735fc8b73b1e8fe21f39852"
+        }
+      }
+    },
+    "char_common_b_ink_raven": {
+      "assetId": "unit:char_common_b_ink_raven",
+      "displayName": "먹물까마귀",
+      "rarity": "B",
+      "seriesId": "common_pool_v1",
+      "role": "변칙",
+      "sourceFamily": "project-authored-recruitment-common",
+      "projectAuthoredDeterministic": true,
+      "structuralRework": false,
+      "reviewStatus": "UNREVIEWED_RUNTIME_FILES",
+      "frameWidth": 235,
+      "frameHeight": 240,
+      "displayHeight": 222,
+      "attackContactFrame": 2,
+      "simulationContactFrame": 24,
+      "motions": {
+        "idle": {
+          "frames": 7,
+          "bytes": 6693,
+          "sha256": "f30a1356ad7a6a1a28cdf4adfa62f26681a52ce5fb3acdfb37464376176f31de"
+        },
+        "move": {
+          "frames": 8,
+          "bytes": 8028,
+          "sha256": "54b3998a060cf607aecad75e759de56c1534bc24b1396d08d7f3f177ccad2f9d"
+        },
+        "attack": {
+          "frames": 7,
+          "bytes": 6377,
+          "sha256": "da20765e61a6fd6ca90da8e374cebca2092e80825b7baa4484a4b585b2b0941e"
+        },
+        "knockback": {
+          "frames": 4,
+          "bytes": 4000,
+          "sha256": "72071a3b0a14cdf742dc593ead536ab543ed01bfd9216c731985b4fd55acbc99"
+        },
+        "death": {
+          "frames": 7,
+          "bytes": 12002,
+          "sha256": "dcf54e011f6269421c5f35062b49c7bef6b38774fd6a546cf6bcc30567e5fa9d"
+        }
+      }
+    },
+    "char_common_a_glass_keeper": {
+      "assetId": "unit:char_common_a_glass_keeper",
+      "displayName": "유리등대지기",
+      "rarity": "A",
+      "seriesId": "common_pool_v1",
+      "role": "결정타",
+      "sourceFamily": "project-authored-recruitment-common",
+      "projectAuthoredDeterministic": true,
+      "structuralRework": false,
+      "reviewStatus": "UNREVIEWED_RUNTIME_FILES",
+      "frameWidth": 255,
+      "frameHeight": 235,
+      "displayHeight": 217,
+      "attackContactFrame": 3,
+      "simulationContactFrame": 70,
+      "motions": {
+        "idle": {
+          "frames": 7,
+          "bytes": 6809,
+          "sha256": "432ef78fe7b3c350a93df2dceb20e2e6e26ea6fad36ae8b10be42dd857ca83c0"
+        },
+        "move": {
+          "frames": 8,
+          "bytes": 8077,
+          "sha256": "83705295dfe5fc02948f89a9761cf0c89b7ed26d6369aaf792e97114b1bc5e26"
+        },
+        "attack": {
+          "frames": 8,
+          "bytes": 7728,
+          "sha256": "34b1b748cd2f48399d69a76d7c7cf5b7b63f6857bd0426d2b2f2e5b2d0128d2a"
+        },
+        "knockback": {
+          "frames": 4,
+          "bytes": 4062,
+          "sha256": "74151cfbcd0f8698ee08e97a586d6e88f51cbc3049b2e31b8e0b0f651fab6b56"
+        },
+        "death": {
+          "frames": 7,
+          "bytes": 12276,
+          "sha256": "27ce0b883073b3f7e091eedba14827e63e7830910005d14d3888304616ed2c05"
+        }
+      }
+    },
+    "char_common_a_bonedrum": {
+      "assetId": "unit:char_common_a_bonedrum",
+      "displayName": "뼈북 악단장",
+      "rarity": "A",
+      "seriesId": "common_pool_v1",
+      "role": "광역",
+      "sourceFamily": "project-authored-recruitment-common",
+      "projectAuthoredDeterministic": true,
+      "structuralRework": false,
+      "reviewStatus": "UNREVIEWED_RUNTIME_FILES",
+      "frameWidth": 255,
+      "frameHeight": 235,
+      "displayHeight": 217,
+      "attackContactFrame": 2,
+      "simulationContactFrame": 18,
+      "motions": {
+        "idle": {
+          "frames": 7,
+          "bytes": 5756,
+          "sha256": "a91baeae7fbf27a8239413313d072de0889158c709a7c52f56f108241f3388cf"
+        },
+        "move": {
+          "frames": 8,
+          "bytes": 6844,
+          "sha256": "34ce6f6498461950955b837e94a1fb372c55cd1a7d8aaed6d467900b5e4e63af"
+        },
+        "attack": {
+          "frames": 8,
+          "bytes": 6656,
+          "sha256": "7c5217430ea414f451654bc3a08734469d99a836184869c32da8c3d0cd570f1f"
+        },
+        "knockback": {
+          "frames": 4,
+          "bytes": 3420,
+          "sha256": "2dd9ad37a9cd7f874668b25576cabf1169bbeb5f6560192c90bd5e0edc9f33ba"
+        },
+        "death": {
+          "frames": 7,
+          "bytes": 11359,
+          "sha256": "671dec29719c9cd77d4a4645ccd8c394bdf94544a08d56b35402c64bd3ec153c"
+        }
+      }
+    },
+    "char_common_a_paper_dragon": {
+      "assetId": "unit:char_common_a_paper_dragon",
+      "displayName": "접지 않은 종이용",
+      "rarity": "A",
+      "seriesId": "common_pool_v1",
+      "role": "광역",
+      "sourceFamily": "project-authored-recruitment-common",
+      "projectAuthoredDeterministic": true,
+      "structuralRework": false,
+      "reviewStatus": "UNREVIEWED_RUNTIME_FILES",
+      "frameWidth": 255,
+      "frameHeight": 255,
+      "displayHeight": 237,
+      "attackContactFrame": 2,
+      "simulationContactFrame": 24,
+      "motions": {
+        "idle": {
+          "frames": 7,
+          "bytes": 5243,
+          "sha256": "e3f47b6770b2cfa5ea679375b53034d8666d0e496edcf38848a0629c3cee2c6a"
+        },
+        "move": {
+          "frames": 8,
+          "bytes": 6170,
+          "sha256": "44fb815cedf4a25631a5d2c54203aafb46ed4d40fab7f809f068b5b314d5276e"
+        },
+        "attack": {
+          "frames": 8,
+          "bytes": 6205,
+          "sha256": "9f0f69bad60d0fc064ae685c653df53a1c98e5444a2e67eec465ba8e0014c6c3"
+        },
+        "knockback": {
+          "frames": 4,
+          "bytes": 3124,
+          "sha256": "ea5515bf4516197ea64ec94ed3630db4ddec15eb747d4dd0cd00681af7ea513a"
+        },
+        "death": {
+          "frames": 7,
+          "bytes": 10032,
+          "sha256": "e4ab932738219c04dd56e118368068723ef2b90dde123d5a266e7f21287d4896"
+        }
+      }
+    },
+    "char_common_a_meteor_cart": {
+      "assetId": "unit:char_common_a_meteor_cart",
+      "displayName": "고철 운석차",
+      "rarity": "A",
+      "seriesId": "common_pool_v1",
+      "role": "결정타",
+      "sourceFamily": "project-authored-recruitment-common",
+      "projectAuthoredDeterministic": true,
+      "structuralRework": false,
+      "reviewStatus": "UNREVIEWED_RUNTIME_FILES",
+      "frameWidth": 310,
+      "frameHeight": 255,
+      "displayHeight": 237,
+      "attackContactFrame": 3,
+      "simulationContactFrame": 58,
+      "motions": {
+        "idle": {
+          "frames": 7,
+          "bytes": 7949,
+          "sha256": "5ee8895a1c1ee23c758e4d0dcd569cb4e8c698f5e72a6b3f2ee268b9c264c47d"
+        },
+        "move": {
+          "frames": 8,
+          "bytes": 9403,
+          "sha256": "fa4e2d4bca2de09271f2f3ec81ebfe5f975a14aed57352f0b1b609acacb8450e"
+        },
+        "attack": {
+          "frames": 8,
+          "bytes": 8872,
+          "sha256": "a9a5b6314d6dabb68636a37537ef63efe664febd465c6691c1fd7e9ae4a1d878"
+        },
+        "knockback": {
+          "frames": 4,
+          "bytes": 4606,
+          "sha256": "ac24c27a9f2b922bf60c3119fa2c353a1aefe0e43a2dfaf1c6a8d48ac2c2b8d9"
+        },
+        "death": {
+          "frames": 7,
+          "bytes": 14670,
+          "sha256": "f8aed875679cfe1960c59889b67db145358cca5ab2b8f3f8376f35515865fa3f"
+        }
+      }
+    },
+    "char_common_a_mirror_guide": {
+      "assetId": "unit:char_common_a_mirror_guide",
+      "displayName": "거울길잡이",
+      "rarity": "A",
+      "seriesId": "common_pool_v1",
+      "role": "변칙",
+      "sourceFamily": "project-authored-recruitment-common",
+      "projectAuthoredDeterministic": true,
+      "structuralRework": false,
+      "reviewStatus": "UNREVIEWED_RUNTIME_FILES",
+      "frameWidth": 255,
+      "frameHeight": 235,
+      "displayHeight": 217,
+      "attackContactFrame": 2,
+      "simulationContactFrame": 24,
+      "motions": {
+        "idle": {
+          "frames": 7,
+          "bytes": 9367,
+          "sha256": "2ddc72d2f0e357f3c144b651c5d3baa44d6e3438a917addb722368d7ead1ec2d"
+        },
+        "move": {
+          "frames": 8,
+          "bytes": 10982,
+          "sha256": "81babe45de66e67b55c1ebd6071f79c4a63079e367bc83d9e607861113aa4f4d"
+        },
+        "attack": {
+          "frames": 8,
+          "bytes": 10669,
+          "sha256": "44def582d55456dc8adbefd6d0964de8ed14089a19ac8f7570362894012b9ff1"
+        },
+        "knockback": {
+          "frames": 4,
+          "bytes": 5151,
+          "sha256": "f8bad987faef17c70171b4ce56956f9299da034a14ee69abae16ea80377a7da1"
+        },
+        "death": {
+          "frames": 7,
+          "bytes": 12922,
+          "sha256": "c26508f0541b836e37c7ecad7406e5e27dd023499279d664d78ef158d33d3ddd"
+        }
+      }
+    },
+    "char_s01_elsia": {
+      "assetId": "unit:char_s01_elsia",
+      "displayName": "에르시아, 백은의 창",
+      "rarity": "S",
+      "seriesId": "series_01_starlight_order",
+      "role": "원거리",
+      "sourceFamily": "project-authored-recruitment-starlight-order",
+      "projectAuthoredDeterministic": true,
+      "structuralRework": false,
+      "reviewStatus": "UNREVIEWED_RUNTIME_FILES",
+      "frameWidth": 285,
+      "frameHeight": 255,
+      "displayHeight": 237,
+      "attackContactFrame": 3,
+      "simulationContactFrame": 16,
+      "motions": {
+        "idle": {
+          "frames": 8,
+          "bytes": 6731,
+          "sha256": "3576957b017e1de1dbdeee799f001a7da6edc005a1ff1b1be0da49f24491c7fa"
+        },
+        "move": {
+          "frames": 8,
+          "bytes": 7242,
+          "sha256": "71d4d98f32a7809dea80f13c5683d208c2e434725ef92cc6defa017b35a45304"
+        },
+        "attack": {
+          "frames": 9,
+          "bytes": 6885,
+          "sha256": "135623d35c25e454bd614267033f44d055946e0f3f0b3a82c86bb4ee9f5a0aa9"
+        },
+        "knockback": {
+          "frames": 4,
+          "bytes": 3666,
+          "sha256": "977d147b9f4c91b29272aa6d8b6cd27bb1c82734f6ee33956642b957e876dfd5"
+        },
+        "death": {
+          "frames": 8,
+          "bytes": 14561,
+          "sha256": "98a768cf34b4f4c2d240652b89a951099695f04b03bbb0853b27d51c9a888f5b"
+        }
+      }
+    },
+    "char_s01_riena": {
+      "assetId": "unit:char_s01_riena",
+      "displayName": "리에나, 불량 성녀",
+      "rarity": "S",
+      "seriesId": "series_01_starlight_order",
+      "role": "광역",
+      "sourceFamily": "project-authored-recruitment-starlight-order",
+      "projectAuthoredDeterministic": true,
+      "structuralRework": false,
+      "reviewStatus": "UNREVIEWED_RUNTIME_FILES",
+      "frameWidth": 285,
+      "frameHeight": 255,
+      "displayHeight": 237,
+      "attackContactFrame": 4,
+      "simulationContactFrame": 42,
+      "motions": {
+        "idle": {
+          "frames": 8,
+          "bytes": 7832,
+          "sha256": "5b5009560af7725c57f367e13bb44e6f1a76b697910c7b678d012e2c8d7537b6"
+        },
+        "move": {
+          "frames": 8,
+          "bytes": 8469,
+          "sha256": "1da6f589327395e7bdb4cdb173b6c78cab146acfbda0d0d88b1ee5f114424370"
+        },
+        "attack": {
+          "frames": 9,
+          "bytes": 8799,
+          "sha256": "96519e201ac24e767d1496f7d371e4b6a08c440c141174df7be9d6f229c582d7"
+        },
+        "knockback": {
+          "frames": 4,
+          "bytes": 4253,
+          "sha256": "78a8f8049d3c1b9c414a401c32cd35c16384cd39cc66cba6bb1e4a46468b34b5"
+        },
+        "death": {
+          "frames": 8,
+          "bytes": 17139,
+          "sha256": "7c28087e1c4952a006eb7e8a42dba9fa49ee97fdf4e0d63eba1deb6faee8bd70"
+        }
+      }
+    },
+    "char_s01_mireille": {
+      "assetId": "unit:char_s01_mireille",
+      "displayName": "미레이유, 유리궁의 사수",
+      "rarity": "S",
+      "seriesId": "series_01_starlight_order",
+      "role": "결정타",
+      "sourceFamily": "project-authored-recruitment-starlight-order",
+      "projectAuthoredDeterministic": true,
+      "structuralRework": false,
+      "reviewStatus": "UNREVIEWED_RUNTIME_FILES",
+      "frameWidth": 285,
+      "frameHeight": 255,
+      "displayHeight": 237,
+      "attackContactFrame": 5,
+      "simulationContactFrame": 80,
+      "motions": {
+        "idle": {
+          "frames": 8,
+          "bytes": 7755,
+          "sha256": "8dc97bfd70c2015ac10ebab46c761d70601c2df893010080c132eec50ded71be"
+        },
+        "move": {
+          "frames": 8,
+          "bytes": 8433,
+          "sha256": "8b2bc8f80bbb02b3b6d1aed70417d074d51e169377f8a45d8700e3da9db5786c"
+        },
+        "attack": {
+          "frames": 9,
+          "bytes": 9409,
+          "sha256": "1f6f64540362acf3b059a13118c6e7a0366156d2c909029b75755ab6ef713a7d"
+        },
+        "knockback": {
+          "frames": 4,
+          "bytes": 4302,
+          "sha256": "39d26120f1fad7fb42475e58033c83cbcdae208791bc28c3165844ac7d458cb3"
+        },
+        "death": {
+          "frames": 8,
+          "bytes": 18521,
+          "sha256": "98f56923ec28c263f05abc1f69d2867b56d9666131bc6d31483a2d56278084ca"
+        }
+      }
+    },
+    "char_s01_neria": {
+      "assetId": "unit:char_s01_neria",
+      "displayName": "네리아, 흑장미 기사",
+      "rarity": "S",
+      "seriesId": "series_01_starlight_order",
+      "role": "전열",
+      "sourceFamily": "project-authored-recruitment-starlight-order",
+      "projectAuthoredDeterministic": true,
+      "structuralRework": false,
+      "reviewStatus": "UNREVIEWED_RUNTIME_FILES",
+      "frameWidth": 285,
+      "frameHeight": 255,
+      "displayHeight": 237,
+      "attackContactFrame": 3,
+      "simulationContactFrame": 20,
+      "motions": {
+        "idle": {
+          "frames": 8,
+          "bytes": 7054,
+          "sha256": "cc9a1052eb904ea7db4a916aae21717580f42764c26e6f9c7ec74e8e3dddf316"
+        },
+        "move": {
+          "frames": 8,
+          "bytes": 7676,
+          "sha256": "a81eb6edf51f7d3fa42727779c41161575a4b6d64de89d61e5092ce1f8d21057"
+        },
+        "attack": {
+          "frames": 9,
+          "bytes": 7443,
+          "sha256": "3b0676e6568d8ada33ebea4f85e52a18cd4a4796227de5e77a8213e9e4e71e14"
+        },
+        "knockback": {
+          "frames": 4,
+          "bytes": 3871,
+          "sha256": "4ab0623d1a222c8ac0793b13622c452f7e3ff5bcc2d0ae0aa2b9bafeb5b4fc20"
+        },
+        "death": {
+          "frames": 8,
+          "bytes": 15900,
+          "sha256": "95f5acae23f3ef8e1156e99e876e95361bfd09dbf84568c0c52ba4bc4fba0426"
+        }
+      }
+    },
+    "char_s01_totoria": {
+      "assetId": "unit:char_s01_totoria",
+      "displayName": "토토리아, 마도인형사",
+      "rarity": "S",
+      "seriesId": "series_01_starlight_order",
+      "role": "변칙",
+      "sourceFamily": "project-authored-recruitment-starlight-order",
+      "projectAuthoredDeterministic": true,
+      "structuralRework": false,
+      "reviewStatus": "UNREVIEWED_RUNTIME_FILES",
+      "frameWidth": 285,
+      "frameHeight": 255,
+      "displayHeight": 237,
+      "attackContactFrame": 3,
+      "simulationContactFrame": 28,
+      "motions": {
+        "idle": {
+          "frames": 8,
+          "bytes": 9737,
+          "sha256": "d99a5472fb7c620c29c52113d70c23ae646569106433436d8645ef319f6f0112"
+        },
+        "move": {
+          "frames": 8,
+          "bytes": 10469,
+          "sha256": "dc43c967732f9dd7bb8fb2d4cc4bed27551975d7cbe426bc789ff3a5a0243778"
+        },
+        "attack": {
+          "frames": 9,
+          "bytes": 10084,
+          "sha256": "378c1a3434d279c2ee5a10cba56971a2d83ddcf1a812a5910ed8b43a7d7fe728"
+        },
+        "knockback": {
+          "frames": 4,
+          "bytes": 5077,
+          "sha256": "28170777e62ea201a76021a272deea0e1ecde6c4f8d4dd19cf3600509c6158f0"
+        },
+        "death": {
+          "frames": 8,
+          "bytes": 18159,
+          "sha256": "2591195f869c7a5b54588ff1f62fdc7eed29a5271227bcc28ff11c8e2ff82c29"
+        }
+      }
+    },
+    "char_s01_arselia": {
+      "assetId": "unit:char_s01_arselia",
+      "displayName": "아르셀리아, 별의 왕녀",
+      "rarity": "SS",
+      "seriesId": "series_01_starlight_order",
+      "role": "결정타",
+      "sourceFamily": "project-authored-recruitment-starlight-order",
+      "projectAuthoredDeterministic": true,
+      "structuralRework": false,
+      "reviewStatus": "UNREVIEWED_RUNTIME_FILES",
+      "frameWidth": 350,
+      "frameHeight": 305,
+      "displayHeight": 287,
+      "attackContactFrame": 4,
+      "simulationContactFrame": 60,
+      "motions": {
+        "idle": {
+          "frames": 8,
+          "bytes": 12931,
+          "sha256": "5d9dfe6aaa44ccd2746f5a5fde19a62386b3d2fbbe52bf92267d790709dc0b23"
+        },
+        "move": {
+          "frames": 8,
+          "bytes": 13652,
+          "sha256": "d221164763ec99ceaaf5c5084d3c1349d7b1805e84863dc328de07bcf55ab80e"
+        },
+        "attack": {
+          "frames": 11,
+          "bytes": 17130,
+          "sha256": "c81b580c9d12a437ee1bd90a48b4e3665490ce544b1ac068ac922b0f97dbce0e"
+        },
+        "knockback": {
+          "frames": 4,
+          "bytes": 6844,
+          "sha256": "000e19239f6b1ea93605f614dad0bc353195b786bb47e3956b562b674a0e4e4b"
+        },
+        "death": {
+          "frames": 9,
+          "bytes": 24098,
+          "sha256": "3a8cbe45ae97fe6c62459f8b2a7f39c137e09976a33252e5ffd3bfcf1dbd2776"
+        }
+      }
+    },
+    "char_s02_barga": {
+      "assetId": "unit:char_s02_barga",
+      "displayName": "돌등껍질 바르가",
+      "rarity": "S",
+      "seriesId": "series_02_primordial_titans",
+      "role": "전열",
+      "sourceFamily": "project-authored-recruitment-primordial-titans",
+      "projectAuthoredDeterministic": true,
+      "structuralRework": false,
+      "reviewStatus": "UNREVIEWED_RUNTIME_FILES",
+      "frameWidth": 375,
+      "frameHeight": 325,
+      "displayHeight": 307,
+      "attackContactFrame": 2,
+      "simulationContactFrame": 24,
+      "motions": {
+        "idle": {
+          "frames": 8,
+          "bytes": 10036,
+          "sha256": "ac5ff3ae66bd170a065ded719421975c3b4b2c2d0c4ae75fc79be25e32f0b717"
+        },
+        "move": {
+          "frames": 8,
+          "bytes": 10689,
+          "sha256": "4d2cd2d2d888ce1d683b7a0ce36c4b507619b0e93347a3e1751df02fbc163bcf"
+        },
+        "attack": {
+          "frames": 9,
+          "bytes": 10312,
+          "sha256": "c3839069dae67351070ac6286d8f43a4ad4c98786c028bcbff9a6f391dadad15"
+        },
+        "knockback": {
+          "frames": 4,
+          "bytes": 5187,
+          "sha256": "236ceda1a06245d57803eaaa8073b64b8dfc9698955cc01fb956056e69b61a3a"
+        },
+        "death": {
+          "frames": 8,
+          "bytes": 19708,
+          "sha256": "f4661164a6c2891c096fb8aabfd750949e57e826b9f7bea5d30766e46d9a82e4"
+        }
+      }
+    },
+    "char_s02_zirka": {
+      "assetId": "unit:char_s02_zirka",
+      "displayName": "꼬리칼날 지르카",
+      "rarity": "S",
+      "seriesId": "series_02_primordial_titans",
+      "role": "전열",
+      "sourceFamily": "project-authored-recruitment-primordial-titans",
+      "projectAuthoredDeterministic": true,
+      "structuralRework": false,
+      "reviewStatus": "UNREVIEWED_RUNTIME_FILES",
+      "frameWidth": 330,
+      "frameHeight": 280,
+      "displayHeight": 262,
+      "attackContactFrame": 3,
+      "simulationContactFrame": 8,
+      "motions": {
+        "idle": {
+          "frames": 8,
+          "bytes": 9138,
+          "sha256": "62e8bc571d2e3a5a57a5d8250bf98bf4616de69fc2f9765f8bd5fba4acae9915"
+        },
+        "move": {
+          "frames": 8,
+          "bytes": 10185,
+          "sha256": "d9137664b5cdb47642561537cb04f11aefca7b3c0b1b0e5d25cc692e25054d46"
+        },
+        "attack": {
+          "frames": 9,
+          "bytes": 9640,
+          "sha256": "0a3adf068a7ce92e5dcd4d5266e1c9be76e3d1686df06d9909559157efbb41bc"
+        },
+        "knockback": {
+          "frames": 4,
+          "bytes": 4905,
+          "sha256": "a5416d983b18691217ee31e665969376eef98873047a113a59eac0effca562d9"
+        },
+        "death": {
+          "frames": 8,
+          "bytes": 19563,
+          "sha256": "6c9d582910da455f5b083dba121470e65c185cb168d097bb81d3c60f2d58d7c7"
+        }
+      }
+    },
+    "char_s02_mogu": {
+      "assetId": "unit:char_s02_mogu",
+      "displayName": "풍선포자 모구",
+      "rarity": "S",
+      "seriesId": "series_02_primordial_titans",
+      "role": "변칙",
+      "sourceFamily": "project-authored-recruitment-primordial-titans",
+      "projectAuthoredDeterministic": true,
+      "structuralRework": false,
+      "reviewStatus": "UNREVIEWED_RUNTIME_FILES",
+      "frameWidth": 330,
+      "frameHeight": 300,
+      "displayHeight": 282,
+      "attackContactFrame": 3,
+      "simulationContactFrame": 30,
+      "motions": {
+        "idle": {
+          "frames": 8,
+          "bytes": 11372,
+          "sha256": "40ac304e72da919156659b9cfa2be19bbb56abf8ed12b1e9968879b104c6603e"
+        },
+        "move": {
+          "frames": 8,
+          "bytes": 12546,
+          "sha256": "41400a6339f4cc8fb5c02f34086a8a541ddc90993daceaf355dcc15e2dd8d86e"
+        },
+        "attack": {
+          "frames": 9,
+          "bytes": 11998,
+          "sha256": "aee4f12f1502f6059d2818718f656059845960d635a55c3f724a17f67c7e5eae"
+        },
+        "knockback": {
+          "frames": 4,
+          "bytes": 5981,
+          "sha256": "d992caf18eba0ec1ed4458959e9adf8317a9da50fd393eb3d48b0ff185657803"
+        },
+        "death": {
+          "frames": 8,
+          "bytes": 20532,
+          "sha256": "7e414e68156203bc7bf257096fe1f3482008425d90651b2f87754741bd2c3af4"
+        }
+      }
+    },
+    "char_s02_gardo": {
+      "assetId": "unit:char_s02_gardo",
+      "displayName": "천공턱 가르도",
+      "rarity": "S",
+      "seriesId": "series_02_primordial_titans",
+      "role": "결정타",
+      "sourceFamily": "project-authored-recruitment-primordial-titans",
+      "projectAuthoredDeterministic": true,
+      "structuralRework": false,
+      "reviewStatus": "UNREVIEWED_RUNTIME_FILES",
+      "frameWidth": 375,
+      "frameHeight": 325,
+      "displayHeight": 307,
+      "attackContactFrame": 5,
+      "simulationContactFrame": 90,
+      "motions": {
+        "idle": {
+          "frames": 8,
+          "bytes": 10654,
+          "sha256": "df8666da120a4349b749deea94f88e3cca79dee44a93de3b9251690b384f75e8"
+        },
+        "move": {
+          "frames": 8,
+          "bytes": 11561,
+          "sha256": "93aa1b602ce5a121abef2bbd282e5be7e50f75a9f6b7002531c03feddf93f822"
+        },
+        "attack": {
+          "frames": 9,
+          "bytes": 12342,
+          "sha256": "9382b801c6fa23d21723c0dd8c6c2bb898db3f0776823696d2abb8e1c4ee5686"
+        },
+        "knockback": {
+          "frames": 4,
+          "bytes": 5655,
+          "sha256": "795a31f4cb0d0acda120264f79a2b7d1c49dde22ba28ecf77a1c94e77ef0e433"
+        },
+        "death": {
+          "frames": 8,
+          "bytes": 21727,
+          "sha256": "66e3accd2334f8cd5eb4db39e80a1914066da63ebcee3b886af1eb8e2f409d55"
+        }
+      }
+    },
+    "char_s02_kreik": {
+      "assetId": "unit:char_s02_kreik",
+      "displayName": "수정벌레 크리크",
+      "rarity": "S",
+      "seriesId": "series_02_primordial_titans",
+      "role": "원거리",
+      "sourceFamily": "project-authored-recruitment-primordial-titans",
+      "projectAuthoredDeterministic": true,
+      "structuralRework": false,
+      "reviewStatus": "UNREVIEWED_RUNTIME_FILES",
+      "frameWidth": 330,
+      "frameHeight": 280,
+      "displayHeight": 262,
+      "attackContactFrame": 3,
+      "simulationContactFrame": 20,
+      "motions": {
+        "idle": {
+          "frames": 8,
+          "bytes": 9156,
+          "sha256": "582db06090b3ccf75c66f8c7ec5b6861ec4cb6fe323b67fcb520b99b3e85af1b"
+        },
+        "move": {
+          "frames": 8,
+          "bytes": 10221,
+          "sha256": "5d03729abe6176d8bc47e34a01cfa28202272410e5e022ef037e4c4938631abb"
+        },
+        "attack": {
+          "frames": 9,
+          "bytes": 9321,
+          "sha256": "bf24503e0ba89849984b14bc95357a9e6977bd4a1dfabf017448782216f4660f"
+        },
+        "knockback": {
+          "frames": 4,
+          "bytes": 4925,
+          "sha256": "016b42bd5666606b98a401c8d279e076dbbb75217a1e2730d8e69c25b24aae2a"
+        },
+        "death": {
+          "frames": 8,
+          "bytes": 19365,
+          "sha256": "0ae7672a22c21b793f902363f913c6a21737da4f6a28209241f9db163d106764"
+        }
+      }
+    },
+    "char_s02_gormu": {
+      "assetId": "unit:char_s02_gormu",
+      "displayName": "고대등짐 고르무",
+      "rarity": "SS",
+      "seriesId": "series_02_primordial_titans",
+      "role": "전열",
+      "sourceFamily": "project-authored-recruitment-primordial-titans",
+      "projectAuthoredDeterministic": true,
+      "structuralRework": false,
+      "reviewStatus": "UNREVIEWED_RUNTIME_FILES",
+      "frameWidth": 375,
+      "frameHeight": 325,
+      "displayHeight": 307,
+      "attackContactFrame": 4,
+      "simulationContactFrame": 50,
+      "motions": {
+        "idle": {
+          "frames": 8,
+          "bytes": 11906,
+          "sha256": "d74f49ef99464f39771cb7089ee9e7b49fba65a54b2dd6529734247bffc2a538"
+        },
+        "move": {
+          "frames": 8,
+          "bytes": 12749,
+          "sha256": "04b0a65ecc3383ba12b6d0721816240ff0be07523f1253ed35962ccaa1ef53e8"
+        },
+        "attack": {
+          "frames": 11,
+          "bytes": 14958,
+          "sha256": "8d4e2b8e4326e4f360012a4e7e9051176eac0fe826d8dfaff92ca0799361352b"
+        },
+        "knockback": {
+          "frames": 4,
+          "bytes": 6127,
+          "sha256": "020868d86bbf3675fb11a23882ee60cd6bb86816d67b48241e67f2d906720470"
+        },
+        "death": {
+          "frames": 9,
+          "bytes": 24502,
+          "sha256": "5e70e9ea296a980404ac9bf354d59a887762922cd4ca1c92846f6589d0397f7d"
+        }
+      }
+    },
+    "char_s03_k17": {
+      "assetId": "unit:char_s03_k17",
+      "displayName": "K-17 절단자",
+      "rarity": "S",
+      "seriesId": "series_03_zero_edge",
+      "role": "전열",
+      "sourceFamily": "project-authored-recruitment-zero-edge",
+      "projectAuthoredDeterministic": true,
+      "structuralRework": false,
+      "reviewStatus": "UNREVIEWED_RUNTIME_FILES",
+      "frameWidth": 310,
+      "frameHeight": 270,
+      "displayHeight": 252,
+      "attackContactFrame": 2,
+      "simulationContactFrame": 6,
+      "motions": {
+        "idle": {
+          "frames": 8,
+          "bytes": 9343,
+          "sha256": "8d989ff13bae53348f031612b656ed0408ce9aed73a5bc0d777a050de014626f"
+        },
+        "move": {
+          "frames": 8,
+          "bytes": 10268,
+          "sha256": "864bd1063bafb9a40f9d5843e987322f0e63e21565eaec4abf7d7bd00474c84e"
+        },
+        "attack": {
+          "frames": 9,
+          "bytes": 9767,
+          "sha256": "0bc6d87f9468187b50fa0b3280d0903035fdaf46a0d94987a4d267c851f93cc7"
+        },
+        "knockback": {
+          "frames": 4,
+          "bytes": 5124,
+          "sha256": "4ed1b8ba3959872b2d5a8873c51cfc8937770c16cf57e6814742c1ee7e7d00de"
+        },
+        "death": {
+          "frames": 8,
+          "bytes": 21534,
+          "sha256": "6a398c3485a9938a140737f3b811b0bfb457831a8e20133d64efb4703fb23c31"
+        }
+      }
+    },
+    "char_s03_arc_railer": {
+      "assetId": "unit:char_s03_arc_railer",
+      "displayName": "아크 레일러",
+      "rarity": "S",
+      "seriesId": "series_03_zero_edge",
+      "role": "결정타",
+      "sourceFamily": "project-authored-recruitment-zero-edge",
+      "projectAuthoredDeterministic": true,
+      "structuralRework": false,
+      "reviewStatus": "UNREVIEWED_RUNTIME_FILES",
+      "frameWidth": 310,
+      "frameHeight": 290,
+      "displayHeight": 272,
+      "attackContactFrame": 6,
+      "simulationContactFrame": 110,
+      "motions": {
+        "idle": {
+          "frames": 8,
+          "bytes": 8584,
+          "sha256": "e31295e0745b2ee1c6e5308d70a47c8d0eb0fc7ac9ca5f654b8e298178e3ce59"
+        },
+        "move": {
+          "frames": 8,
+          "bytes": 9243,
+          "sha256": "c8112d15e32c1803412e3356735293bb83657027067a845637797826b05337c5"
+        },
+        "attack": {
+          "frames": 9,
+          "bytes": 9920,
+          "sha256": "985bb42a22cc4ba98617b4a32cfd290a0b47a3e3358c71fe637ec7c79ac4ac1e"
+        },
+        "knockback": {
+          "frames": 4,
+          "bytes": 4564,
+          "sha256": "2a18d6e808c019772a14e3e40ea23fa31583ce1d35dc2c427e7b507db67c094d"
+        },
+        "death": {
+          "frames": 8,
+          "bytes": 18068,
+          "sha256": "8c452e102f0a23025cfacf074596fe30c3f1a33dd7e33c48b8c4cf44aa55cca6"
+        }
+      }
+    },
+    "char_s03_nana04": {
+      "assetId": "unit:char_s03_nana04",
+      "displayName": "NANA-04",
+      "rarity": "S",
+      "seriesId": "series_03_zero_edge",
+      "role": "원거리",
+      "sourceFamily": "project-authored-recruitment-zero-edge",
+      "projectAuthoredDeterministic": true,
+      "structuralRework": false,
+      "reviewStatus": "UNREVIEWED_RUNTIME_FILES",
+      "frameWidth": 310,
+      "frameHeight": 270,
+      "displayHeight": 252,
+      "attackContactFrame": 2,
+      "simulationContactFrame": 18,
+      "motions": {
+        "idle": {
+          "frames": 8,
+          "bytes": 11278,
+          "sha256": "281d063f659336886ce3d2609d88af62f9f85201579de504b2349e19e262ebe0"
+        },
+        "move": {
+          "frames": 8,
+          "bytes": 12407,
+          "sha256": "573480c2dc5279cd4c99f1073dda5231e4daa455413e1cb3bd229bf5b7ddf33c"
+        },
+        "attack": {
+          "frames": 9,
+          "bytes": 11905,
+          "sha256": "f2b5dbeae01f55b9aaecf8abbabba331c0377c0f3dfb5d04cf2baa85498c75ca"
+        },
+        "knockback": {
+          "frames": 4,
+          "bytes": 5818,
+          "sha256": "56335794b04075593eaea2c4718033d8969303b73cc32c06a7e5c363f2c97706"
+        },
+        "death": {
+          "frames": 8,
+          "bytes": 20256,
+          "sha256": "2846af263b7d2e419de02348df98dd5229fce4f12121d2fccb8bbe8b5b261db2"
+        }
+      }
+    },
+    "char_s03_rxomega": {
+      "assetId": "unit:char_s03_rxomega",
+      "displayName": "방벽기 RX-Ω",
+      "rarity": "S",
+      "seriesId": "series_03_zero_edge",
+      "role": "전열",
+      "sourceFamily": "project-authored-recruitment-zero-edge",
+      "projectAuthoredDeterministic": true,
+      "structuralRework": false,
+      "reviewStatus": "UNREVIEWED_RUNTIME_FILES",
+      "frameWidth": 310,
+      "frameHeight": 270,
+      "displayHeight": 252,
+      "attackContactFrame": 2,
+      "simulationContactFrame": 22,
+      "motions": {
+        "idle": {
+          "frames": 8,
+          "bytes": 8633,
+          "sha256": "b0942bae6654a5e7886db384ddcc40e5536fd67373d6ffa2854b5b2dfe8ca222"
+        },
+        "move": {
+          "frames": 8,
+          "bytes": 9386,
+          "sha256": "446369686c031e84642c42373788d245204d8d77b831047fdf63bb678f03d929"
+        },
+        "attack": {
+          "frames": 9,
+          "bytes": 9078,
+          "sha256": "dcacdf23ec4f36b43f3c039b26e55a418a0bf8b7ed1eba34feb90ddeb835e8a3"
+        },
+        "knockback": {
+          "frames": 4,
+          "bytes": 4593,
+          "sha256": "8e3b468584dc6e67582142826ef858c9c8e8446251c738034bb2f0b9d63389b7"
+        },
+        "death": {
+          "frames": 8,
+          "bytes": 19009,
+          "sha256": "23ccfbf00bd8f8b24571e2cf0f243a952e91a81eda55b4a3cebe33580244fafc"
+        }
+      }
+    },
+    "char_s03_blade_hound": {
+      "assetId": "unit:char_s03_blade_hound",
+      "displayName": "크로노 블레이드 하운드",
+      "rarity": "S",
+      "seriesId": "series_03_zero_edge",
+      "role": "변칙",
+      "sourceFamily": "project-authored-recruitment-zero-edge",
+      "projectAuthoredDeterministic": true,
+      "structuralRework": false,
+      "reviewStatus": "UNREVIEWED_RUNTIME_FILES",
+      "frameWidth": 310,
+      "frameHeight": 270,
+      "displayHeight": 252,
+      "attackContactFrame": 2,
+      "simulationContactFrame": 12,
+      "motions": {
+        "idle": {
+          "frames": 8,
+          "bytes": 10771,
+          "sha256": "0fd40d890be34cffdcb5c0d98014d65069273076390b227ba386b1d2af8af41b"
+        },
+        "move": {
+          "frames": 8,
+          "bytes": 11784,
+          "sha256": "4725078c019ca2e5648a635988fcb43d8d24a04bb56e21d5ed44f820bd568684"
+        },
+        "attack": {
+          "frames": 9,
+          "bytes": 11321,
+          "sha256": "d7eb9b50b1b15566c9c4dfd40dfb02a69bd599fc1c8242dcc32cacf305fd6612"
+        },
+        "knockback": {
+          "frames": 4,
+          "bytes": 5673,
+          "sha256": "3051f4fcad87deca774ad3a8cbb32ce01254fc050fd03d82a1213ca888641308"
+        },
+        "death": {
+          "frames": 8,
+          "bytes": 21292,
+          "sha256": "1c5ea628598b334767675f3950daa88336f7fca33ab3b4a6b34250234d660a73"
+        }
+      }
+    },
+    "char_s03_overlay_astra": {
+      "assetId": "unit:char_s03_overlay_astra",
+      "displayName": "아스트라 프레임",
+      "rarity": "SS",
+      "seriesId": "series_03_zero_edge",
+      "role": "결정타",
+      "sourceFamily": "project-authored-recruitment-zero-edge",
+      "projectAuthoredDeterministic": true,
+      "structuralRework": false,
+      "reviewStatus": "UNREVIEWED_RUNTIME_FILES",
+      "frameWidth": 350,
+      "frameHeight": 305,
+      "displayHeight": 287,
+      "attackContactFrame": 4,
+      "simulationContactFrame": 64,
+      "motions": {
+        "idle": {
+          "frames": 8,
+          "bytes": 14151,
+          "sha256": "c69bda4361c76bb384c6a51205d97784cd05e8d9f5afded56806dc169c0174cd"
+        },
+        "move": {
+          "frames": 8,
+          "bytes": 15324,
+          "sha256": "7256b90843d79a288c367972934764b28c302b7ec384af523c6febe184e167c1"
+        },
+        "attack": {
+          "frames": 11,
+          "bytes": 18765,
+          "sha256": "03a176cd25a1d69ea0e92c7634af60caa66d956ab3dff4b80febf603c635b5e6"
+        },
+        "knockback": {
+          "frames": 4,
+          "bytes": 6908,
+          "sha256": "4c1212459acd0b841535f8e7060de1f78e9df5c3a175c64dba5cd61ab0e407cf"
+        },
+        "death": {
+          "frames": 9,
+          "bytes": 24447,
+          "sha256": "f0789a5cd0c2b0883999618faa213408fb7eb72e9bd0bd85cd6c78056555b912"
+        }
+      }
+    }
+  }
+}
