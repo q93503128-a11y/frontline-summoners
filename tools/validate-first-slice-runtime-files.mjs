@@ -8,7 +8,7 @@ const plan=JSON.parse(await readFile(resolve(root,'assets/raw/production/first-s
 const slice=JSON.parse(await readFile(resolve(root,'assets/raw/production/vertical-slice-01.json'),'utf8'));
 const motions=['idle','move','attack','knockback','death'];
 const targetMap=new Map([
-  ['militia/militia_f1','unit:militia:militia_f1'],['militia/militia_f2','unit:militia:militia_f2'],['militia/militia_f3','unit:militia:militia_f3'],['enemy-raider','unit:enemy-raider'],
+  ['militia/militia_f1','unit:militia:militia_f1'],['militia/militia_f2','unit:militia:militia_f2'],['militia/militia_f3','unit:militia:militia_f3'],['enemy-raider','unit:enemy-raider'],['enemy-boss','unit:enemy-boss'],
 ]);
 function fail(m){throw new Error(`[first-slice runtime] ${m}`)}
 function dims(b){if(b.length<24||b[0]!==0x89||b[1]!==0x50||b[2]!==0x4e||b[3]!==0x47)fail('non-PNG runtime file');return [b.readUInt32BE(16),b.readUInt32BE(20)];}
