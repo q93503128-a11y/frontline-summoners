@@ -1,0 +1,78 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="720" viewBox="0 0 1280 720" shape-rendering="crispEdges">
+  <rect width="1280" height="720" fill="#98c7d1"/>
+  <rect y="0" width="1280" height="172" fill="#b7dce5"/>
+  <rect y="172" width="1280" height="116" fill="#a8d2da"/>
+  <g fill="#e9f1ee" opacity=".75">
+    <rect x="112" y="76" width="86" height="18"/><rect x="132" y="60" width="48" height="18"/><rect x="164" y="72" width="62" height="22"/>
+    <rect x="850" y="98" width="92" height="18"/><rect x="874" y="82" width="54" height="18"/><rect x="914" y="94" width="64" height="22"/>
+  </g>
+  <rect x="1036" y="62" width="48" height="48" fill="#eedc91"/><rect x="1046" y="72" width="28" height="28" fill="#f5e7ad"/>
+  <polygon points="0,384 206,248 382,384" fill="#78969a"/>
+  <polygon points="230,384 520,218 810,384" fill="#6e8f85"/>
+  <polygon points="688,384 1018,262 1280,384" fill="#668477"/>
+  <polygon points="0,420 190,324 356,420" fill="#7f9f84"/>
+  <polygon points="326,420 610,302 888,420" fill="#769879"/>
+  <polygon points="762,420 1062,330 1280,420" fill="#6f8f70"/>
+  <rect y="398" width="1280" height="188" fill="#769e59"/>
+  <rect y="430" width="1280" height="156" fill="#6f9451"/>
+  <g fill="#88ad66">
+    <rect y="408" width="1280" height="12"/>
+    <rect y="456" width="1280" height="8" opacity=".72"/>
+  </g>
+  <g fill="#4f7144" opacity=".9">
+    <rect x="46" y="446" width="6" height="26"/><rect x="38" y="454" width="22" height="5"/>
+    <rect x="162" y="466" width="5" height="20"/><rect x="154" y="472" width="22" height="4"/>
+    <rect x="1118" y="448" width="6" height="26"/><rect x="1110" y="456" width="24" height="5"/>
+    <rect x="1216" y="470" width="5" height="18"/><rect x="1208" y="475" width="21" height="4"/>
+  </g>
+  <g id="left-outpost">
+    <rect x="72" y="314" width="168" height="122" fill="#76624c"/>
+    <rect x="88" y="330" width="136" height="92" fill="#8b7355"/>
+    <rect x="70" y="302" width="172" height="20" fill="#5a493a"/>
+    <rect x="92" y="282" width="18" height="156" fill="#4b3b31"/>
+    <rect x="204" y="274" width="18" height="164" fill="#4b3b31"/>
+    <polygon points="70,302 152,248 244,302" fill="#67513e"/>
+    <rect x="124" y="352" width="54" height="70" fill="#3d342e"/>
+    <rect x="148" y="242" width="10" height="68" fill="#40352d"/>
+    <polygon points="158,244 206,256 158,274" fill="#697d55"/>
+    <g fill="#48392f"><rect x="54" y="424" width="208" height="12"/><rect x="64" y="436" width="14" height="40"/><rect x="232" y="436" width="14" height="38"/></g>
+  </g>
+  <g id="broken-mid-post" opacity=".92">
+    <rect x="302" y="350" width="12" height="88" fill="#554437" transform="rotate(-7 308 394)"/>
+    <rect x="338" y="372" width="12" height="66" fill="#554437" transform="rotate(9 344 405)"/>
+    <rect x="292" y="386" width="78" height="10" fill="#66513e" transform="rotate(-4 331 391)"/>
+    <polygon points="316,348 340,356 316,372" fill="#8e6e4b"/>
+  </g>
+  <g id="right-ruined-watch">
+    <rect x="1040" y="328" width="114" height="104" fill="#6a5747"/>
+    <rect x="1054" y="346" width="86" height="86" fill="#7d6852"/>
+    <rect x="1030" y="318" width="136" height="16" fill="#514238"/>
+    <rect x="1050" y="286" width="14" height="148" fill="#473a32"/>
+    <rect x="1126" y="292" width="14" height="142" fill="#473a32"/>
+    <polygon points="1032,318 1098,278 1158,316" fill="#614d3f"/>
+    <polygon points="1098,278 1148,312 1118,306" fill="#8a6a4c"/>
+    <rect x="1080" y="374" width="36" height="58" fill="#3d332d"/>
+    <rect x="1022" y="422" width="154" height="10" fill="#4a3b32"/>
+  </g>
+  <g id="debris" fill="#65513e">
+    <rect x="256" y="446" width="48" height="10" transform="rotate(8 280 451)"/>
+    <rect x="918" y="450" width="54" height="10" transform="rotate(-6 945 455)"/>
+    <rect x="982" y="462" width="36" height="8" transform="rotate(11 1000 466)"/>
+  </g>
+  <g id="cart" transform="translate(870 390)">
+    <rect x="0" y="22" width="86" height="36" fill="#74583f"/><rect x="10" y="12" width="66" height="16" fill="#896b49"/>
+    <circle cx="18" cy="62" r="15" fill="#493b31"/><circle cx="70" cy="62" r="15" fill="#493b31"/>
+    <circle cx="18" cy="62" r="6" fill="#8c7659"/><circle cx="70" cy="62" r="6" fill="#8c7659"/>
+    <rect x="82" y="34" width="58" height="7" fill="#594738"/>
+  </g>
+  <rect y="486" width="1280" height="100" fill="#587c45"/>
+  <rect y="526" width="1280" height="60" fill="#4d6c3e"/>
+  <rect y="586" width="1280" height="134" fill="#44382f"/>
+  <rect y="586" width="1280" height="16" fill="#5d4a3b"/>
+  <g fill="#7d6450" opacity=".65">
+    <rect x="42" y="618" width="128" height="8"/><rect x="224" y="652" width="162" height="8"/><rect x="512" y="614" width="176" height="8"/><rect x="760" y="664" width="144" height="8"/><rect x="1040" y="626" width="154" height="8"/>
+  </g>
+  <g fill="#9abd6f" opacity=".7">
+    <rect x="14" y="478" width="92" height="6"/><rect x="184" y="492" width="72" height="6"/><rect x="1016" y="482" width="82" height="6"/><rect x="1176" y="496" width="68" height="6"/>
+  </g>
+</svg>
