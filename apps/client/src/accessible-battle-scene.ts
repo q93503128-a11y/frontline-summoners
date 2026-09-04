@@ -6,6 +6,7 @@ import {
   installFirstSliceProductionReviewAudio,
   startFirstSliceProductionReviewMusic,
 } from './first-slice-production-review-audio.ts';
+import { installFirstSliceProductionReviewHud } from './first-slice-production-review-hud.ts';
 import { renderFirstSliceProductionReviewMeadowLayers } from './first-slice-production-review-meadow.ts';
 import {
   installFirstSliceProductionReviewRuntime,
@@ -24,6 +25,7 @@ export class AccessibleBattleScene extends BattleScene {
     if (isFirstSliceProductionReviewMode()) {
       installFirstSliceProductionReviewRuntime(this);
       installFirstSliceProductionReviewAudio(this);
+      installFirstSliceProductionReviewHud(this);
     } else {
       installStorySilhouetteOverlayRuntime(this);
     }
