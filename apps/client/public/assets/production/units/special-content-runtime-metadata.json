@@ -837,7 +837,7 @@
         "reviewStatus": "UNREVIEWED_RUNTIME_FILES"
       },
       "visualPolishPriority03MotionFix": {
-        "version": 1,
+        "version": 2,
         "kind": "DYNAMIC_SILHOUETTE_RECOVERY",
         "reviewStatus": "UNREVIEWED_RUNTIME_FILES"
       }
@@ -865,8 +865,8 @@
         },
         "attack": {
           "frames": 10,
-          "bytes": 22455,
-          "sha256": "ce467c3fe0c56d923a8b6a6c63b91733fd4486c7eaf8922eb3fb3e7aa316052c"
+          "bytes": 24678,
+          "sha256": "9feedebef9a6318b1e166fbc9f465d1b6510eb8a9b09afe2f988d4ab18fb9363"
         },
         "knockback": {
           "frames": 4,
@@ -885,7 +885,7 @@
         "reviewStatus": "UNREVIEWED_RUNTIME_FILES"
       },
       "visualPolishPriority03MotionFix": {
-        "version": 1,
+        "version": 2,
         "kind": "DYNAMIC_SILHOUETTE_RECOVERY",
         "reviewStatus": "UNREVIEWED_RUNTIME_FILES"
       }
@@ -1328,7 +1328,7 @@
         "reviewStatus": "UNREVIEWED_RUNTIME_FILES"
       },
       "visualPolishPriority03MotionFix": {
-        "version": 1,
+        "version": 2,
         "kind": "DYNAMIC_SILHOUETTE_RECOVERY",
         "reviewStatus": "UNREVIEWED_RUNTIME_FILES"
       }
@@ -1612,7 +1612,7 @@
     "normalRuntimeAuthoritative": false
   },
   "visualPolishPriority03MotionFix": {
-    "version": 1,
+    "version": 2,
     "touchedTargets": 3,
     "humanReview": "PENDING",
     "normalRuntimeAuthoritative": false

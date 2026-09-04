@@ -26,67 +26,14 @@
       "attack"
     ],
     "severe": 0,
-    "atRisk": 1,
-    "healthy": 233,
+    "atRisk": 0,
+    "healthy": 234,
     "recruitmentEvolutionGroups": 33,
     "weakEvolution": 0,
     "watchEvolution": 0,
     "clippingRisk": 0
   },
   "topPriorities": [
-    {
-      "metadataFile": "special-content-runtime-metadata.json",
-      "targetKey": "boss_sp_gold_carrier",
-      "assetId": "unit:boss_sp_gold_carrier",
-      "unitId": "boss_sp_gold_carrier",
-      "formId": null,
-      "formOrder": null,
-      "score": 67,
-      "reasons": [
-        "weak-attack:0.0406",
-        "high-similarity:0.9011"
-      ],
-      "nearestOther": {
-        "targetKey": "guard/guard_f1",
-        "rootUnitId": "guard",
-        "similarity": 0.9011
-      },
-      "motions": {
-        "idle": {
-          "frames": 8,
-          "frameWidth": 400,
-          "frameHeight": 330,
-          "occupancy": 0.2768,
-          "widthCoverage": 0.665,
-          "heightCoverage": 0.5,
-          "maxEdgeRatio": 0,
-          "avgDelta": 0.0031,
-          "maxDelta": 0.0043
-        },
-        "move": {
-          "frames": 8,
-          "frameWidth": 400,
-          "frameHeight": 330,
-          "occupancy": 0.3246,
-          "widthCoverage": 0.7913,
-          "heightCoverage": 0.6212,
-          "maxEdgeRatio": 0,
-          "avgDelta": 0.2679,
-          "maxDelta": 0.2703
-        },
-        "attack": {
-          "frames": 10,
-          "frameWidth": 400,
-          "frameHeight": 330,
-          "occupancy": 0.3279,
-          "widthCoverage": 0.876,
-          "heightCoverage": 0.5703,
-          "maxEdgeRatio": 0.0034,
-          "avgDelta": 0.027,
-          "maxDelta": 0.0406
-        }
-      }
-    },
     {
       "metadataFile": "chapter-02-runtime-metadata.json",
       "targetKey": "boss_ch2_rootwidow",
@@ -1492,6 +1439,58 @@
           "maxEdgeRatio": 0.0032,
           "avgDelta": 0.0283,
           "maxDelta": 0.0892
+        }
+      }
+    },
+    {
+      "metadataFile": "special-content-runtime-metadata.json",
+      "targetKey": "boss_sp_gold_carrier",
+      "assetId": "unit:boss_sp_gold_carrier",
+      "unitId": "boss_sp_gold_carrier",
+      "formId": null,
+      "formOrder": null,
+      "score": 91,
+      "reasons": [
+        "high-similarity:0.9011"
+      ],
+      "nearestOther": {
+        "targetKey": "guard/guard_f1",
+        "rootUnitId": "guard",
+        "similarity": 0.9011
+      },
+      "motions": {
+        "idle": {
+          "frames": 8,
+          "frameWidth": 400,
+          "frameHeight": 330,
+          "occupancy": 0.2768,
+          "widthCoverage": 0.665,
+          "heightCoverage": 0.5,
+          "maxEdgeRatio": 0,
+          "avgDelta": 0.0031,
+          "maxDelta": 0.0043
+        },
+        "move": {
+          "frames": 8,
+          "frameWidth": 400,
+          "frameHeight": 330,
+          "occupancy": 0.3246,
+          "widthCoverage": 0.7913,
+          "heightCoverage": 0.6212,
+          "maxEdgeRatio": 0,
+          "avgDelta": 0.2679,
+          "maxDelta": 0.2703
+        },
+        "attack": {
+          "frames": 10,
+          "frameWidth": 400,
+          "frameHeight": 330,
+          "occupancy": 0.3399,
+          "widthCoverage": 0.909,
+          "heightCoverage": 0.6067,
+          "maxEdgeRatio": 0.0038,
+          "avgDelta": 0.0457,
+          "maxDelta": 0.0627
         }
       }
     },
@@ -2378,59 +2377,6 @@
   ],
   "targets": [
     {
-      "metadataFile": "special-content-runtime-metadata.json",
-      "targetKey": "boss_sp_gold_carrier",
-      "assetId": "unit:boss_sp_gold_carrier",
-      "unitId": "boss_sp_gold_carrier",
-      "formId": null,
-      "formOrder": null,
-      "score": 67,
-      "reasons": [
-        "weak-attack:0.0406",
-        "high-similarity:0.9011"
-      ],
-      "nearestOther": {
-        "targetKey": "guard/guard_f1",
-        "rootUnitId": "guard",
-        "similarity": 0.9011
-      },
-      "motions": {
-        "idle": {
-          "frames": 8,
-          "frameWidth": 400,
-          "frameHeight": 330,
-          "occupancy": 0.2768,
-          "widthCoverage": 0.665,
-          "heightCoverage": 0.5,
-          "maxEdgeRatio": 0,
-          "avgDelta": 0.0031,
-          "maxDelta": 0.0043
-        },
-        "move": {
-          "frames": 8,
-          "frameWidth": 400,
-          "frameHeight": 330,
-          "occupancy": 0.3246,
-          "widthCoverage": 0.7913,
-          "heightCoverage": 0.6212,
-          "maxEdgeRatio": 0,
-          "avgDelta": 0.2679,
-          "maxDelta": 0.2703
-        },
-        "attack": {
-          "frames": 10,
-          "frameWidth": 400,
-          "frameHeight": 330,
-          "occupancy": 0.3279,
-          "widthCoverage": 0.876,
-          "heightCoverage": 0.5703,
-          "maxEdgeRatio": 0.0034,
-          "avgDelta": 0.027,
-          "maxDelta": 0.0406
-        }
-      }
-    },
-    {
       "metadataFile": "chapter-02-runtime-metadata.json",
       "targetKey": "boss_ch2_rootwidow",
       "assetId": "unit:boss_ch2_rootwidow",
@@ -3835,6 +3781,58 @@
           "maxEdgeRatio": 0.0032,
           "avgDelta": 0.0283,
           "maxDelta": 0.0892
+        }
+      }
+    },
+    {
+      "metadataFile": "special-content-runtime-metadata.json",
+      "targetKey": "boss_sp_gold_carrier",
+      "assetId": "unit:boss_sp_gold_carrier",
+      "unitId": "boss_sp_gold_carrier",
+      "formId": null,
+      "formOrder": null,
+      "score": 91,
+      "reasons": [
+        "high-similarity:0.9011"
+      ],
+      "nearestOther": {
+        "targetKey": "guard/guard_f1",
+        "rootUnitId": "guard",
+        "similarity": 0.9011
+      },
+      "motions": {
+        "idle": {
+          "frames": 8,
+          "frameWidth": 400,
+          "frameHeight": 330,
+          "occupancy": 0.2768,
+          "widthCoverage": 0.665,
+          "heightCoverage": 0.5,
+          "maxEdgeRatio": 0,
+          "avgDelta": 0.0031,
+          "maxDelta": 0.0043
+        },
+        "move": {
+          "frames": 8,
+          "frameWidth": 400,
+          "frameHeight": 330,
+          "occupancy": 0.3246,
+          "widthCoverage": 0.7913,
+          "heightCoverage": 0.6212,
+          "maxEdgeRatio": 0,
+          "avgDelta": 0.2679,
+          "maxDelta": 0.2703
+        },
+        "attack": {
+          "frames": 10,
+          "frameWidth": 400,
+          "frameHeight": 330,
+          "occupancy": 0.3399,
+          "widthCoverage": 0.909,
+          "heightCoverage": 0.6067,
+          "maxEdgeRatio": 0.0038,
+          "avgDelta": 0.0457,
+          "maxDelta": 0.0627
         }
       }
     },
