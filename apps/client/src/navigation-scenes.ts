@@ -20,6 +20,11 @@ import {
   getSecondSliceReviewSpriteStrips,
   isSecondSliceProductionReviewMode,
 } from './second-slice-production-review-runtime.ts';
+import { preloadThirdSliceProductionReviewBattlefields } from './third-slice-production-review-battlefields.ts';
+import {
+  getThirdSliceReviewSpriteStrips,
+  isThirdSliceProductionReviewMode,
+} from './third-slice-production-review-runtime.ts';
 import { getOwnedCharacterIds } from './save';
 import { addButton, addText, COLORS, drawBackdrop } from './scene-ui';
 import { isCompactMobileViewport } from './viewport';
@@ -53,6 +58,12 @@ export class BootScene extends Phaser.Scene {
       }
       preloadSecondSliceProductionReviewBattlefields(this);
       status.setText('Second-slice production review 자산 불러오는 중…');
+    } else if (isThirdSliceProductionReviewMode()) {
+      for (const strip of getThirdSliceReviewSpriteStrips()) {
+        if (!this.textures.exists(strip.key)) this.load.spritesheet(strip.key, strip.url, { frameWidth: strip.frameWidth, frameHeight: strip.frameHeight });
+      }
+      preloadThirdSliceProductionReviewBattlefields(this);
+      status.setText('Third-slice production review 자산 불러오는 중…');
     }
     this.load.on('progress', (value: number) => bar.displayWidth = Math.max(1, 512 * value));
     this.load.on('loaderror', (file: { key?: string }) => status.setText(`일부 자산 로드 실패 · 대체 표시 사용 예정 ${file.key ?? ''}`));
@@ -71,17 +82,13 @@ export class MainMenuScene extends Phaser.Scene {
     addText(this, compact ? 74 : 88, compact ? 132 : 165, APP_NAME, compact ? 22 : 24, '#9fb0c6');
     addText(this, compact ? 74 : 88, compact ? 188 : 230, compact ? '별난 영웅을 모아 전선을 밀어붙여라.' : '별난 영웅들을 모아 전선을 밀어붙여라.', compact ? 30 : 29, '#e8edf6');
     addText(this, compact ? 74 : 88, compact ? 238 : 272, compact ? '승리할수록 전선과 동료가 열린다.' : '첫 출정은 징집병 하나. 승리할수록 전선과 동료가 열린다.', compact ? 24 : 22, COLORS.muted);
-    if (isFirstSliceProductionReviewMode() || isSecondSliceProductionReviewMode()) {
-      addText(
-        this,
-        compact ? 74 : 88,
-        compact ? 300 : 318,
-        isSecondSliceProductionReviewMode()
+    if (isFirstSliceProductionReviewMode() || isSecondSliceProductionReviewMode() || isThirdSliceProductionReviewMode()) {
+      const reviewLabel = isThirdSliceProductionReviewMode()
+        ? 'THIRD SLICE PRODUCTION REVIEW · 미승인 후보 표시 중'
+        : isSecondSliceProductionReviewMode()
           ? 'SECOND SLICE PRODUCTION REVIEW · 미승인 후보 표시 중'
-          : 'PRODUCTION ART REVIEW · 미승인 후보 표시 중',
-        compact ? 22 : 18,
-        '#f6cf73',
-      );
+          : 'PRODUCTION ART REVIEW · 미승인 후보 표시 중';
+      addText(this, compact ? 74 : 88, compact ? 300 : 318, reviewLabel, compact ? 22 : 18, '#f6cf73');
     }
 
     this.add.rectangle(compact ? 1020 : 1040, compact ? 120 : 105, compact ? 390 : 320, compact ? 145 : 110, 0x222936, 0.96).setStrokeStyle(2, 0x556077);
