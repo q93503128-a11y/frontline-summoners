@@ -124,6 +124,9 @@ function activeUnitCount(host: ReviewHost): number {
 
 interface ReviewUnitView {
   readonly sprite: Phaser.GameObjects.Sprite;
+  readonly hpBg?: Phaser.GameObjects.Rectangle;
+  readonly hp?: Phaser.GameObjects.Rectangle;
+  readonly trait?: Phaser.GameObjects.Text;
 }
 
 interface ReviewHost {
@@ -136,6 +139,23 @@ interface ReviewHost {
 
 const INSTALL_MARKER = Symbol('first-slice-production-review-runtime');
 type InstallableScene = Phaser.Scene & ReviewHost & { [INSTALL_MARKER]?: boolean };
+
+function anchorReviewHealthBar(view: ReviewUnitView, family: RuntimeArtFamily, key: FirstSliceReviewFamilyKey): void {
+  const top = view.sprite.y - family.displayHeight * 0.5;
+  const hpY = Math.max(126, top - (key === 'enemy-boss' ? 13 : 9));
+  if (view.hpBg) {
+    view.hpBg.y = hpY;
+    view.hpBg.setDepth(key === 'enemy-boss' ? 8 : 5);
+  }
+  if (view.hp) {
+    view.hp.y = hpY;
+    view.hp.setDepth(key === 'enemy-boss' ? 9 : 6);
+  }
+  if (view.trait) {
+    view.trait.y = hpY - 22;
+    view.trait.setDepth(key === 'enemy-boss' ? 10 : 7);
+  }
+}
 
 export function installFirstSliceProductionReviewRuntime(scene: Phaser.Scene): void {
   if (!isFirstSliceProductionReviewMode()) return;
@@ -187,8 +207,9 @@ export function installFirstSliceProductionReviewRuntime(scene: Phaser.Scene): v
     originalSyncUnits.call(scene);
     const tick = host.state?.battle?.tick ?? 0;
     for (const unit of host.state?.battle?.units ?? []) {
-      const family = reviewFamilyForUnit(unit.definition.id);
-      if (!family) continue;
+      const key = reviewKeyForUnit(unit.definition.id);
+      const family = key ? REVIEW_FAMILIES[key] : undefined;
+      if (!family || !key) continue;
       const view = host.views.get(unit.simulationId);
       if (!view?.sprite?.active) continue;
       const motion = selectRuntimeMotionStrip(family, unit.state);
@@ -197,6 +218,7 @@ export function installFirstSliceProductionReviewRuntime(scene: Phaser.Scene): v
       if (frame >= 0 && frame < motion.frames) view.sprite.setFrame(frame);
       view.sprite.setScale(family.displayHeight / motion.frameHeight);
       view.sprite.clearTint();
+      anchorReviewHealthBar(view, family, key);
     }
   };
 }
@@ -212,12 +234,13 @@ export function renderFirstSliceProductionReviewLayer(scene: Phaser.Scene): void
     scene.add.image(640, 360, FIRST_SLICE_REVIEW_MEADOW_KEY).setDisplaySize(1280, 720).setDepth(0);
   }
 
-  scene.add.rectangle(640, 24, 760, 38, 0x17120d, 0.9).setStrokeStyle(2, 0xf0c967, 0.9).setDepth(190);
-  scene.add.text(430, 24, 'PRODUCTION ART REVIEW · UNAPPROVED', {
+  const reviewBarY = 126;
+  scene.add.rectangle(640, reviewBarY, 760, 38, 0x17120d, 0.88).setStrokeStyle(2, 0xf0c967, 0.86).setDepth(190);
+  scene.add.text(430, reviewBarY, 'PRODUCTION ART REVIEW · UNAPPROVED', {
     fontFamily: '"Malgun Gothic", sans-serif', fontSize: '17px', color: '#ffe39a',
   }).setOrigin(0.5).setDepth(191);
 
-  const current = scene.add.text(700, 24, `MILITIA ${formLabel(forcedMilitiaReviewForm)}`, {
+  const current = scene.add.text(700, reviewBarY, `MILITIA ${formLabel(forcedMilitiaReviewForm)}`, {
     fontFamily: '"Malgun Gothic", sans-serif', fontSize: '14px', color: '#c9d8ea',
   }).setOrigin(0.5).setDepth(191);
 
@@ -225,7 +248,7 @@ export function renderFirstSliceProductionReviewLayer(scene: Phaser.Scene): void
     ['AUTO', undefined], ['F1', 'militia_f1'], ['F2', 'militia_f2'], ['F3', 'militia_f3'],
   ];
   choices.forEach(([label, value], index) => {
-    const button = scene.add.text(810 + index * 58, 24, label, {
+    const button = scene.add.text(810 + index * 58, reviewBarY, label, {
       fontFamily: '"Malgun Gothic", sans-serif', fontSize: '14px', color: '#fff1b6',
       backgroundColor: '#3b3120', padding: { x: 7, y: 3 },
     }).setOrigin(0.5).setDepth(192).setInteractive({ useHandCursor: true });
