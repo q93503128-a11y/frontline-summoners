@@ -318,28 +318,28 @@
       "motions": {
         "idle": {
           "frames": 6,
-          "bytes": 10697,
-          "sha256": "ec50c43fc6184e6a3e5dbefdae492b4f5e6be04d0bab668a3ce865602508f777"
+          "bytes": 11221,
+          "sha256": "8939772c6ac18a420f02b269aa721e69cdee9f2ab586cd42326fbfe85bacb4f6"
         },
         "move": {
           "frames": 8,
-          "bytes": 13892,
-          "sha256": "832fa137d329c5c9214c397e6c813000ae06140ae903d1f0f684b7ef27ad61f4"
+          "bytes": 15432,
+          "sha256": "cb4beefa86a45f60eebcf251ea99b7448b0cd803003b67e50f125cfb43ca1f32"
         },
         "attack": {
           "frames": 7,
-          "bytes": 13225,
-          "sha256": "371fda05c07d13a86c4089c08f0fc457ea1d43d668781e3550d35ea53ace0ae3"
+          "bytes": 13792,
+          "sha256": "ae10d7a14dc79daea782fd3ffc82c5446ffcd5f2f284feeae6f5f50b4abcf2c4"
         },
         "knockback": {
           "frames": 4,
-          "bytes": 9515,
-          "sha256": "d6ecded181271c9e3355b068f0c59d232ae6fba3342feac9b55f9a0c39850af1"
+          "bytes": 10135,
+          "sha256": "28a617a4b2c83bf2c7e25641cd6180ef3a91d6675972531593db4a36cffcb418"
         },
         "death": {
           "frames": 6,
-          "bytes": 19848,
-          "sha256": "87beb05315d8e707cd0ae4c5571ab86b58780c3d5cab052d8274223002699631"
+          "bytes": 20513,
+          "sha256": "85bf42a4c1dcc51eb815e2c450bf1e56bba9af8199b3dab9cce3001b31380b06"
         }
       },
       "visualPolish": {
@@ -351,6 +351,11 @@
       "visualPolishPriority03": {
         "version": 1,
         "kind": "WATCH_EVOLUTION_SEPARATION_AND_ATTACK_READABILITY",
+        "reviewStatus": "UNREVIEWED_RUNTIME_FILES"
+      },
+      "visualPolishPriority04": {
+        "version": 1,
+        "kind": "FINAL_EVOLUTION_WATCHLIST_DIFFERENTIATION",
         "reviewStatus": "UNREVIEWED_RUNTIME_FILES"
       }
     },
@@ -1242,28 +1247,28 @@
       "motions": {
         "idle": {
           "frames": 7,
-          "bytes": 7579,
-          "sha256": "40422ab96b91c42947de022ed6c63dea678c822569d5b6fa721b68e6d4c95c37"
+          "bytes": 8598,
+          "sha256": "688c4c83aa027a070ff88e657689f0768bb843ec41eed4d7bad3bf8564d51a66"
         },
         "move": {
           "frames": 8,
-          "bytes": 9092,
-          "sha256": "eb54f73fbd56f09aa2f06c336649eb317cec65e2f5a39c011d86a9b5a0b4297c"
+          "bytes": 10535,
+          "sha256": "f980b4d1f838b962b22af46a93ae566f2b2b3d0c0348bd69bb65a39930ef52a9"
         },
         "attack": {
           "frames": 7,
-          "bytes": 9431,
-          "sha256": "7ec4ca2f1ec6cb34ede34b708da996a53fa087ffacf4e9ee7d6c8a48ea5b1fad"
+          "bytes": 10618,
+          "sha256": "f01d2eafe38555c5dc512d25dca1e430c077a9b90854f867fce5ac5bdc25e1da"
         },
         "knockback": {
           "frames": 4,
-          "bytes": 6652,
-          "sha256": "eb008dbfd300d382948ca5b290457526e961452142734973064c1593cd501571"
+          "bytes": 7476,
+          "sha256": "2171b3742fb4d7058e1b19f5372b665ced010c4ff1b135d5a9b1491692f34361"
         },
         "death": {
           "frames": 7,
-          "bytes": 14917,
-          "sha256": "b247cacab078fd70d0ec634d107297ca9e97eb688969141e056a8e876ef5974c"
+          "bytes": 15194,
+          "sha256": "03cee4000d54ca5f997d533d409c49540ffc288b4730d2b642aacb22c55342d6"
         }
       },
       "visualPolish": {
@@ -1275,6 +1280,11 @@
       "visualPolishPriority03": {
         "version": 1,
         "kind": "WATCH_EVOLUTION_SEPARATION_AND_ATTACK_READABILITY",
+        "reviewStatus": "UNREVIEWED_RUNTIME_FILES"
+      },
+      "visualPolishPriority04": {
+        "version": 1,
+        "kind": "FINAL_EVOLUTION_WATCHLIST_DIFFERENTIATION",
         "reviewStatus": "UNREVIEWED_RUNTIME_FILES"
       }
     },
@@ -1299,28 +1309,28 @@
       "motions": {
         "idle": {
           "frames": 7,
-          "bytes": 11623,
-          "sha256": "fbf961ad6728cf2585f832c93d9b10524f640870dc7b528be8960ce6140f1c07"
+          "bytes": 12638,
+          "sha256": "439d977e2cf6c5eb990c067b4ce767a1323f8cf2a772eaf699a5e29b555729c4"
         },
         "move": {
           "frames": 8,
-          "bytes": 13847,
-          "sha256": "22182ba9c93363a29012384d718e693b55859dc55bb6dd4b6ad6982dbfd9990b"
+          "bytes": 15305,
+          "sha256": "e7b2affef657499abd31e83f623a3089ea5f13071fdd37c9080659631d1bc604"
         },
         "attack": {
           "frames": 8,
-          "bytes": 14467,
-          "sha256": "7af4ab65f7df5e0ce8099826c98b73b574259678dd936d6f3ad76352ed3e8083"
+          "bytes": 15263,
+          "sha256": "8b5960164600916a6cde006908d5af434a4f92a3d22970badd1232b8a23931de"
         },
         "knockback": {
           "frames": 4,
-          "bytes": 9522,
-          "sha256": "cd12787a642a3200beaee4c07383983028005085d6c62ee846534a30cecb68a0"
+          "bytes": 10263,
+          "sha256": "c9b5fa039cf8aa6e567d51feb7f885f0ac12152d7be9671c3ff529e552b32f47"
         },
         "death": {
           "frames": 7,
-          "bytes": 21291,
-          "sha256": "f7c18d9d84945b26c83ffbbcec03605546f446686c2feb462a0cb3002e504e47"
+          "bytes": 22330,
+          "sha256": "faeb10ff83447b32daf7353a6d12c77c5354ba845444e22f76055b7a8994b8d0"
         }
       },
       "visualPolish": {
@@ -1332,6 +1342,11 @@
       "visualPolishPriority03": {
         "version": 1,
         "kind": "WATCH_EVOLUTION_SEPARATION_AND_ATTACK_READABILITY",
+        "reviewStatus": "UNREVIEWED_RUNTIME_FILES"
+      },
+      "visualPolishPriority04": {
+        "version": 1,
+        "kind": "FINAL_EVOLUTION_WATCHLIST_DIFFERENTIATION",
         "reviewStatus": "UNREVIEWED_RUNTIME_FILES"
       }
     },
@@ -1413,28 +1428,28 @@
       "motions": {
         "idle": {
           "frames": 7,
-          "bytes": 9432,
-          "sha256": "e496ad87ee007a72d5ac66185a4fe9c92bb321cfd2f9f8d401f980da2838a1a9"
+          "bytes": 12304,
+          "sha256": "fb7fe614c868f01ddc112673634daefdffd8273f9841151c55c3be006310d355"
         },
         "move": {
           "frames": 8,
-          "bytes": 11320,
-          "sha256": "7b036af23370b4239787f8f7ab71d0f4a1caf9320fe2a08249fbcd514c181da8"
+          "bytes": 14807,
+          "sha256": "99e5ee237ab9413f079cbbdca1396e7e830ac9d35422d99693b66018a5635f76"
         },
         "attack": {
           "frames": 7,
-          "bytes": 10735,
-          "sha256": "72595d0bb4f6ecea21988e8188493ff491edd051fb62e96983616de05f7aac10"
+          "bytes": 13693,
+          "sha256": "ece296ab951c18bff29f5b1c0afa805341774f1b62dd0bf98d8f1f91983af5a7"
         },
         "knockback": {
           "frames": 4,
-          "bytes": 8186,
-          "sha256": "978949f27300b63ffcd2412519457feec03fe0da830e83648aa03c09d9d1d025"
+          "bytes": 10513,
+          "sha256": "aad7cca1b69bb2a380a27907fd708546a85061e38db3dbe112210f513ce51d81"
         },
         "death": {
           "frames": 7,
-          "bytes": 19223,
-          "sha256": "55b70ce28d4c29883b4cac562c1ff8f4c52134231ad54c9b7093e32a2afeb081"
+          "bytes": 22427,
+          "sha256": "e1726c82c73443b59c7598e34ce0a431f6586b5e00de71fa09e67364bbe2c6bd"
         }
       },
       "visualPolish": {
@@ -1446,6 +1461,11 @@
       "visualPolishPriority03": {
         "version": 1,
         "kind": "WATCH_EVOLUTION_SEPARATION_AND_ATTACK_READABILITY",
+        "reviewStatus": "UNREVIEWED_RUNTIME_FILES"
+      },
+      "visualPolishPriority04": {
+        "version": 1,
+        "kind": "FINAL_EVOLUTION_WATCHLIST_DIFFERENTIATION",
         "reviewStatus": "UNREVIEWED_RUNTIME_FILES"
       }
     },
@@ -1755,28 +1775,28 @@
       "motions": {
         "idle": {
           "frames": 7,
-          "bytes": 8959,
-          "sha256": "7358b4ee48ee73f15f970c7246dd92b31ed04e2a89d7f7bcdc44b9dba5010cf4"
+          "bytes": 10774,
+          "sha256": "5aa7ec4984c8dc0a2848d0f2d022884e6d482b1734e998727d8f253f13592aca"
         },
         "move": {
           "frames": 8,
-          "bytes": 10685,
-          "sha256": "38e0045b90352941be8784629f3538e44b0ba627c000f2c36af21181e867bb86"
+          "bytes": 13029,
+          "sha256": "89f8cb9b316e43d635cf3e36bae2130142046465dcb6e8bda8a6470ef55e5de8"
         },
         "attack": {
           "frames": 8,
-          "bytes": 12224,
-          "sha256": "d930cdeb9e26504b860cf262eaa06f0c42fc61e812b0241c439a0dd6ecf57630"
+          "bytes": 15385,
+          "sha256": "1cc5e26cfc553d0c50aa69471eab1a9ea3c2b815995508533922a9501bcb9095"
         },
         "knockback": {
           "frames": 4,
-          "bytes": 7822,
-          "sha256": "b5007ef7673c8bbce695e1c95e1df8096afdd5bddac6b6d86786a48180776c48"
+          "bytes": 10777,
+          "sha256": "f95469e126f39319c25ade0f1d750bf5ba1d8a09b85c9f22cf8631fe145c8637"
         },
         "death": {
           "frames": 7,
-          "bytes": 16230,
-          "sha256": "06844328fff806f1c839cdaffb9e36d70b22d1f3ec3080aa18b4477e1ce465ed"
+          "bytes": 19831,
+          "sha256": "34b66b42514544b7923d2177ce3b1ab278052533f071f221a699c41c44fa7ac6"
         }
       },
       "visualPolish": {
@@ -1788,6 +1808,11 @@
       "visualPolishPriority03": {
         "version": 1,
         "kind": "WATCH_EVOLUTION_SEPARATION_AND_ATTACK_READABILITY",
+        "reviewStatus": "UNREVIEWED_RUNTIME_FILES"
+      },
+      "visualPolishPriority04": {
+        "version": 1,
+        "kind": "FINAL_EVOLUTION_WATCHLIST_DIFFERENTIATION",
         "reviewStatus": "UNREVIEWED_RUNTIME_FILES"
       }
     },
@@ -4436,28 +4461,28 @@
       "motions": {
         "idle": {
           "frames": 8,
-          "bytes": 15025,
-          "sha256": "482ae45ab97db09eabd1076808d180c37459c664cecfb181b5365ee15bac5bf0"
+          "bytes": 15962,
+          "sha256": "cd43c83693a0daa5d58d546f094c913bab9e6024d3a20953dd45f0e4fd7a01c8"
         },
         "move": {
           "frames": 8,
-          "bytes": 16515,
-          "sha256": "db0191256c28ba361c5ab28ad8d62c14806e9bd18ba3940699a88d04bdac8cad"
+          "bytes": 17910,
+          "sha256": "97550247e0c5aa59b2ee920aef69edaf43ac0e88ccf31840b12ebb507072c941"
         },
         "attack": {
           "frames": 11,
-          "bytes": 20988,
-          "sha256": "210ee899a2493e4abdf01d34dd75f5d7a884cc348ab7dd06a510d81fd777ab1b"
+          "bytes": 23766,
+          "sha256": "28c36dd7c909c3a13c5931640cefaf8f39af3c64343c6243228aa7f16d20cf1e"
         },
         "knockback": {
           "frames": 4,
-          "bytes": 11541,
-          "sha256": "8306f5efd3d32fc0df362677882df695cbab2e5045372d106444f413d20e9c09"
+          "bytes": 12291,
+          "sha256": "c893a1ae1881ed0bcb0dfd9787d90cc9c053e5a99d02b5841ea2b10839a201c1"
         },
         "death": {
           "frames": 9,
-          "bytes": 33190,
-          "sha256": "6e8c71c51d932d9d2c540f5936a121f78b87d259b098b953f4f8280eea72e868"
+          "bytes": 33652,
+          "sha256": "3ea27b8af0670e38eb0e3c074b5dba93bc1774bb9a73e8ffd8c11bcfeded7a41"
         }
       },
       "visualPolish": {
@@ -4474,6 +4499,11 @@
       "visualPolishPriority03": {
         "version": 1,
         "kind": "WATCH_EVOLUTION_SEPARATION_AND_ATTACK_READABILITY",
+        "reviewStatus": "UNREVIEWED_RUNTIME_FILES"
+      },
+      "visualPolishPriority04": {
+        "version": 1,
+        "kind": "FINAL_EVOLUTION_WATCHLIST_DIFFERENTIATION",
         "reviewStatus": "UNREVIEWED_RUNTIME_FILES"
       }
     },
@@ -4959,28 +4989,28 @@
       "motions": {
         "idle": {
           "frames": 8,
-          "bytes": 10068,
-          "sha256": "ebe92a7d7ff6e801ea3245d60f8d2a6761a2ca650067d50566719d756ff08292"
+          "bytes": 12512,
+          "sha256": "67c4dde8d1b682820aa65ceeff5129feb46f1f6f8f042ee3d48f4123c011e657"
         },
         "move": {
           "frames": 8,
-          "bytes": 11267,
-          "sha256": "846aebd8ae4e5976add2c24f587290d1773bbccce0a5686038a0babb7880f43f"
+          "bytes": 13904,
+          "sha256": "4ceca757cbdeec3b0c88bbed9c25d1b4b89661e8f04caf526c0760bdb9ecabeb"
         },
         "attack": {
           "frames": 9,
-          "bytes": 12762,
-          "sha256": "a1a04e3f538030fc921b5c19c7e723f0f61dbd6e7117f736d03a443a946084c8"
+          "bytes": 15420,
+          "sha256": "0dc2c27894d44a9e2ba524bd9f9843d9dea05be9b1e25d470e284c87bab72c64"
         },
         "knockback": {
           "frames": 4,
-          "bytes": 8991,
-          "sha256": "7477fe82699a4dbb19420c3506018d4f580ef15b3967d0a5fb14312c8ceb9d91"
+          "bytes": 10491,
+          "sha256": "fba79beda2467f3e3864e65f4f8ec4aed770a2b14f9d9b6c6103b3501408ae10"
         },
         "death": {
           "frames": 8,
-          "bytes": 22730,
-          "sha256": "689c599b774442909c6646d8b3d0776d82b442bb223a811d805cfb3296b99e48"
+          "bytes": 25393,
+          "sha256": "a05ac879e837c4e54ab104135b0a8c7c82c9bd762867c099f1b9adfd626d8cdc"
         }
       },
       "visualPolish": {
@@ -4992,6 +5022,11 @@
       "visualPolishPriority03": {
         "version": 1,
         "kind": "WATCH_EVOLUTION_SEPARATION_AND_ATTACK_READABILITY",
+        "reviewStatus": "UNREVIEWED_RUNTIME_FILES"
+      },
+      "visualPolishPriority04": {
+        "version": 1,
+        "kind": "FINAL_EVOLUTION_WATCHLIST_DIFFERENTIATION",
         "reviewStatus": "UNREVIEWED_RUNTIME_FILES"
       }
     },
@@ -5584,6 +5619,13 @@
     "version": 1,
     "targetRoots": 18,
     "touchedForms": 54,
+    "humanReview": "PENDING",
+    "normalRuntimeAuthoritative": false
+  },
+  "visualPolishPriority04": {
+    "version": 1,
+    "targetRoots": 6,
+    "touchedForms": 7,
     "humanReview": "PENDING",
     "normalRuntimeAuthoritative": false
   }

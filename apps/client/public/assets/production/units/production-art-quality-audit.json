@@ -25,12 +25,12 @@
       "move",
       "attack"
     ],
-    "severe": 1,
-    "atRisk": 2,
-    "healthy": 231,
+    "severe": 0,
+    "atRisk": 1,
+    "healthy": 233,
     "recruitmentEvolutionGroups": 33,
     "weakEvolution": 0,
-    "watchEvolution": 6,
+    "watchEvolution": 0,
     "clippingRisk": 0
   },
   "topPriorities": [
@@ -41,10 +41,9 @@
       "unitId": "boss_sp_gold_carrier",
       "formId": null,
       "formOrder": null,
-      "score": 49,
+      "score": 67,
       "reasons": [
-        "weak-move:0.0174",
-        "weak-attack:0.0275",
+        "weak-attack:0.0406",
         "high-similarity:0.9011"
       ],
       "nearestOther": {
@@ -68,129 +67,23 @@
           "frames": 8,
           "frameWidth": 400,
           "frameHeight": 330,
-          "occupancy": 0.2767,
-          "widthCoverage": 0.665,
-          "heightCoverage": 0.5,
+          "occupancy": 0.3246,
+          "widthCoverage": 0.7913,
+          "heightCoverage": 0.6212,
           "maxEdgeRatio": 0,
-          "avgDelta": 0.0174,
-          "maxDelta": 0.0174
+          "avgDelta": 0.2679,
+          "maxDelta": 0.2703
         },
         "attack": {
           "frames": 10,
           "frameWidth": 400,
           "frameHeight": 330,
-          "occupancy": 0.2848,
-          "widthCoverage": 0.7325,
-          "heightCoverage": 0.5,
-          "maxEdgeRatio": 0,
-          "avgDelta": 0.0083,
-          "maxDelta": 0.0275
-        }
-      }
-    },
-    {
-      "metadataFile": "special-content-runtime-metadata.json",
-      "targetKey": "enemy_sp_evo_mirror_seal",
-      "assetId": "unit:enemy_sp_evo_mirror_seal",
-      "unitId": "enemy_sp_evo_mirror_seal",
-      "formId": null,
-      "formOrder": null,
-      "score": 58,
-      "reasons": [
-        "weak-move:0.0113",
-        "weak-attack:0.0239"
-      ],
-      "nearestOther": {
-        "targetKey": "enemy_ch2_bonewheel",
-        "rootUnitId": "enemy_ch2_bonewheel",
-        "similarity": 0.8668
-      },
-      "motions": {
-        "idle": {
-          "frames": 7,
-          "frameWidth": 280,
-          "frameHeight": 250,
-          "occupancy": 0.3957,
-          "widthCoverage": 0.7536,
-          "heightCoverage": 0.7411,
-          "maxEdgeRatio": 0,
-          "avgDelta": 0.0028,
-          "maxDelta": 0.0044
-        },
-        "move": {
-          "frames": 8,
-          "frameWidth": 280,
-          "frameHeight": 250,
-          "occupancy": 0.396,
-          "widthCoverage": 0.7536,
-          "heightCoverage": 0.7425,
-          "maxEdgeRatio": 0,
-          "avgDelta": 0.0113,
-          "maxDelta": 0.0123
-        },
-        "attack": {
-          "frames": 8,
-          "frameWidth": 280,
-          "frameHeight": 250,
-          "occupancy": 0.3972,
-          "widthCoverage": 0.7839,
-          "heightCoverage": 0.7425,
-          "maxEdgeRatio": 0,
-          "avgDelta": 0.0068,
-          "maxDelta": 0.0239
-        }
-      }
-    },
-    {
-      "metadataFile": "special-content-runtime-metadata.json",
-      "targetKey": "enemy_sp_gold_vault_golem",
-      "assetId": "unit:enemy_sp_gold_vault_golem",
-      "unitId": "enemy_sp_gold_vault_golem",
-      "formId": null,
-      "formOrder": null,
-      "score": 58,
-      "reasons": [
-        "weak-move:0.0022",
-        "weak-attack:0.0273"
-      ],
-      "nearestOther": {
-        "targetKey": "enemy_ch2_bonewheel",
-        "rootUnitId": "enemy_ch2_bonewheel",
-        "similarity": 0.8388
-      },
-      "motions": {
-        "idle": {
-          "frames": 7,
-          "frameWidth": 310,
-          "frameHeight": 290,
-          "occupancy": 0.4879,
-          "widthCoverage": 0.8742,
-          "heightCoverage": 0.7256,
-          "maxEdgeRatio": 0,
-          "avgDelta": 0.0016,
-          "maxDelta": 0.0025
-        },
-        "move": {
-          "frames": 8,
-          "frameWidth": 310,
-          "frameHeight": 290,
-          "occupancy": 0.4882,
-          "widthCoverage": 0.8742,
-          "heightCoverage": 0.7276,
-          "maxEdgeRatio": 0,
-          "avgDelta": 0.0022,
-          "maxDelta": 0.0022
-        },
-        "attack": {
-          "frames": 8,
-          "frameWidth": 310,
-          "frameHeight": 290,
-          "occupancy": 0.4882,
-          "widthCoverage": 0.8742,
-          "heightCoverage": 0.7276,
-          "maxEdgeRatio": 0,
-          "avgDelta": 0.0078,
-          "maxDelta": 0.0273
+          "occupancy": 0.3279,
+          "widthCoverage": 0.876,
+          "heightCoverage": 0.5703,
+          "maxEdgeRatio": 0.0034,
+          "avgDelta": 0.027,
+          "maxDelta": 0.0406
         }
       }
     },
@@ -295,6 +188,58 @@
           "maxEdgeRatio": 0,
           "avgDelta": 0.0212,
           "maxDelta": 0.0306
+        }
+      }
+    },
+    {
+      "metadataFile": "special-content-runtime-metadata.json",
+      "targetKey": "enemy_sp_gold_vault_golem",
+      "assetId": "unit:enemy_sp_gold_vault_golem",
+      "unitId": "enemy_sp_gold_vault_golem",
+      "formId": null,
+      "formOrder": null,
+      "score": 76,
+      "reasons": [
+        "weak-attack:0.0379"
+      ],
+      "nearestOther": {
+        "targetKey": "enemy_ch2_bonewheel",
+        "rootUnitId": "enemy_ch2_bonewheel",
+        "similarity": 0.8388
+      },
+      "motions": {
+        "idle": {
+          "frames": 7,
+          "frameWidth": 310,
+          "frameHeight": 290,
+          "occupancy": 0.4879,
+          "widthCoverage": 0.8742,
+          "heightCoverage": 0.7256,
+          "maxEdgeRatio": 0,
+          "avgDelta": 0.0016,
+          "maxDelta": 0.0025
+        },
+        "move": {
+          "frames": 8,
+          "frameWidth": 310,
+          "frameHeight": 290,
+          "occupancy": 0.5347,
+          "widthCoverage": 0.9371,
+          "heightCoverage": 0.7474,
+          "maxEdgeRatio": 0.0023,
+          "avgDelta": 0.161,
+          "maxDelta": 0.1639
+        },
+        "attack": {
+          "frames": 8,
+          "frameWidth": 310,
+          "frameHeight": 290,
+          "occupancy": 0.515,
+          "widthCoverage": 0.9492,
+          "heightCoverage": 0.7276,
+          "maxEdgeRatio": 0.004,
+          "avgDelta": 0.0221,
+          "maxDelta": 0.0379
         }
       }
     },
@@ -563,218 +508,6 @@
       }
     },
     {
-      "metadataFile": "recruitment-form-runtime-metadata.json",
-      "targetKey": "char_common_a_glass_keeper_f3",
-      "assetId": "unit:char_common_a_glass_keeper:char_common_a_glass_keeper_f3",
-      "unitId": "char_common_a_glass_keeper",
-      "formId": "char_common_a_glass_keeper_f3",
-      "formOrder": 3,
-      "score": 82,
-      "reasons": [
-        "low-attack:0.0262",
-        "weak-evolution-separation:0.8275"
-      ],
-      "nearestOther": {
-        "targetKey": "char_common_a_mirror_guide_f3",
-        "rootUnitId": "char_common_a_mirror_guide",
-        "similarity": 0.7434
-      },
-      "motions": {
-        "idle": {
-          "frames": 7,
-          "frameWidth": 267,
-          "frameHeight": 244,
-          "occupancy": 0.348,
-          "widthCoverage": 0.9925,
-          "heightCoverage": 0.8214,
-          "maxEdgeRatio": 0.0002,
-          "avgDelta": 0.0336,
-          "maxDelta": 0.0502
-        },
-        "move": {
-          "frames": 8,
-          "frameWidth": 267,
-          "frameHeight": 244,
-          "occupancy": 0.3481,
-          "widthCoverage": 0.9925,
-          "heightCoverage": 0.8094,
-          "maxEdgeRatio": 0.0002,
-          "avgDelta": 0.1928,
-          "maxDelta": 0.1935
-        },
-        "attack": {
-          "frames": 9,
-          "frameWidth": 267,
-          "frameHeight": 244,
-          "occupancy": 0.3559,
-          "widthCoverage": 0.9925,
-          "heightCoverage": 0.7992,
-          "maxEdgeRatio": 0.0021,
-          "avgDelta": 0.0262,
-          "maxDelta": 0.0757
-        }
-      }
-    },
-    {
-      "metadataFile": "recruitment-form-runtime-metadata.json",
-      "targetKey": "char_common_b_moss_golem_f3",
-      "assetId": "unit:char_common_b_moss_golem:char_common_b_moss_golem_f3",
-      "unitId": "char_common_b_moss_golem",
-      "formId": "char_common_b_moss_golem_f3",
-      "formOrder": 3,
-      "score": 82,
-      "reasons": [
-        "low-attack:0.0345",
-        "weak-evolution-separation:0.8504"
-      ],
-      "nearestOther": {
-        "targetKey": "char_common_a_meteor_cart_f3",
-        "rootUnitId": "char_common_a_meteor_cart",
-        "similarity": 0.806
-      },
-      "motions": {
-        "idle": {
-          "frames": 7,
-          "frameWidth": 292,
-          "frameHeight": 274,
-          "occupancy": 0.2658,
-          "widthCoverage": 0.8596,
-          "heightCoverage": 0.7862,
-          "maxEdgeRatio": 0,
-          "avgDelta": 0.0328,
-          "maxDelta": 0.049
-        },
-        "move": {
-          "frames": 8,
-          "frameWidth": 292,
-          "frameHeight": 274,
-          "occupancy": 0.2658,
-          "widthCoverage": 0.8596,
-          "heightCoverage": 0.7755,
-          "maxEdgeRatio": 0,
-          "avgDelta": 0.2013,
-          "maxDelta": 0.202
-        },
-        "attack": {
-          "frames": 8,
-          "frameWidth": 292,
-          "frameHeight": 274,
-          "occupancy": 0.2731,
-          "widthCoverage": 0.8682,
-          "heightCoverage": 0.7664,
-          "maxEdgeRatio": 0,
-          "avgDelta": 0.0345,
-          "maxDelta": 0.0887
-        }
-      }
-    },
-    {
-      "metadataFile": "recruitment-form-runtime-metadata.json",
-      "targetKey": "char_s02_gormu_f2",
-      "assetId": "unit:char_s02_gormu:char_s02_gormu_f2",
-      "unitId": "char_s02_gormu",
-      "formId": "char_s02_gormu_f2",
-      "formOrder": 2,
-      "score": 82,
-      "reasons": [
-        "low-attack:0.0305",
-        "weak-evolution-separation:0.85"
-      ],
-      "nearestOther": {
-        "targetKey": "char_s02_barga_f3",
-        "rootUnitId": "char_s02_barga",
-        "similarity": 0.7189
-      },
-      "motions": {
-        "idle": {
-          "frames": 8,
-          "frameWidth": 383,
-          "frameHeight": 331,
-          "occupancy": 0.1783,
-          "widthCoverage": 0.812,
-          "heightCoverage": 0.744,
-          "maxEdgeRatio": 0,
-          "avgDelta": 0.0341,
-          "maxDelta": 0.0478
-        },
-        "move": {
-          "frames": 8,
-          "frameWidth": 383,
-          "frameHeight": 331,
-          "occupancy": 0.1783,
-          "widthCoverage": 0.812,
-          "heightCoverage": 0.7356,
-          "maxEdgeRatio": 0,
-          "avgDelta": 0.1767,
-          "maxDelta": 0.1767
-        },
-        "attack": {
-          "frames": 11,
-          "frameWidth": 383,
-          "frameHeight": 331,
-          "occupancy": 0.182,
-          "widthCoverage": 0.8395,
-          "heightCoverage": 0.7281,
-          "maxEdgeRatio": 0,
-          "avgDelta": 0.0305,
-          "maxDelta": 0.1333
-        }
-      }
-    },
-    {
-      "metadataFile": "recruitment-form-runtime-metadata.json",
-      "targetKey": "char_s02_gormu_f3",
-      "assetId": "unit:char_s02_gormu:char_s02_gormu_f3",
-      "unitId": "char_s02_gormu",
-      "formId": "char_s02_gormu_f3",
-      "formOrder": 3,
-      "score": 82,
-      "reasons": [
-        "low-attack:0.033",
-        "weak-evolution-separation:0.85"
-      ],
-      "nearestOther": {
-        "targetKey": "char_s02_mogu_f3",
-        "rootUnitId": "char_s02_mogu",
-        "similarity": 0.7347
-      },
-      "motions": {
-        "idle": {
-          "frames": 8,
-          "frameWidth": 387,
-          "frameHeight": 334,
-          "occupancy": 0.2154,
-          "widthCoverage": 0.8217,
-          "heightCoverage": 0.7403,
-          "maxEdgeRatio": 0,
-          "avgDelta": 0.0311,
-          "maxDelta": 0.0432
-        },
-        "move": {
-          "frames": 8,
-          "frameWidth": 387,
-          "frameHeight": 334,
-          "occupancy": 0.2155,
-          "widthCoverage": 0.8217,
-          "heightCoverage": 0.732,
-          "maxEdgeRatio": 0,
-          "avgDelta": 0.1762,
-          "maxDelta": 0.1792
-        },
-        "attack": {
-          "frames": 12,
-          "frameWidth": 387,
-          "frameHeight": 334,
-          "occupancy": 0.2229,
-          "widthCoverage": 0.8488,
-          "heightCoverage": 0.7246,
-          "maxEdgeRatio": 0,
-          "avgDelta": 0.033,
-          "maxDelta": 0.1068
-        }
-      }
-    },
-    {
       "metadataFile": "special-content-runtime-metadata.json",
       "targetKey": "boss_sp_unobservable",
       "assetId": "unit:boss_sp_unobservable",
@@ -875,6 +608,110 @@
           "maxEdgeRatio": 0,
           "avgDelta": 0.0178,
           "maxDelta": 0.0834
+        }
+      }
+    },
+    {
+      "metadataFile": "recruitment-form-runtime-metadata.json",
+      "targetKey": "char_common_a_glass_keeper_f2",
+      "assetId": "unit:char_common_a_glass_keeper:char_common_a_glass_keeper_f2",
+      "unitId": "char_common_a_glass_keeper",
+      "formId": "char_common_a_glass_keeper_f2",
+      "formOrder": 2,
+      "score": 90,
+      "reasons": [
+        "low-attack:0.0332"
+      ],
+      "nearestOther": {
+        "targetKey": "char_s03_rxomega_f2",
+        "rootUnitId": "char_s03_rxomega",
+        "similarity": 0.6861
+      },
+      "motions": {
+        "idle": {
+          "frames": 7,
+          "frameWidth": 263,
+          "frameHeight": 241,
+          "occupancy": 0.3285,
+          "widthCoverage": 0.9924,
+          "heightCoverage": 0.8358,
+          "maxEdgeRatio": 0.0007,
+          "avgDelta": 0.0228,
+          "maxDelta": 0.0342
+        },
+        "move": {
+          "frames": 8,
+          "frameWidth": 263,
+          "frameHeight": 241,
+          "occupancy": 0.329,
+          "widthCoverage": 0.9924,
+          "heightCoverage": 0.8361,
+          "maxEdgeRatio": 0.0007,
+          "avgDelta": 0.139,
+          "maxDelta": 0.139
+        },
+        "attack": {
+          "frames": 8,
+          "frameWidth": 263,
+          "frameHeight": 241,
+          "occupancy": 0.3586,
+          "widthCoverage": 0.9924,
+          "heightCoverage": 0.8382,
+          "maxEdgeRatio": 0.0022,
+          "avgDelta": 0.0332,
+          "maxDelta": 0.0803
+        }
+      }
+    },
+    {
+      "metadataFile": "recruitment-form-runtime-metadata.json",
+      "targetKey": "char_common_a_glass_keeper_f3",
+      "assetId": "unit:char_common_a_glass_keeper:char_common_a_glass_keeper_f3",
+      "unitId": "char_common_a_glass_keeper",
+      "formId": "char_common_a_glass_keeper_f3",
+      "formOrder": 3,
+      "score": 90,
+      "reasons": [
+        "low-attack:0.0262"
+      ],
+      "nearestOther": {
+        "targetKey": "char_common_a_mirror_guide_f3",
+        "rootUnitId": "char_common_a_mirror_guide",
+        "similarity": 0.7434
+      },
+      "motions": {
+        "idle": {
+          "frames": 7,
+          "frameWidth": 267,
+          "frameHeight": 244,
+          "occupancy": 0.348,
+          "widthCoverage": 0.9925,
+          "heightCoverage": 0.8214,
+          "maxEdgeRatio": 0.0002,
+          "avgDelta": 0.0336,
+          "maxDelta": 0.0502
+        },
+        "move": {
+          "frames": 8,
+          "frameWidth": 267,
+          "frameHeight": 244,
+          "occupancy": 0.3481,
+          "widthCoverage": 0.9925,
+          "heightCoverage": 0.8094,
+          "maxEdgeRatio": 0.0002,
+          "avgDelta": 0.1928,
+          "maxDelta": 0.1935
+        },
+        "attack": {
+          "frames": 9,
+          "frameWidth": 267,
+          "frameHeight": 244,
+          "occupancy": 0.3559,
+          "widthCoverage": 0.9925,
+          "heightCoverage": 0.7992,
+          "maxEdgeRatio": 0.0021,
+          "avgDelta": 0.0262,
+          "maxDelta": 0.0757
         }
       }
     },
@@ -1036,6 +873,214 @@
     },
     {
       "metadataFile": "recruitment-form-runtime-metadata.json",
+      "targetKey": "char_common_b_coffin_merchant_f3",
+      "assetId": "unit:char_common_b_coffin_merchant:char_common_b_coffin_merchant_f3",
+      "unitId": "char_common_b_coffin_merchant",
+      "formId": "char_common_b_coffin_merchant_f3",
+      "formOrder": 3,
+      "score": 90,
+      "reasons": [
+        "low-attack:0.0278"
+      ],
+      "nearestOther": {
+        "targetKey": "char_common_c_tin_squire_f3",
+        "rootUnitId": "char_common_c_tin_squire",
+        "similarity": 0.8095
+      },
+      "motions": {
+        "idle": {
+          "frames": 7,
+          "frameWidth": 247,
+          "frameHeight": 229,
+          "occupancy": 0.4956,
+          "widthCoverage": 0.9919,
+          "heightCoverage": 0.8665,
+          "maxEdgeRatio": 0.0036,
+          "avgDelta": 0.0184,
+          "maxDelta": 0.0295
+        },
+        "move": {
+          "frames": 8,
+          "frameWidth": 247,
+          "frameHeight": 229,
+          "occupancy": 0.4956,
+          "widthCoverage": 0.9919,
+          "heightCoverage": 0.869,
+          "maxEdgeRatio": 0.0036,
+          "avgDelta": 0.1126,
+          "maxDelta": 0.1167
+        },
+        "attack": {
+          "frames": 8,
+          "frameWidth": 247,
+          "frameHeight": 229,
+          "occupancy": 0.502,
+          "widthCoverage": 0.9919,
+          "heightCoverage": 0.869,
+          "maxEdgeRatio": 0.0051,
+          "avgDelta": 0.0278,
+          "maxDelta": 0.093
+        }
+      }
+    },
+    {
+      "metadataFile": "recruitment-form-runtime-metadata.json",
+      "targetKey": "char_common_b_moss_golem_f2",
+      "assetId": "unit:char_common_b_moss_golem:char_common_b_moss_golem_f2",
+      "unitId": "char_common_b_moss_golem",
+      "formId": "char_common_b_moss_golem_f2",
+      "formOrder": 2,
+      "score": 90,
+      "reasons": [
+        "low-attack:0.0281"
+      ],
+      "nearestOther": {
+        "targetKey": "char_common_b_coffin_merchant_f3",
+        "rootUnitId": "char_common_b_coffin_merchant",
+        "similarity": 0.6614
+      },
+      "motions": {
+        "idle": {
+          "frames": 7,
+          "frameWidth": 288,
+          "frameHeight": 271,
+          "occupancy": 0.288,
+          "widthCoverage": 0.8472,
+          "heightCoverage": 0.7986,
+          "maxEdgeRatio": 0.0016,
+          "avgDelta": 0.0262,
+          "maxDelta": 0.0393
+        },
+        "move": {
+          "frames": 8,
+          "frameWidth": 288,
+          "frameHeight": 271,
+          "occupancy": 0.2878,
+          "widthCoverage": 0.8472,
+          "heightCoverage": 0.7989,
+          "maxEdgeRatio": 0.0016,
+          "avgDelta": 0.157,
+          "maxDelta": 0.157
+        },
+        "attack": {
+          "frames": 7,
+          "frameWidth": 288,
+          "frameHeight": 271,
+          "occupancy": 0.2924,
+          "widthCoverage": 0.8611,
+          "heightCoverage": 0.8007,
+          "maxEdgeRatio": 0.0016,
+          "avgDelta": 0.0281,
+          "maxDelta": 0.0879
+        }
+      }
+    },
+    {
+      "metadataFile": "recruitment-form-runtime-metadata.json",
+      "targetKey": "char_common_b_moss_golem_f3",
+      "assetId": "unit:char_common_b_moss_golem:char_common_b_moss_golem_f3",
+      "unitId": "char_common_b_moss_golem",
+      "formId": "char_common_b_moss_golem_f3",
+      "formOrder": 3,
+      "score": 90,
+      "reasons": [
+        "low-attack:0.0345"
+      ],
+      "nearestOther": {
+        "targetKey": "char_common_a_meteor_cart_f3",
+        "rootUnitId": "char_common_a_meteor_cart",
+        "similarity": 0.806
+      },
+      "motions": {
+        "idle": {
+          "frames": 7,
+          "frameWidth": 292,
+          "frameHeight": 274,
+          "occupancy": 0.2658,
+          "widthCoverage": 0.8596,
+          "heightCoverage": 0.7862,
+          "maxEdgeRatio": 0,
+          "avgDelta": 0.0328,
+          "maxDelta": 0.049
+        },
+        "move": {
+          "frames": 8,
+          "frameWidth": 292,
+          "frameHeight": 274,
+          "occupancy": 0.2658,
+          "widthCoverage": 0.8596,
+          "heightCoverage": 0.7755,
+          "maxEdgeRatio": 0,
+          "avgDelta": 0.2013,
+          "maxDelta": 0.202
+        },
+        "attack": {
+          "frames": 8,
+          "frameWidth": 292,
+          "frameHeight": 274,
+          "occupancy": 0.2731,
+          "widthCoverage": 0.8682,
+          "heightCoverage": 0.7664,
+          "maxEdgeRatio": 0,
+          "avgDelta": 0.0345,
+          "maxDelta": 0.0887
+        }
+      }
+    },
+    {
+      "metadataFile": "recruitment-form-runtime-metadata.json",
+      "targetKey": "char_common_c_tin_squire_f3",
+      "assetId": "unit:char_common_c_tin_squire:char_common_c_tin_squire_f3",
+      "unitId": "char_common_c_tin_squire",
+      "formId": "char_common_c_tin_squire_f3",
+      "formOrder": 3,
+      "score": 90,
+      "reasons": [
+        "low-attack:0.0301"
+      ],
+      "nearestOther": {
+        "targetKey": "char_common_b_coffin_merchant_f3",
+        "rootUnitId": "char_common_b_coffin_merchant",
+        "similarity": 0.8095
+      },
+      "motions": {
+        "idle": {
+          "frames": 6,
+          "frameWidth": 232,
+          "frameHeight": 209,
+          "occupancy": 0.5544,
+          "widthCoverage": 0.9612,
+          "heightCoverage": 0.9011,
+          "maxEdgeRatio": 0.0026,
+          "avgDelta": 0.0225,
+          "maxDelta": 0.0303
+        },
+        "move": {
+          "frames": 8,
+          "frameWidth": 232,
+          "frameHeight": 209,
+          "occupancy": 0.5636,
+          "widthCoverage": 0.9612,
+          "heightCoverage": 1,
+          "maxEdgeRatio": 0.0036,
+          "avgDelta": 0.1383,
+          "maxDelta": 0.1431
+        },
+        "attack": {
+          "frames": 7,
+          "frameWidth": 232,
+          "frameHeight": 209,
+          "occupancy": 0.5566,
+          "widthCoverage": 0.9655,
+          "heightCoverage": 0.9043,
+          "maxEdgeRatio": 0.0026,
+          "avgDelta": 0.0301,
+          "maxDelta": 0.0888
+        }
+      }
+    },
+    {
+      "metadataFile": "recruitment-form-runtime-metadata.json",
       "targetKey": "char_common_c_turnip_rider_f3",
       "assetId": "unit:char_common_c_turnip_rider:char_common_c_turnip_rider_f3",
       "unitId": "char_common_c_turnip_rider",
@@ -1187,6 +1232,110 @@
           "maxEdgeRatio": 0,
           "avgDelta": 0.0236,
           "maxDelta": 0.0766
+        }
+      }
+    },
+    {
+      "metadataFile": "recruitment-form-runtime-metadata.json",
+      "targetKey": "char_s02_gormu_f2",
+      "assetId": "unit:char_s02_gormu:char_s02_gormu_f2",
+      "unitId": "char_s02_gormu",
+      "formId": "char_s02_gormu_f2",
+      "formOrder": 2,
+      "score": 90,
+      "reasons": [
+        "low-attack:0.0244"
+      ],
+      "nearestOther": {
+        "targetKey": "char_common_a_mirror_guide_f3",
+        "rootUnitId": "char_common_a_mirror_guide",
+        "similarity": 0.7219
+      },
+      "motions": {
+        "idle": {
+          "frames": 8,
+          "frameWidth": 383,
+          "frameHeight": 331,
+          "occupancy": 0.2154,
+          "widthCoverage": 0.812,
+          "heightCoverage": 0.744,
+          "maxEdgeRatio": 0,
+          "avgDelta": 0.0247,
+          "maxDelta": 0.0345
+        },
+        "move": {
+          "frames": 8,
+          "frameWidth": 383,
+          "frameHeight": 331,
+          "occupancy": 0.2152,
+          "widthCoverage": 0.812,
+          "heightCoverage": 0.7356,
+          "maxEdgeRatio": 0,
+          "avgDelta": 0.1344,
+          "maxDelta": 0.1344
+        },
+        "attack": {
+          "frames": 11,
+          "frameWidth": 383,
+          "frameHeight": 331,
+          "occupancy": 0.2259,
+          "widthCoverage": 0.8521,
+          "heightCoverage": 0.7281,
+          "maxEdgeRatio": 0,
+          "avgDelta": 0.0244,
+          "maxDelta": 0.0917
+        }
+      }
+    },
+    {
+      "metadataFile": "recruitment-form-runtime-metadata.json",
+      "targetKey": "char_s02_gormu_f3",
+      "assetId": "unit:char_s02_gormu:char_s02_gormu_f3",
+      "unitId": "char_s02_gormu",
+      "formId": "char_s02_gormu_f3",
+      "formOrder": 3,
+      "score": 90,
+      "reasons": [
+        "low-attack:0.033"
+      ],
+      "nearestOther": {
+        "targetKey": "char_s02_mogu_f3",
+        "rootUnitId": "char_s02_mogu",
+        "similarity": 0.7347
+      },
+      "motions": {
+        "idle": {
+          "frames": 8,
+          "frameWidth": 387,
+          "frameHeight": 334,
+          "occupancy": 0.2154,
+          "widthCoverage": 0.8217,
+          "heightCoverage": 0.7403,
+          "maxEdgeRatio": 0,
+          "avgDelta": 0.0311,
+          "maxDelta": 0.0432
+        },
+        "move": {
+          "frames": 8,
+          "frameWidth": 387,
+          "frameHeight": 334,
+          "occupancy": 0.2155,
+          "widthCoverage": 0.8217,
+          "heightCoverage": 0.732,
+          "maxEdgeRatio": 0,
+          "avgDelta": 0.1762,
+          "maxDelta": 0.1792
+        },
+        "attack": {
+          "frames": 12,
+          "frameWidth": 387,
+          "frameHeight": 334,
+          "occupancy": 0.2229,
+          "widthCoverage": 0.8488,
+          "heightCoverage": 0.7246,
+          "maxEdgeRatio": 0,
+          "avgDelta": 0.033,
+          "maxDelta": 0.1068
         }
       }
     },
@@ -1659,529 +1808,323 @@
       }
     },
     {
-      "metadataFile": "recruitment-form-runtime-metadata.json",
-      "targetKey": "char_common_a_glass_keeper_f1",
-      "assetId": "unit:char_common_a_glass_keeper:char_common_a_glass_keeper_f1",
-      "unitId": "char_common_a_glass_keeper",
-      "formId": "char_common_a_glass_keeper_f1",
-      "formOrder": 1,
+      "metadataFile": "special-content-runtime-metadata.json",
+      "targetKey": "enemy_sp_soul_armor",
+      "assetId": "unit:enemy_sp_soul_armor",
+      "unitId": "enemy_sp_soul_armor",
+      "formId": null,
+      "formOrder": null,
       "score": 92,
       "reasons": [
-        "weak-evolution-separation:0.8275"
+        "low-move:0.019"
       ],
       "nearestOther": {
-        "targetKey": "char_common_b_moss_golem_f2",
-        "rootUnitId": "char_common_b_moss_golem",
-        "similarity": 0.6751
+        "targetKey": "enemy-boss-iron",
+        "rootUnitId": "enemy-boss-iron",
+        "similarity": 0.7536
       },
       "motions": {
         "idle": {
           "frames": 7,
-          "frameWidth": 259,
-          "frameHeight": 238,
-          "occupancy": 0.2515,
-          "widthCoverage": 0.9807,
-          "heightCoverage": 0.8295,
+          "frameWidth": 250,
+          "frameHeight": 240,
+          "occupancy": 0.2985,
+          "widthCoverage": 0.708,
+          "heightCoverage": 0.8643,
           "maxEdgeRatio": 0,
-          "avgDelta": 0.0411,
-          "maxDelta": 0.0617
+          "avgDelta": 0.0065,
+          "maxDelta": 0.0097
         },
         "move": {
           "frames": 8,
-          "frameWidth": 259,
-          "frameHeight": 238,
-          "occupancy": 0.2517,
-          "widthCoverage": 0.9807,
-          "heightCoverage": 0.8172,
+          "frameWidth": 250,
+          "frameHeight": 240,
+          "occupancy": 0.2991,
+          "widthCoverage": 0.708,
+          "heightCoverage": 0.8667,
           "maxEdgeRatio": 0,
-          "avgDelta": 0.2404,
-          "maxDelta": 0.2404
+          "avgDelta": 0.019,
+          "maxDelta": 0.019
         },
         "attack": {
-          "frames": 8,
-          "frameWidth": 259,
-          "frameHeight": 238,
-          "occupancy": 0.2619,
-          "widthCoverage": 0.9908,
-          "heightCoverage": 0.8067,
-          "maxEdgeRatio": 0.0021,
-          "avgDelta": 0.0554,
-          "maxDelta": 0.1839
+          "frames": 7,
+          "frameWidth": 250,
+          "frameHeight": 240,
+          "occupancy": 0.3105,
+          "widthCoverage": 0.7171,
+          "heightCoverage": 0.8667,
+          "maxEdgeRatio": 0,
+          "avgDelta": 0.0504,
+          "maxDelta": 0.1644
         }
       }
     },
     {
-      "metadataFile": "recruitment-form-runtime-metadata.json",
-      "targetKey": "char_common_a_glass_keeper_f2",
-      "assetId": "unit:char_common_a_glass_keeper:char_common_a_glass_keeper_f2",
-      "unitId": "char_common_a_glass_keeper",
-      "formId": "char_common_a_glass_keeper_f2",
-      "formOrder": 2,
-      "score": 92,
-      "reasons": [
-        "weak-evolution-separation:0.8275"
-      ],
+      "metadataFile": "third-slice-runtime-metadata.json",
+      "targetKey": "battlemage/battlemage_f1",
+      "assetId": "unit:battlemage:battlemage_f1",
+      "unitId": "battlemage",
+      "formId": null,
+      "formOrder": null,
+      "score": 100,
+      "reasons": [],
       "nearestOther": {
-        "targetKey": "char_s03_rxomega_f2",
-        "rootUnitId": "char_s03_rxomega",
-        "similarity": 0.7302
-      },
-      "motions": {
-        "idle": {
-          "frames": 7,
-          "frameWidth": 263,
-          "frameHeight": 241,
-          "occupancy": 0.2842,
-          "widthCoverage": 0.9924,
-          "heightCoverage": 0.8275,
-          "maxEdgeRatio": 0.0001,
-          "avgDelta": 0.0344,
-          "maxDelta": 0.0515
-        },
-        "move": {
-          "frames": 8,
-          "frameWidth": 263,
-          "frameHeight": 241,
-          "occupancy": 0.2846,
-          "widthCoverage": 0.9924,
-          "heightCoverage": 0.8154,
-          "maxEdgeRatio": 0.0001,
-          "avgDelta": 0.2183,
-          "maxDelta": 0.2183
-        },
-        "attack": {
-          "frames": 8,
-          "frameWidth": 263,
-          "frameHeight": 241,
-          "occupancy": 0.295,
-          "widthCoverage": 0.9924,
-          "heightCoverage": 0.805,
-          "maxEdgeRatio": 0.002,
-          "avgDelta": 0.0361,
-          "maxDelta": 0.12
-        }
-      }
-    },
-    {
-      "metadataFile": "recruitment-form-runtime-metadata.json",
-      "targetKey": "char_common_b_coffin_merchant_f1",
-      "assetId": "unit:char_common_b_coffin_merchant:char_common_b_coffin_merchant_f1",
-      "unitId": "char_common_b_coffin_merchant",
-      "formId": "char_common_b_coffin_merchant_f1",
-      "formOrder": 1,
-      "score": 92,
-      "reasons": [
-        "weak-evolution-separation:0.8699"
-      ],
-      "nearestOther": {
-        "targetKey": "char_common_a_bonedrum_f2",
-        "rootUnitId": "char_common_a_bonedrum",
-        "similarity": 0.7133
-      },
-      "motions": {
-        "idle": {
-          "frames": 7,
-          "frameWidth": 239,
-          "frameHeight": 223,
-          "occupancy": 0.2691,
-          "widthCoverage": 0.9874,
-          "heightCoverage": 0.8674,
-          "maxEdgeRatio": 0.0001,
-          "avgDelta": 0.0425,
-          "maxDelta": 0.0637
-        },
-        "move": {
-          "frames": 8,
-          "frameWidth": 239,
-          "frameHeight": 223,
-          "occupancy": 0.2689,
-          "widthCoverage": 0.9874,
-          "heightCoverage": 0.8543,
-          "maxEdgeRatio": 0.0001,
-          "avgDelta": 0.2338,
-          "maxDelta": 0.2338
-        },
-        "attack": {
-          "frames": 7,
-          "frameWidth": 239,
-          "frameHeight": 223,
-          "occupancy": 0.279,
-          "widthCoverage": 0.991,
-          "heightCoverage": 0.843,
-          "maxEdgeRatio": 0.0027,
-          "avgDelta": 0.0883,
-          "maxDelta": 0.2472
-        }
-      }
-    },
-    {
-      "metadataFile": "recruitment-form-runtime-metadata.json",
-      "targetKey": "char_common_b_coffin_merchant_f2",
-      "assetId": "unit:char_common_b_coffin_merchant:char_common_b_coffin_merchant_f2",
-      "unitId": "char_common_b_coffin_merchant",
-      "formId": "char_common_b_coffin_merchant_f2",
-      "formOrder": 2,
-      "score": 92,
-      "reasons": [
-        "weak-evolution-separation:0.8699"
-      ],
-      "nearestOther": {
-        "targetKey": "char_common_a_bonedrum_f2",
-        "rootUnitId": "char_common_a_bonedrum",
-        "similarity": 0.7878
-      },
-      "motions": {
-        "idle": {
-          "frames": 7,
-          "frameWidth": 243,
-          "frameHeight": 226,
-          "occupancy": 0.304,
-          "widthCoverage": 0.9918,
-          "heightCoverage": 0.8603,
-          "maxEdgeRatio": 0.0002,
-          "avgDelta": 0.0358,
-          "maxDelta": 0.0536
-        },
-        "move": {
-          "frames": 8,
-          "frameWidth": 243,
-          "frameHeight": 226,
-          "occupancy": 0.3038,
-          "widthCoverage": 0.9918,
-          "heightCoverage": 0.8473,
-          "maxEdgeRatio": 0.0002,
-          "avgDelta": 0.2004,
-          "maxDelta": 0.2004
-        },
-        "attack": {
-          "frames": 7,
-          "frameWidth": 243,
-          "frameHeight": 226,
-          "occupancy": 0.3146,
-          "widthCoverage": 0.9918,
-          "heightCoverage": 0.8363,
-          "maxEdgeRatio": 0.003,
-          "avgDelta": 0.0732,
-          "maxDelta": 0.2153
-        }
-      }
-    },
-    {
-      "metadataFile": "recruitment-form-runtime-metadata.json",
-      "targetKey": "char_common_b_coffin_merchant_f3",
-      "assetId": "unit:char_common_b_coffin_merchant:char_common_b_coffin_merchant_f3",
-      "unitId": "char_common_b_coffin_merchant",
-      "formId": "char_common_b_coffin_merchant_f3",
-      "formOrder": 3,
-      "score": 92,
-      "reasons": [
-        "weak-evolution-separation:0.8699"
-      ],
-      "nearestOther": {
-        "targetKey": "char_common_a_bonedrum_f2",
-        "rootUnitId": "char_common_a_bonedrum",
-        "similarity": 0.7808
-      },
-      "motions": {
-        "idle": {
-          "frames": 7,
-          "frameWidth": 247,
-          "frameHeight": 229,
-          "occupancy": 0.3414,
-          "widthCoverage": 0.9919,
-          "heightCoverage": 0.8578,
-          "maxEdgeRatio": 0.0005,
-          "avgDelta": 0.0351,
-          "maxDelta": 0.054
-        },
-        "move": {
-          "frames": 8,
-          "frameWidth": 247,
-          "frameHeight": 229,
-          "occupancy": 0.3414,
-          "widthCoverage": 0.9919,
-          "heightCoverage": 0.845,
-          "maxEdgeRatio": 0.0005,
-          "avgDelta": 0.1917,
-          "maxDelta": 0.1963
-        },
-        "attack": {
-          "frames": 8,
-          "frameWidth": 247,
-          "frameHeight": 229,
-          "occupancy": 0.3509,
-          "widthCoverage": 0.9919,
-          "heightCoverage": 0.8341,
-          "maxEdgeRatio": 0.0027,
-          "avgDelta": 0.0495,
-          "maxDelta": 0.1534
-        }
-      }
-    },
-    {
-      "metadataFile": "recruitment-form-runtime-metadata.json",
-      "targetKey": "char_common_b_moss_golem_f1",
-      "assetId": "unit:char_common_b_moss_golem:char_common_b_moss_golem_f1",
-      "unitId": "char_common_b_moss_golem",
-      "formId": "char_common_b_moss_golem_f1",
-      "formOrder": 1,
-      "score": 92,
-      "reasons": [
-        "weak-evolution-separation:0.8504"
-      ],
-      "nearestOther": {
-        "targetKey": "char_common_a_glass_keeper_f1",
-        "rootUnitId": "char_common_a_glass_keeper",
-        "similarity": 0.6705
-      },
-      "motions": {
-        "idle": {
-          "frames": 7,
-          "frameWidth": 284,
-          "frameHeight": 268,
-          "occupancy": 0.2025,
-          "widthCoverage": 0.838,
-          "heightCoverage": 0.7926,
-          "maxEdgeRatio": 0,
-          "avgDelta": 0.0401,
-          "maxDelta": 0.0601
-        },
-        "move": {
-          "frames": 8,
-          "frameWidth": 284,
-          "frameHeight": 268,
-          "occupancy": 0.2028,
-          "widthCoverage": 0.838,
-          "heightCoverage": 0.7817,
-          "maxEdgeRatio": 0,
-          "avgDelta": 0.232,
-          "maxDelta": 0.232
-        },
-        "attack": {
-          "frames": 7,
-          "frameWidth": 284,
-          "frameHeight": 268,
-          "occupancy": 0.206,
-          "widthCoverage": 0.8622,
-          "heightCoverage": 0.7724,
-          "maxEdgeRatio": 0,
-          "avgDelta": 0.0689,
-          "maxDelta": 0.2061
-        }
-      }
-    },
-    {
-      "metadataFile": "recruitment-form-runtime-metadata.json",
-      "targetKey": "char_common_b_moss_golem_f2",
-      "assetId": "unit:char_common_b_moss_golem:char_common_b_moss_golem_f2",
-      "unitId": "char_common_b_moss_golem",
-      "formId": "char_common_b_moss_golem_f2",
-      "formOrder": 2,
-      "score": 92,
-      "reasons": [
-        "weak-evolution-separation:0.8504"
-      ],
-      "nearestOther": {
-        "targetKey": "char_s01_mireille_f3",
-        "rootUnitId": "char_s01_mireille",
-        "similarity": 0.7324
-      },
-      "motions": {
-        "idle": {
-          "frames": 7,
-          "frameWidth": 288,
-          "frameHeight": 271,
-          "occupancy": 0.2277,
-          "widthCoverage": 0.8472,
-          "heightCoverage": 0.7912,
-          "maxEdgeRatio": 0,
-          "avgDelta": 0.0373,
-          "maxDelta": 0.056
-        },
-        "move": {
-          "frames": 8,
-          "frameWidth": 288,
-          "frameHeight": 271,
-          "occupancy": 0.2279,
-          "widthCoverage": 0.8472,
-          "heightCoverage": 0.7804,
-          "maxEdgeRatio": 0,
-          "avgDelta": 0.2138,
-          "maxDelta": 0.2138
-        },
-        "attack": {
-          "frames": 7,
-          "frameWidth": 288,
-          "frameHeight": 271,
-          "occupancy": 0.2317,
-          "widthCoverage": 0.8611,
-          "heightCoverage": 0.7712,
-          "maxEdgeRatio": 0,
-          "avgDelta": 0.0395,
-          "maxDelta": 0.1228
-        }
-      }
-    },
-    {
-      "metadataFile": "recruitment-form-runtime-metadata.json",
-      "targetKey": "char_common_c_tin_squire_f1",
-      "assetId": "unit:char_common_c_tin_squire:char_common_c_tin_squire_f1",
-      "unitId": "char_common_c_tin_squire",
-      "formId": "char_common_c_tin_squire_f1",
-      "formOrder": 1,
-      "score": 92,
-      "reasons": [
-        "weak-evolution-separation:0.8537"
-      ],
-      "nearestOther": {
-        "targetKey": "char_common_a_glass_keeper_f3",
-        "rootUnitId": "char_common_a_glass_keeper",
-        "similarity": 0.6587
+        "targetKey": "char_common_c_turnip_rider",
+        "rootUnitId": "char_common_c_turnip_rider",
+        "similarity": 0.5462
       },
       "motions": {
         "idle": {
           "frames": 6,
-          "frameWidth": 224,
-          "frameHeight": 203,
-          "occupancy": 0.2903,
-          "widthCoverage": 0.7902,
-          "heightCoverage": 0.9031,
+          "frameWidth": 280,
+          "frameHeight": 205,
+          "occupancy": 0.0634,
+          "widthCoverage": 0.5143,
+          "heightCoverage": 0.4537,
           "maxEdgeRatio": 0,
-          "avgDelta": 0.0643,
-          "maxDelta": 0.0804
+          "avgDelta": 0.0479,
+          "maxDelta": 0.0519
         },
         "move": {
           "frames": 8,
-          "frameWidth": 224,
-          "frameHeight": 203,
-          "occupancy": 0.29,
-          "widthCoverage": 0.7902,
-          "heightCoverage": 0.8892,
+          "frameWidth": 280,
+          "frameHeight": 205,
+          "occupancy": 0.0551,
+          "widthCoverage": 0.5143,
+          "heightCoverage": 0.411,
           "maxEdgeRatio": 0,
-          "avgDelta": 0.2715,
-          "maxDelta": 0.2715
+          "avgDelta": 0.2446,
+          "maxDelta": 0.3286
         },
         "attack": {
-          "frames": 6,
-          "frameWidth": 224,
-          "frameHeight": 203,
-          "occupancy": 0.296,
-          "widthCoverage": 0.9487,
-          "heightCoverage": 0.8768,
-          "maxEdgeRatio": 0.0007,
-          "avgDelta": 0.1066,
-          "maxDelta": 0.2937
+          "frames": 8,
+          "frameWidth": 280,
+          "frameHeight": 205,
+          "occupancy": 0.074,
+          "widthCoverage": 0.5415,
+          "heightCoverage": 0.6104,
+          "maxEdgeRatio": 0,
+          "avgDelta": 0.4101,
+          "maxDelta": 0.7048
         }
       }
     },
     {
-      "metadataFile": "recruitment-form-runtime-metadata.json",
-      "targetKey": "char_common_c_tin_squire_f2",
-      "assetId": "unit:char_common_c_tin_squire:char_common_c_tin_squire_f2",
-      "unitId": "char_common_c_tin_squire",
-      "formId": "char_common_c_tin_squire_f2",
-      "formOrder": 2,
-      "score": 92,
-      "reasons": [
-        "weak-evolution-separation:0.8537"
-      ],
+      "metadataFile": "third-slice-runtime-metadata.json",
+      "targetKey": "battlemage/battlemage_f2",
+      "assetId": "unit:battlemage:battlemage_f2",
+      "unitId": "battlemage",
+      "formId": null,
+      "formOrder": null,
+      "score": 100,
+      "reasons": [],
       "nearestOther": {
-        "targetKey": "char_common_a_bonedrum",
-        "rootUnitId": "char_common_a_bonedrum",
-        "similarity": 0.7517
+        "targetKey": "char_common_c_turnip_rider",
+        "rootUnitId": "char_common_c_turnip_rider",
+        "similarity": 0.5474
       },
       "motions": {
         "idle": {
           "frames": 6,
-          "frameWidth": 228,
-          "frameHeight": 206,
-          "occupancy": 0.3583,
-          "widthCoverage": 0.7939,
-          "heightCoverage": 0.8948,
+          "frameWidth": 280,
+          "frameHeight": 205,
+          "occupancy": 0.0651,
+          "widthCoverage": 0.5143,
+          "heightCoverage": 0.4537,
           "maxEdgeRatio": 0,
-          "avgDelta": 0.0473,
-          "maxDelta": 0.0592
+          "avgDelta": 0.0372,
+          "maxDelta": 0.0425
         },
         "move": {
           "frames": 8,
-          "frameWidth": 228,
-          "frameHeight": 206,
-          "occupancy": 0.3579,
-          "widthCoverage": 0.7939,
-          "heightCoverage": 0.8811,
+          "frameWidth": 280,
+          "frameHeight": 205,
+          "occupancy": 0.0579,
+          "widthCoverage": 0.5143,
+          "heightCoverage": 0.411,
           "maxEdgeRatio": 0,
-          "avgDelta": 0.2073,
-          "maxDelta": 0.2073
+          "avgDelta": 0.2208,
+          "maxDelta": 0.3037
         },
         "attack": {
+          "frames": 8,
+          "frameWidth": 280,
+          "frameHeight": 205,
+          "occupancy": 0.0801,
+          "widthCoverage": 0.5429,
+          "heightCoverage": 0.6104,
+          "maxEdgeRatio": 0,
+          "avgDelta": 0.3841,
+          "maxDelta": 0.6528
+        }
+      }
+    },
+    {
+      "metadataFile": "third-slice-runtime-metadata.json",
+      "targetKey": "battlemage/battlemage_f3",
+      "assetId": "unit:battlemage:battlemage_f3",
+      "unitId": "battlemage",
+      "formId": null,
+      "formOrder": null,
+      "score": 100,
+      "reasons": [],
+      "nearestOther": {
+        "targetKey": "char_common_b_coffin_merchant",
+        "rootUnitId": "char_common_b_coffin_merchant",
+        "similarity": 0.7246
+      },
+      "motions": {
+        "idle": {
           "frames": 6,
-          "frameWidth": 228,
-          "frameHeight": 206,
-          "occupancy": 0.3643,
-          "widthCoverage": 0.9437,
-          "heightCoverage": 0.8689,
-          "maxEdgeRatio": 0.0004,
-          "avgDelta": 0.0779,
-          "maxDelta": 0.1988
+          "frameWidth": 290,
+          "frameHeight": 210,
+          "occupancy": 0.1058,
+          "widthCoverage": 0.4966,
+          "heightCoverage": 0.4524,
+          "maxEdgeRatio": 0,
+          "avgDelta": 0.0046,
+          "maxDelta": 0.0085
+        },
+        "move": {
+          "frames": 8,
+          "frameWidth": 290,
+          "frameHeight": 210,
+          "occupancy": 0.1065,
+          "widthCoverage": 0.4966,
+          "heightCoverage": 0.4524,
+          "maxEdgeRatio": 0,
+          "avgDelta": 0.0781,
+          "maxDelta": 0.1025
+        },
+        "attack": {
+          "frames": 8,
+          "frameWidth": 290,
+          "frameHeight": 210,
+          "occupancy": 0.1519,
+          "widthCoverage": 0.5483,
+          "heightCoverage": 0.5869,
+          "maxEdgeRatio": 0,
+          "avgDelta": 0.2277,
+          "maxDelta": 0.3061
+        }
+      }
+    },
+    {
+      "metadataFile": "chapter-02-runtime-metadata.json",
+      "targetKey": "boss_ch2_funeral_king",
+      "assetId": "unit:boss_ch2_funeral_king",
+      "unitId": "boss_ch2_funeral_king",
+      "formId": null,
+      "formOrder": null,
+      "score": 100,
+      "reasons": [],
+      "nearestOther": {
+        "targetKey": "boss_sp_gold_carrier",
+        "rootUnitId": "boss_sp_gold_carrier",
+        "similarity": 0.7631
+      },
+      "motions": {
+        "idle": {
+          "frames": 8,
+          "frameWidth": 330,
+          "frameHeight": 290,
+          "occupancy": 0.2194,
+          "widthCoverage": 0.5758,
+          "heightCoverage": 0.6172,
+          "maxEdgeRatio": 0,
+          "avgDelta": 0.0237,
+          "maxDelta": 0.0332
+        },
+        "move": {
+          "frames": 8,
+          "frameWidth": 330,
+          "frameHeight": 290,
+          "occupancy": 0.2194,
+          "widthCoverage": 0.5758,
+          "heightCoverage": 0.6172,
+          "maxEdgeRatio": 0,
+          "avgDelta": 0.0926,
+          "maxDelta": 0.0926
+        },
+        "attack": {
+          "frames": 8,
+          "frameWidth": 330,
+          "frameHeight": 290,
+          "occupancy": 0.2329,
+          "widthCoverage": 0.7102,
+          "heightCoverage": 0.6172,
+          "maxEdgeRatio": 0,
+          "avgDelta": 0.091,
+          "maxDelta": 0.2103
+        }
+      }
+    },
+    {
+      "metadataFile": "chapter-03-runtime-metadata.json",
+      "targetKey": "boss_ch3_archmagus",
+      "assetId": "unit:boss_ch3_archmagus",
+      "unitId": "boss_ch3_archmagus",
+      "formId": null,
+      "formOrder": null,
+      "score": 100,
+      "reasons": [],
+      "nearestOther": {
+        "targetKey": "boss_sp_rift_nightfall",
+        "rootUnitId": "boss_sp_rift_nightfall",
+        "similarity": 0.6244
+      },
+      "motions": {
+        "idle": {
+          "frames": 8,
+          "frameWidth": 380,
+          "frameHeight": 320,
+          "occupancy": 0.1315,
+          "widthCoverage": 0.6049,
+          "heightCoverage": 0.6512,
+          "maxEdgeRatio": 0,
+          "avgDelta": 0.0948,
+          "maxDelta": 0.1028
+        },
+        "move": {
+          "frames": 8,
+          "frameWidth": 380,
+          "frameHeight": 320,
+          "occupancy": 0.1315,
+          "widthCoverage": 0.6056,
+          "heightCoverage": 0.6496,
+          "maxEdgeRatio": 0,
+          "avgDelta": 0.3138,
+          "maxDelta": 0.3205
+        },
+        "attack": {
+          "frames": 9,
+          "frameWidth": 380,
+          "frameHeight": 320,
+          "occupancy": 0.141,
+          "widthCoverage": 0.6614,
+          "heightCoverage": 0.6507,
+          "maxEdgeRatio": 0,
+          "avgDelta": 0.1664,
+          "maxDelta": 0.4178
         }
       }
     }
   ],
   "recruitmentEvolution": [
     {
-      "unitId": "char_common_b_coffin_merchant",
-      "f1ToF2Similarity": 0.8699,
-      "f2ToF3Similarity": 0.8601,
-      "f1ToF3Similarity": 0.7891,
-      "worstSimilarity": 0.8699,
-      "status": "WATCH"
-    },
-    {
-      "unitId": "char_common_c_tin_squire",
-      "f1ToF2Similarity": 0.8043,
-      "f2ToF3Similarity": 0.8537,
-      "f1ToF3Similarity": 0.6869,
-      "worstSimilarity": 0.8537,
-      "status": "WATCH"
-    },
-    {
-      "unitId": "char_common_b_moss_golem",
-      "f1ToF2Similarity": 0.8504,
-      "f2ToF3Similarity": 0.8142,
-      "f1ToF3Similarity": 0.7313,
-      "worstSimilarity": 0.8504,
-      "status": "WATCH"
-    },
-    {
-      "unitId": "char_s02_gormu",
-      "f1ToF2Similarity": 0.85,
-      "f2ToF3Similarity": 0.7809,
-      "f1ToF3Similarity": 0.7194,
-      "worstSimilarity": 0.85,
-      "status": "WATCH"
-    },
-    {
-      "unitId": "char_s03_nana04",
-      "f1ToF2Similarity": 0.8305,
-      "f2ToF3Similarity": 0.7489,
-      "f1ToF3Similarity": 0.6728,
-      "worstSimilarity": 0.8305,
-      "status": "WATCH"
-    },
-    {
-      "unitId": "char_common_a_glass_keeper",
-      "f1ToF2Similarity": 0.8275,
-      "f2ToF3Similarity": 0.7348,
-      "f1ToF3Similarity": 0.6708,
-      "worstSimilarity": 0.8275,
-      "status": "WATCH"
-    },
-    {
       "unitId": "char_common_c_bell_crab",
       "f1ToF2Similarity": 0.6858,
       "f2ToF3Similarity": 0.8154,
       "f1ToF3Similarity": 0.6356,
       "worstSimilarity": 0.8154,
+      "status": "GOOD"
+    },
+    {
+      "unitId": "char_common_c_tin_squire",
+      "f1ToF2Similarity": 0.8043,
+      "f2ToF3Similarity": 0.6989,
+      "f1ToF3Similarity": 0.5957,
+      "worstSimilarity": 0.8043,
       "status": "GOOD"
     },
     {
@@ -2321,6 +2264,14 @@
       "status": "GOOD"
     },
     {
+      "unitId": "char_s02_gormu",
+      "f1ToF2Similarity": 0.7208,
+      "f2ToF3Similarity": 0.7476,
+      "f1ToF3Similarity": 0.7194,
+      "worstSimilarity": 0.7476,
+      "status": "GOOD"
+    },
+    {
       "unitId": "char_s03_arc_railer",
       "f1ToF2Similarity": 0.5627,
       "f2ToF3Similarity": 0.7465,
@@ -2329,11 +2280,27 @@
       "status": "GOOD"
     },
     {
+      "unitId": "char_common_b_moss_golem",
+      "f1ToF2Similarity": 0.6342,
+      "f2ToF3Similarity": 0.7107,
+      "f1ToF3Similarity": 0.7313,
+      "worstSimilarity": 0.7313,
+      "status": "GOOD"
+    },
+    {
       "unitId": "char_common_b_ink_raven",
       "f1ToF2Similarity": 0.69,
       "f2ToF3Similarity": 0.7266,
       "f1ToF3Similarity": 0.6148,
       "worstSimilarity": 0.7266,
+      "status": "GOOD"
+    },
+    {
+      "unitId": "char_common_a_glass_keeper",
+      "f1ToF2Similarity": 0.7211,
+      "f2ToF3Similarity": 0.7107,
+      "f1ToF3Similarity": 0.6708,
+      "worstSimilarity": 0.7211,
       "status": "GOOD"
     },
     {
@@ -2377,6 +2344,22 @@
       "status": "GOOD"
     },
     {
+      "unitId": "char_common_b_coffin_merchant",
+      "f1ToF2Similarity": 0.6782,
+      "f2ToF3Similarity": 0.5546,
+      "f1ToF3Similarity": 0.5802,
+      "worstSimilarity": 0.6782,
+      "status": "GOOD"
+    },
+    {
+      "unitId": "char_s03_nana04",
+      "f1ToF2Similarity": 0.6282,
+      "f2ToF3Similarity": 0.6117,
+      "f1ToF3Similarity": 0.6728,
+      "worstSimilarity": 0.6728,
+      "status": "GOOD"
+    },
+    {
       "unitId": "char_common_b_lantern_witch",
       "f1ToF2Similarity": 0.4853,
       "f2ToF3Similarity": 0.6695,
@@ -2401,10 +2384,9 @@
       "unitId": "boss_sp_gold_carrier",
       "formId": null,
       "formOrder": null,
-      "score": 49,
+      "score": 67,
       "reasons": [
-        "weak-move:0.0174",
-        "weak-attack:0.0275",
+        "weak-attack:0.0406",
         "high-similarity:0.9011"
       ],
       "nearestOther": {
@@ -2428,129 +2410,23 @@
           "frames": 8,
           "frameWidth": 400,
           "frameHeight": 330,
-          "occupancy": 0.2767,
-          "widthCoverage": 0.665,
-          "heightCoverage": 0.5,
+          "occupancy": 0.3246,
+          "widthCoverage": 0.7913,
+          "heightCoverage": 0.6212,
           "maxEdgeRatio": 0,
-          "avgDelta": 0.0174,
-          "maxDelta": 0.0174
+          "avgDelta": 0.2679,
+          "maxDelta": 0.2703
         },
         "attack": {
           "frames": 10,
           "frameWidth": 400,
           "frameHeight": 330,
-          "occupancy": 0.2848,
-          "widthCoverage": 0.7325,
-          "heightCoverage": 0.5,
-          "maxEdgeRatio": 0,
-          "avgDelta": 0.0083,
-          "maxDelta": 0.0275
-        }
-      }
-    },
-    {
-      "metadataFile": "special-content-runtime-metadata.json",
-      "targetKey": "enemy_sp_evo_mirror_seal",
-      "assetId": "unit:enemy_sp_evo_mirror_seal",
-      "unitId": "enemy_sp_evo_mirror_seal",
-      "formId": null,
-      "formOrder": null,
-      "score": 58,
-      "reasons": [
-        "weak-move:0.0113",
-        "weak-attack:0.0239"
-      ],
-      "nearestOther": {
-        "targetKey": "enemy_ch2_bonewheel",
-        "rootUnitId": "enemy_ch2_bonewheel",
-        "similarity": 0.8668
-      },
-      "motions": {
-        "idle": {
-          "frames": 7,
-          "frameWidth": 280,
-          "frameHeight": 250,
-          "occupancy": 0.3957,
-          "widthCoverage": 0.7536,
-          "heightCoverage": 0.7411,
-          "maxEdgeRatio": 0,
-          "avgDelta": 0.0028,
-          "maxDelta": 0.0044
-        },
-        "move": {
-          "frames": 8,
-          "frameWidth": 280,
-          "frameHeight": 250,
-          "occupancy": 0.396,
-          "widthCoverage": 0.7536,
-          "heightCoverage": 0.7425,
-          "maxEdgeRatio": 0,
-          "avgDelta": 0.0113,
-          "maxDelta": 0.0123
-        },
-        "attack": {
-          "frames": 8,
-          "frameWidth": 280,
-          "frameHeight": 250,
-          "occupancy": 0.3972,
-          "widthCoverage": 0.7839,
-          "heightCoverage": 0.7425,
-          "maxEdgeRatio": 0,
-          "avgDelta": 0.0068,
-          "maxDelta": 0.0239
-        }
-      }
-    },
-    {
-      "metadataFile": "special-content-runtime-metadata.json",
-      "targetKey": "enemy_sp_gold_vault_golem",
-      "assetId": "unit:enemy_sp_gold_vault_golem",
-      "unitId": "enemy_sp_gold_vault_golem",
-      "formId": null,
-      "formOrder": null,
-      "score": 58,
-      "reasons": [
-        "weak-move:0.0022",
-        "weak-attack:0.0273"
-      ],
-      "nearestOther": {
-        "targetKey": "enemy_ch2_bonewheel",
-        "rootUnitId": "enemy_ch2_bonewheel",
-        "similarity": 0.8388
-      },
-      "motions": {
-        "idle": {
-          "frames": 7,
-          "frameWidth": 310,
-          "frameHeight": 290,
-          "occupancy": 0.4879,
-          "widthCoverage": 0.8742,
-          "heightCoverage": 0.7256,
-          "maxEdgeRatio": 0,
-          "avgDelta": 0.0016,
-          "maxDelta": 0.0025
-        },
-        "move": {
-          "frames": 8,
-          "frameWidth": 310,
-          "frameHeight": 290,
-          "occupancy": 0.4882,
-          "widthCoverage": 0.8742,
-          "heightCoverage": 0.7276,
-          "maxEdgeRatio": 0,
-          "avgDelta": 0.0022,
-          "maxDelta": 0.0022
-        },
-        "attack": {
-          "frames": 8,
-          "frameWidth": 310,
-          "frameHeight": 290,
-          "occupancy": 0.4882,
-          "widthCoverage": 0.8742,
-          "heightCoverage": 0.7276,
-          "maxEdgeRatio": 0,
-          "avgDelta": 0.0078,
-          "maxDelta": 0.0273
+          "occupancy": 0.3279,
+          "widthCoverage": 0.876,
+          "heightCoverage": 0.5703,
+          "maxEdgeRatio": 0.0034,
+          "avgDelta": 0.027,
+          "maxDelta": 0.0406
         }
       }
     },
@@ -2655,6 +2531,58 @@
           "maxEdgeRatio": 0,
           "avgDelta": 0.0212,
           "maxDelta": 0.0306
+        }
+      }
+    },
+    {
+      "metadataFile": "special-content-runtime-metadata.json",
+      "targetKey": "enemy_sp_gold_vault_golem",
+      "assetId": "unit:enemy_sp_gold_vault_golem",
+      "unitId": "enemy_sp_gold_vault_golem",
+      "formId": null,
+      "formOrder": null,
+      "score": 76,
+      "reasons": [
+        "weak-attack:0.0379"
+      ],
+      "nearestOther": {
+        "targetKey": "enemy_ch2_bonewheel",
+        "rootUnitId": "enemy_ch2_bonewheel",
+        "similarity": 0.8388
+      },
+      "motions": {
+        "idle": {
+          "frames": 7,
+          "frameWidth": 310,
+          "frameHeight": 290,
+          "occupancy": 0.4879,
+          "widthCoverage": 0.8742,
+          "heightCoverage": 0.7256,
+          "maxEdgeRatio": 0,
+          "avgDelta": 0.0016,
+          "maxDelta": 0.0025
+        },
+        "move": {
+          "frames": 8,
+          "frameWidth": 310,
+          "frameHeight": 290,
+          "occupancy": 0.5347,
+          "widthCoverage": 0.9371,
+          "heightCoverage": 0.7474,
+          "maxEdgeRatio": 0.0023,
+          "avgDelta": 0.161,
+          "maxDelta": 0.1639
+        },
+        "attack": {
+          "frames": 8,
+          "frameWidth": 310,
+          "frameHeight": 290,
+          "occupancy": 0.515,
+          "widthCoverage": 0.9492,
+          "heightCoverage": 0.7276,
+          "maxEdgeRatio": 0.004,
+          "avgDelta": 0.0221,
+          "maxDelta": 0.0379
         }
       }
     },
@@ -2923,218 +2851,6 @@
       }
     },
     {
-      "metadataFile": "recruitment-form-runtime-metadata.json",
-      "targetKey": "char_common_a_glass_keeper_f3",
-      "assetId": "unit:char_common_a_glass_keeper:char_common_a_glass_keeper_f3",
-      "unitId": "char_common_a_glass_keeper",
-      "formId": "char_common_a_glass_keeper_f3",
-      "formOrder": 3,
-      "score": 82,
-      "reasons": [
-        "low-attack:0.0262",
-        "weak-evolution-separation:0.8275"
-      ],
-      "nearestOther": {
-        "targetKey": "char_common_a_mirror_guide_f3",
-        "rootUnitId": "char_common_a_mirror_guide",
-        "similarity": 0.7434
-      },
-      "motions": {
-        "idle": {
-          "frames": 7,
-          "frameWidth": 267,
-          "frameHeight": 244,
-          "occupancy": 0.348,
-          "widthCoverage": 0.9925,
-          "heightCoverage": 0.8214,
-          "maxEdgeRatio": 0.0002,
-          "avgDelta": 0.0336,
-          "maxDelta": 0.0502
-        },
-        "move": {
-          "frames": 8,
-          "frameWidth": 267,
-          "frameHeight": 244,
-          "occupancy": 0.3481,
-          "widthCoverage": 0.9925,
-          "heightCoverage": 0.8094,
-          "maxEdgeRatio": 0.0002,
-          "avgDelta": 0.1928,
-          "maxDelta": 0.1935
-        },
-        "attack": {
-          "frames": 9,
-          "frameWidth": 267,
-          "frameHeight": 244,
-          "occupancy": 0.3559,
-          "widthCoverage": 0.9925,
-          "heightCoverage": 0.7992,
-          "maxEdgeRatio": 0.0021,
-          "avgDelta": 0.0262,
-          "maxDelta": 0.0757
-        }
-      }
-    },
-    {
-      "metadataFile": "recruitment-form-runtime-metadata.json",
-      "targetKey": "char_common_b_moss_golem_f3",
-      "assetId": "unit:char_common_b_moss_golem:char_common_b_moss_golem_f3",
-      "unitId": "char_common_b_moss_golem",
-      "formId": "char_common_b_moss_golem_f3",
-      "formOrder": 3,
-      "score": 82,
-      "reasons": [
-        "low-attack:0.0345",
-        "weak-evolution-separation:0.8504"
-      ],
-      "nearestOther": {
-        "targetKey": "char_common_a_meteor_cart_f3",
-        "rootUnitId": "char_common_a_meteor_cart",
-        "similarity": 0.806
-      },
-      "motions": {
-        "idle": {
-          "frames": 7,
-          "frameWidth": 292,
-          "frameHeight": 274,
-          "occupancy": 0.2658,
-          "widthCoverage": 0.8596,
-          "heightCoverage": 0.7862,
-          "maxEdgeRatio": 0,
-          "avgDelta": 0.0328,
-          "maxDelta": 0.049
-        },
-        "move": {
-          "frames": 8,
-          "frameWidth": 292,
-          "frameHeight": 274,
-          "occupancy": 0.2658,
-          "widthCoverage": 0.8596,
-          "heightCoverage": 0.7755,
-          "maxEdgeRatio": 0,
-          "avgDelta": 0.2013,
-          "maxDelta": 0.202
-        },
-        "attack": {
-          "frames": 8,
-          "frameWidth": 292,
-          "frameHeight": 274,
-          "occupancy": 0.2731,
-          "widthCoverage": 0.8682,
-          "heightCoverage": 0.7664,
-          "maxEdgeRatio": 0,
-          "avgDelta": 0.0345,
-          "maxDelta": 0.0887
-        }
-      }
-    },
-    {
-      "metadataFile": "recruitment-form-runtime-metadata.json",
-      "targetKey": "char_s02_gormu_f2",
-      "assetId": "unit:char_s02_gormu:char_s02_gormu_f2",
-      "unitId": "char_s02_gormu",
-      "formId": "char_s02_gormu_f2",
-      "formOrder": 2,
-      "score": 82,
-      "reasons": [
-        "low-attack:0.0305",
-        "weak-evolution-separation:0.85"
-      ],
-      "nearestOther": {
-        "targetKey": "char_s02_barga_f3",
-        "rootUnitId": "char_s02_barga",
-        "similarity": 0.7189
-      },
-      "motions": {
-        "idle": {
-          "frames": 8,
-          "frameWidth": 383,
-          "frameHeight": 331,
-          "occupancy": 0.1783,
-          "widthCoverage": 0.812,
-          "heightCoverage": 0.744,
-          "maxEdgeRatio": 0,
-          "avgDelta": 0.0341,
-          "maxDelta": 0.0478
-        },
-        "move": {
-          "frames": 8,
-          "frameWidth": 383,
-          "frameHeight": 331,
-          "occupancy": 0.1783,
-          "widthCoverage": 0.812,
-          "heightCoverage": 0.7356,
-          "maxEdgeRatio": 0,
-          "avgDelta": 0.1767,
-          "maxDelta": 0.1767
-        },
-        "attack": {
-          "frames": 11,
-          "frameWidth": 383,
-          "frameHeight": 331,
-          "occupancy": 0.182,
-          "widthCoverage": 0.8395,
-          "heightCoverage": 0.7281,
-          "maxEdgeRatio": 0,
-          "avgDelta": 0.0305,
-          "maxDelta": 0.1333
-        }
-      }
-    },
-    {
-      "metadataFile": "recruitment-form-runtime-metadata.json",
-      "targetKey": "char_s02_gormu_f3",
-      "assetId": "unit:char_s02_gormu:char_s02_gormu_f3",
-      "unitId": "char_s02_gormu",
-      "formId": "char_s02_gormu_f3",
-      "formOrder": 3,
-      "score": 82,
-      "reasons": [
-        "low-attack:0.033",
-        "weak-evolution-separation:0.85"
-      ],
-      "nearestOther": {
-        "targetKey": "char_s02_mogu_f3",
-        "rootUnitId": "char_s02_mogu",
-        "similarity": 0.7347
-      },
-      "motions": {
-        "idle": {
-          "frames": 8,
-          "frameWidth": 387,
-          "frameHeight": 334,
-          "occupancy": 0.2154,
-          "widthCoverage": 0.8217,
-          "heightCoverage": 0.7403,
-          "maxEdgeRatio": 0,
-          "avgDelta": 0.0311,
-          "maxDelta": 0.0432
-        },
-        "move": {
-          "frames": 8,
-          "frameWidth": 387,
-          "frameHeight": 334,
-          "occupancy": 0.2155,
-          "widthCoverage": 0.8217,
-          "heightCoverage": 0.732,
-          "maxEdgeRatio": 0,
-          "avgDelta": 0.1762,
-          "maxDelta": 0.1792
-        },
-        "attack": {
-          "frames": 12,
-          "frameWidth": 387,
-          "frameHeight": 334,
-          "occupancy": 0.2229,
-          "widthCoverage": 0.8488,
-          "heightCoverage": 0.7246,
-          "maxEdgeRatio": 0,
-          "avgDelta": 0.033,
-          "maxDelta": 0.1068
-        }
-      }
-    },
-    {
       "metadataFile": "special-content-runtime-metadata.json",
       "targetKey": "boss_sp_unobservable",
       "assetId": "unit:boss_sp_unobservable",
@@ -3235,6 +2951,110 @@
           "maxEdgeRatio": 0,
           "avgDelta": 0.0178,
           "maxDelta": 0.0834
+        }
+      }
+    },
+    {
+      "metadataFile": "recruitment-form-runtime-metadata.json",
+      "targetKey": "char_common_a_glass_keeper_f2",
+      "assetId": "unit:char_common_a_glass_keeper:char_common_a_glass_keeper_f2",
+      "unitId": "char_common_a_glass_keeper",
+      "formId": "char_common_a_glass_keeper_f2",
+      "formOrder": 2,
+      "score": 90,
+      "reasons": [
+        "low-attack:0.0332"
+      ],
+      "nearestOther": {
+        "targetKey": "char_s03_rxomega_f2",
+        "rootUnitId": "char_s03_rxomega",
+        "similarity": 0.6861
+      },
+      "motions": {
+        "idle": {
+          "frames": 7,
+          "frameWidth": 263,
+          "frameHeight": 241,
+          "occupancy": 0.3285,
+          "widthCoverage": 0.9924,
+          "heightCoverage": 0.8358,
+          "maxEdgeRatio": 0.0007,
+          "avgDelta": 0.0228,
+          "maxDelta": 0.0342
+        },
+        "move": {
+          "frames": 8,
+          "frameWidth": 263,
+          "frameHeight": 241,
+          "occupancy": 0.329,
+          "widthCoverage": 0.9924,
+          "heightCoverage": 0.8361,
+          "maxEdgeRatio": 0.0007,
+          "avgDelta": 0.139,
+          "maxDelta": 0.139
+        },
+        "attack": {
+          "frames": 8,
+          "frameWidth": 263,
+          "frameHeight": 241,
+          "occupancy": 0.3586,
+          "widthCoverage": 0.9924,
+          "heightCoverage": 0.8382,
+          "maxEdgeRatio": 0.0022,
+          "avgDelta": 0.0332,
+          "maxDelta": 0.0803
+        }
+      }
+    },
+    {
+      "metadataFile": "recruitment-form-runtime-metadata.json",
+      "targetKey": "char_common_a_glass_keeper_f3",
+      "assetId": "unit:char_common_a_glass_keeper:char_common_a_glass_keeper_f3",
+      "unitId": "char_common_a_glass_keeper",
+      "formId": "char_common_a_glass_keeper_f3",
+      "formOrder": 3,
+      "score": 90,
+      "reasons": [
+        "low-attack:0.0262"
+      ],
+      "nearestOther": {
+        "targetKey": "char_common_a_mirror_guide_f3",
+        "rootUnitId": "char_common_a_mirror_guide",
+        "similarity": 0.7434
+      },
+      "motions": {
+        "idle": {
+          "frames": 7,
+          "frameWidth": 267,
+          "frameHeight": 244,
+          "occupancy": 0.348,
+          "widthCoverage": 0.9925,
+          "heightCoverage": 0.8214,
+          "maxEdgeRatio": 0.0002,
+          "avgDelta": 0.0336,
+          "maxDelta": 0.0502
+        },
+        "move": {
+          "frames": 8,
+          "frameWidth": 267,
+          "frameHeight": 244,
+          "occupancy": 0.3481,
+          "widthCoverage": 0.9925,
+          "heightCoverage": 0.8094,
+          "maxEdgeRatio": 0.0002,
+          "avgDelta": 0.1928,
+          "maxDelta": 0.1935
+        },
+        "attack": {
+          "frames": 9,
+          "frameWidth": 267,
+          "frameHeight": 244,
+          "occupancy": 0.3559,
+          "widthCoverage": 0.9925,
+          "heightCoverage": 0.7992,
+          "maxEdgeRatio": 0.0021,
+          "avgDelta": 0.0262,
+          "maxDelta": 0.0757
         }
       }
     },
@@ -3396,6 +3216,214 @@
     },
     {
       "metadataFile": "recruitment-form-runtime-metadata.json",
+      "targetKey": "char_common_b_coffin_merchant_f3",
+      "assetId": "unit:char_common_b_coffin_merchant:char_common_b_coffin_merchant_f3",
+      "unitId": "char_common_b_coffin_merchant",
+      "formId": "char_common_b_coffin_merchant_f3",
+      "formOrder": 3,
+      "score": 90,
+      "reasons": [
+        "low-attack:0.0278"
+      ],
+      "nearestOther": {
+        "targetKey": "char_common_c_tin_squire_f3",
+        "rootUnitId": "char_common_c_tin_squire",
+        "similarity": 0.8095
+      },
+      "motions": {
+        "idle": {
+          "frames": 7,
+          "frameWidth": 247,
+          "frameHeight": 229,
+          "occupancy": 0.4956,
+          "widthCoverage": 0.9919,
+          "heightCoverage": 0.8665,
+          "maxEdgeRatio": 0.0036,
+          "avgDelta": 0.0184,
+          "maxDelta": 0.0295
+        },
+        "move": {
+          "frames": 8,
+          "frameWidth": 247,
+          "frameHeight": 229,
+          "occupancy": 0.4956,
+          "widthCoverage": 0.9919,
+          "heightCoverage": 0.869,
+          "maxEdgeRatio": 0.0036,
+          "avgDelta": 0.1126,
+          "maxDelta": 0.1167
+        },
+        "attack": {
+          "frames": 8,
+          "frameWidth": 247,
+          "frameHeight": 229,
+          "occupancy": 0.502,
+          "widthCoverage": 0.9919,
+          "heightCoverage": 0.869,
+          "maxEdgeRatio": 0.0051,
+          "avgDelta": 0.0278,
+          "maxDelta": 0.093
+        }
+      }
+    },
+    {
+      "metadataFile": "recruitment-form-runtime-metadata.json",
+      "targetKey": "char_common_b_moss_golem_f2",
+      "assetId": "unit:char_common_b_moss_golem:char_common_b_moss_golem_f2",
+      "unitId": "char_common_b_moss_golem",
+      "formId": "char_common_b_moss_golem_f2",
+      "formOrder": 2,
+      "score": 90,
+      "reasons": [
+        "low-attack:0.0281"
+      ],
+      "nearestOther": {
+        "targetKey": "char_common_b_coffin_merchant_f3",
+        "rootUnitId": "char_common_b_coffin_merchant",
+        "similarity": 0.6614
+      },
+      "motions": {
+        "idle": {
+          "frames": 7,
+          "frameWidth": 288,
+          "frameHeight": 271,
+          "occupancy": 0.288,
+          "widthCoverage": 0.8472,
+          "heightCoverage": 0.7986,
+          "maxEdgeRatio": 0.0016,
+          "avgDelta": 0.0262,
+          "maxDelta": 0.0393
+        },
+        "move": {
+          "frames": 8,
+          "frameWidth": 288,
+          "frameHeight": 271,
+          "occupancy": 0.2878,
+          "widthCoverage": 0.8472,
+          "heightCoverage": 0.7989,
+          "maxEdgeRatio": 0.0016,
+          "avgDelta": 0.157,
+          "maxDelta": 0.157
+        },
+        "attack": {
+          "frames": 7,
+          "frameWidth": 288,
+          "frameHeight": 271,
+          "occupancy": 0.2924,
+          "widthCoverage": 0.8611,
+          "heightCoverage": 0.8007,
+          "maxEdgeRatio": 0.0016,
+          "avgDelta": 0.0281,
+          "maxDelta": 0.0879
+        }
+      }
+    },
+    {
+      "metadataFile": "recruitment-form-runtime-metadata.json",
+      "targetKey": "char_common_b_moss_golem_f3",
+      "assetId": "unit:char_common_b_moss_golem:char_common_b_moss_golem_f3",
+      "unitId": "char_common_b_moss_golem",
+      "formId": "char_common_b_moss_golem_f3",
+      "formOrder": 3,
+      "score": 90,
+      "reasons": [
+        "low-attack:0.0345"
+      ],
+      "nearestOther": {
+        "targetKey": "char_common_a_meteor_cart_f3",
+        "rootUnitId": "char_common_a_meteor_cart",
+        "similarity": 0.806
+      },
+      "motions": {
+        "idle": {
+          "frames": 7,
+          "frameWidth": 292,
+          "frameHeight": 274,
+          "occupancy": 0.2658,
+          "widthCoverage": 0.8596,
+          "heightCoverage": 0.7862,
+          "maxEdgeRatio": 0,
+          "avgDelta": 0.0328,
+          "maxDelta": 0.049
+        },
+        "move": {
+          "frames": 8,
+          "frameWidth": 292,
+          "frameHeight": 274,
+          "occupancy": 0.2658,
+          "widthCoverage": 0.8596,
+          "heightCoverage": 0.7755,
+          "maxEdgeRatio": 0,
+          "avgDelta": 0.2013,
+          "maxDelta": 0.202
+        },
+        "attack": {
+          "frames": 8,
+          "frameWidth": 292,
+          "frameHeight": 274,
+          "occupancy": 0.2731,
+          "widthCoverage": 0.8682,
+          "heightCoverage": 0.7664,
+          "maxEdgeRatio": 0,
+          "avgDelta": 0.0345,
+          "maxDelta": 0.0887
+        }
+      }
+    },
+    {
+      "metadataFile": "recruitment-form-runtime-metadata.json",
+      "targetKey": "char_common_c_tin_squire_f3",
+      "assetId": "unit:char_common_c_tin_squire:char_common_c_tin_squire_f3",
+      "unitId": "char_common_c_tin_squire",
+      "formId": "char_common_c_tin_squire_f3",
+      "formOrder": 3,
+      "score": 90,
+      "reasons": [
+        "low-attack:0.0301"
+      ],
+      "nearestOther": {
+        "targetKey": "char_common_b_coffin_merchant_f3",
+        "rootUnitId": "char_common_b_coffin_merchant",
+        "similarity": 0.8095
+      },
+      "motions": {
+        "idle": {
+          "frames": 6,
+          "frameWidth": 232,
+          "frameHeight": 209,
+          "occupancy": 0.5544,
+          "widthCoverage": 0.9612,
+          "heightCoverage": 0.9011,
+          "maxEdgeRatio": 0.0026,
+          "avgDelta": 0.0225,
+          "maxDelta": 0.0303
+        },
+        "move": {
+          "frames": 8,
+          "frameWidth": 232,
+          "frameHeight": 209,
+          "occupancy": 0.5636,
+          "widthCoverage": 0.9612,
+          "heightCoverage": 1,
+          "maxEdgeRatio": 0.0036,
+          "avgDelta": 0.1383,
+          "maxDelta": 0.1431
+        },
+        "attack": {
+          "frames": 7,
+          "frameWidth": 232,
+          "frameHeight": 209,
+          "occupancy": 0.5566,
+          "widthCoverage": 0.9655,
+          "heightCoverage": 0.9043,
+          "maxEdgeRatio": 0.0026,
+          "avgDelta": 0.0301,
+          "maxDelta": 0.0888
+        }
+      }
+    },
+    {
+      "metadataFile": "recruitment-form-runtime-metadata.json",
       "targetKey": "char_common_c_turnip_rider_f3",
       "assetId": "unit:char_common_c_turnip_rider:char_common_c_turnip_rider_f3",
       "unitId": "char_common_c_turnip_rider",
@@ -3547,6 +3575,110 @@
           "maxEdgeRatio": 0,
           "avgDelta": 0.0236,
           "maxDelta": 0.0766
+        }
+      }
+    },
+    {
+      "metadataFile": "recruitment-form-runtime-metadata.json",
+      "targetKey": "char_s02_gormu_f2",
+      "assetId": "unit:char_s02_gormu:char_s02_gormu_f2",
+      "unitId": "char_s02_gormu",
+      "formId": "char_s02_gormu_f2",
+      "formOrder": 2,
+      "score": 90,
+      "reasons": [
+        "low-attack:0.0244"
+      ],
+      "nearestOther": {
+        "targetKey": "char_common_a_mirror_guide_f3",
+        "rootUnitId": "char_common_a_mirror_guide",
+        "similarity": 0.7219
+      },
+      "motions": {
+        "idle": {
+          "frames": 8,
+          "frameWidth": 383,
+          "frameHeight": 331,
+          "occupancy": 0.2154,
+          "widthCoverage": 0.812,
+          "heightCoverage": 0.744,
+          "maxEdgeRatio": 0,
+          "avgDelta": 0.0247,
+          "maxDelta": 0.0345
+        },
+        "move": {
+          "frames": 8,
+          "frameWidth": 383,
+          "frameHeight": 331,
+          "occupancy": 0.2152,
+          "widthCoverage": 0.812,
+          "heightCoverage": 0.7356,
+          "maxEdgeRatio": 0,
+          "avgDelta": 0.1344,
+          "maxDelta": 0.1344
+        },
+        "attack": {
+          "frames": 11,
+          "frameWidth": 383,
+          "frameHeight": 331,
+          "occupancy": 0.2259,
+          "widthCoverage": 0.8521,
+          "heightCoverage": 0.7281,
+          "maxEdgeRatio": 0,
+          "avgDelta": 0.0244,
+          "maxDelta": 0.0917
+        }
+      }
+    },
+    {
+      "metadataFile": "recruitment-form-runtime-metadata.json",
+      "targetKey": "char_s02_gormu_f3",
+      "assetId": "unit:char_s02_gormu:char_s02_gormu_f3",
+      "unitId": "char_s02_gormu",
+      "formId": "char_s02_gormu_f3",
+      "formOrder": 3,
+      "score": 90,
+      "reasons": [
+        "low-attack:0.033"
+      ],
+      "nearestOther": {
+        "targetKey": "char_s02_mogu_f3",
+        "rootUnitId": "char_s02_mogu",
+        "similarity": 0.7347
+      },
+      "motions": {
+        "idle": {
+          "frames": 8,
+          "frameWidth": 387,
+          "frameHeight": 334,
+          "occupancy": 0.2154,
+          "widthCoverage": 0.8217,
+          "heightCoverage": 0.7403,
+          "maxEdgeRatio": 0,
+          "avgDelta": 0.0311,
+          "maxDelta": 0.0432
+        },
+        "move": {
+          "frames": 8,
+          "frameWidth": 387,
+          "frameHeight": 334,
+          "occupancy": 0.2155,
+          "widthCoverage": 0.8217,
+          "heightCoverage": 0.732,
+          "maxEdgeRatio": 0,
+          "avgDelta": 0.1762,
+          "maxDelta": 0.1792
+        },
+        "attack": {
+          "frames": 12,
+          "frameWidth": 387,
+          "frameHeight": 334,
+          "occupancy": 0.2229,
+          "widthCoverage": 0.8488,
+          "heightCoverage": 0.7246,
+          "maxEdgeRatio": 0,
+          "avgDelta": 0.033,
+          "maxDelta": 0.1068
         }
       }
     },
@@ -4015,734 +4147,6 @@
           "maxEdgeRatio": 0,
           "avgDelta": 0.1737,
           "maxDelta": 0.2759
-        }
-      }
-    },
-    {
-      "metadataFile": "recruitment-form-runtime-metadata.json",
-      "targetKey": "char_common_a_glass_keeper_f1",
-      "assetId": "unit:char_common_a_glass_keeper:char_common_a_glass_keeper_f1",
-      "unitId": "char_common_a_glass_keeper",
-      "formId": "char_common_a_glass_keeper_f1",
-      "formOrder": 1,
-      "score": 92,
-      "reasons": [
-        "weak-evolution-separation:0.8275"
-      ],
-      "nearestOther": {
-        "targetKey": "char_common_b_moss_golem_f2",
-        "rootUnitId": "char_common_b_moss_golem",
-        "similarity": 0.6751
-      },
-      "motions": {
-        "idle": {
-          "frames": 7,
-          "frameWidth": 259,
-          "frameHeight": 238,
-          "occupancy": 0.2515,
-          "widthCoverage": 0.9807,
-          "heightCoverage": 0.8295,
-          "maxEdgeRatio": 0,
-          "avgDelta": 0.0411,
-          "maxDelta": 0.0617
-        },
-        "move": {
-          "frames": 8,
-          "frameWidth": 259,
-          "frameHeight": 238,
-          "occupancy": 0.2517,
-          "widthCoverage": 0.9807,
-          "heightCoverage": 0.8172,
-          "maxEdgeRatio": 0,
-          "avgDelta": 0.2404,
-          "maxDelta": 0.2404
-        },
-        "attack": {
-          "frames": 8,
-          "frameWidth": 259,
-          "frameHeight": 238,
-          "occupancy": 0.2619,
-          "widthCoverage": 0.9908,
-          "heightCoverage": 0.8067,
-          "maxEdgeRatio": 0.0021,
-          "avgDelta": 0.0554,
-          "maxDelta": 0.1839
-        }
-      }
-    },
-    {
-      "metadataFile": "recruitment-form-runtime-metadata.json",
-      "targetKey": "char_common_a_glass_keeper_f2",
-      "assetId": "unit:char_common_a_glass_keeper:char_common_a_glass_keeper_f2",
-      "unitId": "char_common_a_glass_keeper",
-      "formId": "char_common_a_glass_keeper_f2",
-      "formOrder": 2,
-      "score": 92,
-      "reasons": [
-        "weak-evolution-separation:0.8275"
-      ],
-      "nearestOther": {
-        "targetKey": "char_s03_rxomega_f2",
-        "rootUnitId": "char_s03_rxomega",
-        "similarity": 0.7302
-      },
-      "motions": {
-        "idle": {
-          "frames": 7,
-          "frameWidth": 263,
-          "frameHeight": 241,
-          "occupancy": 0.2842,
-          "widthCoverage": 0.9924,
-          "heightCoverage": 0.8275,
-          "maxEdgeRatio": 0.0001,
-          "avgDelta": 0.0344,
-          "maxDelta": 0.0515
-        },
-        "move": {
-          "frames": 8,
-          "frameWidth": 263,
-          "frameHeight": 241,
-          "occupancy": 0.2846,
-          "widthCoverage": 0.9924,
-          "heightCoverage": 0.8154,
-          "maxEdgeRatio": 0.0001,
-          "avgDelta": 0.2183,
-          "maxDelta": 0.2183
-        },
-        "attack": {
-          "frames": 8,
-          "frameWidth": 263,
-          "frameHeight": 241,
-          "occupancy": 0.295,
-          "widthCoverage": 0.9924,
-          "heightCoverage": 0.805,
-          "maxEdgeRatio": 0.002,
-          "avgDelta": 0.0361,
-          "maxDelta": 0.12
-        }
-      }
-    },
-    {
-      "metadataFile": "recruitment-form-runtime-metadata.json",
-      "targetKey": "char_common_b_coffin_merchant_f1",
-      "assetId": "unit:char_common_b_coffin_merchant:char_common_b_coffin_merchant_f1",
-      "unitId": "char_common_b_coffin_merchant",
-      "formId": "char_common_b_coffin_merchant_f1",
-      "formOrder": 1,
-      "score": 92,
-      "reasons": [
-        "weak-evolution-separation:0.8699"
-      ],
-      "nearestOther": {
-        "targetKey": "char_common_a_bonedrum_f2",
-        "rootUnitId": "char_common_a_bonedrum",
-        "similarity": 0.7133
-      },
-      "motions": {
-        "idle": {
-          "frames": 7,
-          "frameWidth": 239,
-          "frameHeight": 223,
-          "occupancy": 0.2691,
-          "widthCoverage": 0.9874,
-          "heightCoverage": 0.8674,
-          "maxEdgeRatio": 0.0001,
-          "avgDelta": 0.0425,
-          "maxDelta": 0.0637
-        },
-        "move": {
-          "frames": 8,
-          "frameWidth": 239,
-          "frameHeight": 223,
-          "occupancy": 0.2689,
-          "widthCoverage": 0.9874,
-          "heightCoverage": 0.8543,
-          "maxEdgeRatio": 0.0001,
-          "avgDelta": 0.2338,
-          "maxDelta": 0.2338
-        },
-        "attack": {
-          "frames": 7,
-          "frameWidth": 239,
-          "frameHeight": 223,
-          "occupancy": 0.279,
-          "widthCoverage": 0.991,
-          "heightCoverage": 0.843,
-          "maxEdgeRatio": 0.0027,
-          "avgDelta": 0.0883,
-          "maxDelta": 0.2472
-        }
-      }
-    },
-    {
-      "metadataFile": "recruitment-form-runtime-metadata.json",
-      "targetKey": "char_common_b_coffin_merchant_f2",
-      "assetId": "unit:char_common_b_coffin_merchant:char_common_b_coffin_merchant_f2",
-      "unitId": "char_common_b_coffin_merchant",
-      "formId": "char_common_b_coffin_merchant_f2",
-      "formOrder": 2,
-      "score": 92,
-      "reasons": [
-        "weak-evolution-separation:0.8699"
-      ],
-      "nearestOther": {
-        "targetKey": "char_common_a_bonedrum_f2",
-        "rootUnitId": "char_common_a_bonedrum",
-        "similarity": 0.7878
-      },
-      "motions": {
-        "idle": {
-          "frames": 7,
-          "frameWidth": 243,
-          "frameHeight": 226,
-          "occupancy": 0.304,
-          "widthCoverage": 0.9918,
-          "heightCoverage": 0.8603,
-          "maxEdgeRatio": 0.0002,
-          "avgDelta": 0.0358,
-          "maxDelta": 0.0536
-        },
-        "move": {
-          "frames": 8,
-          "frameWidth": 243,
-          "frameHeight": 226,
-          "occupancy": 0.3038,
-          "widthCoverage": 0.9918,
-          "heightCoverage": 0.8473,
-          "maxEdgeRatio": 0.0002,
-          "avgDelta": 0.2004,
-          "maxDelta": 0.2004
-        },
-        "attack": {
-          "frames": 7,
-          "frameWidth": 243,
-          "frameHeight": 226,
-          "occupancy": 0.3146,
-          "widthCoverage": 0.9918,
-          "heightCoverage": 0.8363,
-          "maxEdgeRatio": 0.003,
-          "avgDelta": 0.0732,
-          "maxDelta": 0.2153
-        }
-      }
-    },
-    {
-      "metadataFile": "recruitment-form-runtime-metadata.json",
-      "targetKey": "char_common_b_coffin_merchant_f3",
-      "assetId": "unit:char_common_b_coffin_merchant:char_common_b_coffin_merchant_f3",
-      "unitId": "char_common_b_coffin_merchant",
-      "formId": "char_common_b_coffin_merchant_f3",
-      "formOrder": 3,
-      "score": 92,
-      "reasons": [
-        "weak-evolution-separation:0.8699"
-      ],
-      "nearestOther": {
-        "targetKey": "char_common_a_bonedrum_f2",
-        "rootUnitId": "char_common_a_bonedrum",
-        "similarity": 0.7808
-      },
-      "motions": {
-        "idle": {
-          "frames": 7,
-          "frameWidth": 247,
-          "frameHeight": 229,
-          "occupancy": 0.3414,
-          "widthCoverage": 0.9919,
-          "heightCoverage": 0.8578,
-          "maxEdgeRatio": 0.0005,
-          "avgDelta": 0.0351,
-          "maxDelta": 0.054
-        },
-        "move": {
-          "frames": 8,
-          "frameWidth": 247,
-          "frameHeight": 229,
-          "occupancy": 0.3414,
-          "widthCoverage": 0.9919,
-          "heightCoverage": 0.845,
-          "maxEdgeRatio": 0.0005,
-          "avgDelta": 0.1917,
-          "maxDelta": 0.1963
-        },
-        "attack": {
-          "frames": 8,
-          "frameWidth": 247,
-          "frameHeight": 229,
-          "occupancy": 0.3509,
-          "widthCoverage": 0.9919,
-          "heightCoverage": 0.8341,
-          "maxEdgeRatio": 0.0027,
-          "avgDelta": 0.0495,
-          "maxDelta": 0.1534
-        }
-      }
-    },
-    {
-      "metadataFile": "recruitment-form-runtime-metadata.json",
-      "targetKey": "char_common_b_moss_golem_f1",
-      "assetId": "unit:char_common_b_moss_golem:char_common_b_moss_golem_f1",
-      "unitId": "char_common_b_moss_golem",
-      "formId": "char_common_b_moss_golem_f1",
-      "formOrder": 1,
-      "score": 92,
-      "reasons": [
-        "weak-evolution-separation:0.8504"
-      ],
-      "nearestOther": {
-        "targetKey": "char_common_a_glass_keeper_f1",
-        "rootUnitId": "char_common_a_glass_keeper",
-        "similarity": 0.6705
-      },
-      "motions": {
-        "idle": {
-          "frames": 7,
-          "frameWidth": 284,
-          "frameHeight": 268,
-          "occupancy": 0.2025,
-          "widthCoverage": 0.838,
-          "heightCoverage": 0.7926,
-          "maxEdgeRatio": 0,
-          "avgDelta": 0.0401,
-          "maxDelta": 0.0601
-        },
-        "move": {
-          "frames": 8,
-          "frameWidth": 284,
-          "frameHeight": 268,
-          "occupancy": 0.2028,
-          "widthCoverage": 0.838,
-          "heightCoverage": 0.7817,
-          "maxEdgeRatio": 0,
-          "avgDelta": 0.232,
-          "maxDelta": 0.232
-        },
-        "attack": {
-          "frames": 7,
-          "frameWidth": 284,
-          "frameHeight": 268,
-          "occupancy": 0.206,
-          "widthCoverage": 0.8622,
-          "heightCoverage": 0.7724,
-          "maxEdgeRatio": 0,
-          "avgDelta": 0.0689,
-          "maxDelta": 0.2061
-        }
-      }
-    },
-    {
-      "metadataFile": "recruitment-form-runtime-metadata.json",
-      "targetKey": "char_common_b_moss_golem_f2",
-      "assetId": "unit:char_common_b_moss_golem:char_common_b_moss_golem_f2",
-      "unitId": "char_common_b_moss_golem",
-      "formId": "char_common_b_moss_golem_f2",
-      "formOrder": 2,
-      "score": 92,
-      "reasons": [
-        "weak-evolution-separation:0.8504"
-      ],
-      "nearestOther": {
-        "targetKey": "char_s01_mireille_f3",
-        "rootUnitId": "char_s01_mireille",
-        "similarity": 0.7324
-      },
-      "motions": {
-        "idle": {
-          "frames": 7,
-          "frameWidth": 288,
-          "frameHeight": 271,
-          "occupancy": 0.2277,
-          "widthCoverage": 0.8472,
-          "heightCoverage": 0.7912,
-          "maxEdgeRatio": 0,
-          "avgDelta": 0.0373,
-          "maxDelta": 0.056
-        },
-        "move": {
-          "frames": 8,
-          "frameWidth": 288,
-          "frameHeight": 271,
-          "occupancy": 0.2279,
-          "widthCoverage": 0.8472,
-          "heightCoverage": 0.7804,
-          "maxEdgeRatio": 0,
-          "avgDelta": 0.2138,
-          "maxDelta": 0.2138
-        },
-        "attack": {
-          "frames": 7,
-          "frameWidth": 288,
-          "frameHeight": 271,
-          "occupancy": 0.2317,
-          "widthCoverage": 0.8611,
-          "heightCoverage": 0.7712,
-          "maxEdgeRatio": 0,
-          "avgDelta": 0.0395,
-          "maxDelta": 0.1228
-        }
-      }
-    },
-    {
-      "metadataFile": "recruitment-form-runtime-metadata.json",
-      "targetKey": "char_common_c_tin_squire_f1",
-      "assetId": "unit:char_common_c_tin_squire:char_common_c_tin_squire_f1",
-      "unitId": "char_common_c_tin_squire",
-      "formId": "char_common_c_tin_squire_f1",
-      "formOrder": 1,
-      "score": 92,
-      "reasons": [
-        "weak-evolution-separation:0.8537"
-      ],
-      "nearestOther": {
-        "targetKey": "char_common_a_glass_keeper_f3",
-        "rootUnitId": "char_common_a_glass_keeper",
-        "similarity": 0.6587
-      },
-      "motions": {
-        "idle": {
-          "frames": 6,
-          "frameWidth": 224,
-          "frameHeight": 203,
-          "occupancy": 0.2903,
-          "widthCoverage": 0.7902,
-          "heightCoverage": 0.9031,
-          "maxEdgeRatio": 0,
-          "avgDelta": 0.0643,
-          "maxDelta": 0.0804
-        },
-        "move": {
-          "frames": 8,
-          "frameWidth": 224,
-          "frameHeight": 203,
-          "occupancy": 0.29,
-          "widthCoverage": 0.7902,
-          "heightCoverage": 0.8892,
-          "maxEdgeRatio": 0,
-          "avgDelta": 0.2715,
-          "maxDelta": 0.2715
-        },
-        "attack": {
-          "frames": 6,
-          "frameWidth": 224,
-          "frameHeight": 203,
-          "occupancy": 0.296,
-          "widthCoverage": 0.9487,
-          "heightCoverage": 0.8768,
-          "maxEdgeRatio": 0.0007,
-          "avgDelta": 0.1066,
-          "maxDelta": 0.2937
-        }
-      }
-    },
-    {
-      "metadataFile": "recruitment-form-runtime-metadata.json",
-      "targetKey": "char_common_c_tin_squire_f2",
-      "assetId": "unit:char_common_c_tin_squire:char_common_c_tin_squire_f2",
-      "unitId": "char_common_c_tin_squire",
-      "formId": "char_common_c_tin_squire_f2",
-      "formOrder": 2,
-      "score": 92,
-      "reasons": [
-        "weak-evolution-separation:0.8537"
-      ],
-      "nearestOther": {
-        "targetKey": "char_common_a_bonedrum",
-        "rootUnitId": "char_common_a_bonedrum",
-        "similarity": 0.7517
-      },
-      "motions": {
-        "idle": {
-          "frames": 6,
-          "frameWidth": 228,
-          "frameHeight": 206,
-          "occupancy": 0.3583,
-          "widthCoverage": 0.7939,
-          "heightCoverage": 0.8948,
-          "maxEdgeRatio": 0,
-          "avgDelta": 0.0473,
-          "maxDelta": 0.0592
-        },
-        "move": {
-          "frames": 8,
-          "frameWidth": 228,
-          "frameHeight": 206,
-          "occupancy": 0.3579,
-          "widthCoverage": 0.7939,
-          "heightCoverage": 0.8811,
-          "maxEdgeRatio": 0,
-          "avgDelta": 0.2073,
-          "maxDelta": 0.2073
-        },
-        "attack": {
-          "frames": 6,
-          "frameWidth": 228,
-          "frameHeight": 206,
-          "occupancy": 0.3643,
-          "widthCoverage": 0.9437,
-          "heightCoverage": 0.8689,
-          "maxEdgeRatio": 0.0004,
-          "avgDelta": 0.0779,
-          "maxDelta": 0.1988
-        }
-      }
-    },
-    {
-      "metadataFile": "recruitment-form-runtime-metadata.json",
-      "targetKey": "char_common_c_tin_squire_f3",
-      "assetId": "unit:char_common_c_tin_squire:char_common_c_tin_squire_f3",
-      "unitId": "char_common_c_tin_squire",
-      "formId": "char_common_c_tin_squire_f3",
-      "formOrder": 3,
-      "score": 92,
-      "reasons": [
-        "weak-evolution-separation:0.8537"
-      ],
-      "nearestOther": {
-        "targetKey": "enemy_sp_evo_mirror_seal",
-        "rootUnitId": "enemy_sp_evo_mirror_seal",
-        "similarity": 0.7713
-      },
-      "motions": {
-        "idle": {
-          "frames": 6,
-          "frameWidth": 232,
-          "frameHeight": 209,
-          "occupancy": 0.4268,
-          "widthCoverage": 0.8534,
-          "heightCoverage": 0.8915,
-          "maxEdgeRatio": 0,
-          "avgDelta": 0.0355,
-          "maxDelta": 0.046
-        },
-        "move": {
-          "frames": 8,
-          "frameWidth": 232,
-          "frameHeight": 209,
-          "occupancy": 0.4265,
-          "widthCoverage": 0.8534,
-          "heightCoverage": 0.878,
-          "maxEdgeRatio": 0,
-          "avgDelta": 0.1713,
-          "maxDelta": 0.1763
-        },
-        "attack": {
-          "frames": 7,
-          "frameWidth": 232,
-          "frameHeight": 209,
-          "occupancy": 0.4339,
-          "widthCoverage": 0.947,
-          "heightCoverage": 0.866,
-          "maxEdgeRatio": 0.0001,
-          "avgDelta": 0.0464,
-          "maxDelta": 0.1205
-        }
-      }
-    },
-    {
-      "metadataFile": "recruitment-form-runtime-metadata.json",
-      "targetKey": "char_s02_gormu_f1",
-      "assetId": "unit:char_s02_gormu:char_s02_gormu_f1",
-      "unitId": "char_s02_gormu",
-      "formId": "char_s02_gormu_f1",
-      "formOrder": 1,
-      "score": 92,
-      "reasons": [
-        "weak-evolution-separation:0.85"
-      ],
-      "nearestOther": {
-        "targetKey": "char_s01_arselia_f3",
-        "rootUnitId": "char_s01_arselia",
-        "similarity": 0.7348
-      },
-      "motions": {
-        "idle": {
-          "frames": 8,
-          "frameWidth": 379,
-          "frameHeight": 328,
-          "occupancy": 0.1529,
-          "widthCoverage": 0.8021,
-          "heightCoverage": 0.7447,
-          "maxEdgeRatio": 0,
-          "avgDelta": 0.0535,
-          "maxDelta": 0.0749
-        },
-        "move": {
-          "frames": 8,
-          "frameWidth": 379,
-          "frameHeight": 328,
-          "occupancy": 0.1531,
-          "widthCoverage": 0.8021,
-          "heightCoverage": 0.7363,
-          "maxEdgeRatio": 0,
-          "avgDelta": 0.2465,
-          "maxDelta": 0.2465
-        },
-        "attack": {
-          "frames": 11,
-          "frameWidth": 379,
-          "frameHeight": 328,
-          "occupancy": 0.1551,
-          "widthCoverage": 0.8299,
-          "heightCoverage": 0.7287,
-          "maxEdgeRatio": 0,
-          "avgDelta": 0.0402,
-          "maxDelta": 0.1822
-        }
-      }
-    },
-    {
-      "metadataFile": "recruitment-form-runtime-metadata.json",
-      "targetKey": "char_s03_nana04_f1",
-      "assetId": "unit:char_s03_nana04:char_s03_nana04_f1",
-      "unitId": "char_s03_nana04",
-      "formId": "char_s03_nana04_f1",
-      "formOrder": 1,
-      "score": 92,
-      "reasons": [
-        "weak-evolution-separation:0.8305"
-      ],
-      "nearestOther": {
-        "targetKey": "char_s03_rxomega_f1",
-        "rootUnitId": "char_s03_rxomega",
-        "similarity": 0.7644
-      },
-      "motions": {
-        "idle": {
-          "frames": 8,
-          "frameWidth": 314,
-          "frameHeight": 273,
-          "occupancy": 0.129,
-          "widthCoverage": 0.8662,
-          "heightCoverage": 0.8068,
-          "maxEdgeRatio": 0,
-          "avgDelta": 0.0593,
-          "maxDelta": 0.083
-        },
-        "move": {
-          "frames": 8,
-          "frameWidth": 314,
-          "frameHeight": 273,
-          "occupancy": 0.1294,
-          "widthCoverage": 0.8662,
-          "heightCoverage": 0.7967,
-          "maxEdgeRatio": 0,
-          "avgDelta": 0.3481,
-          "maxDelta": 0.3481
-        },
-        "attack": {
-          "frames": 9,
-          "frameWidth": 314,
-          "frameHeight": 273,
-          "occupancy": 0.1315,
-          "widthCoverage": 0.9126,
-          "heightCoverage": 0.7875,
-          "maxEdgeRatio": 0,
-          "avgDelta": 0.0706,
-          "maxDelta": 0.2774
-        }
-      }
-    },
-    {
-      "metadataFile": "recruitment-form-runtime-metadata.json",
-      "targetKey": "char_s03_nana04_f2",
-      "assetId": "unit:char_s03_nana04:char_s03_nana04_f2",
-      "unitId": "char_s03_nana04",
-      "formId": "char_s03_nana04_f2",
-      "formOrder": 2,
-      "score": 92,
-      "reasons": [
-        "weak-evolution-separation:0.8305"
-      ],
-      "nearestOther": {
-        "targetKey": "char_s03_rxomega_f1",
-        "rootUnitId": "char_s03_rxomega",
-        "similarity": 0.7673
-      },
-      "motions": {
-        "idle": {
-          "frames": 8,
-          "frameWidth": 318,
-          "frameHeight": 276,
-          "occupancy": 0.1562,
-          "widthCoverage": 0.8774,
-          "heightCoverage": 0.8016,
-          "maxEdgeRatio": 0,
-          "avgDelta": 0.0447,
-          "maxDelta": 0.0626
-        },
-        "move": {
-          "frames": 8,
-          "frameWidth": 318,
-          "frameHeight": 276,
-          "occupancy": 0.1567,
-          "widthCoverage": 0.8774,
-          "heightCoverage": 0.7917,
-          "maxEdgeRatio": 0,
-          "avgDelta": 0.2516,
-          "maxDelta": 0.2516
-        },
-        "attack": {
-          "frames": 9,
-          "frameWidth": 318,
-          "frameHeight": 276,
-          "occupancy": 0.1587,
-          "widthCoverage": 0.9168,
-          "heightCoverage": 0.7826,
-          "maxEdgeRatio": 0,
-          "avgDelta": 0.0438,
-          "maxDelta": 0.1679
-        }
-      }
-    },
-    {
-      "metadataFile": "recruitment-form-runtime-metadata.json",
-      "targetKey": "char_s03_nana04_f3",
-      "assetId": "unit:char_s03_nana04:char_s03_nana04_f3",
-      "unitId": "char_s03_nana04",
-      "formId": "char_s03_nana04_f3",
-      "formOrder": 3,
-      "score": 92,
-      "reasons": [
-        "weak-evolution-separation:0.8305"
-      ],
-      "nearestOther": {
-        "targetKey": "char_s01_mireille_f3",
-        "rootUnitId": "char_s01_mireille",
-        "similarity": 0.7529
-      },
-      "motions": {
-        "idle": {
-          "frames": 8,
-          "frameWidth": 322,
-          "frameHeight": 279,
-          "occupancy": 0.1834,
-          "widthCoverage": 0.8882,
-          "heightCoverage": 0.8002,
-          "maxEdgeRatio": 0,
-          "avgDelta": 0.044,
-          "maxDelta": 0.0623
-        },
-        "move": {
-          "frames": 8,
-          "frameWidth": 322,
-          "frameHeight": 279,
-          "occupancy": 0.1834,
-          "widthCoverage": 0.8882,
-          "heightCoverage": 0.7903,
-          "maxEdgeRatio": 0,
-          "avgDelta": 0.2462,
-          "maxDelta": 0.2506
-        },
-        "attack": {
-          "frames": 10,
-          "frameWidth": 322,
-          "frameHeight": 279,
-          "occupancy": 0.1886,
-          "widthCoverage": 0.923,
-          "heightCoverage": 0.7814,
-          "maxEdgeRatio": 0,
-          "avgDelta": 0.0453,
-          "maxDelta": 0.1425
         }
       }
     },
@@ -5649,6 +5053,56 @@
       }
     },
     {
+      "metadataFile": "recruitment-form-runtime-metadata.json",
+      "targetKey": "char_common_a_glass_keeper_f1",
+      "assetId": "unit:char_common_a_glass_keeper:char_common_a_glass_keeper_f1",
+      "unitId": "char_common_a_glass_keeper",
+      "formId": "char_common_a_glass_keeper_f1",
+      "formOrder": 1,
+      "score": 100,
+      "reasons": [],
+      "nearestOther": {
+        "targetKey": "char_common_b_moss_golem_f1",
+        "rootUnitId": "char_common_b_moss_golem",
+        "similarity": 0.6705
+      },
+      "motions": {
+        "idle": {
+          "frames": 7,
+          "frameWidth": 259,
+          "frameHeight": 238,
+          "occupancy": 0.2515,
+          "widthCoverage": 0.9807,
+          "heightCoverage": 0.8295,
+          "maxEdgeRatio": 0,
+          "avgDelta": 0.0411,
+          "maxDelta": 0.0617
+        },
+        "move": {
+          "frames": 8,
+          "frameWidth": 259,
+          "frameHeight": 238,
+          "occupancy": 0.2517,
+          "widthCoverage": 0.9807,
+          "heightCoverage": 0.8172,
+          "maxEdgeRatio": 0,
+          "avgDelta": 0.2404,
+          "maxDelta": 0.2404
+        },
+        "attack": {
+          "frames": 8,
+          "frameWidth": 259,
+          "frameHeight": 238,
+          "occupancy": 0.2619,
+          "widthCoverage": 0.9908,
+          "heightCoverage": 0.8067,
+          "maxEdgeRatio": 0.0021,
+          "avgDelta": 0.0554,
+          "maxDelta": 0.1839
+        }
+      }
+    },
+    {
       "metadataFile": "recruitment-runtime-metadata.json",
       "targetKey": "char_common_a_meteor_cart",
       "assetId": "unit:char_common_a_meteor_cart",
@@ -6349,6 +5803,106 @@
       }
     },
     {
+      "metadataFile": "recruitment-form-runtime-metadata.json",
+      "targetKey": "char_common_b_coffin_merchant_f1",
+      "assetId": "unit:char_common_b_coffin_merchant:char_common_b_coffin_merchant_f1",
+      "unitId": "char_common_b_coffin_merchant",
+      "formId": "char_common_b_coffin_merchant_f1",
+      "formOrder": 1,
+      "score": 100,
+      "reasons": [],
+      "nearestOther": {
+        "targetKey": "char_common_a_bonedrum_f2",
+        "rootUnitId": "char_common_a_bonedrum",
+        "similarity": 0.7133
+      },
+      "motions": {
+        "idle": {
+          "frames": 7,
+          "frameWidth": 239,
+          "frameHeight": 223,
+          "occupancy": 0.2691,
+          "widthCoverage": 0.9874,
+          "heightCoverage": 0.8674,
+          "maxEdgeRatio": 0.0001,
+          "avgDelta": 0.0425,
+          "maxDelta": 0.0637
+        },
+        "move": {
+          "frames": 8,
+          "frameWidth": 239,
+          "frameHeight": 223,
+          "occupancy": 0.2689,
+          "widthCoverage": 0.9874,
+          "heightCoverage": 0.8543,
+          "maxEdgeRatio": 0.0001,
+          "avgDelta": 0.2338,
+          "maxDelta": 0.2338
+        },
+        "attack": {
+          "frames": 7,
+          "frameWidth": 239,
+          "frameHeight": 223,
+          "occupancy": 0.279,
+          "widthCoverage": 0.991,
+          "heightCoverage": 0.843,
+          "maxEdgeRatio": 0.0027,
+          "avgDelta": 0.0883,
+          "maxDelta": 0.2472
+        }
+      }
+    },
+    {
+      "metadataFile": "recruitment-form-runtime-metadata.json",
+      "targetKey": "char_common_b_coffin_merchant_f2",
+      "assetId": "unit:char_common_b_coffin_merchant:char_common_b_coffin_merchant_f2",
+      "unitId": "char_common_b_coffin_merchant",
+      "formId": "char_common_b_coffin_merchant_f2",
+      "formOrder": 2,
+      "score": 100,
+      "reasons": [],
+      "nearestOther": {
+        "targetKey": "enemy_sp_gold_cart",
+        "rootUnitId": "enemy_sp_gold_cart",
+        "similarity": 0.6972
+      },
+      "motions": {
+        "idle": {
+          "frames": 7,
+          "frameWidth": 243,
+          "frameHeight": 226,
+          "occupancy": 0.4188,
+          "widthCoverage": 0.9918,
+          "heightCoverage": 0.8692,
+          "maxEdgeRatio": 0.0017,
+          "avgDelta": 0.0232,
+          "maxDelta": 0.0349
+        },
+        "move": {
+          "frames": 8,
+          "frameWidth": 243,
+          "frameHeight": 226,
+          "occupancy": 0.4186,
+          "widthCoverage": 0.9918,
+          "heightCoverage": 0.8695,
+          "maxEdgeRatio": 0.0017,
+          "avgDelta": 0.1359,
+          "maxDelta": 0.1359
+        },
+        "attack": {
+          "frames": 7,
+          "frameWidth": 243,
+          "frameHeight": 226,
+          "occupancy": 0.4312,
+          "widthCoverage": 0.9918,
+          "heightCoverage": 0.8717,
+          "maxEdgeRatio": 0.0037,
+          "avgDelta": 0.0455,
+          "maxDelta": 0.1338
+        }
+      }
+    },
+    {
       "metadataFile": "recruitment-runtime-metadata.json",
       "targetKey": "char_common_b_ink_raven",
       "assetId": "unit:char_common_b_ink_raven",
@@ -6799,6 +6353,56 @@
       }
     },
     {
+      "metadataFile": "recruitment-form-runtime-metadata.json",
+      "targetKey": "char_common_b_moss_golem_f1",
+      "assetId": "unit:char_common_b_moss_golem:char_common_b_moss_golem_f1",
+      "unitId": "char_common_b_moss_golem",
+      "formId": "char_common_b_moss_golem_f1",
+      "formOrder": 1,
+      "score": 100,
+      "reasons": [],
+      "nearestOther": {
+        "targetKey": "char_common_a_glass_keeper_f1",
+        "rootUnitId": "char_common_a_glass_keeper",
+        "similarity": 0.6705
+      },
+      "motions": {
+        "idle": {
+          "frames": 7,
+          "frameWidth": 284,
+          "frameHeight": 268,
+          "occupancy": 0.2025,
+          "widthCoverage": 0.838,
+          "heightCoverage": 0.7926,
+          "maxEdgeRatio": 0,
+          "avgDelta": 0.0401,
+          "maxDelta": 0.0601
+        },
+        "move": {
+          "frames": 8,
+          "frameWidth": 284,
+          "frameHeight": 268,
+          "occupancy": 0.2028,
+          "widthCoverage": 0.838,
+          "heightCoverage": 0.7817,
+          "maxEdgeRatio": 0,
+          "avgDelta": 0.232,
+          "maxDelta": 0.232
+        },
+        "attack": {
+          "frames": 7,
+          "frameWidth": 284,
+          "frameHeight": 268,
+          "occupancy": 0.206,
+          "widthCoverage": 0.8622,
+          "heightCoverage": 0.7724,
+          "maxEdgeRatio": 0,
+          "avgDelta": 0.0689,
+          "maxDelta": 0.2061
+        }
+      }
+    },
+    {
       "metadataFile": "recruitment-runtime-metadata.json",
       "targetKey": "char_common_c_bell_crab",
       "assetId": "unit:char_common_c_bell_crab",
@@ -7008,9 +6612,9 @@
       "score": 100,
       "reasons": [],
       "nearestOther": {
-        "targetKey": "char_common_c_tin_squire_f3",
-        "rootUnitId": "char_common_c_tin_squire",
-        "similarity": 0.6636
+        "targetKey": "enemy_sp_evo_mirror_seal",
+        "rootUnitId": "enemy_sp_evo_mirror_seal",
+        "similarity": 0.6467
       },
       "motions": {
         "idle": {
@@ -7445,6 +7049,106 @@
           "maxEdgeRatio": 0,
           "avgDelta": 0.1134,
           "maxDelta": 0.3115
+        }
+      }
+    },
+    {
+      "metadataFile": "recruitment-form-runtime-metadata.json",
+      "targetKey": "char_common_c_tin_squire_f1",
+      "assetId": "unit:char_common_c_tin_squire:char_common_c_tin_squire_f1",
+      "unitId": "char_common_c_tin_squire",
+      "formId": "char_common_c_tin_squire_f1",
+      "formOrder": 1,
+      "score": 100,
+      "reasons": [],
+      "nearestOther": {
+        "targetKey": "char_common_a_glass_keeper_f2",
+        "rootUnitId": "char_common_a_glass_keeper",
+        "similarity": 0.6713
+      },
+      "motions": {
+        "idle": {
+          "frames": 6,
+          "frameWidth": 224,
+          "frameHeight": 203,
+          "occupancy": 0.2903,
+          "widthCoverage": 0.7902,
+          "heightCoverage": 0.9031,
+          "maxEdgeRatio": 0,
+          "avgDelta": 0.0643,
+          "maxDelta": 0.0804
+        },
+        "move": {
+          "frames": 8,
+          "frameWidth": 224,
+          "frameHeight": 203,
+          "occupancy": 0.29,
+          "widthCoverage": 0.7902,
+          "heightCoverage": 0.8892,
+          "maxEdgeRatio": 0,
+          "avgDelta": 0.2715,
+          "maxDelta": 0.2715
+        },
+        "attack": {
+          "frames": 6,
+          "frameWidth": 224,
+          "frameHeight": 203,
+          "occupancy": 0.296,
+          "widthCoverage": 0.9487,
+          "heightCoverage": 0.8768,
+          "maxEdgeRatio": 0.0007,
+          "avgDelta": 0.1066,
+          "maxDelta": 0.2937
+        }
+      }
+    },
+    {
+      "metadataFile": "recruitment-form-runtime-metadata.json",
+      "targetKey": "char_common_c_tin_squire_f2",
+      "assetId": "unit:char_common_c_tin_squire:char_common_c_tin_squire_f2",
+      "unitId": "char_common_c_tin_squire",
+      "formId": "char_common_c_tin_squire_f2",
+      "formOrder": 2,
+      "score": 100,
+      "reasons": [],
+      "nearestOther": {
+        "targetKey": "char_common_a_bonedrum",
+        "rootUnitId": "char_common_a_bonedrum",
+        "similarity": 0.7517
+      },
+      "motions": {
+        "idle": {
+          "frames": 6,
+          "frameWidth": 228,
+          "frameHeight": 206,
+          "occupancy": 0.3583,
+          "widthCoverage": 0.7939,
+          "heightCoverage": 0.8948,
+          "maxEdgeRatio": 0,
+          "avgDelta": 0.0473,
+          "maxDelta": 0.0592
+        },
+        "move": {
+          "frames": 8,
+          "frameWidth": 228,
+          "frameHeight": 206,
+          "occupancy": 0.3579,
+          "widthCoverage": 0.7939,
+          "heightCoverage": 0.8811,
+          "maxEdgeRatio": 0,
+          "avgDelta": 0.2073,
+          "maxDelta": 0.2073
+        },
+        "attack": {
+          "frames": 6,
+          "frameWidth": 228,
+          "frameHeight": 206,
+          "occupancy": 0.3643,
+          "widthCoverage": 0.9437,
+          "heightCoverage": 0.8689,
+          "maxEdgeRatio": 0.0004,
+          "avgDelta": 0.0779,
+          "maxDelta": 0.1988
         }
       }
     },
@@ -8949,6 +8653,56 @@
       }
     },
     {
+      "metadataFile": "recruitment-form-runtime-metadata.json",
+      "targetKey": "char_s02_gormu_f1",
+      "assetId": "unit:char_s02_gormu:char_s02_gormu_f1",
+      "unitId": "char_s02_gormu",
+      "formId": "char_s02_gormu_f1",
+      "formOrder": 1,
+      "score": 100,
+      "reasons": [],
+      "nearestOther": {
+        "targetKey": "char_s01_arselia_f3",
+        "rootUnitId": "char_s01_arselia",
+        "similarity": 0.7348
+      },
+      "motions": {
+        "idle": {
+          "frames": 8,
+          "frameWidth": 379,
+          "frameHeight": 328,
+          "occupancy": 0.1529,
+          "widthCoverage": 0.8021,
+          "heightCoverage": 0.7447,
+          "maxEdgeRatio": 0,
+          "avgDelta": 0.0535,
+          "maxDelta": 0.0749
+        },
+        "move": {
+          "frames": 8,
+          "frameWidth": 379,
+          "frameHeight": 328,
+          "occupancy": 0.1531,
+          "widthCoverage": 0.8021,
+          "heightCoverage": 0.7363,
+          "maxEdgeRatio": 0,
+          "avgDelta": 0.2465,
+          "maxDelta": 0.2465
+        },
+        "attack": {
+          "frames": 11,
+          "frameWidth": 379,
+          "frameHeight": 328,
+          "occupancy": 0.1551,
+          "widthCoverage": 0.8299,
+          "heightCoverage": 0.7287,
+          "maxEdgeRatio": 0,
+          "avgDelta": 0.0402,
+          "maxDelta": 0.1822
+        }
+      }
+    },
+    {
       "metadataFile": "recruitment-runtime-metadata.json",
       "targetKey": "char_s02_kreik",
       "assetId": "unit:char_s02_kreik",
@@ -9658,9 +9412,9 @@
       "score": 100,
       "reasons": [],
       "nearestOther": {
-        "targetKey": "char_s02_gormu_f2",
-        "rootUnitId": "char_s02_gormu",
-        "similarity": 0.6727
+        "targetKey": "char_s02_barga_f3",
+        "rootUnitId": "char_s02_barga",
+        "similarity": 0.6713
       },
       "motions": {
         "idle": {
@@ -10149,6 +9903,156 @@
       }
     },
     {
+      "metadataFile": "recruitment-form-runtime-metadata.json",
+      "targetKey": "char_s03_nana04_f1",
+      "assetId": "unit:char_s03_nana04:char_s03_nana04_f1",
+      "unitId": "char_s03_nana04",
+      "formId": "char_s03_nana04_f1",
+      "formOrder": 1,
+      "score": 100,
+      "reasons": [],
+      "nearestOther": {
+        "targetKey": "char_s03_rxomega_f1",
+        "rootUnitId": "char_s03_rxomega",
+        "similarity": 0.7644
+      },
+      "motions": {
+        "idle": {
+          "frames": 8,
+          "frameWidth": 314,
+          "frameHeight": 273,
+          "occupancy": 0.129,
+          "widthCoverage": 0.8662,
+          "heightCoverage": 0.8068,
+          "maxEdgeRatio": 0,
+          "avgDelta": 0.0593,
+          "maxDelta": 0.083
+        },
+        "move": {
+          "frames": 8,
+          "frameWidth": 314,
+          "frameHeight": 273,
+          "occupancy": 0.1294,
+          "widthCoverage": 0.8662,
+          "heightCoverage": 0.7967,
+          "maxEdgeRatio": 0,
+          "avgDelta": 0.3481,
+          "maxDelta": 0.3481
+        },
+        "attack": {
+          "frames": 9,
+          "frameWidth": 314,
+          "frameHeight": 273,
+          "occupancy": 0.1315,
+          "widthCoverage": 0.9126,
+          "heightCoverage": 0.7875,
+          "maxEdgeRatio": 0,
+          "avgDelta": 0.0706,
+          "maxDelta": 0.2774
+        }
+      }
+    },
+    {
+      "metadataFile": "recruitment-form-runtime-metadata.json",
+      "targetKey": "char_s03_nana04_f2",
+      "assetId": "unit:char_s03_nana04:char_s03_nana04_f2",
+      "unitId": "char_s03_nana04",
+      "formId": "char_s03_nana04_f2",
+      "formOrder": 2,
+      "score": 100,
+      "reasons": [],
+      "nearestOther": {
+        "targetKey": "char_s03_rxomega_f2",
+        "rootUnitId": "char_s03_rxomega",
+        "similarity": 0.6452
+      },
+      "motions": {
+        "idle": {
+          "frames": 8,
+          "frameWidth": 318,
+          "frameHeight": 276,
+          "occupancy": 0.1938,
+          "widthCoverage": 0.8774,
+          "heightCoverage": 0.8089,
+          "maxEdgeRatio": 0.0072,
+          "avgDelta": 0.0363,
+          "maxDelta": 0.0508
+        },
+        "move": {
+          "frames": 8,
+          "frameWidth": 318,
+          "frameHeight": 276,
+          "occupancy": 0.1942,
+          "widthCoverage": 0.8774,
+          "heightCoverage": 0.8098,
+          "maxEdgeRatio": 0.0072,
+          "avgDelta": 0.208,
+          "maxDelta": 0.208
+        },
+        "attack": {
+          "frames": 9,
+          "frameWidth": 318,
+          "frameHeight": 276,
+          "occupancy": 0.1963,
+          "widthCoverage": 0.9168,
+          "heightCoverage": 0.8116,
+          "maxEdgeRatio": 0.0072,
+          "avgDelta": 0.036,
+          "maxDelta": 0.138
+        }
+      }
+    },
+    {
+      "metadataFile": "recruitment-form-runtime-metadata.json",
+      "targetKey": "char_s03_nana04_f3",
+      "assetId": "unit:char_s03_nana04:char_s03_nana04_f3",
+      "unitId": "char_s03_nana04",
+      "formId": "char_s03_nana04_f3",
+      "formOrder": 3,
+      "score": 100,
+      "reasons": [],
+      "nearestOther": {
+        "targetKey": "char_s01_mireille_f3",
+        "rootUnitId": "char_s01_mireille",
+        "similarity": 0.7529
+      },
+      "motions": {
+        "idle": {
+          "frames": 8,
+          "frameWidth": 322,
+          "frameHeight": 279,
+          "occupancy": 0.1834,
+          "widthCoverage": 0.8882,
+          "heightCoverage": 0.8002,
+          "maxEdgeRatio": 0,
+          "avgDelta": 0.044,
+          "maxDelta": 0.0623
+        },
+        "move": {
+          "frames": 8,
+          "frameWidth": 322,
+          "frameHeight": 279,
+          "occupancy": 0.1834,
+          "widthCoverage": 0.8882,
+          "heightCoverage": 0.7903,
+          "maxEdgeRatio": 0,
+          "avgDelta": 0.2462,
+          "maxDelta": 0.2506
+        },
+        "attack": {
+          "frames": 10,
+          "frameWidth": 322,
+          "frameHeight": 279,
+          "occupancy": 0.1886,
+          "widthCoverage": 0.923,
+          "heightCoverage": 0.7814,
+          "maxEdgeRatio": 0,
+          "avgDelta": 0.0453,
+          "maxDelta": 0.1425
+        }
+      }
+    },
+    {
       "metadataFile": "recruitment-runtime-metadata.json",
       "targetKey": "char_s03_overlay_astra",
       "assetId": "unit:char_s03_overlay_astra",
@@ -10408,9 +10312,9 @@
       "score": 100,
       "reasons": [],
       "nearestOther": {
-        "targetKey": "char_s03_nana04_f2",
+        "targetKey": "char_s03_nana04_f1",
         "rootUnitId": "char_s03_nana04",
-        "similarity": 0.7673
+        "similarity": 0.7644
       },
       "motions": {
         "idle": {
@@ -12400,6 +12304,56 @@
     },
     {
       "metadataFile": "special-content-runtime-metadata.json",
+      "targetKey": "enemy_sp_evo_mirror_seal",
+      "assetId": "unit:enemy_sp_evo_mirror_seal",
+      "unitId": "enemy_sp_evo_mirror_seal",
+      "formId": null,
+      "formOrder": null,
+      "score": 100,
+      "reasons": [],
+      "nearestOther": {
+        "targetKey": "enemy_ch2_bonewheel",
+        "rootUnitId": "enemy_ch2_bonewheel",
+        "similarity": 0.8668
+      },
+      "motions": {
+        "idle": {
+          "frames": 7,
+          "frameWidth": 280,
+          "frameHeight": 250,
+          "occupancy": 0.3957,
+          "widthCoverage": 0.7536,
+          "heightCoverage": 0.7411,
+          "maxEdgeRatio": 0,
+          "avgDelta": 0.0028,
+          "maxDelta": 0.0044
+        },
+        "move": {
+          "frames": 8,
+          "frameWidth": 280,
+          "frameHeight": 250,
+          "occupancy": 0.4593,
+          "widthCoverage": 0.9902,
+          "heightCoverage": 0.8325,
+          "maxEdgeRatio": 0.0038,
+          "avgDelta": 0.1565,
+          "maxDelta": 0.1808
+        },
+        "attack": {
+          "frames": 8,
+          "frameWidth": 280,
+          "frameHeight": 250,
+          "occupancy": 0.5147,
+          "widthCoverage": 0.9161,
+          "heightCoverage": 0.83,
+          "maxEdgeRatio": 0,
+          "avgDelta": 0.0943,
+          "maxDelta": 0.2069
+        }
+      }
+    },
+    {
+      "metadataFile": "special-content-runtime-metadata.json",
       "targetKey": "enemy_sp_evo_seal_guard",
       "assetId": "unit:enemy_sp_evo_seal_guard",
       "unitId": "enemy_sp_evo_seal_guard",
@@ -13208,9 +13162,9 @@
       "score": 100,
       "reasons": [],
       "nearestOther": {
-        "targetKey": "char_common_b_lantern_witch",
-        "rootUnitId": "char_common_b_lantern_witch",
-        "similarity": 0.4543
+        "targetKey": "char_common_b_coffin_merchant_f2",
+        "rootUnitId": "char_common_b_coffin_merchant",
+        "similarity": 0.462
       },
       "motions": {
         "idle": {
@@ -13908,9 +13862,9 @@
       "score": 100,
       "reasons": [],
       "nearestOther": {
-        "targetKey": "enemy_ch3_contract_enforcer",
-        "rootUnitId": "enemy_ch3_contract_enforcer",
-        "similarity": 0.671
+        "targetKey": "char_common_b_coffin_merchant_f2",
+        "rootUnitId": "char_common_b_coffin_merchant",
+        "similarity": 0.6763
       },
       "motions": {
         "idle": {
