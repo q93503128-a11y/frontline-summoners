@@ -92,10 +92,14 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add apps/client/public/assets/production/units apps/client/public/assets/production/audio
+          git add \
+            apps/client/public/assets/production/units \
+            apps/client/public/assets/production/audio \
+            apps/client/public/assets/production/review/vertical-slice-01/preflight \
+            assets/raw/production/review/vertical-slice-01/preflight
           if git diff --cached --quiet; then
-            echo "Generated first-slice runtime assets are already current."
+            echo "Generated first-slice runtime/preflight assets are already current."
           else
-            git commit -m "chore(art): persist first-slice runtime assets [skip ci]"
+            git commit -m "chore(art): persist first-slice runtime and preflight assets [skip ci]"
             git push
           fi
