@@ -61,6 +61,12 @@ import {
   isChapter04ProductionReviewMode,
   renderChapter04ProductionReviewLayer,
 } from './chapter-04-production-review-runtime.ts';
+import { renderSpecialContentProductionReviewBattlefields } from './special-content-production-review-battlefields.ts';
+import {
+  installSpecialContentProductionReviewRuntime,
+  isSpecialContentProductionReviewMode,
+  renderSpecialContentProductionReviewLayer,
+} from './special-content-production-review-runtime.ts';
 
 /**
  * Presentation-only bridge for camera/VFX accessibility plus production review presentation.
@@ -90,6 +96,8 @@ export class AccessibleBattleScene extends BattleScene {
       installChapter03ProductionReviewRuntime(this);
     } else if (isChapter04ProductionReviewMode()) {
       installChapter04ProductionReviewRuntime(this);
+    } else if (isSpecialContentProductionReviewMode()) {
+      installSpecialContentProductionReviewRuntime(this);
     } else {
       installStorySilhouetteOverlayRuntime(this);
     }
@@ -113,5 +121,7 @@ export class AccessibleBattleScene extends BattleScene {
     renderChapter03ProductionReviewBattlefields(this);
     renderChapter04ProductionReviewLayer(this);
     renderChapter04ProductionReviewBattlefields(this);
+    renderSpecialContentProductionReviewLayer(this);
+    renderSpecialContentProductionReviewBattlefields(this);
   }
 }
