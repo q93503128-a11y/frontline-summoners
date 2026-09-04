@@ -44,6 +44,7 @@ import { isCompactMobileViewport } from './viewport';
 
 class BootScene extends BaseBootScene {
   override create(): void {
+    if (!this.scene.get('first-slice-capture')) this.scene.add('first-slice-capture', FirstSliceProductionCaptureScene, false);
     void restoreAuthenticatedAccountSession().finally(() => {
       if (!this.scene.isActive()) return;
       this.scene.start(isFirstSliceCaptureMode() ? 'first-slice-capture' : 'main-menu');
@@ -89,7 +90,7 @@ const game = new Phaser.Game({
   antialias: true,
   pixelArt: false,
   roundPixels: false,
-  scene: [BootScene, MainMenuScene, FirstSliceProductionCaptureScene, StageHubScene, StageSelectScene, BaseWeaponScene, DeckScene, CatalogScene, BattleScene, ResultScene],
+  scene: [BootScene, MainMenuScene, StageHubScene, StageSelectScene, BaseWeaponScene, DeckScene, CatalogScene, BattleScene, ResultScene],
   scale: {
     mode: Phaser.Scale.FIT,
     autoCenter: Phaser.Scale.CENTER_BOTH,
