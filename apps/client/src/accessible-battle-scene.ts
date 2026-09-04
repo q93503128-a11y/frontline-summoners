@@ -6,6 +6,7 @@ import {
   installFirstSliceProductionReviewAudio,
   startFirstSliceProductionReviewMusic,
 } from './first-slice-production-review-audio.ts';
+import { renderFirstSliceProductionReviewMeadowLayers } from './first-slice-production-review-meadow.ts';
 import {
   installFirstSliceProductionReviewRuntime,
   isFirstSliceProductionReviewMode,
@@ -28,6 +29,7 @@ export class AccessibleBattleScene extends BattleScene {
     }
     super.create();
     renderFirstSliceProductionReviewLayer(this);
+    renderFirstSliceProductionReviewMeadowLayers(this);
     startFirstSliceProductionReviewMusic(this);
   }
 }
