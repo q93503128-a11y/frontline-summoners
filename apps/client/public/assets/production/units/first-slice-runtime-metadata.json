@@ -220,6 +220,60 @@
           "sourceUrl": "https://raw.githubusercontent.com/NQM765/IngeSoft1/84594e5d3da7472615660f453bdb457da13cca2f/Proyecto/Scrum%27s_Castle/Assets/Characters/Medieval%20Warrior%20Pack%202/Sprites/Death.png"
         }
       }
+    },
+    "enemy-boss": {
+      "assetId": "unit:enemy-boss",
+      "sourceFamily": "evil-wizard",
+      "displayHeight": 228,
+      "attackContactFrame": 5,
+      "structuralRework": true,
+      "motions": {
+        "idle": {
+          "url": "/assets/production/units/enemy-boss/idle.png",
+          "frameWidth": 150,
+          "frameHeight": 150,
+          "frames": 8,
+          "bytes": 5760,
+          "sha256": "d59462628ae4af4656500ed76a6bcb59af5eee738c2e411b057a9e492caf2f41",
+          "sourceUrl": "https://raw.githubusercontent.com/NQM765/IngeSoft1/84594e5d3da7472615660f453bdb457da13cca2f/Proyecto/Scrum%27s_Castle/Assets/Characters/Evil%20Wizard/Sprites/Idle.png"
+        },
+        "move": {
+          "url": "/assets/production/units/enemy-boss/move.png",
+          "frameWidth": 150,
+          "frameHeight": 150,
+          "frames": 8,
+          "bytes": 6156,
+          "sha256": "94c8c916352e4c9c105b9b149059b4c1c700216de7c5dfd9a3304517d88e4f74",
+          "sourceUrl": "https://raw.githubusercontent.com/NQM765/IngeSoft1/84594e5d3da7472615660f453bdb457da13cca2f/Proyecto/Scrum%27s_Castle/Assets/Characters/Evil%20Wizard/Sprites/Move.png"
+        },
+        "attack": {
+          "url": "/assets/production/units/enemy-boss/attack.png",
+          "frameWidth": 150,
+          "frameHeight": 150,
+          "frames": 8,
+          "bytes": 7866,
+          "sha256": "dbcad69a111ef062813437dcc7249280a656ad2f7f0e3ff9bb45f4c06c9de557",
+          "sourceUrl": "https://raw.githubusercontent.com/NQM765/IngeSoft1/84594e5d3da7472615660f453bdb457da13cca2f/Proyecto/Scrum%27s_Castle/Assets/Characters/Evil%20Wizard/Sprites/Attack.png"
+        },
+        "knockback": {
+          "url": "/assets/production/units/enemy-boss/knockback.png",
+          "frameWidth": 150,
+          "frameHeight": 150,
+          "frames": 4,
+          "bytes": 3946,
+          "sha256": "b0350e3ed4c0259e510219deb65f7fe9a24dd2b33e1963571fda97b86fe6dbef",
+          "sourceUrl": "https://raw.githubusercontent.com/NQM765/IngeSoft1/84594e5d3da7472615660f453bdb457da13cca2f/Proyecto/Scrum%27s_Castle/Assets/Characters/Evil%20Wizard/Sprites/Take%20Hit.png"
+        },
+        "death": {
+          "url": "/assets/production/units/enemy-boss/death.png",
+          "frameWidth": 150,
+          "frameHeight": 150,
+          "frames": 5,
+          "bytes": 4877,
+          "sha256": "b103c2c92ff1e9f72aa2d4233b4d96a3d73d409c8c698ba1afabd3cf5383bc50",
+          "sourceUrl": "https://raw.githubusercontent.com/NQM765/IngeSoft1/84594e5d3da7472615660f453bdb457da13cca2f/Proyecto/Scrum%27s_Castle/Assets/Characters/Evil%20Wizard/Sprites/Death.png"
+        }
+      }
     }
   }
 }
