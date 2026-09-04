@@ -99,6 +99,11 @@ function reviewKeyForUnit(unitId: string): string | undefined {
   return REVIEW_FAMILIES[unitId] ? unitId : undefined;
 }
 
+export function getReviewAttackFxStyle(unitId: string): AttackFxStyle | undefined {
+  const key = reviewKeyForUnit(unitId);
+  return key ? REVIEW_ATTACK_FX[key] : undefined;
+}
+
 function reviewFamilyForUnit(unitId: string): RuntimeArtFamily | undefined {
   const key = reviewKeyForUnit(unitId);
   return key ? REVIEW_FAMILIES[key] : undefined;
@@ -118,6 +123,32 @@ interface ReviewHost {
 const INSTALL_MARKER = Symbol('first-slice-production-review-runtime');
 type InstallableScene = Phaser.Scene & ReviewHost & { [INSTALL_MARKER]?: boolean };
 
+function playGoldenMaskContactFx(scene: Phaser.Scene, view: ReviewUnitView): void {
+  const x = view.sprite.x - 28;
+  const y = view.sprite.y - 88;
+  const ring = scene.add.ellipse(x, y, 54, 74, 0x1b1420, 0.12).setStrokeStyle(4, 0xf0c967, 0.92).setDepth(view.sprite.depth + 3);
+  const inner = scene.add.ellipse(x, y, 24, 36, 0xd6aa4d, 0.2).setStrokeStyle(2, 0xffe39a, 0.9).setDepth(view.sprite.depth + 3.1);
+  const leftEye = scene.add.rectangle(x - 9, y - 8, 10, 4, 0x2a1722, 0.96).setDepth(view.sprite.depth + 3.2);
+  const rightEye = scene.add.rectangle(x + 9, y - 8, 10, 4, 0x2a1722, 0.96).setDepth(view.sprite.depth + 3.2);
+  scene.tweens.add({
+    targets: [ring, inner],
+    scaleX: 2.8,
+    scaleY: 2.1,
+    alpha: 0,
+    duration: 260,
+    ease: 'Quad.easeOut',
+    onComplete: () => { ring.destroy(); inner.destroy(); },
+  });
+  scene.tweens.add({
+    targets: [leftEye, rightEye],
+    x: (target: Phaser.GameObjects.Rectangle) => target.x + (target.x < x ? -26 : 26),
+    alpha: 0,
+    duration: 180,
+    ease: 'Quad.easeOut',
+    onComplete: () => { leftEye.destroy(); rightEye.destroy(); },
+  });
+}
+
 export function installFirstSliceProductionReviewRuntime(scene: Phaser.Scene): void {
   if (!isFirstSliceProductionReviewMode()) return;
   const host = scene as InstallableScene;
@@ -129,8 +160,9 @@ export function installFirstSliceProductionReviewRuntime(scene: Phaser.Scene): v
   host[INSTALL_MARKER] = true;
 
   host.playAttackFx = (unit: BattleUnit, view: ReviewUnitView, style: AttackFxStyle): void => {
-    const key = reviewKeyForUnit(unit.definition.id);
-    originalPlayAttackFx.call(scene, unit, view, (key && REVIEW_ATTACK_FX[key]) || style);
+    const reviewStyle = getReviewAttackFxStyle(unit.definition.id) ?? style;
+    originalPlayAttackFx.call(scene, unit, view, reviewStyle);
+    if (unit.definition.id === 'enemy-boss') playGoldenMaskContactFx(scene, view);
   };
 
   host.syncUnits = (): void => {
@@ -182,6 +214,12 @@ export function renderFirstSliceProductionReviewLayer(scene: Phaser.Scene): void
     button.on('pointerdown', () => {
       forcedMilitiaReviewForm = value;
       current.setText(`MILITIA ${formLabel(value)}`);
+      if (typeof window !== 'undefined') {
+        const url = new URL(window.location.href);
+        if (value) url.searchParams.set(MILITIA_FORM_QUERY_KEY, value.replace('militia_', ''));
+        else url.searchParams.delete(MILITIA_FORM_QUERY_KEY);
+        window.history.replaceState(null, '', url);
+      }
     });
   });
 }
