@@ -1,0 +1,32 @@
+{
+  "schemaVersion": 1,
+  "sliceId": "fifth-slice-late-wave-05",
+  "scope": "chapter-01-st14-18",
+  "status": "AWAITING_ART",
+  "reviewStatus": "PENDING",
+  "normalRuntimeAuthoritative": false,
+  "generativeAiUsed": false,
+  "sourcePolicy": "PINNED_CC0_AND_PROJECT_AUTHORED_DETERMINISTIC_ONLY",
+  "stageAnchors": ["main_01_014", "main_01_015", "main_01_016", "main_01_017", "main_01_018"],
+  "targets": [
+    {"assetId":"unit:heretic:heretic_f1","unitId":"heretic","displayName":"이단주술사","form":1,"sourceFamily":"evil-wizard-2","visualContract":["asymmetric half-mask","one long talisman bundle","long thin ritual tool on opposite side","small off-axis ritual mark reads above or beside body"]},
+    {"assetId":"unit:heretic:heretic_f2","unitId":"heretic","displayName":"금단의 의식자","form":2,"sourceFamily":"evil-wizard-2","visualContract":["more talismans and longer ritual tool","large ritual ring behind body","more static stance","ritual geometry remains asymmetric"]},
+    {"assetId":"unit:heretic:heretic_f3","unitId":"heretic","displayName":"역주술사","form":3,"sourceFamily":"evil-wizard-2","visualContract":["large rear ring removed","broken or folded twin ritual tools","closer faster ritual silhouette","ordinary walking motion replaces glide"]},
+    {"assetId":"unit:enemy-cultist","unitId":"enemy-cultist","displayName":"검은 깃발지기","form":1,"sourceFamily":"evil-wizard","visualContract":["black banner dominates silhouette","mid-range area ritual","banner and body remain independently readable","24F hit reads completed area mark"]},
+    {"assetId":"unit:enemy-sprinter","unitId":"enemy-sprinter","displayName":"달림개","form":1,"sourceFamily":"project-authored-beast","visualContract":["small low quadruped beast","forward sprint silhouette","7F contact is compact bite or shoulder collision","no humanoid source conversion"]}
+  ],
+  "battlefields": [],
+  "reusedBattlefields": [
+    {"theme":"burning","stageAnchor":"main_01_014","fromSlice":"third-slice"},
+    {"theme":"fortress","stageAnchor":"main_01_015","fromSlice":"third-slice"},
+    {"theme":"ruins","stageAnchor":"main_01_016","fromSlice":"second-slice"},
+    {"theme":"golden","stageAnchor":"main_01_017","fromSlice":"fourth-slice"},
+    {"theme":"meadow","stageAnchor":"main_01_018","fromSlice":"first-slice"}
+  ],
+  "reviewConstraints": {
+    "humanCaptureRequiredForApproval": true,
+    "humanApprovalRequired": true,
+    "automatedMaterializationIsNotReviewEvidence": true,
+    "noRuntimeAuthorityBeforeApproval": true
+  }
+}
