@@ -13,6 +13,8 @@ import {
   StoryPublicCoopLobbyScene as PublicCoopLobbyScene,
 } from './coop-story-scenes';
 import { DeckScene } from './deck-scene';
+import { FirstSliceProductionCaptureScene, isFirstSliceCaptureMode } from './first-slice-production-capture-scene.ts';
+import { isFirstSliceProductionReviewMode } from './first-slice-production-review-runtime.ts';
 import { GrowthScene } from './growth-scene';
 import { RecruitmentScene } from './recruitment-scene';
 import { BootScene as BaseBootScene, MainMenuScene as BaseMainMenuScene } from './navigation-scenes';
@@ -43,7 +45,8 @@ import { isCompactMobileViewport } from './viewport';
 class BootScene extends BaseBootScene {
   override create(): void {
     void restoreAuthenticatedAccountSession().finally(() => {
-      if (this.scene.isActive()) this.scene.start('main-menu');
+      if (!this.scene.isActive()) return;
+      this.scene.start(isFirstSliceCaptureMode() ? 'first-slice-capture' : 'main-menu');
     });
   }
 }
@@ -61,6 +64,17 @@ class MainMenuScene extends BaseMainMenuScene {
     addButton(this, 750, y, width, h, '친구·초대', () => this.scene.start('social'), 0x6b628f);
     addButton(this, 965, y, width, h, '계 정', () => this.scene.start('account'), 0x6f7f96);
     addButton(this, 1180, y, width, h, '설 정', () => this.scene.start('settings'), 0x647783);
+
+    if (isFirstSliceProductionReviewMode()) {
+      addButton(this, compact ? 1010 : 1040, compact ? 292 : 260, compact ? 390 : 350, compact ? 72 : 54, 'FIRST SLICE 캡처 프리플라이트', () => {
+        if (typeof window !== 'undefined') {
+          const url = new URL(window.location.href);
+          url.searchParams.set('capture', 'first-slice');
+          window.history.replaceState(null, '', url);
+        }
+        this.scene.start('first-slice-capture');
+      }, 0x8a6f35);
+    }
   }
 }
 
@@ -75,7 +89,7 @@ const game = new Phaser.Game({
   antialias: true,
   pixelArt: false,
   roundPixels: false,
-  scene: [BootScene, MainMenuScene, StageHubScene, StageSelectScene, BaseWeaponScene, DeckScene, CatalogScene, BattleScene, ResultScene],
+  scene: [BootScene, MainMenuScene, FirstSliceProductionCaptureScene, StageHubScene, StageSelectScene, BaseWeaponScene, DeckScene, CatalogScene, BattleScene, ResultScene],
   scale: {
     mode: Phaser.Scale.FIT,
     autoCenter: Phaser.Scale.CENTER_BOTH,
