@@ -1,0 +1,37 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="720" viewBox="0 0 1280 720">
+  <g opacity=".96">
+    <!-- Reoccupied left outpost: broken old banner under a newer field pennant. -->
+    <path d="M151 234v112" stroke="#3b332c" stroke-width="9"/>
+    <path d="M158 239l72 13-72 27z" fill="#526c4b"/>
+    <path d="M158 245l46 9-46 15z" fill="#819863" opacity=".76"/>
+    <path d="M145 280l-40 19 40 15z" fill="#835b48" opacity=".58"/>
+    <path d="M98 298l17 20m-5-25l18 18" stroke="#d0b274" stroke-width="3" opacity=".7"/>
+    <path d="M77 319l164-12" stroke="#3f342e" stroke-width="8" opacity=".88"/>
+    <path d="M88 338l139-10" stroke="#a0835f" stroke-width="4" opacity=".55"/>
+  </g>
+
+  <g opacity=".9">
+    <!-- Center-left collapsed checkpoint pieces, kept outside the main fight corridor. -->
+    <path d="M270 413l86-55" stroke="#4c4036" stroke-width="11"/>
+    <path d="M292 438l58-92" stroke="#5e4b3d" stroke-width="10"/>
+    <path d="M250 423l108 12" stroke="#6a5340" stroke-width="8"/>
+    <path d="M318 363l38 5-31 22z" fill="#9b744d"/>
+    <circle cx="269" cy="443" r="7" fill="#80705d"/>
+  </g>
+
+  <g opacity=".94">
+    <!-- Ruined right watch: diagonal snapped braces distinguish it from an intact tower. -->
+    <path d="M1035 323l140 0" stroke="#453932" stroke-width="9"/>
+    <path d="M1050 292l0 145M1138 296l0 140" stroke="#41362f" stroke-width="11"/>
+    <path d="M1039 318l120-39" stroke="#725744" stroke-width="12"/>
+    <path d="M1060 348l83 76M1140 345l-68 82" stroke="#533f35" stroke-width="8" opacity=".92"/>
+    <path d="M1138 301l54 10-54 24z" fill="#875f4a"/>
+    <path d="M1145 309l31 6-31 11z" fill="#a57a58" opacity=".6"/>
+  </g>
+
+  <!-- Thin smoke columns live at the extreme sides, never behind the central contact line. -->
+  <g fill="#66706b" opacity=".12">
+    <ellipse cx="230" cy="260" rx="28" ry="13"/><ellipse cx="244" cy="232" rx="20" ry="11"/><ellipse cx="255" cy="208" rx="14" ry="8"/>
+    <ellipse cx="1185" cy="286" rx="28" ry="13"/><ellipse cx="1173" cy="260" rx="20" ry="11"/><ellipse cx="1164" cy="238" rx="13" ry="8"/>
+  </g>
+</svg>
