@@ -1,19 +1,37 @@
 {
   "schemaVersion": 1,
-  "revision": 2,
+  "revision": 3,
   "assetId": "battlefield:meadow",
   "themeId": "meadow",
   "reviewStatus": "UNREVIEWED_RUNTIME_FILE",
   "runtimeUrl": "/assets/production/battlefields/meadow/battlefield-base.svg",
+  "layers": [
+    {
+      "role": "BATTLEFIELD_BASE",
+      "runtimeUrl": "/assets/production/battlefields/meadow/battlefield-base.svg",
+      "reviewStatus": "UNREVIEWED_RUNTIME_FILE"
+    },
+    {
+      "role": "BACKGROUND_LANDMARKS",
+      "runtimeUrl": "/assets/production/battlefields/meadow/background-landmarks.svg",
+      "reviewStatus": "UNREVIEWED_RUNTIME_FILE"
+    },
+    {
+      "role": "FOREGROUND_LOW_DENSITY",
+      "runtimeUrl": "/assets/production/battlefields/meadow/foreground-low-density.svg",
+      "reviewStatus": "UNREVIEWED_RUNTIME_FILE"
+    }
+  ],
   "authorship": "ORIGINAL_PROJECT_VECTOR_COMPOSITION",
   "generativeAiUsed": false,
   "designIntent": [
     "중앙 전투선의 장식 밀도를 낮춰 8~12기 중첩 가독성을 우선",
     "재점거된 국경 초소와 파손된 감시 구조물을 좌우 큰 덩어리로 분리",
-    "원경 국경선·산줄기·공기층을 추가해 전장 깊이를 만들되 중앙 실루엣 대비는 유지",
+    "배경 랜드마크 레이어는 찢긴 구 깃발·신규 야전 깃발·파손 대각 지지대로 뒤집힌 초소 서사를 강화",
+    "전경 레이어는 x=390~890 중앙 교전 회랑을 비우고 화면 가장자리의 풀·목재·돌만 전경으로 올림",
+    "원경 국경선·산줄기·공기층을 유지하되 중앙 실루엣 대비는 유지",
     "캐릭터 접지선 뒤의 최고명도 영역을 피하고 중간 명도 초지를 유지",
-    "배경 수직 구조물을 전투선 중앙에서 비켜 배치해 사거리/장애물 오인을 줄임",
-    "전경 토양과 변두리 잔해는 화면 가장자리 위주로 배치해 전투선 정보 밀도를 억제"
+    "배경 수직 구조물을 전투선 중앙에서 비켜 배치해 사거리/장애물 오인을 줄임"
   ],
   "evidence": null,
   "captures": null,
