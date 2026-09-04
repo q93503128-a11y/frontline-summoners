@@ -3,6 +3,10 @@ import { installAccessibleBattleCameraFeedback } from './battle-camera-feedback'
 import { installStorySilhouetteOverlayRuntime } from './battle-story-silhouette-runtime.ts';
 import { installBattleVfxDensityPolicy } from './battle-vfx-density';
 import {
+  installFirstSliceProductionReviewAudio,
+  startFirstSliceProductionReviewMusic,
+} from './first-slice-production-review-audio.ts';
+import {
   installFirstSliceProductionReviewRuntime,
   isFirstSliceProductionReviewMode,
   renderFirstSliceProductionReviewLayer,
@@ -16,9 +20,14 @@ export class AccessibleBattleScene extends BattleScene {
   override create(): void {
     installAccessibleBattleCameraFeedback(this);
     installBattleVfxDensityPolicy(this);
-    if (isFirstSliceProductionReviewMode()) installFirstSliceProductionReviewRuntime(this);
-    else installStorySilhouetteOverlayRuntime(this);
+    if (isFirstSliceProductionReviewMode()) {
+      installFirstSliceProductionReviewRuntime(this);
+      installFirstSliceProductionReviewAudio(this);
+    } else {
+      installStorySilhouetteOverlayRuntime(this);
+    }
     super.create();
     renderFirstSliceProductionReviewLayer(this);
+    startFirstSliceProductionReviewMusic(this);
   }
 }
