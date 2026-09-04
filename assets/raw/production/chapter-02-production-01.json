@@ -1,0 +1,42 @@
+{
+  "schemaVersion": 1,
+  "batchId": "chapter-02-production-01",
+  "scope": "chapter-02-st01-20",
+  "status": "AWAITING_ART",
+  "reviewStatus": "PENDING",
+  "normalRuntimeAuthoritative": false,
+  "generativeAiUsed": false,
+  "sourcePolicy": "PROJECT_AUTHORED_DETERMINISTIC_ONLY",
+  "stageAnchors": [
+    "main_02_001","main_02_002","main_02_003","main_02_004","main_02_005",
+    "main_02_006","main_02_007","main_02_008","main_02_009","main_02_010",
+    "main_02_011","main_02_012","main_02_013","main_02_014","main_02_015",
+    "main_02_016","main_02_017","main_02_018","main_02_019","main_02_020"
+  ],
+  "targets": [
+    {"assetId":"unit:enemy_ch2_mossboar","unitId":"enemy_ch2_mossboar","displayName":"이끼멧돼지","sourceFamily":"project-authored-nature-beast","visualContract":["boar skeleton distinct from barrel boar","small tree and moss dominate back silhouette","low heavy front line posture","BEAST plus NATURE readable without tint-only reuse"]},
+    {"assetId":"unit:enemy_ch2_umbrella","unitId":"enemy_ch2_umbrella","displayName":"우산버섯","sourceFamily":"project-authored-nature-fungus","visualContract":["large umbrella cap","many tiny legs","no face","attack expands cap then emits short spore area cue"]},
+    {"assetId":"unit:enemy_ch2_vinerider","unitId":"enemy_ch2_vinerider","displayName":"덩굴기수","sourceFamily":"project-authored-nature-vine","visualContract":["vines imitate both mount and rider","no human rider anatomy","long forward vine-lance silhouette","push-oriented contact reads as vine snap"]},
+    {"assetId":"unit:enemy_ch2_seedbattery","unitId":"enemy_ch2_seedbattery","displayName":"씨앗포대","sourceFamily":"project-authored-nature-structure","visualContract":["walking root structure","large seed pouch body","back opens before long-range shot","large minimum range artillery identity"]},
+    {"assetId":"unit:enemy_ch2_bonewheel","unitId":"enemy_ch2_bonewheel","displayName":"뼈바퀴","sourceFamily":"project-authored-undead-wheel","visualContract":["multiple skulls lock into a rolling wheel","very low fast silhouette","rotation visible in move frames","contact is immediate wheel collision"]},
+    {"assetId":"unit:enemy_ch2_coffinbug","unitId":"enemy_ch2_coffinbug","displayName":"관짝벌레","sourceFamily":"project-authored-undead-insect","visualContract":["coffin is the whole upper body","many insect legs emerge underneath","very slow armored crawl","not humanoid undead"]},
+    {"assetId":"unit:enemy_ch2_gravebell","unitId":"enemy_ch2_gravebell","displayName":"묘지종지기","sourceFamily":"project-authored-undead-bell","visualContract":["grave bell replaces head","skeletal frame with long arms","clapper-like arm ends","long warning swing before area hit"]},
+    {"assetId":"unit:enemy_ch2_revivedarmor","unitId":"enemy_ch2_revivedarmor","displayName":"되살아난 갑옷","sourceFamily":"project-authored-undead-armor","visualContract":["empty armor pieces visibly separated","black bindings connect pieces","death visibly disassembles","silhouette supports one-time reassembly rule"]},
+    {"assetId":"unit:boss_ch2_rootwidow","unitId":"boss_ch2_rootwidow","displayName":"뿌리과부","sourceFamily":"project-authored-nature-boss","visualContract":["giant tree trunk body","root skirt moves as multiple legs","upper face replaced by empty nest-like hollow","attack strip distinguishes broad root sweep from long root thrust language"]},
+    {"assetId":"unit:boss_ch2_funeral_king","unitId":"boss_ch2_funeral_king","displayName":"종 없는 장의왕","sourceFamily":"project-authored-undead-boss","visualContract":["large broken bell inverted over upper body","multiple coffins act as legs","bell silhouette dominates king identity","long-range toll and close coffin impact both readable"]}
+  ],
+  "battlefields": [],
+  "reusedBattlefields": [
+    {"theme":"meadow","fromChapter":1},
+    {"theme":"moon","fromChapter":1},
+    {"theme":"ruins","fromChapter":1},
+    {"theme":"canyon","fromChapter":1},
+    {"theme":"fortress","fromChapter":1}
+  ],
+  "reviewConstraints": {
+    "humanCaptureRequiredForApproval": true,
+    "humanApprovalRequired": true,
+    "automatedMaterializationIsNotReviewEvidence": true,
+    "noRuntimeAuthorityBeforeApproval": true
+  }
+}
