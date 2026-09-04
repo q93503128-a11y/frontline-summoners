@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="720" viewBox="0 0 1280 720">
+  <g fill="#50564f" opacity="0.88">
+    <rect x="72" y="235" width="86" height="110"/>
+    <rect x="1120" y="232" width="82" height="112"/>
+  </g>
+  <g fill="#73776e" opacity="0.95">
+    <path d="M48 345 L48 290 Q115 210 182 290 L182 345 L154 345 L154 302 Q115 254 76 302 L76 345Z"/>
+    <path d="M1092 344 L1092 291 Q1159 216 1228 291 L1228 344 L1198 344 L1198 302 Q1160 258 1122 302 L1122 344Z"/>
+  </g>
+  <g fill="#5a5e58">
+    <rect x="38" y="332" width="58" height="18" transform="rotate(-12 67 341)"/>
+    <rect x="164" y="326" width="62" height="18" transform="rotate(10 195 335)"/>
+    <rect x="1055" y="330" width="64" height="18" transform="rotate(9 1087 339)"/>
+    <rect x="1192" y="326" width="58" height="18" transform="rotate(-11 1221 335)"/>
+  </g>
+  <g fill="#8d8f83" opacity="0.5">
+    <ellipse cx="150" cy="382" rx="105" ry="15"/><ellipse cx="1130" cy="380" rx="110" ry="15"/>
+  </g>
+</svg>
