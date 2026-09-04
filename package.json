@@ -12,7 +12,7 @@
     "build": "npm run build --workspaces --if-present",
     "typecheck": "npm run typecheck --workspaces --if-present",
     "test": "npm run test --workspaces --if-present",
-    "assets:production:materialize:first-slice": "node tools/materialize-first-slice-production-art.mjs && node tools/materialize-first-slice-boss.mjs && node tools/materialize-first-slice-production-audio.mjs",
+    "assets:production:materialize:first-slice": "node tools/materialize-first-slice-production-art.mjs && node tools/polish-first-slice-unit-silhouettes.mjs && node tools/materialize-first-slice-boss.mjs && node tools/materialize-first-slice-production-audio.mjs",
     "assets:production:preflight:first-slice": "node tools/materialize-first-slice-review-preflight.mjs && node tools/materialize-first-slice-review-provenance.mjs && node tools/publish-first-slice-review-preflight.mjs",
     "assets:production:runtime:first-slice:check": "npm run assets:production:materialize:first-slice && npm run assets:production:preflight:first-slice && node tools/validate-first-slice-runtime-files.mjs",
     "assets:production:intake:check": "node tools/validate-production-vertical-slice.mjs",
