@@ -7,6 +7,7 @@ import {
   STAGES,
 } from './prototype';
 import { getRuntimeSpriteStrips } from './production-assets.ts';
+import { getFirstSliceReviewAudioAssets } from './first-slice-production-review-audio.ts';
 import {
   FIRST_SLICE_REVIEW_MEADOW_KEY,
   FIRST_SLICE_REVIEW_MEADOW_URL,
@@ -34,11 +35,14 @@ export class BootScene extends Phaser.Scene {
       for (const strip of getFirstSliceReviewSpriteStrips()) {
         if (!this.textures.exists(strip.key)) this.load.spritesheet(strip.key, strip.url, { frameWidth: strip.frameWidth, frameHeight: strip.frameHeight });
       }
+      for (const audio of getFirstSliceReviewAudioAssets()) {
+        if (!this.cache.audio.exists(audio.key)) this.load.audio(audio.key, audio.url);
+      }
       if (!this.textures.exists(FIRST_SLICE_REVIEW_MEADOW_KEY)) this.load.image(FIRST_SLICE_REVIEW_MEADOW_KEY, FIRST_SLICE_REVIEW_MEADOW_URL);
-      status.setText('Production art review 자산 불러오는 중…');
+      status.setText('Production review 자산·오디오 불러오는 중…');
     }
     this.load.on('progress', (value: number) => bar.displayWidth = Math.max(1, 512 * value));
-    this.load.on('loaderror', (file: { key?: string }) => status.setText(`일부 캐릭터 로드 실패 · 대체 표시 사용 예정 ${file.key ?? ''}`));
+    this.load.on('loaderror', (file: { key?: string }) => status.setText(`일부 자산 로드 실패 · 대체 표시 사용 예정 ${file.key ?? ''}`));
   }
 
   create(): void { this.scene.start('main-menu'); }
