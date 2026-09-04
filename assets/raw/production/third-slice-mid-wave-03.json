@@ -1,0 +1,70 @@
+{
+  "schemaVersion": 1,
+  "sliceId": "third-slice-mid-wave-03",
+  "status": "AWAITING_ART",
+  "reviewStatus": "PENDING",
+  "generativeAiUsed": false,
+  "scope": {
+    "stages": ["main_01_004", "main_01_005", "main_01_006", "main_01_007", "main_01_008"],
+    "storyUnits": ["duelist", "lancer", "battlemage"],
+    "enemyUnits": ["enemy-sniper"],
+    "battlefieldThemes": ["fortress", "burning", "moon"],
+    "reusedBattlefieldThemes": ["canyon", "ruins"],
+    "deferred": [
+      {
+        "id": "enemy-sprinter",
+        "reason": "BEAST silhouette requires a suitable lawful non-human source or original production art; current verified CC0 human families are not an acceptable substitute."
+      }
+    ]
+  },
+  "sources": {
+    "martial-hero-2": {
+      "license": "CC0-1.0",
+      "role": "duelist motion/body base",
+      "mustChange": ["weapon silhouette", "coat/waist silhouette", "form posture language"],
+      "forbidden": ["unchanged source sprite as final", "tint-only differentiation"]
+    },
+    "warrior": {
+      "license": "CC0-1.0",
+      "role": "blue lancer motion/body base",
+      "mustChange": ["spear length/width", "banner silhouette", "formation posture"],
+      "forbidden": ["unchanged source sprite as final", "color-only lancer identity"]
+    },
+    "wizard": {
+      "license": "CC0-1.0",
+      "role": "battlemage motion/body base",
+      "mustChange": ["tactical gear", "short staff/plate language", "F3 artillery frame"],
+      "forbidden": ["generic robe-only wizard", "purple-equals-arcane color coding"]
+    },
+    "huntress": {
+      "license": "CC0-1.0",
+      "role": "enemy sniper motion/body base",
+      "mustChange": ["long glass rod", "rangefinder/prism silhouette", "long-aim attack language"],
+      "forbidden": ["unchanged bow identity", "player-hunter silhouette collision"]
+    }
+  },
+  "targets": [
+    {"assetId":"unit:duelist:duelist_f1","runtimeId":"duelist","form":"F1","displayName":"결투검사","sourceFamily":"martial-hero-2","attackContactFrame":2,"motionLanguage":"upright rapier; minimal anticipation; thin contact"},
+    {"assetId":"unit:duelist:duelist_f2","runtimeId":"duelist","form":"F2","displayName":"검무가","sourceFamily":"martial-hero-2","attackContactFrame":2,"motionLanguage":"split coat; rotational balance; faster repeated-feel silhouette"},
+    {"assetId":"unit:duelist:duelist_f3","runtimeId":"duelist","form":"F3","displayName":"일섬검객","sourceFamily":"martial-hero-2","attackContactFrame":2,"motionLanguage":"low still draw stance; one-line slash; heavier recovery"},
+    {"assetId":"unit:lancer:lancer_f1","runtimeId":"lancer","form":"F1","displayName":"청창대","sourceFamily":"warrior","attackContactFrame":2,"motionLanguage":"broad spearhead; layered cloth armor; short back banner"},
+    {"assetId":"unit:lancer:lancer_f2","runtimeId":"lancer","form":"F2","displayName":"장창방진","sourceFamily":"warrior","attackContactFrame":2,"motionLanguage":"longest shaft; lower formation stance; nearly fixed spear height"},
+    {"assetId":"unit:lancer:lancer_f3","runtimeId":"lancer","form":"F3","displayName":"파진창대","sourceFamily":"warrior","attackContactFrame":2,"motionLanguage":"shorter shaft than F2; widest blade; forward sweep posture"},
+    {"assetId":"unit:battlemage:battlemage_f1","runtimeId":"battlemage","form":"F1","displayName":"전투마도사","sourceFamily":"wizard","attackContactFrame":4,"motionLanguage":"short staff plus one tactical plate; compact area burst"},
+    {"assetId":"unit:battlemage:battlemage_f2","runtimeId":"battlemage","form":"F2","displayName":"전선술사","sourceFamily":"wizard","attackContactFrame":4,"motionLanguage":"two-to-three small plates; stable repeated line work"},
+    {"assetId":"unit:battlemage:battlemage_f3","runtimeId":"battlemage","form":"F3","displayName":"포격마도사","sourceFamily":"wizard","attackContactFrame":4,"motionLanguage":"folded rear artillery ring opens only during attack; clear blind-spot artillery identity"},
+    {"assetId":"unit:enemy-sniper","runtimeId":"enemy-sniper","form":"F1","displayName":"유리봉 사수","sourceFamily":"huntress","attackContactFrame":3,"motionLanguage":"very long glass rod; narrow silhouette; long aim then crisp discharge"}
+  ],
+  "battlefields": [
+    {"theme":"fortress","stageAnchor":"main_01_004","intent":"rusted shield-line fortification; heavy side masses; open contact lane"},
+    {"theme":"burning","stageAnchor":"main_01_005","intent":"red-hot supply route; smoke and ember landmarks kept away from the combat line"},
+    {"theme":"moon","stageAnchor":"main_01_007","intent":"long sight ridge; high-contrast lunar landmarks framing rather than crossing sniper sight lines"}
+  ],
+  "lifecycle": {
+    "normalRuntimeAuthority": false,
+    "reviewQuery": "productionReview=third-slice",
+    "humanReview": "PENDING",
+    "reviewer": null,
+    "reviewedAt": null
+  }
+}
