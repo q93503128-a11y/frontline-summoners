@@ -17,8 +17,8 @@
           "frameWidth": 135,
           "frameHeight": 135,
           "frames": 10,
-          "bytes": 2649,
-          "sha256": "373ea40d630f666c8017ed2296086edf63496aeb8f4ce2fc72e48bf532f516dd",
+          "bytes": 3079,
+          "sha256": "f981fa0e1708c82c608226ecbadb32ff98f4671552f015be37d49823b2ebbca4",
           "sourceUrl": "https://raw.githubusercontent.com/chaurunda/ClickerGodot/c425114bfa522b1e57f0cfc4f486580a3210f36d/assets/Medieval%20Warrior%20Pack%203/Sprites/Idle.png"
         },
         "move": {
@@ -26,8 +26,8 @@
           "frameWidth": 135,
           "frameHeight": 135,
           "frames": 6,
-          "bytes": 2435,
-          "sha256": "7a9061d6f9654b1480edb5a314abd84a722c80a0936fde99880d02761cd01ccc",
+          "bytes": 3009,
+          "sha256": "04fc8477518e07d12d73219fc48b70425967b3c2149e5a27ef3e980595a63cd5",
           "sourceUrl": "https://raw.githubusercontent.com/chaurunda/ClickerGodot/c425114bfa522b1e57f0cfc4f486580a3210f36d/assets/Medieval%20Warrior%20Pack%203/Sprites/Run.png"
         },
         "attack": {
@@ -35,8 +35,8 @@
           "frameWidth": 135,
           "frameHeight": 135,
           "frames": 4,
-          "bytes": 2122,
-          "sha256": "01a62f40f231f983c3465c82db9e29d7a248907a2aa4aafd7a574438dd65c3c1",
+          "bytes": 2764,
+          "sha256": "b08799554fb3ed0107a270b0864c4c29bb399ce4de821322b790636c2d7f5e4a",
           "sourceUrl": "https://raw.githubusercontent.com/chaurunda/ClickerGodot/c425114bfa522b1e57f0cfc4f486580a3210f36d/assets/Medieval%20Warrior%20Pack%203/Sprites/Attack1.png"
         },
         "knockback": {
@@ -44,8 +44,8 @@
           "frameWidth": 135,
           "frameHeight": 135,
           "frames": 3,
-          "bytes": 1626,
-          "sha256": "5e66ea9db3680bd4aae8be1ffe61e5bc046ebc3897f2a2156f56919553ff275a",
+          "bytes": 1973,
+          "sha256": "abd4b5ab4f02dea2feb066f000008ea703e724d7bb5be864df08315204346ec3",
           "sourceUrl": "https://raw.githubusercontent.com/chaurunda/ClickerGodot/c425114bfa522b1e57f0cfc4f486580a3210f36d/assets/Medieval%20Warrior%20Pack%203/Sprites/Get%20Hit.png"
         },
         "death": {
@@ -53,10 +53,15 @@
           "frameWidth": 135,
           "frameHeight": 135,
           "frames": 9,
-          "bytes": 3598,
-          "sha256": "88f3d888267f89ad90673642ddaa11e7ba7fa18b61352d8d28b44b5900f61139",
+          "bytes": 4518,
+          "sha256": "4d41a431827ef2665ea28a4315ece0633025d157faaf6fa4ad0727518ae4f975",
           "sourceUrl": "https://raw.githubusercontent.com/chaurunda/ClickerGodot/c425114bfa522b1e57f0cfc4f486580a3210f36d/assets/Medieval%20Warrior%20Pack%203/Sprites/Death.png"
         }
+      },
+      "visualPolish": {
+        "version": 1,
+        "kind": "STRUCTURAL_SILHOUETTE_PASS",
+        "reviewStatus": "UNREVIEWED_RUNTIME_FILES"
       }
     },
     "militia/militia_f2": {
@@ -71,8 +76,8 @@
           "frameWidth": 140,
           "frameHeight": 140,
           "frames": 11,
-          "bytes": 3486,
-          "sha256": "5995c69e4bfef2299d26c4330eb9628ed125ba3c13e6fb3dfe2345daa6b15297",
+          "bytes": 3919,
+          "sha256": "041880dc77aab6143ea6cbfbc8676f41a9e0826eafa2113894b1b1863f3eadde",
           "sourceUrl": "https://raw.githubusercontent.com/NQM765/IngeSoft1/84594e5d3da7472615660f453bdb457da13cca2f/Proyecto/Scrum%27s_Castle/Assets/Characters/Hero%20Knight%202/Sprites/Idle.png"
         },
         "move": {
@@ -80,8 +85,8 @@
           "frameWidth": 140,
           "frameHeight": 140,
           "frames": 8,
-          "bytes": 4327,
-          "sha256": "8e0d79b79732ad9ae8ddf7fd51ca426dd6b1355f23fb351082b75ff42ab8b6f0",
+          "bytes": 4930,
+          "sha256": "16f02aaadca1b84a2d448fd626bb6f071932972e4b1937cefe7e57c582a7c91a",
           "sourceUrl": "https://raw.githubusercontent.com/NQM765/IngeSoft1/84594e5d3da7472615660f453bdb457da13cca2f/Proyecto/Scrum%27s_Castle/Assets/Characters/Hero%20Knight%202/Sprites/Run.png"
         },
         "attack": {
@@ -89,8 +94,8 @@
           "frameWidth": 140,
           "frameHeight": 140,
           "frames": 6,
-          "bytes": 3703,
-          "sha256": "80aee6e494ab901f8603b46a17ad189b113d5cbe48ec1cef4209084f5cb71d4a",
+          "bytes": 5004,
+          "sha256": "9d89ce38fc8ad3387a2cb42ddf6893a7dcad8c808f41c8bf19e8281b8887ada4",
           "sourceUrl": "https://raw.githubusercontent.com/NQM765/IngeSoft1/84594e5d3da7472615660f453bdb457da13cca2f/Proyecto/Scrum%27s_Castle/Assets/Characters/Hero%20Knight%202/Sprites/Attack.png"
         },
         "knockback": {
@@ -98,8 +103,8 @@
           "frameWidth": 140,
           "frameHeight": 140,
           "frames": 4,
-          "bytes": 2462,
-          "sha256": "f124d2a63f6922750efba05a187c23bef79f09fd910cbefcc74c9adb5194f76a",
+          "bytes": 2895,
+          "sha256": "571a3cd1ad55b5925a3d30ba0379fdae3a6d35944db9f8de7c24c1bc62be4a2f",
           "sourceUrl": "https://raw.githubusercontent.com/NQM765/IngeSoft1/84594e5d3da7472615660f453bdb457da13cca2f/Proyecto/Scrum%27s_Castle/Assets/Characters/Hero%20Knight%202/Sprites/Take%20Hit.png"
         },
         "death": {
@@ -107,10 +112,25 @@
           "frameWidth": 140,
           "frameHeight": 140,
           "frames": 9,
-          "bytes": 4110,
-          "sha256": "cffd8e66f0f5e83b32afdd247d9a66031ede97cba1cd1c552de2312894eeb9bc",
+          "bytes": 4951,
+          "sha256": "590d217ab0d3c7287317c028b90d4d7039ece7bda059516ee8ef7f318155b428",
           "sourceUrl": "https://raw.githubusercontent.com/NQM765/IngeSoft1/84594e5d3da7472615660f453bdb457da13cca2f/Proyecto/Scrum%27s_Castle/Assets/Characters/Hero%20Knight%202/Sprites/Death.png"
         }
+      },
+      "visualPolish": {
+        "version": 1,
+        "kind": "STRUCTURAL_SILHOUETTE_PASS",
+        "reviewStatus": "UNREVIEWED_RUNTIME_FILES"
+      },
+      "motionLanguage": {
+        "version": 1,
+        "kind": "FIRST_SLICE_CHARACTER_MOTION_PASS",
+        "reviewStatus": "UNREVIEWED_RUNTIME_FILES",
+        "emphasis": [
+          "DISCIPLINED_SPEAR_SET",
+          "FULL_CONTACT_EXTENSION",
+          "ORDERLY_RECOVERY"
+        ]
       }
     },
     "militia/militia_f3": {
@@ -125,8 +145,8 @@
           "frameWidth": 184,
           "frameHeight": 137,
           "frames": 6,
-          "bytes": 3120,
-          "sha256": "1e5fbee0d65f3c650c0835fa1d49423cd15b7e30cafc6f56d74751dd335df320",
+          "bytes": 3606,
+          "sha256": "24029f828d30789b1b4227107ae608013af8f519af2accb5218028a5e4b462c6",
           "sourceUrl": "https://raw.githubusercontent.com/NQM765/IngeSoft1/84594e5d3da7472615660f453bdb457da13cca2f/Proyecto/Scrum%27s_Castle/Assets/Characters/Medieval%20Warrior%20Pack/Idle.png"
         },
         "move": {
@@ -134,8 +154,8 @@
           "frameWidth": 184,
           "frameHeight": 137,
           "frames": 8,
-          "bytes": 6810,
-          "sha256": "02b5f938f90cc030aeb71efa684f20998fdea4ac7080c86fbb19a333313c95ba",
+          "bytes": 7780,
+          "sha256": "8b9d8605084b97429ab0e49069c588d8a9f05c5b5e65710168f0b0aec696273e",
           "sourceUrl": "https://raw.githubusercontent.com/NQM765/IngeSoft1/84594e5d3da7472615660f453bdb457da13cca2f/Proyecto/Scrum%27s_Castle/Assets/Characters/Medieval%20Warrior%20Pack/Run.png"
         },
         "attack": {
@@ -143,8 +163,8 @@
           "frameWidth": 184,
           "frameHeight": 137,
           "frames": 4,
-          "bytes": 4232,
-          "sha256": "1c3606a60254dd59e27e8fa95f27e88767e5093d9b801c6560a63f20989edf99",
+          "bytes": 5255,
+          "sha256": "23daafbfdfab9d3589814da08c367c2f730ab6959b37bdc0578f6cc97b60e19b",
           "sourceUrl": "https://raw.githubusercontent.com/NQM765/IngeSoft1/84594e5d3da7472615660f453bdb457da13cca2f/Proyecto/Scrum%27s_Castle/Assets/Characters/Medieval%20Warrior%20Pack/Attack1.png"
         },
         "knockback": {
@@ -152,8 +172,8 @@
           "frameWidth": 184,
           "frameHeight": 137,
           "frames": 3,
-          "bytes": 2516,
-          "sha256": "814d31a8f8aeed7ad2efa5d808aec1361730b68854fa688f7ef6aa96cbe03217",
+          "bytes": 2844,
+          "sha256": "63c32b1e4c553462406ea10e16c734442966663dffa7c9abff4946764000df7e",
           "sourceUrl": "https://raw.githubusercontent.com/NQM765/IngeSoft1/84594e5d3da7472615660f453bdb457da13cca2f/Proyecto/Scrum%27s_Castle/Assets/Characters/Medieval%20Warrior%20Pack/Hit.png"
         },
         "death": {
@@ -161,10 +181,25 @@
           "frameWidth": 184,
           "frameHeight": 137,
           "frames": 9,
-          "bytes": 7348,
-          "sha256": "a3c9340389846272733372b3648aa76e615f528a936e3b25bc4abc30d1511a64",
+          "bytes": 8379,
+          "sha256": "b8804a2ae5a898d99db0e27544cd24dd17d79b2597dc69cf41f31ff1aa532d22",
           "sourceUrl": "https://raw.githubusercontent.com/NQM765/IngeSoft1/84594e5d3da7472615660f453bdb457da13cca2f/Proyecto/Scrum%27s_Castle/Assets/Characters/Medieval%20Warrior%20Pack/Death.png"
         }
+      },
+      "visualPolish": {
+        "version": 1,
+        "kind": "STRUCTURAL_SILHOUETTE_PASS",
+        "reviewStatus": "UNREVIEWED_RUNTIME_FILES"
+      },
+      "motionLanguage": {
+        "version": 1,
+        "kind": "FIRST_SLICE_CHARACTER_MOTION_PASS",
+        "reviewStatus": "UNREVIEWED_RUNTIME_FILES",
+        "emphasis": [
+          "LOW_CENTER_RUN",
+          "COMPACT_PRELOAD",
+          "SHORT_COMMITTED_THRUST"
+        ]
       }
     },
     "enemy-raider": {
@@ -179,8 +214,8 @@
           "frameWidth": 150,
           "frameHeight": 150,
           "frames": 8,
-          "bytes": 2683,
-          "sha256": "daf08915058cde1fe22f4f7e82b5205049f3f9e69380e6266296e162396e5e34",
+          "bytes": 3262,
+          "sha256": "0d5fb3b28904c4c6ea4d7f6a3c85542ee469955b718533e5c502fe934dd68b81",
           "sourceUrl": "https://raw.githubusercontent.com/NQM765/IngeSoft1/84594e5d3da7472615660f453bdb457da13cca2f/Proyecto/Scrum%27s_Castle/Assets/Characters/Medieval%20Warrior%20Pack%202/Sprites/Idle.png"
         },
         "move": {
@@ -188,8 +223,8 @@
           "frameWidth": 150,
           "frameHeight": 150,
           "frames": 8,
-          "bytes": 4230,
-          "sha256": "90eff4e5ff13f21d26244eed9a5117f076f817c901fff5f15712865f2d10b8fe",
+          "bytes": 5487,
+          "sha256": "d4d98114c0797d20a713f83c1bdcff66b1d4f3b0045580acbdddf3132b92ffa9",
           "sourceUrl": "https://raw.githubusercontent.com/NQM765/IngeSoft1/84594e5d3da7472615660f453bdb457da13cca2f/Proyecto/Scrum%27s_Castle/Assets/Characters/Medieval%20Warrior%20Pack%202/Sprites/Run.png"
         },
         "attack": {
@@ -197,8 +232,8 @@
           "frameWidth": 150,
           "frameHeight": 150,
           "frames": 4,
-          "bytes": 2979,
-          "sha256": "be7227b1ca35ba70436ee87b70bcb30623c36db27c4579c6102e7e31897ab1cd",
+          "bytes": 3796,
+          "sha256": "66291ac4c8d904c401256570649b20e01017fb29eac526917dbbe1db093eb116",
           "sourceUrl": "https://raw.githubusercontent.com/NQM765/IngeSoft1/84594e5d3da7472615660f453bdb457da13cca2f/Proyecto/Scrum%27s_Castle/Assets/Characters/Medieval%20Warrior%20Pack%202/Sprites/Attack1.png"
         },
         "knockback": {
@@ -206,8 +241,8 @@
           "frameWidth": 150,
           "frameHeight": 150,
           "frames": 4,
-          "bytes": 2432,
-          "sha256": "7a5b32c210c72ac576a403047a870441ddb4101a4cc6d83107fe8e503d13965b",
+          "bytes": 3138,
+          "sha256": "3fc14b856a2a702bd25b294157176accebf248ff4c86ca73a3d2152bf3e9c4e2",
           "sourceUrl": "https://raw.githubusercontent.com/NQM765/IngeSoft1/84594e5d3da7472615660f453bdb457da13cca2f/Proyecto/Scrum%27s_Castle/Assets/Characters/Medieval%20Warrior%20Pack%202/Sprites/Take%20Hit.png"
         },
         "death": {
@@ -215,10 +250,25 @@
           "frameWidth": 150,
           "frameHeight": 150,
           "frames": 6,
-          "bytes": 3928,
-          "sha256": "bf2b462b2150ee5eea253307e93ec43081999b7363d494ee951431d9b314f1ce",
+          "bytes": 6295,
+          "sha256": "31a9b245faafb52391652b38fa8665456f62931c5d746029a1aa456f5f67ec0e",
           "sourceUrl": "https://raw.githubusercontent.com/NQM765/IngeSoft1/84594e5d3da7472615660f453bdb457da13cca2f/Proyecto/Scrum%27s_Castle/Assets/Characters/Medieval%20Warrior%20Pack%202/Sprites/Death.png"
         }
+      },
+      "visualPolish": {
+        "version": 1,
+        "kind": "STRUCTURAL_SILHOUETTE_PASS",
+        "reviewStatus": "UNREVIEWED_RUNTIME_FILES"
+      },
+      "motionLanguage": {
+        "version": 1,
+        "kind": "FIRST_SLICE_CHARACTER_MOTION_PASS",
+        "reviewStatus": "UNREVIEWED_RUNTIME_FILES",
+        "emphasis": [
+          "SACK_INERTIA_SEPARATION",
+          "LOAD_LEADS_KNOCKBACK",
+          "SACK_FALLS_BEFORE_BODY"
+        ]
       }
     },
     "enemy-boss": {
@@ -227,14 +277,25 @@
       "displayHeight": 228,
       "attackContactFrame": 5,
       "structuralRework": true,
+      "visualPolish": {
+        "version": 4,
+        "kind": "GOLDEN_MASK_MOTION_LANGUAGE_PASS",
+        "reviewStatus": "UNREVIEWED_RUNTIME_FILES",
+        "emphasis": [
+          "LONG_MASK_ANTICIPATION",
+          "BODY_LEADS_KNOCKBACK",
+          "MASK_DELAYED_FOLLOW",
+          "MASK_FAILS_BEFORE_BODY_COLLAPSE"
+        ]
+      },
       "motions": {
         "idle": {
           "url": "/assets/production/units/enemy-boss/idle.png",
           "frameWidth": 150,
           "frameHeight": 150,
           "frames": 8,
-          "bytes": 5760,
-          "sha256": "d59462628ae4af4656500ed76a6bcb59af5eee738c2e411b057a9e492caf2f41",
+          "bytes": 6183,
+          "sha256": "306fbe650e25d35c8bd82b38d2a3f7892364f099032649785fb9c2e82e148eae",
           "sourceUrl": "https://raw.githubusercontent.com/NQM765/IngeSoft1/84594e5d3da7472615660f453bdb457da13cca2f/Proyecto/Scrum%27s_Castle/Assets/Characters/Evil%20Wizard/Sprites/Idle.png"
         },
         "move": {
@@ -242,8 +303,8 @@
           "frameWidth": 150,
           "frameHeight": 150,
           "frames": 8,
-          "bytes": 6156,
-          "sha256": "94c8c916352e4c9c105b9b149059b4c1c700216de7c5dfd9a3304517d88e4f74",
+          "bytes": 7153,
+          "sha256": "116cfc67221ae9493f40c1699bf727144e739c9c49af8fd8252a7541d19ef8cd",
           "sourceUrl": "https://raw.githubusercontent.com/NQM765/IngeSoft1/84594e5d3da7472615660f453bdb457da13cca2f/Proyecto/Scrum%27s_Castle/Assets/Characters/Evil%20Wizard/Sprites/Move.png"
         },
         "attack": {
@@ -251,8 +312,8 @@
           "frameWidth": 150,
           "frameHeight": 150,
           "frames": 8,
-          "bytes": 7866,
-          "sha256": "dbcad69a111ef062813437dcc7249280a656ad2f7f0e3ff9bb45f4c06c9de557",
+          "bytes": 15993,
+          "sha256": "52fb1e460c0724bd3a4e2707da29faa9c6d35f539626388f21abdb9580a9a11b",
           "sourceUrl": "https://raw.githubusercontent.com/NQM765/IngeSoft1/84594e5d3da7472615660f453bdb457da13cca2f/Proyecto/Scrum%27s_Castle/Assets/Characters/Evil%20Wizard/Sprites/Attack.png"
         },
         "knockback": {
@@ -260,8 +321,8 @@
           "frameWidth": 150,
           "frameHeight": 150,
           "frames": 4,
-          "bytes": 3946,
-          "sha256": "b0350e3ed4c0259e510219deb65f7fe9a24dd2b33e1963571fda97b86fe6dbef",
+          "bytes": 5385,
+          "sha256": "716e5c18b62c04086e95df856d907e36124cdb9bc96dd3b5ef8bec0f12090253",
           "sourceUrl": "https://raw.githubusercontent.com/NQM765/IngeSoft1/84594e5d3da7472615660f453bdb457da13cca2f/Proyecto/Scrum%27s_Castle/Assets/Characters/Evil%20Wizard/Sprites/Take%20Hit.png"
         },
         "death": {
@@ -269,11 +330,26 @@
           "frameWidth": 150,
           "frameHeight": 150,
           "frames": 5,
-          "bytes": 4877,
-          "sha256": "b103c2c92ff1e9f72aa2d4233b4d96a3d73d409c8c698ba1afabd3cf5383bc50",
+          "bytes": 8578,
+          "sha256": "ac9f200f2b187b33ac9abbe3ff2c8d08ab06c9bc1749420eae363ab04e931348",
           "sourceUrl": "https://raw.githubusercontent.com/NQM765/IngeSoft1/84594e5d3da7472615660f453bdb457da13cca2f/Proyecto/Scrum%27s_Castle/Assets/Characters/Evil%20Wizard/Sprites/Death.png"
         }
       }
     }
+  },
+  "visualPolishPipeline": {
+    "generator": "tools/polish-first-slice-unit-silhouettes.mjs",
+    "version": 1,
+    "reviewStatus": "UNREVIEWED_RUNTIME_FILES"
+  },
+  "motionLanguagePipeline": {
+    "generator": "tools/polish-first-slice-unit-motion-language.mjs",
+    "version": 1,
+    "reviewStatus": "UNREVIEWED_RUNTIME_FILES"
+  },
+  "bossGenerator": {
+    "generator": "tools/materialize-first-slice-boss.mjs",
+    "generatorVersion": 4,
+    "reviewStatus": "UNREVIEWED_RUNTIME_FILES"
   }
 }

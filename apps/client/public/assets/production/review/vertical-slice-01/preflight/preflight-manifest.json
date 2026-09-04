@@ -16,8 +16,8 @@
       "file": "preflight/motion-key-poses.png",
       "width": 1280,
       "height": 720,
-      "bytes": 26803,
-      "sha256": "eb7a7b3e6775481e7207c383e08903ce6ff03468854f69482c8ff9352f160e41",
+      "bytes": 30896,
+      "sha256": "8708dc2973419926f988c41aa0070c74dbfecf1098ab999e1e49f95ac03da56d",
       "intent": "Five committed runtime motions per target, fixed target order F1/F2/F3/raider/boss."
     },
     {
@@ -25,8 +25,8 @@
       "file": "preflight/silhouette-comparison.png",
       "width": 1280,
       "height": 720,
-      "bytes": 7135,
-      "sha256": "47a201002193647bc249d121b5e2154055b386c54cbddf1c9e61de6605dad200",
+      "bytes": 7444,
+      "sha256": "23ada82e116c2f5551be8cb0fc284f250c499ab5f24714dbe972d9266d2ce9c1",
       "intent": "Color-free committed idle silhouettes in canonical comparison order. Human judgment still required."
     },
     {
@@ -34,8 +34,8 @@
       "file": "preflight/contact-board.png",
       "width": 1280,
       "height": 720,
-      "bytes": 28045,
-      "sha256": "ec4a62099acc87873014e4b137b6e1096e859b6206cbd5b4877fe55794ad9f8b",
+      "bytes": 31733,
+      "sha256": "060d85dc2c3c7202f1911fa6a0d30985aead8bb53d3d6ed43c9fe2b7c0703c21",
       "intent": "Idle/contact/knockback visual sequence using each target attackContactFrame. Simulation screenshot confirmation remains pending."
     },
     {
@@ -43,8 +43,8 @@
       "file": "preflight/scale-sheet.png",
       "width": 1280,
       "height": 720,
-      "bytes": 10237,
-      "sha256": "a7edd7e2cb15d3213be3808fb231dede27174421c99e0d0e8b002b87508c67bc",
+      "bytes": 11319,
+      "sha256": "29a34c3e4a9b4169f60731648f0f9117df79d24df6b1cf0cf98f94f9c87b6329",
       "intent": "Committed displayHeight comparison at one shared ground line."
     },
     {
@@ -52,8 +52,8 @@
       "file": "preflight/reference-sheet.png",
       "width": 1280,
       "height": 720,
-      "bytes": 27612,
-      "sha256": "c68c1cc740121ce4c7aaee0a647ce329988f80da0685ab48fd0dcb147718ed4e",
+      "bytes": 31737,
+      "sha256": "487f8f52463201237f3c4c52d79004b427f074f83011c8ea88aa02367aaf5e55",
       "intent": "Sufficient side-view reference sheet: committed idle color/grayscale plus attack/death identity anchors. Not a fabricated front/back turnaround."
     },
     {
@@ -61,8 +61,8 @@
       "file": "preflight/closest-three-differences.png",
       "width": 1280,
       "height": 720,
-      "bytes": 13156,
-      "sha256": "efdf6088fee966197d3d9ff2706b941159afd7c17e81e68fa223de08e36e3199",
+      "bytes": 13576,
+      "sha256": "4758cc123686d26430373b70b78abdbf6e106d350c324f8a6b80bd302730efe7",
       "intent": "Preflight nearest-neighbor silhouette comparison; semantic difference notes live in the review page/manifest, not encoded as fake image text."
     }
   ],

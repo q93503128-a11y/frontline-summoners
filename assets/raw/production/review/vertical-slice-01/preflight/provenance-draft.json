@@ -152,7 +152,7 @@
         "authorOrSource": "Frontline Summoners project-authored vector composition",
         "rightsOrLicense": "PROJECT-OWNED ORIGINAL",
         "productionMethod": "MANUAL",
-        "modifications": "Original deterministic vector battlefield composition. AI generation not used. Runtime metadata revision 2.",
+        "modifications": "Original deterministic vector battlefield composition. AI generation not used. Runtime metadata revision 3.",
         "masterFiles": [
           "apps/client/public/assets/production/battlefields/meadow/battlefield-base.svg",
           "apps/client/public/assets/production/battlefields/meadow/meadow-runtime-metadata.json"

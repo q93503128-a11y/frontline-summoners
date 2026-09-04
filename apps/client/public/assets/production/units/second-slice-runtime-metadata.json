@@ -1,0 +1,490 @@
+{
+  "schemaVersion": 1,
+  "batchId": "second-slice-early-wave-02",
+  "generator": "tools/materialize-second-slice-production-art.mjs",
+  "generatorVersion": 1,
+  "reviewStatus": "UNREVIEWED_RUNTIME_FILES",
+  "structuralRework": true,
+  "targets": {
+    "guard/guard_f1": {
+      "assetId": "unit:guard:guard_f1",
+      "sourceFamily": "hero-knight",
+      "displayHeight": 184,
+      "attackContactFrame": 3,
+      "structuralRework": true,
+      "reviewStatus": "UNREVIEWED_RUNTIME_FILES",
+      "motions": {
+        "idle": {
+          "url": "/assets/production/units/guard/guard_f1/idle.png",
+          "frameWidth": 210,
+          "frameHeight": 190,
+          "frames": 11,
+          "bytes": 5005,
+          "sha256": "1b1e5cb2e3febbc8cba0f176cd9a333521572d76a9f4d8ef94ab14dc3dfd9592",
+          "sourceUrl": "https://raw.githubusercontent.com/vlee489/AC31009-Client/71252f38c7bf4426ff84676cad517f66c3e6cb65/assets/Sprites/HeroKnight/Idle.png",
+          "sourceLocalPath": "/assets/characters/hero-knight/idle.png"
+        },
+        "move": {
+          "url": "/assets/production/units/guard/guard_f1/move.png",
+          "frameWidth": 210,
+          "frameHeight": 190,
+          "frames": 8,
+          "bytes": 5853,
+          "sha256": "27708db50d8d8326a233be5314786ea0482db7c1d01172b8e9c7ee03afc1ea66",
+          "sourceUrl": "https://raw.githubusercontent.com/vlee489/AC31009-Client/71252f38c7bf4426ff84676cad517f66c3e6cb65/assets/Sprites/HeroKnight/Run.png",
+          "sourceLocalPath": "/assets/characters/hero-knight/run.png"
+        },
+        "attack": {
+          "url": "/assets/production/units/guard/guard_f1/attack.png",
+          "frameWidth": 210,
+          "frameHeight": 190,
+          "frames": 7,
+          "bytes": 5869,
+          "sha256": "9dbb1adc883c69575b7b9a18946a409e5b56ff2f1cb1a2afd58f25743d31ae95",
+          "sourceUrl": "https://raw.githubusercontent.com/vlee489/AC31009-Client/71252f38c7bf4426ff84676cad517f66c3e6cb65/assets/Sprites/HeroKnight/Attack1.png",
+          "sourceLocalPath": "/assets/characters/hero-knight/attack.png"
+        },
+        "knockback": {
+          "url": "/assets/production/units/guard/guard_f1/knockback.png",
+          "frameWidth": 210,
+          "frameHeight": 190,
+          "frames": 4,
+          "bytes": 3381,
+          "sha256": "aa80e0b7fa8895cfb4248ddd587a23c3873f9b3d867ae30c5962c6b53fc57185",
+          "sourceUrl": "https://raw.githubusercontent.com/vlee489/AC31009-Client/71252f38c7bf4426ff84676cad517f66c3e6cb65/assets/Sprites/HeroKnight/Take%20Hit.png",
+          "sourceLocalPath": "/assets/characters/hero-knight/hit.png"
+        },
+        "death": {
+          "url": "/assets/production/units/guard/guard_f1/death.png",
+          "frameWidth": 210,
+          "frameHeight": 190,
+          "frames": 11,
+          "bytes": 8107,
+          "sha256": "ce1a5f28f1a4e76d8b9f2fcadf0e015b4a96761f8f2e0c35eaa30a158f68e35f",
+          "sourceUrl": "https://raw.githubusercontent.com/vlee489/AC31009-Client/71252f38c7bf4426ff84676cad517f66c3e6cb65/assets/Sprites/HeroKnight/Death.png",
+          "sourceLocalPath": "/assets/characters/hero-knight/death.png"
+        }
+      }
+    },
+    "guard/guard_f2": {
+      "assetId": "unit:guard:guard_f2",
+      "sourceFamily": "hero-knight",
+      "displayHeight": 192,
+      "attackContactFrame": 3,
+      "structuralRework": true,
+      "reviewStatus": "UNREVIEWED_RUNTIME_FILES",
+      "motions": {
+        "idle": {
+          "url": "/assets/production/units/guard/guard_f2/idle.png",
+          "frameWidth": 210,
+          "frameHeight": 190,
+          "frames": 11,
+          "bytes": 5370,
+          "sha256": "cbd6927dffdb84549bf1cd3d234dedd969ae9d0d5e83392d1da6550c66bb8e01",
+          "sourceUrl": "https://raw.githubusercontent.com/vlee489/AC31009-Client/71252f38c7bf4426ff84676cad517f66c3e6cb65/assets/Sprites/HeroKnight/Idle.png",
+          "sourceLocalPath": "/assets/characters/hero-knight/idle.png"
+        },
+        "move": {
+          "url": "/assets/production/units/guard/guard_f2/move.png",
+          "frameWidth": 210,
+          "frameHeight": 190,
+          "frames": 8,
+          "bytes": 5902,
+          "sha256": "80c0081e2cffe69a0ae44d1e284052a6d291591f4d7109e838d0725bf5055de7",
+          "sourceUrl": "https://raw.githubusercontent.com/vlee489/AC31009-Client/71252f38c7bf4426ff84676cad517f66c3e6cb65/assets/Sprites/HeroKnight/Run.png",
+          "sourceLocalPath": "/assets/characters/hero-knight/run.png"
+        },
+        "attack": {
+          "url": "/assets/production/units/guard/guard_f2/attack.png",
+          "frameWidth": 210,
+          "frameHeight": 190,
+          "frames": 7,
+          "bytes": 5781,
+          "sha256": "494dcb41c3b281d131c4ac9dc3831800ef4fb48e2c375b2618f74f1ce70d0c37",
+          "sourceUrl": "https://raw.githubusercontent.com/vlee489/AC31009-Client/71252f38c7bf4426ff84676cad517f66c3e6cb65/assets/Sprites/HeroKnight/Attack1.png",
+          "sourceLocalPath": "/assets/characters/hero-knight/attack.png"
+        },
+        "knockback": {
+          "url": "/assets/production/units/guard/guard_f2/knockback.png",
+          "frameWidth": 210,
+          "frameHeight": 190,
+          "frames": 4,
+          "bytes": 3418,
+          "sha256": "57c937368c92e3a844e167e060439f11d44a8e5d495594f0b118928d970c0555",
+          "sourceUrl": "https://raw.githubusercontent.com/vlee489/AC31009-Client/71252f38c7bf4426ff84676cad517f66c3e6cb65/assets/Sprites/HeroKnight/Take%20Hit.png",
+          "sourceLocalPath": "/assets/characters/hero-knight/hit.png"
+        },
+        "death": {
+          "url": "/assets/production/units/guard/guard_f2/death.png",
+          "frameWidth": 210,
+          "frameHeight": 190,
+          "frames": 11,
+          "bytes": 8425,
+          "sha256": "98d1f706d8a6b003de40ecdacfd810aad88d00857adb77c9d825b67ad9033d79",
+          "sourceUrl": "https://raw.githubusercontent.com/vlee489/AC31009-Client/71252f38c7bf4426ff84676cad517f66c3e6cb65/assets/Sprites/HeroKnight/Death.png",
+          "sourceLocalPath": "/assets/characters/hero-knight/death.png"
+        }
+      }
+    },
+    "guard/guard_f3": {
+      "assetId": "unit:guard:guard_f3",
+      "sourceFamily": "hero-knight",
+      "displayHeight": 202,
+      "attackContactFrame": 3,
+      "structuralRework": true,
+      "reviewStatus": "UNREVIEWED_RUNTIME_FILES",
+      "motions": {
+        "idle": {
+          "url": "/assets/production/units/guard/guard_f3/idle.png",
+          "frameWidth": 210,
+          "frameHeight": 190,
+          "frames": 11,
+          "bytes": 6080,
+          "sha256": "c81204cc337648d488402fc4e14e6b0a88352c52d6ad8c17c151368e2b519921",
+          "sourceUrl": "https://raw.githubusercontent.com/vlee489/AC31009-Client/71252f38c7bf4426ff84676cad517f66c3e6cb65/assets/Sprites/HeroKnight/Idle.png",
+          "sourceLocalPath": "/assets/characters/hero-knight/idle.png"
+        },
+        "move": {
+          "url": "/assets/production/units/guard/guard_f3/move.png",
+          "frameWidth": 210,
+          "frameHeight": 190,
+          "frames": 8,
+          "bytes": 6545,
+          "sha256": "ff6ca1e3000a68cbc1f1e2703e85c132df0fda1ae9a38c74affe6939039d5c12",
+          "sourceUrl": "https://raw.githubusercontent.com/vlee489/AC31009-Client/71252f38c7bf4426ff84676cad517f66c3e6cb65/assets/Sprites/HeroKnight/Run.png",
+          "sourceLocalPath": "/assets/characters/hero-knight/run.png"
+        },
+        "attack": {
+          "url": "/assets/production/units/guard/guard_f3/attack.png",
+          "frameWidth": 210,
+          "frameHeight": 190,
+          "frames": 7,
+          "bytes": 6175,
+          "sha256": "203f594c3b154cfaad768fc0a4f43988f74e78fc3205740f2978d84acd5e10e0",
+          "sourceUrl": "https://raw.githubusercontent.com/vlee489/AC31009-Client/71252f38c7bf4426ff84676cad517f66c3e6cb65/assets/Sprites/HeroKnight/Attack1.png",
+          "sourceLocalPath": "/assets/characters/hero-knight/attack.png"
+        },
+        "knockback": {
+          "url": "/assets/production/units/guard/guard_f3/knockback.png",
+          "frameWidth": 210,
+          "frameHeight": 190,
+          "frames": 4,
+          "bytes": 3778,
+          "sha256": "3c8ad7a818b9ef8ceb2ab1193c74beafcbfa874205fed6625a205d63f4c20de1",
+          "sourceUrl": "https://raw.githubusercontent.com/vlee489/AC31009-Client/71252f38c7bf4426ff84676cad517f66c3e6cb65/assets/Sprites/HeroKnight/Take%20Hit.png",
+          "sourceLocalPath": "/assets/characters/hero-knight/hit.png"
+        },
+        "death": {
+          "url": "/assets/production/units/guard/guard_f3/death.png",
+          "frameWidth": 210,
+          "frameHeight": 190,
+          "frames": 11,
+          "bytes": 9488,
+          "sha256": "b28a819a6b20abef1de99ade86d695bcdd51a82acb1050fc447c58e07642269a",
+          "sourceUrl": "https://raw.githubusercontent.com/vlee489/AC31009-Client/71252f38c7bf4426ff84676cad517f66c3e6cb65/assets/Sprites/HeroKnight/Death.png",
+          "sourceLocalPath": "/assets/characters/hero-knight/death.png"
+        }
+      }
+    },
+    "hunter/hunter_f1": {
+      "assetId": "unit:hunter:hunter_f1",
+      "sourceFamily": "huntress-2",
+      "displayHeight": 180,
+      "attackContactFrame": 3,
+      "structuralRework": true,
+      "reviewStatus": "UNREVIEWED_RUNTIME_FILES",
+      "motions": {
+        "idle": {
+          "url": "/assets/production/units/hunter/hunter_f1/idle.png",
+          "frameWidth": 190,
+          "frameHeight": 120,
+          "frames": 10,
+          "bytes": 3301,
+          "sha256": "6aedff0f4d1d3ae421292adfa181ea28f50bd213621986d872f96206125ee02d",
+          "sourceUrl": "https://raw.githubusercontent.com/NQM765/IngeSoft1/84594e5d3da7472615660f453bdb457da13cca2f/Proyecto/Scrum%27s_Castle/Assets/Characters/Huntress%202/Sprites/Character/Idle.png",
+          "sourceLocalPath": "/assets/characters/huntress-2/idle.png"
+        },
+        "move": {
+          "url": "/assets/production/units/hunter/hunter_f1/move.png",
+          "frameWidth": 190,
+          "frameHeight": 120,
+          "frames": 8,
+          "bytes": 3345,
+          "sha256": "1aa45ae44bb8c6909872df69680f043375c89bb924053d29206679c64301261f",
+          "sourceUrl": "https://raw.githubusercontent.com/NQM765/IngeSoft1/84594e5d3da7472615660f453bdb457da13cca2f/Proyecto/Scrum%27s_Castle/Assets/Characters/Huntress%202/Sprites/Character/Run.png",
+          "sourceLocalPath": "/assets/characters/huntress-2/run.png"
+        },
+        "attack": {
+          "url": "/assets/production/units/hunter/hunter_f1/attack.png",
+          "frameWidth": 190,
+          "frameHeight": 120,
+          "frames": 6,
+          "bytes": 2677,
+          "sha256": "42e69ea57047b9c87ad2af391beb8be5699da4fb118b6d353cd64040c150d183",
+          "sourceUrl": "https://raw.githubusercontent.com/NQM765/IngeSoft1/84594e5d3da7472615660f453bdb457da13cca2f/Proyecto/Scrum%27s_Castle/Assets/Characters/Huntress%202/Sprites/Character/Attack.png",
+          "sourceLocalPath": "/assets/characters/huntress-2/attack.png"
+        },
+        "knockback": {
+          "url": "/assets/production/units/hunter/hunter_f1/knockback.png",
+          "frameWidth": 190,
+          "frameHeight": 120,
+          "frames": 3,
+          "bytes": 2176,
+          "sha256": "24677ed615e034d746820d800c8e027172aaab0fab386d03326ea7e2ff7f76c6",
+          "sourceUrl": "https://raw.githubusercontent.com/NQM765/IngeSoft1/84594e5d3da7472615660f453bdb457da13cca2f/Proyecto/Scrum%27s_Castle/Assets/Characters/Huntress%202/Sprites/Character/Get%20Hit.png",
+          "sourceLocalPath": "/assets/characters/huntress-2/hit.png"
+        },
+        "death": {
+          "url": "/assets/production/units/hunter/hunter_f1/death.png",
+          "frameWidth": 190,
+          "frameHeight": 120,
+          "frames": 10,
+          "bytes": 5294,
+          "sha256": "82743ec03bb33521965ee5ebf108e78252f5d5f840a9100614c288106276bf10",
+          "sourceUrl": "https://raw.githubusercontent.com/NQM765/IngeSoft1/84594e5d3da7472615660f453bdb457da13cca2f/Proyecto/Scrum%27s_Castle/Assets/Characters/Huntress%202/Sprites/Character/Death.png",
+          "sourceLocalPath": "/assets/characters/huntress-2/death.png"
+        }
+      }
+    },
+    "hunter/hunter_f2": {
+      "assetId": "unit:hunter:hunter_f2",
+      "sourceFamily": "huntress-2",
+      "displayHeight": 184,
+      "attackContactFrame": 3,
+      "structuralRework": true,
+      "reviewStatus": "UNREVIEWED_RUNTIME_FILES",
+      "motions": {
+        "idle": {
+          "url": "/assets/production/units/hunter/hunter_f2/idle.png",
+          "frameWidth": 190,
+          "frameHeight": 120,
+          "frames": 10,
+          "bytes": 3557,
+          "sha256": "099a376651ee947def2645decd454e0857f0928e2687170849789853c80a4b19",
+          "sourceUrl": "https://raw.githubusercontent.com/NQM765/IngeSoft1/84594e5d3da7472615660f453bdb457da13cca2f/Proyecto/Scrum%27s_Castle/Assets/Characters/Huntress%202/Sprites/Character/Idle.png",
+          "sourceLocalPath": "/assets/characters/huntress-2/idle.png"
+        },
+        "move": {
+          "url": "/assets/production/units/hunter/hunter_f2/move.png",
+          "frameWidth": 190,
+          "frameHeight": 120,
+          "frames": 8,
+          "bytes": 3546,
+          "sha256": "6d1801c2a8e891ad126c96a2801dffd7579b2bd0e47c0a1db95c36e5abb5741b",
+          "sourceUrl": "https://raw.githubusercontent.com/NQM765/IngeSoft1/84594e5d3da7472615660f453bdb457da13cca2f/Proyecto/Scrum%27s_Castle/Assets/Characters/Huntress%202/Sprites/Character/Run.png",
+          "sourceLocalPath": "/assets/characters/huntress-2/run.png"
+        },
+        "attack": {
+          "url": "/assets/production/units/hunter/hunter_f2/attack.png",
+          "frameWidth": 190,
+          "frameHeight": 120,
+          "frames": 6,
+          "bytes": 2887,
+          "sha256": "d653a473dd56cca95d78e75a28e263aa9819977a5d76bbbee31bdd06d413dddd",
+          "sourceUrl": "https://raw.githubusercontent.com/NQM765/IngeSoft1/84594e5d3da7472615660f453bdb457da13cca2f/Proyecto/Scrum%27s_Castle/Assets/Characters/Huntress%202/Sprites/Character/Attack.png",
+          "sourceLocalPath": "/assets/characters/huntress-2/attack.png"
+        },
+        "knockback": {
+          "url": "/assets/production/units/hunter/hunter_f2/knockback.png",
+          "frameWidth": 190,
+          "frameHeight": 120,
+          "frames": 3,
+          "bytes": 2328,
+          "sha256": "267ac316af054adfe697c429f30131d5b15a73e7f191c785f8baadf37d7687b3",
+          "sourceUrl": "https://raw.githubusercontent.com/NQM765/IngeSoft1/84594e5d3da7472615660f453bdb457da13cca2f/Proyecto/Scrum%27s_Castle/Assets/Characters/Huntress%202/Sprites/Character/Get%20Hit.png",
+          "sourceLocalPath": "/assets/characters/huntress-2/hit.png"
+        },
+        "death": {
+          "url": "/assets/production/units/hunter/hunter_f2/death.png",
+          "frameWidth": 190,
+          "frameHeight": 120,
+          "frames": 10,
+          "bytes": 6041,
+          "sha256": "5e64efd8d41eeb80816a80e77c587e707a2b15adea0e67bd7a46d66d93494929",
+          "sourceUrl": "https://raw.githubusercontent.com/NQM765/IngeSoft1/84594e5d3da7472615660f453bdb457da13cca2f/Proyecto/Scrum%27s_Castle/Assets/Characters/Huntress%202/Sprites/Character/Death.png",
+          "sourceLocalPath": "/assets/characters/huntress-2/death.png"
+        }
+      }
+    },
+    "hunter/hunter_f3": {
+      "assetId": "unit:hunter:hunter_f3",
+      "sourceFamily": "huntress-2",
+      "displayHeight": 188,
+      "attackContactFrame": 3,
+      "structuralRework": true,
+      "reviewStatus": "UNREVIEWED_RUNTIME_FILES",
+      "motions": {
+        "idle": {
+          "url": "/assets/production/units/hunter/hunter_f3/idle.png",
+          "frameWidth": 190,
+          "frameHeight": 120,
+          "frames": 10,
+          "bytes": 3614,
+          "sha256": "9bf0ba5fa6ad27305324dbd0660f384d8750761e44c57908d660466c327dbb31",
+          "sourceUrl": "https://raw.githubusercontent.com/NQM765/IngeSoft1/84594e5d3da7472615660f453bdb457da13cca2f/Proyecto/Scrum%27s_Castle/Assets/Characters/Huntress%202/Sprites/Character/Idle.png",
+          "sourceLocalPath": "/assets/characters/huntress-2/idle.png"
+        },
+        "move": {
+          "url": "/assets/production/units/hunter/hunter_f3/move.png",
+          "frameWidth": 190,
+          "frameHeight": 120,
+          "frames": 8,
+          "bytes": 3730,
+          "sha256": "e47699c9e2189036f43123518d46007dc188b39132f07bae4bcf6a6b02f2e0f0",
+          "sourceUrl": "https://raw.githubusercontent.com/NQM765/IngeSoft1/84594e5d3da7472615660f453bdb457da13cca2f/Proyecto/Scrum%27s_Castle/Assets/Characters/Huntress%202/Sprites/Character/Run.png",
+          "sourceLocalPath": "/assets/characters/huntress-2/run.png"
+        },
+        "attack": {
+          "url": "/assets/production/units/hunter/hunter_f3/attack.png",
+          "frameWidth": 190,
+          "frameHeight": 120,
+          "frames": 6,
+          "bytes": 3058,
+          "sha256": "391eb981402b6c5b0cd7de7f1baff41034244825ca8746b0e4fdf6beae88f2ad",
+          "sourceUrl": "https://raw.githubusercontent.com/NQM765/IngeSoft1/84594e5d3da7472615660f453bdb457da13cca2f/Proyecto/Scrum%27s_Castle/Assets/Characters/Huntress%202/Sprites/Character/Attack.png",
+          "sourceLocalPath": "/assets/characters/huntress-2/attack.png"
+        },
+        "knockback": {
+          "url": "/assets/production/units/hunter/hunter_f3/knockback.png",
+          "frameWidth": 190,
+          "frameHeight": 120,
+          "frames": 3,
+          "bytes": 2321,
+          "sha256": "effabf59a62dbfa6ce5c87ec7231dbb1e5f1ed2a5cb14cf06dde430cf7435431",
+          "sourceUrl": "https://raw.githubusercontent.com/NQM765/IngeSoft1/84594e5d3da7472615660f453bdb457da13cca2f/Proyecto/Scrum%27s_Castle/Assets/Characters/Huntress%202/Sprites/Character/Get%20Hit.png",
+          "sourceLocalPath": "/assets/characters/huntress-2/hit.png"
+        },
+        "death": {
+          "url": "/assets/production/units/hunter/hunter_f3/death.png",
+          "frameWidth": 190,
+          "frameHeight": 120,
+          "frames": 10,
+          "bytes": 6183,
+          "sha256": "324eef0e0995942c7f354ff9a96b1bd98ebb6ce0c2b97ccd7b9cda2d2d718f5c",
+          "sourceUrl": "https://raw.githubusercontent.com/NQM765/IngeSoft1/84594e5d3da7472615660f453bdb457da13cca2f/Proyecto/Scrum%27s_Castle/Assets/Characters/Huntress%202/Sprites/Character/Death.png",
+          "sourceLocalPath": "/assets/characters/huntress-2/death.png"
+        }
+      }
+    },
+    "enemy-spearman": {
+      "assetId": "unit:enemy-spearman",
+      "sourceFamily": "fantasy-warrior",
+      "displayHeight": 188,
+      "attackContactFrame": 3,
+      "structuralRework": true,
+      "reviewStatus": "UNREVIEWED_RUNTIME_FILES",
+      "motions": {
+        "idle": {
+          "url": "/assets/production/units/enemy-spearman/idle.png",
+          "frameWidth": 230,
+          "frameHeight": 175,
+          "frames": 10,
+          "bytes": 5330,
+          "sha256": "e8ca9f2ede9bb8be49cf1a2bfe8eb7375430d866ff41a4258ac351ccff579881",
+          "sourceUrl": "https://raw.githubusercontent.com/NQM765/IngeSoft1/84594e5d3da7472615660f453bdb457da13cca2f/Proyecto/Scrum%27s_Castle/Assets/Characters/Fantasy%20Warrior/Sprites/Idle.png",
+          "sourceLocalPath": "/assets/characters/fantasy-warrior/idle.png"
+        },
+        "move": {
+          "url": "/assets/production/units/enemy-spearman/move.png",
+          "frameWidth": 230,
+          "frameHeight": 175,
+          "frames": 8,
+          "bytes": 5115,
+          "sha256": "14faaf0c8fdaa921ca1d5b358171a87be33e71c6d09de9088100450208c1f8da",
+          "sourceUrl": "https://raw.githubusercontent.com/NQM765/IngeSoft1/84594e5d3da7472615660f453bdb457da13cca2f/Proyecto/Scrum%27s_Castle/Assets/Characters/Fantasy%20Warrior/Sprites/Run.png",
+          "sourceLocalPath": "/assets/characters/fantasy-warrior/run.png"
+        },
+        "attack": {
+          "url": "/assets/production/units/enemy-spearman/attack.png",
+          "frameWidth": 230,
+          "frameHeight": 175,
+          "frames": 7,
+          "bytes": 6441,
+          "sha256": "d59c41629ad79e7a40427a5775d3a367175179dd6a748490d4015e9724d845ee",
+          "sourceUrl": "https://raw.githubusercontent.com/NQM765/IngeSoft1/84594e5d3da7472615660f453bdb457da13cca2f/Proyecto/Scrum%27s_Castle/Assets/Characters/Fantasy%20Warrior/Sprites/Attack1.png",
+          "sourceLocalPath": "/assets/characters/fantasy-warrior/attack.png"
+        },
+        "knockback": {
+          "url": "/assets/production/units/enemy-spearman/knockback.png",
+          "frameWidth": 230,
+          "frameHeight": 175,
+          "frames": 3,
+          "bytes": 2276,
+          "sha256": "a3c20b087eb5b5f0405b182c9b6bb02d4a52f4c0a593ba510a199eafa9c3bea1",
+          "sourceUrl": "https://raw.githubusercontent.com/NQM765/IngeSoft1/84594e5d3da7472615660f453bdb457da13cca2f/Proyecto/Scrum%27s_Castle/Assets/Characters/Fantasy%20Warrior/Sprites/Take%20hit.png",
+          "sourceLocalPath": "/assets/characters/fantasy-warrior/hit.png"
+        },
+        "death": {
+          "url": "/assets/production/units/enemy-spearman/death.png",
+          "frameWidth": 230,
+          "frameHeight": 175,
+          "frames": 7,
+          "bytes": 4999,
+          "sha256": "027cc5c37f1e0bf726c77ad260e220a55f9a3f947e4352e8f1c931e94b42751e",
+          "sourceUrl": "https://raw.githubusercontent.com/NQM765/IngeSoft1/84594e5d3da7472615660f453bdb457da13cca2f/Proyecto/Scrum%27s_Castle/Assets/Characters/Fantasy%20Warrior/Sprites/Death.png",
+          "sourceLocalPath": "/assets/characters/fantasy-warrior/death.png"
+        }
+      }
+    },
+    "enemy-shield": {
+      "assetId": "unit:enemy-shield",
+      "sourceFamily": "king-2",
+      "displayHeight": 190,
+      "attackContactFrame": 2,
+      "structuralRework": true,
+      "reviewStatus": "UNREVIEWED_RUNTIME_FILES",
+      "motions": {
+        "idle": {
+          "url": "/assets/production/units/enemy-shield/idle.png",
+          "frameWidth": 200,
+          "frameHeight": 130,
+          "frames": 8,
+          "bytes": 6410,
+          "sha256": "e7a335cf1968fee981c87a094e4eed2f391328356566d7e6218c98aa0b851af8",
+          "sourceUrl": "https://raw.githubusercontent.com/NQM765/IngeSoft1/84594e5d3da7472615660f453bdb457da13cca2f/Proyecto/Scrum%27s_Castle/Assets/Characters/Medieval%20King%20Pack%202/Sprites/Idle.png",
+          "sourceLocalPath": "/assets/characters/king-2/idle.png"
+        },
+        "move": {
+          "url": "/assets/production/units/enemy-shield/move.png",
+          "frameWidth": 200,
+          "frameHeight": 130,
+          "frames": 8,
+          "bytes": 6090,
+          "sha256": "01d3b12fef0af50acf1309ea233061ff6f836bc1d1825694a699f3af4a915fb1",
+          "sourceUrl": "https://raw.githubusercontent.com/NQM765/IngeSoft1/84594e5d3da7472615660f453bdb457da13cca2f/Proyecto/Scrum%27s_Castle/Assets/Characters/Medieval%20King%20Pack%202/Sprites/Run.png",
+          "sourceLocalPath": "/assets/characters/king-2/run.png"
+        },
+        "attack": {
+          "url": "/assets/production/units/enemy-shield/attack.png",
+          "frameWidth": 200,
+          "frameHeight": 130,
+          "frames": 4,
+          "bytes": 4945,
+          "sha256": "cdb04e2f612f5428eabd16f498b00659081e6244c69fa03c9d4ac0f125687b1f",
+          "sourceUrl": "https://raw.githubusercontent.com/NQM765/IngeSoft1/84594e5d3da7472615660f453bdb457da13cca2f/Proyecto/Scrum%27s_Castle/Assets/Characters/Medieval%20King%20Pack%202/Sprites/Attack1.png",
+          "sourceLocalPath": "/assets/characters/king-2/attack.png"
+        },
+        "knockback": {
+          "url": "/assets/production/units/enemy-shield/knockback.png",
+          "frameWidth": 200,
+          "frameHeight": 130,
+          "frames": 4,
+          "bytes": 4630,
+          "sha256": "08b2fc6199b36745bc0909e551f16ee48ddd34d5c0aeef27e6113ff50175c506",
+          "sourceUrl": "https://raw.githubusercontent.com/NQM765/IngeSoft1/84594e5d3da7472615660f453bdb457da13cca2f/Proyecto/Scrum%27s_Castle/Assets/Characters/Medieval%20King%20Pack%202/Sprites/Take%20Hit.png",
+          "sourceLocalPath": "/assets/characters/king-2/hit.png"
+        },
+        "death": {
+          "url": "/assets/production/units/enemy-shield/death.png",
+          "frameWidth": 200,
+          "frameHeight": 130,
+          "frames": 6,
+          "bytes": 6566,
+          "sha256": "e2396c51dcf0f08d713b510a99214e5d0881b653b23598a357cb2fa299438d04",
+          "sourceUrl": "https://raw.githubusercontent.com/NQM765/IngeSoft1/84594e5d3da7472615660f453bdb457da13cca2f/Proyecto/Scrum%27s_Castle/Assets/Characters/Medieval%20King%20Pack%202/Sprites/Death.png",
+          "sourceLocalPath": "/assets/characters/king-2/death.png"
+        }
+      }
+    }
+  }
+}
