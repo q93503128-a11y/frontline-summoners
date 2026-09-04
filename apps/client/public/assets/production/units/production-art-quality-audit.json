@@ -26,385 +26,14 @@
       "attack"
     ],
     "severe": 0,
-    "atRisk": 7,
-    "healthy": 227,
+    "atRisk": 0,
+    "healthy": 234,
     "recruitmentEvolutionGroups": 33,
-    "weakEvolution": 5,
-    "watchEvolution": 17,
+    "weakEvolution": 0,
+    "watchEvolution": 18,
     "clippingRisk": 0
   },
   "topPriorities": [
-    {
-      "metadataFile": "second-slice-runtime-metadata.json",
-      "targetKey": "enemy-shield",
-      "assetId": "unit:enemy-shield",
-      "unitId": "enemy-shield",
-      "formId": null,
-      "formOrder": null,
-      "score": 62,
-      "reasons": [
-        "weak-move:0.0178",
-        "near-duplicate:0.9577"
-      ],
-      "nearestOther": {
-        "targetKey": "enemy_ch2_bonewheel",
-        "rootUnitId": "enemy_ch2_bonewheel",
-        "similarity": 0.9577
-      },
-      "motions": {
-        "idle": {
-          "frames": 8,
-          "frameWidth": 200,
-          "frameHeight": 130,
-          "occupancy": 0.2047,
-          "widthCoverage": 0.395,
-          "heightCoverage": 0.6692,
-          "maxEdgeRatio": 0,
-          "avgDelta": 0.0053,
-          "maxDelta": 0.0084
-        },
-        "move": {
-          "frames": 8,
-          "frameWidth": 200,
-          "frameHeight": 130,
-          "occupancy": 0.2084,
-          "widthCoverage": 0.4194,
-          "heightCoverage": 0.6692,
-          "maxEdgeRatio": 0,
-          "avgDelta": 0.0178,
-          "maxDelta": 0.0316
-        },
-        "attack": {
-          "frames": 4,
-          "frameWidth": 200,
-          "frameHeight": 130,
-          "occupancy": 0.2117,
-          "widthCoverage": 0.4763,
-          "heightCoverage": 0.6692,
-          "maxEdgeRatio": 0,
-          "avgDelta": 0.1327,
-          "maxDelta": 0.1857
-        }
-      }
-    },
-    {
-      "metadataFile": "recruitment-form-runtime-metadata.json",
-      "targetKey": "char_common_b_clockduck_f2",
-      "assetId": "unit:char_common_b_clockduck:char_common_b_clockduck_f2",
-      "unitId": "char_common_b_clockduck",
-      "formId": "char_common_b_clockduck_f2",
-      "formOrder": 2,
-      "score": 72,
-      "reasons": [
-        "near-duplicate:0.9924",
-        "weak-evolution-separation:0.8784"
-      ],
-      "nearestOther": {
-        "targetKey": "char_common_b_lantern_witch_f2",
-        "rootUnitId": "char_common_b_lantern_witch",
-        "similarity": 0.9924
-      },
-      "motions": {
-        "idle": {
-          "frames": 7,
-          "frameWidth": 243,
-          "frameHeight": 226,
-          "occupancy": 0.2413,
-          "widthCoverage": 0.7778,
-          "heightCoverage": 0.8603,
-          "maxEdgeRatio": 0,
-          "avgDelta": 0.0386,
-          "maxDelta": 0.0579
-        },
-        "move": {
-          "frames": 8,
-          "frameWidth": 243,
-          "frameHeight": 226,
-          "occupancy": 0.2416,
-          "widthCoverage": 0.7778,
-          "heightCoverage": 0.8473,
-          "maxEdgeRatio": 0,
-          "avgDelta": 0.2243,
-          "maxDelta": 0.2243
-        },
-        "attack": {
-          "frames": 7,
-          "frameWidth": 243,
-          "frameHeight": 226,
-          "occupancy": 0.2461,
-          "widthCoverage": 0.9001,
-          "heightCoverage": 0.8363,
-          "maxEdgeRatio": 0,
-          "avgDelta": 0.0795,
-          "maxDelta": 0.2444
-        }
-      }
-    },
-    {
-      "metadataFile": "recruitment-form-runtime-metadata.json",
-      "targetKey": "char_common_c_turnip_rider_f3",
-      "assetId": "unit:char_common_c_turnip_rider:char_common_c_turnip_rider_f3",
-      "unitId": "char_common_c_turnip_rider",
-      "formId": "char_common_c_turnip_rider_f3",
-      "formOrder": 3,
-      "score": 72,
-      "reasons": [
-        "low-attack:0.0306",
-        "weak-evolution-separation:0.9077"
-      ],
-      "nearestOther": {
-        "targetKey": "char_common_c_lantern_moth_f3",
-        "rootUnitId": "char_common_c_lantern_moth",
-        "similarity": 0.7595
-      },
-      "motions": {
-        "idle": {
-          "frames": 6,
-          "frameWidth": 232,
-          "frameHeight": 209,
-          "occupancy": 0.4304,
-          "widthCoverage": 0.8491,
-          "heightCoverage": 0.9346,
-          "maxEdgeRatio": 0,
-          "avgDelta": 0.032,
-          "maxDelta": 0.0395
-        },
-        "move": {
-          "frames": 8,
-          "frameWidth": 232,
-          "frameHeight": 209,
-          "occupancy": 0.4303,
-          "widthCoverage": 0.8491,
-          "heightCoverage": 0.9211,
-          "maxEdgeRatio": 0,
-          "avgDelta": 0.1138,
-          "maxDelta": 0.1158
-        },
-        "attack": {
-          "frames": 7,
-          "frameWidth": 232,
-          "frameHeight": 209,
-          "occupancy": 0.4346,
-          "widthCoverage": 0.931,
-          "heightCoverage": 0.9091,
-          "maxEdgeRatio": 0.0001,
-          "avgDelta": 0.0306,
-          "maxDelta": 0.0932
-        }
-      }
-    },
-    {
-      "metadataFile": "recruitment-form-runtime-metadata.json",
-      "targetKey": "char_s02_barga_f2",
-      "assetId": "unit:char_s02_barga:char_s02_barga_f2",
-      "unitId": "char_s02_barga",
-      "formId": "char_s02_barga_f2",
-      "formOrder": 2,
-      "score": 72,
-      "reasons": [
-        "low-attack:0.0289",
-        "weak-evolution-separation:0.9139"
-      ],
-      "nearestOther": {
-        "targetKey": "char_s01_totoria_f2",
-        "rootUnitId": "char_s01_totoria",
-        "similarity": 0.7519
-      },
-      "motions": {
-        "idle": {
-          "frames": 8,
-          "frameWidth": 383,
-          "frameHeight": 331,
-          "occupancy": 0.1649,
-          "widthCoverage": 0.671,
-          "heightCoverage": 0.744,
-          "maxEdgeRatio": 0,
-          "avgDelta": 0.0268,
-          "maxDelta": 0.0375
-        },
-        "move": {
-          "frames": 8,
-          "frameWidth": 383,
-          "frameHeight": 331,
-          "occupancy": 0.1651,
-          "widthCoverage": 0.671,
-          "heightCoverage": 0.7356,
-          "maxEdgeRatio": 0,
-          "avgDelta": 0.1587,
-          "maxDelta": 0.1587
-        },
-        "attack": {
-          "frames": 9,
-          "frameWidth": 383,
-          "frameHeight": 331,
-          "occupancy": 0.1673,
-          "widthCoverage": 0.7418,
-          "heightCoverage": 0.7281,
-          "maxEdgeRatio": 0,
-          "avgDelta": 0.0289,
-          "maxDelta": 0.1172
-        }
-      }
-    },
-    {
-      "metadataFile": "recruitment-form-runtime-metadata.json",
-      "targetKey": "char_s02_barga_f3",
-      "assetId": "unit:char_s02_barga:char_s02_barga_f3",
-      "unitId": "char_s02_barga",
-      "formId": "char_s02_barga_f3",
-      "formOrder": 3,
-      "score": 72,
-      "reasons": [
-        "low-attack:0.0221",
-        "weak-evolution-separation:0.9139"
-      ],
-      "nearestOther": {
-        "targetKey": "char_s02_zirka_f3",
-        "rootUnitId": "char_s02_zirka",
-        "similarity": 0.7704
-      },
-      "motions": {
-        "idle": {
-          "frames": 8,
-          "frameWidth": 387,
-          "frameHeight": 334,
-          "occupancy": 0.1847,
-          "widthCoverage": 0.6925,
-          "heightCoverage": 0.7403,
-          "maxEdgeRatio": 0,
-          "avgDelta": 0.0278,
-          "maxDelta": 0.04
-        },
-        "move": {
-          "frames": 8,
-          "frameWidth": 387,
-          "frameHeight": 334,
-          "occupancy": 0.1848,
-          "widthCoverage": 0.6925,
-          "heightCoverage": 0.732,
-          "maxEdgeRatio": 0,
-          "avgDelta": 0.1415,
-          "maxDelta": 0.1451
-        },
-        "attack": {
-          "frames": 10,
-          "frameWidth": 387,
-          "frameHeight": 334,
-          "occupancy": 0.1865,
-          "widthCoverage": 0.7442,
-          "heightCoverage": 0.7246,
-          "maxEdgeRatio": 0,
-          "avgDelta": 0.0221,
-          "maxDelta": 0.084
-        }
-      }
-    },
-    {
-      "metadataFile": "recruitment-form-runtime-metadata.json",
-      "targetKey": "char_s02_gormu_f2",
-      "assetId": "unit:char_s02_gormu:char_s02_gormu_f2",
-      "unitId": "char_s02_gormu",
-      "formId": "char_s02_gormu_f2",
-      "formOrder": 2,
-      "score": 72,
-      "reasons": [
-        "low-attack:0.0325",
-        "weak-evolution-separation:0.9315"
-      ],
-      "nearestOther": {
-        "targetKey": "char_s01_arselia_f3",
-        "rootUnitId": "char_s01_arselia",
-        "similarity": 0.7414
-      },
-      "motions": {
-        "idle": {
-          "frames": 8,
-          "frameWidth": 383,
-          "frameHeight": 331,
-          "occupancy": 0.1644,
-          "widthCoverage": 0.812,
-          "heightCoverage": 0.744,
-          "maxEdgeRatio": 0,
-          "avgDelta": 0.0372,
-          "maxDelta": 0.0521
-        },
-        "move": {
-          "frames": 8,
-          "frameWidth": 383,
-          "frameHeight": 331,
-          "occupancy": 0.1643,
-          "widthCoverage": 0.812,
-          "heightCoverage": 0.7356,
-          "maxEdgeRatio": 0,
-          "avgDelta": 0.1872,
-          "maxDelta": 0.1872
-        },
-        "attack": {
-          "frames": 11,
-          "frameWidth": 383,
-          "frameHeight": 331,
-          "occupancy": 0.1671,
-          "widthCoverage": 0.8395,
-          "heightCoverage": 0.7281,
-          "maxEdgeRatio": 0,
-          "avgDelta": 0.0325,
-          "maxDelta": 0.1494
-        }
-      }
-    },
-    {
-      "metadataFile": "recruitment-form-runtime-metadata.json",
-      "targetKey": "char_s02_gormu_f3",
-      "assetId": "unit:char_s02_gormu:char_s02_gormu_f3",
-      "unitId": "char_s02_gormu",
-      "formId": "char_s02_gormu_f3",
-      "formOrder": 3,
-      "score": 72,
-      "reasons": [
-        "low-attack:0.0323",
-        "weak-evolution-separation:0.9315"
-      ],
-      "nearestOther": {
-        "targetKey": "char_s01_arselia_f3",
-        "rootUnitId": "char_s01_arselia",
-        "similarity": 0.7059
-      },
-      "motions": {
-        "idle": {
-          "frames": 8,
-          "frameWidth": 387,
-          "frameHeight": 334,
-          "occupancy": 0.1744,
-          "widthCoverage": 0.8217,
-          "heightCoverage": 0.7403,
-          "maxEdgeRatio": 0,
-          "avgDelta": 0.0407,
-          "maxDelta": 0.0558
-        },
-        "move": {
-          "frames": 8,
-          "frameWidth": 387,
-          "frameHeight": 334,
-          "occupancy": 0.1744,
-          "widthCoverage": 0.8217,
-          "heightCoverage": 0.732,
-          "maxEdgeRatio": 0,
-          "avgDelta": 0.1775,
-          "maxDelta": 0.1814
-        },
-        "attack": {
-          "frames": 12,
-          "frameWidth": 387,
-          "frameHeight": 334,
-          "occupancy": 0.1768,
-          "widthCoverage": 0.8488,
-          "heightCoverage": 0.7246,
-          "maxEdgeRatio": 0,
-          "avgDelta": 0.0323,
-          "maxDelta": 0.1262
-        }
-      }
-    },
     {
       "metadataFile": "chapter-04-runtime-metadata.json",
       "targetKey": "boss_ch4_zero_engine",
@@ -458,162 +87,6 @@
       }
     },
     {
-      "metadataFile": "recruitment-form-runtime-metadata.json",
-      "targetKey": "char_common_b_lantern_witch_f2",
-      "assetId": "unit:char_common_b_lantern_witch:char_common_b_lantern_witch_f2",
-      "unitId": "char_common_b_lantern_witch",
-      "formId": "char_common_b_lantern_witch_f2",
-      "formOrder": 2,
-      "score": 80,
-      "reasons": [
-        "near-duplicate:0.9924"
-      ],
-      "nearestOther": {
-        "targetKey": "char_common_b_clockduck_f2",
-        "rootUnitId": "char_common_b_clockduck",
-        "similarity": 0.9924
-      },
-      "motions": {
-        "idle": {
-          "frames": 7,
-          "frameWidth": 243,
-          "frameHeight": 226,
-          "occupancy": 0.2341,
-          "widthCoverage": 0.7778,
-          "heightCoverage": 0.8603,
-          "maxEdgeRatio": 0,
-          "avgDelta": 0.0405,
-          "maxDelta": 0.0608
-        },
-        "move": {
-          "frames": 8,
-          "frameWidth": 243,
-          "frameHeight": 226,
-          "occupancy": 0.2342,
-          "widthCoverage": 0.7778,
-          "heightCoverage": 0.8473,
-          "maxEdgeRatio": 0,
-          "avgDelta": 0.232,
-          "maxDelta": 0.232
-        },
-        "attack": {
-          "frames": 7,
-          "frameWidth": 243,
-          "frameHeight": 226,
-          "occupancy": 0.2643,
-          "widthCoverage": 0.9336,
-          "heightCoverage": 0.8363,
-          "maxEdgeRatio": 0.0047,
-          "avgDelta": 0.0904,
-          "maxDelta": 0.3256
-        }
-      }
-    },
-    {
-      "metadataFile": "recruitment-form-runtime-metadata.json",
-      "targetKey": "char_s01_riena_f2",
-      "assetId": "unit:char_s01_riena:char_s01_riena_f2",
-      "unitId": "char_s01_riena",
-      "formId": "char_s01_riena_f2",
-      "formOrder": 2,
-      "score": 80,
-      "reasons": [
-        "near-duplicate:0.9862"
-      ],
-      "nearestOther": {
-        "targetKey": "char_s01_totoria_f2",
-        "rootUnitId": "char_s01_totoria",
-        "similarity": 0.9862
-      },
-      "motions": {
-        "idle": {
-          "frames": 8,
-          "frameWidth": 293,
-          "frameHeight": 261,
-          "occupancy": 0.1682,
-          "widthCoverage": 0.7235,
-          "heightCoverage": 0.8132,
-          "maxEdgeRatio": 0,
-          "avgDelta": 0.0433,
-          "maxDelta": 0.0606
-        },
-        "move": {
-          "frames": 8,
-          "frameWidth": 293,
-          "frameHeight": 261,
-          "occupancy": 0.1683,
-          "widthCoverage": 0.7235,
-          "heightCoverage": 0.8027,
-          "maxEdgeRatio": 0,
-          "avgDelta": 0.232,
-          "maxDelta": 0.232
-        },
-        "attack": {
-          "frames": 9,
-          "frameWidth": 293,
-          "frameHeight": 261,
-          "occupancy": 0.1863,
-          "widthCoverage": 0.84,
-          "heightCoverage": 0.7931,
-          "maxEdgeRatio": 0,
-          "avgDelta": 0.0708,
-          "maxDelta": 0.3304
-        }
-      }
-    },
-    {
-      "metadataFile": "recruitment-form-runtime-metadata.json",
-      "targetKey": "char_s01_totoria_f2",
-      "assetId": "unit:char_s01_totoria:char_s01_totoria_f2",
-      "unitId": "char_s01_totoria",
-      "formId": "char_s01_totoria_f2",
-      "formOrder": 2,
-      "score": 80,
-      "reasons": [
-        "near-duplicate:0.9862"
-      ],
-      "nearestOther": {
-        "targetKey": "char_s01_riena_f2",
-        "rootUnitId": "char_s01_riena",
-        "similarity": 0.9862
-      },
-      "motions": {
-        "idle": {
-          "frames": 8,
-          "frameWidth": 293,
-          "frameHeight": 261,
-          "occupancy": 0.1698,
-          "widthCoverage": 0.7235,
-          "heightCoverage": 0.8132,
-          "maxEdgeRatio": 0,
-          "avgDelta": 0.0509,
-          "maxDelta": 0.0688
-        },
-        "move": {
-          "frames": 8,
-          "frameWidth": 293,
-          "frameHeight": 261,
-          "occupancy": 0.1698,
-          "widthCoverage": 0.7235,
-          "heightCoverage": 0.8027,
-          "maxEdgeRatio": 0,
-          "avgDelta": 0.2314,
-          "maxDelta": 0.2333
-        },
-        "attack": {
-          "frames": 9,
-          "frameWidth": 293,
-          "frameHeight": 261,
-          "occupancy": 0.1727,
-          "widthCoverage": 0.8335,
-          "heightCoverage": 0.7931,
-          "maxEdgeRatio": 0,
-          "avgDelta": 0.0653,
-          "maxDelta": 0.2424
-        }
-      }
-    },
-    {
       "metadataFile": "chapter-02-runtime-metadata.json",
       "targetKey": "enemy_ch2_bonewheel",
       "assetId": "unit:enemy_ch2_bonewheel",
@@ -622,12 +95,12 @@
       "formOrder": null,
       "score": 80,
       "reasons": [
-        "near-duplicate:0.9577"
+        "near-duplicate:0.9547"
       ],
       "nearestOther": {
-        "targetKey": "enemy-shield",
-        "rootUnitId": "enemy-shield",
-        "similarity": 0.9577
+        "targetKey": "boss_ch4_zero_engine",
+        "rootUnitId": "boss_ch4_zero_engine",
+        "similarity": 0.9547
       },
       "motions": {
         "idle": {
@@ -1036,365 +509,107 @@
     },
     {
       "metadataFile": "recruitment-form-runtime-metadata.json",
-      "targetKey": "char_common_c_turnip_rider_f1",
-      "assetId": "unit:char_common_c_turnip_rider:char_common_c_turnip_rider_f1",
-      "unitId": "char_common_c_turnip_rider",
-      "formId": "char_common_c_turnip_rider_f1",
-      "formOrder": 1,
-      "score": 82,
-      "reasons": [
-        "weak-evolution-separation:0.9077"
-      ],
-      "nearestOther": {
-        "targetKey": "char_common_a_paper_dragon_f1",
-        "rootUnitId": "char_common_a_paper_dragon",
-        "similarity": 0.6102
-      },
-      "motions": {
-        "idle": {
-          "frames": 6,
-          "frameWidth": 224,
-          "frameHeight": 203,
-          "occupancy": 0.252,
-          "widthCoverage": 0.7902,
-          "heightCoverage": 0.9179,
-          "maxEdgeRatio": 0,
-          "avgDelta": 0.057,
-          "maxDelta": 0.0712
-        },
-        "move": {
-          "frames": 8,
-          "frameWidth": 224,
-          "frameHeight": 203,
-          "occupancy": 0.2524,
-          "widthCoverage": 0.7902,
-          "heightCoverage": 0.9039,
-          "maxEdgeRatio": 0,
-          "avgDelta": 0.2131,
-          "maxDelta": 0.2131
-        },
-        "attack": {
-          "frames": 6,
-          "frameWidth": 224,
-          "frameHeight": 203,
-          "occupancy": 0.2573,
-          "widthCoverage": 0.9278,
-          "heightCoverage": 0.8916,
-          "maxEdgeRatio": 0.0008,
-          "avgDelta": 0.0913,
-          "maxDelta": 0.2204
-        }
-      }
-    },
-    {
-      "metadataFile": "recruitment-form-runtime-metadata.json",
-      "targetKey": "char_common_c_turnip_rider_f2",
-      "assetId": "unit:char_common_c_turnip_rider:char_common_c_turnip_rider_f2",
-      "unitId": "char_common_c_turnip_rider",
-      "formId": "char_common_c_turnip_rider_f2",
+      "targetKey": "char_s02_gormu_f2",
+      "assetId": "unit:char_s02_gormu:char_s02_gormu_f2",
+      "unitId": "char_s02_gormu",
+      "formId": "char_s02_gormu_f2",
       "formOrder": 2,
       "score": 82,
       "reasons": [
-        "weak-evolution-separation:0.9077"
+        "low-attack:0.0295",
+        "weak-evolution-separation:0.8793"
       ],
       "nearestOther": {
-        "targetKey": "char_common_b_clockduck_f3",
-        "rootUnitId": "char_common_b_clockduck",
-        "similarity": 0.7588
-      },
-      "motions": {
-        "idle": {
-          "frames": 6,
-          "frameWidth": 228,
-          "frameHeight": 206,
-          "occupancy": 0.4019,
-          "widthCoverage": 0.8026,
-          "heightCoverage": 0.9239,
-          "maxEdgeRatio": 0,
-          "avgDelta": 0.034,
-          "maxDelta": 0.0425
-        },
-        "move": {
-          "frames": 8,
-          "frameWidth": 228,
-          "frameHeight": 206,
-          "occupancy": 0.4021,
-          "widthCoverage": 0.8026,
-          "heightCoverage": 0.9102,
-          "maxEdgeRatio": 0,
-          "avgDelta": 0.1267,
-          "maxDelta": 0.1267
-        },
-        "attack": {
-          "frames": 6,
-          "frameWidth": 228,
-          "frameHeight": 206,
-          "occupancy": 0.4078,
-          "widthCoverage": 0.9452,
-          "heightCoverage": 0.8981,
-          "maxEdgeRatio": 0.0003,
-          "avgDelta": 0.0458,
-          "maxDelta": 0.1191
-        }
-      }
-    },
-    {
-      "metadataFile": "recruitment-form-runtime-metadata.json",
-      "targetKey": "char_s02_barga_f1",
-      "assetId": "unit:char_s02_barga:char_s02_barga_f1",
-      "unitId": "char_s02_barga",
-      "formId": "char_s02_barga_f1",
-      "formOrder": 1,
-      "score": 82,
-      "reasons": [
-        "weak-evolution-separation:0.9139"
-      ],
-      "nearestOther": {
-        "targetKey": "char_s01_totoria_f2",
-        "rootUnitId": "char_s01_totoria",
-        "similarity": 0.753
+        "targetKey": "char_s02_barga_f3",
+        "rootUnitId": "char_s02_barga",
+        "similarity": 0.7273
       },
       "motions": {
         "idle": {
           "frames": 8,
-          "frameWidth": 379,
-          "frameHeight": 328,
-          "occupancy": 0.1527,
-          "widthCoverage": 0.6755,
-          "heightCoverage": 0.7447,
+          "frameWidth": 383,
+          "frameHeight": 331,
+          "occupancy": 0.1781,
+          "widthCoverage": 0.812,
+          "heightCoverage": 0.744,
           "maxEdgeRatio": 0,
-          "avgDelta": 0.0303,
-          "maxDelta": 0.0424
+          "avgDelta": 0.0342,
+          "maxDelta": 0.0479
         },
         "move": {
           "frames": 8,
-          "frameWidth": 379,
-          "frameHeight": 328,
-          "occupancy": 0.1527,
-          "widthCoverage": 0.6755,
-          "heightCoverage": 0.7363,
+          "frameWidth": 383,
+          "frameHeight": 331,
+          "occupancy": 0.1781,
+          "widthCoverage": 0.812,
+          "heightCoverage": 0.7356,
           "maxEdgeRatio": 0,
-          "avgDelta": 0.1806,
-          "maxDelta": 0.1806
-        },
-        "attack": {
-          "frames": 9,
-          "frameWidth": 379,
-          "frameHeight": 328,
-          "occupancy": 0.155,
-          "widthCoverage": 0.747,
-          "heightCoverage": 0.7287,
-          "maxEdgeRatio": 0,
-          "avgDelta": 0.0358,
-          "maxDelta": 0.1433
-        }
-      }
-    },
-    {
-      "metadataFile": "recruitment-form-runtime-metadata.json",
-      "targetKey": "char_s02_gormu_f1",
-      "assetId": "unit:char_s02_gormu:char_s02_gormu_f1",
-      "unitId": "char_s02_gormu",
-      "formId": "char_s02_gormu_f1",
-      "formOrder": 1,
-      "score": 82,
-      "reasons": [
-        "weak-evolution-separation:0.9315"
-      ],
-      "nearestOther": {
-        "targetKey": "char_s01_arselia_f3",
-        "rootUnitId": "char_s01_arselia",
-        "similarity": 0.7348
-      },
-      "motions": {
-        "idle": {
-          "frames": 8,
-          "frameWidth": 379,
-          "frameHeight": 328,
-          "occupancy": 0.1529,
-          "widthCoverage": 0.8021,
-          "heightCoverage": 0.7447,
-          "maxEdgeRatio": 0,
-          "avgDelta": 0.0535,
-          "maxDelta": 0.0749
-        },
-        "move": {
-          "frames": 8,
-          "frameWidth": 379,
-          "frameHeight": 328,
-          "occupancy": 0.1531,
-          "widthCoverage": 0.8021,
-          "heightCoverage": 0.7363,
-          "maxEdgeRatio": 0,
-          "avgDelta": 0.2465,
-          "maxDelta": 0.2465
+          "avgDelta": 0.1757,
+          "maxDelta": 0.1757
         },
         "attack": {
           "frames": 11,
-          "frameWidth": 379,
-          "frameHeight": 328,
-          "occupancy": 0.1551,
-          "widthCoverage": 0.8299,
-          "heightCoverage": 0.7287,
+          "frameWidth": 383,
+          "frameHeight": 331,
+          "occupancy": 0.1813,
+          "widthCoverage": 0.8395,
+          "heightCoverage": 0.7281,
           "maxEdgeRatio": 0,
-          "avgDelta": 0.0402,
-          "maxDelta": 0.1822
+          "avgDelta": 0.0295,
+          "maxDelta": 0.1321
         }
       }
     },
     {
       "metadataFile": "recruitment-form-runtime-metadata.json",
-      "targetKey": "char_s03_arc_railer_f1",
-      "assetId": "unit:char_s03_arc_railer:char_s03_arc_railer_f1",
-      "unitId": "char_s03_arc_railer",
-      "formId": "char_s03_arc_railer_f1",
-      "formOrder": 1,
-      "score": 82,
-      "reasons": [
-        "weak-evolution-separation:0.9424"
-      ],
-      "nearestOther": {
-        "targetKey": "char_s02_zirka_f2",
-        "rootUnitId": "char_s02_zirka",
-        "similarity": 0.7534
-      },
-      "motions": {
-        "idle": {
-          "frames": 8,
-          "frameWidth": 314,
-          "frameHeight": 293,
-          "occupancy": 0.1353,
-          "widthCoverage": 0.7357,
-          "heightCoverage": 0.7858,
-          "maxEdgeRatio": 0,
-          "avgDelta": 0.0503,
-          "maxDelta": 0.0704
-        },
-        "move": {
-          "frames": 8,
-          "frameWidth": 314,
-          "frameHeight": 293,
-          "occupancy": 0.1352,
-          "widthCoverage": 0.7357,
-          "heightCoverage": 0.7765,
-          "maxEdgeRatio": 0,
-          "avgDelta": 0.2984,
-          "maxDelta": 0.2984
-        },
-        "attack": {
-          "frames": 9,
-          "frameWidth": 314,
-          "frameHeight": 293,
-          "occupancy": 0.141,
-          "widthCoverage": 0.8139,
-          "heightCoverage": 0.7679,
-          "maxEdgeRatio": 0,
-          "avgDelta": 0.0609,
-          "maxDelta": 0.2473
-        }
-      }
-    },
-    {
-      "metadataFile": "recruitment-form-runtime-metadata.json",
-      "targetKey": "char_s03_arc_railer_f2",
-      "assetId": "unit:char_s03_arc_railer:char_s03_arc_railer_f2",
-      "unitId": "char_s03_arc_railer",
-      "formId": "char_s03_arc_railer_f2",
-      "formOrder": 2,
-      "score": 82,
-      "reasons": [
-        "weak-evolution-separation:0.9424"
-      ],
-      "nearestOther": {
-        "targetKey": "char_s02_zirka_f2",
-        "rootUnitId": "char_s02_zirka",
-        "similarity": 0.7783
-      },
-      "motions": {
-        "idle": {
-          "frames": 8,
-          "frameWidth": 318,
-          "frameHeight": 296,
-          "occupancy": 0.1461,
-          "widthCoverage": 0.7327,
-          "heightCoverage": 0.7813,
-          "maxEdgeRatio": 0,
-          "avgDelta": 0.0406,
-          "maxDelta": 0.0568
-        },
-        "move": {
-          "frames": 8,
-          "frameWidth": 318,
-          "frameHeight": 296,
-          "occupancy": 0.1464,
-          "widthCoverage": 0.7327,
-          "heightCoverage": 0.772,
-          "maxEdgeRatio": 0,
-          "avgDelta": 0.2304,
-          "maxDelta": 0.2304
-        },
-        "attack": {
-          "frames": 9,
-          "frameWidth": 318,
-          "frameHeight": 296,
-          "occupancy": 0.1524,
-          "widthCoverage": 0.8305,
-          "heightCoverage": 0.7635,
-          "maxEdgeRatio": 0,
-          "avgDelta": 0.0473,
-          "maxDelta": 0.1966
-        }
-      }
-    },
-    {
-      "metadataFile": "recruitment-form-runtime-metadata.json",
-      "targetKey": "char_s03_arc_railer_f3",
-      "assetId": "unit:char_s03_arc_railer:char_s03_arc_railer_f3",
-      "unitId": "char_s03_arc_railer",
-      "formId": "char_s03_arc_railer_f3",
+      "targetKey": "char_s02_gormu_f3",
+      "assetId": "unit:char_s02_gormu:char_s02_gormu_f3",
+      "unitId": "char_s02_gormu",
+      "formId": "char_s02_gormu_f3",
       "formOrder": 3,
       "score": 82,
       "reasons": [
-        "weak-evolution-separation:0.9424"
+        "low-attack:0.0324",
+        "weak-evolution-separation:0.8793"
       ],
       "nearestOther": {
-        "targetKey": "char_s01_riena_f3",
-        "rootUnitId": "char_s01_riena",
-        "similarity": 0.7407
+        "targetKey": "char_s02_barga_f3",
+        "rootUnitId": "char_s02_barga",
+        "similarity": 0.7241
       },
       "motions": {
         "idle": {
           "frames": 8,
-          "frameWidth": 322,
-          "frameHeight": 299,
-          "occupancy": 0.1617,
-          "widthCoverage": 0.8292,
-          "heightCoverage": 0.7801,
+          "frameWidth": 387,
+          "frameHeight": 334,
+          "occupancy": 0.2038,
+          "widthCoverage": 0.8217,
+          "heightCoverage": 0.7403,
           "maxEdgeRatio": 0,
-          "avgDelta": 0.056,
-          "maxDelta": 0.0785
+          "avgDelta": 0.0378,
+          "maxDelta": 0.052
         },
         "move": {
           "frames": 8,
-          "frameWidth": 322,
-          "frameHeight": 299,
-          "occupancy": 0.1617,
-          "widthCoverage": 0.8292,
-          "heightCoverage": 0.7709,
+          "frameWidth": 387,
+          "frameHeight": 334,
+          "occupancy": 0.2038,
+          "widthCoverage": 0.8217,
+          "heightCoverage": 0.732,
           "maxEdgeRatio": 0,
-          "avgDelta": 0.2408,
-          "maxDelta": 0.2456
+          "avgDelta": 0.1662,
+          "maxDelta": 0.1697
         },
         "attack": {
-          "frames": 10,
-          "frameWidth": 322,
-          "frameHeight": 299,
-          "occupancy": 0.1662,
-          "widthCoverage": 0.8882,
-          "heightCoverage": 0.7625,
+          "frames": 12,
+          "frameWidth": 387,
+          "frameHeight": 334,
+          "occupancy": 0.2078,
+          "widthCoverage": 0.8488,
+          "heightCoverage": 0.7246,
           "maxEdgeRatio": 0,
-          "avgDelta": 0.0458,
-          "maxDelta": 0.1599
+          "avgDelta": 0.0324,
+          "maxDelta": 0.1081
         }
       }
     },
@@ -1506,110 +721,6 @@
     },
     {
       "metadataFile": "recruitment-form-runtime-metadata.json",
-      "targetKey": "char_s03_rxomega_f1",
-      "assetId": "unit:char_s03_rxomega:char_s03_rxomega_f1",
-      "unitId": "char_s03_rxomega",
-      "formId": "char_s03_rxomega_f1",
-      "formOrder": 1,
-      "score": 82,
-      "reasons": [
-        "weak-evolution-separation:0.9375"
-      ],
-      "nearestOther": {
-        "targetKey": "char_s03_nana04_f3",
-        "rootUnitId": "char_s03_nana04",
-        "similarity": 0.7905
-      },
-      "motions": {
-        "idle": {
-          "frames": 8,
-          "frameWidth": 314,
-          "frameHeight": 273,
-          "occupancy": 0.1729,
-          "widthCoverage": 0.8471,
-          "heightCoverage": 0.8068,
-          "maxEdgeRatio": 0,
-          "avgDelta": 0.0448,
-          "maxDelta": 0.0627
-        },
-        "move": {
-          "frames": 8,
-          "frameWidth": 314,
-          "frameHeight": 273,
-          "occupancy": 0.1732,
-          "widthCoverage": 0.8471,
-          "heightCoverage": 0.7967,
-          "maxEdgeRatio": 0,
-          "avgDelta": 0.2524,
-          "maxDelta": 0.2524
-        },
-        "attack": {
-          "frames": 9,
-          "frameWidth": 314,
-          "frameHeight": 273,
-          "occupancy": 0.177,
-          "widthCoverage": 0.8797,
-          "heightCoverage": 0.7875,
-          "maxEdgeRatio": 0,
-          "avgDelta": 0.0625,
-          "maxDelta": 0.2289
-        }
-      }
-    },
-    {
-      "metadataFile": "recruitment-form-runtime-metadata.json",
-      "targetKey": "char_s03_rxomega_f2",
-      "assetId": "unit:char_s03_rxomega:char_s03_rxomega_f2",
-      "unitId": "char_s03_rxomega",
-      "formId": "char_s03_rxomega_f2",
-      "formOrder": 2,
-      "score": 82,
-      "reasons": [
-        "weak-evolution-separation:0.9375"
-      ],
-      "nearestOther": {
-        "targetKey": "char_s03_nana04_f3",
-        "rootUnitId": "char_s03_nana04",
-        "similarity": 0.8073
-      },
-      "motions": {
-        "idle": {
-          "frames": 8,
-          "frameWidth": 318,
-          "frameHeight": 276,
-          "occupancy": 0.1885,
-          "widthCoverage": 0.8585,
-          "heightCoverage": 0.8016,
-          "maxEdgeRatio": 0,
-          "avgDelta": 0.0408,
-          "maxDelta": 0.0571
-        },
-        "move": {
-          "frames": 8,
-          "frameWidth": 318,
-          "frameHeight": 276,
-          "occupancy": 0.1887,
-          "widthCoverage": 0.8585,
-          "heightCoverage": 0.7917,
-          "maxEdgeRatio": 0,
-          "avgDelta": 0.2079,
-          "maxDelta": 0.2079
-        },
-        "attack": {
-          "frames": 9,
-          "frameWidth": 318,
-          "frameHeight": 276,
-          "occupancy": 0.1927,
-          "widthCoverage": 0.8906,
-          "heightCoverage": 0.7826,
-          "maxEdgeRatio": 0,
-          "avgDelta": 0.0481,
-          "maxDelta": 0.179
-        }
-      }
-    },
-    {
-      "metadataFile": "recruitment-form-runtime-metadata.json",
       "targetKey": "char_s03_rxomega_f3",
       "assetId": "unit:char_s03_rxomega:char_s03_rxomega_f3",
       "unitId": "char_s03_rxomega",
@@ -1617,46 +728,47 @@
       "formOrder": 3,
       "score": 82,
       "reasons": [
-        "weak-evolution-separation:0.9375"
+        "low-attack:0.0265",
+        "weak-evolution-separation:0.8287"
       ],
       "nearestOther": {
-        "targetKey": "char_s03_nana04_f3",
-        "rootUnitId": "char_s03_nana04",
-        "similarity": 0.8102
+        "targetKey": "char_common_b_coffin_merchant_f3",
+        "rootUnitId": "char_common_b_coffin_merchant",
+        "similarity": 0.7443
       },
       "motions": {
         "idle": {
           "frames": 8,
           "frameWidth": 322,
           "frameHeight": 279,
-          "occupancy": 0.1869,
+          "occupancy": 0.2483,
           "widthCoverage": 0.8696,
           "heightCoverage": 0.8002,
           "maxEdgeRatio": 0,
-          "avgDelta": 0.0484,
-          "maxDelta": 0.0679
+          "avgDelta": 0.0348,
+          "maxDelta": 0.0516
         },
         "move": {
           "frames": 8,
           "frameWidth": 322,
           "frameHeight": 279,
-          "occupancy": 0.1873,
+          "occupancy": 0.2483,
           "widthCoverage": 0.8696,
           "heightCoverage": 0.7903,
           "maxEdgeRatio": 0,
-          "avgDelta": 0.2207,
-          "maxDelta": 0.2252
+          "avgDelta": 0.1613,
+          "maxDelta": 0.1657
         },
         "attack": {
           "frames": 10,
           "frameWidth": 322,
           "frameHeight": 279,
-          "occupancy": 0.1887,
+          "occupancy": 0.2526,
           "widthCoverage": 0.9019,
           "heightCoverage": 0.7814,
           "maxEdgeRatio": 0,
-          "avgDelta": 0.0536,
-          "maxDelta": 0.1861
+          "avgDelta": 0.0265,
+          "maxDelta": 0.0931
         }
       }
     },
@@ -1919,6 +1031,162 @@
           "maxEdgeRatio": 0,
           "avgDelta": 0.0306,
           "maxDelta": 0.1507
+        }
+      }
+    },
+    {
+      "metadataFile": "recruitment-form-runtime-metadata.json",
+      "targetKey": "char_common_c_turnip_rider_f3",
+      "assetId": "unit:char_common_c_turnip_rider:char_common_c_turnip_rider_f3",
+      "unitId": "char_common_c_turnip_rider",
+      "formId": "char_common_c_turnip_rider_f3",
+      "formOrder": 3,
+      "score": 90,
+      "reasons": [
+        "low-attack:0.0262"
+      ],
+      "nearestOther": {
+        "targetKey": "enemy_ch4_error_mass",
+        "rootUnitId": "enemy_ch4_error_mass",
+        "similarity": 0.7692
+      },
+      "motions": {
+        "idle": {
+          "frames": 6,
+          "frameWidth": 232,
+          "frameHeight": 209,
+          "occupancy": 0.4713,
+          "widthCoverage": 0.9009,
+          "heightCoverage": 0.9442,
+          "maxEdgeRatio": 0.0005,
+          "avgDelta": 0.0362,
+          "maxDelta": 0.0449
+        },
+        "move": {
+          "frames": 8,
+          "frameWidth": 232,
+          "frameHeight": 209,
+          "occupancy": 0.4709,
+          "widthCoverage": 0.9009,
+          "heightCoverage": 0.945,
+          "maxEdgeRatio": 0.0006,
+          "avgDelta": 0.1213,
+          "maxDelta": 0.1226
+        },
+        "attack": {
+          "frames": 7,
+          "frameWidth": 232,
+          "frameHeight": 209,
+          "occupancy": 0.4763,
+          "widthCoverage": 0.9606,
+          "heightCoverage": 0.9474,
+          "maxEdgeRatio": 0.0004,
+          "avgDelta": 0.0262,
+          "maxDelta": 0.0687
+        }
+      }
+    },
+    {
+      "metadataFile": "recruitment-form-runtime-metadata.json",
+      "targetKey": "char_s02_barga_f2",
+      "assetId": "unit:char_s02_barga:char_s02_barga_f2",
+      "unitId": "char_s02_barga",
+      "formId": "char_s02_barga_f2",
+      "formOrder": 2,
+      "score": 90,
+      "reasons": [
+        "low-attack:0.0298"
+      ],
+      "nearestOther": {
+        "targetKey": "char_s02_zirka_f3",
+        "rootUnitId": "char_s02_zirka",
+        "similarity": 0.749
+      },
+      "motions": {
+        "idle": {
+          "frames": 8,
+          "frameWidth": 383,
+          "frameHeight": 331,
+          "occupancy": 0.1667,
+          "widthCoverage": 0.705,
+          "heightCoverage": 0.744,
+          "maxEdgeRatio": 0,
+          "avgDelta": 0.0281,
+          "maxDelta": 0.0393
+        },
+        "move": {
+          "frames": 8,
+          "frameWidth": 383,
+          "frameHeight": 331,
+          "occupancy": 0.1669,
+          "widthCoverage": 0.705,
+          "heightCoverage": 0.7356,
+          "maxEdgeRatio": 0,
+          "avgDelta": 0.1611,
+          "maxDelta": 0.1611
+        },
+        "attack": {
+          "frames": 9,
+          "frameWidth": 383,
+          "frameHeight": 331,
+          "occupancy": 0.1697,
+          "widthCoverage": 0.7528,
+          "heightCoverage": 0.7281,
+          "maxEdgeRatio": 0,
+          "avgDelta": 0.0298,
+          "maxDelta": 0.1158
+        }
+      }
+    },
+    {
+      "metadataFile": "recruitment-form-runtime-metadata.json",
+      "targetKey": "char_s02_barga_f3",
+      "assetId": "unit:char_s02_barga:char_s02_barga_f3",
+      "unitId": "char_s02_barga",
+      "formId": "char_s02_barga_f3",
+      "formOrder": 3,
+      "score": 90,
+      "reasons": [
+        "low-attack:0.0236"
+      ],
+      "nearestOther": {
+        "targetKey": "char_s01_elsia_f3",
+        "rootUnitId": "char_s01_elsia",
+        "similarity": 0.7409
+      },
+      "motions": {
+        "idle": {
+          "frames": 8,
+          "frameWidth": 387,
+          "frameHeight": 334,
+          "occupancy": 0.1897,
+          "widthCoverage": 0.7545,
+          "heightCoverage": 0.7403,
+          "maxEdgeRatio": 0,
+          "avgDelta": 0.0301,
+          "maxDelta": 0.0431
+        },
+        "move": {
+          "frames": 8,
+          "frameWidth": 387,
+          "frameHeight": 334,
+          "occupancy": 0.1898,
+          "widthCoverage": 0.7545,
+          "heightCoverage": 0.732,
+          "maxEdgeRatio": 0,
+          "avgDelta": 0.1475,
+          "maxDelta": 0.151
+        },
+        "attack": {
+          "frames": 10,
+          "frameWidth": 387,
+          "frameHeight": 334,
+          "occupancy": 0.1922,
+          "widthCoverage": 0.7933,
+          "heightCoverage": 0.7246,
+          "maxEdgeRatio": 0,
+          "avgDelta": 0.0236,
+          "maxDelta": 0.0766
         }
       }
     },
@@ -2129,49 +1397,737 @@
           "maxDelta": 0.2024
         }
       }
+    },
+    {
+      "metadataFile": "recruitment-runtime-metadata.json",
+      "targetKey": "char_common_a_paper_dragon",
+      "assetId": "unit:char_common_a_paper_dragon",
+      "unitId": "char_common_a_paper_dragon",
+      "formId": null,
+      "formOrder": null,
+      "score": 91,
+      "reasons": [
+        "high-similarity:0.8824"
+      ],
+      "nearestOther": {
+        "targetKey": "char_common_b_ink_raven",
+        "rootUnitId": "char_common_b_ink_raven",
+        "similarity": 0.8824
+      },
+      "motions": {
+        "idle": {
+          "frames": 7,
+          "frameWidth": 255,
+          "frameHeight": 255,
+          "occupancy": 0.1105,
+          "widthCoverage": 0.6471,
+          "heightCoverage": 0.3255,
+          "maxEdgeRatio": 0,
+          "avgDelta": 0.0599,
+          "maxDelta": 0.0899
+        },
+        "move": {
+          "frames": 8,
+          "frameWidth": 255,
+          "frameHeight": 255,
+          "occupancy": 0.1107,
+          "widthCoverage": 0.6529,
+          "heightCoverage": 0.3255,
+          "maxEdgeRatio": 0,
+          "avgDelta": 0.2538,
+          "maxDelta": 0.2538
+        },
+        "attack": {
+          "frames": 8,
+          "frameWidth": 255,
+          "frameHeight": 255,
+          "occupancy": 0.1307,
+          "widthCoverage": 0.7681,
+          "heightCoverage": 0.3255,
+          "maxEdgeRatio": 0,
+          "avgDelta": 0.0907,
+          "maxDelta": 0.3741
+        }
+      }
+    },
+    {
+      "metadataFile": "recruitment-runtime-metadata.json",
+      "targetKey": "char_common_b_ink_raven",
+      "assetId": "unit:char_common_b_ink_raven",
+      "unitId": "char_common_b_ink_raven",
+      "formId": null,
+      "formOrder": null,
+      "score": 91,
+      "reasons": [
+        "high-similarity:0.8824"
+      ],
+      "nearestOther": {
+        "targetKey": "char_common_a_paper_dragon",
+        "rootUnitId": "char_common_a_paper_dragon",
+        "similarity": 0.8824
+      },
+      "motions": {
+        "idle": {
+          "frames": 7,
+          "frameWidth": 235,
+          "frameHeight": 240,
+          "occupancy": 0.1266,
+          "widthCoverage": 0.7021,
+          "heightCoverage": 0.3625,
+          "maxEdgeRatio": 0,
+          "avgDelta": 0.088,
+          "maxDelta": 0.1241
+        },
+        "move": {
+          "frames": 8,
+          "frameWidth": 235,
+          "frameHeight": 240,
+          "occupancy": 0.1269,
+          "widthCoverage": 0.7085,
+          "heightCoverage": 0.3661,
+          "maxEdgeRatio": 0,
+          "avgDelta": 0.2732,
+          "maxDelta": 0.281
+        },
+        "attack": {
+          "frames": 7,
+          "frameWidth": 235,
+          "frameHeight": 240,
+          "occupancy": 0.1301,
+          "widthCoverage": 0.8116,
+          "heightCoverage": 0.3625,
+          "maxEdgeRatio": 0,
+          "avgDelta": 0.1259,
+          "maxDelta": 0.3251
+        }
+      }
+    },
+    {
+      "metadataFile": "recruitment-form-runtime-metadata.json",
+      "targetKey": "char_s01_elsia_f3",
+      "assetId": "unit:char_s01_elsia:char_s01_elsia_f3",
+      "unitId": "char_s01_elsia",
+      "formId": "char_s01_elsia_f3",
+      "formOrder": 3,
+      "score": 91,
+      "reasons": [
+        "high-similarity:0.9188"
+      ],
+      "nearestOther": {
+        "targetKey": "char_s01_totoria_f3",
+        "rootUnitId": "char_s01_totoria",
+        "similarity": 0.9188
+      },
+      "motions": {
+        "idle": {
+          "frames": 8,
+          "frameWidth": 297,
+          "frameHeight": 264,
+          "occupancy": 0.1883,
+          "widthCoverage": 0.8215,
+          "heightCoverage": 0.8078,
+          "maxEdgeRatio": 0,
+          "avgDelta": 0.0574,
+          "maxDelta": 0.0824
+        },
+        "move": {
+          "frames": 8,
+          "frameWidth": 297,
+          "frameHeight": 264,
+          "occupancy": 0.1885,
+          "widthCoverage": 0.8215,
+          "heightCoverage": 0.7973,
+          "maxEdgeRatio": 0,
+          "avgDelta": 0.2369,
+          "maxDelta": 0.2459
+        },
+        "attack": {
+          "frames": 10,
+          "frameWidth": 297,
+          "frameHeight": 264,
+          "occupancy": 0.1927,
+          "widthCoverage": 0.9162,
+          "heightCoverage": 0.7879,
+          "maxEdgeRatio": 0,
+          "avgDelta": 0.0601,
+          "maxDelta": 0.2121
+        }
+      }
+    },
+    {
+      "metadataFile": "recruitment-form-runtime-metadata.json",
+      "targetKey": "char_s01_riena_f1",
+      "assetId": "unit:char_s01_riena:char_s01_riena_f1",
+      "unitId": "char_s01_riena",
+      "formId": "char_s01_riena_f1",
+      "formOrder": 1,
+      "score": 91,
+      "reasons": [
+        "high-similarity:0.9086"
+      ],
+      "nearestOther": {
+        "targetKey": "char_s01_totoria_f1",
+        "rootUnitId": "char_s01_totoria",
+        "similarity": 0.9086
+      },
+      "motions": {
+        "idle": {
+          "frames": 8,
+          "frameWidth": 289,
+          "frameHeight": 258,
+          "occupancy": 0.1161,
+          "widthCoverage": 0.7266,
+          "heightCoverage": 0.8149,
+          "maxEdgeRatio": 0,
+          "avgDelta": 0.0621,
+          "maxDelta": 0.0869
+        },
+        "move": {
+          "frames": 8,
+          "frameWidth": 289,
+          "frameHeight": 258,
+          "occupancy": 0.116,
+          "widthCoverage": 0.7266,
+          "heightCoverage": 0.8043,
+          "maxEdgeRatio": 0,
+          "avgDelta": 0.3175,
+          "maxDelta": 0.3175
+        },
+        "attack": {
+          "frames": 9,
+          "frameWidth": 289,
+          "frameHeight": 258,
+          "occupancy": 0.1398,
+          "widthCoverage": 0.8447,
+          "heightCoverage": 0.7946,
+          "maxEdgeRatio": 0,
+          "avgDelta": 0.1001,
+          "maxDelta": 0.4349
+        }
+      }
+    },
+    {
+      "metadataFile": "recruitment-form-runtime-metadata.json",
+      "targetKey": "char_s01_totoria_f1",
+      "assetId": "unit:char_s01_totoria:char_s01_totoria_f1",
+      "unitId": "char_s01_totoria",
+      "formId": "char_s01_totoria_f1",
+      "formOrder": 1,
+      "score": 91,
+      "reasons": [
+        "high-similarity:0.9086"
+      ],
+      "nearestOther": {
+        "targetKey": "char_s01_riena_f1",
+        "rootUnitId": "char_s01_riena",
+        "similarity": 0.9086
+      },
+      "motions": {
+        "idle": {
+          "frames": 8,
+          "frameWidth": 289,
+          "frameHeight": 258,
+          "occupancy": 0.111,
+          "widthCoverage": 0.7197,
+          "heightCoverage": 0.8149,
+          "maxEdgeRatio": 0,
+          "avgDelta": 0.0977,
+          "maxDelta": 0.1233
+        },
+        "move": {
+          "frames": 8,
+          "frameWidth": 289,
+          "frameHeight": 258,
+          "occupancy": 0.1111,
+          "widthCoverage": 0.7197,
+          "heightCoverage": 0.8043,
+          "maxEdgeRatio": 0,
+          "avgDelta": 0.3465,
+          "maxDelta": 0.3541
+        },
+        "attack": {
+          "frames": 9,
+          "frameWidth": 289,
+          "frameHeight": 258,
+          "occupancy": 0.1159,
+          "widthCoverage": 0.8358,
+          "heightCoverage": 0.7946,
+          "maxEdgeRatio": 0,
+          "avgDelta": 0.116,
+          "maxDelta": 0.3785
+        }
+      }
+    },
+    {
+      "metadataFile": "recruitment-form-runtime-metadata.json",
+      "targetKey": "char_s01_totoria_f3",
+      "assetId": "unit:char_s01_totoria:char_s01_totoria_f3",
+      "unitId": "char_s01_totoria",
+      "formId": "char_s01_totoria_f3",
+      "formOrder": 3,
+      "score": 91,
+      "reasons": [
+        "high-similarity:0.9188"
+      ],
+      "nearestOther": {
+        "targetKey": "char_s01_elsia_f3",
+        "rootUnitId": "char_s01_elsia",
+        "similarity": 0.9188
+      },
+      "motions": {
+        "idle": {
+          "frames": 8,
+          "frameWidth": 297,
+          "frameHeight": 264,
+          "occupancy": 0.1904,
+          "widthCoverage": 0.8418,
+          "heightCoverage": 0.8078,
+          "maxEdgeRatio": 0,
+          "avgDelta": 0.0645,
+          "maxDelta": 0.0881
+        },
+        "move": {
+          "frames": 8,
+          "frameWidth": 297,
+          "frameHeight": 264,
+          "occupancy": 0.1904,
+          "widthCoverage": 0.8418,
+          "heightCoverage": 0.7973,
+          "maxEdgeRatio": 0,
+          "avgDelta": 0.2384,
+          "maxDelta": 0.2484
+        },
+        "attack": {
+          "frames": 10,
+          "frameWidth": 297,
+          "frameHeight": 264,
+          "occupancy": 0.1938,
+          "widthCoverage": 0.8774,
+          "heightCoverage": 0.7879,
+          "maxEdgeRatio": 0,
+          "avgDelta": 0.0657,
+          "maxDelta": 0.2056
+        }
+      }
+    },
+    {
+      "metadataFile": "chapter-04-runtime-metadata.json",
+      "targetKey": "enemy_ch4_error_mass",
+      "assetId": "unit:enemy_ch4_error_mass",
+      "unitId": "enemy_ch4_error_mass",
+      "formId": null,
+      "formOrder": null,
+      "score": 91,
+      "reasons": [
+        "high-similarity:0.9097"
+      ],
+      "nearestOther": {
+        "targetKey": "enemy_ch2_bonewheel",
+        "rootUnitId": "enemy_ch2_bonewheel",
+        "similarity": 0.9097
+      },
+      "motions": {
+        "idle": {
+          "frames": 7,
+          "frameWidth": 260,
+          "frameHeight": 220,
+          "occupancy": 0.252,
+          "widthCoverage": 0.6176,
+          "heightCoverage": 0.5864,
+          "maxEdgeRatio": 0,
+          "avgDelta": 0.0937,
+          "maxDelta": 0.1007
+        },
+        "move": {
+          "frames": 8,
+          "frameWidth": 260,
+          "frameHeight": 220,
+          "occupancy": 0.2513,
+          "widthCoverage": 0.6163,
+          "heightCoverage": 0.5864,
+          "maxEdgeRatio": 0,
+          "avgDelta": 0.2117,
+          "maxDelta": 0.2185
+        },
+        "attack": {
+          "frames": 8,
+          "frameWidth": 260,
+          "frameHeight": 220,
+          "occupancy": 0.2629,
+          "widthCoverage": 0.6596,
+          "heightCoverage": 0.5983,
+          "maxEdgeRatio": 0,
+          "avgDelta": 0.2065,
+          "maxDelta": 0.2819
+        }
+      }
+    },
+    {
+      "metadataFile": "chapter-04-runtime-metadata.json",
+      "targetKey": "enemy_ch4_void_lens",
+      "assetId": "unit:enemy_ch4_void_lens",
+      "unitId": "enemy_ch4_void_lens",
+      "formId": null,
+      "formOrder": null,
+      "score": 91,
+      "reasons": [
+        "high-similarity:0.9237"
+      ],
+      "nearestOther": {
+        "targetKey": "boss_ch4_zero_engine",
+        "rootUnitId": "boss_ch4_zero_engine",
+        "similarity": 0.9237
+      },
+      "motions": {
+        "idle": {
+          "frames": 7,
+          "frameWidth": 280,
+          "frameHeight": 240,
+          "occupancy": 0.2547,
+          "widthCoverage": 0.526,
+          "heightCoverage": 0.6958,
+          "maxEdgeRatio": 0,
+          "avgDelta": 0.0165,
+          "maxDelta": 0.0214
+        },
+        "move": {
+          "frames": 8,
+          "frameWidth": 280,
+          "frameHeight": 240,
+          "occupancy": 0.2555,
+          "widthCoverage": 0.5259,
+          "heightCoverage": 0.6542,
+          "maxEdgeRatio": 0,
+          "avgDelta": 0.0869,
+          "maxDelta": 0.0886
+        },
+        "attack": {
+          "frames": 8,
+          "frameWidth": 280,
+          "frameHeight": 240,
+          "occupancy": 0.2785,
+          "widthCoverage": 0.6179,
+          "heightCoverage": 0.6563,
+          "maxEdgeRatio": 0.0041,
+          "avgDelta": 0.0811,
+          "maxDelta": 0.2923
+        }
+      }
+    },
+    {
+      "metadataFile": "special-content-runtime-metadata.json",
+      "targetKey": "enemy_ev_ze_shield",
+      "assetId": "unit:enemy_ev_ze_shield",
+      "unitId": "enemy_ev_ze_shield",
+      "formId": null,
+      "formOrder": null,
+      "score": 91,
+      "reasons": [
+        "high-similarity:0.8932"
+      ],
+      "nearestOther": {
+        "targetKey": "enemy_sp_gold_cart",
+        "rootUnitId": "enemy_sp_gold_cart",
+        "similarity": 0.8932
+      },
+      "motions": {
+        "idle": {
+          "frames": 7,
+          "frameWidth": 260,
+          "frameHeight": 230,
+          "occupancy": 0.2584,
+          "widthCoverage": 0.4115,
+          "heightCoverage": 0.787,
+          "maxEdgeRatio": 0,
+          "avgDelta": 0.0202,
+          "maxDelta": 0.0303
+        },
+        "move": {
+          "frames": 8,
+          "frameWidth": 260,
+          "frameHeight": 230,
+          "occupancy": 0.2586,
+          "widthCoverage": 0.4115,
+          "heightCoverage": 0.7891,
+          "maxEdgeRatio": 0,
+          "avgDelta": 0.0853,
+          "maxDelta": 0.0853
+        },
+        "attack": {
+          "frames": 7,
+          "frameWidth": 260,
+          "frameHeight": 230,
+          "occupancy": 0.281,
+          "widthCoverage": 0.5934,
+          "heightCoverage": 0.787,
+          "maxEdgeRatio": 0,
+          "avgDelta": 0.0828,
+          "maxDelta": 0.2639
+        }
+      }
+    },
+    {
+      "metadataFile": "special-content-runtime-metadata.json",
+      "targetKey": "enemy_sp_evo_seal_guard",
+      "assetId": "unit:enemy_sp_evo_seal_guard",
+      "unitId": "enemy_sp_evo_seal_guard",
+      "formId": null,
+      "formOrder": null,
+      "score": 91,
+      "reasons": [
+        "high-similarity:0.9342"
+      ],
+      "nearestOther": {
+        "targetKey": "enemy_sp_gold_vault_golem",
+        "rootUnitId": "enemy_sp_gold_vault_golem",
+        "similarity": 0.9342
+      },
+      "motions": {
+        "idle": {
+          "frames": 7,
+          "frameWidth": 260,
+          "frameHeight": 250,
+          "occupancy": 0.2502,
+          "widthCoverage": 0.4192,
+          "heightCoverage": 0.752,
+          "maxEdgeRatio": 0,
+          "avgDelta": 0.0196,
+          "maxDelta": 0.0293
+        },
+        "move": {
+          "frames": 8,
+          "frameWidth": 260,
+          "frameHeight": 250,
+          "occupancy": 0.2504,
+          "widthCoverage": 0.4192,
+          "heightCoverage": 0.754,
+          "maxEdgeRatio": 0,
+          "avgDelta": 0.0831,
+          "maxDelta": 0.0831
+        },
+        "attack": {
+          "frames": 7,
+          "frameWidth": 260,
+          "frameHeight": 250,
+          "occupancy": 0.2606,
+          "widthCoverage": 0.5456,
+          "heightCoverage": 0.752,
+          "maxEdgeRatio": 0,
+          "avgDelta": 0.0766,
+          "maxDelta": 0.2436
+        }
+      }
+    },
+    {
+      "metadataFile": "special-content-runtime-metadata.json",
+      "targetKey": "enemy_sp_gold_cart",
+      "assetId": "unit:enemy_sp_gold_cart",
+      "unitId": "enemy_sp_gold_cart",
+      "formId": null,
+      "formOrder": null,
+      "score": 91,
+      "reasons": [
+        "high-similarity:0.922"
+      ],
+      "nearestOther": {
+        "targetKey": "guard/guard_f3",
+        "rootUnitId": "guard",
+        "similarity": 0.922
+      },
+      "motions": {
+        "idle": {
+          "frames": 6,
+          "frameWidth": 270,
+          "frameHeight": 200,
+          "occupancy": 0.2301,
+          "widthCoverage": 0.5136,
+          "heightCoverage": 0.5883,
+          "maxEdgeRatio": 0,
+          "avgDelta": 0.1038,
+          "maxDelta": 0.117
+        },
+        "move": {
+          "frames": 8,
+          "frameWidth": 270,
+          "frameHeight": 200,
+          "occupancy": 0.23,
+          "widthCoverage": 0.513,
+          "heightCoverage": 0.5887,
+          "maxEdgeRatio": 0,
+          "avgDelta": 0.2038,
+          "maxDelta": 0.2074
+        },
+        "attack": {
+          "frames": 7,
+          "frameWidth": 270,
+          "frameHeight": 200,
+          "occupancy": 0.2374,
+          "widthCoverage": 0.5968,
+          "heightCoverage": 0.5886,
+          "maxEdgeRatio": 0,
+          "avgDelta": 0.1197,
+          "maxDelta": 0.2449
+        }
+      }
+    },
+    {
+      "metadataFile": "special-content-runtime-metadata.json",
+      "targetKey": "enemy_sp_gold_vault_golem",
+      "assetId": "unit:enemy_sp_gold_vault_golem",
+      "unitId": "enemy_sp_gold_vault_golem",
+      "formId": null,
+      "formOrder": null,
+      "score": 91,
+      "reasons": [
+        "high-similarity:0.9342"
+      ],
+      "nearestOther": {
+        "targetKey": "enemy_sp_evo_seal_guard",
+        "rootUnitId": "enemy_sp_evo_seal_guard",
+        "similarity": 0.9342
+      },
+      "motions": {
+        "idle": {
+          "frames": 7,
+          "frameWidth": 310,
+          "frameHeight": 290,
+          "occupancy": 0.226,
+          "widthCoverage": 0.429,
+          "heightCoverage": 0.6931,
+          "maxEdgeRatio": 0,
+          "avgDelta": 0.0188,
+          "maxDelta": 0.0281
+        },
+        "move": {
+          "frames": 8,
+          "frameWidth": 310,
+          "frameHeight": 290,
+          "occupancy": 0.2262,
+          "widthCoverage": 0.429,
+          "heightCoverage": 0.6948,
+          "maxEdgeRatio": 0,
+          "avgDelta": 0.0798,
+          "maxDelta": 0.0798
+        },
+        "attack": {
+          "frames": 8,
+          "frameWidth": 310,
+          "frameHeight": 290,
+          "occupancy": 0.2361,
+          "widthCoverage": 0.5427,
+          "heightCoverage": 0.6931,
+          "maxEdgeRatio": 0,
+          "avgDelta": 0.0626,
+          "maxDelta": 0.2355
+        }
+      }
+    },
+    {
+      "metadataFile": "special-content-runtime-metadata.json",
+      "targetKey": "enemy_sp_soul_armor",
+      "assetId": "unit:enemy_sp_soul_armor",
+      "unitId": "enemy_sp_soul_armor",
+      "formId": null,
+      "formOrder": null,
+      "score": 91,
+      "reasons": [
+        "high-similarity:0.8926"
+      ],
+      "nearestOther": {
+        "targetKey": "enemy_sp_evo_seal_guard",
+        "rootUnitId": "enemy_sp_evo_seal_guard",
+        "similarity": 0.8926
+      },
+      "motions": {
+        "idle": {
+          "frames": 7,
+          "frameWidth": 250,
+          "frameHeight": 240,
+          "occupancy": 0.1974,
+          "widthCoverage": 0.348,
+          "heightCoverage": 0.8292,
+          "maxEdgeRatio": 0,
+          "avgDelta": 0.0252,
+          "maxDelta": 0.0378
+        },
+        "move": {
+          "frames": 8,
+          "frameWidth": 250,
+          "frameHeight": 240,
+          "occupancy": 0.1976,
+          "widthCoverage": 0.348,
+          "heightCoverage": 0.8313,
+          "maxEdgeRatio": 0,
+          "avgDelta": 0.0988,
+          "maxDelta": 0.0988
+        },
+        "attack": {
+          "frames": 7,
+          "frameWidth": 250,
+          "frameHeight": 240,
+          "occupancy": 0.2141,
+          "widthCoverage": 0.5109,
+          "heightCoverage": 0.8292,
+          "maxEdgeRatio": 0,
+          "avgDelta": 0.1052,
+          "maxDelta": 0.3319
+        }
+      }
+    },
+    {
+      "metadataFile": "second-slice-runtime-metadata.json",
+      "targetKey": "guard/guard_f1",
+      "assetId": "unit:guard:guard_f1",
+      "unitId": "guard",
+      "formId": null,
+      "formOrder": null,
+      "score": 91,
+      "reasons": [
+        "high-similarity:0.8852"
+      ],
+      "nearestOther": {
+        "targetKey": "boss_sp_soul_grand_forge",
+        "rootUnitId": "boss_sp_soul_grand_forge",
+        "similarity": 0.8852
+      },
+      "motions": {
+        "idle": {
+          "frames": 11,
+          "frameWidth": 210,
+          "frameHeight": 190,
+          "occupancy": 0.0917,
+          "widthCoverage": 0.2238,
+          "heightCoverage": 0.4368,
+          "maxEdgeRatio": 0,
+          "avgDelta": 0,
+          "maxDelta": 0
+        },
+        "move": {
+          "frames": 8,
+          "frameWidth": 210,
+          "frameHeight": 190,
+          "occupancy": 0.0918,
+          "widthCoverage": 0.2137,
+          "heightCoverage": 0.4507,
+          "maxEdgeRatio": 0,
+          "avgDelta": 0.0396,
+          "maxDelta": 0.0536
+        },
+        "attack": {
+          "frames": 7,
+          "frameWidth": 210,
+          "frameHeight": 190,
+          "occupancy": 0.104,
+          "widthCoverage": 0.3701,
+          "heightCoverage": 0.5075,
+          "maxEdgeRatio": 0,
+          "avgDelta": 0.1737,
+          "maxDelta": 0.2759
+        }
+      }
     }
   ],
   "recruitmentEvolution": [
-    {
-      "unitId": "char_s03_arc_railer",
-      "f1ToF2Similarity": 0.9424,
-      "f2ToF3Similarity": 0.661,
-      "f1ToF3Similarity": 0.6509,
-      "worstSimilarity": 0.9424,
-      "status": "WEAK"
-    },
-    {
-      "unitId": "char_s03_rxomega",
-      "f1ToF2Similarity": 0.8565,
-      "f2ToF3Similarity": 0.9375,
-      "f1ToF3Similarity": 0.8421,
-      "worstSimilarity": 0.9375,
-      "status": "WEAK"
-    },
-    {
-      "unitId": "char_s02_gormu",
-      "f1ToF2Similarity": 0.9315,
-      "f2ToF3Similarity": 0.9283,
-      "f1ToF3Similarity": 0.864,
-      "worstSimilarity": 0.9315,
-      "status": "WEAK"
-    },
-    {
-      "unitId": "char_s02_barga",
-      "f1ToF2Similarity": 0.9139,
-      "f2ToF3Similarity": 0.8619,
-      "f1ToF3Similarity": 0.8182,
-      "worstSimilarity": 0.9139,
-      "status": "WEAK"
-    },
-    {
-      "unitId": "char_common_c_turnip_rider",
-      "f1ToF2Similarity": 0.6806,
-      "f2ToF3Similarity": 0.9077,
-      "f1ToF3Similarity": 0.6178,
-      "worstSimilarity": 0.9077,
-      "status": "WEAK"
-    },
     {
       "unitId": "char_s01_neria",
       "f1ToF2Similarity": 0.5875,
@@ -2245,11 +2201,11 @@
       "status": "WATCH"
     },
     {
-      "unitId": "char_common_b_clockduck",
-      "f1ToF2Similarity": 0.7154,
-      "f2ToF3Similarity": 0.8784,
-      "f1ToF3Similarity": 0.6333,
-      "worstSimilarity": 0.8784,
+      "unitId": "char_s02_gormu",
+      "f1ToF2Similarity": 0.8793,
+      "f2ToF3Similarity": 0.8494,
+      "f1ToF3Similarity": 0.7595,
+      "worstSimilarity": 0.8793,
       "status": "WATCH"
     },
     {
@@ -2309,11 +2265,27 @@
       "status": "WATCH"
     },
     {
+      "unitId": "char_s03_rxomega",
+      "f1ToF2Similarity": 0.8287,
+      "f2ToF3Similarity": 0.7774,
+      "f1ToF3Similarity": 0.658,
+      "worstSimilarity": 0.8287,
+      "status": "WATCH"
+    },
+    {
       "unitId": "char_common_c_bell_crab",
       "f1ToF2Similarity": 0.6858,
       "f2ToF3Similarity": 0.8154,
       "f1ToF3Similarity": 0.6356,
       "worstSimilarity": 0.8154,
+      "status": "GOOD"
+    },
+    {
+      "unitId": "char_s02_barga",
+      "f1ToF2Similarity": 0.7977,
+      "f2ToF3Similarity": 0.7868,
+      "f1ToF3Similarity": 0.6797,
+      "worstSimilarity": 0.7977,
       "status": "GOOD"
     },
     {
@@ -2341,11 +2313,11 @@
       "status": "GOOD"
     },
     {
-      "unitId": "char_common_b_lantern_witch",
-      "f1ToF2Similarity": 0.7548,
-      "f2ToF3Similarity": 0.7778,
-      "f1ToF3Similarity": 0.5908,
-      "worstSimilarity": 0.7778,
+      "unitId": "char_common_c_turnip_rider",
+      "f1ToF2Similarity": 0.6533,
+      "f2ToF3Similarity": 0.7847,
+      "f1ToF3Similarity": 0.5611,
+      "worstSimilarity": 0.7847,
       "status": "GOOD"
     },
     {
@@ -2365,11 +2337,11 @@
       "status": "GOOD"
     },
     {
-      "unitId": "char_s01_riena",
-      "f1ToF2Similarity": 0.7545,
-      "f2ToF3Similarity": 0.7165,
-      "f1ToF3Similarity": 0.587,
-      "worstSimilarity": 0.7545,
+      "unitId": "char_s01_totoria",
+      "f1ToF2Similarity": 0.4558,
+      "f2ToF3Similarity": 0.7566,
+      "f1ToF3Similarity": 0.5079,
+      "worstSimilarity": 0.7566,
       "status": "GOOD"
     },
     {
@@ -2381,11 +2353,27 @@
       "status": "GOOD"
     },
     {
-      "unitId": "char_s01_totoria",
-      "f1ToF2Similarity": 0.7149,
-      "f2ToF3Similarity": 0.6641,
-      "f1ToF3Similarity": 0.5079,
-      "worstSimilarity": 0.7149,
+      "unitId": "char_s03_arc_railer",
+      "f1ToF2Similarity": 0.5627,
+      "f2ToF3Similarity": 0.7465,
+      "f1ToF3Similarity": 0.4466,
+      "worstSimilarity": 0.7465,
+      "status": "GOOD"
+    },
+    {
+      "unitId": "char_common_b_clockduck",
+      "f1ToF2Similarity": 0.5292,
+      "f2ToF3Similarity": 0.6985,
+      "f1ToF3Similarity": 0.6333,
+      "worstSimilarity": 0.6985,
+      "status": "GOOD"
+    },
+    {
+      "unitId": "char_s01_riena",
+      "f1ToF2Similarity": 0.4407,
+      "f2ToF3Similarity": 0.6885,
+      "f1ToF3Similarity": 0.587,
+      "worstSimilarity": 0.6885,
       "status": "GOOD"
     },
     {
@@ -2395,380 +2383,17 @@
       "f1ToF3Similarity": 0.455,
       "worstSimilarity": 0.6795,
       "status": "GOOD"
+    },
+    {
+      "unitId": "char_common_b_lantern_witch",
+      "f1ToF2Similarity": 0.4853,
+      "f2ToF3Similarity": 0.6695,
+      "f1ToF3Similarity": 0.5908,
+      "worstSimilarity": 0.6695,
+      "status": "GOOD"
     }
   ],
   "targets": [
-    {
-      "metadataFile": "second-slice-runtime-metadata.json",
-      "targetKey": "enemy-shield",
-      "assetId": "unit:enemy-shield",
-      "unitId": "enemy-shield",
-      "formId": null,
-      "formOrder": null,
-      "score": 62,
-      "reasons": [
-        "weak-move:0.0178",
-        "near-duplicate:0.9577"
-      ],
-      "nearestOther": {
-        "targetKey": "enemy_ch2_bonewheel",
-        "rootUnitId": "enemy_ch2_bonewheel",
-        "similarity": 0.9577
-      },
-      "motions": {
-        "idle": {
-          "frames": 8,
-          "frameWidth": 200,
-          "frameHeight": 130,
-          "occupancy": 0.2047,
-          "widthCoverage": 0.395,
-          "heightCoverage": 0.6692,
-          "maxEdgeRatio": 0,
-          "avgDelta": 0.0053,
-          "maxDelta": 0.0084
-        },
-        "move": {
-          "frames": 8,
-          "frameWidth": 200,
-          "frameHeight": 130,
-          "occupancy": 0.2084,
-          "widthCoverage": 0.4194,
-          "heightCoverage": 0.6692,
-          "maxEdgeRatio": 0,
-          "avgDelta": 0.0178,
-          "maxDelta": 0.0316
-        },
-        "attack": {
-          "frames": 4,
-          "frameWidth": 200,
-          "frameHeight": 130,
-          "occupancy": 0.2117,
-          "widthCoverage": 0.4763,
-          "heightCoverage": 0.6692,
-          "maxEdgeRatio": 0,
-          "avgDelta": 0.1327,
-          "maxDelta": 0.1857
-        }
-      }
-    },
-    {
-      "metadataFile": "recruitment-form-runtime-metadata.json",
-      "targetKey": "char_common_b_clockduck_f2",
-      "assetId": "unit:char_common_b_clockduck:char_common_b_clockduck_f2",
-      "unitId": "char_common_b_clockduck",
-      "formId": "char_common_b_clockduck_f2",
-      "formOrder": 2,
-      "score": 72,
-      "reasons": [
-        "near-duplicate:0.9924",
-        "weak-evolution-separation:0.8784"
-      ],
-      "nearestOther": {
-        "targetKey": "char_common_b_lantern_witch_f2",
-        "rootUnitId": "char_common_b_lantern_witch",
-        "similarity": 0.9924
-      },
-      "motions": {
-        "idle": {
-          "frames": 7,
-          "frameWidth": 243,
-          "frameHeight": 226,
-          "occupancy": 0.2413,
-          "widthCoverage": 0.7778,
-          "heightCoverage": 0.8603,
-          "maxEdgeRatio": 0,
-          "avgDelta": 0.0386,
-          "maxDelta": 0.0579
-        },
-        "move": {
-          "frames": 8,
-          "frameWidth": 243,
-          "frameHeight": 226,
-          "occupancy": 0.2416,
-          "widthCoverage": 0.7778,
-          "heightCoverage": 0.8473,
-          "maxEdgeRatio": 0,
-          "avgDelta": 0.2243,
-          "maxDelta": 0.2243
-        },
-        "attack": {
-          "frames": 7,
-          "frameWidth": 243,
-          "frameHeight": 226,
-          "occupancy": 0.2461,
-          "widthCoverage": 0.9001,
-          "heightCoverage": 0.8363,
-          "maxEdgeRatio": 0,
-          "avgDelta": 0.0795,
-          "maxDelta": 0.2444
-        }
-      }
-    },
-    {
-      "metadataFile": "recruitment-form-runtime-metadata.json",
-      "targetKey": "char_common_c_turnip_rider_f3",
-      "assetId": "unit:char_common_c_turnip_rider:char_common_c_turnip_rider_f3",
-      "unitId": "char_common_c_turnip_rider",
-      "formId": "char_common_c_turnip_rider_f3",
-      "formOrder": 3,
-      "score": 72,
-      "reasons": [
-        "low-attack:0.0306",
-        "weak-evolution-separation:0.9077"
-      ],
-      "nearestOther": {
-        "targetKey": "char_common_c_lantern_moth_f3",
-        "rootUnitId": "char_common_c_lantern_moth",
-        "similarity": 0.7595
-      },
-      "motions": {
-        "idle": {
-          "frames": 6,
-          "frameWidth": 232,
-          "frameHeight": 209,
-          "occupancy": 0.4304,
-          "widthCoverage": 0.8491,
-          "heightCoverage": 0.9346,
-          "maxEdgeRatio": 0,
-          "avgDelta": 0.032,
-          "maxDelta": 0.0395
-        },
-        "move": {
-          "frames": 8,
-          "frameWidth": 232,
-          "frameHeight": 209,
-          "occupancy": 0.4303,
-          "widthCoverage": 0.8491,
-          "heightCoverage": 0.9211,
-          "maxEdgeRatio": 0,
-          "avgDelta": 0.1138,
-          "maxDelta": 0.1158
-        },
-        "attack": {
-          "frames": 7,
-          "frameWidth": 232,
-          "frameHeight": 209,
-          "occupancy": 0.4346,
-          "widthCoverage": 0.931,
-          "heightCoverage": 0.9091,
-          "maxEdgeRatio": 0.0001,
-          "avgDelta": 0.0306,
-          "maxDelta": 0.0932
-        }
-      }
-    },
-    {
-      "metadataFile": "recruitment-form-runtime-metadata.json",
-      "targetKey": "char_s02_barga_f2",
-      "assetId": "unit:char_s02_barga:char_s02_barga_f2",
-      "unitId": "char_s02_barga",
-      "formId": "char_s02_barga_f2",
-      "formOrder": 2,
-      "score": 72,
-      "reasons": [
-        "low-attack:0.0289",
-        "weak-evolution-separation:0.9139"
-      ],
-      "nearestOther": {
-        "targetKey": "char_s01_totoria_f2",
-        "rootUnitId": "char_s01_totoria",
-        "similarity": 0.7519
-      },
-      "motions": {
-        "idle": {
-          "frames": 8,
-          "frameWidth": 383,
-          "frameHeight": 331,
-          "occupancy": 0.1649,
-          "widthCoverage": 0.671,
-          "heightCoverage": 0.744,
-          "maxEdgeRatio": 0,
-          "avgDelta": 0.0268,
-          "maxDelta": 0.0375
-        },
-        "move": {
-          "frames": 8,
-          "frameWidth": 383,
-          "frameHeight": 331,
-          "occupancy": 0.1651,
-          "widthCoverage": 0.671,
-          "heightCoverage": 0.7356,
-          "maxEdgeRatio": 0,
-          "avgDelta": 0.1587,
-          "maxDelta": 0.1587
-        },
-        "attack": {
-          "frames": 9,
-          "frameWidth": 383,
-          "frameHeight": 331,
-          "occupancy": 0.1673,
-          "widthCoverage": 0.7418,
-          "heightCoverage": 0.7281,
-          "maxEdgeRatio": 0,
-          "avgDelta": 0.0289,
-          "maxDelta": 0.1172
-        }
-      }
-    },
-    {
-      "metadataFile": "recruitment-form-runtime-metadata.json",
-      "targetKey": "char_s02_barga_f3",
-      "assetId": "unit:char_s02_barga:char_s02_barga_f3",
-      "unitId": "char_s02_barga",
-      "formId": "char_s02_barga_f3",
-      "formOrder": 3,
-      "score": 72,
-      "reasons": [
-        "low-attack:0.0221",
-        "weak-evolution-separation:0.9139"
-      ],
-      "nearestOther": {
-        "targetKey": "char_s02_zirka_f3",
-        "rootUnitId": "char_s02_zirka",
-        "similarity": 0.7704
-      },
-      "motions": {
-        "idle": {
-          "frames": 8,
-          "frameWidth": 387,
-          "frameHeight": 334,
-          "occupancy": 0.1847,
-          "widthCoverage": 0.6925,
-          "heightCoverage": 0.7403,
-          "maxEdgeRatio": 0,
-          "avgDelta": 0.0278,
-          "maxDelta": 0.04
-        },
-        "move": {
-          "frames": 8,
-          "frameWidth": 387,
-          "frameHeight": 334,
-          "occupancy": 0.1848,
-          "widthCoverage": 0.6925,
-          "heightCoverage": 0.732,
-          "maxEdgeRatio": 0,
-          "avgDelta": 0.1415,
-          "maxDelta": 0.1451
-        },
-        "attack": {
-          "frames": 10,
-          "frameWidth": 387,
-          "frameHeight": 334,
-          "occupancy": 0.1865,
-          "widthCoverage": 0.7442,
-          "heightCoverage": 0.7246,
-          "maxEdgeRatio": 0,
-          "avgDelta": 0.0221,
-          "maxDelta": 0.084
-        }
-      }
-    },
-    {
-      "metadataFile": "recruitment-form-runtime-metadata.json",
-      "targetKey": "char_s02_gormu_f2",
-      "assetId": "unit:char_s02_gormu:char_s02_gormu_f2",
-      "unitId": "char_s02_gormu",
-      "formId": "char_s02_gormu_f2",
-      "formOrder": 2,
-      "score": 72,
-      "reasons": [
-        "low-attack:0.0325",
-        "weak-evolution-separation:0.9315"
-      ],
-      "nearestOther": {
-        "targetKey": "char_s01_arselia_f3",
-        "rootUnitId": "char_s01_arselia",
-        "similarity": 0.7414
-      },
-      "motions": {
-        "idle": {
-          "frames": 8,
-          "frameWidth": 383,
-          "frameHeight": 331,
-          "occupancy": 0.1644,
-          "widthCoverage": 0.812,
-          "heightCoverage": 0.744,
-          "maxEdgeRatio": 0,
-          "avgDelta": 0.0372,
-          "maxDelta": 0.0521
-        },
-        "move": {
-          "frames": 8,
-          "frameWidth": 383,
-          "frameHeight": 331,
-          "occupancy": 0.1643,
-          "widthCoverage": 0.812,
-          "heightCoverage": 0.7356,
-          "maxEdgeRatio": 0,
-          "avgDelta": 0.1872,
-          "maxDelta": 0.1872
-        },
-        "attack": {
-          "frames": 11,
-          "frameWidth": 383,
-          "frameHeight": 331,
-          "occupancy": 0.1671,
-          "widthCoverage": 0.8395,
-          "heightCoverage": 0.7281,
-          "maxEdgeRatio": 0,
-          "avgDelta": 0.0325,
-          "maxDelta": 0.1494
-        }
-      }
-    },
-    {
-      "metadataFile": "recruitment-form-runtime-metadata.json",
-      "targetKey": "char_s02_gormu_f3",
-      "assetId": "unit:char_s02_gormu:char_s02_gormu_f3",
-      "unitId": "char_s02_gormu",
-      "formId": "char_s02_gormu_f3",
-      "formOrder": 3,
-      "score": 72,
-      "reasons": [
-        "low-attack:0.0323",
-        "weak-evolution-separation:0.9315"
-      ],
-      "nearestOther": {
-        "targetKey": "char_s01_arselia_f3",
-        "rootUnitId": "char_s01_arselia",
-        "similarity": 0.7059
-      },
-      "motions": {
-        "idle": {
-          "frames": 8,
-          "frameWidth": 387,
-          "frameHeight": 334,
-          "occupancy": 0.1744,
-          "widthCoverage": 0.8217,
-          "heightCoverage": 0.7403,
-          "maxEdgeRatio": 0,
-          "avgDelta": 0.0407,
-          "maxDelta": 0.0558
-        },
-        "move": {
-          "frames": 8,
-          "frameWidth": 387,
-          "frameHeight": 334,
-          "occupancy": 0.1744,
-          "widthCoverage": 0.8217,
-          "heightCoverage": 0.732,
-          "maxEdgeRatio": 0,
-          "avgDelta": 0.1775,
-          "maxDelta": 0.1814
-        },
-        "attack": {
-          "frames": 12,
-          "frameWidth": 387,
-          "frameHeight": 334,
-          "occupancy": 0.1768,
-          "widthCoverage": 0.8488,
-          "heightCoverage": 0.7246,
-          "maxEdgeRatio": 0,
-          "avgDelta": 0.0323,
-          "maxDelta": 0.1262
-        }
-      }
-    },
     {
       "metadataFile": "chapter-04-runtime-metadata.json",
       "targetKey": "boss_ch4_zero_engine",
@@ -2822,162 +2447,6 @@
       }
     },
     {
-      "metadataFile": "recruitment-form-runtime-metadata.json",
-      "targetKey": "char_common_b_lantern_witch_f2",
-      "assetId": "unit:char_common_b_lantern_witch:char_common_b_lantern_witch_f2",
-      "unitId": "char_common_b_lantern_witch",
-      "formId": "char_common_b_lantern_witch_f2",
-      "formOrder": 2,
-      "score": 80,
-      "reasons": [
-        "near-duplicate:0.9924"
-      ],
-      "nearestOther": {
-        "targetKey": "char_common_b_clockduck_f2",
-        "rootUnitId": "char_common_b_clockduck",
-        "similarity": 0.9924
-      },
-      "motions": {
-        "idle": {
-          "frames": 7,
-          "frameWidth": 243,
-          "frameHeight": 226,
-          "occupancy": 0.2341,
-          "widthCoverage": 0.7778,
-          "heightCoverage": 0.8603,
-          "maxEdgeRatio": 0,
-          "avgDelta": 0.0405,
-          "maxDelta": 0.0608
-        },
-        "move": {
-          "frames": 8,
-          "frameWidth": 243,
-          "frameHeight": 226,
-          "occupancy": 0.2342,
-          "widthCoverage": 0.7778,
-          "heightCoverage": 0.8473,
-          "maxEdgeRatio": 0,
-          "avgDelta": 0.232,
-          "maxDelta": 0.232
-        },
-        "attack": {
-          "frames": 7,
-          "frameWidth": 243,
-          "frameHeight": 226,
-          "occupancy": 0.2643,
-          "widthCoverage": 0.9336,
-          "heightCoverage": 0.8363,
-          "maxEdgeRatio": 0.0047,
-          "avgDelta": 0.0904,
-          "maxDelta": 0.3256
-        }
-      }
-    },
-    {
-      "metadataFile": "recruitment-form-runtime-metadata.json",
-      "targetKey": "char_s01_riena_f2",
-      "assetId": "unit:char_s01_riena:char_s01_riena_f2",
-      "unitId": "char_s01_riena",
-      "formId": "char_s01_riena_f2",
-      "formOrder": 2,
-      "score": 80,
-      "reasons": [
-        "near-duplicate:0.9862"
-      ],
-      "nearestOther": {
-        "targetKey": "char_s01_totoria_f2",
-        "rootUnitId": "char_s01_totoria",
-        "similarity": 0.9862
-      },
-      "motions": {
-        "idle": {
-          "frames": 8,
-          "frameWidth": 293,
-          "frameHeight": 261,
-          "occupancy": 0.1682,
-          "widthCoverage": 0.7235,
-          "heightCoverage": 0.8132,
-          "maxEdgeRatio": 0,
-          "avgDelta": 0.0433,
-          "maxDelta": 0.0606
-        },
-        "move": {
-          "frames": 8,
-          "frameWidth": 293,
-          "frameHeight": 261,
-          "occupancy": 0.1683,
-          "widthCoverage": 0.7235,
-          "heightCoverage": 0.8027,
-          "maxEdgeRatio": 0,
-          "avgDelta": 0.232,
-          "maxDelta": 0.232
-        },
-        "attack": {
-          "frames": 9,
-          "frameWidth": 293,
-          "frameHeight": 261,
-          "occupancy": 0.1863,
-          "widthCoverage": 0.84,
-          "heightCoverage": 0.7931,
-          "maxEdgeRatio": 0,
-          "avgDelta": 0.0708,
-          "maxDelta": 0.3304
-        }
-      }
-    },
-    {
-      "metadataFile": "recruitment-form-runtime-metadata.json",
-      "targetKey": "char_s01_totoria_f2",
-      "assetId": "unit:char_s01_totoria:char_s01_totoria_f2",
-      "unitId": "char_s01_totoria",
-      "formId": "char_s01_totoria_f2",
-      "formOrder": 2,
-      "score": 80,
-      "reasons": [
-        "near-duplicate:0.9862"
-      ],
-      "nearestOther": {
-        "targetKey": "char_s01_riena_f2",
-        "rootUnitId": "char_s01_riena",
-        "similarity": 0.9862
-      },
-      "motions": {
-        "idle": {
-          "frames": 8,
-          "frameWidth": 293,
-          "frameHeight": 261,
-          "occupancy": 0.1698,
-          "widthCoverage": 0.7235,
-          "heightCoverage": 0.8132,
-          "maxEdgeRatio": 0,
-          "avgDelta": 0.0509,
-          "maxDelta": 0.0688
-        },
-        "move": {
-          "frames": 8,
-          "frameWidth": 293,
-          "frameHeight": 261,
-          "occupancy": 0.1698,
-          "widthCoverage": 0.7235,
-          "heightCoverage": 0.8027,
-          "maxEdgeRatio": 0,
-          "avgDelta": 0.2314,
-          "maxDelta": 0.2333
-        },
-        "attack": {
-          "frames": 9,
-          "frameWidth": 293,
-          "frameHeight": 261,
-          "occupancy": 0.1727,
-          "widthCoverage": 0.8335,
-          "heightCoverage": 0.7931,
-          "maxEdgeRatio": 0,
-          "avgDelta": 0.0653,
-          "maxDelta": 0.2424
-        }
-      }
-    },
-    {
       "metadataFile": "chapter-02-runtime-metadata.json",
       "targetKey": "enemy_ch2_bonewheel",
       "assetId": "unit:enemy_ch2_bonewheel",
@@ -2986,12 +2455,12 @@
       "formOrder": null,
       "score": 80,
       "reasons": [
-        "near-duplicate:0.9577"
+        "near-duplicate:0.9547"
       ],
       "nearestOther": {
-        "targetKey": "enemy-shield",
-        "rootUnitId": "enemy-shield",
-        "similarity": 0.9577
+        "targetKey": "boss_ch4_zero_engine",
+        "rootUnitId": "boss_ch4_zero_engine",
+        "similarity": 0.9547
       },
       "motions": {
         "idle": {
@@ -3400,365 +2869,107 @@
     },
     {
       "metadataFile": "recruitment-form-runtime-metadata.json",
-      "targetKey": "char_common_c_turnip_rider_f1",
-      "assetId": "unit:char_common_c_turnip_rider:char_common_c_turnip_rider_f1",
-      "unitId": "char_common_c_turnip_rider",
-      "formId": "char_common_c_turnip_rider_f1",
-      "formOrder": 1,
-      "score": 82,
-      "reasons": [
-        "weak-evolution-separation:0.9077"
-      ],
-      "nearestOther": {
-        "targetKey": "char_common_a_paper_dragon_f1",
-        "rootUnitId": "char_common_a_paper_dragon",
-        "similarity": 0.6102
-      },
-      "motions": {
-        "idle": {
-          "frames": 6,
-          "frameWidth": 224,
-          "frameHeight": 203,
-          "occupancy": 0.252,
-          "widthCoverage": 0.7902,
-          "heightCoverage": 0.9179,
-          "maxEdgeRatio": 0,
-          "avgDelta": 0.057,
-          "maxDelta": 0.0712
-        },
-        "move": {
-          "frames": 8,
-          "frameWidth": 224,
-          "frameHeight": 203,
-          "occupancy": 0.2524,
-          "widthCoverage": 0.7902,
-          "heightCoverage": 0.9039,
-          "maxEdgeRatio": 0,
-          "avgDelta": 0.2131,
-          "maxDelta": 0.2131
-        },
-        "attack": {
-          "frames": 6,
-          "frameWidth": 224,
-          "frameHeight": 203,
-          "occupancy": 0.2573,
-          "widthCoverage": 0.9278,
-          "heightCoverage": 0.8916,
-          "maxEdgeRatio": 0.0008,
-          "avgDelta": 0.0913,
-          "maxDelta": 0.2204
-        }
-      }
-    },
-    {
-      "metadataFile": "recruitment-form-runtime-metadata.json",
-      "targetKey": "char_common_c_turnip_rider_f2",
-      "assetId": "unit:char_common_c_turnip_rider:char_common_c_turnip_rider_f2",
-      "unitId": "char_common_c_turnip_rider",
-      "formId": "char_common_c_turnip_rider_f2",
+      "targetKey": "char_s02_gormu_f2",
+      "assetId": "unit:char_s02_gormu:char_s02_gormu_f2",
+      "unitId": "char_s02_gormu",
+      "formId": "char_s02_gormu_f2",
       "formOrder": 2,
       "score": 82,
       "reasons": [
-        "weak-evolution-separation:0.9077"
+        "low-attack:0.0295",
+        "weak-evolution-separation:0.8793"
       ],
       "nearestOther": {
-        "targetKey": "char_common_b_clockduck_f3",
-        "rootUnitId": "char_common_b_clockduck",
-        "similarity": 0.7588
-      },
-      "motions": {
-        "idle": {
-          "frames": 6,
-          "frameWidth": 228,
-          "frameHeight": 206,
-          "occupancy": 0.4019,
-          "widthCoverage": 0.8026,
-          "heightCoverage": 0.9239,
-          "maxEdgeRatio": 0,
-          "avgDelta": 0.034,
-          "maxDelta": 0.0425
-        },
-        "move": {
-          "frames": 8,
-          "frameWidth": 228,
-          "frameHeight": 206,
-          "occupancy": 0.4021,
-          "widthCoverage": 0.8026,
-          "heightCoverage": 0.9102,
-          "maxEdgeRatio": 0,
-          "avgDelta": 0.1267,
-          "maxDelta": 0.1267
-        },
-        "attack": {
-          "frames": 6,
-          "frameWidth": 228,
-          "frameHeight": 206,
-          "occupancy": 0.4078,
-          "widthCoverage": 0.9452,
-          "heightCoverage": 0.8981,
-          "maxEdgeRatio": 0.0003,
-          "avgDelta": 0.0458,
-          "maxDelta": 0.1191
-        }
-      }
-    },
-    {
-      "metadataFile": "recruitment-form-runtime-metadata.json",
-      "targetKey": "char_s02_barga_f1",
-      "assetId": "unit:char_s02_barga:char_s02_barga_f1",
-      "unitId": "char_s02_barga",
-      "formId": "char_s02_barga_f1",
-      "formOrder": 1,
-      "score": 82,
-      "reasons": [
-        "weak-evolution-separation:0.9139"
-      ],
-      "nearestOther": {
-        "targetKey": "char_s01_totoria_f2",
-        "rootUnitId": "char_s01_totoria",
-        "similarity": 0.753
+        "targetKey": "char_s02_barga_f3",
+        "rootUnitId": "char_s02_barga",
+        "similarity": 0.7273
       },
       "motions": {
         "idle": {
           "frames": 8,
-          "frameWidth": 379,
-          "frameHeight": 328,
-          "occupancy": 0.1527,
-          "widthCoverage": 0.6755,
-          "heightCoverage": 0.7447,
+          "frameWidth": 383,
+          "frameHeight": 331,
+          "occupancy": 0.1781,
+          "widthCoverage": 0.812,
+          "heightCoverage": 0.744,
           "maxEdgeRatio": 0,
-          "avgDelta": 0.0303,
-          "maxDelta": 0.0424
+          "avgDelta": 0.0342,
+          "maxDelta": 0.0479
         },
         "move": {
           "frames": 8,
-          "frameWidth": 379,
-          "frameHeight": 328,
-          "occupancy": 0.1527,
-          "widthCoverage": 0.6755,
-          "heightCoverage": 0.7363,
+          "frameWidth": 383,
+          "frameHeight": 331,
+          "occupancy": 0.1781,
+          "widthCoverage": 0.812,
+          "heightCoverage": 0.7356,
           "maxEdgeRatio": 0,
-          "avgDelta": 0.1806,
-          "maxDelta": 0.1806
-        },
-        "attack": {
-          "frames": 9,
-          "frameWidth": 379,
-          "frameHeight": 328,
-          "occupancy": 0.155,
-          "widthCoverage": 0.747,
-          "heightCoverage": 0.7287,
-          "maxEdgeRatio": 0,
-          "avgDelta": 0.0358,
-          "maxDelta": 0.1433
-        }
-      }
-    },
-    {
-      "metadataFile": "recruitment-form-runtime-metadata.json",
-      "targetKey": "char_s02_gormu_f1",
-      "assetId": "unit:char_s02_gormu:char_s02_gormu_f1",
-      "unitId": "char_s02_gormu",
-      "formId": "char_s02_gormu_f1",
-      "formOrder": 1,
-      "score": 82,
-      "reasons": [
-        "weak-evolution-separation:0.9315"
-      ],
-      "nearestOther": {
-        "targetKey": "char_s01_arselia_f3",
-        "rootUnitId": "char_s01_arselia",
-        "similarity": 0.7348
-      },
-      "motions": {
-        "idle": {
-          "frames": 8,
-          "frameWidth": 379,
-          "frameHeight": 328,
-          "occupancy": 0.1529,
-          "widthCoverage": 0.8021,
-          "heightCoverage": 0.7447,
-          "maxEdgeRatio": 0,
-          "avgDelta": 0.0535,
-          "maxDelta": 0.0749
-        },
-        "move": {
-          "frames": 8,
-          "frameWidth": 379,
-          "frameHeight": 328,
-          "occupancy": 0.1531,
-          "widthCoverage": 0.8021,
-          "heightCoverage": 0.7363,
-          "maxEdgeRatio": 0,
-          "avgDelta": 0.2465,
-          "maxDelta": 0.2465
+          "avgDelta": 0.1757,
+          "maxDelta": 0.1757
         },
         "attack": {
           "frames": 11,
-          "frameWidth": 379,
-          "frameHeight": 328,
-          "occupancy": 0.1551,
-          "widthCoverage": 0.8299,
-          "heightCoverage": 0.7287,
+          "frameWidth": 383,
+          "frameHeight": 331,
+          "occupancy": 0.1813,
+          "widthCoverage": 0.8395,
+          "heightCoverage": 0.7281,
           "maxEdgeRatio": 0,
-          "avgDelta": 0.0402,
-          "maxDelta": 0.1822
+          "avgDelta": 0.0295,
+          "maxDelta": 0.1321
         }
       }
     },
     {
       "metadataFile": "recruitment-form-runtime-metadata.json",
-      "targetKey": "char_s03_arc_railer_f1",
-      "assetId": "unit:char_s03_arc_railer:char_s03_arc_railer_f1",
-      "unitId": "char_s03_arc_railer",
-      "formId": "char_s03_arc_railer_f1",
-      "formOrder": 1,
-      "score": 82,
-      "reasons": [
-        "weak-evolution-separation:0.9424"
-      ],
-      "nearestOther": {
-        "targetKey": "char_s02_zirka_f2",
-        "rootUnitId": "char_s02_zirka",
-        "similarity": 0.7534
-      },
-      "motions": {
-        "idle": {
-          "frames": 8,
-          "frameWidth": 314,
-          "frameHeight": 293,
-          "occupancy": 0.1353,
-          "widthCoverage": 0.7357,
-          "heightCoverage": 0.7858,
-          "maxEdgeRatio": 0,
-          "avgDelta": 0.0503,
-          "maxDelta": 0.0704
-        },
-        "move": {
-          "frames": 8,
-          "frameWidth": 314,
-          "frameHeight": 293,
-          "occupancy": 0.1352,
-          "widthCoverage": 0.7357,
-          "heightCoverage": 0.7765,
-          "maxEdgeRatio": 0,
-          "avgDelta": 0.2984,
-          "maxDelta": 0.2984
-        },
-        "attack": {
-          "frames": 9,
-          "frameWidth": 314,
-          "frameHeight": 293,
-          "occupancy": 0.141,
-          "widthCoverage": 0.8139,
-          "heightCoverage": 0.7679,
-          "maxEdgeRatio": 0,
-          "avgDelta": 0.0609,
-          "maxDelta": 0.2473
-        }
-      }
-    },
-    {
-      "metadataFile": "recruitment-form-runtime-metadata.json",
-      "targetKey": "char_s03_arc_railer_f2",
-      "assetId": "unit:char_s03_arc_railer:char_s03_arc_railer_f2",
-      "unitId": "char_s03_arc_railer",
-      "formId": "char_s03_arc_railer_f2",
-      "formOrder": 2,
-      "score": 82,
-      "reasons": [
-        "weak-evolution-separation:0.9424"
-      ],
-      "nearestOther": {
-        "targetKey": "char_s02_zirka_f2",
-        "rootUnitId": "char_s02_zirka",
-        "similarity": 0.7783
-      },
-      "motions": {
-        "idle": {
-          "frames": 8,
-          "frameWidth": 318,
-          "frameHeight": 296,
-          "occupancy": 0.1461,
-          "widthCoverage": 0.7327,
-          "heightCoverage": 0.7813,
-          "maxEdgeRatio": 0,
-          "avgDelta": 0.0406,
-          "maxDelta": 0.0568
-        },
-        "move": {
-          "frames": 8,
-          "frameWidth": 318,
-          "frameHeight": 296,
-          "occupancy": 0.1464,
-          "widthCoverage": 0.7327,
-          "heightCoverage": 0.772,
-          "maxEdgeRatio": 0,
-          "avgDelta": 0.2304,
-          "maxDelta": 0.2304
-        },
-        "attack": {
-          "frames": 9,
-          "frameWidth": 318,
-          "frameHeight": 296,
-          "occupancy": 0.1524,
-          "widthCoverage": 0.8305,
-          "heightCoverage": 0.7635,
-          "maxEdgeRatio": 0,
-          "avgDelta": 0.0473,
-          "maxDelta": 0.1966
-        }
-      }
-    },
-    {
-      "metadataFile": "recruitment-form-runtime-metadata.json",
-      "targetKey": "char_s03_arc_railer_f3",
-      "assetId": "unit:char_s03_arc_railer:char_s03_arc_railer_f3",
-      "unitId": "char_s03_arc_railer",
-      "formId": "char_s03_arc_railer_f3",
+      "targetKey": "char_s02_gormu_f3",
+      "assetId": "unit:char_s02_gormu:char_s02_gormu_f3",
+      "unitId": "char_s02_gormu",
+      "formId": "char_s02_gormu_f3",
       "formOrder": 3,
       "score": 82,
       "reasons": [
-        "weak-evolution-separation:0.9424"
+        "low-attack:0.0324",
+        "weak-evolution-separation:0.8793"
       ],
       "nearestOther": {
-        "targetKey": "char_s01_riena_f3",
-        "rootUnitId": "char_s01_riena",
-        "similarity": 0.7407
+        "targetKey": "char_s02_barga_f3",
+        "rootUnitId": "char_s02_barga",
+        "similarity": 0.7241
       },
       "motions": {
         "idle": {
           "frames": 8,
-          "frameWidth": 322,
-          "frameHeight": 299,
-          "occupancy": 0.1617,
-          "widthCoverage": 0.8292,
-          "heightCoverage": 0.7801,
+          "frameWidth": 387,
+          "frameHeight": 334,
+          "occupancy": 0.2038,
+          "widthCoverage": 0.8217,
+          "heightCoverage": 0.7403,
           "maxEdgeRatio": 0,
-          "avgDelta": 0.056,
-          "maxDelta": 0.0785
+          "avgDelta": 0.0378,
+          "maxDelta": 0.052
         },
         "move": {
           "frames": 8,
-          "frameWidth": 322,
-          "frameHeight": 299,
-          "occupancy": 0.1617,
-          "widthCoverage": 0.8292,
-          "heightCoverage": 0.7709,
+          "frameWidth": 387,
+          "frameHeight": 334,
+          "occupancy": 0.2038,
+          "widthCoverage": 0.8217,
+          "heightCoverage": 0.732,
           "maxEdgeRatio": 0,
-          "avgDelta": 0.2408,
-          "maxDelta": 0.2456
+          "avgDelta": 0.1662,
+          "maxDelta": 0.1697
         },
         "attack": {
-          "frames": 10,
-          "frameWidth": 322,
-          "frameHeight": 299,
-          "occupancy": 0.1662,
-          "widthCoverage": 0.8882,
-          "heightCoverage": 0.7625,
+          "frames": 12,
+          "frameWidth": 387,
+          "frameHeight": 334,
+          "occupancy": 0.2078,
+          "widthCoverage": 0.8488,
+          "heightCoverage": 0.7246,
           "maxEdgeRatio": 0,
-          "avgDelta": 0.0458,
-          "maxDelta": 0.1599
+          "avgDelta": 0.0324,
+          "maxDelta": 0.1081
         }
       }
     },
@@ -3870,110 +3081,6 @@
     },
     {
       "metadataFile": "recruitment-form-runtime-metadata.json",
-      "targetKey": "char_s03_rxomega_f1",
-      "assetId": "unit:char_s03_rxomega:char_s03_rxomega_f1",
-      "unitId": "char_s03_rxomega",
-      "formId": "char_s03_rxomega_f1",
-      "formOrder": 1,
-      "score": 82,
-      "reasons": [
-        "weak-evolution-separation:0.9375"
-      ],
-      "nearestOther": {
-        "targetKey": "char_s03_nana04_f3",
-        "rootUnitId": "char_s03_nana04",
-        "similarity": 0.7905
-      },
-      "motions": {
-        "idle": {
-          "frames": 8,
-          "frameWidth": 314,
-          "frameHeight": 273,
-          "occupancy": 0.1729,
-          "widthCoverage": 0.8471,
-          "heightCoverage": 0.8068,
-          "maxEdgeRatio": 0,
-          "avgDelta": 0.0448,
-          "maxDelta": 0.0627
-        },
-        "move": {
-          "frames": 8,
-          "frameWidth": 314,
-          "frameHeight": 273,
-          "occupancy": 0.1732,
-          "widthCoverage": 0.8471,
-          "heightCoverage": 0.7967,
-          "maxEdgeRatio": 0,
-          "avgDelta": 0.2524,
-          "maxDelta": 0.2524
-        },
-        "attack": {
-          "frames": 9,
-          "frameWidth": 314,
-          "frameHeight": 273,
-          "occupancy": 0.177,
-          "widthCoverage": 0.8797,
-          "heightCoverage": 0.7875,
-          "maxEdgeRatio": 0,
-          "avgDelta": 0.0625,
-          "maxDelta": 0.2289
-        }
-      }
-    },
-    {
-      "metadataFile": "recruitment-form-runtime-metadata.json",
-      "targetKey": "char_s03_rxomega_f2",
-      "assetId": "unit:char_s03_rxomega:char_s03_rxomega_f2",
-      "unitId": "char_s03_rxomega",
-      "formId": "char_s03_rxomega_f2",
-      "formOrder": 2,
-      "score": 82,
-      "reasons": [
-        "weak-evolution-separation:0.9375"
-      ],
-      "nearestOther": {
-        "targetKey": "char_s03_nana04_f3",
-        "rootUnitId": "char_s03_nana04",
-        "similarity": 0.8073
-      },
-      "motions": {
-        "idle": {
-          "frames": 8,
-          "frameWidth": 318,
-          "frameHeight": 276,
-          "occupancy": 0.1885,
-          "widthCoverage": 0.8585,
-          "heightCoverage": 0.8016,
-          "maxEdgeRatio": 0,
-          "avgDelta": 0.0408,
-          "maxDelta": 0.0571
-        },
-        "move": {
-          "frames": 8,
-          "frameWidth": 318,
-          "frameHeight": 276,
-          "occupancy": 0.1887,
-          "widthCoverage": 0.8585,
-          "heightCoverage": 0.7917,
-          "maxEdgeRatio": 0,
-          "avgDelta": 0.2079,
-          "maxDelta": 0.2079
-        },
-        "attack": {
-          "frames": 9,
-          "frameWidth": 318,
-          "frameHeight": 276,
-          "occupancy": 0.1927,
-          "widthCoverage": 0.8906,
-          "heightCoverage": 0.7826,
-          "maxEdgeRatio": 0,
-          "avgDelta": 0.0481,
-          "maxDelta": 0.179
-        }
-      }
-    },
-    {
-      "metadataFile": "recruitment-form-runtime-metadata.json",
       "targetKey": "char_s03_rxomega_f3",
       "assetId": "unit:char_s03_rxomega:char_s03_rxomega_f3",
       "unitId": "char_s03_rxomega",
@@ -3981,46 +3088,47 @@
       "formOrder": 3,
       "score": 82,
       "reasons": [
-        "weak-evolution-separation:0.9375"
+        "low-attack:0.0265",
+        "weak-evolution-separation:0.8287"
       ],
       "nearestOther": {
-        "targetKey": "char_s03_nana04_f3",
-        "rootUnitId": "char_s03_nana04",
-        "similarity": 0.8102
+        "targetKey": "char_common_b_coffin_merchant_f3",
+        "rootUnitId": "char_common_b_coffin_merchant",
+        "similarity": 0.7443
       },
       "motions": {
         "idle": {
           "frames": 8,
           "frameWidth": 322,
           "frameHeight": 279,
-          "occupancy": 0.1869,
+          "occupancy": 0.2483,
           "widthCoverage": 0.8696,
           "heightCoverage": 0.8002,
           "maxEdgeRatio": 0,
-          "avgDelta": 0.0484,
-          "maxDelta": 0.0679
+          "avgDelta": 0.0348,
+          "maxDelta": 0.0516
         },
         "move": {
           "frames": 8,
           "frameWidth": 322,
           "frameHeight": 279,
-          "occupancy": 0.1873,
+          "occupancy": 0.2483,
           "widthCoverage": 0.8696,
           "heightCoverage": 0.7903,
           "maxEdgeRatio": 0,
-          "avgDelta": 0.2207,
-          "maxDelta": 0.2252
+          "avgDelta": 0.1613,
+          "maxDelta": 0.1657
         },
         "attack": {
           "frames": 10,
           "frameWidth": 322,
           "frameHeight": 279,
-          "occupancy": 0.1887,
+          "occupancy": 0.2526,
           "widthCoverage": 0.9019,
           "heightCoverage": 0.7814,
           "maxEdgeRatio": 0,
-          "avgDelta": 0.0536,
-          "maxDelta": 0.1861
+          "avgDelta": 0.0265,
+          "maxDelta": 0.0931
         }
       }
     },
@@ -4283,6 +3391,162 @@
           "maxEdgeRatio": 0,
           "avgDelta": 0.0306,
           "maxDelta": 0.1507
+        }
+      }
+    },
+    {
+      "metadataFile": "recruitment-form-runtime-metadata.json",
+      "targetKey": "char_common_c_turnip_rider_f3",
+      "assetId": "unit:char_common_c_turnip_rider:char_common_c_turnip_rider_f3",
+      "unitId": "char_common_c_turnip_rider",
+      "formId": "char_common_c_turnip_rider_f3",
+      "formOrder": 3,
+      "score": 90,
+      "reasons": [
+        "low-attack:0.0262"
+      ],
+      "nearestOther": {
+        "targetKey": "enemy_ch4_error_mass",
+        "rootUnitId": "enemy_ch4_error_mass",
+        "similarity": 0.7692
+      },
+      "motions": {
+        "idle": {
+          "frames": 6,
+          "frameWidth": 232,
+          "frameHeight": 209,
+          "occupancy": 0.4713,
+          "widthCoverage": 0.9009,
+          "heightCoverage": 0.9442,
+          "maxEdgeRatio": 0.0005,
+          "avgDelta": 0.0362,
+          "maxDelta": 0.0449
+        },
+        "move": {
+          "frames": 8,
+          "frameWidth": 232,
+          "frameHeight": 209,
+          "occupancy": 0.4709,
+          "widthCoverage": 0.9009,
+          "heightCoverage": 0.945,
+          "maxEdgeRatio": 0.0006,
+          "avgDelta": 0.1213,
+          "maxDelta": 0.1226
+        },
+        "attack": {
+          "frames": 7,
+          "frameWidth": 232,
+          "frameHeight": 209,
+          "occupancy": 0.4763,
+          "widthCoverage": 0.9606,
+          "heightCoverage": 0.9474,
+          "maxEdgeRatio": 0.0004,
+          "avgDelta": 0.0262,
+          "maxDelta": 0.0687
+        }
+      }
+    },
+    {
+      "metadataFile": "recruitment-form-runtime-metadata.json",
+      "targetKey": "char_s02_barga_f2",
+      "assetId": "unit:char_s02_barga:char_s02_barga_f2",
+      "unitId": "char_s02_barga",
+      "formId": "char_s02_barga_f2",
+      "formOrder": 2,
+      "score": 90,
+      "reasons": [
+        "low-attack:0.0298"
+      ],
+      "nearestOther": {
+        "targetKey": "char_s02_zirka_f3",
+        "rootUnitId": "char_s02_zirka",
+        "similarity": 0.749
+      },
+      "motions": {
+        "idle": {
+          "frames": 8,
+          "frameWidth": 383,
+          "frameHeight": 331,
+          "occupancy": 0.1667,
+          "widthCoverage": 0.705,
+          "heightCoverage": 0.744,
+          "maxEdgeRatio": 0,
+          "avgDelta": 0.0281,
+          "maxDelta": 0.0393
+        },
+        "move": {
+          "frames": 8,
+          "frameWidth": 383,
+          "frameHeight": 331,
+          "occupancy": 0.1669,
+          "widthCoverage": 0.705,
+          "heightCoverage": 0.7356,
+          "maxEdgeRatio": 0,
+          "avgDelta": 0.1611,
+          "maxDelta": 0.1611
+        },
+        "attack": {
+          "frames": 9,
+          "frameWidth": 383,
+          "frameHeight": 331,
+          "occupancy": 0.1697,
+          "widthCoverage": 0.7528,
+          "heightCoverage": 0.7281,
+          "maxEdgeRatio": 0,
+          "avgDelta": 0.0298,
+          "maxDelta": 0.1158
+        }
+      }
+    },
+    {
+      "metadataFile": "recruitment-form-runtime-metadata.json",
+      "targetKey": "char_s02_barga_f3",
+      "assetId": "unit:char_s02_barga:char_s02_barga_f3",
+      "unitId": "char_s02_barga",
+      "formId": "char_s02_barga_f3",
+      "formOrder": 3,
+      "score": 90,
+      "reasons": [
+        "low-attack:0.0236"
+      ],
+      "nearestOther": {
+        "targetKey": "char_s01_elsia_f3",
+        "rootUnitId": "char_s01_elsia",
+        "similarity": 0.7409
+      },
+      "motions": {
+        "idle": {
+          "frames": 8,
+          "frameWidth": 387,
+          "frameHeight": 334,
+          "occupancy": 0.1897,
+          "widthCoverage": 0.7545,
+          "heightCoverage": 0.7403,
+          "maxEdgeRatio": 0,
+          "avgDelta": 0.0301,
+          "maxDelta": 0.0431
+        },
+        "move": {
+          "frames": 8,
+          "frameWidth": 387,
+          "frameHeight": 334,
+          "occupancy": 0.1898,
+          "widthCoverage": 0.7545,
+          "heightCoverage": 0.732,
+          "maxEdgeRatio": 0,
+          "avgDelta": 0.1475,
+          "maxDelta": 0.151
+        },
+        "attack": {
+          "frames": 10,
+          "frameWidth": 387,
+          "frameHeight": 334,
+          "occupancy": 0.1922,
+          "widthCoverage": 0.7933,
+          "heightCoverage": 0.7246,
+          "maxEdgeRatio": 0,
+          "avgDelta": 0.0236,
+          "maxDelta": 0.0766
         }
       }
     },
@@ -5692,110 +4956,6 @@
     },
     {
       "metadataFile": "recruitment-form-runtime-metadata.json",
-      "targetKey": "char_common_b_clockduck_f1",
-      "assetId": "unit:char_common_b_clockduck:char_common_b_clockduck_f1",
-      "unitId": "char_common_b_clockduck",
-      "formId": "char_common_b_clockduck_f1",
-      "formOrder": 1,
-      "score": 92,
-      "reasons": [
-        "weak-evolution-separation:0.8784"
-      ],
-      "nearestOther": {
-        "targetKey": "char_common_b_lantern_witch_f1",
-        "rootUnitId": "char_common_b_lantern_witch",
-        "similarity": 0.8673
-      },
-      "motions": {
-        "idle": {
-          "frames": 7,
-          "frameWidth": 239,
-          "frameHeight": 223,
-          "occupancy": 0.1543,
-          "widthCoverage": 0.7741,
-          "heightCoverage": 0.8674,
-          "maxEdgeRatio": 0,
-          "avgDelta": 0.0627,
-          "maxDelta": 0.0941
-        },
-        "move": {
-          "frames": 8,
-          "frameWidth": 239,
-          "frameHeight": 223,
-          "occupancy": 0.1545,
-          "widthCoverage": 0.7741,
-          "heightCoverage": 0.8543,
-          "maxEdgeRatio": 0,
-          "avgDelta": 0.3376,
-          "maxDelta": 0.3376
-        },
-        "attack": {
-          "frames": 7,
-          "frameWidth": 239,
-          "frameHeight": 223,
-          "occupancy": 0.1597,
-          "widthCoverage": 0.9091,
-          "heightCoverage": 0.843,
-          "maxEdgeRatio": 0,
-          "avgDelta": 0.1187,
-          "maxDelta": 0.3612
-        }
-      }
-    },
-    {
-      "metadataFile": "recruitment-form-runtime-metadata.json",
-      "targetKey": "char_common_b_clockduck_f3",
-      "assetId": "unit:char_common_b_clockduck:char_common_b_clockduck_f3",
-      "unitId": "char_common_b_clockduck",
-      "formId": "char_common_b_clockduck_f3",
-      "formOrder": 3,
-      "score": 92,
-      "reasons": [
-        "weak-evolution-separation:0.8784"
-      ],
-      "nearestOther": {
-        "targetKey": "char_common_b_lantern_witch_f2",
-        "rootUnitId": "char_common_b_lantern_witch",
-        "similarity": 0.8716
-      },
-      "motions": {
-        "idle": {
-          "frames": 7,
-          "frameWidth": 247,
-          "frameHeight": 229,
-          "occupancy": 0.2562,
-          "widthCoverage": 0.7814,
-          "heightCoverage": 0.8578,
-          "maxEdgeRatio": 0,
-          "avgDelta": 0.054,
-          "maxDelta": 0.0799
-        },
-        "move": {
-          "frames": 8,
-          "frameWidth": 247,
-          "frameHeight": 229,
-          "occupancy": 0.2564,
-          "widthCoverage": 0.7814,
-          "heightCoverage": 0.845,
-          "maxEdgeRatio": 0,
-          "avgDelta": 0.2318,
-          "maxDelta": 0.2373
-        },
-        "attack": {
-          "frames": 8,
-          "frameWidth": 247,
-          "frameHeight": 229,
-          "occupancy": 0.2606,
-          "widthCoverage": 0.8841,
-          "heightCoverage": 0.8341,
-          "maxEdgeRatio": 0,
-          "avgDelta": 0.0673,
-          "maxDelta": 0.2043
-        }
-      }
-    },
-    {
-      "metadataFile": "recruitment-form-runtime-metadata.json",
       "targetKey": "char_common_b_coffin_merchant_f1",
       "assetId": "unit:char_common_b_coffin_merchant:char_common_b_coffin_merchant_f1",
       "unitId": "char_common_b_coffin_merchant",
@@ -5806,9 +4966,9 @@
         "weak-evolution-separation:0.8842"
       ],
       "nearestOther": {
-        "targetKey": "char_common_a_mirror_guide_f3",
-        "rootUnitId": "char_common_a_mirror_guide",
-        "similarity": 0.6944
+        "targetKey": "char_s03_rxomega_f3",
+        "rootUnitId": "char_s03_rxomega",
+        "similarity": 0.6993
       },
       "motions": {
         "idle": {
@@ -6430,9 +5590,9 @@
         "weak-evolution-separation:0.8967"
       ],
       "nearestOther": {
-        "targetKey": "char_s01_riena_f2",
-        "rootUnitId": "char_s01_riena",
-        "similarity": 0.8661
+        "targetKey": "char_s03_blade_hound_f3",
+        "rootUnitId": "char_s03_blade_hound",
+        "similarity": 0.7655
       },
       "motions": {
         "idle": {
@@ -6482,9 +5642,9 @@
         "weak-evolution-separation:0.8967"
       ],
       "nearestOther": {
-        "targetKey": "char_s01_riena_f2",
-        "rootUnitId": "char_s01_riena",
-        "similarity": 0.7935
+        "targetKey": "char_s02_kreik_f3",
+        "rootUnitId": "char_s02_kreik",
+        "similarity": 0.7557
       },
       "motions": {
         "idle": {
@@ -6675,6 +5835,58 @@
           "maxEdgeRatio": 0,
           "avgDelta": 0.0546,
           "maxDelta": 0.1998
+        }
+      }
+    },
+    {
+      "metadataFile": "recruitment-form-runtime-metadata.json",
+      "targetKey": "char_s02_gormu_f1",
+      "assetId": "unit:char_s02_gormu:char_s02_gormu_f1",
+      "unitId": "char_s02_gormu",
+      "formId": "char_s02_gormu_f1",
+      "formOrder": 1,
+      "score": 92,
+      "reasons": [
+        "weak-evolution-separation:0.8793"
+      ],
+      "nearestOther": {
+        "targetKey": "char_s01_arselia_f3",
+        "rootUnitId": "char_s01_arselia",
+        "similarity": 0.7348
+      },
+      "motions": {
+        "idle": {
+          "frames": 8,
+          "frameWidth": 379,
+          "frameHeight": 328,
+          "occupancy": 0.1529,
+          "widthCoverage": 0.8021,
+          "heightCoverage": 0.7447,
+          "maxEdgeRatio": 0,
+          "avgDelta": 0.0535,
+          "maxDelta": 0.0749
+        },
+        "move": {
+          "frames": 8,
+          "frameWidth": 379,
+          "frameHeight": 328,
+          "occupancy": 0.1531,
+          "widthCoverage": 0.8021,
+          "heightCoverage": 0.7363,
+          "maxEdgeRatio": 0,
+          "avgDelta": 0.2465,
+          "maxDelta": 0.2465
+        },
+        "attack": {
+          "frames": 11,
+          "frameWidth": 379,
+          "frameHeight": 328,
+          "occupancy": 0.1551,
+          "widthCoverage": 0.8299,
+          "heightCoverage": 0.7287,
+          "maxEdgeRatio": 0,
+          "avgDelta": 0.0402,
+          "maxDelta": 0.1822
         }
       }
     },
@@ -7262,9 +6474,9 @@
         "weak-evolution-separation:0.8679"
       ],
       "nearestOther": {
-        "targetKey": "char_s03_rxomega_f2",
-        "rootUnitId": "char_s03_rxomega",
-        "similarity": 0.7434
+        "targetKey": "char_s03_nana04_f2",
+        "rootUnitId": "char_s03_nana04",
+        "similarity": 0.7402
       },
       "motions": {
         "idle": {
@@ -7470,9 +6682,9 @@
         "weak-evolution-separation:0.8698"
       ],
       "nearestOther": {
-        "targetKey": "char_s03_rxomega_f3",
+        "targetKey": "char_s03_rxomega_f2",
         "rootUnitId": "char_s03_rxomega",
-        "similarity": 0.8102
+        "similarity": 0.7982
       },
       "motions": {
         "idle": {
@@ -7507,6 +6719,110 @@
           "maxEdgeRatio": 0,
           "avgDelta": 0.0422,
           "maxDelta": 0.1443
+        }
+      }
+    },
+    {
+      "metadataFile": "recruitment-form-runtime-metadata.json",
+      "targetKey": "char_s03_rxomega_f1",
+      "assetId": "unit:char_s03_rxomega:char_s03_rxomega_f1",
+      "unitId": "char_s03_rxomega",
+      "formId": "char_s03_rxomega_f1",
+      "formOrder": 1,
+      "score": 92,
+      "reasons": [
+        "weak-evolution-separation:0.8287"
+      ],
+      "nearestOther": {
+        "targetKey": "char_s03_nana04_f3",
+        "rootUnitId": "char_s03_nana04",
+        "similarity": 0.7905
+      },
+      "motions": {
+        "idle": {
+          "frames": 8,
+          "frameWidth": 314,
+          "frameHeight": 273,
+          "occupancy": 0.1729,
+          "widthCoverage": 0.8471,
+          "heightCoverage": 0.8068,
+          "maxEdgeRatio": 0,
+          "avgDelta": 0.0448,
+          "maxDelta": 0.0627
+        },
+        "move": {
+          "frames": 8,
+          "frameWidth": 314,
+          "frameHeight": 273,
+          "occupancy": 0.1732,
+          "widthCoverage": 0.8471,
+          "heightCoverage": 0.7967,
+          "maxEdgeRatio": 0,
+          "avgDelta": 0.2524,
+          "maxDelta": 0.2524
+        },
+        "attack": {
+          "frames": 9,
+          "frameWidth": 314,
+          "frameHeight": 273,
+          "occupancy": 0.177,
+          "widthCoverage": 0.8797,
+          "heightCoverage": 0.7875,
+          "maxEdgeRatio": 0,
+          "avgDelta": 0.0625,
+          "maxDelta": 0.2289
+        }
+      }
+    },
+    {
+      "metadataFile": "recruitment-form-runtime-metadata.json",
+      "targetKey": "char_s03_rxomega_f2",
+      "assetId": "unit:char_s03_rxomega:char_s03_rxomega_f2",
+      "unitId": "char_s03_rxomega",
+      "formId": "char_s03_rxomega_f2",
+      "formOrder": 2,
+      "score": 92,
+      "reasons": [
+        "weak-evolution-separation:0.8287"
+      ],
+      "nearestOther": {
+        "targetKey": "char_s03_nana04_f3",
+        "rootUnitId": "char_s03_nana04",
+        "similarity": 0.7982
+      },
+      "motions": {
+        "idle": {
+          "frames": 8,
+          "frameWidth": 318,
+          "frameHeight": 276,
+          "occupancy": 0.1964,
+          "widthCoverage": 0.8585,
+          "heightCoverage": 0.8016,
+          "maxEdgeRatio": 0,
+          "avgDelta": 0.0385,
+          "maxDelta": 0.0539
+        },
+        "move": {
+          "frames": 8,
+          "frameWidth": 318,
+          "frameHeight": 276,
+          "occupancy": 0.1966,
+          "widthCoverage": 0.8585,
+          "heightCoverage": 0.7917,
+          "maxEdgeRatio": 0,
+          "avgDelta": 0.1972,
+          "maxDelta": 0.1972
+        },
+        "attack": {
+          "frames": 9,
+          "frameWidth": 318,
+          "frameHeight": 276,
+          "occupancy": 0.2014,
+          "widthCoverage": 0.8906,
+          "heightCoverage": 0.7826,
+          "maxEdgeRatio": 0,
+          "avgDelta": 0.0381,
+          "maxDelta": 0.1396
         }
       }
     },
@@ -8511,6 +7827,156 @@
       }
     },
     {
+      "metadataFile": "recruitment-form-runtime-metadata.json",
+      "targetKey": "char_common_b_clockduck_f1",
+      "assetId": "unit:char_common_b_clockduck:char_common_b_clockduck_f1",
+      "unitId": "char_common_b_clockduck",
+      "formId": "char_common_b_clockduck_f1",
+      "formOrder": 1,
+      "score": 100,
+      "reasons": [],
+      "nearestOther": {
+        "targetKey": "char_common_b_lantern_witch_f1",
+        "rootUnitId": "char_common_b_lantern_witch",
+        "similarity": 0.8673
+      },
+      "motions": {
+        "idle": {
+          "frames": 7,
+          "frameWidth": 239,
+          "frameHeight": 223,
+          "occupancy": 0.1543,
+          "widthCoverage": 0.7741,
+          "heightCoverage": 0.8674,
+          "maxEdgeRatio": 0,
+          "avgDelta": 0.0627,
+          "maxDelta": 0.0941
+        },
+        "move": {
+          "frames": 8,
+          "frameWidth": 239,
+          "frameHeight": 223,
+          "occupancy": 0.1545,
+          "widthCoverage": 0.7741,
+          "heightCoverage": 0.8543,
+          "maxEdgeRatio": 0,
+          "avgDelta": 0.3376,
+          "maxDelta": 0.3376
+        },
+        "attack": {
+          "frames": 7,
+          "frameWidth": 239,
+          "frameHeight": 223,
+          "occupancy": 0.1597,
+          "widthCoverage": 0.9091,
+          "heightCoverage": 0.843,
+          "maxEdgeRatio": 0,
+          "avgDelta": 0.1187,
+          "maxDelta": 0.3612
+        }
+      }
+    },
+    {
+      "metadataFile": "recruitment-form-runtime-metadata.json",
+      "targetKey": "char_common_b_clockduck_f2",
+      "assetId": "unit:char_common_b_clockduck:char_common_b_clockduck_f2",
+      "unitId": "char_common_b_clockduck",
+      "formId": "char_common_b_clockduck_f2",
+      "formOrder": 2,
+      "score": 100,
+      "reasons": [],
+      "nearestOther": {
+        "targetKey": "char_common_b_lantern_witch_f3",
+        "rootUnitId": "char_common_b_lantern_witch",
+        "similarity": 0.7579
+      },
+      "motions": {
+        "idle": {
+          "frames": 7,
+          "frameWidth": 243,
+          "frameHeight": 226,
+          "occupancy": 0.2811,
+          "widthCoverage": 0.8807,
+          "heightCoverage": 0.8603,
+          "maxEdgeRatio": 0,
+          "avgDelta": 0.042,
+          "maxDelta": 0.063
+        },
+        "move": {
+          "frames": 8,
+          "frameWidth": 243,
+          "frameHeight": 226,
+          "occupancy": 0.2812,
+          "widthCoverage": 0.8807,
+          "heightCoverage": 0.8473,
+          "maxEdgeRatio": 0,
+          "avgDelta": 0.2221,
+          "maxDelta": 0.2221
+        },
+        "attack": {
+          "frames": 7,
+          "frameWidth": 243,
+          "frameHeight": 226,
+          "occupancy": 0.2857,
+          "widthCoverage": 0.9236,
+          "heightCoverage": 0.8363,
+          "maxEdgeRatio": 0,
+          "avgDelta": 0.0641,
+          "maxDelta": 0.1976
+        }
+      }
+    },
+    {
+      "metadataFile": "recruitment-form-runtime-metadata.json",
+      "targetKey": "char_common_b_clockduck_f3",
+      "assetId": "unit:char_common_b_clockduck:char_common_b_clockduck_f3",
+      "unitId": "char_common_b_clockduck",
+      "formId": "char_common_b_clockduck_f3",
+      "formOrder": 3,
+      "score": 100,
+      "reasons": [],
+      "nearestOther": {
+        "targetKey": "char_common_b_lantern_witch_f3",
+        "rootUnitId": "char_common_b_lantern_witch",
+        "similarity": 0.7895
+      },
+      "motions": {
+        "idle": {
+          "frames": 7,
+          "frameWidth": 247,
+          "frameHeight": 229,
+          "occupancy": 0.2562,
+          "widthCoverage": 0.7814,
+          "heightCoverage": 0.8578,
+          "maxEdgeRatio": 0,
+          "avgDelta": 0.054,
+          "maxDelta": 0.0799
+        },
+        "move": {
+          "frames": 8,
+          "frameWidth": 247,
+          "frameHeight": 229,
+          "occupancy": 0.2564,
+          "widthCoverage": 0.7814,
+          "heightCoverage": 0.845,
+          "maxEdgeRatio": 0,
+          "avgDelta": 0.2318,
+          "maxDelta": 0.2373
+        },
+        "attack": {
+          "frames": 8,
+          "frameWidth": 247,
+          "frameHeight": 229,
+          "occupancy": 0.2606,
+          "widthCoverage": 0.8841,
+          "heightCoverage": 0.8341,
+          "maxEdgeRatio": 0,
+          "avgDelta": 0.0673,
+          "maxDelta": 0.2043
+        }
+      }
+    },
+    {
       "metadataFile": "recruitment-runtime-metadata.json",
       "targetKey": "char_common_b_coffin_merchant",
       "assetId": "unit:char_common_b_coffin_merchant",
@@ -8657,6 +8123,56 @@
           "maxEdgeRatio": 0.0069,
           "avgDelta": 0.1252,
           "maxDelta": 0.4266
+        }
+      }
+    },
+    {
+      "metadataFile": "recruitment-form-runtime-metadata.json",
+      "targetKey": "char_common_b_lantern_witch_f2",
+      "assetId": "unit:char_common_b_lantern_witch:char_common_b_lantern_witch_f2",
+      "unitId": "char_common_b_lantern_witch",
+      "formId": "char_common_b_lantern_witch_f2",
+      "formOrder": 2,
+      "score": 100,
+      "reasons": [],
+      "nearestOther": {
+        "targetKey": "char_common_c_slinger_f2",
+        "rootUnitId": "char_common_c_slinger",
+        "similarity": 0.7193
+      },
+      "motions": {
+        "idle": {
+          "frames": 7,
+          "frameWidth": 243,
+          "frameHeight": 226,
+          "occupancy": 0.2907,
+          "widthCoverage": 0.8542,
+          "heightCoverage": 0.8603,
+          "maxEdgeRatio": 0,
+          "avgDelta": 0.0784,
+          "maxDelta": 0.0973
+        },
+        "move": {
+          "frames": 8,
+          "frameWidth": 243,
+          "frameHeight": 226,
+          "occupancy": 0.2898,
+          "widthCoverage": 0.8519,
+          "heightCoverage": 0.8473,
+          "maxEdgeRatio": 0,
+          "avgDelta": 0.243,
+          "maxDelta": 0.243
+        },
+        "attack": {
+          "frames": 7,
+          "frameWidth": 243,
+          "frameHeight": 226,
+          "occupancy": 0.3209,
+          "widthCoverage": 0.9518,
+          "heightCoverage": 0.8363,
+          "maxEdgeRatio": 0.0039,
+          "avgDelta": 0.1119,
+          "maxDelta": 0.3018
         }
       }
     },
@@ -9120,9 +8636,9 @@
       "score": 100,
       "reasons": [],
       "nearestOther": {
-        "targetKey": "char_common_c_turnip_rider_f3",
-        "rootUnitId": "char_common_c_turnip_rider",
-        "similarity": 0.7595
+        "targetKey": "char_common_b_ink_raven_f3",
+        "rootUnitId": "char_common_b_ink_raven",
+        "similarity": 0.7341
       },
       "motions": {
         "idle": {
@@ -9320,9 +8836,9 @@
       "score": 100,
       "reasons": [],
       "nearestOther": {
-        "targetKey": "char_s02_gormu",
-        "rootUnitId": "char_s02_gormu",
-        "similarity": 0.7161
+        "targetKey": "char_common_c_turnip_rider_f3",
+        "rootUnitId": "char_common_c_turnip_rider",
+        "similarity": 0.7204
       },
       "motions": {
         "idle": {
@@ -9457,6 +8973,106 @@
           "maxEdgeRatio": 0,
           "avgDelta": 0.0815,
           "maxDelta": 0.203
+        }
+      }
+    },
+    {
+      "metadataFile": "recruitment-form-runtime-metadata.json",
+      "targetKey": "char_common_c_turnip_rider_f1",
+      "assetId": "unit:char_common_c_turnip_rider:char_common_c_turnip_rider_f1",
+      "unitId": "char_common_c_turnip_rider",
+      "formId": "char_common_c_turnip_rider_f1",
+      "formOrder": 1,
+      "score": 100,
+      "reasons": [],
+      "nearestOther": {
+        "targetKey": "char_common_a_paper_dragon_f1",
+        "rootUnitId": "char_common_a_paper_dragon",
+        "similarity": 0.6102
+      },
+      "motions": {
+        "idle": {
+          "frames": 6,
+          "frameWidth": 224,
+          "frameHeight": 203,
+          "occupancy": 0.252,
+          "widthCoverage": 0.7902,
+          "heightCoverage": 0.9179,
+          "maxEdgeRatio": 0,
+          "avgDelta": 0.057,
+          "maxDelta": 0.0712
+        },
+        "move": {
+          "frames": 8,
+          "frameWidth": 224,
+          "frameHeight": 203,
+          "occupancy": 0.2524,
+          "widthCoverage": 0.7902,
+          "heightCoverage": 0.9039,
+          "maxEdgeRatio": 0,
+          "avgDelta": 0.2131,
+          "maxDelta": 0.2131
+        },
+        "attack": {
+          "frames": 6,
+          "frameWidth": 224,
+          "frameHeight": 203,
+          "occupancy": 0.2573,
+          "widthCoverage": 0.9278,
+          "heightCoverage": 0.8916,
+          "maxEdgeRatio": 0.0008,
+          "avgDelta": 0.0913,
+          "maxDelta": 0.2204
+        }
+      }
+    },
+    {
+      "metadataFile": "recruitment-form-runtime-metadata.json",
+      "targetKey": "char_common_c_turnip_rider_f2",
+      "assetId": "unit:char_common_c_turnip_rider:char_common_c_turnip_rider_f2",
+      "unitId": "char_common_c_turnip_rider",
+      "formId": "char_common_c_turnip_rider_f2",
+      "formOrder": 2,
+      "score": 100,
+      "reasons": [],
+      "nearestOther": {
+        "targetKey": "char_common_b_clockduck_f3",
+        "rootUnitId": "char_common_b_clockduck",
+        "similarity": 0.7337
+      },
+      "motions": {
+        "idle": {
+          "frames": 6,
+          "frameWidth": 228,
+          "frameHeight": 206,
+          "occupancy": 0.4148,
+          "widthCoverage": 0.8026,
+          "heightCoverage": 0.9239,
+          "maxEdgeRatio": 0,
+          "avgDelta": 0.0353,
+          "maxDelta": 0.0441
+        },
+        "move": {
+          "frames": 8,
+          "frameWidth": 228,
+          "frameHeight": 206,
+          "occupancy": 0.4149,
+          "widthCoverage": 0.8026,
+          "heightCoverage": 0.9126,
+          "maxEdgeRatio": 0,
+          "avgDelta": 0.1293,
+          "maxDelta": 0.1293
+        },
+        "attack": {
+          "frames": 6,
+          "frameWidth": 228,
+          "frameHeight": 206,
+          "occupancy": 0.4211,
+          "widthCoverage": 0.9452,
+          "heightCoverage": 0.9029,
+          "maxEdgeRatio": 0.0003,
+          "avgDelta": 0.0424,
+          "maxDelta": 0.1105
         }
       }
     },
@@ -9770,9 +9386,9 @@
       "score": 100,
       "reasons": [],
       "nearestOther": {
-        "targetKey": "char_s01_totoria_f2",
-        "rootUnitId": "char_s01_totoria",
-        "similarity": 0.8369
+        "targetKey": "char_s01_riena_f3",
+        "rootUnitId": "char_s01_riena",
+        "similarity": 0.8193
       },
       "motions": {
         "idle": {
@@ -10112,6 +9728,56 @@
     },
     {
       "metadataFile": "recruitment-form-runtime-metadata.json",
+      "targetKey": "char_s01_riena_f2",
+      "assetId": "unit:char_s01_riena:char_s01_riena_f2",
+      "unitId": "char_s01_riena",
+      "formId": "char_s01_riena_f2",
+      "formOrder": 2,
+      "score": 100,
+      "reasons": [],
+      "nearestOther": {
+        "targetKey": "char_s01_totoria_f2",
+        "rootUnitId": "char_s01_totoria",
+        "similarity": 0.8101
+      },
+      "motions": {
+        "idle": {
+          "frames": 8,
+          "frameWidth": 293,
+          "frameHeight": 261,
+          "occupancy": 0.1972,
+          "widthCoverage": 0.8737,
+          "heightCoverage": 0.8132,
+          "maxEdgeRatio": 0,
+          "avgDelta": 0.0457,
+          "maxDelta": 0.0639
+        },
+        "move": {
+          "frames": 8,
+          "frameWidth": 293,
+          "frameHeight": 261,
+          "occupancy": 0.1973,
+          "widthCoverage": 0.8737,
+          "heightCoverage": 0.8027,
+          "maxEdgeRatio": 0,
+          "avgDelta": 0.231,
+          "maxDelta": 0.231
+        },
+        "attack": {
+          "frames": 9,
+          "frameWidth": 293,
+          "frameHeight": 261,
+          "occupancy": 0.2149,
+          "widthCoverage": 0.9188,
+          "heightCoverage": 0.7931,
+          "maxEdgeRatio": 0,
+          "avgDelta": 0.0839,
+          "maxDelta": 0.2825
+        }
+      }
+    },
+    {
+      "metadataFile": "recruitment-form-runtime-metadata.json",
       "targetKey": "char_s01_riena_f3",
       "assetId": "unit:char_s01_riena:char_s01_riena_f3",
       "unitId": "char_s01_riena",
@@ -10211,6 +9877,56 @@
       }
     },
     {
+      "metadataFile": "recruitment-form-runtime-metadata.json",
+      "targetKey": "char_s01_totoria_f2",
+      "assetId": "unit:char_s01_totoria:char_s01_totoria_f2",
+      "unitId": "char_s01_totoria",
+      "formId": "char_s01_totoria_f2",
+      "formOrder": 2,
+      "score": 100,
+      "reasons": [],
+      "nearestOther": {
+        "targetKey": "char_s01_riena_f2",
+        "rootUnitId": "char_s01_riena",
+        "similarity": 0.8101
+      },
+      "motions": {
+        "idle": {
+          "frames": 8,
+          "frameWidth": 293,
+          "frameHeight": 261,
+          "occupancy": 0.22,
+          "widthCoverage": 0.8464,
+          "heightCoverage": 0.8132,
+          "maxEdgeRatio": 0,
+          "avgDelta": 0.0495,
+          "maxDelta": 0.0675
+        },
+        "move": {
+          "frames": 8,
+          "frameWidth": 293,
+          "frameHeight": 261,
+          "occupancy": 0.22,
+          "widthCoverage": 0.8464,
+          "heightCoverage": 0.8027,
+          "maxEdgeRatio": 0,
+          "avgDelta": 0.2157,
+          "maxDelta": 0.2172
+        },
+        "attack": {
+          "frames": 9,
+          "frameWidth": 293,
+          "frameHeight": 261,
+          "occupancy": 0.2215,
+          "widthCoverage": 0.8745,
+          "heightCoverage": 0.7931,
+          "maxEdgeRatio": 0,
+          "avgDelta": 0.049,
+          "maxDelta": 0.1786
+        }
+      }
+    },
+    {
       "metadataFile": "recruitment-runtime-metadata.json",
       "targetKey": "char_s02_barga",
       "assetId": "unit:char_s02_barga",
@@ -10257,6 +9973,56 @@
           "maxEdgeRatio": 0,
           "avgDelta": 0.0796,
           "maxDelta": 0.3155
+        }
+      }
+    },
+    {
+      "metadataFile": "recruitment-form-runtime-metadata.json",
+      "targetKey": "char_s02_barga_f1",
+      "assetId": "unit:char_s02_barga:char_s02_barga_f1",
+      "unitId": "char_s02_barga",
+      "formId": "char_s02_barga_f1",
+      "formOrder": 1,
+      "score": 100,
+      "reasons": [],
+      "nearestOther": {
+        "targetKey": "char_s01_elsia_f2",
+        "rootUnitId": "char_s01_elsia",
+        "similarity": 0.751
+      },
+      "motions": {
+        "idle": {
+          "frames": 8,
+          "frameWidth": 379,
+          "frameHeight": 328,
+          "occupancy": 0.1527,
+          "widthCoverage": 0.6755,
+          "heightCoverage": 0.7447,
+          "maxEdgeRatio": 0,
+          "avgDelta": 0.0303,
+          "maxDelta": 0.0424
+        },
+        "move": {
+          "frames": 8,
+          "frameWidth": 379,
+          "frameHeight": 328,
+          "occupancy": 0.1527,
+          "widthCoverage": 0.6755,
+          "heightCoverage": 0.7363,
+          "maxEdgeRatio": 0,
+          "avgDelta": 0.1806,
+          "maxDelta": 0.1806
+        },
+        "attack": {
+          "frames": 9,
+          "frameWidth": 379,
+          "frameHeight": 328,
+          "occupancy": 0.155,
+          "widthCoverage": 0.747,
+          "heightCoverage": 0.7287,
+          "maxEdgeRatio": 0,
+          "avgDelta": 0.0358,
+          "maxDelta": 0.1433
         }
       }
     },
@@ -10557,6 +10323,156 @@
           "maxEdgeRatio": 0,
           "avgDelta": 0.0538,
           "maxDelta": 0.2178
+        }
+      }
+    },
+    {
+      "metadataFile": "recruitment-form-runtime-metadata.json",
+      "targetKey": "char_s03_arc_railer_f1",
+      "assetId": "unit:char_s03_arc_railer:char_s03_arc_railer_f1",
+      "unitId": "char_s03_arc_railer",
+      "formId": "char_s03_arc_railer_f1",
+      "formOrder": 1,
+      "score": 100,
+      "reasons": [],
+      "nearestOther": {
+        "targetKey": "char_s02_zirka_f2",
+        "rootUnitId": "char_s02_zirka",
+        "similarity": 0.7534
+      },
+      "motions": {
+        "idle": {
+          "frames": 8,
+          "frameWidth": 314,
+          "frameHeight": 293,
+          "occupancy": 0.1353,
+          "widthCoverage": 0.7357,
+          "heightCoverage": 0.7858,
+          "maxEdgeRatio": 0,
+          "avgDelta": 0.0503,
+          "maxDelta": 0.0704
+        },
+        "move": {
+          "frames": 8,
+          "frameWidth": 314,
+          "frameHeight": 293,
+          "occupancy": 0.1352,
+          "widthCoverage": 0.7357,
+          "heightCoverage": 0.7765,
+          "maxEdgeRatio": 0,
+          "avgDelta": 0.2984,
+          "maxDelta": 0.2984
+        },
+        "attack": {
+          "frames": 9,
+          "frameWidth": 314,
+          "frameHeight": 293,
+          "occupancy": 0.141,
+          "widthCoverage": 0.8139,
+          "heightCoverage": 0.7679,
+          "maxEdgeRatio": 0,
+          "avgDelta": 0.0609,
+          "maxDelta": 0.2473
+        }
+      }
+    },
+    {
+      "metadataFile": "recruitment-form-runtime-metadata.json",
+      "targetKey": "char_s03_arc_railer_f2",
+      "assetId": "unit:char_s03_arc_railer:char_s03_arc_railer_f2",
+      "unitId": "char_s03_arc_railer",
+      "formId": "char_s03_arc_railer_f2",
+      "formOrder": 2,
+      "score": 100,
+      "reasons": [],
+      "nearestOther": {
+        "targetKey": "char_s02_gormu_f2",
+        "rootUnitId": "char_s02_gormu",
+        "similarity": 0.6863
+      },
+      "motions": {
+        "idle": {
+          "frames": 8,
+          "frameWidth": 318,
+          "frameHeight": 296,
+          "occupancy": 0.187,
+          "widthCoverage": 0.8208,
+          "heightCoverage": 0.7813,
+          "maxEdgeRatio": 0,
+          "avgDelta": 0.0599,
+          "maxDelta": 0.0838
+        },
+        "move": {
+          "frames": 8,
+          "frameWidth": 318,
+          "frameHeight": 296,
+          "occupancy": 0.1874,
+          "widthCoverage": 0.8208,
+          "heightCoverage": 0.772,
+          "maxEdgeRatio": 0,
+          "avgDelta": 0.2822,
+          "maxDelta": 0.2822
+        },
+        "attack": {
+          "frames": 9,
+          "frameWidth": 318,
+          "frameHeight": 296,
+          "occupancy": 0.1944,
+          "widthCoverage": 0.8931,
+          "heightCoverage": 0.7635,
+          "maxEdgeRatio": 0,
+          "avgDelta": 0.0402,
+          "maxDelta": 0.158
+        }
+      }
+    },
+    {
+      "metadataFile": "recruitment-form-runtime-metadata.json",
+      "targetKey": "char_s03_arc_railer_f3",
+      "assetId": "unit:char_s03_arc_railer:char_s03_arc_railer_f3",
+      "unitId": "char_s03_arc_railer",
+      "formId": "char_s03_arc_railer_f3",
+      "formOrder": 3,
+      "score": 100,
+      "reasons": [],
+      "nearestOther": {
+        "targetKey": "char_s02_gormu_f3",
+        "rootUnitId": "char_s02_gormu",
+        "similarity": 0.671
+      },
+      "motions": {
+        "idle": {
+          "frames": 8,
+          "frameWidth": 322,
+          "frameHeight": 299,
+          "occupancy": 0.2252,
+          "widthCoverage": 0.8665,
+          "heightCoverage": 0.7801,
+          "maxEdgeRatio": 0,
+          "avgDelta": 0.0634,
+          "maxDelta": 0.0887
+        },
+        "move": {
+          "frames": 8,
+          "frameWidth": 322,
+          "frameHeight": 299,
+          "occupancy": 0.2253,
+          "widthCoverage": 0.8665,
+          "heightCoverage": 0.7709,
+          "maxEdgeRatio": 0,
+          "avgDelta": 0.2582,
+          "maxDelta": 0.2616
+        },
+        "attack": {
+          "frames": 10,
+          "frameWidth": 322,
+          "frameHeight": 299,
+          "occupancy": 0.2316,
+          "widthCoverage": 0.9224,
+          "heightCoverage": 0.7625,
+          "maxEdgeRatio": 0,
+          "avgDelta": 0.0364,
+          "maxDelta": 0.1189
         }
       }
     },
@@ -12120,9 +12036,9 @@
       "score": 100,
       "reasons": [],
       "nearestOther": {
-        "targetKey": "enemy-shield",
-        "rootUnitId": "enemy-shield",
-        "similarity": 0.7988
+        "targetKey": "boss_sp_glass_castle",
+        "rootUnitId": "boss_sp_glass_castle",
+        "similarity": 0.7846
       },
       "motions": {
         "idle": {
@@ -13411,6 +13327,56 @@
       }
     },
     {
+      "metadataFile": "second-slice-runtime-metadata.json",
+      "targetKey": "enemy-shield",
+      "assetId": "unit:enemy-shield",
+      "unitId": "enemy-shield",
+      "formId": null,
+      "formOrder": null,
+      "score": 100,
+      "reasons": [],
+      "nearestOther": {
+        "targetKey": "char_common_a_bonedrum",
+        "rootUnitId": "char_common_a_bonedrum",
+        "similarity": 0.7773
+      },
+      "motions": {
+        "idle": {
+          "frames": 8,
+          "frameWidth": 200,
+          "frameHeight": 130,
+          "occupancy": 0.4199,
+          "widthCoverage": 0.655,
+          "heightCoverage": 1,
+          "maxEdgeRatio": 0.005,
+          "avgDelta": 0.0026,
+          "maxDelta": 0.0041
+        },
+        "move": {
+          "frames": 8,
+          "frameWidth": 200,
+          "frameHeight": 130,
+          "occupancy": 0.4275,
+          "widthCoverage": 0.655,
+          "heightCoverage": 0.9923,
+          "maxEdgeRatio": 0.0051,
+          "avgDelta": 0.2917,
+          "maxDelta": 0.2951
+        },
+        "attack": {
+          "frames": 4,
+          "frameWidth": 200,
+          "frameHeight": 130,
+          "occupancy": 0.4467,
+          "widthCoverage": 0.845,
+          "heightCoverage": 1,
+          "maxEdgeRatio": 0.0047,
+          "avgDelta": 0.1723,
+          "maxDelta": 0.2574
+        }
+      }
+    },
+    {
       "metadataFile": "third-slice-runtime-metadata.json",
       "targetKey": "enemy-sniper",
       "assetId": "unit:enemy-sniper",
@@ -13770,9 +13736,9 @@
       "score": 100,
       "reasons": [],
       "nearestOther": {
-        "targetKey": "lancer/lancer_f2",
-        "rootUnitId": "lancer",
-        "similarity": 0.392
+        "targetKey": "enemy-shield",
+        "rootUnitId": "enemy-shield",
+        "similarity": 0.4143
       },
       "motions": {
         "idle": {
@@ -13820,9 +13786,9 @@
       "score": 100,
       "reasons": [],
       "nearestOther": {
-        "targetKey": "enemy-spearman",
-        "rootUnitId": "enemy-spearman",
-        "similarity": 0.3929
+        "targetKey": "enemy-shield",
+        "rootUnitId": "enemy-shield",
+        "similarity": 0.4118
       },
       "motions": {
         "idle": {

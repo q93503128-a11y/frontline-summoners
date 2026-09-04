@@ -439,8 +439,8 @@
           "frameWidth": 200,
           "frameHeight": 130,
           "frames": 8,
-          "bytes": 6410,
-          "sha256": "e7a335cf1968fee981c87a094e4eed2f391328356566d7e6218c98aa0b851af8",
+          "bytes": 7820,
+          "sha256": "c0864f8cd7f7cd00f2e4aff67e401011392d97cc1d73c727d0e8ba0b601172ec",
           "sourceUrl": "https://raw.githubusercontent.com/NQM765/IngeSoft1/84594e5d3da7472615660f453bdb457da13cca2f/Proyecto/Scrum%27s_Castle/Assets/Characters/Medieval%20King%20Pack%202/Sprites/Idle.png",
           "sourceLocalPath": "/assets/characters/king-2/idle.png"
         },
@@ -449,8 +449,8 @@
           "frameWidth": 200,
           "frameHeight": 130,
           "frames": 8,
-          "bytes": 6090,
-          "sha256": "01d3b12fef0af50acf1309ea233061ff6f836bc1d1825694a699f3af4a915fb1",
+          "bytes": 7748,
+          "sha256": "eec4d2481378630c483718a3314205d61844de85cc3eff1ebeb59a9f3ea3a4be",
           "sourceUrl": "https://raw.githubusercontent.com/NQM765/IngeSoft1/84594e5d3da7472615660f453bdb457da13cca2f/Proyecto/Scrum%27s_Castle/Assets/Characters/Medieval%20King%20Pack%202/Sprites/Run.png",
           "sourceLocalPath": "/assets/characters/king-2/run.png"
         },
@@ -459,8 +459,8 @@
           "frameWidth": 200,
           "frameHeight": 130,
           "frames": 4,
-          "bytes": 4945,
-          "sha256": "cdb04e2f612f5428eabd16f498b00659081e6244c69fa03c9d4ac0f125687b1f",
+          "bytes": 6440,
+          "sha256": "713f094490d2e388690f8630f09ddc5f33f13e03f63dc608e85403d0f4926491",
           "sourceUrl": "https://raw.githubusercontent.com/NQM765/IngeSoft1/84594e5d3da7472615660f453bdb457da13cca2f/Proyecto/Scrum%27s_Castle/Assets/Characters/Medieval%20King%20Pack%202/Sprites/Attack1.png",
           "sourceLocalPath": "/assets/characters/king-2/attack.png"
         },
@@ -469,8 +469,8 @@
           "frameWidth": 200,
           "frameHeight": 130,
           "frames": 4,
-          "bytes": 4630,
-          "sha256": "08b2fc6199b36745bc0909e551f16ee48ddd34d5c0aeef27e6113ff50175c506",
+          "bytes": 5910,
+          "sha256": "2ab7104e05c57b949818c1c6f8d3dda20dd94143a6309421f81ca8931911f95d",
           "sourceUrl": "https://raw.githubusercontent.com/NQM765/IngeSoft1/84594e5d3da7472615660f453bdb457da13cca2f/Proyecto/Scrum%27s_Castle/Assets/Characters/Medieval%20King%20Pack%202/Sprites/Take%20Hit.png",
           "sourceLocalPath": "/assets/characters/king-2/hit.png"
         },
@@ -479,12 +479,22 @@
           "frameWidth": 200,
           "frameHeight": 130,
           "frames": 6,
-          "bytes": 6566,
-          "sha256": "e2396c51dcf0f08d713b510a99214e5d0881b653b23598a357cb2fa299438d04",
+          "bytes": 8414,
+          "sha256": "fda4ddaa9241c2db539d292db3101e151efa11770348ff4dee55c9fcb201743a",
           "sourceUrl": "https://raw.githubusercontent.com/NQM765/IngeSoft1/84594e5d3da7472615660f453bdb457da13cca2f/Proyecto/Scrum%27s_Castle/Assets/Characters/Medieval%20King%20Pack%202/Sprites/Death.png",
           "sourceLocalPath": "/assets/characters/king-2/death.png"
         }
+      },
+      "visualPolishPriority02": {
+        "version": 1,
+        "kind": "ASYMMETRIC_TOWER_SHIELD_AND_MOVE_READABILITY",
+        "reviewStatus": "UNREVIEWED_RUNTIME_FILES"
       }
     }
+  },
+  "visualPolishPriority02": {
+    "version": 1,
+    "target": "enemy-shield",
+    "humanReview": "PENDING"
   }
 }

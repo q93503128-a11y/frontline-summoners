@@ -62,6 +62,11 @@
         "kind": "RECRUITMENT_FORM_SILHOUETTE_DIFFERENTIATION_PASS",
         "reviewStatus": "UNREVIEWED_RUNTIME_FILES",
         "normalRuntimeAuthoritative": false
+      },
+      "visualPolishPriority02": {
+        "version": 1,
+        "kind": "TARGETED_DIFFERENTIATION_AND_ATTACK_READABILITY",
+        "reviewStatus": "UNREVIEWED_RUNTIME_FILES"
       }
     },
     "char_common_c_turnip_rider_f2": {
@@ -85,28 +90,28 @@
       "motions": {
         "idle": {
           "frames": 6,
-          "bytes": 6544,
-          "sha256": "7d3007b59d279faae41c5eb65b9a73d4d97e8a965830a8e87da9872e791815ed"
+          "bytes": 6907,
+          "sha256": "d4af3d94747331864d3cf8d9c185c114301afda94e8b7317cf76b9ec8f8ef9b1"
         },
         "move": {
           "frames": 8,
-          "bytes": 8789,
-          "sha256": "2faaa127f74316f50d606652f394fda3a0bbf1f41a1d358633ea937e586ae641"
+          "bytes": 9237,
+          "sha256": "f6c550ff9ce330683de9889079c95e3044286fd93afc69f1ab5e32d96436a58f"
         },
         "attack": {
           "frames": 6,
-          "bytes": 6948,
-          "sha256": "8771afb87e7184d478d22200edfb942ee4559f67e3648841c391c1d03c371b66"
+          "bytes": 7312,
+          "sha256": "4b606768031d9bd872be46cff45606b14a639fdfc2a1395edf2e90b9cd5d331b"
         },
         "knockback": {
           "frames": 4,
-          "bytes": 6477,
-          "sha256": "5c130f09ffa568c12d555b4d3f7cc6dcc96f0ff14ad4dd382120d5843b5acd24"
+          "bytes": 6892,
+          "sha256": "e30992680d6da9700a7f1cb097a827bd298e4d855f25a3ffc86febd655ab55f5"
         },
         "death": {
           "frames": 6,
-          "bytes": 14693,
-          "sha256": "c1552a33e05f6cdb81f2eb54c31624d48f8ff51c0e919cf1d79728975632eaf0"
+          "bytes": 15605,
+          "sha256": "aea29ff7d7825400c03ef52aac9e70535da8bc24f35e4fd4ddfd94f0cf0a3dd5"
         }
       },
       "visualPolish": {
@@ -114,6 +119,11 @@
         "kind": "RECRUITMENT_FORM_SILHOUETTE_DIFFERENTIATION_PASS",
         "reviewStatus": "UNREVIEWED_RUNTIME_FILES",
         "normalRuntimeAuthoritative": false
+      },
+      "visualPolishPriority02": {
+        "version": 1,
+        "kind": "TARGETED_DIFFERENTIATION_AND_ATTACK_READABILITY",
+        "reviewStatus": "UNREVIEWED_RUNTIME_FILES"
       }
     },
     "char_common_c_turnip_rider_f3": {
@@ -137,28 +147,28 @@
       "motions": {
         "idle": {
           "frames": 6,
-          "bytes": 10262,
-          "sha256": "6cfa8261307e1f44c8274f3c9f36012a1c590d60ca3ee0238616a194a1c0381e"
+          "bytes": 11256,
+          "sha256": "5e8c6a79483e51395294ca14d5736190ddc6983de2cbab8e2df5ca83cfa9d9b7"
         },
         "move": {
           "frames": 8,
-          "bytes": 13905,
-          "sha256": "474e060be2e9ce223d50345d2bfceec1dc1144f0d3fdd1945d8e36708897f2b7"
+          "bytes": 15077,
+          "sha256": "db72a7d54c72100db3a8732a91d034e66ab510dd09720c634abb93d003a5d1cf"
         },
         "attack": {
           "frames": 7,
-          "bytes": 12936,
-          "sha256": "75c154f0c2a2f5539275d4f27a751a10722a9a4a0f1a4165ea0bd0779e47e81a"
+          "bytes": 14016,
+          "sha256": "f77288a193caa2c5b7ece87438a1bdd6974eb2d8bf6dc8abb72c50683cfe1a82"
         },
         "knockback": {
           "frames": 4,
-          "bytes": 10668,
-          "sha256": "35c0231fe7b0f1bc2cab38528abb8e4957fe4afabf466db25da7bb64a3d50367"
+          "bytes": 11604,
+          "sha256": "a7dc2d4dcde35049ed579652e7db8e44442dda95656cca5b7ae9928e7a73ceda"
         },
         "death": {
           "frames": 6,
-          "bytes": 20192,
-          "sha256": "465f4be74548112ce91925d3693800a8ebf8111e684be362a8cd18cd6005145a"
+          "bytes": 22121,
+          "sha256": "660075e8878a9a12f913a547156f99780cb4bf3f4dafe18227a7bfc807f902a0"
         }
       },
       "visualPolish": {
@@ -166,6 +176,11 @@
         "kind": "RECRUITMENT_FORM_SILHOUETTE_DIFFERENTIATION_PASS",
         "reviewStatus": "UNREVIEWED_RUNTIME_FILES",
         "normalRuntimeAuthoritative": false
+      },
+      "visualPolishPriority02": {
+        "version": 1,
+        "kind": "TARGETED_DIFFERENTIATION_AND_ATTACK_READABILITY",
+        "reviewStatus": "UNREVIEWED_RUNTIME_FILES"
       }
     },
     "char_common_c_tin_squire_f1": {
@@ -842,6 +857,11 @@
         "kind": "RECRUITMENT_FORM_SILHOUETTE_DIFFERENTIATION_PASS",
         "reviewStatus": "UNREVIEWED_RUNTIME_FILES",
         "normalRuntimeAuthoritative": false
+      },
+      "visualPolishPriority02": {
+        "version": 1,
+        "kind": "TARGETED_DIFFERENTIATION_AND_ATTACK_READABILITY",
+        "reviewStatus": "UNREVIEWED_RUNTIME_FILES"
       }
     },
     "char_common_b_lantern_witch_f2": {
@@ -865,28 +885,28 @@
       "motions": {
         "idle": {
           "frames": 7,
-          "bytes": 7028,
-          "sha256": "c838beb32362cc595e63db59ef598b032ce21d3da4b3fc5b183dc31cc2b063f0"
+          "bytes": 9458,
+          "sha256": "92caa3ee54623288367c8d4c147f067114ae60ec7a7311b6540cc4bc851354b2"
         },
         "move": {
           "frames": 8,
-          "bytes": 8275,
-          "sha256": "036b7c272fe18784d5df27c75c0a02ae6adcfadd25c70c6f31b3ac8ed3063c1e"
+          "bytes": 10616,
+          "sha256": "4cd8bb422e431166811a7db18b6dedb267e5d42f74cdeb20c882e8578f1c3cc8"
         },
         "attack": {
           "frames": 7,
-          "bytes": 8131,
-          "sha256": "95ddf97574d8a9631b4576c4c9a2bf89537a055a541ab5863a19efefdd440eba"
+          "bytes": 10544,
+          "sha256": "124948d2750401ea2299632a2fd0e6e33454de414802fa035ab93b73ffef482e"
         },
         "knockback": {
           "frames": 4,
-          "bytes": 6249,
-          "sha256": "93bf6b395e04acec1847d589c9d253833f1a256afa571523971b659f276b11cb"
+          "bytes": 8431,
+          "sha256": "9542fef657616d2c31e034cea1b20882bc06e60e137e61a911f860c23d96d167"
         },
         "death": {
           "frames": 7,
-          "bytes": 15097,
-          "sha256": "b0d3bd0be21988106f4860e36d1d8b3f720539c2242d24001c6c54367dad594a"
+          "bytes": 20064,
+          "sha256": "7d3403697631be1124c6c77fe1c9c7b711d32a087cfa9c9770eb42a8a6fb0f50"
         }
       },
       "visualPolish": {
@@ -894,6 +914,11 @@
         "kind": "RECRUITMENT_FORM_SILHOUETTE_DIFFERENTIATION_PASS",
         "reviewStatus": "UNREVIEWED_RUNTIME_FILES",
         "normalRuntimeAuthoritative": false
+      },
+      "visualPolishPriority02": {
+        "version": 1,
+        "kind": "TARGETED_DIFFERENTIATION_AND_ATTACK_READABILITY",
+        "reviewStatus": "UNREVIEWED_RUNTIME_FILES"
       }
     },
     "char_common_b_lantern_witch_f3": {
@@ -946,6 +971,11 @@
         "kind": "RECRUITMENT_FORM_SILHOUETTE_DIFFERENTIATION_PASS",
         "reviewStatus": "UNREVIEWED_RUNTIME_FILES",
         "normalRuntimeAuthoritative": false
+      },
+      "visualPolishPriority02": {
+        "version": 1,
+        "kind": "TARGETED_DIFFERENTIATION_AND_ATTACK_READABILITY",
+        "reviewStatus": "UNREVIEWED_RUNTIME_FILES"
       }
     },
     "char_common_b_clockduck_f1": {
@@ -998,6 +1028,11 @@
         "kind": "RECRUITMENT_FORM_SILHOUETTE_DIFFERENTIATION_PASS",
         "reviewStatus": "UNREVIEWED_RUNTIME_FILES",
         "normalRuntimeAuthoritative": false
+      },
+      "visualPolishPriority02": {
+        "version": 1,
+        "kind": "TARGETED_DIFFERENTIATION_AND_ATTACK_READABILITY",
+        "reviewStatus": "UNREVIEWED_RUNTIME_FILES"
       }
     },
     "char_common_b_clockduck_f2": {
@@ -1021,28 +1056,28 @@
       "motions": {
         "idle": {
           "frames": 7,
-          "bytes": 7166,
-          "sha256": "ce6de0f51b12acfe87c9c2619477e06ab7ac492aa35cfca9196fb4951667726d"
+          "bytes": 7971,
+          "sha256": "63d78e0ebad70d603a7e842962a0da24e01872fd87c0dbceeed486b18a45af12"
         },
         "move": {
           "frames": 8,
-          "bytes": 8528,
-          "sha256": "1687c04621c0df949660e56f164ba94cc810dccca5f7689a5b3fad4d7b649d70"
+          "bytes": 9626,
+          "sha256": "af9e7d9d234f25a1bb2895f3d1e35d94457607cfe5b5fe52eb7cf790baab74f3"
         },
         "attack": {
           "frames": 7,
-          "bytes": 7479,
-          "sha256": "4f4aeefb5c6fbe5fb6f317f444b25cd540c3539209ff8457ed9fdecf040a04b0"
+          "bytes": 8294,
+          "sha256": "d0837cb23809bb0cfbcd34a0ba6b94e6f611a91c273880410896e83621b1e5b4"
         },
         "knockback": {
           "frames": 4,
-          "bytes": 6096,
-          "sha256": "414cab429c04257d57e278d52fe5ac9a82f0ae9410fcb76f08e01a0659aa9a01"
+          "bytes": 6877,
+          "sha256": "d73a6e024e3a994f554398634153f194a55491a8b1918251b43cbbc53701982a"
         },
         "death": {
           "frames": 7,
-          "bytes": 15526,
-          "sha256": "69fa1dca0b54384ebb8c28844cb24182b172a03bf354694ede37e25c65c1af32"
+          "bytes": 16965,
+          "sha256": "d50b59c483f90536ab2355f36cc310ffdb53b0f2042f3517b66a78b722108702"
         }
       },
       "visualPolish": {
@@ -1050,6 +1085,11 @@
         "kind": "RECRUITMENT_FORM_SILHOUETTE_DIFFERENTIATION_PASS",
         "reviewStatus": "UNREVIEWED_RUNTIME_FILES",
         "normalRuntimeAuthoritative": false
+      },
+      "visualPolishPriority02": {
+        "version": 1,
+        "kind": "TARGETED_DIFFERENTIATION_AND_ATTACK_READABILITY",
+        "reviewStatus": "UNREVIEWED_RUNTIME_FILES"
       }
     },
     "char_common_b_clockduck_f3": {
@@ -1102,6 +1142,11 @@
         "kind": "RECRUITMENT_FORM_SILHOUETTE_DIFFERENTIATION_PASS",
         "reviewStatus": "UNREVIEWED_RUNTIME_FILES",
         "normalRuntimeAuthoritative": false
+      },
+      "visualPolishPriority02": {
+        "version": 1,
+        "kind": "TARGETED_DIFFERENTIATION_AND_ATTACK_READABILITY",
+        "reviewStatus": "UNREVIEWED_RUNTIME_FILES"
       }
     },
     "char_common_b_coffin_merchant_f1": {
@@ -2558,6 +2603,11 @@
         "kind": "RECRUITMENT_FORM_SILHOUETTE_DIFFERENTIATION_PASS",
         "reviewStatus": "UNREVIEWED_RUNTIME_FILES",
         "normalRuntimeAuthoritative": false
+      },
+      "visualPolishPriority02": {
+        "version": 1,
+        "kind": "TARGETED_DIFFERENTIATION_AND_ATTACK_READABILITY",
+        "reviewStatus": "UNREVIEWED_RUNTIME_FILES"
       }
     },
     "char_s01_riena_f2": {
@@ -2581,28 +2631,28 @@
       "motions": {
         "idle": {
           "frames": 8,
-          "bytes": 8992,
-          "sha256": "cd812f4027a993759cba7f313c7bd6f349b73f1dbfddf62bfcffa568d226cd08"
+          "bytes": 10040,
+          "sha256": "95e9d8695fdca38fc105eeb870de9a5d82e849a418aaa2597f6c40c1546c7ba6"
         },
         "move": {
           "frames": 8,
-          "bytes": 9879,
-          "sha256": "60b29452d4e49959bb5bbdeaee26d237073c213ef10cd3730edee691d4d33258"
+          "bytes": 11112,
+          "sha256": "6fd97df0242c485d990cce6885180e6fe625a9fa617b62b6285f4d8a1b8418f6"
         },
         "attack": {
           "frames": 9,
-          "bytes": 11822,
-          "sha256": "f4fa814966ac888d1708863097bd276f3eb96d8910f067c5587f5b72ebcef101"
+          "bytes": 13399,
+          "sha256": "9c5a456dba41738afc9a3fa2f9598167d972570f378ad7651de03d8d47da0910"
         },
         "knockback": {
           "frames": 4,
-          "bytes": 7190,
-          "sha256": "2370d1842298173c193072ae16303b62ee0ff65642fcebe47e20dc52bd71cd87"
+          "bytes": 7718,
+          "sha256": "209e26de5669c004c79e65e4db9a899a3d4daa86c1598eb0568455578be23479"
         },
         "death": {
           "frames": 8,
-          "bytes": 19383,
-          "sha256": "751bd3769123ae9c1a9e8f80f53f36ac7fd8e137f1963b749b4d0b5d13f5d2ef"
+          "bytes": 20833,
+          "sha256": "72871b5ea1a071ef4d0d26b835fafd3a13ac14046b5a8a2e28b7f1b0e17b285c"
         }
       },
       "visualPolish": {
@@ -2610,6 +2660,11 @@
         "kind": "RECRUITMENT_FORM_SILHOUETTE_DIFFERENTIATION_PASS",
         "reviewStatus": "UNREVIEWED_RUNTIME_FILES",
         "normalRuntimeAuthoritative": false
+      },
+      "visualPolishPriority02": {
+        "version": 1,
+        "kind": "TARGETED_DIFFERENTIATION_AND_ATTACK_READABILITY",
+        "reviewStatus": "UNREVIEWED_RUNTIME_FILES"
       }
     },
     "char_s01_riena_f3": {
@@ -2662,6 +2717,11 @@
         "kind": "RECRUITMENT_FORM_SILHOUETTE_DIFFERENTIATION_PASS",
         "reviewStatus": "UNREVIEWED_RUNTIME_FILES",
         "normalRuntimeAuthoritative": false
+      },
+      "visualPolishPriority02": {
+        "version": 1,
+        "kind": "TARGETED_DIFFERENTIATION_AND_ATTACK_READABILITY",
+        "reviewStatus": "UNREVIEWED_RUNTIME_FILES"
       }
     },
     "char_s01_mireille_f1": {
@@ -3026,6 +3086,11 @@
         "kind": "RECRUITMENT_FORM_SILHOUETTE_DIFFERENTIATION_PASS",
         "reviewStatus": "UNREVIEWED_RUNTIME_FILES",
         "normalRuntimeAuthoritative": false
+      },
+      "visualPolishPriority02": {
+        "version": 1,
+        "kind": "TARGETED_DIFFERENTIATION_AND_ATTACK_READABILITY",
+        "reviewStatus": "UNREVIEWED_RUNTIME_FILES"
       }
     },
     "char_s01_totoria_f2": {
@@ -3049,28 +3114,28 @@
       "motions": {
         "idle": {
           "frames": 8,
-          "bytes": 10598,
-          "sha256": "14a8f84f71483bd16d054c2232e55cdb5d62014b0abf1079484a0e28471fb826"
+          "bytes": 13234,
+          "sha256": "c8106ee811576425cf6a0dc0db811052a8c383d982c3e1764110b9c8f2ca9f2a"
         },
         "move": {
           "frames": 8,
-          "bytes": 11485,
-          "sha256": "a8c41b84d8cb967dc2610120c538de950ed7e84e7a616b29cf07aa0ca388e35f"
+          "bytes": 14872,
+          "sha256": "3a384f59a8a5760831e0949f21e15af432118080188cf2e02bd85d53c833c127"
         },
         "attack": {
           "frames": 9,
-          "bytes": 12305,
-          "sha256": "d845806ca6c8b4db18bd824b674a0be1204675facbc912754f13967821408d6d"
+          "bytes": 15251,
+          "sha256": "94f2d375a378478dc1ae956bcec70ce8c7f8b4850c384e3feaedadccbb28ef71"
         },
         "knockback": {
           "frames": 4,
-          "bytes": 7225,
-          "sha256": "7503e0100eb2b42cd469f05313a1e5bbd3e05e09d05f4f9bc933bf23f92ca0a5"
+          "bytes": 9476,
+          "sha256": "335172b108dac0c23bb3cd14e494c2140b19edc33ef6f65833e99b1874125374"
         },
         "death": {
           "frames": 8,
-          "bytes": 20010,
-          "sha256": "cc1962cde648c9aab1891882c1147e21414707977b6227f3aad8cf68672ca5bb"
+          "bytes": 26004,
+          "sha256": "58a9f4afad6fff413c0ed545fcd69c10527283323aef591dac0906340fb37a27"
         }
       },
       "visualPolish": {
@@ -3078,6 +3143,11 @@
         "kind": "RECRUITMENT_FORM_SILHOUETTE_DIFFERENTIATION_PASS",
         "reviewStatus": "UNREVIEWED_RUNTIME_FILES",
         "normalRuntimeAuthoritative": false
+      },
+      "visualPolishPriority02": {
+        "version": 1,
+        "kind": "TARGETED_DIFFERENTIATION_AND_ATTACK_READABILITY",
+        "reviewStatus": "UNREVIEWED_RUNTIME_FILES"
       }
     },
     "char_s01_totoria_f3": {
@@ -3130,6 +3200,11 @@
         "kind": "RECRUITMENT_FORM_SILHOUETTE_DIFFERENTIATION_PASS",
         "reviewStatus": "UNREVIEWED_RUNTIME_FILES",
         "normalRuntimeAuthoritative": false
+      },
+      "visualPolishPriority02": {
+        "version": 1,
+        "kind": "TARGETED_DIFFERENTIATION_AND_ATTACK_READABILITY",
+        "reviewStatus": "UNREVIEWED_RUNTIME_FILES"
       }
     },
     "char_s01_arselia_f1": {
@@ -3338,6 +3413,11 @@
         "kind": "RECRUITMENT_FORM_SILHOUETTE_DIFFERENTIATION_PASS",
         "reviewStatus": "UNREVIEWED_RUNTIME_FILES",
         "normalRuntimeAuthoritative": false
+      },
+      "visualPolishPriority02": {
+        "version": 1,
+        "kind": "TARGETED_DIFFERENTIATION_AND_ATTACK_READABILITY",
+        "reviewStatus": "UNREVIEWED_RUNTIME_FILES"
       }
     },
     "char_s02_barga_f2": {
@@ -3361,28 +3441,28 @@
       "motions": {
         "idle": {
           "frames": 8,
-          "bytes": 13237,
-          "sha256": "b4efc0b6829dc6d4ce5ee728f6ae9381df3b3a7971593b310d21a4d99978212d"
+          "bytes": 13273,
+          "sha256": "cd91a23973ee7a803d2b136724f2bca97ca33f1e4e918c85ba32d452569b4da8"
         },
         "move": {
           "frames": 8,
-          "bytes": 14333,
-          "sha256": "38192f031b4e7e09d8c4ea4581cb5e9ce96d3e94462f5cf42501cf459d103a34"
+          "bytes": 14367,
+          "sha256": "680589eb0b496257104b4ab5c54bfd5b91bda7bd60667fec738e661d6b992f8d"
         },
         "attack": {
           "frames": 9,
-          "bytes": 14907,
-          "sha256": "dd8a62ba177a21a27d589f8007502421e6b5e846bb96fffe876361a97d95e7a1"
+          "bytes": 15502,
+          "sha256": "11f3fc810dc0c5a8e2d6f22c61f40d9bd26a05eef5db5f4d85b5a53ef00f989d"
         },
         "knockback": {
           "frames": 4,
-          "bytes": 10033,
-          "sha256": "b2ba0c292335e3feaeef6786f9fdede67e58583d1e71e6bc8fb2dedf1829fdf4"
+          "bytes": 10022,
+          "sha256": "d705b546c9a3eaf111b7cf7cefd5c8592731ec18d4732e01d272f321f8fd248d"
         },
         "death": {
           "frames": 8,
-          "bytes": 27074,
-          "sha256": "63235932fc582c1a381054a617c81f89c314539863847c69ae64148902e32f96"
+          "bytes": 26705,
+          "sha256": "ef0cdf982e2dce8f59645b8ef16c703caae8757f6a3a8ec8b9ad5edefee9d97f"
         }
       },
       "visualPolish": {
@@ -3390,6 +3470,11 @@
         "kind": "RECRUITMENT_FORM_SILHOUETTE_DIFFERENTIATION_PASS",
         "reviewStatus": "UNREVIEWED_RUNTIME_FILES",
         "normalRuntimeAuthoritative": false
+      },
+      "visualPolishPriority02": {
+        "version": 1,
+        "kind": "TARGETED_DIFFERENTIATION_AND_ATTACK_READABILITY",
+        "reviewStatus": "UNREVIEWED_RUNTIME_FILES"
       }
     },
     "char_s02_barga_f3": {
@@ -3413,28 +3498,28 @@
       "motions": {
         "idle": {
           "frames": 8,
-          "bytes": 17243,
-          "sha256": "c15a196e1cbc69ee684ff28be9a68a35f1e7fde0f1a6ef5a8d72b8109bdb037f"
+          "bytes": 17878,
+          "sha256": "100e06a37255a33b0da34cb540348c5a8b3a5a3cf2324c60396b12c918bee6aa"
         },
         "move": {
           "frames": 8,
-          "bytes": 19147,
-          "sha256": "d6cbff1b01bf6d884aaa71d2fb3b7b8dd162143bacedd5ad8fd52c636229bf4f"
+          "bytes": 20005,
+          "sha256": "fb85f60f18c35bc506bd2d7a2ea48256d8b0a8f4a082a624600a6f439cc61efb"
         },
         "attack": {
           "frames": 10,
-          "bytes": 21393,
-          "sha256": "2e153fe8ba166f16e29a1fe9700cf3870f592553489f683e9f4dd4fefbd950ec"
+          "bytes": 22443,
+          "sha256": "4a7686c1890016360e855475ad3e15cf3ddc4b2f33f1124af1ac5831a4754a89"
         },
         "knockback": {
           "frames": 4,
-          "bytes": 12694,
-          "sha256": "2dd31a6c58b239251f25b826f20a1bbf9b3c356684d5ece2a262da367d2bf350"
+          "bytes": 13315,
+          "sha256": "4f4f90143f0719b51f5a031978e742b590cd2e5c43bfc4fc23bfe3813eab1983"
         },
         "death": {
           "frames": 8,
-          "bytes": 32108,
-          "sha256": "ea5ba5b354d461db7b829910b4253f43fcc24a489738de92d8ad7b0ab98ed0a8"
+          "bytes": 34386,
+          "sha256": "f3d5a873488d4d340ace295e574ea7be1a72dfe12d07f13c1880dc08da6356d7"
         }
       },
       "visualPolish": {
@@ -3442,6 +3527,11 @@
         "kind": "RECRUITMENT_FORM_SILHOUETTE_DIFFERENTIATION_PASS",
         "reviewStatus": "UNREVIEWED_RUNTIME_FILES",
         "normalRuntimeAuthoritative": false
+      },
+      "visualPolishPriority02": {
+        "version": 1,
+        "kind": "TARGETED_DIFFERENTIATION_AND_ATTACK_READABILITY",
+        "reviewStatus": "UNREVIEWED_RUNTIME_FILES"
       }
     },
     "char_s02_zirka_f1": {
@@ -4118,6 +4208,11 @@
         "kind": "RECRUITMENT_FORM_SILHOUETTE_DIFFERENTIATION_PASS",
         "reviewStatus": "UNREVIEWED_RUNTIME_FILES",
         "normalRuntimeAuthoritative": false
+      },
+      "visualPolishPriority02": {
+        "version": 1,
+        "kind": "TARGETED_DIFFERENTIATION_AND_ATTACK_READABILITY",
+        "reviewStatus": "UNREVIEWED_RUNTIME_FILES"
       }
     },
     "char_s02_gormu_f2": {
@@ -4141,28 +4236,28 @@
       "motions": {
         "idle": {
           "frames": 8,
-          "bytes": 13974,
-          "sha256": "e34302ee31628a416edb3700b9cf792d8ce26fde69488af3250ccf271d7b90eb"
+          "bytes": 14738,
+          "sha256": "ba77a08c505f77f93f6bcb425b6ef660b4fd6b515ee3965f6e4ffa2672e2a4fa"
         },
         "move": {
           "frames": 8,
-          "bytes": 15234,
-          "sha256": "ecd78caf9f9472e1e1577d27dcd2c58b6d61a32e32ccb258e3e78496614de00e"
+          "bytes": 16112,
+          "sha256": "42ff9a4d20e61b2d6f838b965cd824b73f530462d605fc494c9d9f917d7c2e82"
         },
         "attack": {
           "frames": 11,
-          "bytes": 19693,
-          "sha256": "a2d3fc4a5989a0475624f31896bc0e77725fa0b73fa32db816935672a8db5552"
+          "bytes": 20524,
+          "sha256": "2ff0ee5c40cddd5f857fe7d17f1057c4e4bf56cc4c99b11aa308486d9d9d01de"
         },
         "knockback": {
           "frames": 4,
-          "bytes": 10413,
-          "sha256": "5e2b5f29fd23c476ceec7f1af97084eb1b67f6e75a6f1efc6df066a648fdb582"
+          "bytes": 11023,
+          "sha256": "3a8db9ec8c3e0be4a00120072485fc95abe8f23e14a5778cff7d3f36635fc321"
         },
         "death": {
           "frames": 9,
-          "bytes": 31587,
-          "sha256": "f0e3e415500736fa644c3611594dacad25d330749199959e55cf18c6532764d5"
+          "bytes": 32491,
+          "sha256": "8015ec5d4c8404af2bb9bae75139ba879c2b3c1787bf177a1be6977facdc5330"
         }
       },
       "visualPolish": {
@@ -4170,6 +4265,11 @@
         "kind": "RECRUITMENT_FORM_SILHOUETTE_DIFFERENTIATION_PASS",
         "reviewStatus": "UNREVIEWED_RUNTIME_FILES",
         "normalRuntimeAuthoritative": false
+      },
+      "visualPolishPriority02": {
+        "version": 1,
+        "kind": "TARGETED_DIFFERENTIATION_AND_ATTACK_READABILITY",
+        "reviewStatus": "UNREVIEWED_RUNTIME_FILES"
       }
     },
     "char_s02_gormu_f3": {
@@ -4193,28 +4293,28 @@
       "motions": {
         "idle": {
           "frames": 8,
-          "bytes": 18196,
-          "sha256": "b13717e2ffaa207b1d13658e374c2e9c9c8fa59f89b4b53bdba3dab2cfefa470"
+          "bytes": 19476,
+          "sha256": "de1cc8d6375be3c8ba668f2402007bf444a5df634bfc40e36c65193ebc79aad1"
         },
         "move": {
           "frames": 8,
-          "bytes": 20198,
-          "sha256": "532cd67cbf54f70582803c930e7f96682f1e31c3bba73445ee102a8b62223232"
+          "bytes": 21736,
+          "sha256": "cb834160af9ed2a0277614fadf8839f7f745fb44cbca671309edeae4618514ed"
         },
         "attack": {
           "frames": 12,
-          "bytes": 27220,
-          "sha256": "9769c36bbeeb638b048aed985d4c584e3ef216c7d56d8c2467e1142e237ca8c8"
+          "bytes": 28835,
+          "sha256": "f601428074f592688ad42d83fb9f4a20f3d6fdbdcb5c45044b89db2e76b8d20e"
         },
         "knockback": {
           "frames": 4,
-          "bytes": 13595,
-          "sha256": "8593a41bab80dd9ff9e47fce29e210cf8470278a1785a4fa0052d1fad97e9f1b"
+          "bytes": 14144,
+          "sha256": "add22bcd04031960e06e90266cd0d75a445e59379ad819f3a8602e9677a73375"
         },
         "death": {
           "frames": 9,
-          "bytes": 37862,
-          "sha256": "88f08d0a64e0aeda4673465bb8d028ddf73174ba09d88fdf2ab983933ca66c9f"
+          "bytes": 39313,
+          "sha256": "06913e4d54afa2411cc4e2fb9157a37311d46df03137e50c399102d5fec6e9d1"
         }
       },
       "visualPolish": {
@@ -4222,6 +4322,11 @@
         "kind": "RECRUITMENT_FORM_SILHOUETTE_DIFFERENTIATION_PASS",
         "reviewStatus": "UNREVIEWED_RUNTIME_FILES",
         "normalRuntimeAuthoritative": false
+      },
+      "visualPolishPriority02": {
+        "version": 1,
+        "kind": "TARGETED_DIFFERENTIATION_AND_ATTACK_READABILITY",
+        "reviewStatus": "UNREVIEWED_RUNTIME_FILES"
       }
     },
     "char_s03_k17_f1": {
@@ -4430,6 +4535,11 @@
         "kind": "RECRUITMENT_FORM_SILHOUETTE_DIFFERENTIATION_PASS",
         "reviewStatus": "UNREVIEWED_RUNTIME_FILES",
         "normalRuntimeAuthoritative": false
+      },
+      "visualPolishPriority02": {
+        "version": 1,
+        "kind": "TARGETED_DIFFERENTIATION_AND_ATTACK_READABILITY",
+        "reviewStatus": "UNREVIEWED_RUNTIME_FILES"
       }
     },
     "char_s03_arc_railer_f2": {
@@ -4453,28 +4563,28 @@
       "motions": {
         "idle": {
           "frames": 8,
-          "bytes": 9866,
-          "sha256": "16fa888a6a117024d9f6b00066a3d1ba0d9b911f4ef9d7275ecbf20ade0ec47d"
+          "bytes": 11095,
+          "sha256": "20bd4080819f20cfc8f3411539d08179f6e9675ed86343c83792bd7379ec2205"
         },
         "move": {
           "frames": 8,
-          "bytes": 10921,
-          "sha256": "864caa139466d088a57feb7ab4eef18c5780902b4ad38110d41c6a18d01aa8c3"
+          "bytes": 12160,
+          "sha256": "36e9dff82a53fe79f89c8345195b62283dd78a9ae0a67ad41a20621878359e83"
         },
         "attack": {
           "frames": 9,
-          "bytes": 13394,
-          "sha256": "5055dd756f7f077539e14b402345b53323440f541f8deebc13e8d359ae867466"
+          "bytes": 14611,
+          "sha256": "e03929d3f0f272b0040879cdb47dc8fd351b8e6ef6deb9dc92c1cfe8192eee83"
         },
         "knockback": {
           "frames": 4,
-          "bytes": 8666,
-          "sha256": "f8fd672ad41675c5a98d154f535da3da3bd53b668d05842262289d0e34ff8cfd"
+          "bytes": 9268,
+          "sha256": "cfa439c75723fb8780b84468098fad9cd00a2519e55c1a3e7566a799a9bfb489"
         },
         "death": {
           "frames": 8,
-          "bytes": 22587,
-          "sha256": "4c40506f149ad6c22b65af36eebf93672e05b7370ef09669e57c569b3a29b0f6"
+          "bytes": 24335,
+          "sha256": "a1772998b7be57d21daea058f2c9077fe6014fcab870a78ef42c1aa1c8b1cf99"
         }
       },
       "visualPolish": {
@@ -4482,6 +4592,11 @@
         "kind": "RECRUITMENT_FORM_SILHOUETTE_DIFFERENTIATION_PASS",
         "reviewStatus": "UNREVIEWED_RUNTIME_FILES",
         "normalRuntimeAuthoritative": false
+      },
+      "visualPolishPriority02": {
+        "version": 1,
+        "kind": "TARGETED_DIFFERENTIATION_AND_ATTACK_READABILITY",
+        "reviewStatus": "UNREVIEWED_RUNTIME_FILES"
       }
     },
     "char_s03_arc_railer_f3": {
@@ -4505,28 +4620,28 @@
       "motions": {
         "idle": {
           "frames": 8,
-          "bytes": 14547,
-          "sha256": "b58cb6dc557b55ecda13ec3bb2037166c74800e155031cf68aebd9b4ffb0abd1"
+          "bytes": 16559,
+          "sha256": "7636ca025e6a87a9cb09e497c4d609bb04fc99bea80b80016cf612ff022d3a01"
         },
         "move": {
           "frames": 8,
-          "bytes": 16148,
-          "sha256": "c2ff6b037935682a9bc44d7873fc754be213753555ff5cf359a61132fd77ae1c"
+          "bytes": 18280,
+          "sha256": "e0dfe2d88941c1d70c4d8764bb788e0cf3a87172a917bb44c31089b8b3880522"
         },
         "attack": {
           "frames": 10,
-          "bytes": 19427,
-          "sha256": "6d8a2bfa3393dbdfef90f40cba3278275205a562eefddfc111739d0c654d43e3"
+          "bytes": 21544,
+          "sha256": "9b982d123481a80a377764a2940e0c58459980c088c7fe2f1ada07ea8132c6f3"
         },
         "knockback": {
           "frames": 4,
-          "bytes": 11454,
-          "sha256": "07fe7ff96b8da3adaaeeef2555ec06ec4320750b3a15f7a985996693ec87254f"
+          "bytes": 12497,
+          "sha256": "c889a280f8cbe184d7bda90600691c2e22582a3667a3d7649d9c4c4eb290a84f"
         },
         "death": {
           "frames": 8,
-          "bytes": 28177,
-          "sha256": "f78c02e4ae3f367b0c0391178b90caccd901ed45a859ed1355f7c632bb44c976"
+          "bytes": 31179,
+          "sha256": "99e28a263bdfb34ff34708496f615cd9ab55b56d87329f0a535100ea91f8c839"
         }
       },
       "visualPolish": {
@@ -4534,6 +4649,11 @@
         "kind": "RECRUITMENT_FORM_SILHOUETTE_DIFFERENTIATION_PASS",
         "reviewStatus": "UNREVIEWED_RUNTIME_FILES",
         "normalRuntimeAuthoritative": false
+      },
+      "visualPolishPriority02": {
+        "version": 1,
+        "kind": "TARGETED_DIFFERENTIATION_AND_ATTACK_READABILITY",
+        "reviewStatus": "UNREVIEWED_RUNTIME_FILES"
       }
     },
     "char_s03_nana04_f1": {
@@ -4742,6 +4862,11 @@
         "kind": "RECRUITMENT_FORM_SILHOUETTE_DIFFERENTIATION_PASS",
         "reviewStatus": "UNREVIEWED_RUNTIME_FILES",
         "normalRuntimeAuthoritative": false
+      },
+      "visualPolishPriority02": {
+        "version": 1,
+        "kind": "TARGETED_DIFFERENTIATION_AND_ATTACK_READABILITY",
+        "reviewStatus": "UNREVIEWED_RUNTIME_FILES"
       }
     },
     "char_s03_rxomega_f2": {
@@ -4765,28 +4890,28 @@
       "motions": {
         "idle": {
           "frames": 8,
-          "bytes": 10284,
-          "sha256": "395934ddb42a5de5de55a8895d986cfe60e3f895ac740b8880502484e9fe7bf0"
+          "bytes": 10147,
+          "sha256": "407886c2c87963d1d2da1bc3e118fcc26742fb6137e1027aaeefb53686bff392"
         },
         "move": {
           "frames": 8,
-          "bytes": 11619,
-          "sha256": "bfc1814cb371a27390299769c7dadc426cd507fc6ff498dc6a641e09ebb853ee"
+          "bytes": 11450,
+          "sha256": "be1a603a472acc5efca4e7b394dc0414c8e79fb32fa31241ab268dff1e23ded8"
         },
         "attack": {
           "frames": 9,
-          "bytes": 12964,
-          "sha256": "fc710f3b5868cf4944a31efd6d3d028881611029cdaa7d038c78ea4682a87ec9"
+          "bytes": 12900,
+          "sha256": "8eb50fed20cc4391ed71f48af100eb4ccb64d2eb8f3cfd02b4c16c3699f39b12"
         },
         "knockback": {
           "frames": 4,
-          "bytes": 8871,
-          "sha256": "834e36d94e0f6610bf4c201dcc21f0d81ab3b5f00c216963fe6d6077516cd099"
+          "bytes": 8469,
+          "sha256": "d50dde9c81e3fc39568931215459c6ad21a1f717359f969f142cf34b3061ac9d"
         },
         "death": {
           "frames": 8,
-          "bytes": 23609,
-          "sha256": "a95ca9a6aeee399fa3c9d80f0faf6fd514e502df7f4261f864e4f7d5fef42ab8"
+          "bytes": 21880,
+          "sha256": "c88d165fca5e07284cc1ecfdc3eb3d8178f6fa1f38dcecfa5003cfb87c53ed4b"
         }
       },
       "visualPolish": {
@@ -4794,6 +4919,11 @@
         "kind": "RECRUITMENT_FORM_SILHOUETTE_DIFFERENTIATION_PASS",
         "reviewStatus": "UNREVIEWED_RUNTIME_FILES",
         "normalRuntimeAuthoritative": false
+      },
+      "visualPolishPriority02": {
+        "version": 1,
+        "kind": "TARGETED_DIFFERENTIATION_AND_ATTACK_READABILITY",
+        "reviewStatus": "UNREVIEWED_RUNTIME_FILES"
       }
     },
     "char_s03_rxomega_f3": {
@@ -4817,28 +4947,28 @@
       "motions": {
         "idle": {
           "frames": 8,
-          "bytes": 13824,
-          "sha256": "eab5add8deb5a2fc904623ade93d0d65e184f32b80b669c3c14720c52c279323"
+          "bytes": 14088,
+          "sha256": "4a972fe1c15f561aadd278880b8b0792fb131a50f83d69eeb5180c358ed63e58"
         },
         "move": {
           "frames": 8,
-          "bytes": 15813,
-          "sha256": "bb80626b9377dfdc392581f5a53a19bcb0f126eda36b6f646cb43ff5c7ce8d91"
+          "bytes": 16105,
+          "sha256": "cd065984f4cc8afb2a1289cf89ac562c09e3a7b3474703318754e013c0f96c1e"
         },
         "attack": {
           "frames": 10,
-          "bytes": 18073,
-          "sha256": "acb49ff1aa18d71eb1c01fc3259344d866104e5491ce45df3000db115e8b307c"
+          "bytes": 19027,
+          "sha256": "2462639798d81799d623865b84a47fe580a5c9c511a8878126b30b67e4295980"
         },
         "knockback": {
           "frames": 4,
-          "bytes": 11171,
-          "sha256": "e7be36eaf8112092cffe9685e528d85b84184d693f64ec66800a857456dad5d5"
+          "bytes": 11116,
+          "sha256": "1c4e22ace1d91695956eb419411e782ed53646d54eda72532529048af16c0798"
         },
         "death": {
           "frames": 8,
-          "bytes": 28576,
-          "sha256": "43cec2137bd7595af8cf03778863faade2d00f5e7d1ed35503ab368ef0572c43"
+          "bytes": 27193,
+          "sha256": "aa2d3f72a66516425da14f82ec9f1e917ec7742d153ed01c48efb8ea38471942"
         }
       },
       "visualPolish": {
@@ -4846,6 +4976,11 @@
         "kind": "RECRUITMENT_FORM_SILHOUETTE_DIFFERENTIATION_PASS",
         "reviewStatus": "UNREVIEWED_RUNTIME_FILES",
         "normalRuntimeAuthoritative": false
+      },
+      "visualPolishPriority02": {
+        "version": 1,
+        "kind": "TARGETED_DIFFERENTIATION_AND_ATTACK_READABILITY",
+        "reviewStatus": "UNREVIEWED_RUNTIME_FILES"
       }
     },
     "char_s03_blade_hound_f1": {
@@ -5165,6 +5300,13 @@
     "version": 1,
     "kind": "RECRUITMENT_FORM_SILHOUETTE_DIFFERENTIATION_PASS",
     "targetCount": 99,
+    "humanReview": "PENDING",
+    "normalRuntimeAuthoritative": false
+  },
+  "visualPolishPriority02": {
+    "version": 1,
+    "targetRoots": 9,
+    "touchedForms": 27,
     "humanReview": "PENDING",
     "normalRuntimeAuthoritative": false
   }
