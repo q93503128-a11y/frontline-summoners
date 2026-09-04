@@ -1,0 +1,106 @@
+{
+  "schemaVersion": 1,
+  "batchId": "second-slice-early-wave-02",
+  "status": "AWAITING_ART",
+  "reviewLifecycle": "UNREVIEWED_RUNTIME_CANDIDATES_ONLY",
+  "stageAnchors": ["main_01_002", "main_01_003", "main_01_004"],
+  "sourcePolicy": {
+    "generativeAiAllowed": false,
+    "sourceKind": "PINNED_CC0_REFERENCE_REWORK",
+    "approvalRule": "Runtime review candidates do not become normal runtime-authoritative until legitimate human approval."
+  },
+  "deferred": [
+    {
+      "assetId": "unit:enemy-sprinter",
+      "reason": "BEAST silhouette cannot be honestly represented by the currently verified humanoid CC0 source families; hold until a suitable non-humanoid lawful source is verified."
+    }
+  ],
+  "targets": [
+    {
+      "assetId": "unit:guard:guard_f1",
+      "runtimePath": "guard/guard_f1",
+      "sourceFamily": "hero-knight",
+      "status": "AWAITING_ART",
+      "displayHeight": 184,
+      "attackContactFrame": 3,
+      "identity": ["oversized rectangular wood-and-iron shield", "short legs", "low center", "face remains visible"]
+    },
+    {
+      "assetId": "unit:guard:guard_f2",
+      "runtimePath": "guard/guard_f2",
+      "sourceFamily": "hero-knight",
+      "status": "AWAITING_ART",
+      "displayHeight": 192,
+      "attackContactFrame": 3,
+      "identity": ["wider gate-top shield", "more side braces", "lower pushing stance", "not an attack knight"]
+    },
+    {
+      "assetId": "unit:guard:guard_f3",
+      "runtimePath": "guard/guard_f3",
+      "sourceFamily": "hero-knight",
+      "status": "AWAITING_ART",
+      "displayHeight": 202,
+      "attackContactFrame": 3,
+      "identity": ["mobile wall silhouette", "thick shield body", "ground skids or small support wheels", "face remains visible"]
+    },
+    {
+      "assetId": "unit:hunter:hunter_f1",
+      "runtimePath": "hunter/hunter_f1",
+      "sourceFamily": "huntress-2",
+      "status": "AWAITING_ART",
+      "displayHeight": 180,
+      "attackContactFrame": 3,
+      "identity": ["light hunting clothes", "thin long hunting spear", "shoulder trap and leather strap", "short cape"]
+    },
+    {
+      "assetId": "unit:hunter:hunter_f2",
+      "runtimePath": "hunter/hunter_f2",
+      "sourceFamily": "huntress-2",
+      "status": "AWAITING_ART",
+      "displayHeight": 184,
+      "attackContactFrame": 3,
+      "identity": ["longer hooked or double-edged spearhead", "trophy horn or hide at shoulder", "body armor does not bulk up"]
+    },
+    {
+      "assetId": "unit:hunter:hunter_f3",
+      "runtimePath": "hunter/hunter_f3",
+      "sourceFamily": "huntress-2",
+      "status": "AWAITING_ART",
+      "displayHeight": 188,
+      "attackContactFrame": 3,
+      "identity": ["longest horizontal spear", "marking ties and small pennant", "range increase must read from silhouette"]
+    },
+    {
+      "assetId": "unit:enemy-spearman",
+      "runtimePath": "enemy-spearman",
+      "sourceFamily": "fantasy-warrior",
+      "status": "AWAITING_ART",
+      "displayHeight": 188,
+      "attackContactFrame": 3,
+      "identity": ["long narrow enemy spear", "neck-and-shoulder silhouette elongated by gear", "clear blind spot under the spear", "not a recolored hunter"]
+    },
+    {
+      "assetId": "unit:enemy-shield",
+      "runtimePath": "enemy-shield",
+      "sourceFamily": "king-2",
+      "status": "AWAITING_ART",
+      "displayHeight": 190,
+      "attackContactFrame": 2,
+      "identity": ["large improvised cooking-pot shield", "round and dented front mass", "slow single-block silhouette", "not a rectangular guard shield"]
+    }
+  ],
+  "battlefields": [
+    {
+      "assetId": "battlefield:canyon:main_01_002",
+      "runtimeRoot": "apps/client/public/assets/production/battlefields/canyon",
+      "status": "AWAITING_ART",
+      "identity": ["dust-road pursuit", "low canyon walls framing edges", "clear center combat corridor", "no range-wall visual confusion"]
+    },
+    {
+      "assetId": "battlefield:ruins:main_01_003",
+      "runtimeRoot": "apps/client/public/assets/production/battlefields/ruins",
+      "status": "AWAITING_ART",
+      "identity": ["broken border masonry", "collapsed arch landmarks", "long-spear lane readability", "low central clutter"]
+    }
+  ]
+}
