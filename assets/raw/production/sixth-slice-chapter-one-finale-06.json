@@ -1,0 +1,62 @@
+{
+  "schemaVersion": 1,
+  "sliceId": "sixth-slice-chapter-one-finale-06",
+  "scope": "chapter-01-st19-20-finale",
+  "status": "AWAITING_ART",
+  "reviewStatus": "PENDING",
+  "normalRuntimeAuthoritative": false,
+  "generativeAiUsed": false,
+  "sourcePolicy": "PINNED_CC0_AND_PROJECT_AUTHORED_DETERMINISTIC_ONLY",
+  "stageAnchors": ["main_01_019", "main_01_020"],
+  "targets": [
+    {
+      "assetId": "unit:voidsage:voidsage_f1",
+      "unitId": "voidsage",
+      "displayName": "공허현자",
+      "form": 1,
+      "sourceFamily": "project-authored-anomaly",
+      "simulationContactFrame": 48,
+      "visualContract": ["no staff", "three irregular spatial plates orbit body", "body silhouette partially interrupted by plates", "single decisive collapse at real contact"]
+    },
+    {
+      "assetId": "unit:voidsage:voidsage_f2",
+      "unitId": "voidsage",
+      "displayName": "틈새의 현자",
+      "form": 2,
+      "sourceFamily": "project-authored-anomaly",
+      "simulationContactFrame": 48,
+      "visualContract": ["four to five spatial plates", "plates appear to pass through body", "longer-range sidegrade reads from wider orbit", "single contact only"]
+    },
+    {
+      "assetId": "unit:voidsage:voidsage_f3",
+      "unitId": "voidsage",
+      "displayName": "공허를 본 자",
+      "form": 3,
+      "sourceFamily": "project-authored-anomaly",
+      "simulationContactFrame": 48,
+      "visualContract": ["six or more larger space fragments", "body decoration reduced", "fragments align for one decisive collapse", "no screen-filling black hole"]
+    },
+    {
+      "assetId": "unit:enemy-boss-iron",
+      "unitId": "enemy-boss-iron",
+      "displayName": "철문장군",
+      "form": 1,
+      "sourceFamily": "hero-knight",
+      "simulationContactFrame": 52,
+      "visualContract": ["giant gate-shaped shield dominates silhouette", "short thick body behind gate", "very slow armored advance", "close-range area hit reads as gate-body impact"]
+    }
+  ],
+  "reusedBattlefields": [
+    {"theme": "moon", "stageAnchor": "main_01_019", "fromSlice": "third-slice"},
+    {"theme": "fortress", "stageAnchor": "main_01_020", "fromSlice": "third-slice"}
+  ],
+  "reusedBosses": [
+    {"unitId": "enemy-boss", "displayName": "황금가면 사령술사", "fromSlice": "first-slice", "stageAnchors": ["main_01_019", "main_01_020"]}
+  ],
+  "reviewConstraints": {
+    "humanCaptureRequiredForApproval": true,
+    "humanApprovalRequired": true,
+    "automatedMaterializationIsNotReviewEvidence": true,
+    "noRuntimeAuthorityBeforeApproval": true
+  }
+}
