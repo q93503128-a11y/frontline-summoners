@@ -1,0 +1,393 @@
+{
+  "schemaVersion": 1,
+  "batchId": "chapter-02-production-01",
+  "generatorVersion": 1,
+  "status": "UNREVIEWED_RUNTIME_FILES",
+  "humanReview": "PENDING",
+  "reviewer": null,
+  "reviewedAt": null,
+  "generativeAiUsed": false,
+  "normalRuntimeAuthoritative": false,
+  "targets": {
+    "enemy_ch2_mossboar": {
+      "assetId": "unit:enemy_ch2_mossboar",
+      "sourceFamily": "project-authored-nature-beast",
+      "structuralRework": false,
+      "projectAuthoredDeterministic": true,
+      "reviewStatus": "UNREVIEWED_RUNTIME_FILES",
+      "frameWidth": 230,
+      "frameHeight": 170,
+      "displayHeight": 176,
+      "attackContactFrame": 2,
+      "motions": {
+        "idle": {
+          "frames": 6,
+          "bytes": 4014,
+          "sha256": "eb8930cf382c6f24fd5ec2b691a7175ec74eacb788edef3c051013305bdfd0ac"
+        },
+        "move": {
+          "frames": 8,
+          "bytes": 5148,
+          "sha256": "bb7e915fd4a18e4dc1e1fb2086313bc713090684b4b16e35f9abd52233a74b94"
+        },
+        "attack": {
+          "frames": 6,
+          "bytes": 3820,
+          "sha256": "828a22bf27e516ad43f879fc2cf10c551b666a3cc68433ac2adfb9a5629e27b5"
+        },
+        "knockback": {
+          "frames": 4,
+          "bytes": 2790,
+          "sha256": "7df895815502de73616157ec54708675e4c6a88d410d177bada3a344c58e5867"
+        },
+        "death": {
+          "frames": 6,
+          "bytes": 5619,
+          "sha256": "6a830c27dd60f58acea1b0b2e4acff8110845aeb68d5d6d2cc7a7c62bf334212"
+        }
+      }
+    },
+    "enemy_ch2_umbrella": {
+      "assetId": "unit:enemy_ch2_umbrella",
+      "sourceFamily": "project-authored-nature-fungus",
+      "structuralRework": false,
+      "projectAuthoredDeterministic": true,
+      "reviewStatus": "UNREVIEWED_RUNTIME_FILES",
+      "frameWidth": 190,
+      "frameHeight": 180,
+      "displayHeight": 164,
+      "attackContactFrame": 3,
+      "motions": {
+        "idle": {
+          "frames": 6,
+          "bytes": 2873,
+          "sha256": "0a2b98c1197665aca05e05f4a0276fcc4ad66a76d7d6bc33618ac8467ac4fc68"
+        },
+        "move": {
+          "frames": 8,
+          "bytes": 3865,
+          "sha256": "4cc78130abc23d7c625fa7f651a84f876a3cffbbd2d7ccb465fb4f7873f687c8"
+        },
+        "attack": {
+          "frames": 7,
+          "bytes": 4411,
+          "sha256": "a7a95af7d7eebe6b7646da24a59d82fc4d4d1255e998662ed61a88ca6f8507bc"
+        },
+        "knockback": {
+          "frames": 4,
+          "bytes": 2002,
+          "sha256": "80474c9a1d7af9f26fb93a5dbafe42f43bbd57fd3de382bf1299da8f3acd868f"
+        },
+        "death": {
+          "frames": 6,
+          "bytes": 4098,
+          "sha256": "0de404eb13d83d782613dc4c3e790939b22aad3b763d4b6d5887e694ce5ef296"
+        }
+      }
+    },
+    "enemy_ch2_vinerider": {
+      "assetId": "unit:enemy_ch2_vinerider",
+      "sourceFamily": "project-authored-nature-vine",
+      "structuralRework": false,
+      "projectAuthoredDeterministic": true,
+      "reviewStatus": "UNREVIEWED_RUNTIME_FILES",
+      "frameWidth": 250,
+      "frameHeight": 190,
+      "displayHeight": 190,
+      "attackContactFrame": 3,
+      "motions": {
+        "idle": {
+          "frames": 6,
+          "bytes": 4101,
+          "sha256": "75df0f0b36456aaaee84e043051dc3cef5281dad8e24291bca58602a8ec45e55"
+        },
+        "move": {
+          "frames": 8,
+          "bytes": 5331,
+          "sha256": "5f4f9d0e06dff993c32e583b067843d0231138203f36ae3d0f703207bcd87c00"
+        },
+        "attack": {
+          "frames": 7,
+          "bytes": 4608,
+          "sha256": "0d8c7923780cf7ddac1a43bd18d27eaf5534e194786953e114f9741ae5355c5e"
+        },
+        "knockback": {
+          "frames": 4,
+          "bytes": 3019,
+          "sha256": "e1e6864cba6bcf272b5074421bef3b4b10a033ba6e71cdfed869722d831e00ff"
+        },
+        "death": {
+          "frames": 6,
+          "bytes": 6015,
+          "sha256": "aeb465361f07a41c17798e4fc3e186591053985f7c831df4ab2dde7a7649dbfe"
+        }
+      }
+    },
+    "enemy_ch2_seedbattery": {
+      "assetId": "unit:enemy_ch2_seedbattery",
+      "sourceFamily": "project-authored-nature-structure",
+      "structuralRework": false,
+      "projectAuthoredDeterministic": true,
+      "reviewStatus": "UNREVIEWED_RUNTIME_FILES",
+      "frameWidth": 250,
+      "frameHeight": 200,
+      "displayHeight": 188,
+      "attackContactFrame": 4,
+      "motions": {
+        "idle": {
+          "frames": 6,
+          "bytes": 4296,
+          "sha256": "813c39d4c58821dfaaa1c672c770dc092355bca48b9f07b5a4385131edc26d7d"
+        },
+        "move": {
+          "frames": 8,
+          "bytes": 5635,
+          "sha256": "08fb7d1fe7c94339540dd0a42b85a8d0190250f3aaac014336c7eb58aab17e41"
+        },
+        "attack": {
+          "frames": 8,
+          "bytes": 6627,
+          "sha256": "895c35f6f0533781c695e1e817ce8b734a028151c48587d1b0816edd9d29e9a0"
+        },
+        "knockback": {
+          "frames": 4,
+          "bytes": 3101,
+          "sha256": "405c9125aa3210535506103337c0913f825e60cfad11e0dce2faf3c644214a86"
+        },
+        "death": {
+          "frames": 7,
+          "bytes": 7075,
+          "sha256": "815e25d3b6bbc3d917f120395b42629f1e5ab9b0c23257c0306ec96681700a73"
+        }
+      }
+    },
+    "enemy_ch2_bonewheel": {
+      "assetId": "unit:enemy_ch2_bonewheel",
+      "sourceFamily": "project-authored-undead-wheel",
+      "structuralRework": false,
+      "projectAuthoredDeterministic": true,
+      "reviewStatus": "UNREVIEWED_RUNTIME_FILES",
+      "frameWidth": 180,
+      "frameHeight": 160,
+      "displayHeight": 152,
+      "attackContactFrame": 1,
+      "motions": {
+        "idle": {
+          "frames": 6,
+          "bytes": 7210,
+          "sha256": "04320c361fec57ecaf6dc2ee9de5c87bd71249ae017f6e575a2e0632625d1c55"
+        },
+        "move": {
+          "frames": 8,
+          "bytes": 9228,
+          "sha256": "cfc2580d089193d2766c770b36f02f444b183d411dfa6ec79470af40feed4a74"
+        },
+        "attack": {
+          "frames": 5,
+          "bytes": 6094,
+          "sha256": "6c0e0c00a109b7593b1825905b5b2ade33ef58b2dbfe86618d0b1cd6d3f869cf"
+        },
+        "knockback": {
+          "frames": 4,
+          "bytes": 4980,
+          "sha256": "ef5ae16df19bba992439d638f42b9bd57b4ff6b5a781f13b452d05ff5546aa3d"
+        },
+        "death": {
+          "frames": 6,
+          "bytes": 7526,
+          "sha256": "3e1ea7a165d61874384d0d66603f80013872d6dd608e8932f5522e3c97adbc26"
+        }
+      }
+    },
+    "enemy_ch2_coffinbug": {
+      "assetId": "unit:enemy_ch2_coffinbug",
+      "sourceFamily": "project-authored-undead-insect",
+      "structuralRework": false,
+      "projectAuthoredDeterministic": true,
+      "reviewStatus": "UNREVIEWED_RUNTIME_FILES",
+      "frameWidth": 230,
+      "frameHeight": 180,
+      "displayHeight": 194,
+      "attackContactFrame": 2,
+      "motions": {
+        "idle": {
+          "frames": 6,
+          "bytes": 4894,
+          "sha256": "4d6ce521d39594f09aaac47d758ac6d424127aa5f49c6663fbfa95e744f68f49"
+        },
+        "move": {
+          "frames": 8,
+          "bytes": 6397,
+          "sha256": "ff146c48fe17f1be4c6463039599cf78e64b72ccfaaedcdd6f3c526b3e3f3b43"
+        },
+        "attack": {
+          "frames": 6,
+          "bytes": 5217,
+          "sha256": "1994d1b66d76f12619da813f2f839c09e30fab13c1d478706665e1bec3772495"
+        },
+        "knockback": {
+          "frames": 4,
+          "bytes": 3352,
+          "sha256": "fe1824160869aa37f79421204c87d1f82d74a5e4f29111d708ea958781ef53d8"
+        },
+        "death": {
+          "frames": 7,
+          "bytes": 8037,
+          "sha256": "805bbd52cdd481e197bbe3862ea5af621154f4d753c93c762544fbcec4c2fe62"
+        }
+      }
+    },
+    "enemy_ch2_gravebell": {
+      "assetId": "unit:enemy_ch2_gravebell",
+      "sourceFamily": "project-authored-undead-bell",
+      "structuralRework": false,
+      "projectAuthoredDeterministic": true,
+      "reviewStatus": "UNREVIEWED_RUNTIME_FILES",
+      "frameWidth": 230,
+      "frameHeight": 220,
+      "displayHeight": 204,
+      "attackContactFrame": 4,
+      "motions": {
+        "idle": {
+          "frames": 6,
+          "bytes": 4211,
+          "sha256": "4c932caa98a4a65f207dd680b80b7c1fea35af6b0b6f4b0ff7f925daadf59b1b"
+        },
+        "move": {
+          "frames": 8,
+          "bytes": 5596,
+          "sha256": "ec4940b7d0ef69dc8fb021d9a61899ead705f8d28646650471a7c2b9c27ff45f"
+        },
+        "attack": {
+          "frames": 8,
+          "bytes": 7032,
+          "sha256": "d2fdb76d327e9f752494b04fb4c20f116b8f9c978198c1d126edb73ed3fa379b"
+        },
+        "knockback": {
+          "frames": 4,
+          "bytes": 3026,
+          "sha256": "141bfc75f77ddaaaded7a20c6866af6b8defd085cee3ed6b6f615ff27de9f77c"
+        },
+        "death": {
+          "frames": 7,
+          "bytes": 8745,
+          "sha256": "4e01c68568da3fd0be31b3914eda0789ada1e6b701e5100626fc71e11a9a32ca"
+        }
+      }
+    },
+    "enemy_ch2_revivedarmor": {
+      "assetId": "unit:enemy_ch2_revivedarmor",
+      "sourceFamily": "project-authored-undead-armor",
+      "structuralRework": false,
+      "projectAuthoredDeterministic": true,
+      "reviewStatus": "UNREVIEWED_RUNTIME_FILES",
+      "frameWidth": 230,
+      "frameHeight": 220,
+      "displayHeight": 210,
+      "attackContactFrame": 2,
+      "motions": {
+        "idle": {
+          "frames": 6,
+          "bytes": 4010,
+          "sha256": "3299769866efc8665c336f4e70af749a77b585f8905c9102088591e70aca98ad"
+        },
+        "move": {
+          "frames": 8,
+          "bytes": 5325,
+          "sha256": "2f56f11eb0bdb454c40d58252f606964233427c28959c254b470152dd715a166"
+        },
+        "attack": {
+          "frames": 6,
+          "bytes": 3989,
+          "sha256": "ce228dab99acb3708d818643b306ac4d4e72283039a03190f2e64645c4489045"
+        },
+        "knockback": {
+          "frames": 4,
+          "bytes": 2793,
+          "sha256": "5a9a7023763564feca05e17eab31cd0afb394faf13e7fa4d145fb787826cd8f0"
+        },
+        "death": {
+          "frames": 8,
+          "bytes": 7786,
+          "sha256": "a935c3a539389620f51dd43ef6e472b6967c483f1c5793a3561a67acd628b299"
+        }
+      }
+    },
+    "boss_ch2_rootwidow": {
+      "assetId": "unit:boss_ch2_rootwidow",
+      "sourceFamily": "project-authored-nature-boss",
+      "structuralRework": false,
+      "projectAuthoredDeterministic": true,
+      "reviewStatus": "UNREVIEWED_RUNTIME_FILES",
+      "frameWidth": 320,
+      "frameHeight": 280,
+      "displayHeight": 268,
+      "attackContactFrame": 4,
+      "motions": {
+        "idle": {
+          "frames": 8,
+          "bytes": 11004,
+          "sha256": "2e5e65a1cddd7cde53ebada5abef670c6b58d5e80d9b9965e92a4c8b580d68a2"
+        },
+        "move": {
+          "frames": 8,
+          "bytes": 11718,
+          "sha256": "68ae1c4d2b1ec63509855d15211c38b53c5c24de3c91f11e918b7f509b192f55"
+        },
+        "attack": {
+          "frames": 8,
+          "bytes": 11333,
+          "sha256": "5d5d04640dd94fd0032e030f40923bc95cdeedcb988e4415c18d00641c826115"
+        },
+        "knockback": {
+          "frames": 4,
+          "bytes": 5885,
+          "sha256": "41e0ec9eece402c1f0d41ec7051f432b529fa5d56097da159d9f5f11c1b05958"
+        },
+        "death": {
+          "frames": 8,
+          "bytes": 18818,
+          "sha256": "31f5ba60d7282f727ceb36681ecad550dcee4af75b92ce1877d4d344835d8647"
+        }
+      }
+    },
+    "boss_ch2_funeral_king": {
+      "assetId": "unit:boss_ch2_funeral_king",
+      "sourceFamily": "project-authored-undead-boss",
+      "structuralRework": false,
+      "projectAuthoredDeterministic": true,
+      "reviewStatus": "UNREVIEWED_RUNTIME_FILES",
+      "frameWidth": 330,
+      "frameHeight": 290,
+      "displayHeight": 276,
+      "attackContactFrame": 5,
+      "motions": {
+        "idle": {
+          "frames": 8,
+          "bytes": 10199,
+          "sha256": "77a10489036d0c375b5096e58f8eee63543ea0b95eaedf16c3ae14c6e02edc67"
+        },
+        "move": {
+          "frames": 8,
+          "bytes": 10786,
+          "sha256": "68ab110c6a17314d0c1d482af90c16cf5b90e12c116a8319c7148f71fddb4ee4"
+        },
+        "attack": {
+          "frames": 8,
+          "bytes": 13534,
+          "sha256": "f81a3969f548dd0a884e8f809a5e5a2b4811de70746ac5668da22774aec0b91d"
+        },
+        "knockback": {
+          "frames": 4,
+          "bytes": 5753,
+          "sha256": "b036ae5c9d50ac05eaedd15326b0900d2c0aab515602b6f452f4ebadb3abef49"
+        },
+        "death": {
+          "frames": 8,
+          "bytes": 19866,
+          "sha256": "43be4da8544c4f56a0126d01b1af0fa24f8b213f0105d279fe10f9e32d3a6c69"
+        }
+      }
+    }
+  }
+}
