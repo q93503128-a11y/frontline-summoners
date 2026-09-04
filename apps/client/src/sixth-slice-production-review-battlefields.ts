@@ -1,0 +1,8 @@
+import Phaser from 'phaser';
+import { isSixthSliceProductionReviewMode } from './sixth-slice-production-review-runtime.ts';
+type Theme='moon'|'fortress';
+const entry=(theme:Theme)=>({baseKey:`sixth-slice-${theme}-base`,baseUrl:`/assets/production/battlefields/${theme}/battlefield-base.svg`,backgroundKey:`sixth-slice-${theme}-background`,backgroundUrl:`/assets/production/battlefields/${theme}/background-landmarks.svg`,foregroundKey:`sixth-slice-${theme}-foreground`,foregroundUrl:`/assets/production/battlefields/${theme}/foreground-low-density.svg`});
+const B={moon:entry('moon'),fortress:entry('fortress')} as const;
+function theme(scene:Phaser.Scene):Theme|undefined{const t=(scene as unknown as{stage?:{theme?:string}}).stage?.theme;return t==='moon'||t==='fortress'?t:undefined;}
+export function preloadSixthSliceProductionReviewBattlefields(scene:Phaser.Scene):void{if(!isSixthSliceProductionReviewMode())return;for(const e of Object.values(B))for(const [key,url] of [[e.baseKey,e.baseUrl],[e.backgroundKey,e.backgroundUrl],[e.foregroundKey,e.foregroundUrl]] as const)if(!scene.textures.exists(key))scene.load.image(key,url);}
+export function renderSixthSliceProductionReviewBattlefields(scene:Phaser.Scene):void{if(!isSixthSliceProductionReviewMode())return;const t=theme(scene);if(!t)return;const e=B[t];if(scene.textures.exists(e.baseKey))scene.add.image(640,360,e.baseKey).setDisplaySize(1280,720).setDepth(0);if(scene.textures.exists(e.backgroundKey))scene.add.image(640,360,e.backgroundKey).setDisplaySize(1280,720).setDepth(.4);if(scene.textures.exists(e.foregroundKey))scene.add.image(640,360,e.foregroundKey).setDisplaySize(1280,720).setDepth(2.4);}
