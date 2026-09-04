@@ -1,0 +1,56 @@
+{
+  "schemaVersion": 1,
+  "sliceId": "fourth-slice-mid-wave-04",
+  "generatorVersion": 1,
+  "assetId": "unit:enemy-berserker",
+  "sourceFamily": "fantasy-warrior",
+  "projectAuthored": false,
+  "structuralRework": true,
+  "generativeAiUsed": false,
+  "status": "AWAITING_ART",
+  "reviewStatus": "UNREVIEWED_RUNTIME_FILES",
+  "normalRuntimeAuthoritative": false,
+  "displayHeight": 204,
+  "attackContactFrame": 4,
+  "frameWidth": 255,
+  "frameHeight": 185,
+  "motions": {
+    "idle": 10,
+    "move": 8,
+    "attack": 7,
+    "knockback": 3,
+    "death": 7
+  },
+  "files": {
+    "idle": {
+      "frames": 10,
+      "width": 2550,
+      "height": 185,
+      "sha256": "a49d23ac0cc97b5bb9d0e36a34e579bf3e3e430621fef797f91c0ce93539f5aa"
+    },
+    "move": {
+      "frames": 8,
+      "width": 2040,
+      "height": 185,
+      "sha256": "1af418a84a5cfb0bc8277f4cc94249e4e9cbbe013fe582750097234e7c6adc00"
+    },
+    "attack": {
+      "frames": 7,
+      "width": 1785,
+      "height": 185,
+      "sha256": "5fb2f31329bea0dd42e42e93ba5e2cd38fc3a796d5d369f3b2d399a6ec2f7436"
+    },
+    "knockback": {
+      "frames": 3,
+      "width": 765,
+      "height": 185,
+      "sha256": "ae1167f85c41fb68e76ff3be842147792ef3f77da5a033fa48d4f1409bf3df34"
+    },
+    "death": {
+      "frames": 7,
+      "width": 1785,
+      "height": 185,
+      "sha256": "aa35a3f2b4b46897eb144ce9ca16fecf20a3f27f97369f3619e2a58591149d79"
+    }
+  }
+}

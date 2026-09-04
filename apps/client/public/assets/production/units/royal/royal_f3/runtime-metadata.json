@@ -1,0 +1,56 @@
+{
+  "schemaVersion": 1,
+  "sliceId": "fourth-slice-mid-wave-04",
+  "generatorVersion": 1,
+  "assetId": "unit:royal:royal_f3",
+  "sourceFamily": "hero-knight",
+  "projectAuthored": false,
+  "structuralRework": true,
+  "generativeAiUsed": false,
+  "status": "AWAITING_ART",
+  "reviewStatus": "UNREVIEWED_RUNTIME_FILES",
+  "normalRuntimeAuthoritative": false,
+  "displayHeight": 216,
+  "attackContactFrame": 4,
+  "frameWidth": 265,
+  "frameHeight": 205,
+  "motions": {
+    "idle": 11,
+    "move": 8,
+    "attack": 7,
+    "knockback": 4,
+    "death": 11
+  },
+  "files": {
+    "idle": {
+      "frames": 11,
+      "width": 2915,
+      "height": 205,
+      "sha256": "5a5dddefe9f612968b9dce6d83f81c0e07fe0e73d62871c64cc8c7d575f70f67"
+    },
+    "move": {
+      "frames": 8,
+      "width": 2120,
+      "height": 205,
+      "sha256": "79ba695eb0ba415333ac6adf7dca9caea81b18ad0a5577fb6c94c826c404854a"
+    },
+    "attack": {
+      "frames": 7,
+      "width": 1855,
+      "height": 205,
+      "sha256": "0eb3bd6fe8cfa4d566caf68ade0d94811a01e57d99f5b4cd2e5786b6819723e0"
+    },
+    "knockback": {
+      "frames": 4,
+      "width": 1060,
+      "height": 205,
+      "sha256": "fc2848ac77460996fc618459f12c1b7d0ead8298829842b785ba47bb3e33b953"
+    },
+    "death": {
+      "frames": 11,
+      "width": 2915,
+      "height": 205,
+      "sha256": "8ac9eeb53d27fb5beaa04b58159c54db481fab2da4d51f1177631b5110fe7817"
+    }
+  }
+}

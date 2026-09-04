@@ -1,0 +1,56 @@
+{
+  "schemaVersion": 1,
+  "sliceId": "fourth-slice-mid-wave-04",
+  "generatorVersion": 1,
+  "assetId": "unit:enemy-knight",
+  "sourceFamily": "project-authored-beast",
+  "projectAuthored": true,
+  "structuralRework": true,
+  "generativeAiUsed": false,
+  "status": "AWAITING_ART",
+  "reviewStatus": "UNREVIEWED_RUNTIME_FILES",
+  "normalRuntimeAuthoritative": false,
+  "displayHeight": 176,
+  "attackContactFrame": 3,
+  "frameWidth": 230,
+  "frameHeight": 150,
+  "motions": {
+    "idle": 6,
+    "move": 8,
+    "attack": 6,
+    "knockback": 4,
+    "death": 6
+  },
+  "files": {
+    "idle": {
+      "frames": 6,
+      "width": 1380,
+      "height": 150,
+      "sha256": "8db24dfc6283300cc26952178f831cdd218ed2537868d05d89197fd7a44b35e0"
+    },
+    "move": {
+      "frames": 8,
+      "width": 1840,
+      "height": 150,
+      "sha256": "f5e4fa5044e8384447310d1dd1d645521a3b7600763ad0ce0a8ae7d22e92dec9"
+    },
+    "attack": {
+      "frames": 6,
+      "width": 1380,
+      "height": 150,
+      "sha256": "def9e8593f4de16248f6da5cf019f72ea0fbcaaeb55d40c9c9a446f19777c2c3"
+    },
+    "knockback": {
+      "frames": 4,
+      "width": 920,
+      "height": 150,
+      "sha256": "05215c6d2af2822487034a8824c18acd3f0dc6f62ab925aae636211e526723f8"
+    },
+    "death": {
+      "frames": 6,
+      "width": 1380,
+      "height": 150,
+      "sha256": "2a56d1a6573c0998b8ee089ff5daacb84db386f2b470800952c6ff8ec0016675"
+    }
+  }
+}

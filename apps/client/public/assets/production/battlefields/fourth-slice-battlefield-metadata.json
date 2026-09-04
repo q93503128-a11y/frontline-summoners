@@ -1,0 +1,21 @@
+{
+  "schemaVersion": 1,
+  "sliceId": "fourth-slice-mid-wave-04",
+  "status": "UNREVIEWED_RUNTIME_FILES",
+  "authorship": "ORIGINAL_PROJECT_VECTOR_COMPOSITION",
+  "generativeAiUsed": false,
+  "humanReview": "PENDING",
+  "reviewer": null,
+  "reviewedAt": null,
+  "theme": "golden",
+  "stageAnchor": "main_01_011",
+  "clearCorridor": {
+    "xMin": 360,
+    "xMax": 930
+  },
+  "files": [
+    "battlefield-base.svg",
+    "background-landmarks.svg",
+    "foreground-low-density.svg"
+  ]
+}

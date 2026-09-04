@@ -1,0 +1,56 @@
+{
+  "schemaVersion": 1,
+  "sliceId": "fourth-slice-mid-wave-04",
+  "generatorVersion": 1,
+  "assetId": "unit:pyromancer:pyromancer_f2",
+  "sourceFamily": "evil-wizard-2",
+  "projectAuthored": false,
+  "structuralRework": true,
+  "generativeAiUsed": false,
+  "status": "AWAITING_ART",
+  "reviewStatus": "UNREVIEWED_RUNTIME_FILES",
+  "normalRuntimeAuthoritative": false,
+  "displayHeight": 202,
+  "attackContactFrame": 5,
+  "frameWidth": 310,
+  "frameHeight": 260,
+  "motions": {
+    "idle": 8,
+    "move": 8,
+    "attack": 8,
+    "knockback": 3,
+    "death": 7
+  },
+  "files": {
+    "idle": {
+      "frames": 8,
+      "width": 2480,
+      "height": 260,
+      "sha256": "8483abf4b8f67181197ab4d21b8b47dd8e180d6a8bde04d7cc8875a5c3d8fefe"
+    },
+    "move": {
+      "frames": 8,
+      "width": 2480,
+      "height": 260,
+      "sha256": "78f97c17434bfb6e601aabc13c409b26e6a7fd891496358169b7f88c7122bbb4"
+    },
+    "attack": {
+      "frames": 8,
+      "width": 2480,
+      "height": 260,
+      "sha256": "446837f5d130fa0cb90a189547cea531edffd2850250d706731f9cb8f470c6ed"
+    },
+    "knockback": {
+      "frames": 3,
+      "width": 930,
+      "height": 260,
+      "sha256": "45c69807ddfe59f300ecb002eb3f93f1295e1957d7e08d64dc018e8e4cc21c02"
+    },
+    "death": {
+      "frames": 7,
+      "width": 2170,
+      "height": 260,
+      "sha256": "8c12b6f557c39fb4d6a67adb2b95dcd08b42d70bab81eec444f7ecc3b1851cfe"
+    }
+  }
+}
