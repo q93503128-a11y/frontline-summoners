@@ -1,0 +1,166 @@
+{
+  "schemaVersion": 1,
+  "status": "PREFLIGHT_DRAFT_ONLY",
+  "note": "Derived from committed runtime metadata and rework contracts. This file does not change review-package lifecycle state.",
+  "targets": {
+    "unit:militia:militia_f1": {
+      "status": "DRAFT_NOT_CANONICAL_REVIEW_PROVENANCE",
+      "sourceFamily": "warrior-3",
+      "sourceUrls": [
+        "https://raw.githubusercontent.com/chaurunda/ClickerGodot/c425114bfa522b1e57f0cfc4f486580a3210f36d/assets/Medieval%20Warrior%20Pack%203/Sprites/Idle.png",
+        "https://raw.githubusercontent.com/chaurunda/ClickerGodot/c425114bfa522b1e57f0cfc4f486580a3210f36d/assets/Medieval%20Warrior%20Pack%203/Sprites/Run.png",
+        "https://raw.githubusercontent.com/chaurunda/ClickerGodot/c425114bfa522b1e57f0cfc4f486580a3210f36d/assets/Medieval%20Warrior%20Pack%203/Sprites/Attack1.png",
+        "https://raw.githubusercontent.com/chaurunda/ClickerGodot/c425114bfa522b1e57f0cfc4f486580a3210f36d/assets/Medieval%20Warrior%20Pack%203/Sprites/Get%20Hit.png",
+        "https://raw.githubusercontent.com/chaurunda/ClickerGodot/c425114bfa522b1e57f0cfc4f486580a3210f36d/assets/Medieval%20Warrior%20Pack%203/Sprites/Death.png"
+      ],
+      "promotableProvenance": {
+        "authorOrSource": "warrior-3 CC0 source family; pinned source URLs recorded alongside this draft",
+        "rightsOrLicense": "CC0-1.0",
+        "productionMethod": "MANUAL",
+        "modifications": "Deterministic non-generative structural rework in project tooling. Required silhouette reads: irregular rectangular travel pack; short improvised weapon; upright novice stance. Forbidden reads: shield infantry; long-lance specialist; clean regular-army kit.",
+        "masterFiles": [
+          "tools/materialize-first-slice-production-art.mjs",
+          "assets/raw/production/first-slice-rework-01.json"
+        ],
+        "runtimeFiles": [
+          "apps/client/public/assets/production/units/militia/militia_f1/idle.png",
+          "apps/client/public/assets/production/units/militia/militia_f1/move.png",
+          "apps/client/public/assets/production/units/militia/militia_f1/attack.png",
+          "apps/client/public/assets/production/units/militia/militia_f1/knockback.png",
+          "apps/client/public/assets/production/units/militia/militia_f1/death.png"
+        ]
+      }
+    },
+    "unit:militia:militia_f2": {
+      "status": "DRAFT_NOT_CANONICAL_REVIEW_PROVENANCE",
+      "sourceFamily": "hero-knight-2",
+      "sourceUrls": [
+        "https://raw.githubusercontent.com/NQM765/IngeSoft1/84594e5d3da7472615660f453bdb457da13cca2f/Proyecto/Scrum%27s_Castle/Assets/Characters/Hero%20Knight%202/Sprites/Idle.png",
+        "https://raw.githubusercontent.com/NQM765/IngeSoft1/84594e5d3da7472615660f453bdb457da13cca2f/Proyecto/Scrum%27s_Castle/Assets/Characters/Hero%20Knight%202/Sprites/Run.png",
+        "https://raw.githubusercontent.com/NQM765/IngeSoft1/84594e5d3da7472615660f453bdb457da13cca2f/Proyecto/Scrum%27s_Castle/Assets/Characters/Hero%20Knight%202/Sprites/Attack.png",
+        "https://raw.githubusercontent.com/NQM765/IngeSoft1/84594e5d3da7472615660f453bdb457da13cca2f/Proyecto/Scrum%27s_Castle/Assets/Characters/Hero%20Knight%202/Sprites/Take%20Hit.png",
+        "https://raw.githubusercontent.com/NQM765/IngeSoft1/84594e5d3da7472615660f453bdb457da13cca2f/Proyecto/Scrum%27s_Castle/Assets/Characters/Hero%20Knight%202/Sprites/Death.png"
+      ],
+      "promotableProvenance": {
+        "authorOrSource": "hero-knight-2 CC0 source family; pinned source URLs recorded alongside this draft",
+        "rightsOrLicense": "CC0-1.0",
+        "productionMethod": "MANUAL",
+        "modifications": "Deterministic non-generative structural rework in project tooling. Required silhouette reads: square orderly pack; regular spearhead; uniform shoulder and belt lines. Forbidden reads: F1 irregular conscript; oversized elite knight; F3 crouched veteran.",
+        "masterFiles": [
+          "tools/materialize-first-slice-production-art.mjs",
+          "assets/raw/production/first-slice-rework-01.json"
+        ],
+        "runtimeFiles": [
+          "apps/client/public/assets/production/units/militia/militia_f2/idle.png",
+          "apps/client/public/assets/production/units/militia/militia_f2/move.png",
+          "apps/client/public/assets/production/units/militia/militia_f2/attack.png",
+          "apps/client/public/assets/production/units/militia/militia_f2/knockback.png",
+          "apps/client/public/assets/production/units/militia/militia_f2/death.png"
+        ]
+      }
+    },
+    "unit:militia:militia_f3": {
+      "status": "DRAFT_NOT_CANONICAL_REVIEW_PROVENANCE",
+      "sourceFamily": "warrior-1",
+      "sourceUrls": [
+        "https://raw.githubusercontent.com/NQM765/IngeSoft1/84594e5d3da7472615660f453bdb457da13cca2f/Proyecto/Scrum%27s_Castle/Assets/Characters/Medieval%20Warrior%20Pack/Idle.png",
+        "https://raw.githubusercontent.com/NQM765/IngeSoft1/84594e5d3da7472615660f453bdb457da13cca2f/Proyecto/Scrum%27s_Castle/Assets/Characters/Medieval%20Warrior%20Pack/Run.png",
+        "https://raw.githubusercontent.com/NQM765/IngeSoft1/84594e5d3da7472615660f453bdb457da13cca2f/Proyecto/Scrum%27s_Castle/Assets/Characters/Medieval%20Warrior%20Pack/Attack1.png",
+        "https://raw.githubusercontent.com/NQM765/IngeSoft1/84594e5d3da7472615660f453bdb457da13cca2f/Proyecto/Scrum%27s_Castle/Assets/Characters/Medieval%20Warrior%20Pack/Hit.png",
+        "https://raw.githubusercontent.com/NQM765/IngeSoft1/84594e5d3da7472615660f453bdb457da13cca2f/Proyecto/Scrum%27s_Castle/Assets/Characters/Medieval%20Warrior%20Pack/Death.png"
+      ],
+      "promotableProvenance": {
+        "authorOrSource": "warrior-1 CC0 source family; pinned source URLs recorded alongside this draft",
+        "rightsOrLicense": "CC0-1.0",
+        "productionMethod": "MANUAL",
+        "modifications": "Deterministic non-generative structural rework in project tooling. Required silhouette reads: shortest practical weapon; low forward veteran stance; worn repaired equipment. Forbidden reads: bigger shinier F2 armor; ceremonial elite; long-spear specialist.",
+        "masterFiles": [
+          "tools/materialize-first-slice-production-art.mjs",
+          "assets/raw/production/first-slice-rework-01.json"
+        ],
+        "runtimeFiles": [
+          "apps/client/public/assets/production/units/militia/militia_f3/idle.png",
+          "apps/client/public/assets/production/units/militia/militia_f3/move.png",
+          "apps/client/public/assets/production/units/militia/militia_f3/attack.png",
+          "apps/client/public/assets/production/units/militia/militia_f3/knockback.png",
+          "apps/client/public/assets/production/units/militia/militia_f3/death.png"
+        ]
+      }
+    },
+    "unit:enemy-raider": {
+      "status": "DRAFT_NOT_CANONICAL_REVIEW_PROVENANCE",
+      "sourceFamily": "warrior",
+      "sourceUrls": [
+        "https://raw.githubusercontent.com/NQM765/IngeSoft1/84594e5d3da7472615660f453bdb457da13cca2f/Proyecto/Scrum%27s_Castle/Assets/Characters/Medieval%20Warrior%20Pack%202/Sprites/Idle.png",
+        "https://raw.githubusercontent.com/NQM765/IngeSoft1/84594e5d3da7472615660f453bdb457da13cca2f/Proyecto/Scrum%27s_Castle/Assets/Characters/Medieval%20Warrior%20Pack%202/Sprites/Run.png",
+        "https://raw.githubusercontent.com/NQM765/IngeSoft1/84594e5d3da7472615660f453bdb457da13cca2f/Proyecto/Scrum%27s_Castle/Assets/Characters/Medieval%20Warrior%20Pack%202/Sprites/Attack1.png",
+        "https://raw.githubusercontent.com/NQM765/IngeSoft1/84594e5d3da7472615660f453bdb457da13cca2f/Proyecto/Scrum%27s_Castle/Assets/Characters/Medieval%20Warrior%20Pack%202/Sprites/Take%20Hit.png",
+        "https://raw.githubusercontent.com/NQM765/IngeSoft1/84594e5d3da7472615660f453bdb457da13cca2f/Proyecto/Scrum%27s_Castle/Assets/Characters/Medieval%20Warrior%20Pack%202/Sprites/Death.png"
+      ],
+      "promotableProvenance": {
+        "authorOrSource": "warrior CC0 source family; pinned source URLs recorded alongside this draft",
+        "rightsOrLicense": "CC0-1.0",
+        "productionMethod": "MANUAL",
+        "modifications": "Deterministic non-generative structural rework in project tooling. Required silhouette reads: one-sided oversized loot sack; small secondary hand weapon; forward-leaning uneven gait. Forbidden reads: militia backpack; symmetrical soldier loadout; large primary sword silhouette.",
+        "masterFiles": [
+          "tools/materialize-first-slice-production-art.mjs",
+          "assets/raw/production/first-slice-rework-01.json"
+        ],
+        "runtimeFiles": [
+          "apps/client/public/assets/production/units/enemy-raider/idle.png",
+          "apps/client/public/assets/production/units/enemy-raider/move.png",
+          "apps/client/public/assets/production/units/enemy-raider/attack.png",
+          "apps/client/public/assets/production/units/enemy-raider/knockback.png",
+          "apps/client/public/assets/production/units/enemy-raider/death.png"
+        ]
+      }
+    },
+    "unit:enemy-boss": {
+      "status": "DRAFT_NOT_CANONICAL_REVIEW_PROVENANCE",
+      "sourceFamily": "evil-wizard",
+      "sourceUrls": [
+        "https://raw.githubusercontent.com/NQM765/IngeSoft1/84594e5d3da7472615660f453bdb457da13cca2f/Proyecto/Scrum%27s_Castle/Assets/Characters/Evil%20Wizard/Sprites/Idle.png",
+        "https://raw.githubusercontent.com/NQM765/IngeSoft1/84594e5d3da7472615660f453bdb457da13cca2f/Proyecto/Scrum%27s_Castle/Assets/Characters/Evil%20Wizard/Sprites/Move.png",
+        "https://raw.githubusercontent.com/NQM765/IngeSoft1/84594e5d3da7472615660f453bdb457da13cca2f/Proyecto/Scrum%27s_Castle/Assets/Characters/Evil%20Wizard/Sprites/Attack.png",
+        "https://raw.githubusercontent.com/NQM765/IngeSoft1/84594e5d3da7472615660f453bdb457da13cca2f/Proyecto/Scrum%27s_Castle/Assets/Characters/Evil%20Wizard/Sprites/Take%20Hit.png",
+        "https://raw.githubusercontent.com/NQM765/IngeSoft1/84594e5d3da7472615660f453bdb457da13cca2f/Proyecto/Scrum%27s_Castle/Assets/Characters/Evil%20Wizard/Sprites/Death.png"
+      ],
+      "promotableProvenance": {
+        "authorOrSource": "evil-wizard CC0 source family; pinned source URLs recorded alongside this draft",
+        "rightsOrLicense": "CC0-1.0",
+        "productionMethod": "MANUAL",
+        "modifications": "Deterministic non-generative structural rework in project tooling. Required silhouette reads: oversized floating mask behind the body; small commander body beneath mask; wide rear-weighted spell silhouette. Forbidden reads: scaled-up normal wizard; melee frontliner; single-body helmet silhouette.",
+        "masterFiles": [
+          "tools/materialize-first-slice-production-art.mjs",
+          "tools/materialize-first-slice-boss.mjs",
+          "assets/raw/production/first-slice-rework-01.json"
+        ],
+        "runtimeFiles": [
+          "apps/client/public/assets/production/units/enemy-boss/idle.png",
+          "apps/client/public/assets/production/units/enemy-boss/move.png",
+          "apps/client/public/assets/production/units/enemy-boss/attack.png",
+          "apps/client/public/assets/production/units/enemy-boss/knockback.png",
+          "apps/client/public/assets/production/units/enemy-boss/death.png"
+        ]
+      }
+    },
+    "battlefield:meadow": {
+      "status": "DRAFT_NOT_CANONICAL_REVIEW_PROVENANCE",
+      "sourceFamily": "project-original-vector-composition",
+      "sourceUrls": [],
+      "promotableProvenance": {
+        "authorOrSource": "Frontline Summoners project-authored vector composition",
+        "rightsOrLicense": "PROJECT-OWNED ORIGINAL",
+        "productionMethod": "MANUAL",
+        "modifications": "Original deterministic vector battlefield composition. AI generation not used. Runtime metadata revision 2.",
+        "masterFiles": [
+          "apps/client/public/assets/production/battlefields/meadow/battlefield-base.svg",
+          "apps/client/public/assets/production/battlefields/meadow/meadow-runtime-metadata.json"
+        ],
+        "runtimeFiles": [
+          "apps/client/public/assets/production/battlefields/meadow/battlefield-base.svg"
+        ]
+      }
+    }
+  }
+}

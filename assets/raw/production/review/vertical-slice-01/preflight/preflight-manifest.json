@@ -1,0 +1,106 @@
+{
+  "schemaVersion": 1,
+  "status": "PREFLIGHT_ONLY_NOT_REVIEW_EVIDENCE",
+  "generatedFrom": "apps/client/public/assets/production/units/first-slice-runtime-metadata.json",
+  "generatedFromReviewStatus": "UNREVIEWED_RUNTIME_FILES",
+  "targetOrder": [
+    "militia/militia_f1",
+    "militia/militia_f2",
+    "militia/militia_f3",
+    "enemy-raider",
+    "enemy-boss"
+  ],
+  "boards": [
+    {
+      "id": "motion-key-poses",
+      "file": "preflight/motion-key-poses.png",
+      "width": 1280,
+      "height": 720,
+      "bytes": 26803,
+      "sha256": "eb7a7b3e6775481e7207c383e08903ce6ff03468854f69482c8ff9352f160e41",
+      "intent": "Five committed runtime motions per target, fixed target order F1/F2/F3/raider/boss."
+    },
+    {
+      "id": "silhouette-comparison",
+      "file": "preflight/silhouette-comparison.png",
+      "width": 1280,
+      "height": 720,
+      "bytes": 7135,
+      "sha256": "47a201002193647bc249d121b5e2154055b386c54cbddf1c9e61de6605dad200",
+      "intent": "Color-free committed idle silhouettes in canonical comparison order. Human judgment still required."
+    },
+    {
+      "id": "contact-board",
+      "file": "preflight/contact-board.png",
+      "width": 1280,
+      "height": 720,
+      "bytes": 28045,
+      "sha256": "ec4a62099acc87873014e4b137b6e1096e859b6206cbd5b4877fe55794ad9f8b",
+      "intent": "Idle/contact/knockback visual sequence using each target attackContactFrame. Simulation screenshot confirmation remains pending."
+    },
+    {
+      "id": "scale-sheet",
+      "file": "preflight/scale-sheet.png",
+      "width": 1280,
+      "height": 720,
+      "bytes": 10237,
+      "sha256": "a7edd7e2cb15d3213be3808fb231dede27174421c99e0d0e8b002b87508c67bc",
+      "intent": "Committed displayHeight comparison at one shared ground line."
+    },
+    {
+      "id": "reference-sheet",
+      "file": "preflight/reference-sheet.png",
+      "width": 1280,
+      "height": 720,
+      "bytes": 27612,
+      "sha256": "c68c1cc740121ce4c7aaee0a647ce329988f80da0685ab48fd0dcb147718ed4e",
+      "intent": "Sufficient side-view reference sheet: committed idle color/grayscale plus attack/death identity anchors. Not a fabricated front/back turnaround."
+    },
+    {
+      "id": "closest-three-differences",
+      "file": "preflight/closest-three-differences.png",
+      "width": 1280,
+      "height": 720,
+      "bytes": 13156,
+      "sha256": "efdf6088fee966197d3d9ff2706b941159afd7c17e81e68fa223de08e36e3199",
+      "intent": "Preflight nearest-neighbor silhouette comparison; semantic difference notes live in the review page/manifest, not encoded as fake image text."
+    }
+  ],
+  "contractMapping": {
+    "turnaround-reference": {
+      "candidate": "preflight/reference-sheet.png",
+      "qualification": "SUFFICIENT_SIDE_REFERENCE_CANDIDATE_NOT_FULL_TURNAROUND"
+    },
+    "silhouette-comparison": {
+      "candidate": "preflight/silhouette-comparison.png",
+      "qualification": "PREFLIGHT"
+    },
+    "motion-key-poses": {
+      "candidate": "preflight/motion-key-poses.png",
+      "qualification": "PREFLIGHT"
+    },
+    "contact-board": {
+      "candidate": "preflight/contact-board.png",
+      "qualification": "VISUAL_CONTACT_FRAME_PREFLIGHT_SIM_CAPTURE_PENDING"
+    },
+    "scale-sheet": {
+      "candidate": "preflight/scale-sheet.png",
+      "qualification": "PREFLIGHT"
+    },
+    "closest-three-differences": {
+      "candidate": "preflight/closest-three-differences.png",
+      "qualification": "PREFLIGHT_NOT_HUMAN_JUDGMENT"
+    }
+  },
+  "missingForReadyForReview": [
+    "real runtime PNG captures at exact review viewport sizes",
+    "human-authored closest-three difference notes/acceptance",
+    "target provenance promoted into canonical review package",
+    "human decision that side reference is sufficient or a true turnaround is required"
+  ],
+  "humanReview": {
+    "status": "PENDING",
+    "reviewer": null,
+    "reviewedAt": null
+  }
+}
