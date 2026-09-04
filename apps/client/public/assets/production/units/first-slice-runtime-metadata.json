@@ -1,0 +1,225 @@
+{
+  "schemaVersion": 2,
+  "generator": "tools/materialize-first-slice-production-art.mjs",
+  "generatorVersion": 2,
+  "reviewStatus": "UNREVIEWED_RUNTIME_FILES",
+  "structuralRework": true,
+  "targets": {
+    "militia/militia_f1": {
+      "assetId": "unit:militia:militia_f1",
+      "sourceFamily": "warrior-3",
+      "displayHeight": 174,
+      "attackContactFrame": 2,
+      "structuralRework": true,
+      "motions": {
+        "idle": {
+          "url": "/assets/production/units/militia/militia_f1/idle.png",
+          "frameWidth": 135,
+          "frameHeight": 135,
+          "frames": 10,
+          "bytes": 2649,
+          "sha256": "373ea40d630f666c8017ed2296086edf63496aeb8f4ce2fc72e48bf532f516dd",
+          "sourceUrl": "https://raw.githubusercontent.com/chaurunda/ClickerGodot/c425114bfa522b1e57f0cfc4f486580a3210f36d/assets/Medieval%20Warrior%20Pack%203/Sprites/Idle.png"
+        },
+        "move": {
+          "url": "/assets/production/units/militia/militia_f1/move.png",
+          "frameWidth": 135,
+          "frameHeight": 135,
+          "frames": 6,
+          "bytes": 2435,
+          "sha256": "7a9061d6f9654b1480edb5a314abd84a722c80a0936fde99880d02761cd01ccc",
+          "sourceUrl": "https://raw.githubusercontent.com/chaurunda/ClickerGodot/c425114bfa522b1e57f0cfc4f486580a3210f36d/assets/Medieval%20Warrior%20Pack%203/Sprites/Run.png"
+        },
+        "attack": {
+          "url": "/assets/production/units/militia/militia_f1/attack.png",
+          "frameWidth": 135,
+          "frameHeight": 135,
+          "frames": 4,
+          "bytes": 2122,
+          "sha256": "01a62f40f231f983c3465c82db9e29d7a248907a2aa4aafd7a574438dd65c3c1",
+          "sourceUrl": "https://raw.githubusercontent.com/chaurunda/ClickerGodot/c425114bfa522b1e57f0cfc4f486580a3210f36d/assets/Medieval%20Warrior%20Pack%203/Sprites/Attack1.png"
+        },
+        "knockback": {
+          "url": "/assets/production/units/militia/militia_f1/knockback.png",
+          "frameWidth": 135,
+          "frameHeight": 135,
+          "frames": 3,
+          "bytes": 1626,
+          "sha256": "5e66ea9db3680bd4aae8be1ffe61e5bc046ebc3897f2a2156f56919553ff275a",
+          "sourceUrl": "https://raw.githubusercontent.com/chaurunda/ClickerGodot/c425114bfa522b1e57f0cfc4f486580a3210f36d/assets/Medieval%20Warrior%20Pack%203/Sprites/Get%20Hit.png"
+        },
+        "death": {
+          "url": "/assets/production/units/militia/militia_f1/death.png",
+          "frameWidth": 135,
+          "frameHeight": 135,
+          "frames": 9,
+          "bytes": 3598,
+          "sha256": "88f3d888267f89ad90673642ddaa11e7ba7fa18b61352d8d28b44b5900f61139",
+          "sourceUrl": "https://raw.githubusercontent.com/chaurunda/ClickerGodot/c425114bfa522b1e57f0cfc4f486580a3210f36d/assets/Medieval%20Warrior%20Pack%203/Sprites/Death.png"
+        }
+      }
+    },
+    "militia/militia_f2": {
+      "assetId": "unit:militia:militia_f2",
+      "sourceFamily": "hero-knight-2",
+      "displayHeight": 184,
+      "attackContactFrame": 3,
+      "structuralRework": true,
+      "motions": {
+        "idle": {
+          "url": "/assets/production/units/militia/militia_f2/idle.png",
+          "frameWidth": 140,
+          "frameHeight": 140,
+          "frames": 11,
+          "bytes": 3486,
+          "sha256": "5995c69e4bfef2299d26c4330eb9628ed125ba3c13e6fb3dfe2345daa6b15297",
+          "sourceUrl": "https://raw.githubusercontent.com/NQM765/IngeSoft1/84594e5d3da7472615660f453bdb457da13cca2f/Proyecto/Scrum%27s_Castle/Assets/Characters/Hero%20Knight%202/Sprites/Idle.png"
+        },
+        "move": {
+          "url": "/assets/production/units/militia/militia_f2/move.png",
+          "frameWidth": 140,
+          "frameHeight": 140,
+          "frames": 8,
+          "bytes": 4327,
+          "sha256": "8e0d79b79732ad9ae8ddf7fd51ca426dd6b1355f23fb351082b75ff42ab8b6f0",
+          "sourceUrl": "https://raw.githubusercontent.com/NQM765/IngeSoft1/84594e5d3da7472615660f453bdb457da13cca2f/Proyecto/Scrum%27s_Castle/Assets/Characters/Hero%20Knight%202/Sprites/Run.png"
+        },
+        "attack": {
+          "url": "/assets/production/units/militia/militia_f2/attack.png",
+          "frameWidth": 140,
+          "frameHeight": 140,
+          "frames": 6,
+          "bytes": 3703,
+          "sha256": "80aee6e494ab901f8603b46a17ad189b113d5cbe48ec1cef4209084f5cb71d4a",
+          "sourceUrl": "https://raw.githubusercontent.com/NQM765/IngeSoft1/84594e5d3da7472615660f453bdb457da13cca2f/Proyecto/Scrum%27s_Castle/Assets/Characters/Hero%20Knight%202/Sprites/Attack.png"
+        },
+        "knockback": {
+          "url": "/assets/production/units/militia/militia_f2/knockback.png",
+          "frameWidth": 140,
+          "frameHeight": 140,
+          "frames": 4,
+          "bytes": 2462,
+          "sha256": "f124d2a63f6922750efba05a187c23bef79f09fd910cbefcc74c9adb5194f76a",
+          "sourceUrl": "https://raw.githubusercontent.com/NQM765/IngeSoft1/84594e5d3da7472615660f453bdb457da13cca2f/Proyecto/Scrum%27s_Castle/Assets/Characters/Hero%20Knight%202/Sprites/Take%20Hit.png"
+        },
+        "death": {
+          "url": "/assets/production/units/militia/militia_f2/death.png",
+          "frameWidth": 140,
+          "frameHeight": 140,
+          "frames": 9,
+          "bytes": 4110,
+          "sha256": "cffd8e66f0f5e83b32afdd247d9a66031ede97cba1cd1c552de2312894eeb9bc",
+          "sourceUrl": "https://raw.githubusercontent.com/NQM765/IngeSoft1/84594e5d3da7472615660f453bdb457da13cca2f/Proyecto/Scrum%27s_Castle/Assets/Characters/Hero%20Knight%202/Sprites/Death.png"
+        }
+      }
+    },
+    "militia/militia_f3": {
+      "assetId": "unit:militia:militia_f3",
+      "sourceFamily": "warrior-1",
+      "displayHeight": 176,
+      "attackContactFrame": 2,
+      "structuralRework": true,
+      "motions": {
+        "idle": {
+          "url": "/assets/production/units/militia/militia_f3/idle.png",
+          "frameWidth": 184,
+          "frameHeight": 137,
+          "frames": 6,
+          "bytes": 3120,
+          "sha256": "1e5fbee0d65f3c650c0835fa1d49423cd15b7e30cafc6f56d74751dd335df320",
+          "sourceUrl": "https://raw.githubusercontent.com/NQM765/IngeSoft1/84594e5d3da7472615660f453bdb457da13cca2f/Proyecto/Scrum%27s_Castle/Assets/Characters/Medieval%20Warrior%20Pack/Idle.png"
+        },
+        "move": {
+          "url": "/assets/production/units/militia/militia_f3/move.png",
+          "frameWidth": 184,
+          "frameHeight": 137,
+          "frames": 8,
+          "bytes": 6810,
+          "sha256": "02b5f938f90cc030aeb71efa684f20998fdea4ac7080c86fbb19a333313c95ba",
+          "sourceUrl": "https://raw.githubusercontent.com/NQM765/IngeSoft1/84594e5d3da7472615660f453bdb457da13cca2f/Proyecto/Scrum%27s_Castle/Assets/Characters/Medieval%20Warrior%20Pack/Run.png"
+        },
+        "attack": {
+          "url": "/assets/production/units/militia/militia_f3/attack.png",
+          "frameWidth": 184,
+          "frameHeight": 137,
+          "frames": 4,
+          "bytes": 4232,
+          "sha256": "1c3606a60254dd59e27e8fa95f27e88767e5093d9b801c6560a63f20989edf99",
+          "sourceUrl": "https://raw.githubusercontent.com/NQM765/IngeSoft1/84594e5d3da7472615660f453bdb457da13cca2f/Proyecto/Scrum%27s_Castle/Assets/Characters/Medieval%20Warrior%20Pack/Attack1.png"
+        },
+        "knockback": {
+          "url": "/assets/production/units/militia/militia_f3/knockback.png",
+          "frameWidth": 184,
+          "frameHeight": 137,
+          "frames": 3,
+          "bytes": 2516,
+          "sha256": "814d31a8f8aeed7ad2efa5d808aec1361730b68854fa688f7ef6aa96cbe03217",
+          "sourceUrl": "https://raw.githubusercontent.com/NQM765/IngeSoft1/84594e5d3da7472615660f453bdb457da13cca2f/Proyecto/Scrum%27s_Castle/Assets/Characters/Medieval%20Warrior%20Pack/Hit.png"
+        },
+        "death": {
+          "url": "/assets/production/units/militia/militia_f3/death.png",
+          "frameWidth": 184,
+          "frameHeight": 137,
+          "frames": 9,
+          "bytes": 7348,
+          "sha256": "a3c9340389846272733372b3648aa76e615f528a936e3b25bc4abc30d1511a64",
+          "sourceUrl": "https://raw.githubusercontent.com/NQM765/IngeSoft1/84594e5d3da7472615660f453bdb457da13cca2f/Proyecto/Scrum%27s_Castle/Assets/Characters/Medieval%20Warrior%20Pack/Death.png"
+        }
+      }
+    },
+    "enemy-raider": {
+      "assetId": "unit:enemy-raider",
+      "sourceFamily": "warrior",
+      "displayHeight": 178,
+      "attackContactFrame": 2,
+      "structuralRework": true,
+      "motions": {
+        "idle": {
+          "url": "/assets/production/units/enemy-raider/idle.png",
+          "frameWidth": 150,
+          "frameHeight": 150,
+          "frames": 8,
+          "bytes": 2683,
+          "sha256": "daf08915058cde1fe22f4f7e82b5205049f3f9e69380e6266296e162396e5e34",
+          "sourceUrl": "https://raw.githubusercontent.com/NQM765/IngeSoft1/84594e5d3da7472615660f453bdb457da13cca2f/Proyecto/Scrum%27s_Castle/Assets/Characters/Medieval%20Warrior%20Pack%202/Sprites/Idle.png"
+        },
+        "move": {
+          "url": "/assets/production/units/enemy-raider/move.png",
+          "frameWidth": 150,
+          "frameHeight": 150,
+          "frames": 8,
+          "bytes": 4230,
+          "sha256": "90eff4e5ff13f21d26244eed9a5117f076f817c901fff5f15712865f2d10b8fe",
+          "sourceUrl": "https://raw.githubusercontent.com/NQM765/IngeSoft1/84594e5d3da7472615660f453bdb457da13cca2f/Proyecto/Scrum%27s_Castle/Assets/Characters/Medieval%20Warrior%20Pack%202/Sprites/Run.png"
+        },
+        "attack": {
+          "url": "/assets/production/units/enemy-raider/attack.png",
+          "frameWidth": 150,
+          "frameHeight": 150,
+          "frames": 4,
+          "bytes": 2979,
+          "sha256": "be7227b1ca35ba70436ee87b70bcb30623c36db27c4579c6102e7e31897ab1cd",
+          "sourceUrl": "https://raw.githubusercontent.com/NQM765/IngeSoft1/84594e5d3da7472615660f453bdb457da13cca2f/Proyecto/Scrum%27s_Castle/Assets/Characters/Medieval%20Warrior%20Pack%202/Sprites/Attack1.png"
+        },
+        "knockback": {
+          "url": "/assets/production/units/enemy-raider/knockback.png",
+          "frameWidth": 150,
+          "frameHeight": 150,
+          "frames": 4,
+          "bytes": 2432,
+          "sha256": "7a5b32c210c72ac576a403047a870441ddb4101a4cc6d83107fe8e503d13965b",
+          "sourceUrl": "https://raw.githubusercontent.com/NQM765/IngeSoft1/84594e5d3da7472615660f453bdb457da13cca2f/Proyecto/Scrum%27s_Castle/Assets/Characters/Medieval%20Warrior%20Pack%202/Sprites/Take%20Hit.png"
+        },
+        "death": {
+          "url": "/assets/production/units/enemy-raider/death.png",
+          "frameWidth": 150,
+          "frameHeight": 150,
+          "frames": 6,
+          "bytes": 3928,
+          "sha256": "bf2b462b2150ee5eea253307e93ec43081999b7363d494ee951431d9b314f1ce",
+          "sourceUrl": "https://raw.githubusercontent.com/NQM765/IngeSoft1/84594e5d3da7472615660f453bdb457da13cca2f/Proyecto/Scrum%27s_Castle/Assets/Characters/Medieval%20Warrior%20Pack%202/Sprites/Death.png"
+        }
+      }
+    }
+  }
+}
