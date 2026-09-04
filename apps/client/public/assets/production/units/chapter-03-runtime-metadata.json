@@ -1,0 +1,393 @@
+{
+  "schemaVersion": 2,
+  "batchId": "chapter-03-production-01",
+  "generator": "tools/materialize-chapter-03-production-art.mjs",
+  "generatorVersion": 1,
+  "status": "UNREVIEWED_RUNTIME_FILES",
+  "humanReview": "PENDING",
+  "normalRuntimeAuthoritative": false,
+  "generativeAiUsed": false,
+  "sourcePolicy": "PROJECT_AUTHORED_DETERMINISTIC_ONLY",
+  "targets": {
+    "enemy_ch3_glasseye": {
+      "assetId": "unit:enemy_ch3_glasseye",
+      "sourceFamily": "project-authored-arcane-eye",
+      "projectAuthoredDeterministic": true,
+      "structuralRework": false,
+      "reviewStatus": "UNREVIEWED_RUNTIME_FILES",
+      "frameWidth": 210,
+      "frameHeight": 200,
+      "displayHeight": 182,
+      "attackContactFrame": 3,
+      "motions": {
+        "idle": {
+          "frames": 6,
+          "bytes": 3698,
+          "sha256": "e099fb66f48fcfd78deef02897302a222f81ca77df9ec71ad4d00dc5e7c8e921"
+        },
+        "move": {
+          "frames": 8,
+          "bytes": 4813,
+          "sha256": "b27ed32562cf780cbd6694f822ff1172f272f8ce5e1445b18160c24eda654a36"
+        },
+        "attack": {
+          "frames": 7,
+          "bytes": 4369,
+          "sha256": "04f1874752497ae1f33314da8374747cbf1c583bcd5d350723cf6f2340ae7d35"
+        },
+        "knockback": {
+          "frames": 4,
+          "bytes": 2545,
+          "sha256": "4e11c5e89549b109b55b6e7ae6f814e0d53afaafe468b8884691d932397a6b86"
+        },
+        "death": {
+          "frames": 6,
+          "bytes": 5467,
+          "sha256": "bc1d1226b82487083cee71924eaa111a88b0cbfe2866941890514731bbf18fc1"
+        }
+      }
+    },
+    "enemy_ch3_spellbug": {
+      "assetId": "unit:enemy_ch3_spellbug",
+      "sourceFamily": "project-authored-arcane-insect",
+      "projectAuthoredDeterministic": true,
+      "structuralRework": false,
+      "reviewStatus": "UNREVIEWED_RUNTIME_FILES",
+      "frameWidth": 180,
+      "frameHeight": 150,
+      "displayHeight": 142,
+      "attackContactFrame": 1,
+      "motions": {
+        "idle": {
+          "frames": 6,
+          "bytes": 2290,
+          "sha256": "3a3222dfed1c4dd30f879887695c146602bb298a6c91077f4b015d5cbf4fd921"
+        },
+        "move": {
+          "frames": 8,
+          "bytes": 3016,
+          "sha256": "c84d0376eb6a4cdde183b02e57f0b1fc944de9d5fbae21884ae22b552e30ec76"
+        },
+        "attack": {
+          "frames": 5,
+          "bytes": 1968,
+          "sha256": "efb198fdd6a38da7c732d48080a75b63a902c2a0bb1c4f355fb2d2c15eb7558a"
+        },
+        "knockback": {
+          "frames": 4,
+          "bytes": 1682,
+          "sha256": "fed4f6ae0958979c2ff85f94773cacec9009d4b734ed90176d74ac0db87e3420"
+        },
+        "death": {
+          "frames": 6,
+          "bytes": 2991,
+          "sha256": "130ce0c8f36416efcfc8b2c8c2c82927b5ab996aef0ca6d03ca3d49e0330426f"
+        }
+      }
+    },
+    "enemy_ch3_floating_library": {
+      "assetId": "unit:enemy_ch3_floating_library",
+      "sourceFamily": "project-authored-arcane-floating-structure",
+      "projectAuthoredDeterministic": true,
+      "structuralRework": false,
+      "reviewStatus": "UNREVIEWED_RUNTIME_FILES",
+      "frameWidth": 300,
+      "frameHeight": 240,
+      "displayHeight": 222,
+      "attackContactFrame": 5,
+      "motions": {
+        "idle": {
+          "frames": 7,
+          "bytes": 8409,
+          "sha256": "d0997ddc05ea7940ac437e6de5f9714ff78d3cf9ff6dc501ba219ff95261645d"
+        },
+        "move": {
+          "frames": 8,
+          "bytes": 9815,
+          "sha256": "576afb8323eb2346c10bc90fc82d7f7b31848d3ca7c9fdfdaf2d854860fb8024"
+        },
+        "attack": {
+          "frames": 8,
+          "bytes": 13672,
+          "sha256": "b7288bf8d1f0f16444b85fe7bf11e071aef7f35e6e5d87f36acacbed302f3cdd"
+        },
+        "knockback": {
+          "frames": 4,
+          "bytes": 4692,
+          "sha256": "87faa04266c7a92e9d8851e2ecaa0951b66a317a4b7dfcaf898d2aae7bc91d99"
+        },
+        "death": {
+          "frames": 7,
+          "bytes": 11614,
+          "sha256": "d28c4f5384727c78148b8421e6796a78e12dcef0e5a1d495bdd90188e618782a"
+        }
+      }
+    },
+    "enemy_ch3_inkdemon": {
+      "assetId": "unit:enemy_ch3_inkdemon",
+      "sourceFamily": "project-authored-demon-ink",
+      "projectAuthoredDeterministic": true,
+      "structuralRework": false,
+      "reviewStatus": "UNREVIEWED_RUNTIME_FILES",
+      "frameWidth": 210,
+      "frameHeight": 160,
+      "displayHeight": 154,
+      "attackContactFrame": 3,
+      "motions": {
+        "idle": {
+          "frames": 6,
+          "bytes": 3022,
+          "sha256": "0648543701a0a360f985a51ce0a2ce33d80076515aa87968e18459530a50edf0"
+        },
+        "move": {
+          "frames": 8,
+          "bytes": 3885,
+          "sha256": "cff4a23cd9a2a3cb80ff70a54da6079f2e29bf347637b96ea22cfd0f4c624be5"
+        },
+        "attack": {
+          "frames": 7,
+          "bytes": 3884,
+          "sha256": "b3f230be3a6c78b99cb56d709de9a1eb80bb854fcefc648702c723155a490f7d"
+        },
+        "knockback": {
+          "frames": 4,
+          "bytes": 2174,
+          "sha256": "7dd45624587218869f775b4939de0429e9776344941cbcb60d3eaeaa094ff41a"
+        },
+        "death": {
+          "frames": 6,
+          "bytes": 4358,
+          "sha256": "68478d9f8371f33d3bfb7dcfc948a1b95ba4da63f943937a0e2700094a90d7b5"
+        }
+      }
+    },
+    "enemy_ch3_chain_demon": {
+      "assetId": "unit:enemy_ch3_chain_demon",
+      "sourceFamily": "project-authored-demon-chain",
+      "projectAuthoredDeterministic": true,
+      "structuralRework": false,
+      "reviewStatus": "UNREVIEWED_RUNTIME_FILES",
+      "frameWidth": 260,
+      "frameHeight": 230,
+      "displayHeight": 214,
+      "attackContactFrame": 4,
+      "motions": {
+        "idle": {
+          "frames": 6,
+          "bytes": 5740,
+          "sha256": "ba897389ba58cf439b770d111bcd104c6d961dd0f2568c4a3868d92723a68ab9"
+        },
+        "move": {
+          "frames": 8,
+          "bytes": 7303,
+          "sha256": "16948bc65ffcb891a1d75734c2bde24d65c480595cb89cf85a13a775e81d3abf"
+        },
+        "attack": {
+          "frames": 8,
+          "bytes": 8082,
+          "sha256": "68e2972f64cf0c2f6f41d7ea60432856a35e9451fa5372b33dbc036ed2ac72f7"
+        },
+        "knockback": {
+          "frames": 4,
+          "bytes": 3926,
+          "sha256": "4b59d0cdf589f9d2359fa2263b48a98308701cf985bc39d8f0a8a0407dd56c47"
+        },
+        "death": {
+          "frames": 7,
+          "bytes": 10631,
+          "sha256": "db1b1e1077175834bc6e07f617720c20877838cffb1ab25f4491453927d6180d"
+        }
+      }
+    },
+    "enemy_ch3_contract_enforcer": {
+      "assetId": "unit:enemy_ch3_contract_enforcer",
+      "sourceFamily": "project-authored-demon-contract-armor",
+      "projectAuthoredDeterministic": true,
+      "structuralRework": false,
+      "reviewStatus": "UNREVIEWED_RUNTIME_FILES",
+      "frameWidth": 270,
+      "frameHeight": 250,
+      "displayHeight": 232,
+      "attackContactFrame": 3,
+      "motions": {
+        "idle": {
+          "frames": 7,
+          "bytes": 7723,
+          "sha256": "dba77da81e5902a766422aa2d581f8a6eafd44431ed1b063f9f6160283a663a1"
+        },
+        "move": {
+          "frames": 8,
+          "bytes": 9774,
+          "sha256": "a8621398ed1a8704ceb0c04e284ab5dadf32f0dc21687b5ea9b7babe5719d9b9"
+        },
+        "attack": {
+          "frames": 7,
+          "bytes": 8037,
+          "sha256": "a8f26855487767a3043b79c2e5e87155c4aae8467e6e4f4c8379be2f59e78a75"
+        },
+        "knockback": {
+          "frames": 4,
+          "bytes": 4944,
+          "sha256": "5c3eebaf78ab34e67a0d3fcfa4c308562fd3a7a3aa3e25600643852df69e898c"
+        },
+        "death": {
+          "frames": 8,
+          "bytes": 18197,
+          "sha256": "d1b81d82e16dbad8e6a48acb89244d2c4a9b37f2ae89bccb5eafa45f3a448cc3"
+        }
+      }
+    },
+    "enemy_ch3_arcane_battery": {
+      "assetId": "unit:enemy_ch3_arcane_battery",
+      "sourceFamily": "project-authored-arcane-structure",
+      "projectAuthoredDeterministic": true,
+      "structuralRework": false,
+      "reviewStatus": "UNREVIEWED_RUNTIME_FILES",
+      "frameWidth": 330,
+      "frameHeight": 240,
+      "displayHeight": 218,
+      "attackContactFrame": 5,
+      "motions": {
+        "idle": {
+          "frames": 6,
+          "bytes": 7220,
+          "sha256": "e910199f6627c72d11021e3bdb346658fe880c445c167f807aa6f8c5252937b0"
+        },
+        "move": {
+          "frames": 8,
+          "bytes": 9894,
+          "sha256": "9a51815021192f1f09aee00a44e5e44397b3051fbe981e5357528aa20fdc375c"
+        },
+        "attack": {
+          "frames": 8,
+          "bytes": 10242,
+          "sha256": "e9a6e06a97bdcbebf24e66b928d18685c9222dd65e29a98ec014ae73431acb23"
+        },
+        "knockback": {
+          "frames": 4,
+          "bytes": 5146,
+          "sha256": "98dafcb0ef03a723684ee1cb70bfb1a23c56b59e88787fa74b2977e9a261f554"
+        },
+        "death": {
+          "frames": 7,
+          "bytes": 14937,
+          "sha256": "0e80219d4946a70a6751a07919f6df13140703ae82bbfb35da00400d765cbe49"
+        }
+      }
+    },
+    "enemy_ch3_torn_mirror": {
+      "assetId": "unit:enemy_ch3_torn_mirror",
+      "sourceFamily": "project-authored-arcane-demon-mirror",
+      "projectAuthoredDeterministic": true,
+      "structuralRework": false,
+      "reviewStatus": "UNREVIEWED_RUNTIME_FILES",
+      "frameWidth": 280,
+      "frameHeight": 250,
+      "displayHeight": 226,
+      "attackContactFrame": 3,
+      "motions": {
+        "idle": {
+          "frames": 7,
+          "bytes": 7311,
+          "sha256": "9cd478c7b556e114578ffc947d9a92d8fcc0e9951278f84c8b82343a4a9e7f7e"
+        },
+        "move": {
+          "frames": 8,
+          "bytes": 14785,
+          "sha256": "af46b6b1102644075f1b951ddba58ddd3c1fafff86354e45f0a54ed62cd4cb49"
+        },
+        "attack": {
+          "frames": 8,
+          "bytes": 15470,
+          "sha256": "23ccb8bd3e4e7c18ca0bfb635626dff80193f66d6affd05163900294a97965f6"
+        },
+        "knockback": {
+          "frames": 4,
+          "bytes": 4645,
+          "sha256": "3902d0a51ebb502998665736e2d4bd015e7a5a95218a6c6021e00314d0ce5f90"
+        },
+        "death": {
+          "frames": 7,
+          "bytes": 17930,
+          "sha256": "32181c0eecc9995a6492cd2a5624ae10738cae142a1fcbe62be92c14e9489ad1"
+        }
+      }
+    },
+    "boss_ch3_archmagus": {
+      "assetId": "unit:boss_ch3_archmagus",
+      "sourceFamily": "project-authored-arcane-boss",
+      "projectAuthoredDeterministic": true,
+      "structuralRework": false,
+      "reviewStatus": "UNREVIEWED_RUNTIME_FILES",
+      "frameWidth": 380,
+      "frameHeight": 320,
+      "displayHeight": 296,
+      "attackContactFrame": 6,
+      "motions": {
+        "idle": {
+          "frames": 8,
+          "bytes": 17749,
+          "sha256": "d9fabf718dced5481151ec25c3fcf0e1a93af5471c9fb28993632ccca92311d0"
+        },
+        "move": {
+          "frames": 8,
+          "bytes": 20318,
+          "sha256": "66ab221f16d35fc950fbb7b7f154479f3ef230e3e59db2d834e76d2445aeab2c"
+        },
+        "attack": {
+          "frames": 9,
+          "bytes": 21088,
+          "sha256": "145232ea83684856db3b7039443bff30f3b04af60717c7717d80fb1081456865"
+        },
+        "knockback": {
+          "frames": 4,
+          "bytes": 8572,
+          "sha256": "f68f22a8cec8b79175b0140cf4b29714398823bc09ccf4cd09a3cb3b6cd25e39"
+        },
+        "death": {
+          "frames": 8,
+          "bytes": 29306,
+          "sha256": "782e0b18745151fa31acb10eacb19edcf2ededfa40c731de35ae1351e12c22e8"
+        }
+      }
+    },
+    "boss_ch3_belzar": {
+      "assetId": "unit:boss_ch3_belzar",
+      "sourceFamily": "project-authored-demon-boss",
+      "projectAuthoredDeterministic": true,
+      "structuralRework": false,
+      "reviewStatus": "UNREVIEWED_RUNTIME_FILES",
+      "frameWidth": 360,
+      "frameHeight": 310,
+      "displayHeight": 288,
+      "attackContactFrame": 4,
+      "motions": {
+        "idle": {
+          "frames": 8,
+          "bytes": 10497,
+          "sha256": "df295371d4cd0b143c28d924c4ba254fd9bff50fb44b570308e609cc6f106535"
+        },
+        "move": {
+          "frames": 8,
+          "bytes": 11387,
+          "sha256": "b6461749c4df9f696658ef56d5bb179963056271c5c8ea2ab065a95e06afabed"
+        },
+        "attack": {
+          "frames": 8,
+          "bytes": 11260,
+          "sha256": "35ecbb6c91ddba18bc7df419a21e1820ca6868a27dfde43bc80a6f7670fc96cb"
+        },
+        "knockback": {
+          "frames": 4,
+          "bytes": 5616,
+          "sha256": "fb0ba4823ffd6ee976e01aa936bec33636fe0c90d0d68e41fc14725e4b6bbcab"
+        },
+        "death": {
+          "frames": 8,
+          "bytes": 18069,
+          "sha256": "307fd71668273f25ab9e4727fe27ab2df3c385bc0993d934fcca7177e39f37f3"
+        }
+      }
+    }
+  }
+}
