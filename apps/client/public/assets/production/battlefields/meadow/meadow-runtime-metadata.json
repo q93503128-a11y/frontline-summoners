@@ -1,0 +1,22 @@
+{
+  "schemaVersion": 1,
+  "assetId": "battlefield:meadow",
+  "themeId": "meadow",
+  "reviewStatus": "UNREVIEWED_RUNTIME_FILE",
+  "runtimeUrl": "/assets/production/battlefields/meadow/battlefield-base.svg",
+  "authorship": "ORIGINAL_PROJECT_VECTOR_COMPOSITION",
+  "generativeAiUsed": false,
+  "designIntent": [
+    "중앙 전투선의 장식 밀도를 낮춰 8~12기 중첩 가독성을 우선",
+    "재점거된 국경 초소와 파손된 감시 구조물을 좌우 큰 덩어리로 분리",
+    "캐릭터 접지선 뒤의 최고명도 영역을 피하고 중간 명도 초지를 유지",
+    "배경 수직 구조물을 전투선 중앙에서 비켜 배치해 사거리/장애물 오인을 줄임"
+  ],
+  "evidence": null,
+  "captures": null,
+  "humanReview": {
+    "status": "PENDING",
+    "reviewer": null,
+    "reviewedAt": null
+  }
+}
