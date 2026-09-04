@@ -28,7 +28,12 @@ export const FIRST_SLICE_REVIEW_AUDIO: readonly FirstSliceReviewAudioAsset[] = [
 const AUDIO_BY_KEY = new Map(FIRST_SLICE_REVIEW_AUDIO.map((asset) => [asset.key, asset] as const));
 const INSTALL_MARKER = Symbol('first-slice-production-review-audio');
 const LAST_PLAYED = new WeakMap<Phaser.Scene, Map<string, number>>();
-const REVIEW_MUSIC = new WeakMap<Phaser.Scene, Phaser.Sound.BaseSound>();
+
+type MutableVolumeSound = Phaser.Sound.BaseSound & {
+  setVolume(volume: number): MutableVolumeSound;
+};
+
+const REVIEW_MUSIC = new WeakMap<Phaser.Scene, MutableVolumeSound>();
 
 type ReviewAudioHost = Phaser.Scene & {
   [INSTALL_MARKER]?: boolean;
@@ -142,7 +147,7 @@ export function startFirstSliceProductionReviewMusic(scene: Phaser.Scene): void 
   if (!isFirstSliceProductionReviewMode() || !scene.cache.audio.exists('review-audio-ch01-battle')) return;
   const gain = normalMusicGain();
   if (gain <= 0.001) return;
-  const music = scene.sound.add('review-audio-ch01-battle', { loop: true, volume: gain });
+  const music = scene.sound.add('review-audio-ch01-battle', { loop: true, volume: gain }) as MutableVolumeSound;
   REVIEW_MUSIC.set(scene, music);
   const start = (): void => {
     if (!music.isPlaying) music.play();
