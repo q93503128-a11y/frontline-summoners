@@ -6,6 +6,7 @@ import {
   installFirstSliceProductionReviewAudio,
   startFirstSliceProductionReviewMusic,
 } from './first-slice-production-review-audio.ts';
+import { installFirstSliceProductionReviewBossWarning } from './first-slice-production-review-boss-warning.ts';
 import {
   installFirstSliceProductionReviewRuntime,
   isFirstSliceProductionReviewMode,
@@ -23,6 +24,7 @@ export class AccessibleBattleScene extends BattleScene {
     if (isFirstSliceProductionReviewMode()) {
       installFirstSliceProductionReviewRuntime(this);
       installFirstSliceProductionReviewAudio(this);
+      installFirstSliceProductionReviewBossWarning(this);
     } else {
       installStorySilhouetteOverlayRuntime(this);
     }
