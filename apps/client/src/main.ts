@@ -44,7 +44,7 @@ import { isCompactMobileViewport } from './viewport';
 
 class BootScene extends BaseBootScene {
   override create(): void {
-    if (!this.scene.get('first-slice-capture')) this.scene.add('first-slice-capture', FirstSliceProductionCaptureScene, false);
+    this.scene.add('first-slice-capture', FirstSliceProductionCaptureScene, false);
     void restoreAuthenticatedAccountSession().finally(() => {
       if (!this.scene.isActive()) return;
       this.scene.start(isFirstSliceCaptureMode() ? 'first-slice-capture' : 'main-menu');
