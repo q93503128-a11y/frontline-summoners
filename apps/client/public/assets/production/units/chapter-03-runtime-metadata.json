@@ -288,29 +288,34 @@
       "motions": {
         "idle": {
           "frames": 7,
-          "bytes": 7311,
-          "sha256": "9cd478c7b556e114578ffc947d9a92d8fcc0e9951278f84c8b82343a4a9e7f7e"
+          "bytes": 10043,
+          "sha256": "5ddc0eb0bfe9cdbdf8c6fa971ac2dffaac9278e660467968ea47eebbfbbc3382"
         },
         "move": {
           "frames": 8,
-          "bytes": 14785,
-          "sha256": "af46b6b1102644075f1b951ddba58ddd3c1fafff86354e45f0a54ed62cd4cb49"
+          "bytes": 20668,
+          "sha256": "e5017548e6714b690f2028adf031506a2dd3df35159ee51634bbf4485ed2bbfc"
         },
         "attack": {
           "frames": 8,
-          "bytes": 15470,
-          "sha256": "23ccb8bd3e4e7c18ca0bfb635626dff80193f66d6affd05163900294a97965f6"
+          "bytes": 21425,
+          "sha256": "8e664743a64c3cd7626b8730fa7a0cb0e311e24189462c08db623ed6ecfc7178"
         },
         "knockback": {
           "frames": 4,
-          "bytes": 4645,
-          "sha256": "3902d0a51ebb502998665736e2d4bd015e7a5a95218a6c6021e00314d0ce5f90"
+          "bytes": 10897,
+          "sha256": "fe0852eb266f2e50d0b80073a3a7762c335c63a360967484c71f8f0cbae690ec"
         },
         "death": {
           "frames": 7,
-          "bytes": 17930,
-          "sha256": "32181c0eecc9995a6492cd2a5624ae10738cae142a1fcbe62be92c14e9489ad1"
+          "bytes": 24288,
+          "sha256": "e14d01b95cbfd8ef89ff7b9b1cf331e69236f5db67c5d324d381ee76fafc9ff0"
         }
+      },
+      "visualPolishPriority03": {
+        "version": 1,
+        "kind": "CROSS_BATCH_IDENTITY_AND_MOTION_READABILITY",
+        "reviewStatus": "UNREVIEWED_RUNTIME_FILES"
       }
     },
     "boss_ch3_archmagus": {
@@ -389,5 +394,11 @@
         }
       }
     }
+  },
+  "visualPolishPriority03": {
+    "version": 1,
+    "touchedTargets": 1,
+    "humanReview": "PENDING",
+    "normalRuntimeAuthoritative": false
   }
 }

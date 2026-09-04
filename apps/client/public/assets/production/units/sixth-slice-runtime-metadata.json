@@ -132,30 +132,41 @@
       "motions": {
         "idle": {
           "frames": 11,
-          "bytes": 8128,
-          "sha256": "6b4001990da1e8aa2af45fed36457af4785533e5b38f7c80d1621e27f60e3217"
+          "bytes": 13418,
+          "sha256": "84cdb09dae5daa2eaf1a590e3d7cf6537b91dbc382100467e6b179e62fb86eab"
         },
         "move": {
           "frames": 8,
-          "bytes": 8075,
-          "sha256": "0838661d53b91c97cee1d6e63b6a3fc7f0d91e52fc296cf181b39baa4859575a"
+          "bytes": 11691,
+          "sha256": "5162df80c56e4077051d30ad887cf8e2c8c912cee63e41721790469e92e02060"
         },
         "attack": {
           "frames": 7,
-          "bytes": 9318,
-          "sha256": "4aed8dd8e00da1a89b1301e674ca588ffd3ef0caa280fe0ce5a1b2d70a5f41b5"
+          "bytes": 12644,
+          "sha256": "4fdcf1ebeb2e53dcced43c8cc4427f0938a5e71cfa78372ebaedc426f61974c5"
         },
         "knockback": {
           "frames": 4,
-          "bytes": 4952,
-          "sha256": "d7b5853a97d1ae9176b000877fbec32bd9feb72ca75b69d0fec124656a73f750"
+          "bytes": 6513,
+          "sha256": "0df0e782e68c5ba8541efbe574a581a6cb7b36ac17dc15201ec2164ec82eac2d"
         },
         "death": {
           "frames": 11,
-          "bytes": 13212,
-          "sha256": "b31e11dda44532c46d716a56c54b4c624480b0046005408a6ac5fd51a6c6089f"
+          "bytes": 16836,
+          "sha256": "017bd54277789fca84f7003f8d36665176bf98781e3bf35fe810916a78fb54a1"
         }
+      },
+      "visualPolishPriority03": {
+        "version": 1,
+        "kind": "CROSS_BATCH_IDENTITY_AND_MOTION_READABILITY",
+        "reviewStatus": "UNREVIEWED_RUNTIME_FILES"
       }
     }
+  },
+  "visualPolishPriority03": {
+    "version": 1,
+    "touchedTargets": 1,
+    "humanReview": "PENDING",
+    "normalRuntimeAuthoritative": false
   }
 }

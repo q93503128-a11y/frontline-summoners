@@ -288,29 +288,34 @@
       "motions": {
         "idle": {
           "frames": 7,
-          "bytes": 7106,
-          "sha256": "ba6ae0536ef4ffffc1b6c8ff48f025fb787f0d6a2ba6fdd326769f9455ff5fe7"
+          "bytes": 8760,
+          "sha256": "853258f34489b9bdb3c4ad14df36d374f7605e563d8aab1dd86a9f2bf3218600"
         },
         "move": {
           "frames": 8,
-          "bytes": 8350,
-          "sha256": "534520dbb1e81059052b53d31ed845b877e05ae62eaa927a6c74e78cbebf3291"
+          "bytes": 10396,
+          "sha256": "c483b72f77b830eeef13aa6a2996fd86fb25acfa3b4fd096725f28919ef8a93c"
         },
         "attack": {
           "frames": 7,
-          "bytes": 7716,
-          "sha256": "886403bdf33ad291c6427db5f12b7de3e79757fa469e742f26fa8af7c9b9c895"
+          "bytes": 10400,
+          "sha256": "928e9c64eea3d04b2aba10c738fb3357f71b4a880511e27279f98857a2bbb05b"
         },
         "knockback": {
           "frames": 4,
-          "bytes": 3779,
-          "sha256": "598d7c98e86bd82bbe606750e2044e0e2102800c6c3a92f519d41404e67339ce"
+          "bytes": 6346,
+          "sha256": "bc710fd9ec5cbcd940a709f1cc861a187cc75ceed2bafbfd3177cf6f6c16f136"
         },
         "death": {
           "frames": 7,
-          "bytes": 13222,
-          "sha256": "bf30a4c911352a9d5e41562e3bdffc82d918a752ae523529e65d94b640dfb47e"
+          "bytes": 15151,
+          "sha256": "2c5007c3b6a5f4473483d6b4f3098a0dc1bc331981e29c3ce6ca490c8a371e8d"
         }
+      },
+      "visualPolishPriority03": {
+        "version": 1,
+        "kind": "CROSS_BATCH_IDENTITY_AND_MOTION_READABILITY",
+        "reviewStatus": "UNREVIEWED_RUNTIME_FILES"
       }
     },
     "enemy_ev_ze_railpod": {
@@ -516,29 +521,34 @@
       "motions": {
         "idle": {
           "frames": 8,
-          "bytes": 18188,
-          "sha256": "6d4f65f7383429d071c92c1268b463eaab8bc19b3a20ad7364370ca6fe6fa025"
+          "bytes": 23204,
+          "sha256": "d4256dc446357066c7bf360dce8103e46bc1d685acee9f4aad0e6919f56f2838"
         },
         "move": {
           "frames": 8,
-          "bytes": 19825,
-          "sha256": "f63ac6f7b9ebc13cf348dfc6fee701a8e32a1557bd556ec7b554dee12deaf91f"
+          "bytes": 25615,
+          "sha256": "ac63b04de2f433e4f1a3a4192f2204ab7f9cfde499ac39bb85f65d57fb447e6e"
         },
         "attack": {
           "frames": 10,
-          "bytes": 22710,
-          "sha256": "0744bc1225c73b91905fac7d11b73625f40df80886cd8a5c8b0b735b68c97383"
+          "bytes": 32454,
+          "sha256": "0271b3acc74a4f519a4fa99bcbc73a1a566178317d20175f35a76e017ca340d3"
         },
         "knockback": {
           "frames": 4,
-          "bytes": 9632,
-          "sha256": "e4d689912cc5111d8c77312558e68e0d470e4eb14ac2258d0fb96a3efd3dd3cb"
+          "bytes": 25362,
+          "sha256": "e7f045293da492ce51b0f1f766489e3ad18488643cd14a64d021ae6afcc9c03f"
         },
         "death": {
           "frames": 9,
-          "bytes": 49964,
-          "sha256": "202ea2252137fd7058c664f4013ee7e8a111ffb563e51bcd8bf71685111da436"
+          "bytes": 71157,
+          "sha256": "31b7fb042fcfc1b95d70f3537c2e85406c374be3dfaed600686f546fc2f01aab"
         }
+      },
+      "visualPolishPriority03": {
+        "version": 1,
+        "kind": "CROSS_BATCH_IDENTITY_AND_MOTION_READABILITY",
+        "reviewStatus": "UNREVIEWED_RUNTIME_FILES"
       }
     },
     "boss_sp_walking_machine_castle": {
@@ -554,29 +564,34 @@
       "motions": {
         "idle": {
           "frames": 8,
-          "bytes": 19196,
-          "sha256": "c28aa13bf7bd2bd70f94ad9a0f5c20ebc2d170a38f071276cf787f64643ddb53"
+          "bytes": 21078,
+          "sha256": "9c2e269e7669a93f85e20535797f1dad70817fae8ce36eaa176cd8d407b0aedc"
         },
         "move": {
           "frames": 8,
-          "bytes": 19327,
-          "sha256": "7f325ad4967e97fe1867f6816ab067138305a8f1813c60e3ffb6f4e85eaea0d8"
+          "bytes": 21988,
+          "sha256": "1b60fcbcea6111ed9f7d90bb3e441cc38973c668df374e551cc95712eded610f"
         },
         "attack": {
           "frames": 10,
-          "bytes": 23394,
-          "sha256": "a885149ef73074272f98325a77679783b3d5b27a1b3c6a6ed013414d6fb02a11"
+          "bytes": 26823,
+          "sha256": "fb41e48456f6b6152b4841d48d0bc03c6639cc30967e519b6d0d15956eaf72f5"
         },
         "knockback": {
           "frames": 4,
-          "bytes": 9723,
-          "sha256": "d2c1bea49b0b01d68941540be79ad8cfe0bbfef40a8cd5358fe0aa6df8b55d32"
+          "bytes": 13794,
+          "sha256": "86ad24dc2162cc614bdd977e2d1d6e045955fc040eebe6157ad05b0b610372d7"
         },
         "death": {
           "frames": 9,
-          "bytes": 33654,
-          "sha256": "7174609e6421eae0f49f2eff3b67ed4579ba7e148c00662e5076547899650468"
+          "bytes": 36772,
+          "sha256": "49a80a5df4816e67b01a4f5539ddfb10ef9909388f34207aa0025ddad10c0421"
         }
+      },
+      "visualPolishPriority03": {
+        "version": 1,
+        "kind": "CROSS_BATCH_IDENTITY_AND_MOTION_READABILITY",
+        "reviewStatus": "UNREVIEWED_RUNTIME_FILES"
       }
     },
     "boss_sp_unobservable": {
@@ -592,29 +607,34 @@
       "motions": {
         "idle": {
           "frames": 8,
-          "bytes": 16907,
-          "sha256": "ab9c80c5ab20112ac5ba90011ecee5e49cb8d43d6fc45678a2c1c20a516a08a3"
+          "bytes": 22432,
+          "sha256": "834fd100457eab126434a259a2f00ff822c0e2fc914cdd1cd041f48286bad9a0"
         },
         "move": {
           "frames": 8,
-          "bytes": 17860,
-          "sha256": "6536d201a341f6625a9123d424b5a095aaed9d7e21a4fdfb2e939d105042cadc"
+          "bytes": 23488,
+          "sha256": "4d3557b85b3e99f39a46ffc12a2d58fff9ea72e38d098fbd4de86f3a330129b9"
         },
         "attack": {
           "frames": 10,
-          "bytes": 21151,
-          "sha256": "20b569641ec6e906305e8303559d6bfa71ec3062204dbce4f5fa9894777fec63"
+          "bytes": 27802,
+          "sha256": "15ca9109d3a8a0832a04774a96d6c57c3652fcfcae6afd4fe684ee6ab880c25f"
         },
         "knockback": {
           "frames": 4,
-          "bytes": 8357,
-          "sha256": "5c2a291290a8a1bdd9f9c120ba3a0d0c5170cc9bd07b794f62ad78c84a050230"
+          "bytes": 12864,
+          "sha256": "7aba51e12a91d6f9b8728cab84dd0b3557b58d84bd2f6d8cbad67a3a27bec5f7"
         },
         "death": {
           "frames": 9,
-          "bytes": 30406,
-          "sha256": "ee2aab7c4eb8593bb7b198624c914bd78f45f7f582464e0ce868309cf6e09b3a"
+          "bytes": 39861,
+          "sha256": "df9df82a23a1d460d69b43bcf2626958c6efaf0e766c4d4701fdff6432874c11"
         }
+      },
+      "visualPolishPriority03": {
+        "version": 1,
+        "kind": "CROSS_BATCH_IDENTITY_AND_MOTION_READABILITY",
+        "reviewStatus": "UNREVIEWED_RUNTIME_FILES"
       }
     },
     "enemy_sp_gold_porter": {
@@ -668,29 +688,34 @@
       "motions": {
         "idle": {
           "frames": 6,
-          "bytes": 4929,
-          "sha256": "98ac1290cbb03955b431047d375224bdd1dd694dd58718fb484a11a67d9450e4"
+          "bytes": 8226,
+          "sha256": "e76f323c58aa415600c17157ef88e9833e5a4ed032a2d2a9054859620ea52dff"
         },
         "move": {
           "frames": 8,
-          "bytes": 6558,
-          "sha256": "37d4493c20405659ce6c02f4ba04ebd3f363f493a84bb200d15e4fe4b8a8223d"
+          "bytes": 10547,
+          "sha256": "6c3568f4865a400028a4582a5d0e28f01d7d7f5c9e4601696c37b3a29732c15d"
         },
         "attack": {
           "frames": 7,
-          "bytes": 6447,
-          "sha256": "8ddc5a7ca3daf61cd4e163782458acd27956254638d3c6eb33cbd801a86d4a87"
+          "bytes": 10267,
+          "sha256": "94e308a30709e15da4e1ef55c099c63bc8a7fe1d1d02a2b825e66ae0d9a6c7c5"
         },
         "knockback": {
           "frames": 4,
-          "bytes": 3346,
-          "sha256": "85ed1e4b9284755bfdec32b1585e7a75af386cf8a5bb83405651cf3ffdf93568"
+          "bytes": 6439,
+          "sha256": "c6189df279ce85b8ae82260a7728acffb59f3a3fc7ad598a7000ba4c7aa3bdeb"
         },
         "death": {
           "frames": 7,
-          "bytes": 10457,
-          "sha256": "68e6a2b52322a925b892336b6a665336c79df3d075725eefade9eb977665ec00"
+          "bytes": 13573,
+          "sha256": "247bb6b5bd3c883699ce7e7bf0802ec99485fbe8f5a38e6f811b3d99ad532007"
         }
+      },
+      "visualPolishPriority03": {
+        "version": 1,
+        "kind": "CROSS_BATCH_IDENTITY_AND_MOTION_READABILITY",
+        "reviewStatus": "UNREVIEWED_RUNTIME_FILES"
       }
     },
     "enemy_sp_gold_guard": {
@@ -782,29 +807,34 @@
       "motions": {
         "idle": {
           "frames": 7,
-          "bytes": 9963,
-          "sha256": "abbc5ddaeafda9f529fc84fe0d6a7d68ce38d61c5a3da1712ccc62e0cb154956"
+          "bytes": 11847,
+          "sha256": "a3dadf717f11d2e15ba814ce7aecd5f102d56f7cdf76db7bd2d7abc47661fc9b"
         },
         "move": {
           "frames": 8,
-          "bytes": 11934,
-          "sha256": "e09dba42613aee6c3dbeadcfd9aec8798648ed0567c2e532625002bef628d5bf"
+          "bytes": 14172,
+          "sha256": "7c79011bb8c0217f9b66625d08e34cb23746e0a422b32cef470a067e9f9f1730"
         },
         "attack": {
           "frames": 8,
-          "bytes": 12231,
-          "sha256": "3ae1c0aedf32370547a3fdb65f2ba1ff33225e87c4d829c0c53700d783664d91"
+          "bytes": 14888,
+          "sha256": "6fcf2740a6135d70af45b489d0482e7a2eefee388cb4e2138510222398512865"
         },
         "knockback": {
           "frames": 4,
-          "bytes": 5737,
-          "sha256": "fa60e15a8b09f9dd9914a8ae2d7bfeb232a0ef39dbe806222f45480f9e8fa9ac"
+          "bytes": 7936,
+          "sha256": "5bfb0649c7cc0dc53e3fcc378c30ef6345bfda79bad6209e1a0a459a6e396edf"
         },
         "death": {
           "frames": 8,
-          "bytes": 21656,
-          "sha256": "b18b40b47157526b0bd0ef3928f347e3df4a7fdd471c5f7ac800f55e358d26d8"
+          "bytes": 18009,
+          "sha256": "1a6939909844504e4dd9b243b93f9111010a7843143a5117b6d24efd56a522a3"
         }
+      },
+      "visualPolishPriority03": {
+        "version": 1,
+        "kind": "CROSS_BATCH_IDENTITY_AND_MOTION_READABILITY",
+        "reviewStatus": "UNREVIEWED_RUNTIME_FILES"
       }
     },
     "boss_sp_gold_carrier": {
@@ -820,29 +850,34 @@
       "motions": {
         "idle": {
           "frames": 8,
-          "bytes": 9763,
-          "sha256": "dfafc0f5d6039c6b2af6727cc99b51fcf622ff49ebd8f4d3e62ec734266bbbfa"
+          "bytes": 13000,
+          "sha256": "fe4cea00619b8a5ef0ae81e24bdf4e519851d2279f5ada76d44ce1b56c99f2a4"
         },
         "move": {
           "frames": 8,
-          "bytes": 10091,
-          "sha256": "16a12b82b7dc054b81e7e52230938ac2f08c5c776e6e4525f75068174dd3ae42"
+          "bytes": 13297,
+          "sha256": "289a82adbfc980eee81f86dae044e243d8e962decc1de5e1f10a0890a21a1e89"
         },
         "attack": {
           "frames": 10,
-          "bytes": 12744,
-          "sha256": "3162209cb30c0c8ba5eef5f159140884c5f37de0d34e894758a2170d4c188c4e"
+          "bytes": 18124,
+          "sha256": "71ba0cb33cbbfc822404bb61c32f33886a8853a4b3cd9061c16b8c69cac68d4e"
         },
         "knockback": {
           "frames": 4,
-          "bytes": 4926,
-          "sha256": "05ff88737cdfa73e2252b21d5180300039375cae3652b160e78fa4a5b2ed0682"
+          "bytes": 7704,
+          "sha256": "88d9546d3373a4d0e2d477da4388070b8cbf776aa168232c31422dfbaccbeaed"
         },
         "death": {
           "frames": 9,
-          "bytes": 20438,
-          "sha256": "ea5fbd74f5d11eb350429cf1f1127d8226e18742e1a5e9f7db1804ecc5d067cd"
+          "bytes": 25083,
+          "sha256": "0ee895a29338e660d07ae3214d09ef682c7b1f004c1dc3c86f574fee9822470d"
         }
+      },
+      "visualPolishPriority03": {
+        "version": 1,
+        "kind": "CROSS_BATCH_IDENTITY_AND_MOTION_READABILITY",
+        "reviewStatus": "UNREVIEWED_RUNTIME_FILES"
       }
     },
     "enemy_sp_soul_wisp": {
@@ -896,29 +931,34 @@
       "motions": {
         "idle": {
           "frames": 7,
-          "bytes": 6201,
-          "sha256": "95fc010c5edbc81428c2fa145c4df72fa4e6dc3a218a921c3851577f9a246c95"
+          "bytes": 7952,
+          "sha256": "64a81e86e95993c29b141cda64cd9b81176cf06b80dac9f2ae5b2d9da94f260e"
         },
         "move": {
           "frames": 8,
-          "bytes": 7113,
-          "sha256": "e525cb59f468fada5b58f65e863139ea6ddfde3f8cbaa4c846345aadbc98dc77"
+          "bytes": 9121,
+          "sha256": "95da523da1de9363f612ece6c3c183a552d9f514791fcebf899082332eb13d6f"
         },
         "attack": {
           "frames": 7,
-          "bytes": 6725,
-          "sha256": "737666770f0aff32ac312b62a486bef4d742c47cbc9954341d4d191ed39d7b26"
+          "bytes": 9361,
+          "sha256": "29f97c158347a9a9524c0bd4d624c26bb385660746cd6b5827f7843d6ce89324"
         },
         "knockback": {
           "frames": 4,
-          "bytes": 3645,
-          "sha256": "9c6b069ef685116fcc9c00fdf931a1f1104f2ad488542ce863939fb16a1b2d7b"
+          "bytes": 6718,
+          "sha256": "d935aec2848f702ee83cdf7cf3930f95020829f878fdc0c5d03ff3a9c469c32f"
         },
         "death": {
           "frames": 7,
-          "bytes": 12834,
-          "sha256": "088ae43ebc3f4605bdcdc89c4b1c51ef0dc3b82099db063297fb884e879e0627"
+          "bytes": 15571,
+          "sha256": "c1a4cf9cb9f4763abc8222da08330bfeae8792e8e1e78883211e7969ef3645e7"
         }
+      },
+      "visualPolishPriority03": {
+        "version": 1,
+        "kind": "CROSS_BATCH_IDENTITY_AND_MOTION_READABILITY",
+        "reviewStatus": "UNREVIEWED_RUNTIME_FILES"
       }
     },
     "enemy_sp_soul_hammer": {
@@ -1048,29 +1088,34 @@
       "motions": {
         "idle": {
           "frames": 8,
-          "bytes": 13937,
-          "sha256": "94c2a66d1d12e14373bdfdda83c82f30261e9383110b3cf9e20058b75769a65b"
+          "bytes": 16361,
+          "sha256": "14c6a1c0758f5c8fb4cd79db8ba442af27071e7397124254093aef5ae783eebd"
         },
         "move": {
           "frames": 8,
-          "bytes": 14425,
-          "sha256": "18285900102004e7b1b172274afd055839d746cbff7b2728ab430d4d38068abb"
+          "bytes": 16920,
+          "sha256": "52675bac0f9b5a6fa21447290f1c1577ebe50f9c046245e40008ba7e931ed33f"
         },
         "attack": {
           "frames": 11,
-          "bytes": 18993,
-          "sha256": "5bb41e844c492c7d38b8b56a4174155efed95dc05dfc9a359db3152e3dc488ea"
+          "bytes": 26885,
+          "sha256": "3f9923e1d075078c06ce31bd252dcfdff1f4d6952fc32893b637a2f083634981"
         },
         "knockback": {
           "frames": 4,
-          "bytes": 6842,
-          "sha256": "b2a8182c9ca8ed824acad50fd73f181f4978f1fa1d20e289a079017a6237bcd0"
+          "bytes": 10794,
+          "sha256": "103b7ff9264b93db088e035b937db77bfa3a93728bcb9a4379ddf2153d0cc720"
         },
         "death": {
           "frames": 9,
-          "bytes": 25099,
-          "sha256": "c954f8b700e43fbb35d7e77e5d2a406abc6e0235ef6e2895c1cf87418fe7610d"
+          "bytes": 29358,
+          "sha256": "d3889c704a5f5ae26853e9410f1cef8f80af93c205e597688bcd2031f7b873ba"
         }
+      },
+      "visualPolishPriority03": {
+        "version": 1,
+        "kind": "CROSS_BATCH_IDENTITY_AND_MOTION_READABILITY",
+        "reviewStatus": "UNREVIEWED_RUNTIME_FILES"
       }
     },
     "enemy_sp_evo_fragment": {
@@ -1124,29 +1169,34 @@
       "motions": {
         "idle": {
           "frames": 7,
-          "bytes": 7348,
-          "sha256": "f1e52f7ce3a0dbac869265111354d63dbdf3e92468c9543c427544e9da416aa2"
+          "bytes": 8895,
+          "sha256": "8ab9764d419b97df714c3ecf9e20179d276172e425a27f10a0a18aae81d420a4"
         },
         "move": {
           "frames": 8,
-          "bytes": 8700,
-          "sha256": "663d2de37b191606689357a3f3989d1a92d85455352d12e71b774b8fc5fc6cfb"
+          "bytes": 10548,
+          "sha256": "5f3283bb755c938c6607927f4fcbac937df79c6b7b5a034bdbd03f0360a5e35f"
         },
         "attack": {
           "frames": 7,
-          "bytes": 7654,
-          "sha256": "c2550a3f99cca633fe26eb582c3a4798194c909928977ad34ec78336298ce4d9"
+          "bytes": 9840,
+          "sha256": "31b8630b529bf863546f7c71db6fa9e245a5395226994b1aacec38658db54090"
         },
         "knockback": {
           "frames": 4,
-          "bytes": 3971,
-          "sha256": "6a017ac8b72247f389138eb8301725099dfb83f8f46341e91c9ebace94836871"
+          "bytes": 6488,
+          "sha256": "72f3e96e743f3c5dbc74f9f3f777f37f164c2dded3cd0128eb719e3b7042d39f"
         },
         "death": {
           "frames": 7,
-          "bytes": 13952,
-          "sha256": "ebfdd6bd7aafd99a0149ebe792c3d1accac285c72be5729c5dc3bc4029c03396"
+          "bytes": 15979,
+          "sha256": "a3f810530d02d9b3aea68182699b454e86273f99beee09c1693526d1ec672c76"
         }
+      },
+      "visualPolishPriority03": {
+        "version": 1,
+        "kind": "CROSS_BATCH_IDENTITY_AND_MOTION_READABILITY",
+        "reviewStatus": "UNREVIEWED_RUNTIME_FILES"
       }
     },
     "enemy_sp_evo_keyeater": {
@@ -1238,29 +1288,34 @@
       "motions": {
         "idle": {
           "frames": 7,
-          "bytes": 13903,
-          "sha256": "dfbf8a7b901be3af816b88d83bf06701f53dd5165a43a28150daee69d865e559"
+          "bytes": 17426,
+          "sha256": "91fef20258c5c1852af498b20e67745298750d1ad8901b14df3cc2097d701817"
         },
         "move": {
           "frames": 8,
-          "bytes": 16777,
-          "sha256": "6afd6820b874d246084d7fedf66149e73bf1dab4f593f85fd1f59f826075c706"
+          "bytes": 21482,
+          "sha256": "fb59502c4c372da5bd08bba8f8952af6414e457e34b0c880df4661366b3b51c2"
         },
         "attack": {
           "frames": 8,
-          "bytes": 16403,
-          "sha256": "0d183ed9ae1813979a1317f8467a4bb6eb5cab066a1d54869b3b1190920d6ea4"
+          "bytes": 21063,
+          "sha256": "39dc5f70880f60177170453e68245771d0f038db9c6f95c0827842e43d5f5b73"
         },
         "knockback": {
           "frames": 4,
-          "bytes": 8062,
-          "sha256": "cc4c3dd8ddc17eb956cef137fc740fac65b5820ce6bd16ba651ceeb7c8d478c7"
+          "bytes": 12038,
+          "sha256": "f34899c519b0a22a04fd94efb89a728f05e82ee915662e0a45883b6ed6f64f2d"
         },
         "death": {
           "frames": 7,
-          "bytes": 22267,
-          "sha256": "8b1c46846ac688674a18aaf191e1b9caf31e491fc398bca02d4acb8be4ffa89a"
+          "bytes": 25441,
+          "sha256": "8cf2d6f084c344b70ddc154f832ef290f8f8a78a966f733274d418ebafb3c2c9"
         }
+      },
+      "visualPolishPriority03": {
+        "version": 1,
+        "kind": "CROSS_BATCH_IDENTITY_AND_MOTION_READABILITY",
+        "reviewStatus": "UNREVIEWED_RUNTIME_FILES"
       }
     },
     "enemy_sp_evo_glyph_turret": {
@@ -1352,29 +1407,34 @@
       "motions": {
         "idle": {
           "frames": 8,
-          "bytes": 14686,
-          "sha256": "8c9fa277b60a771201fc460af7ee1ffa80485b74730a4770efe92edf50588b54"
+          "bytes": 16682,
+          "sha256": "72824433d783deb681ac692508ae72952a30c46b6154edf428367e082dc9b9e6"
         },
         "move": {
           "frames": 8,
-          "bytes": 15127,
-          "sha256": "868ff9ba975e7c3174a4913de76622fafe606ecb13a0a06e2ae853d8f53ca371"
+          "bytes": 17253,
+          "sha256": "6099fba55b33a7f6eda300fb105ae3f86ebadd6bcb6f75737a396cc6e3297c4d"
         },
         "attack": {
           "frames": 11,
-          "bytes": 20343,
-          "sha256": "e378074b05be7fc824246e38669b34951d3e1e680a94aac7e2212a84d453a5a6"
+          "bytes": 24852,
+          "sha256": "b7aac9456b6e91018716b4e8b55ff28f85796771b2d75f0c4476a42ca56e4cdd"
         },
         "knockback": {
           "frames": 4,
-          "bytes": 7319,
-          "sha256": "aec7be1e23a66a4934c6f8199968af4fe2770ff2b2f8e5b9b3b089f7eda18810"
+          "bytes": 11426,
+          "sha256": "fec3917db6d46afc1bf8ee0a45b629399a707c27f9de41de17bcf81e878470ac"
         },
         "death": {
           "frames": 9,
-          "bytes": 28085,
-          "sha256": "7d0c2501cf8c1c31f443ca29b8390aa1a6a5d57c503f8f2a462bb4a649bc9373"
+          "bytes": 32277,
+          "sha256": "b937fa5b244bedafcfb63f43224657620e44ad6dff2183b466b631228b4b7e50"
         }
+      },
+      "visualPolishPriority03": {
+        "version": 1,
+        "kind": "CROSS_BATCH_IDENTITY_AND_MOTION_READABILITY",
+        "reviewStatus": "UNREVIEWED_RUNTIME_FILES"
       }
     },
     "enemy_sp_rift_shardling": {
@@ -1529,5 +1589,11 @@
         }
       }
     }
+  },
+  "visualPolishPriority03": {
+    "version": 1,
+    "touchedTargets": 12,
+    "humanReview": "PENDING",
+    "normalRuntimeAuthoritative": false
   }
 }

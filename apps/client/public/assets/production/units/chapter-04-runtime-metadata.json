@@ -212,29 +212,34 @@
       "motions": {
         "idle": {
           "frames": 7,
-          "bytes": 7808,
-          "sha256": "d637d01070ad634f7689877f207e116ab7794bbf0d9273d29a08363148b3e91d"
+          "bytes": 9745,
+          "sha256": "448886817a2c66592986bb45f438f33ae3cffeb84d3d48e5b2b28a81507b4a9f"
         },
         "move": {
           "frames": 8,
-          "bytes": 10936,
-          "sha256": "d39464a5fb7bbfd5ad5f12e1d0afa71898d9ac02cb090e6df77538ad41576de2"
+          "bytes": 14747,
+          "sha256": "ff8d2b839717549b3980462eedaf58d3ae2c8ba75e4ac7ba1516b9762656ada6"
         },
         "attack": {
           "frames": 8,
-          "bytes": 13719,
-          "sha256": "c1bb6218f912f24118527bd4f5eaa1967e07641ae58ac65f16789ea1e400f9af"
+          "bytes": 16513,
+          "sha256": "9c11af93fdddc82055eeef3e1b850cd714ec2317316615305af2888b924b8c0d"
         },
         "knockback": {
           "frames": 4,
-          "bytes": 5438,
-          "sha256": "904cca8d06955ac28594c8d0b19b7c2d3bd360edc88e0344fc08d8235f9edb36"
+          "bytes": 7645,
+          "sha256": "de775a141a2cfc645e84757ef268ac5d8cb2eb244c9275ccdda9a51ef320103a"
         },
         "death": {
           "frames": 7,
-          "bytes": 16230,
-          "sha256": "03756a1d30511cab080558dcee7a7abb7eebe4e3109142936bb10f49d85795a3"
+          "bytes": 18866,
+          "sha256": "18a656054b4a22743fe9c87fa6bd76dec9bfbbded9001afe284ca0f19c076d0c"
         }
+      },
+      "visualPolishPriority03": {
+        "version": 1,
+        "kind": "CROSS_BATCH_IDENTITY_AND_MOTION_READABILITY",
+        "reviewStatus": "UNREVIEWED_RUNTIME_FILES"
       }
     },
     "enemy_ch4_void_lens": {
@@ -250,29 +255,34 @@
       "motions": {
         "idle": {
           "frames": 7,
-          "bytes": 9038,
-          "sha256": "29153351e5571a75c03397dd6c099cd6937cd3b0b12206fc9a11aa661b400f97"
+          "bytes": 12121,
+          "sha256": "b00ae520922180538b103a8614a081598fe8661fda707f5f7ef8245a329fc015"
         },
         "move": {
           "frames": 8,
-          "bytes": 12648,
-          "sha256": "5b095ffe4465c69d8f695890360f10868d4507973972a8ea802e6300632e99c6"
+          "bytes": 16976,
+          "sha256": "bc1f7e0e08fc523be0feb2dd071c87badf5307f0a897a74da2adedd3c9e750fd"
         },
         "attack": {
           "frames": 8,
-          "bytes": 15269,
-          "sha256": "feb7a1ee18d5401dc4c7608b8f259f1ef0ca80b8ca7a20421fa1a15908aeb62d"
+          "bytes": 20077,
+          "sha256": "546bc44b5df77e50727569fd59e65fd76344c28455a954bdbbb1297966f60145"
         },
         "knockback": {
           "frames": 4,
-          "bytes": 5117,
-          "sha256": "0251a9bdcc365cecc1f1326cc73cd728033111591ecd058f15f966d4fe3572f4"
+          "bytes": 9262,
+          "sha256": "32892859c12f8f645d10b678ede9fee546e8f48d9116ba65069f26d94b867406"
         },
         "death": {
           "frames": 7,
-          "bytes": 12843,
-          "sha256": "43b28299c766b7afd74e31fccaa56d4e67f2b82af9f4dee9b87ee90944ef2ed1"
+          "bytes": 18994,
+          "sha256": "c335f40431f1d9a0361f113d3e84d35a052bdfd370295a783926bd558c908740"
         }
+      },
+      "visualPolishPriority03": {
+        "version": 1,
+        "kind": "CROSS_BATCH_IDENTITY_AND_MOTION_READABILITY",
+        "reviewStatus": "UNREVIEWED_RUNTIME_FILES"
       }
     },
     "enemy_ch4_fusion_cavalry": {
@@ -364,30 +374,41 @@
       "motions": {
         "idle": {
           "frames": 8,
-          "bytes": 19852,
-          "sha256": "87055462b57a6feab0e9ec1e738984662ab432431649caae1f53077f86740b03"
+          "bytes": 22991,
+          "sha256": "70d57d3bccfe3d3e4036fa1de695146cfb5304bbbfdf3edead2f1846be00043e"
         },
         "move": {
           "frames": 8,
-          "bytes": 23091,
-          "sha256": "c571eba8d1bbbfc49164abc05d1e070baeb123aaed8319476bc02d2c579bdecd"
+          "bytes": 27180,
+          "sha256": "47269c372f904d2294a15e7a03cfb54becf6f910a33456d1de0700d90520556f"
         },
         "attack": {
           "frames": 11,
-          "bytes": 57314,
-          "sha256": "ebdf875f5d49a7be712bde0f2df4354b9ee98be8c64712766197c602a87b803e"
+          "bytes": 60536,
+          "sha256": "89c9768c3bdd5ff94f4d0fc8e76e5a58d3fbf0d8d79fb10cb9ef2439e45edda0"
         },
         "knockback": {
           "frames": 4,
-          "bytes": 9653,
-          "sha256": "9cedd5183d0bb1211f9da300f17286584ec44e3ab4d0cc95525480dcbc034a32"
+          "bytes": 15583,
+          "sha256": "d087b09a6b744f893748aa592a8e0266120838665af35394c025104fe922f092"
         },
         "death": {
           "frames": 9,
-          "bytes": 38282,
-          "sha256": "863617deb8f8effc1e2d42d02bae84600d92f2f04d70d0c799518fea2d08d69f"
+          "bytes": 44935,
+          "sha256": "76b66475db3413803b6d23387b59cd69f57c10ae8487ffa37531dc4e5c9da31f"
         }
+      },
+      "visualPolishPriority03": {
+        "version": 1,
+        "kind": "CROSS_BATCH_IDENTITY_AND_MOTION_READABILITY",
+        "reviewStatus": "UNREVIEWED_RUNTIME_FILES"
       }
     }
+  },
+  "visualPolishPriority03": {
+    "version": 1,
+    "touchedTargets": 3,
+    "humanReview": "PENDING",
+    "normalRuntimeAuthoritative": false
   }
 }

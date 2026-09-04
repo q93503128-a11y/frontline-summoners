@@ -79,8 +79,8 @@
           "frameWidth": 210,
           "frameHeight": 190,
           "frames": 11,
-          "bytes": 5370,
-          "sha256": "cbd6927dffdb84549bf1cd3d234dedd969ae9d0d5e83392d1da6550c66bb8e01",
+          "bytes": 7519,
+          "sha256": "ce5c054f83907aad9dd0f0ea86fbe2de85038a098a829472a532dca599428373",
           "sourceUrl": "https://raw.githubusercontent.com/vlee489/AC31009-Client/71252f38c7bf4426ff84676cad517f66c3e6cb65/assets/Sprites/HeroKnight/Idle.png",
           "sourceLocalPath": "/assets/characters/hero-knight/idle.png"
         },
@@ -89,8 +89,8 @@
           "frameWidth": 210,
           "frameHeight": 190,
           "frames": 8,
-          "bytes": 5902,
-          "sha256": "80c0081e2cffe69a0ae44d1e284052a6d291591f4d7109e838d0725bf5055de7",
+          "bytes": 7839,
+          "sha256": "90efe3a80c1a2101cde7fd0220438a4d11180da08391575e9cc3d7ebf12afe27",
           "sourceUrl": "https://raw.githubusercontent.com/vlee489/AC31009-Client/71252f38c7bf4426ff84676cad517f66c3e6cb65/assets/Sprites/HeroKnight/Run.png",
           "sourceLocalPath": "/assets/characters/hero-knight/run.png"
         },
@@ -99,8 +99,8 @@
           "frameWidth": 210,
           "frameHeight": 190,
           "frames": 7,
-          "bytes": 5781,
-          "sha256": "494dcb41c3b281d131c4ac9dc3831800ef4fb48e2c375b2618f74f1ce70d0c37",
+          "bytes": 7653,
+          "sha256": "e5e7d8d0452465d86b79482eb7ff6c92b0689f98ab54a356447ff07d374bcf56",
           "sourceUrl": "https://raw.githubusercontent.com/vlee489/AC31009-Client/71252f38c7bf4426ff84676cad517f66c3e6cb65/assets/Sprites/HeroKnight/Attack1.png",
           "sourceLocalPath": "/assets/characters/hero-knight/attack.png"
         },
@@ -109,8 +109,8 @@
           "frameWidth": 210,
           "frameHeight": 190,
           "frames": 4,
-          "bytes": 3418,
-          "sha256": "57c937368c92e3a844e167e060439f11d44a8e5d495594f0b118928d970c0555",
+          "bytes": 4694,
+          "sha256": "8ff79c86c751e2d6d432f5bbbf9b532b6a20319be245dead2c50e5a390e4841f",
           "sourceUrl": "https://raw.githubusercontent.com/vlee489/AC31009-Client/71252f38c7bf4426ff84676cad517f66c3e6cb65/assets/Sprites/HeroKnight/Take%20Hit.png",
           "sourceLocalPath": "/assets/characters/hero-knight/hit.png"
         },
@@ -119,11 +119,16 @@
           "frameWidth": 210,
           "frameHeight": 190,
           "frames": 11,
-          "bytes": 8425,
-          "sha256": "98d1f706d8a6b003de40ecdacfd810aad88d00857adb77c9d825b67ad9033d79",
+          "bytes": 10495,
+          "sha256": "c8456fb21bcda7e477cf69d91283861ba2822ec40ad6f712950c3b5df79eab12",
           "sourceUrl": "https://raw.githubusercontent.com/vlee489/AC31009-Client/71252f38c7bf4426ff84676cad517f66c3e6cb65/assets/Sprites/HeroKnight/Death.png",
           "sourceLocalPath": "/assets/characters/hero-knight/death.png"
         }
+      },
+      "visualPolishPriority03": {
+        "version": 1,
+        "kind": "CROSS_BATCH_IDENTITY_AND_MOTION_READABILITY",
+        "reviewStatus": "UNREVIEWED_RUNTIME_FILES"
       }
     },
     "guard/guard_f3": {
@@ -139,8 +144,8 @@
           "frameWidth": 210,
           "frameHeight": 190,
           "frames": 11,
-          "bytes": 6080,
-          "sha256": "c81204cc337648d488402fc4e14e6b0a88352c52d6ad8c17c151368e2b519921",
+          "bytes": 8276,
+          "sha256": "fcda25acbbfb75ce9456b0493c32509abf26b7aa0116b2309705ae6002cb7cf8",
           "sourceUrl": "https://raw.githubusercontent.com/vlee489/AC31009-Client/71252f38c7bf4426ff84676cad517f66c3e6cb65/assets/Sprites/HeroKnight/Idle.png",
           "sourceLocalPath": "/assets/characters/hero-knight/idle.png"
         },
@@ -149,8 +154,8 @@
           "frameWidth": 210,
           "frameHeight": 190,
           "frames": 8,
-          "bytes": 6545,
-          "sha256": "ff6ca1e3000a68cbc1f1e2703e85c132df0fda1ae9a38c74affe6939039d5c12",
+          "bytes": 8632,
+          "sha256": "2d5c4769b5bdd2d9f0db5f53ed0878a7a69bc231216d07da077709119c20f866",
           "sourceUrl": "https://raw.githubusercontent.com/vlee489/AC31009-Client/71252f38c7bf4426ff84676cad517f66c3e6cb65/assets/Sprites/HeroKnight/Run.png",
           "sourceLocalPath": "/assets/characters/hero-knight/run.png"
         },
@@ -159,8 +164,8 @@
           "frameWidth": 210,
           "frameHeight": 190,
           "frames": 7,
-          "bytes": 6175,
-          "sha256": "203f594c3b154cfaad768fc0a4f43988f74e78fc3205740f2978d84acd5e10e0",
+          "bytes": 8281,
+          "sha256": "245d06964a78620351c4c9076b323d00dce2bbef4fc31a069830924fc2902dbf",
           "sourceUrl": "https://raw.githubusercontent.com/vlee489/AC31009-Client/71252f38c7bf4426ff84676cad517f66c3e6cb65/assets/Sprites/HeroKnight/Attack1.png",
           "sourceLocalPath": "/assets/characters/hero-knight/attack.png"
         },
@@ -169,8 +174,8 @@
           "frameWidth": 210,
           "frameHeight": 190,
           "frames": 4,
-          "bytes": 3778,
-          "sha256": "3c8ad7a818b9ef8ceb2ab1193c74beafcbfa874205fed6625a205d63f4c20de1",
+          "bytes": 5060,
+          "sha256": "68fcbb3394a18687da5e275ca56eed7f975fdf1f70f9fbd1e2640d1e4a5fa428",
           "sourceUrl": "https://raw.githubusercontent.com/vlee489/AC31009-Client/71252f38c7bf4426ff84676cad517f66c3e6cb65/assets/Sprites/HeroKnight/Take%20Hit.png",
           "sourceLocalPath": "/assets/characters/hero-knight/hit.png"
         },
@@ -179,11 +184,16 @@
           "frameWidth": 210,
           "frameHeight": 190,
           "frames": 11,
-          "bytes": 9488,
-          "sha256": "b28a819a6b20abef1de99ade86d695bcdd51a82acb1050fc447c58e07642269a",
+          "bytes": 11737,
+          "sha256": "2741a30d0414b3d7c427bd880b902796c5501743a272e01243ee49568301c4cf",
           "sourceUrl": "https://raw.githubusercontent.com/vlee489/AC31009-Client/71252f38c7bf4426ff84676cad517f66c3e6cb65/assets/Sprites/HeroKnight/Death.png",
           "sourceLocalPath": "/assets/characters/hero-knight/death.png"
         }
+      },
+      "visualPolishPriority03": {
+        "version": 1,
+        "kind": "CROSS_BATCH_IDENTITY_AND_MOTION_READABILITY",
+        "reviewStatus": "UNREVIEWED_RUNTIME_FILES"
       }
     },
     "hunter/hunter_f1": {
@@ -496,5 +506,11 @@
     "version": 1,
     "target": "enemy-shield",
     "humanReview": "PENDING"
+  },
+  "visualPolishPriority03": {
+    "version": 1,
+    "touchedTargets": 2,
+    "humanReview": "PENDING",
+    "normalRuntimeAuthoritative": false
   }
 }
