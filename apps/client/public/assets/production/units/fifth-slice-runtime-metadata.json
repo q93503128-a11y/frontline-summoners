@@ -1,0 +1,198 @@
+{
+  "schemaVersion": 1,
+  "sliceId": "fifth-slice-late-wave-05",
+  "generatorVersion": 1,
+  "status": "UNREVIEWED_RUNTIME_FILES",
+  "humanReview": "PENDING",
+  "reviewer": null,
+  "reviewedAt": null,
+  "generativeAiUsed": false,
+  "normalRuntimeAuthoritative": false,
+  "targets": {
+    "heretic/heretic_f1": {
+      "assetId": "unit:heretic:heretic_f1",
+      "sourceFamily": "evil-wizard-2",
+      "structuralRework": true,
+      "reviewStatus": "UNREVIEWED_RUNTIME_FILES",
+      "frameWidth": 310,
+      "frameHeight": 260,
+      "displayHeight": 198,
+      "attackContactFrame": 5,
+      "motions": {
+        "idle": {
+          "file": "apps/client/public/assets/production/units/heretic/heretic_f1/idle.png",
+          "frames": 8,
+          "sha256": "c7b5dcc480de292f12c76497061245ea0eb4b565503398389b9878783d52058a"
+        },
+        "move": {
+          "file": "apps/client/public/assets/production/units/heretic/heretic_f1/move.png",
+          "frames": 8,
+          "sha256": "30fbc168eef83e7e5292c99e8314256b3b7b002422c6eabaec1277232f1193d4"
+        },
+        "attack": {
+          "file": "apps/client/public/assets/production/units/heretic/heretic_f1/attack.png",
+          "frames": 8,
+          "sha256": "33b3aa812b31f639b39b3405a2c2c528301f134f2c5d7ce7c97ec1ad098300b7"
+        },
+        "knockback": {
+          "file": "apps/client/public/assets/production/units/heretic/heretic_f1/knockback.png",
+          "frames": 3,
+          "sha256": "fb6846ac180b450c06d643451a895fec3b1b779df65af0eb9dbd7206eb94e20b"
+        },
+        "death": {
+          "file": "apps/client/public/assets/production/units/heretic/heretic_f1/death.png",
+          "frames": 7,
+          "sha256": "4622071d8ba42a30c9d9f5ec66bd7476cb04d800b8ab8ff20aa0c6d321a3d9f9"
+        }
+      }
+    },
+    "heretic/heretic_f2": {
+      "assetId": "unit:heretic:heretic_f2",
+      "sourceFamily": "evil-wizard-2",
+      "structuralRework": true,
+      "reviewStatus": "UNREVIEWED_RUNTIME_FILES",
+      "frameWidth": 330,
+      "frameHeight": 270,
+      "displayHeight": 206,
+      "attackContactFrame": 5,
+      "motions": {
+        "idle": {
+          "file": "apps/client/public/assets/production/units/heretic/heretic_f2/idle.png",
+          "frames": 8,
+          "sha256": "14401120e17f7335ef04cf173f392cc46aba4c76f73be20e7c8ec44d4987e275"
+        },
+        "move": {
+          "file": "apps/client/public/assets/production/units/heretic/heretic_f2/move.png",
+          "frames": 8,
+          "sha256": "9c45ebad8e33bcc08b9a22d035457d72a62b33b4cb5f9db2d5a9b08e5a764018"
+        },
+        "attack": {
+          "file": "apps/client/public/assets/production/units/heretic/heretic_f2/attack.png",
+          "frames": 8,
+          "sha256": "a8b4a7b980d5be47f8d2432e46f59e83a0ce059542e84e2b06090aab416bbf38"
+        },
+        "knockback": {
+          "file": "apps/client/public/assets/production/units/heretic/heretic_f2/knockback.png",
+          "frames": 3,
+          "sha256": "784feaa2757cacb8f071939b75be1aa58bab56dc57be65fd4f7226a3ecf14be1"
+        },
+        "death": {
+          "file": "apps/client/public/assets/production/units/heretic/heretic_f2/death.png",
+          "frames": 7,
+          "sha256": "ece0db78f6a2098953961d99ff7ad4e69ca2dcf373b24b61a13ab1fad52cb9dd"
+        }
+      }
+    },
+    "heretic/heretic_f3": {
+      "assetId": "unit:heretic:heretic_f3",
+      "sourceFamily": "evil-wizard-2",
+      "structuralRework": true,
+      "reviewStatus": "UNREVIEWED_RUNTIME_FILES",
+      "frameWidth": 290,
+      "frameHeight": 245,
+      "displayHeight": 194,
+      "attackContactFrame": 5,
+      "motions": {
+        "idle": {
+          "file": "apps/client/public/assets/production/units/heretic/heretic_f3/idle.png",
+          "frames": 8,
+          "sha256": "dc646b33b5134899b38f75f8f2cbe58d42f783ee9fc74cf676ace292f18ccbcb"
+        },
+        "move": {
+          "file": "apps/client/public/assets/production/units/heretic/heretic_f3/move.png",
+          "frames": 8,
+          "sha256": "6165636127a8d465431c36ea835440dd278040114d02dd16eadd256ba6d91a7f"
+        },
+        "attack": {
+          "file": "apps/client/public/assets/production/units/heretic/heretic_f3/attack.png",
+          "frames": 8,
+          "sha256": "8df780ba824376f35405b5baa597e41cc9ee5fb90afafb5b3a3536bf3f231c81"
+        },
+        "knockback": {
+          "file": "apps/client/public/assets/production/units/heretic/heretic_f3/knockback.png",
+          "frames": 3,
+          "sha256": "9909064ab0b27e02aec6dd4990b1e712daeb6549b165f6a354ae8329ec56f34e"
+        },
+        "death": {
+          "file": "apps/client/public/assets/production/units/heretic/heretic_f3/death.png",
+          "frames": 7,
+          "sha256": "025edb3b403c36c003f64a69806ea5e0b8940684a79817527332c5ae73f6a821"
+        }
+      }
+    },
+    "enemy-cultist": {
+      "assetId": "unit:enemy-cultist",
+      "sourceFamily": "evil-wizard",
+      "structuralRework": true,
+      "reviewStatus": "UNREVIEWED_RUNTIME_FILES",
+      "frameWidth": 260,
+      "frameHeight": 200,
+      "displayHeight": 188,
+      "attackContactFrame": 4,
+      "motions": {
+        "idle": {
+          "file": "apps/client/public/assets/production/units/enemy-cultist/idle.png",
+          "frames": 8,
+          "sha256": "c7e076e1870aba21498e00b38fcd66926a70ea7f27e096634154a0b67a598a66"
+        },
+        "move": {
+          "file": "apps/client/public/assets/production/units/enemy-cultist/move.png",
+          "frames": 8,
+          "sha256": "bcdb7a2ed2fbe3f2a192e5cf7b3460744b57b0f0510f7f884ed66e129d89a1d7"
+        },
+        "attack": {
+          "file": "apps/client/public/assets/production/units/enemy-cultist/attack.png",
+          "frames": 8,
+          "sha256": "e287b5ca940a6f55787d46be46a71c8242eee8032c2631da1046cf03b5ae45fd"
+        },
+        "knockback": {
+          "file": "apps/client/public/assets/production/units/enemy-cultist/knockback.png",
+          "frames": 4,
+          "sha256": "d8185aee82de7c01a3ae7de28f026c923c3631baf20f9c7c892fecc5e9764eff"
+        },
+        "death": {
+          "file": "apps/client/public/assets/production/units/enemy-cultist/death.png",
+          "frames": 5,
+          "sha256": "6ca920b6e2ba003ee1a43188571a8589c7ca22e24358135d18af5c9d84cefc5e"
+        }
+      }
+    },
+    "enemy-sprinter": {
+      "assetId": "unit:enemy-sprinter",
+      "sourceFamily": "project-authored-beast",
+      "structuralRework": true,
+      "reviewStatus": "UNREVIEWED_RUNTIME_FILES",
+      "frameWidth": 210,
+      "frameHeight": 130,
+      "displayHeight": 140,
+      "attackContactFrame": 2,
+      "motions": {
+        "idle": {
+          "file": "apps/client/public/assets/production/units/enemy-sprinter/idle.png",
+          "frames": 6,
+          "sha256": "53196f03445923d85fe6b25b674de8fcc8a36ef085d1d849b63342d5628c575a"
+        },
+        "move": {
+          "file": "apps/client/public/assets/production/units/enemy-sprinter/move.png",
+          "frames": 8,
+          "sha256": "ff9b520339fe833f7265979d984eca0e16fe6b6ac89c125ac3c45c7400914aaa"
+        },
+        "attack": {
+          "file": "apps/client/public/assets/production/units/enemy-sprinter/attack.png",
+          "frames": 6,
+          "sha256": "77223853b5301565ef44e890f7644ab8096d7410f417a5672099cb38e5c08b97"
+        },
+        "knockback": {
+          "file": "apps/client/public/assets/production/units/enemy-sprinter/knockback.png",
+          "frames": 4,
+          "sha256": "1f26e0e8b51881979b48eb77f2408a047a6e4dad23195c122edc28126712698c"
+        },
+        "death": {
+          "file": "apps/client/public/assets/production/units/enemy-sprinter/death.png",
+          "frames": 6,
+          "sha256": "84d3928e66d85543fd16bc60adf3ef72c845ab25e8b58e0882366f247cf5e407"
+        }
+      }
+    }
+  }
+}
