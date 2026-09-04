@@ -3,6 +3,11 @@ import type { BattleUnit } from '@frontline/sim';
 import type { PlayableBattleState } from '@frontline/sim/playable';
 import type { AttackFxStyle, SpriteStrip } from './assets.ts';
 import { getActiveVisualFormId } from './active-visual-forms.ts';
+import {
+  playFirstSliceReviewContactFx,
+  playFirstSliceReviewImpactFx,
+  type FirstSliceReviewFamilyKey,
+} from './first-slice-production-review-contact-vfx.ts';
 import { getRuntimeMotionFrame, selectRuntimeMotionStrip } from './production-motion.ts';
 import type { RuntimeArtFamily } from './production-assets.ts';
 
@@ -19,7 +24,7 @@ function strip(key: string, url: string, frameWidth: number, frameHeight: number
   return { key, url, frameWidth, frameHeight, frames };
 }
 
-const REVIEW_FAMILIES: Readonly<Record<string, RuntimeArtFamily>> = {
+const REVIEW_FAMILIES: Readonly<Record<FirstSliceReviewFamilyKey, RuntimeArtFamily>> = {
   militia_f1: {
     id: 'review-militia-f1', displayHeight: 174, attackContactFrame: 2,
     idle: strip('review-militia-f1-idle', `${ROOT}/militia/militia_f1/idle.png`, 135, 135, 10),
@@ -62,7 +67,7 @@ const REVIEW_FAMILIES: Readonly<Record<string, RuntimeArtFamily>> = {
   },
 };
 
-const REVIEW_ATTACK_FX: Readonly<Record<string, AttackFxStyle>> = {
+const REVIEW_ATTACK_FX: Readonly<Record<FirstSliceReviewFamilyKey, AttackFxStyle>> = {
   militia_f1: 'SLASH',
   militia_f2: 'PIERCE',
   militia_f3: 'PIERCE',
@@ -94,9 +99,10 @@ export function getFirstSliceReviewSpriteStrips(): readonly SpriteStrip[] {
   return Object.values(REVIEW_FAMILIES).flatMap((family) => [...allStrips(family)]);
 }
 
-function reviewKeyForUnit(unitId: string): string | undefined {
-  if (unitId === 'militia') return forcedMilitiaReviewForm ?? getActiveVisualFormId('militia') ?? 'militia_f1';
-  return REVIEW_FAMILIES[unitId] ? unitId : undefined;
+function reviewKeyForUnit(unitId: string): FirstSliceReviewFamilyKey | undefined {
+  if (unitId === 'militia') return forcedMilitiaReviewForm ?? getActiveVisualFormId('militia') as MilitiaReviewForm | undefined ?? 'militia_f1';
+  if (unitId === 'enemy-raider' || unitId === 'enemy-boss') return unitId;
+  return undefined;
 }
 
 export function getReviewAttackFxStyle(unitId: string): AttackFxStyle | undefined {
@@ -109,6 +115,10 @@ function reviewFamilyForUnit(unitId: string): RuntimeArtFamily | undefined {
   return key ? REVIEW_FAMILIES[key] : undefined;
 }
 
+function activeUnitCount(host: ReviewHost): number {
+  return (host.state?.battle?.units ?? []).filter((unit) => unit.hp > 0).length;
+}
+
 interface ReviewUnitView {
   readonly sprite: Phaser.GameObjects.Sprite;
 }
@@ -118,36 +128,11 @@ interface ReviewHost {
   views: Map<number, ReviewUnitView>;
   syncUnits(): void;
   playAttackFx(unit: BattleUnit, view: ReviewUnitView, style: AttackFxStyle): void;
+  playUnitImpactFx(unit: BattleUnit, view: ReviewUnitView, damage: number): void;
 }
 
 const INSTALL_MARKER = Symbol('first-slice-production-review-runtime');
 type InstallableScene = Phaser.Scene & ReviewHost & { [INSTALL_MARKER]?: boolean };
-
-function playGoldenMaskContactFx(scene: Phaser.Scene, view: ReviewUnitView): void {
-  const x = view.sprite.x - 28;
-  const y = view.sprite.y - 88;
-  const ring = scene.add.ellipse(x, y, 54, 74, 0x1b1420, 0.12).setStrokeStyle(4, 0xf0c967, 0.92).setDepth(view.sprite.depth + 3);
-  const inner = scene.add.ellipse(x, y, 24, 36, 0xd6aa4d, 0.2).setStrokeStyle(2, 0xffe39a, 0.9).setDepth(view.sprite.depth + 3.1);
-  const leftEye = scene.add.rectangle(x - 9, y - 8, 10, 4, 0x2a1722, 0.96).setDepth(view.sprite.depth + 3.2);
-  const rightEye = scene.add.rectangle(x + 9, y - 8, 10, 4, 0x2a1722, 0.96).setDepth(view.sprite.depth + 3.2);
-  scene.tweens.add({
-    targets: [ring, inner],
-    scaleX: 2.8,
-    scaleY: 2.1,
-    alpha: 0,
-    duration: 260,
-    ease: 'Quad.easeOut',
-    onComplete: () => { ring.destroy(); inner.destroy(); },
-  });
-  scene.tweens.add({
-    targets: [leftEye, rightEye],
-    x: (target: Phaser.GameObjects.Rectangle) => target.x + (target.x < x ? -26 : 26),
-    alpha: 0,
-    duration: 180,
-    ease: 'Quad.easeOut',
-    onComplete: () => { leftEye.destroy(); rightEye.destroy(); },
-  });
-}
 
 export function installFirstSliceProductionReviewRuntime(scene: Phaser.Scene): void {
   if (!isFirstSliceProductionReviewMode()) return;
@@ -155,14 +140,44 @@ export function installFirstSliceProductionReviewRuntime(scene: Phaser.Scene): v
   if (host[INSTALL_MARKER]) return;
   const originalSyncUnits = host.syncUnits;
   const originalPlayAttackFx = host.playAttackFx;
+  const originalPlayUnitImpactFx = host.playUnitImpactFx;
   if (typeof originalSyncUnits !== 'function') throw new Error('first-slice review runtime requires BattleScene.syncUnits');
   if (typeof originalPlayAttackFx !== 'function') throw new Error('first-slice review runtime requires BattleScene.playAttackFx');
+  if (typeof originalPlayUnitImpactFx !== 'function') throw new Error('first-slice review runtime requires BattleScene.playUnitImpactFx');
   host[INSTALL_MARKER] = true;
 
   host.playAttackFx = (unit: BattleUnit, view: ReviewUnitView, style: AttackFxStyle): void => {
-    const reviewStyle = getReviewAttackFxStyle(unit.definition.id) ?? style;
-    originalPlayAttackFx.call(scene, unit, view, reviewStyle);
-    if (unit.definition.id === 'enemy-boss') playGoldenMaskContactFx(scene, view);
+    const key = reviewKeyForUnit(unit.definition.id);
+    if (!key) {
+      originalPlayAttackFx.call(scene, unit, view, style);
+      return;
+    }
+    const direction: 1 | -1 = unit.team === 'PLAYER' ? 1 : -1;
+    const distance = key === 'militia_f2' ? 46 : key === 'militia_f3' ? 34 : key === 'enemy-boss' ? 42 : 36;
+    playFirstSliceReviewContactFx(
+      scene,
+      key,
+      view.sprite.x + direction * distance,
+      view.sprite.y - (key === 'enemy-boss' ? 34 : 8),
+      direction,
+      activeUnitCount(host),
+    );
+  };
+
+  host.playUnitImpactFx = (unit: BattleUnit, view: ReviewUnitView, damage: number): void => {
+    const key = reviewKeyForUnit(unit.definition.id);
+    if (!key) {
+      originalPlayUnitImpactFx.call(scene, unit, view, damage);
+      return;
+    }
+    playFirstSliceReviewImpactFx(
+      scene,
+      key,
+      view.sprite.x,
+      view.sprite.y - 8,
+      damage / Math.max(1, unit.definition.maxHp),
+      activeUnitCount(host),
+    );
   };
 
   host.syncUnits = (): void => {
