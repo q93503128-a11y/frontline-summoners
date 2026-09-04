@@ -1,0 +1,161 @@
+{
+  "schemaVersion": 1,
+  "sliceId": "sixth-slice-chapter-one-finale-06",
+  "generatorVersion": 1,
+  "status": "UNREVIEWED_RUNTIME_FILES",
+  "humanReview": "PENDING",
+  "reviewer": null,
+  "reviewedAt": null,
+  "generativeAiUsed": false,
+  "normalRuntimeAuthoritative": false,
+  "targets": {
+    "voidsage/voidsage_f1": {
+      "assetId": "unit:voidsage:voidsage_f1",
+      "sourceFamily": "project-authored-anomaly",
+      "reviewStatus": "UNREVIEWED_RUNTIME_FILES",
+      "frameWidth": 270,
+      "frameHeight": 220,
+      "displayHeight": 198,
+      "attackContactFrame": 5,
+      "simulationContactFrame": 48,
+      "motions": {
+        "idle": {
+          "frames": 6,
+          "bytes": 5914,
+          "sha256": "b6e723e7c70d2ddbf7be8473c4153056a0fc004220958a0e6fce4a22eddd08f2"
+        },
+        "move": {
+          "frames": 8,
+          "bytes": 8131,
+          "sha256": "1940145fb237a0bf391a936cc741678b1ef7b35fff06f2e412abf8932e398c27"
+        },
+        "attack": {
+          "frames": 8,
+          "bytes": 8496,
+          "sha256": "d11ffec8c2042b8b771045fffde95aaac5ca3add881a1a5ccf841f71dd46e474"
+        },
+        "knockback": {
+          "frames": 4,
+          "bytes": 3028,
+          "sha256": "2a82c2d8b4ba46df3dd3854f04c5fc5e043949d4b5aefcd538399166749e656e"
+        },
+        "death": {
+          "frames": 7,
+          "bytes": 7166,
+          "sha256": "96fedba0e75e24e10390a98c245195786fcced51c30bc587864072617b903d9b"
+        }
+      }
+    },
+    "voidsage/voidsage_f2": {
+      "assetId": "unit:voidsage:voidsage_f2",
+      "sourceFamily": "project-authored-anomaly",
+      "reviewStatus": "UNREVIEWED_RUNTIME_FILES",
+      "frameWidth": 300,
+      "frameHeight": 230,
+      "displayHeight": 204,
+      "attackContactFrame": 5,
+      "simulationContactFrame": 48,
+      "motions": {
+        "idle": {
+          "frames": 6,
+          "bytes": 7838,
+          "sha256": "2e2329386b0857063855556d15c66cee7ac2e62c3aae148dca05c4a98185dc49"
+        },
+        "move": {
+          "frames": 8,
+          "bytes": 10645,
+          "sha256": "89a940b67c10028344576aea97dcf1827349f471411dd0969d86d6e560d675b8"
+        },
+        "attack": {
+          "frames": 8,
+          "bytes": 10844,
+          "sha256": "8d84b7835296db0854974a66d5860bba089f9a088e7275fbf71bf153abd4f1fc"
+        },
+        "knockback": {
+          "frames": 4,
+          "bytes": 3623,
+          "sha256": "2a8f1b3d539d1be55bfe53f16807eda60c3867d5222ce0f7072c019063cfc48b"
+        },
+        "death": {
+          "frames": 7,
+          "bytes": 10679,
+          "sha256": "f01597f0b1dd586b0ed95d3fa0f45b9dd824f615640d55460d0ec15f5bc7a473"
+        }
+      }
+    },
+    "voidsage/voidsage_f3": {
+      "assetId": "unit:voidsage:voidsage_f3",
+      "sourceFamily": "project-authored-anomaly",
+      "reviewStatus": "UNREVIEWED_RUNTIME_FILES",
+      "frameWidth": 330,
+      "frameHeight": 240,
+      "displayHeight": 214,
+      "attackContactFrame": 5,
+      "simulationContactFrame": 48,
+      "motions": {
+        "idle": {
+          "frames": 6,
+          "bytes": 10419,
+          "sha256": "e17c289c2701f93ba0d08d036cd6386ca8806cfb1843ec82abfddeaff894533c"
+        },
+        "move": {
+          "frames": 8,
+          "bytes": 14334,
+          "sha256": "88216e39413d753d3fd972eab0a9b748be51f21810fdc7a81078a99d6c2c57f1"
+        },
+        "attack": {
+          "frames": 8,
+          "bytes": 13948,
+          "sha256": "c70db2f1cb6871028361810d29d95fc37aa6a14e14cafd94cc21095b629b82c0"
+        },
+        "knockback": {
+          "frames": 4,
+          "bytes": 4593,
+          "sha256": "ed3b38553c18ae0ca09dee88c85670e451e2eb6f17122fd35ae037ffe745758f"
+        },
+        "death": {
+          "frames": 7,
+          "bytes": 13478,
+          "sha256": "5580dd87d312e4341a85fce67f712091e564b247504e3f41c4f7c94aee89a1e2"
+        }
+      }
+    },
+    "enemy-boss-iron": {
+      "assetId": "unit:enemy-boss-iron",
+      "sourceFamily": "hero-knight",
+      "reviewStatus": "UNREVIEWED_RUNTIME_FILES",
+      "frameWidth": 300,
+      "frameHeight": 225,
+      "displayHeight": 244,
+      "attackContactFrame": 4,
+      "simulationContactFrame": 52,
+      "motions": {
+        "idle": {
+          "frames": 11,
+          "bytes": 8128,
+          "sha256": "6b4001990da1e8aa2af45fed36457af4785533e5b38f7c80d1621e27f60e3217"
+        },
+        "move": {
+          "frames": 8,
+          "bytes": 8075,
+          "sha256": "0838661d53b91c97cee1d6e63b6a3fc7f0d91e52fc296cf181b39baa4859575a"
+        },
+        "attack": {
+          "frames": 7,
+          "bytes": 9318,
+          "sha256": "4aed8dd8e00da1a89b1301e674ca588ffd3ef0caa280fe0ce5a1b2d70a5f41b5"
+        },
+        "knockback": {
+          "frames": 4,
+          "bytes": 4952,
+          "sha256": "d7b5853a97d1ae9176b000877fbec32bd9feb72ca75b69d0fec124656a73f750"
+        },
+        "death": {
+          "frames": 11,
+          "bytes": 13212,
+          "sha256": "b31e11dda44532c46d716a56c54b4c624480b0046005408a6ac5fd51a6c6089f"
+        }
+      }
+    }
+  }
+}
