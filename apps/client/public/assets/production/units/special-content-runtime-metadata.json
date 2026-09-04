@@ -1,0 +1,1533 @@
+{
+  "schemaVersion": 2,
+  "batchId": "special-content-production-01",
+  "generator": "tools/materialize-special-content-production-art.mjs",
+  "generatorVersion": 1,
+  "status": "UNREVIEWED_RUNTIME_FILES",
+  "humanReview": "PENDING",
+  "normalRuntimeAuthoritative": false,
+  "generativeAiUsed": false,
+  "sourcePolicy": "PROJECT_AUTHORED_DETERMINISTIC_ONLY",
+  "targets": {
+    "enemy_ev_sand_crab": {
+      "assetId": "unit:enemy_ev_sand_crab",
+      "sourceFamily": "project-authored-event-beast-crab",
+      "projectAuthoredDeterministic": true,
+      "structuralRework": false,
+      "reviewStatus": "UNREVIEWED_RUNTIME_FILES",
+      "frameWidth": 200,
+      "frameHeight": 150,
+      "displayHeight": 138,
+      "attackContactFrame": 2,
+      "motions": {
+        "idle": {
+          "frames": 6,
+          "bytes": 3205,
+          "sha256": "3ea545e2c748c16fbdadd08e94347d4afcb577eaa9808535b57084c16a69b613"
+        },
+        "move": {
+          "frames": 8,
+          "bytes": 4100,
+          "sha256": "7c47e5b7c0ec85325c36891931989b0bff49056190ae259140ee1f47ae9439b5"
+        },
+        "attack": {
+          "frames": 6,
+          "bytes": 3838,
+          "sha256": "ab976dbdc0d328f2ec489ef4b3aca47322a0dc0e133d115bdd4f88ed224b180f"
+        },
+        "knockback": {
+          "frames": 4,
+          "bytes": 2131,
+          "sha256": "aa0f652357b85fbc4277e6880801e923aeda7e7293120ddb90f5329b0c491f94"
+        },
+        "death": {
+          "frames": 6,
+          "bytes": 5502,
+          "sha256": "977c78b1e4fe9b75aec760155861e7df9a0c098637e53c5912735e907a744cf2"
+        }
+      }
+    },
+    "enemy_ev_foodcart": {
+      "assetId": "unit:enemy_ev_foodcart",
+      "sourceFamily": "project-authored-event-anomaly-cart",
+      "projectAuthoredDeterministic": true,
+      "structuralRework": false,
+      "reviewStatus": "UNREVIEWED_RUNTIME_FILES",
+      "frameWidth": 280,
+      "frameHeight": 220,
+      "displayHeight": 202,
+      "attackContactFrame": 3,
+      "motions": {
+        "idle": {
+          "frames": 7,
+          "bytes": 6985,
+          "sha256": "1ba2c66c3a52049e53c1b6e02831c4d1be7f05fa1ba772015085c8cfad0bedd7"
+        },
+        "move": {
+          "frames": 8,
+          "bytes": 8042,
+          "sha256": "8fe0e3c8d4f65a08f45a13645ab4cf024ee610524cb118a40a5b300fda4f4362"
+        },
+        "attack": {
+          "frames": 7,
+          "bytes": 8105,
+          "sha256": "df461b8cb777c9c63a03a8ad61bff0e36c66f95c4976c635707315d12febb0c1"
+        },
+        "knockback": {
+          "frames": 4,
+          "bytes": 4063,
+          "sha256": "3edf9178ca4303877ecb5f4e46a0b6037e97674c8ffb9c6643069d3561aef4ca"
+        },
+        "death": {
+          "frames": 7,
+          "bytes": 12478,
+          "sha256": "1d67e7a8fae59a897bc1f5c759261466341fd1c4c71981ae90e23ddbd9653129"
+        }
+      }
+    },
+    "enemy_ev_tailbeast": {
+      "assetId": "unit:enemy_ev_tailbeast",
+      "sourceFamily": "project-authored-event-beast-tail",
+      "projectAuthoredDeterministic": true,
+      "structuralRework": false,
+      "reviewStatus": "UNREVIEWED_RUNTIME_FILES",
+      "frameWidth": 280,
+      "frameHeight": 210,
+      "displayHeight": 194,
+      "attackContactFrame": 3,
+      "motions": {
+        "idle": {
+          "frames": 7,
+          "bytes": 5567,
+          "sha256": "7707442cfdab46731ff4cab6e792b98fc482aa35e9f5a4f88ceee207acdc61d9"
+        },
+        "move": {
+          "frames": 8,
+          "bytes": 6508,
+          "sha256": "c73ee3dbbd1e161ea49421526d0488323ec155f2bed35f5eb31ca1c5a34860b7"
+        },
+        "attack": {
+          "frames": 7,
+          "bytes": 6033,
+          "sha256": "50694f789fc192724e669f53fef7f2ec0df0fecb0afc406b8f2c30fee0bd1dd8"
+        },
+        "knockback": {
+          "frames": 4,
+          "bytes": 3225,
+          "sha256": "668d6903b299a3e76ae9d82a89adc299de4fe98107648fd5f53e4cb1ac8c7064"
+        },
+        "death": {
+          "frames": 7,
+          "bytes": 11521,
+          "sha256": "63aa3adf6cb4304bbac1e4495347f50f34415a83a43b1f8c22b1a772e0e73073"
+        }
+      }
+    },
+    "enemy_ev_firework_jelly": {
+      "assetId": "unit:enemy_ev_firework_jelly",
+      "sourceFamily": "project-authored-event-arcane-jelly",
+      "projectAuthoredDeterministic": true,
+      "structuralRework": false,
+      "reviewStatus": "UNREVIEWED_RUNTIME_FILES",
+      "frameWidth": 260,
+      "frameHeight": 240,
+      "displayHeight": 218,
+      "attackContactFrame": 5,
+      "motions": {
+        "idle": {
+          "frames": 7,
+          "bytes": 7661,
+          "sha256": "6e8cce82544a1b3ce5aff694caaeee3dbc83cb16155ce5e1885a8a1439c96321"
+        },
+        "move": {
+          "frames": 8,
+          "bytes": 9264,
+          "sha256": "0216cf9112f5aeb34c9a48e3ba8971079ed3a471927e6d4e0c2195a6ab3f0427"
+        },
+        "attack": {
+          "frames": 9,
+          "bytes": 9940,
+          "sha256": "f9a6c90e8164ad56e1c5ce48966b89426b936547e25a3fbfa09d4a45ed93e72c"
+        },
+        "knockback": {
+          "frames": 4,
+          "bytes": 4354,
+          "sha256": "c509835a71132206c509e8926a58c8d195048e99d562a7525a53049549a43125"
+        },
+        "death": {
+          "frames": 7,
+          "bytes": 18454,
+          "sha256": "077cef05b6a2466105f8736f4a9fa83127c80114322bd9e5476dd8da79ee8a5c"
+        }
+      }
+    },
+    "boss_ev_summer_kaiju": {
+      "assetId": "unit:boss_ev_summer_kaiju",
+      "sourceFamily": "project-authored-event-kaiju-boss",
+      "projectAuthoredDeterministic": true,
+      "structuralRework": false,
+      "reviewStatus": "UNREVIEWED_RUNTIME_FILES",
+      "frameWidth": 390,
+      "frameHeight": 320,
+      "displayHeight": 294,
+      "attackContactFrame": 3,
+      "motions": {
+        "idle": {
+          "frames": 8,
+          "bytes": 11370,
+          "sha256": "b9648d46a3fdde11ae4e7cd0989336d3ceb9ccd88134cabb9140a9c16ad5d5f5"
+        },
+        "move": {
+          "frames": 8,
+          "bytes": 12022,
+          "sha256": "8e5e0092feca6adcc609d5c27b6073e277f56208837aeafe9b0636e7ed1a1cf3"
+        },
+        "attack": {
+          "frames": 10,
+          "bytes": 14598,
+          "sha256": "1730cf38ef48a95792f16ed1923889586a2308a6f7bdcefab212935ca3825970"
+        },
+        "knockback": {
+          "frames": 4,
+          "bytes": 5635,
+          "sha256": "8520f4c6d95284ae69669f743a904ad7df7f7deaeca610f091c5fb412efd62b4"
+        },
+        "death": {
+          "frames": 9,
+          "bytes": 22817,
+          "sha256": "16a3a08c9983bbf70e4e2652d373e0d943e03a244fb56258cd2d047e5bdd4b88"
+        }
+      }
+    },
+    "enemy_ev_ze_drone": {
+      "assetId": "unit:enemy_ev_ze_drone",
+      "sourceFamily": "project-authored-event-machine-drone",
+      "projectAuthoredDeterministic": true,
+      "structuralRework": false,
+      "reviewStatus": "UNREVIEWED_RUNTIME_FILES",
+      "frameWidth": 210,
+      "frameHeight": 170,
+      "displayHeight": 156,
+      "attackContactFrame": 2,
+      "motions": {
+        "idle": {
+          "frames": 6,
+          "bytes": 2664,
+          "sha256": "41ee63f16699a47bc8fe8b4aa6497767bcd22ec01b9cff109d320c027bbac574"
+        },
+        "move": {
+          "frames": 8,
+          "bytes": 3502,
+          "sha256": "521af4a9122e8fc38a1fa5258f6b9416e934fd7b99ae83a7437a893516d91adb"
+        },
+        "attack": {
+          "frames": 6,
+          "bytes": 3528,
+          "sha256": "737c683b221e7e33bd20248d063e9c34f5d14767777e5423d7f90d0a8a8374d8"
+        },
+        "knockback": {
+          "frames": 4,
+          "bytes": 1786,
+          "sha256": "aedd46a487453d590de2dc417793c9931585b69a733141b563d2f4d030a0fc1c"
+        },
+        "death": {
+          "frames": 6,
+          "bytes": 4922,
+          "sha256": "d7e89dd142b45eab224ee719c0d5d170ba2418de3db866444a8dae4ff0187659"
+        }
+      }
+    },
+    "enemy_ev_ze_scrap_blade": {
+      "assetId": "unit:enemy_ev_ze_scrap_blade",
+      "sourceFamily": "project-authored-event-machine-cutter",
+      "projectAuthoredDeterministic": true,
+      "structuralRework": false,
+      "reviewStatus": "UNREVIEWED_RUNTIME_FILES",
+      "frameWidth": 220,
+      "frameHeight": 180,
+      "displayHeight": 166,
+      "attackContactFrame": 2,
+      "motions": {
+        "idle": {
+          "frames": 6,
+          "bytes": 4830,
+          "sha256": "20d03283f7c2b90bc747a5bab2341543d3141a710ab68eef334afff2123d1e14"
+        },
+        "move": {
+          "frames": 8,
+          "bytes": 6651,
+          "sha256": "36abc76b694cec302c40b6380dd9b16e0251c149867cc8ea4f8aa7d295cbb0b2"
+        },
+        "attack": {
+          "frames": 6,
+          "bytes": 5427,
+          "sha256": "6bdc97c79915fc3ce0a85e92d94678d29576769e6a1a12164976bb1bfc1c70b9"
+        },
+        "knockback": {
+          "frames": 4,
+          "bytes": 3234,
+          "sha256": "4a55564c290592f12869d92543dbde691a2d12315b2de90aab662e842441cfd5"
+        },
+        "death": {
+          "frames": 6,
+          "bytes": 9440,
+          "sha256": "2436dbdd520cf073d0866c3f297d220c42c0ed555be3633a3674981266cf8536"
+        }
+      }
+    },
+    "enemy_ev_ze_shield": {
+      "assetId": "unit:enemy_ev_ze_shield",
+      "sourceFamily": "project-authored-event-machine-barrier",
+      "projectAuthoredDeterministic": true,
+      "structuralRework": false,
+      "reviewStatus": "UNREVIEWED_RUNTIME_FILES",
+      "frameWidth": 260,
+      "frameHeight": 230,
+      "displayHeight": 212,
+      "attackContactFrame": 3,
+      "motions": {
+        "idle": {
+          "frames": 7,
+          "bytes": 7106,
+          "sha256": "ba6ae0536ef4ffffc1b6c8ff48f025fb787f0d6a2ba6fdd326769f9455ff5fe7"
+        },
+        "move": {
+          "frames": 8,
+          "bytes": 8350,
+          "sha256": "534520dbb1e81059052b53d31ed845b877e05ae62eaa927a6c74e78cbebf3291"
+        },
+        "attack": {
+          "frames": 7,
+          "bytes": 7716,
+          "sha256": "886403bdf33ad291c6427db5f12b7de3e79757fa469e742f26fa8af7c9b9c895"
+        },
+        "knockback": {
+          "frames": 4,
+          "bytes": 3779,
+          "sha256": "598d7c98e86bd82bbe606750e2044e0e2102800c6c3a92f519d41404e67339ce"
+        },
+        "death": {
+          "frames": 7,
+          "bytes": 13222,
+          "sha256": "bf30a4c911352a9d5e41562e3bdffc82d918a752ae523529e65d94b640dfb47e"
+        }
+      }
+    },
+    "enemy_ev_ze_railpod": {
+      "assetId": "unit:enemy_ev_ze_railpod",
+      "sourceFamily": "project-authored-event-machine-railpod",
+      "projectAuthoredDeterministic": true,
+      "structuralRework": false,
+      "reviewStatus": "UNREVIEWED_RUNTIME_FILES",
+      "frameWidth": 340,
+      "frameHeight": 220,
+      "displayHeight": 202,
+      "attackContactFrame": 5,
+      "motions": {
+        "idle": {
+          "frames": 6,
+          "bytes": 4821,
+          "sha256": "cda11a003d212364b59d32e69ccbbbc78e169008f08eab24bea405b4ca53d936"
+        },
+        "move": {
+          "frames": 7,
+          "bytes": 5750,
+          "sha256": "5079329909b280b6c8c708feb99d36c2f8d03fae96218e535306a0e0c659eab2"
+        },
+        "attack": {
+          "frames": 9,
+          "bytes": 7442,
+          "sha256": "658d6b5198e611b510e46e2e78ac2a6a12d23691ee53431d53ea885ce6724abf"
+        },
+        "knockback": {
+          "frames": 4,
+          "bytes": 3141,
+          "sha256": "41e50faf68c36adca3f838665a92f6bbddeb4bc8b73c66097e059c44f516b058"
+        },
+        "death": {
+          "frames": 7,
+          "bytes": 10967,
+          "sha256": "d13dcecd351a69089ec83afbe1192c5083ae982ee931c4ca33dee53e4df96ef6"
+        }
+      }
+    },
+    "boss_ev_ze_testframe": {
+      "assetId": "unit:boss_ev_ze_testframe",
+      "sourceFamily": "project-authored-event-machine-frame-boss",
+      "projectAuthoredDeterministic": true,
+      "structuralRework": false,
+      "reviewStatus": "UNREVIEWED_RUNTIME_FILES",
+      "frameWidth": 400,
+      "frameHeight": 330,
+      "displayHeight": 302,
+      "attackContactFrame": 3,
+      "motions": {
+        "idle": {
+          "frames": 8,
+          "bytes": 27393,
+          "sha256": "1b7665e55aab34da7a2aabece1207d6a540e6436bada5315b265c3fb4be072a9"
+        },
+        "move": {
+          "frames": 8,
+          "bytes": 27929,
+          "sha256": "d2d2290d2350255161015bba96390844e6b1c15bd9527561e7cc100307d95b44"
+        },
+        "attack": {
+          "frames": 11,
+          "bytes": 40312,
+          "sha256": "8f695a7af39e6793e0e87ee7d9c043d98e518c0df3db6f430901bd69e392f46c"
+        },
+        "knockback": {
+          "frames": 4,
+          "bytes": 13466,
+          "sha256": "9c0059d6e474ae3e223e7af0603a2d72aeb7cb8a852f4aed9e513cc2be15b29d"
+        },
+        "death": {
+          "frames": 9,
+          "bytes": 41585,
+          "sha256": "b119682ddb2db087635720b60e84b0d3215f92c83496eaf5c80f433f96af8f61"
+        }
+      }
+    },
+    "enemy_sp_glutton_juvenile": {
+      "assetId": "unit:enemy_sp_glutton_juvenile",
+      "sourceFamily": "project-authored-special-beast-juvenile",
+      "projectAuthoredDeterministic": true,
+      "structuralRework": false,
+      "reviewStatus": "UNREVIEWED_RUNTIME_FILES",
+      "frameWidth": 280,
+      "frameHeight": 230,
+      "displayHeight": 212,
+      "attackContactFrame": 2,
+      "motions": {
+        "idle": {
+          "frames": 7,
+          "bytes": 6289,
+          "sha256": "833002faaec623db463659b757883f03ad1d686239bb3b39c1d23a13b09de75a"
+        },
+        "move": {
+          "frames": 8,
+          "bytes": 7395,
+          "sha256": "e118e3a114af773d41d41ec265e55dab0fadd7f28b60e06457d217d0f7763e77"
+        },
+        "attack": {
+          "frames": 7,
+          "bytes": 6601,
+          "sha256": "0832623eaec11016ab31e2ad0d5b0aa5310d24513deb9dc7c592451b3cbf5c83"
+        },
+        "knockback": {
+          "frames": 4,
+          "bytes": 3596,
+          "sha256": "f056e2d8e435522c2d87275b9dc86f2910ce9fe4256d8de630e0cb05b3b200b8"
+        },
+        "death": {
+          "frames": 7,
+          "bytes": 12315,
+          "sha256": "7ba865c893ff1cb31a13569d3ae9edd3a796b2185dcf66741a74618c3fc4b3cd"
+        }
+      }
+    },
+    "boss_sp_glutton_drake": {
+      "assetId": "unit:boss_sp_glutton_drake",
+      "sourceFamily": "project-authored-special-beast-drake-boss",
+      "projectAuthoredDeterministic": true,
+      "structuralRework": false,
+      "reviewStatus": "UNREVIEWED_RUNTIME_FILES",
+      "frameWidth": 410,
+      "frameHeight": 340,
+      "displayHeight": 312,
+      "attackContactFrame": 3,
+      "motions": {
+        "idle": {
+          "frames": 8,
+          "bytes": 11430,
+          "sha256": "ebc71ddd3b334cb1c7554cf53276d667293ea37daeeb51d97899879f87cd1c52"
+        },
+        "move": {
+          "frames": 8,
+          "bytes": 11710,
+          "sha256": "b1251af665c16c45b529265db9d797cca4d470a277975ddb98ccc290acd381ba"
+        },
+        "attack": {
+          "frames": 10,
+          "bytes": 14599,
+          "sha256": "d808be4f6c8fff0c992126412ff29fee22f65870db1f6a23e4ff84181cc4c2a9"
+        },
+        "knockback": {
+          "frames": 4,
+          "bytes": 5604,
+          "sha256": "8410501ade17cb3b8f748db41234c8e08971feb4722ebc3780343697479dbae0"
+        },
+        "death": {
+          "frames": 9,
+          "bytes": 24153,
+          "sha256": "6639970ba796d3671f17487dc96c5c69538f0ded73e379a5affc87dc28fd310e"
+        }
+      }
+    },
+    "boss_sp_undying_night": {
+      "assetId": "unit:boss_sp_undying_night",
+      "sourceFamily": "project-authored-special-undead-king-boss",
+      "projectAuthoredDeterministic": true,
+      "structuralRework": false,
+      "reviewStatus": "UNREVIEWED_RUNTIME_FILES",
+      "frameWidth": 360,
+      "frameHeight": 330,
+      "displayHeight": 302,
+      "attackContactFrame": 4,
+      "motions": {
+        "idle": {
+          "frames": 8,
+          "bytes": 9781,
+          "sha256": "3bf4cdd0050b5731fe1d63c58b53d90625cee22fc0b0cac511eedab53b04c2ea"
+        },
+        "move": {
+          "frames": 8,
+          "bytes": 10031,
+          "sha256": "dca84cd40c3b5be18dd4a8448995cd16d9a633d7be6e83fe6ee4767ebef677e0"
+        },
+        "attack": {
+          "frames": 9,
+          "bytes": 11021,
+          "sha256": "a3a0857ffea4103cc79fecee98b20e89660bb36c2429e9373dad28a574f900fe"
+        },
+        "knockback": {
+          "frames": 4,
+          "bytes": 4899,
+          "sha256": "fb393f95526607fad5e340682702e7d5f3b8fa103290737d9c7eb4cea2f9bfa1"
+        },
+        "death": {
+          "frames": 9,
+          "bytes": 21695,
+          "sha256": "17d8daff457e4866bc7f0f0a07a60c21ee85aa3169d65d03165948295e9bb22a"
+        }
+      }
+    },
+    "boss_sp_glass_castle": {
+      "assetId": "unit:boss_sp_glass_castle",
+      "sourceFamily": "project-authored-special-arcane-glass-castle",
+      "projectAuthoredDeterministic": true,
+      "structuralRework": false,
+      "reviewStatus": "UNREVIEWED_RUNTIME_FILES",
+      "frameWidth": 430,
+      "frameHeight": 350,
+      "displayHeight": 318,
+      "attackContactFrame": 4,
+      "motions": {
+        "idle": {
+          "frames": 8,
+          "bytes": 18188,
+          "sha256": "6d4f65f7383429d071c92c1268b463eaab8bc19b3a20ad7364370ca6fe6fa025"
+        },
+        "move": {
+          "frames": 8,
+          "bytes": 19825,
+          "sha256": "f63ac6f7b9ebc13cf348dfc6fee701a8e32a1557bd556ec7b554dee12deaf91f"
+        },
+        "attack": {
+          "frames": 10,
+          "bytes": 22710,
+          "sha256": "0744bc1225c73b91905fac7d11b73625f40df80886cd8a5c8b0b735b68c97383"
+        },
+        "knockback": {
+          "frames": 4,
+          "bytes": 9632,
+          "sha256": "e4d689912cc5111d8c77312558e68e0d470e4eb14ac2258d0fb96a3efd3dd3cb"
+        },
+        "death": {
+          "frames": 9,
+          "bytes": 49964,
+          "sha256": "202ea2252137fd7058c664f4013ee7e8a111ffb563e51bcd8bf71685111da436"
+        }
+      }
+    },
+    "boss_sp_walking_machine_castle": {
+      "assetId": "unit:boss_sp_walking_machine_castle",
+      "sourceFamily": "project-authored-special-machine-castle",
+      "projectAuthoredDeterministic": true,
+      "structuralRework": false,
+      "reviewStatus": "UNREVIEWED_RUNTIME_FILES",
+      "frameWidth": 440,
+      "frameHeight": 350,
+      "displayHeight": 320,
+      "attackContactFrame": 4,
+      "motions": {
+        "idle": {
+          "frames": 8,
+          "bytes": 19196,
+          "sha256": "c28aa13bf7bd2bd70f94ad9a0f5c20ebc2d170a38f071276cf787f64643ddb53"
+        },
+        "move": {
+          "frames": 8,
+          "bytes": 19327,
+          "sha256": "7f325ad4967e97fe1867f6816ab067138305a8f1813c60e3ffb6f4e85eaea0d8"
+        },
+        "attack": {
+          "frames": 10,
+          "bytes": 23394,
+          "sha256": "a885149ef73074272f98325a77679783b3d5b27a1b3c6a6ed013414d6fb02a11"
+        },
+        "knockback": {
+          "frames": 4,
+          "bytes": 9723,
+          "sha256": "d2c1bea49b0b01d68941540be79ad8cfe0bbfef40a8cd5358fe0aa6df8b55d32"
+        },
+        "death": {
+          "frames": 9,
+          "bytes": 33654,
+          "sha256": "7174609e6421eae0f49f2eff3b67ed4579ba7e148c00662e5076547899650468"
+        }
+      }
+    },
+    "boss_sp_unobservable": {
+      "assetId": "unit:boss_sp_unobservable",
+      "sourceFamily": "project-authored-special-anomaly-unobservable",
+      "projectAuthoredDeterministic": true,
+      "structuralRework": false,
+      "reviewStatus": "UNREVIEWED_RUNTIME_FILES",
+      "frameWidth": 370,
+      "frameHeight": 330,
+      "displayHeight": 300,
+      "attackContactFrame": 3,
+      "motions": {
+        "idle": {
+          "frames": 8,
+          "bytes": 16907,
+          "sha256": "ab9c80c5ab20112ac5ba90011ecee5e49cb8d43d6fc45678a2c1c20a516a08a3"
+        },
+        "move": {
+          "frames": 8,
+          "bytes": 17860,
+          "sha256": "6536d201a341f6625a9123d424b5a095aaed9d7e21a4fdfb2e939d105042cadc"
+        },
+        "attack": {
+          "frames": 10,
+          "bytes": 21151,
+          "sha256": "20b569641ec6e906305e8303559d6bfa71ec3062204dbce4f5fa9894777fec63"
+        },
+        "knockback": {
+          "frames": 4,
+          "bytes": 8357,
+          "sha256": "5c2a291290a8a1bdd9f9c120ba3a0d0c5170cc9bd07b794f62ad78c84a050230"
+        },
+        "death": {
+          "frames": 9,
+          "bytes": 30406,
+          "sha256": "ee2aab7c4eb8593bb7b198624c914bd78f45f7f582464e0ce868309cf6e09b3a"
+        }
+      }
+    },
+    "enemy_sp_gold_porter": {
+      "assetId": "unit:enemy_sp_gold_porter",
+      "sourceFamily": "project-authored-special-gold-porter",
+      "projectAuthoredDeterministic": true,
+      "structuralRework": false,
+      "reviewStatus": "UNREVIEWED_RUNTIME_FILES",
+      "frameWidth": 200,
+      "frameHeight": 190,
+      "displayHeight": 174,
+      "attackContactFrame": 2,
+      "motions": {
+        "idle": {
+          "frames": 6,
+          "bytes": 3848,
+          "sha256": "49e92364dc70160c2efd7eae46951fa3d7127ee25a9893972ee94bda07574fd4"
+        },
+        "move": {
+          "frames": 8,
+          "bytes": 5248,
+          "sha256": "0bbebee4c1927c75b51d76881a077032e5dedf48ed5a859507d2878be1e687ed"
+        },
+        "attack": {
+          "frames": 6,
+          "bytes": 4424,
+          "sha256": "16218ba073821b3318db894274f46ff72a1c29e3d2b5aba030e737f7011617d8"
+        },
+        "knockback": {
+          "frames": 4,
+          "bytes": 2535,
+          "sha256": "5e0f973b0836d5d3f370851d8e9706b1e95d20fd04dfc6677cf1c550dbb62c4c"
+        },
+        "death": {
+          "frames": 6,
+          "bytes": 6192,
+          "sha256": "3bb22346d8a0d17ff0b6f677db664c964cd17ba66035748206ed0efe8e57f303"
+        }
+      }
+    },
+    "enemy_sp_gold_cart": {
+      "assetId": "unit:enemy_sp_gold_cart",
+      "sourceFamily": "project-authored-special-gold-cart",
+      "projectAuthoredDeterministic": true,
+      "structuralRework": false,
+      "reviewStatus": "UNREVIEWED_RUNTIME_FILES",
+      "frameWidth": 270,
+      "frameHeight": 200,
+      "displayHeight": 184,
+      "attackContactFrame": 3,
+      "motions": {
+        "idle": {
+          "frames": 6,
+          "bytes": 4929,
+          "sha256": "98ac1290cbb03955b431047d375224bdd1dd694dd58718fb484a11a67d9450e4"
+        },
+        "move": {
+          "frames": 8,
+          "bytes": 6558,
+          "sha256": "37d4493c20405659ce6c02f4ba04ebd3f363f493a84bb200d15e4fe4b8a8223d"
+        },
+        "attack": {
+          "frames": 7,
+          "bytes": 6447,
+          "sha256": "8ddc5a7ca3daf61cd4e163782458acd27956254638d3c6eb33cbd801a86d4a87"
+        },
+        "knockback": {
+          "frames": 4,
+          "bytes": 3346,
+          "sha256": "85ed1e4b9284755bfdec32b1585e7a75af386cf8a5bb83405651cf3ffdf93568"
+        },
+        "death": {
+          "frames": 7,
+          "bytes": 10457,
+          "sha256": "68e6a2b52322a925b892336b6a665336c79df3d075725eefade9eb977665ec00"
+        }
+      }
+    },
+    "enemy_sp_gold_guard": {
+      "assetId": "unit:enemy_sp_gold_guard",
+      "sourceFamily": "project-authored-special-gold-guard",
+      "projectAuthoredDeterministic": true,
+      "structuralRework": false,
+      "reviewStatus": "UNREVIEWED_RUNTIME_FILES",
+      "frameWidth": 240,
+      "frameHeight": 230,
+      "displayHeight": 212,
+      "attackContactFrame": 3,
+      "motions": {
+        "idle": {
+          "frames": 7,
+          "bytes": 6837,
+          "sha256": "778d03af4aafcf7f12f69135172fe120722418c88c6be111aa04e3f878d4659a"
+        },
+        "move": {
+          "frames": 8,
+          "bytes": 7949,
+          "sha256": "929bafcfae2d8877d2b2672e0350b49899221d3e6ec34de19d09bab11cb3d915"
+        },
+        "attack": {
+          "frames": 7,
+          "bytes": 7309,
+          "sha256": "3b87ea316f9e39c0e389b68aadb81cd4221026c9f24b07868fd9794d327a79c6"
+        },
+        "knockback": {
+          "frames": 4,
+          "bytes": 3955,
+          "sha256": "84b98edd187cdc0563708a58b59fef4782feeacd6d5b07e6cf12390034a33cee"
+        },
+        "death": {
+          "frames": 7,
+          "bytes": 14566,
+          "sha256": "edcb60d878bba03b751197cb7756b7b45b28651359ecf5d54498550efcd9fee3"
+        }
+      }
+    },
+    "enemy_sp_gold_train": {
+      "assetId": "unit:enemy_sp_gold_train",
+      "sourceFamily": "project-authored-special-gold-train",
+      "projectAuthoredDeterministic": true,
+      "structuralRework": false,
+      "reviewStatus": "UNREVIEWED_RUNTIME_FILES",
+      "frameWidth": 360,
+      "frameHeight": 220,
+      "displayHeight": 202,
+      "attackContactFrame": 4,
+      "motions": {
+        "idle": {
+          "frames": 7,
+          "bytes": 7621,
+          "sha256": "37d25a758c727aad929ea14ae193849ebaf65d882d86f3a727b6113a5892d508"
+        },
+        "move": {
+          "frames": 8,
+          "bytes": 9170,
+          "sha256": "372aaaa3236b7b860f6fc38a36125b5bfb86057f36826929755cdd310f7e57bc"
+        },
+        "attack": {
+          "frames": 8,
+          "bytes": 9131,
+          "sha256": "2f2930663ebcaaa6cf67300b6734dc1a780214d31f60d1692f35ffc7e389ff51"
+        },
+        "knockback": {
+          "frames": 4,
+          "bytes": 4457,
+          "sha256": "57471b191276d875034b1e30e768e29dfb7bd7080984da831a32cb688cc7f9ed"
+        },
+        "death": {
+          "frames": 7,
+          "bytes": 14915,
+          "sha256": "091977dd2ab62c6d5e6480ee69b0d22f51aeb2aea9d796cbbbd5967340187d84"
+        }
+      }
+    },
+    "enemy_sp_gold_vault_golem": {
+      "assetId": "unit:enemy_sp_gold_vault_golem",
+      "sourceFamily": "project-authored-special-gold-vault-golem",
+      "projectAuthoredDeterministic": true,
+      "structuralRework": false,
+      "reviewStatus": "UNREVIEWED_RUNTIME_FILES",
+      "frameWidth": 310,
+      "frameHeight": 290,
+      "displayHeight": 266,
+      "attackContactFrame": 4,
+      "motions": {
+        "idle": {
+          "frames": 7,
+          "bytes": 9963,
+          "sha256": "abbc5ddaeafda9f529fc84fe0d6a7d68ce38d61c5a3da1712ccc62e0cb154956"
+        },
+        "move": {
+          "frames": 8,
+          "bytes": 11934,
+          "sha256": "e09dba42613aee6c3dbeadcfd9aec8798648ed0567c2e532625002bef628d5bf"
+        },
+        "attack": {
+          "frames": 8,
+          "bytes": 12231,
+          "sha256": "3ae1c0aedf32370547a3fdb65f2ba1ff33225e87c4d829c0c53700d783664d91"
+        },
+        "knockback": {
+          "frames": 4,
+          "bytes": 5737,
+          "sha256": "fa60e15a8b09f9dd9914a8ae2d7bfeb232a0ef39dbe806222f45480f9e8fa9ac"
+        },
+        "death": {
+          "frames": 8,
+          "bytes": 21656,
+          "sha256": "b18b40b47157526b0bd0ef3928f347e3df4a7fdd471c5f7ac800f55e358d26d8"
+        }
+      }
+    },
+    "boss_sp_gold_carrier": {
+      "assetId": "unit:boss_sp_gold_carrier",
+      "sourceFamily": "project-authored-special-gold-carrier-boss",
+      "projectAuthoredDeterministic": true,
+      "structuralRework": false,
+      "reviewStatus": "UNREVIEWED_RUNTIME_FILES",
+      "frameWidth": 400,
+      "frameHeight": 330,
+      "displayHeight": 302,
+      "attackContactFrame": 3,
+      "motions": {
+        "idle": {
+          "frames": 8,
+          "bytes": 9763,
+          "sha256": "dfafc0f5d6039c6b2af6727cc99b51fcf622ff49ebd8f4d3e62ec734266bbbfa"
+        },
+        "move": {
+          "frames": 8,
+          "bytes": 10091,
+          "sha256": "16a12b82b7dc054b81e7e52230938ac2f08c5c776e6e4525f75068174dd3ae42"
+        },
+        "attack": {
+          "frames": 10,
+          "bytes": 12744,
+          "sha256": "3162209cb30c0c8ba5eef5f159140884c5f37de0d34e894758a2170d4c188c4e"
+        },
+        "knockback": {
+          "frames": 4,
+          "bytes": 4926,
+          "sha256": "05ff88737cdfa73e2252b21d5180300039375cae3652b160e78fa4a5b2ed0682"
+        },
+        "death": {
+          "frames": 9,
+          "bytes": 20438,
+          "sha256": "ea5fbd74f5d11eb350429cf1f1127d8226e18742e1a5e9f7db1804ecc5d067cd"
+        }
+      }
+    },
+    "enemy_sp_soul_wisp": {
+      "assetId": "unit:enemy_sp_soul_wisp",
+      "sourceFamily": "project-authored-special-soul-wisp",
+      "projectAuthoredDeterministic": true,
+      "structuralRework": false,
+      "reviewStatus": "UNREVIEWED_RUNTIME_FILES",
+      "frameWidth": 190,
+      "frameHeight": 180,
+      "displayHeight": 164,
+      "attackContactFrame": 1,
+      "motions": {
+        "idle": {
+          "frames": 6,
+          "bytes": 2854,
+          "sha256": "7ea79748ee1ee54f6734050794da12936432d413ac328d4911a9992b26fd388e"
+        },
+        "move": {
+          "frames": 8,
+          "bytes": 3690,
+          "sha256": "ac2f3cfbcb6d90b037e31e0a3c3787155d0ed7c8d1de4814e748a9ead9ded203"
+        },
+        "attack": {
+          "frames": 5,
+          "bytes": 2831,
+          "sha256": "c5fdf7ebcc447276aa1896966496457aa96f5bd7511dc10160cd99e29e2def65"
+        },
+        "knockback": {
+          "frames": 4,
+          "bytes": 1858,
+          "sha256": "0d313ec4589ac5c9d74b81fff05ce6930e975b7fdfbd85a4102879988ed741b8"
+        },
+        "death": {
+          "frames": 6,
+          "bytes": 5987,
+          "sha256": "e18db060040a943385c25a2891bca83d6f9c4cdc681922cfd39ed04fac7db352"
+        }
+      }
+    },
+    "enemy_sp_soul_armor": {
+      "assetId": "unit:enemy_sp_soul_armor",
+      "sourceFamily": "project-authored-special-soul-armor",
+      "projectAuthoredDeterministic": true,
+      "structuralRework": false,
+      "reviewStatus": "UNREVIEWED_RUNTIME_FILES",
+      "frameWidth": 250,
+      "frameHeight": 240,
+      "displayHeight": 220,
+      "attackContactFrame": 3,
+      "motions": {
+        "idle": {
+          "frames": 7,
+          "bytes": 6201,
+          "sha256": "95fc010c5edbc81428c2fa145c4df72fa4e6dc3a218a921c3851577f9a246c95"
+        },
+        "move": {
+          "frames": 8,
+          "bytes": 7113,
+          "sha256": "e525cb59f468fada5b58f65e863139ea6ddfde3f8cbaa4c846345aadbc98dc77"
+        },
+        "attack": {
+          "frames": 7,
+          "bytes": 6725,
+          "sha256": "737666770f0aff32ac312b62a486bef4d742c47cbc9954341d4d191ed39d7b26"
+        },
+        "knockback": {
+          "frames": 4,
+          "bytes": 3645,
+          "sha256": "9c6b069ef685116fcc9c00fdf931a1f1104f2ad488542ce863939fb16a1b2d7b"
+        },
+        "death": {
+          "frames": 7,
+          "bytes": 12834,
+          "sha256": "088ae43ebc3f4605bdcdc89c4b1c51ef0dc3b82099db063297fb884e879e0627"
+        }
+      }
+    },
+    "enemy_sp_soul_hammer": {
+      "assetId": "unit:enemy_sp_soul_hammer",
+      "sourceFamily": "project-authored-special-soul-hammer",
+      "projectAuthoredDeterministic": true,
+      "structuralRework": false,
+      "reviewStatus": "UNREVIEWED_RUNTIME_FILES",
+      "frameWidth": 270,
+      "frameHeight": 230,
+      "displayHeight": 212,
+      "attackContactFrame": 3,
+      "motions": {
+        "idle": {
+          "frames": 7,
+          "bytes": 4765,
+          "sha256": "16f43d1d143d8b59bf13164a3f724c56bc9074c4ab91ef69868a92f802960448"
+        },
+        "move": {
+          "frames": 8,
+          "bytes": 5732,
+          "sha256": "a8b1fc51a7d83ff27c99090ffd22015c4616ee27e9e4ab221c934e9525a86c58"
+        },
+        "attack": {
+          "frames": 7,
+          "bytes": 5500,
+          "sha256": "4503925c73c0f3279da6fbcc7c47b0a768aa6ab787a46c88be24f72c7132ffc7"
+        },
+        "knockback": {
+          "frames": 4,
+          "bytes": 2832,
+          "sha256": "6e792bb62385571ac5fd72dbf19c7e03fc486c8ad62cbc48ad49dabc81fdfdf6"
+        },
+        "death": {
+          "frames": 7,
+          "bytes": 10053,
+          "sha256": "2af4186b9a650ef747a0583d68e472c53c1b1b096f8eb1f9de05cf069f7a42a8"
+        }
+      }
+    },
+    "enemy_sp_soul_chorus": {
+      "assetId": "unit:enemy_sp_soul_chorus",
+      "sourceFamily": "project-authored-special-soul-chorus",
+      "projectAuthoredDeterministic": true,
+      "structuralRework": false,
+      "reviewStatus": "UNREVIEWED_RUNTIME_FILES",
+      "frameWidth": 280,
+      "frameHeight": 220,
+      "displayHeight": 202,
+      "attackContactFrame": 2,
+      "motions": {
+        "idle": {
+          "frames": 7,
+          "bytes": 5656,
+          "sha256": "cff4965d857b4963a81b72272a074b5c8afe546fe950175e3c66bfb0b1292408"
+        },
+        "move": {
+          "frames": 8,
+          "bytes": 6427,
+          "sha256": "983fca23480f0bbca1acd249febb5055741cff9244e40bf935cb7ef791a3c98b"
+        },
+        "attack": {
+          "frames": 8,
+          "bytes": 6860,
+          "sha256": "3681c05f8cc8862a0e54ea6290c6bf85cc6ec4b6de8496eb71bd6897a53a7c19"
+        },
+        "knockback": {
+          "frames": 4,
+          "bytes": 3176,
+          "sha256": "71ff97c73c831620c25a50718c903fcfabdf7a4c1fa554bdc8ebe382de928e1e"
+        },
+        "death": {
+          "frames": 7,
+          "bytes": 11614,
+          "sha256": "c9e02ba4ac1e731ef589ab2b1ac1a7b9d01146e660aa0837127687ec988d28ae"
+        }
+      }
+    },
+    "enemy_sp_soul_furnace": {
+      "assetId": "unit:enemy_sp_soul_furnace",
+      "sourceFamily": "project-authored-special-soul-furnace",
+      "projectAuthoredDeterministic": true,
+      "structuralRework": false,
+      "reviewStatus": "UNREVIEWED_RUNTIME_FILES",
+      "frameWidth": 320,
+      "frameHeight": 250,
+      "displayHeight": 230,
+      "attackContactFrame": 3,
+      "motions": {
+        "idle": {
+          "frames": 7,
+          "bytes": 8453,
+          "sha256": "8ce7cd9fde87c8b416356c184fe7b9bfd55f325bc797cb115829039a418b3875"
+        },
+        "move": {
+          "frames": 8,
+          "bytes": 10103,
+          "sha256": "eef59986596d6eadf15bec513c3f71e339a95408c5ec4c2370cefe62bc90d29c"
+        },
+        "attack": {
+          "frames": 9,
+          "bytes": 10881,
+          "sha256": "9491996352827dedb2eb70610915ce2a0fcc9ac1450a3e5f0c024cd009058070"
+        },
+        "knockback": {
+          "frames": 4,
+          "bytes": 4889,
+          "sha256": "8b95f089d401a38881a38a696731f47e809e521a66126709171cd28b6859d99b"
+        },
+        "death": {
+          "frames": 8,
+          "bytes": 22206,
+          "sha256": "2d24755acde1872713933177564443a4d33855c99ca2e0e556e867c428d9a6d2"
+        }
+      }
+    },
+    "boss_sp_soul_grand_forge": {
+      "assetId": "unit:boss_sp_soul_grand_forge",
+      "sourceFamily": "project-authored-special-soul-forge-boss",
+      "projectAuthoredDeterministic": true,
+      "structuralRework": false,
+      "reviewStatus": "UNREVIEWED_RUNTIME_FILES",
+      "frameWidth": 420,
+      "frameHeight": 350,
+      "displayHeight": 320,
+      "attackContactFrame": 4,
+      "motions": {
+        "idle": {
+          "frames": 8,
+          "bytes": 13937,
+          "sha256": "94c2a66d1d12e14373bdfdda83c82f30261e9383110b3cf9e20058b75769a65b"
+        },
+        "move": {
+          "frames": 8,
+          "bytes": 14425,
+          "sha256": "18285900102004e7b1b172274afd055839d746cbff7b2728ab430d4d38068abb"
+        },
+        "attack": {
+          "frames": 11,
+          "bytes": 18993,
+          "sha256": "5bb41e844c492c7d38b8b56a4174155efed95dc05dfc9a359db3152e3dc488ea"
+        },
+        "knockback": {
+          "frames": 4,
+          "bytes": 6842,
+          "sha256": "b2a8182c9ca8ed824acad50fd73f181f4978f1fa1d20e289a079017a6237bcd0"
+        },
+        "death": {
+          "frames": 9,
+          "bytes": 25099,
+          "sha256": "c954f8b700e43fbb35d7e77e5d2a406abc6e0235ef6e2895c1cf87418fe7610d"
+        }
+      }
+    },
+    "enemy_sp_evo_fragment": {
+      "assetId": "unit:enemy_sp_evo_fragment",
+      "sourceFamily": "project-authored-special-evo-fragment",
+      "projectAuthoredDeterministic": true,
+      "structuralRework": false,
+      "reviewStatus": "UNREVIEWED_RUNTIME_FILES",
+      "frameWidth": 190,
+      "frameHeight": 170,
+      "displayHeight": 156,
+      "attackContactFrame": 2,
+      "motions": {
+        "idle": {
+          "frames": 6,
+          "bytes": 3042,
+          "sha256": "5b0ba35147ea8641f371a1af7602439b03b83cca12b98d1bd324328e2eb9785e"
+        },
+        "move": {
+          "frames": 8,
+          "bytes": 4080,
+          "sha256": "27d72c95c9608329f70cacd0fb6316e7b246d290b0da82ebc4aa872449b24bdc"
+        },
+        "attack": {
+          "frames": 6,
+          "bytes": 3592,
+          "sha256": "8abb9402f79d85ab8659a6cc35fe70f16808e1e277bdadb957b9108d223e27b5"
+        },
+        "knockback": {
+          "frames": 4,
+          "bytes": 2071,
+          "sha256": "c2bfbb0671239bb62bb3a59887d13ba407b2850ea14532007d8ca6634a388288"
+        },
+        "death": {
+          "frames": 6,
+          "bytes": 6152,
+          "sha256": "19b1b267763d9169969b6a0a1dac8a4e01cb685f9c9285a4373252944ecbd796"
+        }
+      }
+    },
+    "enemy_sp_evo_seal_guard": {
+      "assetId": "unit:enemy_sp_evo_seal_guard",
+      "sourceFamily": "project-authored-special-evo-seal-guard",
+      "projectAuthoredDeterministic": true,
+      "structuralRework": false,
+      "reviewStatus": "UNREVIEWED_RUNTIME_FILES",
+      "frameWidth": 260,
+      "frameHeight": 250,
+      "displayHeight": 230,
+      "attackContactFrame": 3,
+      "motions": {
+        "idle": {
+          "frames": 7,
+          "bytes": 7348,
+          "sha256": "f1e52f7ce3a0dbac869265111354d63dbdf3e92468c9543c427544e9da416aa2"
+        },
+        "move": {
+          "frames": 8,
+          "bytes": 8700,
+          "sha256": "663d2de37b191606689357a3f3989d1a92d85455352d12e71b774b8fc5fc6cfb"
+        },
+        "attack": {
+          "frames": 7,
+          "bytes": 7654,
+          "sha256": "c2550a3f99cca633fe26eb582c3a4798194c909928977ad34ec78336298ce4d9"
+        },
+        "knockback": {
+          "frames": 4,
+          "bytes": 3971,
+          "sha256": "6a017ac8b72247f389138eb8301725099dfb83f8f46341e91c9ebace94836871"
+        },
+        "death": {
+          "frames": 7,
+          "bytes": 13952,
+          "sha256": "ebfdd6bd7aafd99a0149ebe792c3d1accac285c72be5729c5dc3bc4029c03396"
+        }
+      }
+    },
+    "enemy_sp_evo_keyeater": {
+      "assetId": "unit:enemy_sp_evo_keyeater",
+      "sourceFamily": "project-authored-special-evo-keyeater",
+      "projectAuthoredDeterministic": true,
+      "structuralRework": false,
+      "reviewStatus": "UNREVIEWED_RUNTIME_FILES",
+      "frameWidth": 200,
+      "frameHeight": 160,
+      "displayHeight": 148,
+      "attackContactFrame": 1,
+      "motions": {
+        "idle": {
+          "frames": 6,
+          "bytes": 3285,
+          "sha256": "5e9b167ca307d14872ebe66faa2f804e789de3817e19ef11fa05f0f1ddd63e3e"
+        },
+        "move": {
+          "frames": 8,
+          "bytes": 4480,
+          "sha256": "329dc1785fdca9fcdc6ea80aaf3afb920e79c014c62d5cd8e2a123ca159ff5d8"
+        },
+        "attack": {
+          "frames": 5,
+          "bytes": 3567,
+          "sha256": "53c989a486aa734551a5f29af224239fe6ac6859292fa97c0e8bac930714ca0b"
+        },
+        "knockback": {
+          "frames": 4,
+          "bytes": 2294,
+          "sha256": "c50567a1667e85487e0b2a02340a6fde9fec50b3902d4919256a255002d677e8"
+        },
+        "death": {
+          "frames": 6,
+          "bytes": 5697,
+          "sha256": "a2dbf0149ab21a2db9f0cfecc68e0c0fb9ca711715bd7f21efc28b9c1d53a069"
+        }
+      }
+    },
+    "enemy_sp_evo_chain_seal": {
+      "assetId": "unit:enemy_sp_evo_chain_seal",
+      "sourceFamily": "project-authored-special-evo-chain-seal",
+      "projectAuthoredDeterministic": true,
+      "structuralRework": false,
+      "reviewStatus": "UNREVIEWED_RUNTIME_FILES",
+      "frameWidth": 270,
+      "frameHeight": 240,
+      "displayHeight": 220,
+      "attackContactFrame": 3,
+      "motions": {
+        "idle": {
+          "frames": 7,
+          "bytes": 5857,
+          "sha256": "e5758875c5dc7fcc2a468e0869fbeddadf10f6668321d12ebf5dac88db0166bb"
+        },
+        "move": {
+          "frames": 8,
+          "bytes": 6652,
+          "sha256": "1fb44e905f32d6107e84d71457bee003729c8fb06b1d02dc1adf3313ff22de23"
+        },
+        "attack": {
+          "frames": 7,
+          "bytes": 6484,
+          "sha256": "9f7eeaceaf2254239902c7f056cddcbd4736a41e40360550185c421f42c7930a"
+        },
+        "knockback": {
+          "frames": 4,
+          "bytes": 3472,
+          "sha256": "02bd3bc3fbc91f4be6dc6afd4276a34a5109effbf09c62ddc6d7a0f2f1fe21e7"
+        },
+        "death": {
+          "frames": 7,
+          "bytes": 12530,
+          "sha256": "9880735b65e96376f9d4ee2d578943db81ced86665fec67ba4ad2be00a02fedd"
+        }
+      }
+    },
+    "enemy_sp_evo_mirror_seal": {
+      "assetId": "unit:enemy_sp_evo_mirror_seal",
+      "sourceFamily": "project-authored-special-evo-mirror-seal",
+      "projectAuthoredDeterministic": true,
+      "structuralRework": false,
+      "reviewStatus": "UNREVIEWED_RUNTIME_FILES",
+      "frameWidth": 280,
+      "frameHeight": 250,
+      "displayHeight": 228,
+      "attackContactFrame": 4,
+      "motions": {
+        "idle": {
+          "frames": 7,
+          "bytes": 13903,
+          "sha256": "dfbf8a7b901be3af816b88d83bf06701f53dd5165a43a28150daee69d865e559"
+        },
+        "move": {
+          "frames": 8,
+          "bytes": 16777,
+          "sha256": "6afd6820b874d246084d7fedf66149e73bf1dab4f593f85fd1f59f826075c706"
+        },
+        "attack": {
+          "frames": 8,
+          "bytes": 16403,
+          "sha256": "0d183ed9ae1813979a1317f8467a4bb6eb5cab066a1d54869b3b1190920d6ea4"
+        },
+        "knockback": {
+          "frames": 4,
+          "bytes": 8062,
+          "sha256": "cc4c3dd8ddc17eb956cef137fc740fac65b5820ce6bd16ba651ceeb7c8d478c7"
+        },
+        "death": {
+          "frames": 7,
+          "bytes": 22267,
+          "sha256": "8b1c46846ac688674a18aaf191e1b9caf31e491fc398bca02d4acb8be4ffa89a"
+        }
+      }
+    },
+    "enemy_sp_evo_glyph_turret": {
+      "assetId": "unit:enemy_sp_evo_glyph_turret",
+      "sourceFamily": "project-authored-special-evo-glyph-turret",
+      "projectAuthoredDeterministic": true,
+      "structuralRework": false,
+      "reviewStatus": "UNREVIEWED_RUNTIME_FILES",
+      "frameWidth": 330,
+      "frameHeight": 240,
+      "displayHeight": 220,
+      "attackContactFrame": 5,
+      "motions": {
+        "idle": {
+          "frames": 7,
+          "bytes": 7893,
+          "sha256": "9f8b4fd77016b4dcded21a06b1f807ec1b55e5b21e04f77d665a4506720e396c"
+        },
+        "move": {
+          "frames": 8,
+          "bytes": 9070,
+          "sha256": "aeca98609125404b3ec7031ebc7513c66c9e1586b25e9f96d2ae71ddbcc998cc"
+        },
+        "attack": {
+          "frames": 9,
+          "bytes": 10033,
+          "sha256": "e498bdaeddbfd75e55241607dbbfbd2bad47ed4c8af6a0ecb696250069ccd5d0"
+        },
+        "knockback": {
+          "frames": 4,
+          "bytes": 4602,
+          "sha256": "03ca27719be9c662eacdd45e453f0997a4cf6c7227e109807f19d6783daaf927"
+        },
+        "death": {
+          "frames": 7,
+          "bytes": 15421,
+          "sha256": "bd0b388a868431fa8cb3dabfd7a977b6f68edcb46a44a4cae23eae321a17a8a2"
+        }
+      }
+    },
+    "enemy_sp_evo_mid_guardian": {
+      "assetId": "unit:enemy_sp_evo_mid_guardian",
+      "sourceFamily": "project-authored-special-evo-mid-guardian",
+      "projectAuthoredDeterministic": true,
+      "structuralRework": false,
+      "reviewStatus": "UNREVIEWED_RUNTIME_FILES",
+      "frameWidth": 330,
+      "frameHeight": 300,
+      "displayHeight": 276,
+      "attackContactFrame": 4,
+      "motions": {
+        "idle": {
+          "frames": 8,
+          "bytes": 11693,
+          "sha256": "9bdf26a32c5f90852a986deee7d736513b68f531b88aaf9aa0327df816145548"
+        },
+        "move": {
+          "frames": 8,
+          "bytes": 12175,
+          "sha256": "8792efc26e3f85abe7cc0852587af02d49586f73c2e0c07e490681a7c63ef93f"
+        },
+        "attack": {
+          "frames": 8,
+          "bytes": 12480,
+          "sha256": "8d7c5650bc3d890f63067f5768bc4aed5f539662ce09f78ebb20f12827a2fac1"
+        },
+        "knockback": {
+          "frames": 4,
+          "bytes": 5931,
+          "sha256": "512a927acb04f13014c1462eb7fcd96344886625bcb617e35f597a119e2a53d1"
+        },
+        "death": {
+          "frames": 8,
+          "bytes": 23414,
+          "sha256": "be695e332d621e8cf6be6ba9c58d9da42e42ae261226fed9731036681b6b239a"
+        }
+      }
+    },
+    "boss_sp_evo_gatekeeper": {
+      "assetId": "unit:boss_sp_evo_gatekeeper",
+      "sourceFamily": "project-authored-special-evo-gatekeeper-boss",
+      "projectAuthoredDeterministic": true,
+      "structuralRework": false,
+      "reviewStatus": "UNREVIEWED_RUNTIME_FILES",
+      "frameWidth": 410,
+      "frameHeight": 340,
+      "displayHeight": 312,
+      "attackContactFrame": 3,
+      "motions": {
+        "idle": {
+          "frames": 8,
+          "bytes": 14686,
+          "sha256": "8c9fa277b60a771201fc460af7ee1ffa80485b74730a4770efe92edf50588b54"
+        },
+        "move": {
+          "frames": 8,
+          "bytes": 15127,
+          "sha256": "868ff9ba975e7c3174a4913de76622fafe606ecb13a0a06e2ae853d8f53ca371"
+        },
+        "attack": {
+          "frames": 11,
+          "bytes": 20343,
+          "sha256": "e378074b05be7fc824246e38669b34951d3e1e680a94aac7e2212a84d453a5a6"
+        },
+        "knockback": {
+          "frames": 4,
+          "bytes": 7319,
+          "sha256": "aec7be1e23a66a4934c6f8199968af4fe2770ff2b2f8e5b9b3b089f7eda18810"
+        },
+        "death": {
+          "frames": 9,
+          "bytes": 28085,
+          "sha256": "7d0c2501cf8c1c31f443ca29b8390aa1a6a5d57c503f8f2a462bb4a649bc9373"
+        }
+      }
+    },
+    "enemy_sp_rift_shardling": {
+      "assetId": "unit:enemy_sp_rift_shardling",
+      "sourceFamily": "project-authored-special-rift-shardling",
+      "projectAuthoredDeterministic": true,
+      "structuralRework": false,
+      "reviewStatus": "UNREVIEWED_RUNTIME_FILES",
+      "frameWidth": 200,
+      "frameHeight": 180,
+      "displayHeight": 164,
+      "attackContactFrame": 2,
+      "motions": {
+        "idle": {
+          "frames": 6,
+          "bytes": 3215,
+          "sha256": "9e7a67187d8cd177971f32b9619e12b72bef4fdc1ecc79746e3f402bea0f551b"
+        },
+        "move": {
+          "frames": 8,
+          "bytes": 4347,
+          "sha256": "aa8549067e3df3682445a7f7f9586ac07d0cfcfe0c9a2e16c6f8cdd02063a136"
+        },
+        "attack": {
+          "frames": 6,
+          "bytes": 3926,
+          "sha256": "bd8597bd6b4e7fc2c78741ef34b7e5374557a8c65d36bd990e5285533bbe37da"
+        },
+        "knockback": {
+          "frames": 4,
+          "bytes": 2176,
+          "sha256": "d5ad3407571113566d9ea727ec3f228789109dbca8f1d840ecbe542b9265e156"
+        },
+        "death": {
+          "frames": 6,
+          "bytes": 6626,
+          "sha256": "306afbf7b7e47cd540f9a07474324468dbf700dd0930fc3d475594e0098e8075"
+        }
+      }
+    },
+    "enemy_sp_rift_mirror_orb": {
+      "assetId": "unit:enemy_sp_rift_mirror_orb",
+      "sourceFamily": "project-authored-special-rift-mirror-orb",
+      "projectAuthoredDeterministic": true,
+      "structuralRework": false,
+      "reviewStatus": "UNREVIEWED_RUNTIME_FILES",
+      "frameWidth": 260,
+      "frameHeight": 230,
+      "displayHeight": 212,
+      "attackContactFrame": 3,
+      "motions": {
+        "idle": {
+          "frames": 7,
+          "bytes": 8729,
+          "sha256": "3815e97740408b4c3f0291517608f30af280e509ce42548ec153ee0323fe78f0"
+        },
+        "move": {
+          "frames": 8,
+          "bytes": 10045,
+          "sha256": "a71cc055c09c2393d4124d3ae90cec18ad370625fe85722a052a5237b286fdad"
+        },
+        "attack": {
+          "frames": 8,
+          "bytes": 10594,
+          "sha256": "a6a7655126fd36301003a570a984d9f87c92b2ccc5bd9dbb233774fa1d389ba7"
+        },
+        "knockback": {
+          "frames": 4,
+          "bytes": 4886,
+          "sha256": "ded1a0523368e601565329da74ac8cc0af4e54a30b4e527baf89ca2449a0e5a2"
+        },
+        "death": {
+          "frames": 7,
+          "bytes": 14226,
+          "sha256": "98563672016bb5592ffc6ff8f017568e56edb98d7da2448ce362dde279a60051"
+        }
+      }
+    },
+    "enemy_sp_rift_observer": {
+      "assetId": "unit:enemy_sp_rift_observer",
+      "sourceFamily": "project-authored-special-rift-observer",
+      "projectAuthoredDeterministic": true,
+      "structuralRework": false,
+      "reviewStatus": "UNREVIEWED_RUNTIME_FILES",
+      "frameWidth": 300,
+      "frameHeight": 260,
+      "displayHeight": 238,
+      "attackContactFrame": 5,
+      "motions": {
+        "idle": {
+          "frames": 7,
+          "bytes": 8066,
+          "sha256": "75483d1329ffc2137235883679595863a03718fe10c2109b93d48ec2a2c2ada9"
+        },
+        "move": {
+          "frames": 8,
+          "bytes": 9237,
+          "sha256": "f007be5a92c42c31cf3b863ae348cbcc98149232247210688cbd48a29ea1b1b7"
+        },
+        "attack": {
+          "frames": 9,
+          "bytes": 11061,
+          "sha256": "4877c33712fb23302bac381c5740681fecf8f4ca04be7e1352c95d31eee847a8"
+        },
+        "knockback": {
+          "frames": 4,
+          "bytes": 4469,
+          "sha256": "8293abab41d479fbf4750f293493a62e60efafb89717dbdd5d13558f22854ae3"
+        },
+        "death": {
+          "frames": 7,
+          "bytes": 14574,
+          "sha256": "74ac9309668a8845b2a9ef260300ec4ddb0272d5b90524c288882b16ad99db90"
+        }
+      }
+    },
+    "boss_sp_rift_nightfall": {
+      "assetId": "unit:boss_sp_rift_nightfall",
+      "sourceFamily": "project-authored-special-rift-nightfall-boss",
+      "projectAuthoredDeterministic": true,
+      "structuralRework": false,
+      "reviewStatus": "UNREVIEWED_RUNTIME_FILES",
+      "frameWidth": 400,
+      "frameHeight": 340,
+      "displayHeight": 310,
+      "attackContactFrame": 3,
+      "motions": {
+        "idle": {
+          "frames": 8,
+          "bytes": 18599,
+          "sha256": "b320e64a39fd67a8342b59ceb70f10708f52aef492ac3f65213fccda2b8cc2e2"
+        },
+        "move": {
+          "frames": 8,
+          "bytes": 19256,
+          "sha256": "5dd651493ed58c4d827a72614d11d5c4ac90e8e6d8232d9b0c8e4c0b8c89f229"
+        },
+        "attack": {
+          "frames": 11,
+          "bytes": 26873,
+          "sha256": "e62db61fb5c2c1800ae424c1f22e60e8654e6642b1d5fb7011d55d95e4bfd87f"
+        },
+        "knockback": {
+          "frames": 4,
+          "bytes": 8993,
+          "sha256": "2e3fc41fbed29591844eb90241de6602e70ecbe493dee12b73bd89661161a25f"
+        },
+        "death": {
+          "frames": 9,
+          "bytes": 28760,
+          "sha256": "9168765292eba04a2a0014358a62dedbf2ff2626f24889d38639a2b68360ae47"
+        }
+      }
+    }
+  }
+}
