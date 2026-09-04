@@ -44,6 +44,7 @@ import { isCompactMobileViewport } from './viewport';
 
 class BootScene extends BaseBootScene {
   override create(): void {
+    // Review tooling stays dynamically registered so canonical gameplay scene ordering remains untouched.
     this.scene.add('first-slice-capture', FirstSliceProductionCaptureScene, false);
     void restoreAuthenticatedAccountSession().finally(() => {
       if (!this.scene.isActive()) return;
