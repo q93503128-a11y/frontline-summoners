@@ -8,6 +8,7 @@ import {
 } from './prototype';
 import { getRuntimeSpriteStrips } from './production-assets.ts';
 import { getFirstSliceReviewAudioAssets } from './first-slice-production-review-audio.ts';
+import { preloadFirstSliceProductionReviewMeadowLayers } from './first-slice-production-review-meadow.ts';
 import {
   FIRST_SLICE_REVIEW_MEADOW_KEY,
   FIRST_SLICE_REVIEW_MEADOW_URL,
@@ -39,6 +40,7 @@ export class BootScene extends Phaser.Scene {
         if (!this.cache.audio.exists(audio.key)) this.load.audio(audio.key, audio.url);
       }
       if (!this.textures.exists(FIRST_SLICE_REVIEW_MEADOW_KEY)) this.load.image(FIRST_SLICE_REVIEW_MEADOW_KEY, FIRST_SLICE_REVIEW_MEADOW_URL);
+      preloadFirstSliceProductionReviewMeadowLayers(this);
       status.setText('Production review 자산·오디오 불러오는 중…');
     }
     this.load.on('progress', (value: number) => bar.displayWidth = Math.max(1, 512 * value));
