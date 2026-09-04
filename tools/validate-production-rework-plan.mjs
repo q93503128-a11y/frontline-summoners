@@ -14,6 +14,7 @@ const EXPECTED = [
   'unit:militia:militia_f2',
   'unit:militia:militia_f3',
   'unit:enemy-raider',
+  'unit:enemy-boss',
 ];
 
 function fail(message) {
@@ -23,7 +24,7 @@ function fail(message) {
 if (plan?.id !== 'frontline-first-slice-rework-01') fail('unexpected manifest id');
 if (plan?.status !== 'WORKBENCH') fail('rework manifest must remain WORKBENCH until real production files exist');
 if (JSON.stringify(plan.requiredMotions) !== JSON.stringify(REQUIRED)) fail('required motion set/order drifted');
-if (!Array.isArray(plan.targets) || plan.targets.length !== EXPECTED.length) fail('first rework batch must contain exactly four targets');
+if (!Array.isArray(plan.targets) || plan.targets.length !== EXPECTED.length) fail('first rework batch must contain exactly five targets');
 
 const ids = plan.targets.map((target) => target.assetId);
 if (new Set(ids).size !== ids.length) fail('duplicate rework target');
@@ -35,7 +36,7 @@ for (const target of plan.targets) {
   if (target.license !== 'CC0-1.0') fail(`${target.assetId} must use the verified CC0 source-reference pool`);
   if (target.sourceRole !== 'REWORK_BASE_AND_MOTION_REFERENCE') fail(`${target.assetId} source role is not rework-only`);
   if (typeof target.sourceFamily !== 'string' || target.sourceFamily.length === 0) fail(`${target.assetId} missing source family`);
-  if (sourceFamilies.has(target.sourceFamily)) fail(`${target.assetId} reuses a first-slice source family; four-way body separation is required`);
+  if (sourceFamilies.has(target.sourceFamily)) fail(`${target.assetId} reuses a first-slice source family; body separation is required`);
   sourceFamilies.add(target.sourceFamily);
   if (!Array.isArray(target.mustReadWithoutColor) || target.mustReadWithoutColor.length < 3) fail(`${target.assetId} needs at least three grayscale differentiators`);
   if (!Array.isArray(target.mustNotReadAs) || target.mustNotReadAs.length < 3) fail(`${target.assetId} needs explicit anti-confusion constraints`);
