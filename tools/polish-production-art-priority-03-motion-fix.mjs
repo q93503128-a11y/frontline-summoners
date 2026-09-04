@@ -65,10 +65,12 @@ function draw(frame, w, h, id, motion, i, n) {
       rect(frame, w, h, X(cx - 142 + dx), Y(cy - 8 + dy), X(cx - 102 + dx), Y(cy + 30 + dy), P.gold, 0.94);
       rect(frame, w, h, X(cx + 102 - dx), Y(cy - 8 - dy), X(cx + 142 - dx), Y(cy + 30 - dy), P.gold, 0.94);
     } else {
-      const reach = X(cx + 95 + w * (0.19 + 0.12 * pulse));
-      triangle(frame, w, h, [cx + 55, cy - 72], [reach, Y(cy - 58 - h * 0.05 * pulse)], [cx + 61, cy + 3], P.g, 0.92);
-      ellipse(frame, w, h, reach, Y(cy - 58 - h * 0.05 * pulse), 32 + Math.round(18 * pulse), 26 + Math.round(12 * pulse), P.a, 0.92);
-      line(frame, w, h, cx - 66, cy - 32, X(cx - 126 - w * 0.08 * pulse), Y(cy - 83), P.gold, 13, 0.94);
+      const reach = X(cx + 95 + w * (0.19 + 0.18 * pulse));
+      const reachY = Y(cy - 58 - h * 0.09 * pulse);
+      triangle(frame, w, h, [cx + 55, cy - 72], [reach, reachY], [cx + 61, cy + 3], P.g, 0.92);
+      ellipse(frame, w, h, reach, reachY, 32 + Math.round(28 * pulse), 26 + Math.round(20 * pulse), P.a, 0.92);
+      line(frame, w, h, cx - 66, cy - 32, X(cx - 126 - w * 0.14 * pulse), Y(cy - 83 - h * 0.03 * pulse), P.gold, 13, 0.94);
+      line(frame, w, h, cx + 44, cy + 18, X(cx + 118 + w * 0.12 * pulse), Y(cy + 68 + h * 0.04 * pulse), P.g, 10, 0.88);
     }
   } else if (id === 'enemy_sp_evo_mirror_seal') {
     if (motion === 'move') {
@@ -134,14 +136,14 @@ for (const id of TARGETS) {
   }
 
   meta.visualPolishPriority03MotionFix = {
-    version: 1,
+    version: 2,
     kind: 'DYNAMIC_SILHOUETTE_RECOVERY',
     reviewStatus: 'UNREVIEWED_RUNTIME_FILES',
   };
 }
 
 metadata.visualPolishPriority03MotionFix = {
-  version: 1,
+  version: 2,
   touchedTargets: touched,
   humanReview: 'PENDING',
   normalRuntimeAuthoritative: false,
