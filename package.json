@@ -15,7 +15,7 @@
     "assets:production:materialize:first-slice": "node tools/materialize-first-slice-production-art.mjs && node tools/polish-first-slice-unit-silhouettes.mjs && node tools/polish-first-slice-unit-motion-language.mjs && node tools/materialize-first-slice-boss.mjs && node tools/materialize-first-slice-production-audio.mjs",
     "assets:production:preflight:first-slice": "node tools/materialize-first-slice-review-preflight.mjs && node tools/materialize-first-slice-review-provenance.mjs && node tools/publish-first-slice-review-preflight.mjs",
     "assets:production:runtime:first-slice:check": "npm run assets:production:materialize:first-slice && npm run assets:production:preflight:first-slice && node tools/validate-first-slice-runtime-files.mjs",
-    "assets:production:materialize:second-slice": "node tools/materialize-second-slice-production-art.mjs",
+    "assets:production:materialize:second-slice": "node tools/prepare-second-slice-source-cache.mjs && node tools/materialize-second-slice-production-art.mjs",
     "assets:production:runtime:second-slice:check": "npm run assets:production:materialize:second-slice && node tools/validate-second-slice-runtime-files.mjs",
     "assets:production:intake:check": "node tools/validate-production-vertical-slice.mjs",
     "assets:production:review:check": "node tools/validate-production-review-package.mjs",
