@@ -1,0 +1,34 @@
+{
+  "schemaVersion": 1,
+  "batchId": "chapter-04-production-01",
+  "chapterId": "chapter-04",
+  "chapterName": "제4장 · 기어 제국의 균열",
+  "stageRange": ["main_04_001", "main_04_020"],
+  "status": "AWAITING_ART",
+  "reviewStatus": "PENDING",
+  "normalRuntimeAuthoritative": false,
+  "generativeAiUsed": false,
+  "sourcePolicy": "PROJECT_AUTHORED_DETERMINISTIC_ONLY",
+  "targets": [
+    {"assetId":"unit:enemy_ch4_sawbird","unitId":"enemy_ch4_sawbird","displayName":"톱니새","visualAnchor":"톱날 날개 두 장과 작은 기계 몸통이 먼저 읽히는 고속 비행체"},
+    {"assetId":"unit:enemy_ch4_magnet_spider","unitId":"enemy_ch4_magnet_spider","displayName":"자력거미","visualAnchor":"6족 기계 다리 위 말굽자석 몸통과 밀어내기 자기장"},
+    {"assetId":"unit:enemy_ch4_railworm","unitId":"enemy_ch4_railworm","displayName":"레일벌레","visualAnchor":"분절 궤도 몸체보다 긴 레일 포신이 우선 읽히는 초장거리 포격체"},
+    {"assetId":"unit:enemy_ch4_furnace_golem","unitId":"enemy_ch4_furnace_golem","displayName":"용광로 골렘","visualAnchor":"거대한 용광로 몸체와 짧고 무거운 장갑 사지"},
+    {"assetId":"unit:enemy_ch4_folded_soldier","unitId":"enemy_ch4_folded_soldier","displayName":"접힌 병사","visualAnchor":"인간형이 아니라 관절과 몸통이 공간적으로 꺾여 겹친 변칙 실루엣"},
+    {"assetId":"unit:enemy_ch4_error_mass","unitId":"enemy_ch4_error_mass","displayName":"오류덩어리","visualAnchor":"서로 어긋난 여러 오류 조각과 코어가 겹친 하나의 불안정 질량"},
+    {"assetId":"unit:enemy_ch4_void_lens","unitId":"enemy_ch4_void_lens","displayName":"공허렌즈","visualAnchor":"다중 렌즈 고리와 검은 중심점이 떠 있는 장거리 변칙체"},
+    {"assetId":"unit:enemy_ch4_fusion_cavalry","unitId":"enemy_ch4_fusion_cavalry","displayName":"융합기병","visualAnchor":"기계 기병의 차체와 공간 균열 고리가 분리되지 않고 하나로 융합된 돌격 실루엣"},
+    {"assetId":"unit:boss_ch4_moving_throne","unitId":"boss_ch4_moving_throne","displayName":"기어황제의 이동왕좌","visualAnchor":"과도하게 높지 않은 이동 성채형 왕좌와 하부 압착 구조"},
+    {"assetId":"unit:boss_ch4_zero_engine","unitId":"boss_ch4_zero_engine","displayName":"공허엔진 제로","visualAnchor":"동심 링 정렬·압축·회전만으로 고정 공격 패턴을 예고하는 최종 엔진"}
+  ],
+  "battlefields": [],
+  "reusedBattlefieldThemes": ["canyon", "fortress", "ruins", "burning", "moon", "golden"],
+  "reviewRoute": "?productionReview=chapter-04",
+  "notes": [
+    "Chapter 04 is materialized as one chapter-sized production batch covering ST01 through ST20.",
+    "All ten targets are deterministic project-authored silhouettes; no external sprite or generative image is used.",
+    "Attack poses encode the canonical combat timing language without adding new abilities or random patterns.",
+    "Existing production battlefield themes are reused; no redundant chapter-specific background copies are authored.",
+    "Files remain non-authoritative until legitimate human review and approval."
+  ]
+}
