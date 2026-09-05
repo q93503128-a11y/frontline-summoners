@@ -39,7 +39,7 @@
     "assets:production:quality:audit": "node tools/audit-production-art-quality.mjs",
     "assets:production:review-gallery:materialize": "node tools/materialize-production-review-gallery.mjs && node tools/patch-production-review-gallery-runtime.mjs",
     "assets:production:review-gallery:check": "npm run assets:production:review-gallery:materialize && node tools/validate-production-review-gallery.mjs",
-    "assets:production:review-compare:materialize": "node tools/materialize-production-review-compare.mjs",
+    "assets:production:review-compare:materialize": "node tools/materialize-production-review-compare.mjs && node tools/patch-production-review-compare-runtime.mjs",
     "assets:production:review-compare:check": "npm run assets:production:review-compare:materialize && node tools/validate-production-review-compare.mjs",
     "assets:production:review-queue:materialize": "node tools/materialize-production-review-rework-queue.mjs && node tools/patch-production-review-rework-queue-export.mjs",
     "assets:production:review-queue:check": "npm run assets:production:review-queue:materialize && node tools/validate-production-review-rework-queue.mjs && node tools/validate-production-review-rework-export-identity.mjs",
