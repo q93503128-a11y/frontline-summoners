@@ -39,15 +39,17 @@
     "assets:production:quality:audit": "node tools/audit-production-art-quality.mjs",
     "assets:production:review-gallery:materialize": "node tools/materialize-production-review-gallery.mjs",
     "assets:production:review-gallery:check": "npm run assets:production:review-gallery:materialize && node tools/validate-production-review-gallery.mjs",
-    "assets:production:review-queue:materialize": "node tools/materialize-production-review-rework-queue.mjs",
-    "assets:production:review-queue:check": "npm run assets:production:review-queue:materialize && node tools/validate-production-review-rework-queue.mjs",
+    "assets:production:review-queue:materialize": "node tools/materialize-production-review-rework-queue.mjs && node tools/patch-production-review-rework-queue-export.mjs",
+    "assets:production:review-queue:check": "npm run assets:production:review-queue:materialize && node tools/validate-production-review-rework-queue.mjs && node tools/validate-production-review-rework-export-identity.mjs",
     "assets:production:review-hub:materialize": "node tools/materialize-production-review-hub.mjs",
     "assets:production:review-hub:check": "npm run assets:production:review-hub:materialize && npm run assets:production:review-gallery:check && npm run assets:production:review-queue:check && node tools/validate-production-review-hub.mjs",
+    "assets:production:rework-intake:import": "node tools/import-local-production-rework-draft.mjs",
+    "assets:production:rework-intake:check": "node tools/validate-production-rework-intake-contract.mjs",
     "assets:production:intake:check": "node tools/validate-production-vertical-slice.mjs",
     "assets:production:review:check": "node tools/validate-production-review-package.mjs",
     "assets:production:concept:check": "node tools/validate-production-concept-candidates.mjs",
     "assets:production:rework:check": "node tools/validate-production-rework-plan.mjs",
-    "assets:production:check": "npm run assets:production:runtime:first-slice:check && npm run assets:production:runtime:second-slice:check && npm run assets:production:runtime:third-slice:check && npm run assets:production:runtime:fourth-slice:check && npm run assets:production:runtime:fifth-slice:check && npm run assets:production:runtime:sixth-slice:check && npm run assets:production:runtime:chapter-02:check && npm run assets:production:runtime:chapter-03:check && npm run assets:production:runtime:chapter-04:check && npm run assets:production:runtime:special-content:check && npm run assets:production:runtime:recruitment:check && npm run assets:production:polish:priority-03 && npm run assets:production:quality:audit && npm run assets:production:review-hub:check && npm run assets:production:intake:check && npm run assets:production:review:check && npm run assets:production:concept:check && npm run assets:production:rework:check"
+    "assets:production:check": "npm run assets:production:runtime:first-slice:check && npm run assets:production:runtime:second-slice:check && npm run assets:production:runtime:third-slice:check && npm run assets:production:runtime:fourth-slice:check && npm run assets:production:runtime:fifth-slice:check && npm run assets:production:runtime:sixth-slice:check && npm run assets:production:runtime:chapter-02:check && npm run assets:production:runtime:chapter-03:check && npm run assets:production:runtime:chapter-04:check && npm run assets:production:runtime:special-content:check && npm run assets:production:runtime:recruitment:check && npm run assets:production:polish:priority-03 && npm run assets:production:quality:audit && npm run assets:production:review-hub:check && npm run assets:production:rework-intake:check && npm run assets:production:intake:check && npm run assets:production:review:check && npm run assets:production:concept:check && npm run assets:production:rework:check"
   },
   "devDependencies": {
     "typescript": "7.0.2"
