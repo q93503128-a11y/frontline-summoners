@@ -35,6 +35,12 @@ function publicUrlFromFile(file) {
     : null;
 }
 
+function assetUrlFallback(assetId, motionName) {
+  return typeof assetId === 'string' && assetId.startsWith('unit:')
+    ? `/assets/production/units/${assetId.slice(5).split(':').join('/')}/${motionName}.png`
+    : null;
+}
+
 for (const [id, metadataFile] of EXPECTED) {
   assert(html.includes(`\"${id}\"`), `missing mode ${id}`);
   assert(html.includes(metadataFile), `missing metadata mapping ${metadataFile}`);
@@ -56,7 +62,8 @@ assert(html.includes("cache:'no-store'"), 'metadata must be loaded fresh');
 assert(html.includes('COMPARE LAB'), 'comparison lab navigation missing');
 assert(html.includes("modeId==='recruitment'"), 'recruitment runtime fallback resolver missing');
 assert(html.includes("prefix='apps/client/public/'"), 'file-backed runtime resolver missing');
-assert(html.includes('motion.url||fileUrl||recruitmentFallback'), 'runtime resolver precedence missing');
+assert(html.includes("assetId.startsWith('unit:')"), 'asset-id runtime fallback resolver missing');
+assert(html.includes('motion.url||fileUrl||recruitmentFallback||assetFallback'), 'runtime resolver precedence missing');
 assert(html.includes("data-filter=\"pending\""), 'pending filter missing');
 assert(html.includes("data-filter=\"revisit\""), 'revisit filter missing');
 assert(html.includes("event.key.toLowerCase()"), 'keyboard review navigation missing');
@@ -69,6 +76,7 @@ let targetCount = 0;
 let stripCount = 0;
 let fileBackedStrips = 0;
 let recruitmentFallbackStrips = 0;
+let assetFallbackStrips = 0;
 const filesToCheck = [];
 for (const [modeId, metadataFile] of EXPECTED) {
   const metadata = JSON.parse(await readFile(resolve(unitsRoot, metadataFile), 'utf8'));
@@ -82,7 +90,8 @@ for (const [modeId, metadataFile] of EXPECTED) {
       const recruitmentFallback = modeId === 'recruitment' && target.unitId && target.formId
         ? `/assets/production/units/${target.unitId}/${target.formId}/${motionName}.png`
         : null;
-      const url = motion.url ?? fileUrl ?? recruitmentFallback;
+      const assetFallback = assetUrlFallback(target.assetId, motionName);
+      const url = motion.url ?? fileUrl ?? recruitmentFallback ?? assetFallback;
       const frameWidth = Number(motion.frameWidth ?? target.frameWidth);
       const frameHeight = Number(motion.frameHeight ?? target.frameHeight);
       const frames = Number(motion.frames);
@@ -92,6 +101,7 @@ for (const [modeId, metadataFile] of EXPECTED) {
       assert(Number.isInteger(frames) && frames > 0, `${modeId}:${targetKey}:${motionName} invalid frame count`);
       if (!motion.url && fileUrl) fileBackedStrips += 1;
       if (!motion.url && !fileUrl && recruitmentFallback) recruitmentFallbackStrips += 1;
+      if (!motion.url && !fileUrl && !recruitmentFallback && assetFallback) assetFallbackStrips += 1;
       filesToCheck.push([`${modeId}:${targetKey}:${motionName}`, resolve(publicRoot, url.slice(1))]);
       stripCount += 1;
     }
@@ -104,6 +114,7 @@ assert(targetCount === 209, `expected 209 canonical review targets/forms, got ${
 assert(stripCount === 1045, `expected 1045 five-motion strips, got ${stripCount}`);
 assert(fileBackedStrips > 0, 'expected at least one file-backed canonical runtime strip');
 assert(recruitmentFallbackStrips === 495, `expected 495 recruitment derived runtime strips, got ${recruitmentFallbackStrips}`);
+assert(assetFallbackStrips > 0, 'expected at least one asset-id derived canonical runtime strip');
 await Promise.all(filesToCheck.map(async ([label, path]) => {
   const info = await stat(path);
   assert(info.isFile() && info.size > 0, `${label} runtime PNG missing or empty`);
@@ -111,4 +122,4 @@ await Promise.all(filesToCheck.map(async ([label, path]) => {
 
 const info = await stat(htmlPath);
 assert(info.size > 10000, 'gallery HTML unexpectedly small');
-console.log(`[production-review-gallery] validated ${EXPECTED.length} modes / ${targetCount} targets/forms / ${stripCount} live strips / ${fileBackedStrips} file-backed / ${recruitmentFallbackStrips} recruitment derived`);
+console.log(`[production-review-gallery] validated ${EXPECTED.length} modes / ${targetCount} targets/forms / ${stripCount} live strips / ${fileBackedStrips} file-backed / ${recruitmentFallbackStrips} recruitment derived / ${assetFallbackStrips} asset-id derived`);
