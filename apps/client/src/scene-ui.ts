@@ -14,10 +14,6 @@ import { isCompactMobileViewport } from './viewport';
 
 export const FONT = '"Malgun Gothic", "Apple SD Gothic Neo", "Noto Sans KR", sans-serif';
 
-/**
- * Frontline command palette.
- * Keep semantic colors distinct from decorative accents so state does not rely on hue alone.
- */
 export const COLORS = {
   ink: 0x10141c,
   panel: 0x202735,
@@ -95,10 +91,6 @@ export function addText(
   });
 }
 
-/**
- * Shared command button. Existing call-sites stay source-compatible while gaining a production state model.
- * The visual is intentionally a clipped command ribbon instead of the old bordered rectangle.
- */
 export function addButton(
   scene: Phaser.Scene,
   x: number,
@@ -158,20 +150,20 @@ export function addButton(
 
     visual.fillStyle(0x080b10, inactive ? 0.24 : 0.36);
     visual.fillPoints([
-      { x: left + notch + 2, y: top + 5 },
-      { x: right + 2, y: top + 5 },
-      { x: right - notch + 2, y: bottom + 5 },
-      { x: left + 2, y: bottom + 5 },
-      { x: left + notch + 2, y: top + 5 },
+      new Phaser.Math.Vector2(left + notch + 2, top + 5),
+      new Phaser.Math.Vector2(right + 2, top + 5),
+      new Phaser.Math.Vector2(right - notch + 2, bottom + 5),
+      new Phaser.Math.Vector2(left + 2, bottom + 5),
+      new Phaser.Math.Vector2(left + notch + 2, top + 5),
     ], true);
 
     visual.fillStyle(fill, inactive ? 0.82 : 0.99);
     visual.fillPoints([
-      { x: left + notch, y: top },
-      { x: right, y: top },
-      { x: right - notch, y: bottom },
-      { x: left, y: bottom },
-      { x: left + notch, y: top },
+      new Phaser.Math.Vector2(left + notch, top),
+      new Phaser.Math.Vector2(right, top),
+      new Phaser.Math.Vector2(right - notch, bottom),
+      new Phaser.Math.Vector2(left, bottom),
+      new Phaser.Math.Vector2(left + notch, top),
     ], true);
 
     const railAlpha = inactive ? 0.32 : selected ? 1 : 0.72;
@@ -233,7 +225,6 @@ export function setButtonState(
   return button;
 }
 
-/** Low-chrome grouping surface. Use only when separation cannot be achieved by spacing/dividers. */
 export function addCommandPanel(
   scene: Phaser.Scene,
   x: number,
@@ -319,7 +310,6 @@ export function drawBackdrop(scene: Phaser.Scene, variant: 'menu' | 'map' = 'men
     return;
   }
 
-  // Command-tent/menu background: layered canvas and distant ridge, not a generic gradient card field.
   if (!reducedEffects) {
     g.fillStyle(highContrast ? 0x15202a : 0x1b2631, 1).fillTriangle(0, 600, 260, 300, 520, 600);
     g.fillStyle(highContrast ? 0x111b25 : 0x17232d, 1).fillTriangle(310, 600, 700, 220, 1040, 600);
@@ -332,7 +322,6 @@ export function drawBackdrop(scene: Phaser.Scene, variant: 'menu' | 'map' = 'men
   g.lineBetween(690, 116, 1238, 116);
 }
 
-/** Accessibility-safe camera shake. Callers may keep their authored duration/intensity; 0% disables it. */
 export function shakeCamera(
   scene: Phaser.Scene,
   durationMs: number,
@@ -343,7 +332,6 @@ export function shakeCamera(
   scene.cameras.main.shake(durationMs, intensity * factor);
 }
 
-/** Full-screen flash helper that respects the strong-flash reduction preference. */
 export function flashCamera(
   scene: Phaser.Scene,
   durationMs: number,
@@ -355,11 +343,6 @@ export function flashCamera(
   scene.cameras.main.flash(durationMs, red, green, blue);
 }
 
-/**
- * Central player-facing art resolver. Production art is returned only after its manifest entry is APPROVED;
- * otherwise the existing verified CC0 placeholder family remains authoritative. When callers omit a form id,
- * the current active save's presentation-only F1/F2/F3 selection is used.
- */
 export function familyForUnit(unitId: string, selectedFormId = getActiveVisualFormId(unitId)): ResolvedUnitArt {
   return resolveUnitArt(unitId, selectedFormId);
 }
