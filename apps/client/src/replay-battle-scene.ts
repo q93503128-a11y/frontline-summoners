@@ -1,5 +1,6 @@
 import Phaser from 'phaser';
 import { loadActiveProgress } from './active-progress';
+import { installBattleFrontlineOverlay } from './battle-frontline-overlay';
 import { QuirkBattleScene as BattleScene } from './quirk-battle-scene';
 import {
   getNextBattleSpeed,
@@ -50,6 +51,7 @@ export class ReplayBattleScene extends BattleScene {
         return;
       }
       this.battleCreateStarted = true;
+      installBattleFrontlineOverlay(this);
       super.create();
       const convenience = getReplayConvenienceState(this.replayStage, progress);
       this.maxReplaySpeed = convenience.maxBattleSpeed;
