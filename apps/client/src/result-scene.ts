@@ -15,7 +15,16 @@ import {
   type PrototypeStage,
 } from './prototype';
 import { getEffectiveDeckSlotIds, recordNormalStageClear, recordSpecialStageClear } from './save';
-import { addButton, addText, COLORS, drawBackdrop } from './scene-ui';
+import {
+  addButton,
+  addCommandPanel,
+  addSectionHeading,
+  addStatusPill,
+  addText,
+  COLORS,
+  drawBackdrop,
+  setButtonState,
+} from './scene-ui';
 import { getStageCollectionForStage } from './stage-navigation';
 import { getPostStageStory } from './story-content';
 import { shouldPresentStory } from './story-progress';
@@ -47,6 +56,8 @@ export class ResultScene extends Phaser.Scene {
   private winner: string | null = null;
   private resultRecorded = false;
   private postStoryId: string | undefined;
+  private actionButtons: Phaser.GameObjects.Container[] = [];
+  private settlementPill?: Phaser.GameObjects.Container;
 
   constructor() { super('result'); }
 
@@ -55,6 +66,8 @@ export class ResultScene extends Phaser.Scene {
     this.winner = data.winner ?? null;
     this.resultRecorded = false;
     this.postStoryId = undefined;
+    this.actionButtons = [];
+    this.settlementPill = undefined;
   }
 
   create(): void {
@@ -63,90 +76,136 @@ export class ResultScene extends Phaser.Scene {
     const compact = isCompactMobileViewport();
     const special = this.stage.stageType === 'SPECIAL';
     const collection = getStageCollectionForStage(this.stage.id);
-    const stageLabel = special ? `SPECIAL ${getSpecialStageNumber(this.stage.id)}` : `STAGE ${getStageNumber(this.stage.id)}`;
+    const stageNumber = special ? getSpecialStageNumber(this.stage.id) : getStageNumber(this.stage.id);
+    const stageLabel = special ? `특수 작전 ${stageNumber}` : `전장 ${stageNumber}`;
     this.resultRecorded = !victory;
-    addText(this, INTERNAL_WIDTH / 2, compact ? 70 : 86, victory ? '승 리' : '패 배', compact ? 56 : 62, victory ? COLORS.gold : COLORS.red, 'center').setOrigin(0.5);
-    addText(this, INTERNAL_WIDTH / 2, compact ? 132 : 148, `${stageLabel} · ${this.stage.name}`, compact ? 28 : 25, '#e9edf4', 'center').setOrigin(0.5);
 
-    this.add.rectangle(INTERNAL_WIDTH / 2, compact ? 345 : 355, compact ? 820 : 760, compact ? 360 : 320, 0x242b38, 0.98).setStrokeStyle(3, victory ? 0xb99449 : 0x805151);
-    if (victory && special) {
-      addText(this, INTERNAL_WIDTH / 2, compact ? 210 : 238, 'SPECIAL 클리어', compact ? 28 : 23, '#d8b4ef', 'center').setOrigin(0.5);
-      addText(this, INTERNAL_WIDTH / 2, compact ? 264 : 290, this.stage.name, compact ? 38 : 35, '#f1ceff', 'center').setOrigin(0.5);
-      addText(this, INTERNAL_WIDTH / 2, compact ? 322 : 342, this.stage.subtitle, compact ? 24 : 18, '#c8d0dc', 'center').setOrigin(0.5).setWordWrapWidth(compact ? 720 : 680);
-      const rewardText = addText(this, INTERNAL_WIDTH / 2, compact ? 390 : 395, '보상 계산 중…', compact ? 22 : 18, '#f2d37c', 'center').setOrigin(0.5).setWordWrapWidth(compact ? 720 : 680);
-      const status = addText(this, INTERNAL_WIDTH / 2, compact ? 446 : 447, compact ? 'SPECIAL 결과 저장 중…' : 'SPECIAL 클리어·재화 결과 저장 중…', compact ? 21 : 16, '#8f9aac', 'center').setOrigin(0.5);
-      void recordSpecialStageClear(this.stage.id).then((result) => {
-        this.resultRecorded = true;
-        if (result.firstClear) loadGuestAchievementProfile(result.progress);
-        if (!this.scene.isActive()) return;
-        const profileReward = result.firstClear ? formatSpecialProfileReward(this.stage.id) : undefined;
-        rewardText.setText(`${result.firstClear ? '첫 클리어 · ' : '재클리어 · '}${formatResourceReward(result.resourceReward)}${profileReward ? `\n${profileReward}` : ''}`);
-        if (result.persisted) {
-          status.setText(result.firstClear ? 'SPECIAL 첫 클리어 저장 완료' : 'SPECIAL 재클리어 보상 저장 완료');
-          status.setColor('#8ee3aa');
-        } else {
-          status.setText(compact ? '영구 저장 실패 · 현재 탭 기록 유지' : '브라우저 영구 저장 실패 · 현재 탭에서는 결과 유지');
-          status.setColor('#ffb37c');
-        }
-      }).catch((error: unknown) => {
-        this.resultRecorded = true;
-        if (!this.scene.isActive()) return;
-        rewardText.setText('보상 저장 실패');
-        status.setText(error instanceof Error ? error.message : 'SPECIAL 결과 처리에 실패했습니다.');
-        status.setColor('#ff9a91');
-      });
-    } else if (victory) {
-      const rewardTitle = addText(this, INTERNAL_WIDTH / 2, compact ? 202 : 224, 'NORMAL_CLEAR 보상', compact ? 28 : 23, '#8ee3aa', 'center').setOrigin(0.5);
-      addText(this, INTERNAL_WIDTH / 2, compact ? 250 : 270, getPermanentRewardEffectText(this.stage.permanentRewardId), compact ? 23 : 18, '#ffe18a', 'center').setOrigin(0.5).setWordWrapWidth(compact ? 720 : 680);
-      const unlockSlot = this.stage.unlockUnitId ? getSlotById(this.stage.unlockUnitId) : undefined;
-      const unlockText = addText(this, INTERNAL_WIDTH / 2, compact ? 326 : 330, unlockSlot ? `동료 · ${unlockSlot.displayName}` : '동료 해금 없음', compact ? 22 : 18, unlockSlot ? '#9ccfff' : '#8f9aac', 'center').setOrigin(0.5);
-      const rewardText = addText(this, INTERNAL_WIDTH / 2, compact ? 386 : 390, '일반 재화 계산 중…', compact ? 21 : 17, '#f2d37c', 'center').setOrigin(0.5).setWordWrapWidth(compact ? 720 : 680);
-      const status = addText(this, INTERNAL_WIDTH / 2, compact ? 450 : 448, compact ? '진행 저장 중…' : 'NORMAL_CLEAR 진행·재화 저장 중…', compact ? 20 : 16, '#8f9aac', 'center').setOrigin(0.5);
-      void recordNormalStageClear(this.stage.id, 'SOLO_BATTLE').then((result) => {
-        this.resultRecorded = true;
-        const deckSlotIds = getEffectiveDeckSlotIds(result.progress);
-        const storyTenQuirk = qualifiesStoryTenLateQuirk(this.stage.id, deckSlotIds);
-        let storyTenNew = false;
-        if (storyTenQuirk) {
-          const beforeProfile = loadGuestAchievementProfile(result.progress);
-          storyTenNew = !beforeProfile.factIds.includes('quirk_story_ten_late');
-          recordGuestAchievementFact(result.progress, 'quirk_story_ten_late');
-        }
-        const postStory = result.firstClear && result.persisted ? getPostStageStory(this.stage.id) : undefined;
-        if (postStory && shouldPresentStory(postStory, getClientSettings().autoSkipStory)) this.postStoryId = postStory.id;
-        if (!this.scene.isActive()) return;
-        rewardTitle.setText(result.firstClear ? '영구 보상 획득' : 'NORMAL_CLEAR 재클리어 보상');
-        const quirkText = storyTenQuirk ? `\n${storyTenNew ? '숨겨진 업적 달성' : '숨겨진 업적 조건 재달성'} · 열 명의 이야기` : '';
-        rewardText.setText(`${result.firstClear ? '첫 클리어 · ' : '재클리어 · '}${formatResourceReward(result.resourceReward)}${quirkText}`);
-        if (result.persisted) {
-          const storySuffix = this.postStoryId ? ' · 나갈 때 장 완료 연출' : '';
-          status.setText(compact
-            ? result.firstClear ? `NORMAL_CLEAR · 다음 스테이지 개방${storySuffix}` : '재클리어 보상 저장 완료'
-            : result.firstClear ? `NORMAL_CLEAR 저장 완료 · 다음 스테이지 개방${storySuffix}` : '재클리어 보상 저장 완료 · 영구 보상 반복 획득 없음');
-          status.setColor('#8ee3aa');
-        } else {
-          status.setText(compact ? '영구 저장 실패 · 현재 탭 진행 유지' : '브라우저 영구 저장 실패 · 현재 탭에서는 진행 유지');
-          status.setColor('#ffb37c');
-        }
-        if (unlockSlot) unlockText.setText(result.firstClear ? `신규 동료 · ${unlockSlot.displayName}` : `보유 동료 · ${unlockSlot.displayName}`);
-      }).catch((error: unknown) => {
-        this.resultRecorded = true;
-        if (!this.scene.isActive()) return;
-        rewardText.setText('보상 저장 실패');
-        status.setText(error instanceof Error ? error.message : 'NORMAL_CLEAR 결과 처리에 실패했습니다.');
-        status.setColor('#ff9a91');
-      });
-    } else {
-      addText(this, INTERNAL_WIDTH / 2, compact ? 286 : 310, compact ? '소환 타이밍과 편성을 바꿔 다시 도전해 보자.' : '편성과 소환 타이밍을 바꿔 다시 도전해 보자.', compact ? 28 : 24, '#dce2ec', 'center').setOrigin(0.5);
-      addText(this, INTERNAL_WIDTH / 2, compact ? 356 : 370, compact ? '패배해도 에너지나 보상을 잃지 않는다.' : '패배 시 보상 손실이나 에너지 소모는 없다.', compact ? 24 : 18, '#aeb8c7', 'center').setOrigin(0.5);
-      addText(this, INTERNAL_WIDTH / 2, compact ? 420 : 425, compact ? `전장 ${BATTLEFIELD_THEME_LABELS[this.stage.theme]} · ${this.stage.mapLength}m` : `현재 전장 · ${BATTLEFIELD_THEME_LABELS[this.stage.theme]} / ${this.stage.mapLength}m`, compact ? 21 : 17, '#8796aa', 'center').setOrigin(0.5);
+    addText(this, 76, 48, victory ? '작전 성공' : '작전 실패', compact ? 50 : 55, victory ? COLORS.gold : COLORS.red);
+    addText(this, 80, 112, `${stageLabel} · ${this.stage.name}`, compact ? 26 : 23, '#e6edf4');
+    addText(this, 80, 150, this.stage.subtitle, compact ? 18 : 15, COLORS.muted).setWordWrapWidth(730);
+    this.settlementPill = addStatusPill(this, 980, 74, victory ? '결과 정산 중' : '정산 없음', victory ? 'warning' : 'neutral');
+
+    addSectionHeading(this, 76, 202, victory ? '전과 보고' : '재정비 보고', 1128, victory ? 0xb79852 : 0x8a5f62);
+    addCommandPanel(this, 640, 390, 1120, 330, victory ? 0xb79852 : 0x8a5f62, victory ? 0x211f1b : 0x241d20, 0.95);
+
+    if (victory && special) this.renderSpecialVictory();
+    else if (victory) this.renderMainVictory();
+    else this.renderDefeat();
+
+    const buttonY = compact ? 630 : 620;
+    const h = compact ? 86 : 64;
+    const retry = addButton(this, 350, buttonY, 250, h, '다시 도전', () => {
+      if (this.resultRecorded) this.leaveResult('battle', { stageId: this.stage.id });
+    }, 0x668aa8, { tone: 'primary' });
+    const stageButton = addButton(this, 640, buttonY, 240, h, '스테이지 선택', () => {
+      if (this.resultRecorded) this.leaveResult('stage-select', { collectionId: collection.id });
+    }, special ? 0x846598 : 0x66788d, { tone: 'secondary' });
+    const home = addButton(this, 920, buttonY, 220, h, '지휘소', () => {
+      if (this.resultRecorded) this.leaveResult('main-menu');
+    }, 0x5c6878, { tone: 'quiet' });
+    this.actionButtons = [retry, stageButton, home];
+    this.updateActionStates();
+  }
+
+  private renderSpecialVictory(): void {
+    const compact = isCompactMobileViewport();
+    addText(this, 116, 270, '특수 작전 클리어', compact ? 27 : 24, '#dfbcef');
+    addText(this, 116, 315, this.stage.name, compact ? 35 : 32, '#f4ddff');
+    addText(this, 116, 365, '반복 보상', compact ? 18 : 15, '#b9c3cf');
+    const rewardText = addText(this, 116, 400, '보상을 계산하고 있습니다…', compact ? 22 : 18, COLORS.gold).setWordWrapWidth(930);
+    const status = addText(this, 116, 470, '클리어 기록과 보상을 저장하는 중…', compact ? 19 : 16, COLORS.muted).setWordWrapWidth(930);
+
+    void recordSpecialStageClear(this.stage.id).then((result) => {
+      this.resultRecorded = true;
+      if (result.firstClear) loadGuestAchievementProfile(result.progress);
+      if (!this.scene.isActive()) return;
+      const profileReward = result.firstClear ? formatSpecialProfileReward(this.stage.id) : undefined;
+      rewardText.setText(`${result.firstClear ? '첫 클리어 · ' : '재클리어 · '}${formatResourceReward(result.resourceReward)}${profileReward ? `\n${profileReward}` : ''}`);
+      if (result.persisted) {
+        status.setText(result.firstClear ? '첫 클리어와 보상을 저장했습니다.' : '재클리어 보상을 저장했습니다.').setColor(COLORS.green);
+        this.replaceSettlementPill(result.firstClear ? '첫 클리어 저장됨' : '보상 저장됨', 'online');
+      } else {
+        status.setText('영구 저장에 실패했습니다. 현재 실행에서는 결과를 유지합니다.').setColor(COLORS.warning);
+        this.replaceSettlementPill('저장 확인 필요', 'warning');
+      }
+      this.updateActionStates();
+    }).catch((error: unknown) => {
+      this.resultRecorded = true;
+      if (!this.scene.isActive()) return;
+      rewardText.setText('보상 저장에 실패했습니다.').setColor(COLORS.red);
+      status.setText(error instanceof Error ? error.message : '특수 작전 결과 처리에 실패했습니다.').setColor(COLORS.red);
+      this.replaceSettlementPill('정산 오류', 'danger');
+      this.updateActionStates();
+    });
+  }
+
+  private renderMainVictory(): void {
+    const compact = isCompactMobileViewport();
+    const rewardTitle = addText(this, 116, 270, '첫 직접 클리어 보상', compact ? 27 : 24, COLORS.green);
+    addText(this, 116, 315, getPermanentRewardEffectText(this.stage.permanentRewardId), compact ? 23 : 19, '#ffe39a').setWordWrapWidth(930);
+    const unlockSlot = this.stage.unlockUnitId ? getSlotById(this.stage.unlockUnitId) : undefined;
+    const unlockText = addText(this, 116, 365, unlockSlot ? `동료 후보 · ${unlockSlot.displayName}` : '추가 동료 해금 없음', compact ? 20 : 17, unlockSlot ? '#a9d4f4' : '#8995a2');
+    const rewardText = addText(this, 116, 405, '일반 보상을 계산하고 있습니다…', compact ? 20 : 17, COLORS.gold).setWordWrapWidth(930);
+    const status = addText(this, 116, 470, '진행과 보상을 저장하는 중…', compact ? 19 : 16, COLORS.muted).setWordWrapWidth(930);
+
+    void recordNormalStageClear(this.stage.id, 'SOLO_BATTLE').then((result) => {
+      this.resultRecorded = true;
+      const deckSlotIds = getEffectiveDeckSlotIds(result.progress);
+      const storyTenQuirk = qualifiesStoryTenLateQuirk(this.stage.id, deckSlotIds);
+      let storyTenNew = false;
+      if (storyTenQuirk) {
+        const beforeProfile = loadGuestAchievementProfile(result.progress);
+        storyTenNew = !beforeProfile.factIds.includes('quirk_story_ten_late');
+        recordGuestAchievementFact(result.progress, 'quirk_story_ten_late');
+      }
+      const postStory = result.firstClear && result.persisted ? getPostStageStory(this.stage.id) : undefined;
+      if (postStory && shouldPresentStory(postStory, getClientSettings().autoSkipStory)) this.postStoryId = postStory.id;
+      if (!this.scene.isActive()) return;
+
+      rewardTitle.setText(result.firstClear ? '영구 보상 획득' : '재클리어 보상');
+      const quirkText = storyTenQuirk ? `\n${storyTenNew ? '숨겨진 업적 달성' : '숨겨진 업적 조건 재달성'} · 열 명의 이야기` : '';
+      rewardText.setText(`${result.firstClear ? '첫 클리어 · ' : '재클리어 · '}${formatResourceReward(result.resourceReward)}${quirkText}`);
+      if (result.persisted) {
+        status.setText(result.firstClear
+          ? `진행 저장 완료 · 다음 전장 개방${this.postStoryId ? ' · 장 완료 이야기 예정' : ''}`
+          : '재클리어 보상 저장 완료 · 영구 보상은 반복 지급되지 않습니다.').setColor(COLORS.green);
+        this.replaceSettlementPill(result.firstClear ? '새 전선 개방' : '보상 저장됨', 'online');
+      } else {
+        status.setText('영구 저장에 실패했습니다. 현재 실행에서는 진행을 유지합니다.').setColor(COLORS.warning);
+        this.replaceSettlementPill('저장 확인 필요', 'warning');
+      }
+      if (unlockSlot) unlockText.setText(result.firstClear ? `신규 동료 · ${unlockSlot.displayName}` : `보유 동료 · ${unlockSlot.displayName}`);
+      this.updateActionStates();
+    }).catch((error: unknown) => {
+      this.resultRecorded = true;
+      if (!this.scene.isActive()) return;
+      rewardText.setText('보상 저장에 실패했습니다.').setColor(COLORS.red);
+      status.setText(error instanceof Error ? error.message : '결과 처리에 실패했습니다.').setColor(COLORS.red);
+      this.replaceSettlementPill('정산 오류', 'danger');
+      this.updateActionStates();
+    });
+  }
+
+  private renderDefeat(): void {
+    const compact = isCompactMobileViewport();
+    addText(this, 116, 285, '전선 재정비', compact ? 32 : 29, '#f1d3d0');
+    addText(this, 116, 342, '편성과 소환 타이밍을 바꿔 다시 도전해 보세요.', compact ? 26 : 22, '#dce4ec');
+    addText(this, 116, 395, '패배해도 에너지나 보상을 잃지 않습니다.', compact ? 21 : 18, '#abb6c3');
+    addText(this, 116, 445, `현재 전장 · ${BATTLEFIELD_THEME_LABELS[this.stage.theme]} · ${this.stage.mapLength}m`, compact ? 19 : 16, '#8e9cac');
+    addText(this, 116, 490, '추천: 전선이 밀리기 전에 보급소 투자와 저비용 유닛 생산 간격을 다시 확인하세요.', compact ? 17 : 14, '#9ca8b6').setWordWrapWidth(930);
+    this.replaceSettlementPill('즉시 재도전 가능', 'neutral');
+  }
+
+  private replaceSettlementPill(label: string, kind: 'neutral' | 'online' | 'warning' | 'danger'): void {
+    this.settlementPill?.destroy(true);
+    this.settlementPill = addStatusPill(this, 980, 74, label, kind);
+  }
+
+  private updateActionStates(): void {
+    for (const button of this.actionButtons) {
+      if (this.resultRecorded) setButtonState(button, 'default');
+      else setButtonState(button, 'loading', '결과 저장이 끝난 뒤 이동할 수 있습니다.');
     }
-
-    const guarded = (action: () => void): void => { if (!this.resultRecorded) return; action(); };
-    const resultButtonHeight = compact ? 84 : 68;
-    addButton(this, 380, compact ? 600 : 590, 260, resultButtonHeight, '다시 도전', () => guarded(() => this.leaveResult('battle', { stageId: this.stage.id })), 0x6d88a7);
-    addButton(this, 640, compact ? 600 : 590, 220, resultButtonHeight, '스테이지', () => guarded(() => this.leaveResult('stage-select', { collectionId: collection.id })), special ? 0x80659b : 0x667185);
-    addButton(this, 900, compact ? 600 : 590, 220, resultButtonHeight, '메인', () => guarded(() => this.leaveResult('main-menu')), 0x667185);
   }
 
   private leaveResult(nextScene: string, nextData?: object): void {
