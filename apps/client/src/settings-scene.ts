@@ -98,20 +98,20 @@ export class SettingsScene extends Phaser.Scene {
     this.content.add(addText(this, 626, 486, '낮은 품질·VFX·배터리 절약은 장식 효과만 줄입니다.', compact ? 15 : 12, '#a8b8a1', 'center').setOrigin(0.5).setWordWrapWidth(320));
     this.content.add(addText(this, 626, 530, '스토리 자동 건너뛰기는 장면을 렌더하지 않지만 전투 판정은 유지합니다.', compact ? 14 : 11, '#91a28d', 'center').setOrigin(0.5).setWordWrapWidth(320));
 
-    this.settingRow(852, 214, 300, rowHeight, 'Master', `${this.settings.masterVolume}%`, () => {
+    this.settingRow(852, 214, 300, rowHeight, '전체 음량', `${this.settings.masterVolume}%`, () => {
       this.change({ masterVolume: cycleSettingValue(this.settings.masterVolume, AUDIO_VOLUME_VALUES) });
     }, this.settings.masterVolume === 0, 0x8b745c);
-    this.settingRow(852, 274, 300, rowHeight, 'Music', `${this.settings.musicVolume}%`, () => {
+    this.settingRow(852, 274, 300, rowHeight, '음악', `${this.settings.musicVolume}%`, () => {
       this.change({ musicVolume: cycleSettingValue(this.settings.musicVolume, AUDIO_VOLUME_VALUES) });
     }, this.settings.musicVolume === 0, 0x8b745c);
-    this.settingRow(852, 334, 300, rowHeight, 'SFX', `${this.settings.sfxVolume}%`, () => {
+    this.settingRow(852, 334, 300, rowHeight, '효과음', `${this.settings.sfxVolume}%`, () => {
       this.change({ sfxVolume: cycleSettingValue(this.settings.sfxVolume, AUDIO_VOLUME_VALUES) });
     }, this.settings.sfxVolume === 0, 0x8b745c);
-    this.settingRow(852, 394, 300, rowHeight, 'UI', `${this.settings.uiVolume}%`, () => {
+    this.settingRow(852, 394, 300, rowHeight, '메뉴·알림', `${this.settings.uiVolume}%`, () => {
       this.change({ uiVolume: cycleSettingValue(this.settings.uiVolume, AUDIO_VOLUME_VALUES) });
     }, this.settings.uiVolume === 0, 0x8b745c);
-    this.content.add(addText(this, 1016, 486, 'Master 0%는 모든 오디오 bus를 완전히 음소거합니다.', compact ? 15 : 12, '#c5b39e', 'center').setOrigin(0.5).setWordWrapWidth(320));
-    this.content.add(addText(this, 1016, 530, '각 버스는 Master 음량과 함께 적용됩니다.', compact ? 14 : 11, '#a99c8e', 'center').setOrigin(0.5));
+    this.content.add(addText(this, 1016, 486, '전체 음량 0%는 게임의 모든 소리를 음소거합니다.', compact ? 15 : 12, '#c5b39e', 'center').setOrigin(0.5).setWordWrapWidth(320));
+    this.content.add(addText(this, 1016, 530, '음악·효과음·메뉴 알림 음량은 전체 음량과 함께 적용됩니다.', compact ? 14 : 11, '#a99c8e', 'center').setOrigin(0.5).setWordWrapWidth(320));
 
     const reset = addButton(this, INTERNAL_WIDTH / 2, compact ? 665 : 657, 310, compact ? 78 : 54, '기본값으로 초기화', () => this.reset(), 0x7a5e61, { tone: 'danger' });
     this.content.add(reset);
