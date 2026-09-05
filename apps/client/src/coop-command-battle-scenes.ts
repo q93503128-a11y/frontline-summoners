@@ -1,12 +1,14 @@
 import Phaser from 'phaser';
-import type { CoopBattleSnapshot } from './coop-network';
-import type { CoopSession } from './coop-network';
+import type { CoopBattleSnapshot, CoopServerMessage, CoopSession } from './coop-network';
 import { getSlotById } from './prototype';
+import { loadGuestProgress } from './save';
 import { setButtonState } from './scene-ui';
 import {
   StoryFriendCoopBattleScene as BaseStoryFriendCoopBattleScene,
   StoryGuestCoopBattleScene as BaseStoryGuestCoopBattleScene,
 } from './coop-story-scenes';
+import { getPostStageStory } from './story-content';
+import { presentStoryOverlay } from './story-overlay';
 import { isCompactMobileViewport } from './viewport';
 
 export {
@@ -24,6 +26,14 @@ type CoopBattlePresentationCarrier = Phaser.Scene & {
 };
 
 type RuntimeCarrier = CoopBattlePresentationCarrier & Record<string, unknown>;
+
+type GuestStoryRuntimeCarrier = RuntimeCarrier & {
+  storySession?: CoopSession;
+  storyStageId?: string;
+  stageWasClearedBeforeBattle?: boolean;
+  postStoryHandled?: boolean;
+  onStoryServerMessage?: (message: CoopServerMessage) => void;
+};
 
 function visitTexts(object: Phaser.GameObjects.GameObject, action: (text: Phaser.GameObjects.Text) => void): void {
   if (object instanceof Phaser.GameObjects.Text) action(object);
@@ -48,6 +58,8 @@ function sanitizePlayerText(scene: Phaser.Scene, session: CoopSession | undefine
     text = text.replace(/ · Lv(\d+)/g, ' · 보급소 $1단계');
     text = text.replace(/\bREADY\b/g, '사용 가능');
     text = text.replace(/\bMAX\b/g, '최대');
+    text = text.replace(/협동 NORMAL_CLEAR 저장 완료/g, '협동 클리어 저장 완료');
+    text = text.replace(/현재 탭에서 클리어 유지/g, '저장에 실패해 이번 실행에서만 클리어가 유지됩니다.');
     text = text.replace(/최근 사용 ([AB])/g, (_match, id: string) => `최근 사용 ${seatName(id, ownSeatId)}`);
     text = text.replace(/^([AB])·/g, (_match, id: string) => `${seatName(id, ownSeatId)}·`);
     text = text.replace(/\b(\d+)F\b/g, '재사용 대기');
@@ -152,6 +164,50 @@ function wrapAfter(carrier: RuntimeCarrier, methodName: string, after: () => voi
   return () => { carrier[methodName] = original; };
 }
 
+function installGuestPersistedStoryBridge(scene: Phaser.Scene): (() => void) | undefined {
+  const carrier = scene as unknown as GuestStoryRuntimeCarrier;
+  const original = carrier.onStoryServerMessage;
+  if (typeof original !== 'function') return undefined;
+
+  carrier.onStoryServerMessage = (message: CoopServerMessage): void => {
+    if (message.type !== 'BATTLE_FINISHED' || carrier.postStoryHandled === true || !scene.scene.isActive()) return;
+    const stageId = typeof carrier.storyStageId === 'string' ? carrier.storyStageId : '';
+    if (!stageId || message.battle.winner !== 'PLAYER' || carrier.stageWasClearedBeforeBattle === true) return;
+    const story = getPostStageStory(stageId);
+    if (!story) return;
+
+    carrier.postStoryHandled = true;
+    let checks = 0;
+    let reading = false;
+    const poll = scene.time.addEvent({
+      delay: 80,
+      loop: true,
+      callback: () => {
+        if (reading || !scene.scene.isActive()) return;
+        reading = true;
+        checks += 1;
+        void loadGuestProgress()
+          .then((progress) => {
+            if (!scene.scene.isActive()) return;
+            if (progress.clearedStageIds.includes(stageId)) {
+              poll.destroy();
+              presentStoryOverlay(scene, story);
+            } else if (checks >= 50) {
+              poll.destroy();
+            }
+          })
+          .catch(() => {
+            if (checks >= 50) poll.destroy();
+          })
+          .finally(() => { reading = false; });
+      },
+    });
+    scene.events.once(Phaser.Scenes.Events.SHUTDOWN, () => poll.destroy());
+  };
+
+  return () => { carrier.onStoryServerMessage = original; };
+}
+
 function installCoopBattleCommandSurface(scene: Phaser.Scene): void {
   const carrier = scene as unknown as RuntimeCarrier;
   const refresh = (): void => {
@@ -176,8 +232,10 @@ function installCoopBattleCommandSurface(scene: Phaser.Scene): void {
 
 export class StoryGuestCoopBattleScene extends BaseStoryGuestCoopBattleScene {
   override create(): void {
+    const restoreStoryHandler = installGuestPersistedStoryBridge(this);
     super.create();
     installCoopBattleCommandSurface(this);
+    this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => restoreStoryHandler?.());
   }
 }
 
