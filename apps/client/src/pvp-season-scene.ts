@@ -22,7 +22,7 @@ function tierName(id: string): string {
     BRONZE: '브론즈', SILVER: '실버', GOLD: '골드', PLATINUM: '플래티넘',
     DIAMOND: '다이아', MASTER: '마스터', GRANDMASTER: '그랜드마스터', FRONTLINE_APEX: '전선 최상위',
   };
-  return names[id] ?? id;
+  return names[id] ?? '미분류';
 }
 function resultName(result: 'WIN' | 'LOSS' | 'DRAW'): string { return result === 'WIN' ? '승' : result === 'LOSS' ? '패' : '무'; }
 function deltaText(delta: number | null): string { return delta === null ? '-' : delta > 0 ? `+${delta}` : String(delta); }
@@ -33,6 +33,8 @@ export class PvpSeasonScene extends Phaser.Scene {
   private content?: Phaser.GameObjects.Container;
   private status?: Phaser.GameObjects.Text;
   private claiming = false;
+  private loading = false;
+  private loadFailed = false;
 
   constructor() { super('pvp-season'); }
 
@@ -48,14 +50,25 @@ export class PvpSeasonScene extends Phaser.Scene {
   }
 
   private async loadSeasonOverview(): Promise<void> {
+    if (this.loading) return;
+    this.loading = true;
+    this.loadFailed = false;
+    this.status?.setText('시즌 기록을 불러오는 중…').setColor('#a9b5c5');
+    this.render();
     try {
       const overview = await getPvpSeasonOverview();
       if (!this.scene.isActive()) return;
       this.overview = overview;
       this.status?.setText('서버 시즌 기록 동기화 완료').setColor('#8ee3aa');
+    } catch {
+      if (!this.scene.isActive()) return;
+      this.overview = null;
+      this.loadFailed = true;
+      this.status?.setText('시즌 기록을 불러오지 못했습니다. 네트워크 상태를 확인해 주세요.').setColor('#ff9a91');
+    } finally {
+      if (!this.scene.isActive()) return;
+      this.loading = false;
       this.render();
-    } catch (error) {
-      if (this.scene.isActive()) this.status?.setText(error instanceof Error ? error.message : '시즌 기록을 불러오지 못했습니다.').setColor('#ff9a91');
     }
   }
 
@@ -76,8 +89,8 @@ export class PvpSeasonScene extends Phaser.Scene {
         this.status?.setText('시즌 정산 확인 완료').setColor('#8ee3aa');
       }
       this.overview = await getPvpSeasonOverview();
-    } catch (error) {
-      if (this.scene.isActive()) this.status?.setText(error instanceof Error ? error.message : '시즌 명예 보상을 받지 못했습니다.').setColor('#ff9a91');
+    } catch {
+      if (this.scene.isActive()) this.status?.setText('시즌 명예 보상을 확인하지 못했습니다. 다시 시도해 주세요.').setColor('#ff9a91');
     } finally {
       this.claiming = false;
       if (this.scene.isActive()) this.render();
@@ -90,7 +103,11 @@ export class PvpSeasonScene extends Phaser.Scene {
     const compact = isCompactMobileViewport();
     const overview = this.overview;
     if (!overview) {
-      this.content.add(addText(this, INTERNAL_WIDTH / 2, 350, '시즌 데이터 동기화 중…', compact ? 28 : 24, '#b9c3d0', 'center').setOrigin(0.5));
+      this.content.add(addCommandPanel(this, INTERNAL_WIDTH / 2, 360, 760, 300, this.loadFailed ? 0x8b6664 : 0x657184, 0x1b222c, 0.94));
+      this.content.add(addText(this, INTERNAL_WIDTH / 2, 310, this.loadFailed ? '시즌 기록을 확인하지 못했습니다.' : '시즌 데이터 동기화 중…', compact ? 28 : 24, this.loadFailed ? '#e3c1bf' : '#b9c3d0', 'center').setOrigin(0.5));
+      const action = addButton(this, INTERNAL_WIDTH / 2, 405, 280, compact ? 82 : 58, this.loadFailed ? '다시 불러오기' : '기록 확인 중', () => { void this.loadSeasonOverview(); }, this.loadFailed ? 0x8b6664 : 0x657184, { tone: 'primary' });
+      this.content.add(action);
+      if (this.loading) setButtonState(action, 'loading', '시즌 기록을 동기화하고 있습니다.');
       return;
     }
 
@@ -108,11 +125,12 @@ export class PvpSeasonScene extends Phaser.Scene {
 
     const phase = phaseName(overview.phase);
     this.content.add(addStatusPill(this, 86, 194, phase, overview.phase === 'ACTIVE' ? 'online' : 'neutral'));
-    const rankText = rating.placementComplete && overview.globalRank !== null ? `전체 #${overview.globalRank}` : `배치 ${rating.placementMatches}/5`;
-    this.content.add(addText(this, 88, 238, tierName(rating.displayedTier), compact ? 30 : 27, '#fff4cf'));
-    this.content.add(addText(this, 88, 279, `${rating.mmr} MMR · ${rankText}`, compact ? 22 : 19, '#cfe6ff'));
+    const placementComplete = rating.placementComplete;
+    const rankText = placementComplete && overview.globalRank !== null ? `전체 #${overview.globalRank}` : `배치전 ${rating.placementMatches}/5`;
+    this.content.add(addText(this, 88, 238, placementComplete ? tierName(rating.displayedTier) : '배치 진행 중', compact ? 30 : 27, '#fff4cf'));
+    this.content.add(addText(this, 88, 279, placementComplete ? `평점 ${rating.mmr} · ${rankText}` : `${rankText} · 완료 후 평점 공개`, compact ? 22 : 19, '#cfe6ff'));
     this.content.add(addText(this, 88, 326, `${rating.rankedWins}승  ${rating.rankedLosses}패  ${rating.rankedDraws}무`, compact ? 20 : 17, '#c4cfdd'));
-    this.content.add(addText(this, 88, 364, `최고 ${rating.bestMmr} MMR`, compact ? 18 : 15, '#f0d67d'));
+    this.content.add(addText(this, 88, 364, placementComplete ? `최고 평점 ${rating.bestMmr}` : '배치 완료 전 평점 비공개', compact ? 18 : 15, '#f0d67d'));
     this.content.add(addText(this, 88, 409, `참가 ${overview.ratedPlayerCount}명\n배치 완료 ${overview.placementPlayerCount}명`, compact ? 18 : 15, '#9fabb9'));
     this.content.add(addText(this, 88, 470, `정규 시즌 목표 ${overview.activeWeeksTarget}주 · 정산 ${overview.settlementDaysTarget}일`, compact ? 16 : 13, '#8f9baa').setWordWrapWidth(300));
 
@@ -155,8 +173,8 @@ export class PvpSeasonScene extends Phaser.Scene {
     }
 
     const finalRank = latest.finalRank === null ? '미배치' : `#${latest.finalRank}`;
-    this.content.add(addText(this, 96, 592, `직전 정산 · ${tierName(latest.finalTier)} ${latest.finalMmr} MMR · ${finalRank}`, compact ? 18 : 15, '#f0d67d'));
-    this.content.add(addText(this, 96, 623, `${latest.rankedWins}승 ${latest.rankedLosses}패 ${latest.rankedDraws}무 · 최고 ${latest.bestMmr} MMR`, compact ? 17 : 14, '#d2dae5'));
+    this.content.add(addText(this, 96, 592, `직전 정산 · ${tierName(latest.finalTier)} · 평점 ${latest.finalMmr} · ${finalRank}`, compact ? 18 : 15, '#f0d67d'));
+    this.content.add(addText(this, 96, 623, `${latest.rankedWins}승 ${latest.rankedLosses}패 ${latest.rankedDraws}무 · 최고 평점 ${latest.bestMmr}`, compact ? 17 : 14, '#d2dae5'));
     const honorNames = latest.honors.map((honor) => honor.displayName);
     const shown = honorNames.slice(0, 3).join(' · ');
     const extra = honorNames.length > 3 ? ` 외 ${honorNames.length - 3}개` : '';
