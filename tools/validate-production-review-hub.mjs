@@ -36,6 +36,7 @@ function stripCount(metadata) {
 assert(manifest.schemaVersion === 1, 'manifest schema drift');
 assert(manifest.generatedBy === 'tools/materialize-production-review-hub.mjs', 'manifest generator drift');
 assert(manifest.reviewHubPath === '/assets/production/review/index.html', 'hub path drift');
+assert(manifest.reworkQueuePath === '/assets/production/review/rework-queue.html', 'rework queue path drift');
 assert(manifest.humanApprovalAuthority === false, 'review hub must never have approval authority');
 assert(Array.isArray(manifest.modes) && manifest.modes.length === EXPECTED.length, `expected ${EXPECTED.length} review modes`);
 assert(manifest.audit?.humanApprovalAuthority === false, 'machine audit must not claim approval authority');
@@ -92,6 +93,8 @@ assert(html.includes('UNAPPROVED · HUMAN REVIEW REQUIRED'), 'unapproved warning
 assert(html.includes('NOT APPROVAL EVIDENCE'), 'approval-evidence boundary warning missing');
 assert(html.includes('MOTION GALLERY'), 'motion gallery call-to-action missing');
 assert(html.includes('OPEN BATTLE REVIEW'), 'battle review call-to-action missing');
+assert(html.includes('OPEN LOCAL REWORK QUEUE'), 'local rework queue call-to-action missing');
+assert(html.includes('rework-queue.html'), 'local rework queue link missing');
 assert(html.includes('localStorage'), 'local-only checklist implementation missing');
 assert(html.includes('frontline-production-review-local-v1:'), 'local checklist namespace missing');
 assert(!html.includes('reviewedAt'), 'hub must not write reviewedAt');
@@ -100,7 +103,9 @@ assert(!html.includes('reviewerId'), 'hub must not write reviewer identity');
 const htmlInfo = await stat(resolve(reviewRoot, 'index.html'));
 const manifestInfo = await stat(resolve(reviewRoot, 'production-review-master.json'));
 const galleryInfo = await stat(resolve(reviewRoot, 'gallery.html'));
+const queueInfo = await stat(resolve(reviewRoot, 'rework-queue.html'));
 assert(htmlInfo.size > 4000, 'hub HTML unexpectedly small');
 assert(manifestInfo.size > 1000, 'hub manifest unexpectedly small');
 assert(galleryInfo.size > 9000, 'gallery HTML unexpectedly small');
-console.log(`[production-review-hub] validated ${manifest.modes.length} battle + gallery routes / ${manifest.modes.reduce((sum, mode) => sum + mode.targetCount, 0)} listed targets/forms / human approval authority=false`);
+assert(queueInfo.size > 10000, 'rework queue HTML unexpectedly small');
+console.log(`[production-review-hub] validated ${manifest.modes.length} battle + gallery routes / local rework queue / ${manifest.modes.reduce((sum, mode) => sum + mode.targetCount, 0)} listed targets/forms / human approval authority=false`);
