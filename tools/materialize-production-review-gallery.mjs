@@ -1,0 +1,180 @@
+import { mkdir, writeFile } from 'node:fs/promises';
+import { dirname, resolve } from 'node:path';
+import { fileURLToPath } from 'node:url';
+
+const root = resolve(dirname(fileURLToPath(import.meta.url)), '..');
+const outDir = resolve(root, 'apps/client/public/assets/production/review');
+const htmlPath = resolve(outDir, 'gallery.html');
+
+const MODES = [
+  ['first-slice', 'First Slice', 'first-slice-runtime-metadata.json'],
+  ['second-slice', 'Second Slice', 'second-slice-runtime-metadata.json'],
+  ['third-slice', 'Third Slice', 'third-slice-runtime-metadata.json'],
+  ['fourth-slice', 'Fourth Slice', 'fourth-slice-runtime-metadata.json'],
+  ['fifth-slice', 'Fifth Slice', 'fifth-slice-runtime-metadata.json'],
+  ['sixth-slice', 'Chapter 1 Finale', 'sixth-slice-runtime-metadata.json'],
+  ['chapter-02', 'Chapter 2', 'chapter-02-runtime-metadata.json'],
+  ['chapter-03', 'Chapter 3', 'chapter-03-runtime-metadata.json'],
+  ['chapter-04', 'Chapter 4', 'chapter-04-runtime-metadata.json'],
+  ['special-content', 'Special Content', 'special-content-runtime-metadata.json'],
+  ['recruitment', 'Recruitment', 'recruitment-form-runtime-metadata.json'],
+].map(([id, label, metadataFile]) => ({ id, label, metadataFile }));
+
+const modePayload = JSON.stringify(Object.fromEntries(MODES.map((mode) => [mode.id, mode]))).replaceAll('<', '\\u003c');
+
+const html = `<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Frontline Summoners · Motion Review Gallery</title>
+  <style>
+    :root{color-scheme:dark;font-family:"Malgun Gothic",system-ui,sans-serif;background:#090d13;color:#edf2f8}
+    *{box-sizing:border-box}body{margin:0;background:#090d13;min-height:100vh}.shell{width:min(1540px,calc(100% - 28px));margin:0 auto;padding:22px 0 56px}
+    .top{position:sticky;top:0;z-index:50;background:#090d13f2;backdrop-filter:blur(9px);border-bottom:1px solid #283342;padding:12px 0 14px}.row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}.grow{flex:1}.eyebrow{font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:#8fa0b5}.title{margin:3px 0 0;font-size:25px}.warn{border:1px solid #a8782c;background:#2b2113;color:#ffd78a;border-radius:9px;padding:8px 10px;font-size:12px;font-weight:800}.btn,.filter{appearance:none;border:1px solid #405069;background:#182230;color:#d8e1ec;border-radius:8px;padding:8px 10px;text-decoration:none;cursor:pointer;font-weight:700}.btn:hover,.filter:hover{background:#213047}.btn.primary{background:#d9b35e;color:#191309;border-color:#d9b35e}.filter.active{background:#405a78;border-color:#6684a6}.controls{margin-top:12px}.search{min-width:260px;flex:1;background:#111923;border:1px solid #354255;color:#eaf0f7;border-radius:8px;padding:9px 11px}.metric{font-size:12px;color:#a8b5c5}.metric b{color:#eef3f9}.progress{height:5px;background:#1a2431;border-radius:999px;overflow:hidden;margin-top:10px}.progress>i{display:block;height:100%;width:0;background:#d9b35e;transition:width .2s}
+    .hint{margin:12px 0 18px;color:#8d9caf;font-size:12px;line-height:1.55}.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:13px}.card{border:1px solid #2d3949;background:#101720;border-radius:13px;padding:14px;scroll-margin-top:145px}.card.revisit{border-color:#9a633e}.card.done{box-shadow:inset 3px 0 #547a5e}.card.hidden{display:none}.card-head{display:flex;gap:10px;align-items:flex-start}.name{font-size:15px;font-weight:800;word-break:break-all}.sub{font-size:11px;color:#8999ac;margin-top:3px;word-break:break-all}.local{margin-left:auto;display:flex;gap:8px;align-items:center;white-space:nowrap;font-size:11px}.local label{display:flex;gap:4px;align-items:center}.motions{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:7px;margin-top:11px}.motion{background:#0a0f16;border:1px solid #25303e;border-radius:9px;padding:7px;min-width:0}.motion-head{display:flex;justify-content:space-between;gap:5px;font-size:10px;color:#a7b4c5;margin-bottom:5px}.motion-head strong{color:#e0e7f0}.stage{height:150px;display:flex;align-items:center;justify-content:center;background:linear-gradient(180deg,#151d28,#0a0f16);border-radius:6px;overflow:hidden;position:relative}.stage.contact{outline:2px solid #d9b35e;outline-offset:-2px}.stage canvas{width:100%;height:100%;image-rendering:pixelated}.empty{padding:70px 20px;text-align:center;color:#9caaba}.fatal{border:1px solid #7e4141;background:#2a1515;color:#ffc5c5;border-radius:9px;padding:14px;margin-top:18px}
+    @media(max-width:1180px){.grid{grid-template-columns:1fr}.stage{height:170px}}@media(max-width:760px){.motions{grid-template-columns:repeat(2,minmax(0,1fr))}.stage{height:150px}.local{width:100%;margin-left:0}.card-head{flex-wrap:wrap}.search{min-width:100%}}
+  </style>
+</head>
+<body>
+<div class="shell">
+  <div class="top">
+    <div class="row">
+      <div class="grow"><div class="eyebrow">Frontline Summoners / production art</div><h1 class="title" id="title">Motion Review Gallery</h1></div>
+      <div class="warn">UNAPPROVED · LOCAL REVIEW AID ONLY</div>
+      <a class="btn" href="index.html">← HUB</a>
+      <a class="btn primary" id="battle" href="../../../">OPEN BATTLE REVIEW</a>
+    </div>
+    <div class="row controls">
+      <input class="search" id="search" type="search" placeholder="target / asset id 검색" autocomplete="off">
+      <button class="filter active" data-filter="all">ALL</button>
+      <button class="filter" data-filter="pending">PENDING</button>
+      <button class="filter" data-filter="done">LOCAL CHECKED</button>
+      <button class="filter" data-filter="revisit">REVISIT</button>
+      <button class="btn" id="pause">PAUSE</button>
+      <span class="metric" id="metric"></span>
+    </div>
+    <div class="progress"><i id="progress"></i></div>
+  </div>
+  <div class="hint">각 카드에서 idle · move · attack · knockback · death를 같은 크기로 반복 재생한다. attack의 실제 contact frame에는 금색 테두리가 잠깐 표시된다. 체크/REVISIT 상태는 이 브라우저 localStorage에만 남는 개인 진행 메모이며 정본 파일이나 승인 상태를 바꾸지 않는다. 단축키: J/K 다음·이전 카드, R 현재 카드 로컬 체크, X 현재 카드 REVISIT, Space 재생/일시정지.</div>
+  <main class="grid" id="grid"></main>
+</div>
+<script>
+  const MODES=${modePayload};
+  const MOTIONS=['idle','move','attack','knockback','death'];
+  const PREFIX='frontline-production-review-gallery-local-v1:';
+  const params=new URLSearchParams(location.search);
+  const modeId=params.get('mode');
+  const mode=MODES[modeId];
+  const grid=document.getElementById('grid');
+  const title=document.getElementById('title');
+  const battle=document.getElementById('battle');
+  const search=document.getElementById('search');
+  const metric=document.getElementById('metric');
+  const progress=document.getElementById('progress');
+  const pauseButton=document.getElementById('pause');
+  let activeFilter='all';
+  let paused=false;
+  let currentCard=null;
+  let cards=[];
+  const animations=new Set();
+
+  function localKey(targetKey, kind){return PREFIX+modeId+':'+targetKey+':'+kind;}
+  function getFlag(targetKey,kind){return localStorage.getItem(localKey(targetKey,kind))==='1';}
+  function setFlag(targetKey,kind,value){localStorage.setItem(localKey(targetKey,kind),value?'1':'0');}
+  function esc(value){return String(value).replace(/[&<>\"']/g,function(ch){return {'&':'&amp;','<':'&lt;','>':'&gt;','\"':'&quot;',"'":'&#39;'}[ch];});}
+
+  function updateSummary(){
+    const total=cards.length;
+    const done=cards.filter(function(card){return card.dataset.done==='1';}).length;
+    const revisit=cards.filter(function(card){return card.dataset.revisit==='1';}).length;
+    const visible=cards.filter(function(card){return !card.classList.contains('hidden');}).length;
+    metric.innerHTML='<b>'+done+'/'+total+'</b> local checked · <b>'+revisit+'</b> revisit · '+visible+' visible';
+    progress.style.width=(total?Math.round(done/total*100):0)+'%';
+  }
+
+  function applyFilter(){
+    const q=search.value.trim().toLowerCase();
+    cards.forEach(function(card){
+      const text=card.dataset.search;
+      const done=card.dataset.done==='1';
+      const revisit=card.dataset.revisit==='1';
+      const stateOk=activeFilter==='all'||(activeFilter==='pending'&&!done)||(activeFilter==='done'&&done)||(activeFilter==='revisit'&&revisit);
+      card.classList.toggle('hidden',!(stateOk&&(!q||text.includes(q))));
+    });
+    updateSummary();
+  }
+
+  function syncCardState(card,targetKey,done,revisit){
+    card.dataset.done=done?'1':'0';card.dataset.revisit=revisit?'1':'0';
+    card.classList.toggle('done',done);card.classList.toggle('revisit',revisit);
+    setFlag(targetKey,'checked',done);setFlag(targetKey,'revisit',revisit);applyFilter();
+  }
+
+  function makeMotion(target,motionName,motion){
+    const box=document.createElement('div');box.className='motion';
+    const head=document.createElement('div');head.className='motion-head';
+    head.innerHTML='<strong>'+esc(motionName)+'</strong><span>'+motion.frames+'f · '+motion.frameWidth+'×'+motion.frameHeight+'</span>';
+    const stage=document.createElement('div');stage.className='stage';
+    const canvas=document.createElement('canvas');canvas.width=240;canvas.height=150;
+    canvas.dataset.url=motion.url;canvas.dataset.frames=String(motion.frames);canvas.dataset.frameWidth=String(motion.frameWidth);canvas.dataset.frameHeight=String(motion.frameHeight);canvas.dataset.motion=motionName;canvas.dataset.contact=String(target.attackContactFrame??-1);
+    stage.appendChild(canvas);box.appendChild(head);box.appendChild(stage);return box;
+  }
+
+  function makeCard(targetKey,target){
+    const card=document.createElement('article');card.className='card';card.tabIndex=0;card.dataset.target=targetKey;card.dataset.search=(targetKey+' '+(target.assetId||'')).toLowerCase();
+    const done=getFlag(targetKey,'checked'),revisit=getFlag(targetKey,'revisit');card.dataset.done=done?'1':'0';card.dataset.revisit=revisit?'1':'0';card.classList.toggle('done',done);card.classList.toggle('revisit',revisit);
+    const head=document.createElement('div');head.className='card-head';
+    const identity=document.createElement('div');identity.className='grow';identity.innerHTML='<div class="name">'+esc(targetKey)+'</div><div class="sub">'+esc(target.assetId||'no assetId')+' · display '+esc(target.displayHeight??'?')+' · attack contact '+esc(target.attackContactFrame??'?')+'</div>';
+    const local=document.createElement('div');local.className='local';
+    const doneLabel=document.createElement('label'),doneInput=document.createElement('input');doneInput.type='checkbox';doneInput.checked=done;doneLabel.append(doneInput,document.createTextNode(' LOCAL CHECKED'));
+    const revisitLabel=document.createElement('label'),revisitInput=document.createElement('input');revisitInput.type='checkbox';revisitInput.checked=revisit;revisitLabel.append(revisitInput,document.createTextNode(' REVISIT'));
+    local.append(doneLabel,revisitLabel);head.append(identity,local);card.appendChild(head);
+    const motions=document.createElement('div');motions.className='motions';
+    MOTIONS.forEach(function(name){if(target.motions&&target.motions[name])motions.appendChild(makeMotion(target,name,target.motions[name]));});card.appendChild(motions);
+    doneInput.addEventListener('change',function(){syncCardState(card,targetKey,doneInput.checked,revisitInput.checked);});
+    revisitInput.addEventListener('change',function(){syncCardState(card,targetKey,doneInput.checked,revisitInput.checked);});
+    card.addEventListener('focusin',function(){currentCard=card;});card.addEventListener('mouseenter',function(){currentCard=card;});
+    return card;
+  }
+
+  function startCanvas(canvas){
+    if(canvas.dataset.started==='1')return;canvas.dataset.started='1';
+    const image=new Image();const frames=Number(canvas.dataset.frames),fw=Number(canvas.dataset.frameWidth),fh=Number(canvas.dataset.frameHeight),contact=Number(canvas.dataset.contact);const ctx=canvas.getContext('2d');ctx.imageSmoothingEnabled=false;
+    const state={canvas:canvas,image:image,frame:0,last:0};animations.add(state);
+    image.onload=function(){draw(state);};image.src=canvas.dataset.url;
+    function draw(entry){if(!image.complete||!image.naturalWidth)return;ctx.clearRect(0,0,canvas.width,canvas.height);const scale=Math.min(canvas.width/fw,canvas.height/fh);const dw=Math.max(1,Math.floor(fw*scale)),dh=Math.max(1,Math.floor(fh*scale)),dx=Math.floor((canvas.width-dw)/2),dy=Math.floor((canvas.height-dh)/2);ctx.drawImage(image,entry.frame*fw,0,fw,fh,dx,dy,dw,dh);canvas.parentElement.classList.toggle('contact',canvas.dataset.motion==='attack'&&entry.frame===contact);}
+    state.draw=draw;
+  }
+
+  function tick(now){
+    if(!paused){animations.forEach(function(state){if(!state.canvas.isConnected||state.canvas.closest('.hidden'))return;if(now-state.last>=125){state.last=now;state.frame=(state.frame+1)%Number(state.canvas.dataset.frames);state.draw&&state.draw(state);}});}requestAnimationFrame(tick);
+  }
+
+  function visibleCards(){return cards.filter(function(card){return !card.classList.contains('hidden');});}
+  function jump(delta){const list=visibleCards();if(!list.length)return;let index=currentCard?list.indexOf(currentCard):-1;if(index<0)index=delta>0?-1:0;index=Math.max(0,Math.min(list.length-1,index+delta));currentCard=list[index];currentCard.focus({preventScroll:true});currentCard.scrollIntoView({behavior:'smooth',block:'start'});}
+  function toggleCurrent(kind){if(!currentCard)return;const targetKey=currentCard.dataset.target;const done=currentCard.dataset.done==='1';const revisit=currentCard.dataset.revisit==='1';syncCardState(currentCard,targetKey,kind==='checked'?!done:done,kind==='revisit'?!revisit:revisit);const inputs=currentCard.querySelectorAll('.local input');inputs[0].checked=currentCard.dataset.done==='1';inputs[1].checked=currentCard.dataset.revisit==='1';}
+
+  async function boot(){
+    if(!mode){grid.innerHTML='<div class="fatal">알 수 없는 mode다. HUB에서 review mode를 다시 선택해라.</div>';battle.hidden=true;return;}
+    title.textContent=mode.label+' · Motion Review Gallery';battle.href='../../../?productionReview='+encodeURIComponent(mode.id);
+    try{
+      const response=await fetch('../units/'+encodeURIComponent(mode.metadataFile),{cache:'no-store'});if(!response.ok)throw new Error('metadata HTTP '+response.status);const metadata=await response.json();
+      const entries=Object.entries(metadata.targets||{});if(!entries.length)throw new Error('metadata has no targets');
+      const fragment=document.createDocumentFragment();entries.forEach(function(pair){fragment.appendChild(makeCard(pair[0],pair[1]));});grid.appendChild(fragment);cards=Array.from(grid.querySelectorAll('.card'));currentCard=cards[0]||null;updateSummary();
+      const observer=new IntersectionObserver(function(entries){entries.forEach(function(entry){if(entry.isIntersecting)entry.target.querySelectorAll('canvas').forEach(startCanvas);});},{rootMargin:'450px 0px'});cards.forEach(function(card){observer.observe(card);});
+    }catch(error){grid.innerHTML='<div class="fatal">Gallery metadata load failed: '+esc(error&&error.message?error.message:error)+'</div>';}
+  }
+
+  search.addEventListener('input',applyFilter);
+  document.querySelectorAll('[data-filter]').forEach(function(button){button.addEventListener('click',function(){activeFilter=button.dataset.filter;document.querySelectorAll('[data-filter]').forEach(function(item){item.classList.toggle('active',item===button);});applyFilter();});});
+  pauseButton.addEventListener('click',function(){paused=!paused;pauseButton.textContent=paused?'PLAY':'PAUSE';});
+  document.addEventListener('keydown',function(event){if(event.target instanceof HTMLInputElement)return;const key=event.key.toLowerCase();if(key==='j'){event.preventDefault();jump(1);}else if(key==='k'){event.preventDefault();jump(-1);}else if(key==='r'){event.preventDefault();toggleCurrent('checked');}else if(key==='x'){event.preventDefault();toggleCurrent('revisit');}else if(event.code==='Space'){event.preventDefault();paused=!paused;pauseButton.textContent=paused?'PLAY':'PAUSE';}});
+  requestAnimationFrame(tick);boot();
+</script>
+</body>
+</html>`;
+
+await mkdir(outDir, { recursive: true });
+await writeFile(htmlPath, html);
+console.log(`[production-review-gallery] materialized target motion gallery for ${MODES.length} review modes`);
