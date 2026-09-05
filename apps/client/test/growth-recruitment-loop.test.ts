@@ -53,11 +53,13 @@ test('recruitment UI exposes paid pulls and explicit duplicate handling through 
 });
 
 test('growth scene exposes paid base level, shared plus growth, evolution unlock, and form selection through active authority', async () => {
-  const [main, growth] = await Promise.all([
+  const [main, adapter, growth] = await Promise.all([
     readFile(new URL('../src/main.ts', import.meta.url), 'utf8'),
+    readFile(new URL('../src/meta-command-scenes.ts', import.meta.url), 'utf8'),
     readFile(new URL('../src/growth-scene.ts', import.meta.url), 'utf8'),
   ]);
-  assert.match(main, /import \{ GrowthScene \} from '\.\/growth-scene';/);
+  assert.match(main, /import \{ CatalogScene, GrowthScene \} from '\.\/meta-command-scenes';/);
+  assert.match(adapter, /GrowthScene as BaseGrowthScene/);
   assert.match(main, /game\.scene\.add\('growth', GrowthScene, false\);/);
   assert.match(growth, /getOwnedCharacterIds\(this\.progress\)/);
   assert.match(growth, /buildCharacterCombatSlot\(slot, meta\.level, meta\.selectedFormId, meta\.plusLevel\)/);
