@@ -94,8 +94,8 @@ export class SocialScene extends Phaser.Scene {
     addText(this, 45, 30, '친구 · 협동 · 친선전', compact ? 42 : 44, COLORS.cream);
     addText(this, 47, 83, '친구 코드는 계정 식별용 · 자유 채팅 없음 · 차단 우선', compact ? 19 : 16, COLORS.muted);
     addButton(this, 1170, 58, 160, compact ? 78 : 50, '메인', () => this.scene.start('main-menu'), 0x586275);
-    addButton(this, 1040, 117, 210, compact ? 72 : 48, '친구 코드 추가', () => { void this.promptFriendRequest(); }, 0x5f7897);
-    addButton(this, 810, 117, 210, compact ? 72 : 48, '닉네임 변경', () => { void this.promptRename(); }, 0x6b628f);
+    addButton(this, 1040, 117, 210, compact ? 72 : 48, '친구 코드 추가', () => { if (!this.requireOnlineSocial()) return; void this.promptFriendRequest(); }, 0x5f7897);
+    addButton(this, 810, 117, 210, compact ? 72 : 48, '닉네임 변경', () => { if (!this.requireOnlineSocial()) return; void this.promptRename(); }, 0x6b628f);
     this.statusText = addText(this, INTERNAL_WIDTH / 2, 684, '소셜 정보 불러오는 중…', compact ? 19 : 15, '#a9b5c5', 'center').setOrigin(0.5);
 
     (Object.keys(TAB_LABELS) as SocialTab[]).forEach((tab, index) => {
@@ -114,6 +114,13 @@ export class SocialScene extends Phaser.Scene {
       return;
     }
     void this.refresh();
+  }
+
+  private requireOnlineSocial(): boolean {
+    if (getAccountClientState().kind === 'AUTHENTICATED_ONLINE') return true;
+    this.statusText?.setText('친구 기능은 온라인 로그인이 필요합니다. 계정 화면으로 이동합니다.').setColor('#ffd493');
+    this.scene.start('account');
+    return false;
   }
 
   private async refresh(message?: string): Promise<void> {
@@ -137,8 +144,12 @@ export class SocialScene extends Phaser.Scene {
     this.contentLayer = this.add.container(0, 0);
     const compact = isCompactMobileViewport();
     if (!this.summary) {
-      const message = getAccountClientState().kind === 'AUTHENTICATED_ONLINE' ? '동기화 중…' : '계정 메뉴에서 로그인하세요.';
-      this.contentLayer.add(addText(this, INTERNAL_WIDTH / 2, 365, message, compact ? 28 : 24, '#aeb8c5', 'center').setOrigin(0.5));
+      const online = getAccountClientState().kind === 'AUTHENTICATED_ONLINE';
+      const message = online ? '동기화 중…' : `${TAB_LABELS[this.tab]} 기능은 온라인 로그인 후 사용할 수 있습니다.`;
+      this.contentLayer.add(addText(this, INTERNAL_WIDTH / 2, 350, message, compact ? 28 : 24, '#aeb8c5', 'center').setOrigin(0.5));
+      if (!online) {
+        this.contentLayer.add(addButton(this, INTERNAL_WIDTH / 2, 425, 260, compact ? 76 : 54, '계정에서 로그인', () => this.scene.start('account'), 0x5f7897));
+      }
       return;
     }
 

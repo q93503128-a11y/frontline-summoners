@@ -25,6 +25,11 @@ import {
 import { loadGuestAchievementProfile } from './achievement-profile.ts';
 import { fetchGoogleAuthConfig, loginWithGoogleCredential } from './google-login.ts';
 import { loadGuestProgress, type GuestProgress } from './save.ts';
+import {
+  applyGuestDeveloperResourceCode,
+  isGuestDeveloperResourceSandboxActive,
+  resetGuestLocalAccountData,
+} from './guest-maintenance.ts';
 import { addButton, addText, COLORS, drawBackdrop } from './scene-ui';
 import { isCompactMobileViewport } from './viewport';
 
@@ -135,6 +140,8 @@ export class AccountScene extends Phaser.Scene {
     const compact = isCompactMobileViewport();
     addText(this, 62, 46, '계 정', compact ? 48 : 44, COLORS.cream);
     addText(this, 64, 104, '로그인 계정은 서버 저장이 정본입니다.', compact ? 22 : 19, COLORS.muted);
+    addButton(this, 1015, 60, 185, compact ? 64 : 44, '게스트 초기화', () => { void this.resetGuestLocalAccount(); }, 0x8a6262);
+    addButton(this, 1190, 60, 150, compact ? 64 : 44, '개발자 코드', () => { void this.applyDeveloperCode(); }, 0x765f8d);
 
     this.add.rectangle(INTERNAL_WIDTH / 2, 285, compact ? 980 : 900, 330, 0x202735, 0.98).setStrokeStyle(3, 0x657086);
     this.stateText = addText(this, INTERNAL_WIDTH / 2, 175, '', compact ? 32 : 30, '#ffffff', 'center').setOrigin(0.5);
@@ -245,6 +252,13 @@ export class AccountScene extends Phaser.Scene {
       if (!automatic) this.setMessage('게스트 진행 이전은 온라인 로그인 상태에서만 가능합니다.', COLORS.gold);
       return;
     }
+    if (isGuestDeveloperResourceSandboxActive()) {
+      this.migrationEnvelope = null;
+      this.migrationPreview = null;
+      this.replacementArmed = false;
+      this.setMessage('개발자 테스트 재화가 적용된 게스트 진행은 서버 계정으로 이전할 수 없습니다. 게스트 초기화 후 정상 진행을 사용하세요.', COLORS.red);
+      return;
+    }
     const guestProgress = await loadGuestProgress();
     if (!hasMeaningfulGuestProgress(guestProgress)) {
       this.migrationEnvelope = null;
@@ -339,6 +353,46 @@ export class AccountScene extends Phaser.Scene {
       this.setMessage('게스트 장착 취향을 가져왔습니다 · 서버 미해금 장식과 로컬 업적 소유권은 이전하지 않았습니다.', COLORS.green);
     } catch (error) {
       if (!this.destroyed) this.setMessage(error instanceof Error ? error.message : '게스트 프로필 가져오기에 실패했습니다.', COLORS.red);
+    }
+  }
+
+  private async resetGuestLocalAccount(): Promise<void> {
+    if (typeof window === 'undefined') return;
+    const confirmation = window.prompt('이 기기의 게스트 진행, 재화, 도감, 모집, 성장, 기록, 게스트 프로필을 모두 삭제합니다. 로그인 서버 계정은 건드리지 않습니다.\n초기화하려면 RESET을 입력하세요.');
+    if (confirmation === null) return;
+    if (confirmation.trim() !== 'RESET') {
+      this.setMessage('게스트 초기화를 취소했습니다. RESET을 정확히 입력해야 합니다.', COLORS.gold);
+      return;
+    }
+    this.setMessage('게스트 로컬 저장을 초기화하는 중…', COLORS.muted);
+    const reset = await resetGuestLocalAccountData();
+    if (!reset) {
+      this.setMessage('게스트 저장 초기화에 실패했습니다. 브라우저 저장소 사용 가능 여부를 확인하세요.', COLORS.red);
+      return;
+    }
+    this.setMessage('게스트 로컬 저장을 초기화했습니다. 서버 계정은 변경하지 않았습니다. 새 상태를 불러옵니다.', COLORS.green);
+    window.setTimeout(() => window.location.reload(), 250);
+  }
+
+  private async applyDeveloperCode(): Promise<void> {
+    if (getAccountClientState().kind !== 'GUEST_LOCAL') {
+      this.setMessage('개발자 재화 코드는 게스트 로컬 테스트에서만 사용할 수 있습니다. 서버 계정에는 적용하지 않습니다.', COLORS.gold);
+      return;
+    }
+    if (typeof window === 'undefined') return;
+    const code = window.prompt('개발자 테스트 코드를 입력하세요.');
+    if (code === null) return;
+    this.setMessage('개발자 테스트 재화를 적용하는 중…', COLORS.muted);
+    try {
+      const result = await applyGuestDeveloperResourceCode(code);
+      if (!result.activated) {
+        this.setMessage('개발자 코드가 일치하지 않습니다.', COLORS.red);
+        return;
+      }
+      this.setMessage('개발자 테스트 재화 적용 완료 · 모든 재화를 999,999,999로 채웠습니다. 이 게스트 저장은 서버 이전이 차단됩니다.', COLORS.green);
+      window.setTimeout(() => window.location.reload(), 250);
+    } catch (error) {
+      this.setMessage(error instanceof Error ? error.message : '개발자 테스트 재화 적용에 실패했습니다.', COLORS.red);
     }
   }
 
