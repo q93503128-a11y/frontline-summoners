@@ -10,7 +10,7 @@ import {
   shouldUseStrongFlash,
 } from './client-settings';
 import { resolveUnitArt, type ResolvedUnitArt } from './production-assets.ts';
-import { isCompactMobileViewport } from './viewport';
+import { getCurrentMinimumInternalTouchTarget, isCompactMobileViewport } from './viewport';
 
 export const FONT = '"Malgun Gothic", "Apple SD Gothic Neo", "Noto Sans KR", sans-serif';
 
@@ -104,10 +104,12 @@ export function addButton(
 ): Phaser.GameObjects.Container {
   const settings = getClientSettings();
   const highContrast = settings.highContrast;
+  const compact = isCompactMobileViewport();
   const tone = options.tone ?? 'secondary';
   const visual = scene.add.graphics();
   const labelText = addText(scene, 0, 0, label, Math.max(17, Math.floor(height * 0.29)), '#ffffff', 'center').setOrigin(0.5);
-  const hit = scene.add.rectangle(0, 0, width, height, 0xffffff, 0.001);
+  const minimumTouch = compact ? getCurrentMinimumInternalTouchTarget() : 0;
+  const hit = scene.add.rectangle(0, 0, Math.max(width, minimumTouch), Math.max(height, minimumTouch), 0xffffff, 0.001);
   const marker = scene.add.triangle(-width / 2 + 10, 0, 0, -7, 0, 7, 8, 0, accent, 0.95);
   const container = scene.add.container(x, y, [visual, marker, labelText, hit]);
   const controller: CommandButtonController = {
