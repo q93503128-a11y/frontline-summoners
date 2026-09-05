@@ -5,7 +5,6 @@ import { restoreAuthenticatedAccountSession } from './account-network';
 import { AccountCommandScene as AccountScene } from './account-command-scene';
 import { ReplayBattleScene as BattleScene } from './replay-battle-scene';
 import { BaseWeaponScene } from './base-weapon-scene';
-import { CatalogScene } from './catalog-scene';
 import {
   StoryGuestCoopBattleScene as CoopBattleScene,
   StoryGuestCoopLobbyScene as CoopLobbyScene,
@@ -16,7 +15,7 @@ import {
 import { DeckScene } from './deck-scene';
 import { FirstSliceProductionCaptureScene, isFirstSliceCaptureMode } from './first-slice-production-capture-scene.ts';
 import { isFirstSliceProductionReviewMode } from './first-slice-production-review-runtime.ts';
-import { GrowthScene } from './growth-scene';
+import { CatalogScene, GrowthScene } from './meta-command-scenes';
 import { RecruitmentScene } from './recruitment-scene';
 import { BootScene as BaseBootScene, MainMenuScene as BaseMainMenuScene } from './navigation-scenes';
 import { ProfileScene } from './profile-scene';
