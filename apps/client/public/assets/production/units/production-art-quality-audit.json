@@ -10,6 +10,7 @@
     "chapter-04-runtime-metadata.json",
     "fifth-slice-runtime-metadata.json",
     "first-slice-runtime-metadata.json",
+    "fourth-slice-runtime-metadata.json",
     "recruitment-form-runtime-metadata.json",
     "recruitment-runtime-metadata.json",
     "second-slice-runtime-metadata.json",
@@ -18,8 +19,8 @@
     "third-slice-runtime-metadata.json"
   ],
   "summary": {
-    "totalTargets": 234,
-    "totalStripsAudited": 702,
+    "totalTargets": 242,
+    "totalStripsAudited": 726,
     "motionsAuditedPerTarget": [
       "idle",
       "move",
@@ -27,7 +28,7 @@
     ],
     "severe": 0,
     "atRisk": 0,
-    "healthy": 234,
+    "healthy": 242,
     "recruitmentEvolutionGroups": 33,
     "weakEvolution": 0,
     "watchEvolution": 0,
@@ -252,12 +253,12 @@
       "score": 81,
       "reasons": [
         "low-attack:0.0343",
-        "high-similarity:0.9131"
+        "high-similarity:0.9174"
       ],
       "nearestOther": {
-        "targetKey": "enemy_ch2_bonewheel",
-        "rootUnitId": "enemy_ch2_bonewheel",
-        "similarity": 0.9131
+        "targetKey": "pyromancer/pyromancer_f3",
+        "rootUnitId": "pyromancer",
+        "similarity": 0.9174
       },
       "motions": {
         "idle": {
@@ -1711,12 +1712,12 @@
       "formOrder": null,
       "score": 91,
       "reasons": [
-        "high-similarity:0.9131"
+        "high-similarity:0.932"
       ],
       "nearestOther": {
-        "targetKey": "boss_ch4_zero_engine",
-        "rootUnitId": "boss_ch4_zero_engine",
-        "similarity": 0.9131
+        "targetKey": "pyromancer/pyromancer_f3",
+        "rootUnitId": "pyromancer",
+        "similarity": 0.932
       },
       "motions": {
         "idle": {
@@ -1751,6 +1752,58 @@
           "maxEdgeRatio": 0.0015,
           "avgDelta": 0.1591,
           "maxDelta": 0.2809
+        }
+      }
+    },
+    {
+      "metadataFile": "special-content-runtime-metadata.json",
+      "targetKey": "enemy_sp_evo_mirror_seal",
+      "assetId": "unit:enemy_sp_evo_mirror_seal",
+      "unitId": "enemy_sp_evo_mirror_seal",
+      "formId": null,
+      "formOrder": null,
+      "score": 91,
+      "reasons": [
+        "high-similarity:0.8814"
+      ],
+      "nearestOther": {
+        "targetKey": "pyromancer/pyromancer_f3",
+        "rootUnitId": "pyromancer",
+        "similarity": 0.8814
+      },
+      "motions": {
+        "idle": {
+          "frames": 7,
+          "frameWidth": 280,
+          "frameHeight": 250,
+          "occupancy": 0.3957,
+          "widthCoverage": 0.7536,
+          "heightCoverage": 0.7411,
+          "maxEdgeRatio": 0,
+          "avgDelta": 0.0028,
+          "maxDelta": 0.0044
+        },
+        "move": {
+          "frames": 8,
+          "frameWidth": 280,
+          "frameHeight": 250,
+          "occupancy": 0.4593,
+          "widthCoverage": 0.9902,
+          "heightCoverage": 0.8325,
+          "maxEdgeRatio": 0.0038,
+          "avgDelta": 0.1565,
+          "maxDelta": 0.1808
+        },
+        "attack": {
+          "frames": 8,
+          "frameWidth": 280,
+          "frameHeight": 250,
+          "occupancy": 0.5147,
+          "widthCoverage": 0.9161,
+          "heightCoverage": 0.83,
+          "maxEdgeRatio": 0,
+          "avgDelta": 0.0943,
+          "maxDelta": 0.2069
         }
       }
     },
@@ -1803,6 +1856,58 @@
           "maxEdgeRatio": 0,
           "avgDelta": 0.1737,
           "maxDelta": 0.2759
+        }
+      }
+    },
+    {
+      "metadataFile": "fourth-slice-runtime-metadata.json",
+      "targetKey": "pyromancer/pyromancer_f3",
+      "assetId": "unit:pyromancer:pyromancer_f3",
+      "unitId": "pyromancer",
+      "formId": "pyromancer_f3",
+      "formOrder": 3,
+      "score": 91,
+      "reasons": [
+        "high-similarity:0.932"
+      ],
+      "nearestOther": {
+        "targetKey": "enemy_ch2_bonewheel",
+        "rootUnitId": "enemy_ch2_bonewheel",
+        "similarity": 0.932
+      },
+      "motions": {
+        "idle": {
+          "frames": 8,
+          "frameWidth": 330,
+          "frameHeight": 270,
+          "occupancy": 0.1372,
+          "widthCoverage": 0.4178,
+          "heightCoverage": 0.463,
+          "maxEdgeRatio": 0,
+          "avgDelta": 0.0111,
+          "maxDelta": 0.0183
+        },
+        "move": {
+          "frames": 8,
+          "frameWidth": 330,
+          "frameHeight": 270,
+          "occupancy": 0.1743,
+          "widthCoverage": 0.753,
+          "heightCoverage": 0.6,
+          "maxEdgeRatio": 0,
+          "avgDelta": 0.3666,
+          "maxDelta": 0.3695
+        },
+        "attack": {
+          "frames": 8,
+          "frameWidth": 330,
+          "frameHeight": 270,
+          "occupancy": 0.1868,
+          "widthCoverage": 0.7083,
+          "heightCoverage": 0.5019,
+          "maxEdgeRatio": 0,
+          "avgDelta": 0.1472,
+          "maxDelta": 0.2267
         }
       }
     },
@@ -2005,106 +2110,6 @@
           "maxEdgeRatio": 0,
           "avgDelta": 0.2277,
           "maxDelta": 0.3061
-        }
-      }
-    },
-    {
-      "metadataFile": "chapter-02-runtime-metadata.json",
-      "targetKey": "boss_ch2_funeral_king",
-      "assetId": "unit:boss_ch2_funeral_king",
-      "unitId": "boss_ch2_funeral_king",
-      "formId": null,
-      "formOrder": null,
-      "score": 100,
-      "reasons": [],
-      "nearestOther": {
-        "targetKey": "boss_sp_gold_carrier",
-        "rootUnitId": "boss_sp_gold_carrier",
-        "similarity": 0.7631
-      },
-      "motions": {
-        "idle": {
-          "frames": 8,
-          "frameWidth": 330,
-          "frameHeight": 290,
-          "occupancy": 0.2194,
-          "widthCoverage": 0.5758,
-          "heightCoverage": 0.6172,
-          "maxEdgeRatio": 0,
-          "avgDelta": 0.0237,
-          "maxDelta": 0.0332
-        },
-        "move": {
-          "frames": 8,
-          "frameWidth": 330,
-          "frameHeight": 290,
-          "occupancy": 0.2194,
-          "widthCoverage": 0.5758,
-          "heightCoverage": 0.6172,
-          "maxEdgeRatio": 0,
-          "avgDelta": 0.0926,
-          "maxDelta": 0.0926
-        },
-        "attack": {
-          "frames": 8,
-          "frameWidth": 330,
-          "frameHeight": 290,
-          "occupancy": 0.2329,
-          "widthCoverage": 0.7102,
-          "heightCoverage": 0.6172,
-          "maxEdgeRatio": 0,
-          "avgDelta": 0.091,
-          "maxDelta": 0.2103
-        }
-      }
-    },
-    {
-      "metadataFile": "chapter-03-runtime-metadata.json",
-      "targetKey": "boss_ch3_archmagus",
-      "assetId": "unit:boss_ch3_archmagus",
-      "unitId": "boss_ch3_archmagus",
-      "formId": null,
-      "formOrder": null,
-      "score": 100,
-      "reasons": [],
-      "nearestOther": {
-        "targetKey": "boss_sp_rift_nightfall",
-        "rootUnitId": "boss_sp_rift_nightfall",
-        "similarity": 0.6244
-      },
-      "motions": {
-        "idle": {
-          "frames": 8,
-          "frameWidth": 380,
-          "frameHeight": 320,
-          "occupancy": 0.1315,
-          "widthCoverage": 0.6049,
-          "heightCoverage": 0.6512,
-          "maxEdgeRatio": 0,
-          "avgDelta": 0.0948,
-          "maxDelta": 0.1028
-        },
-        "move": {
-          "frames": 8,
-          "frameWidth": 380,
-          "frameHeight": 320,
-          "occupancy": 0.1315,
-          "widthCoverage": 0.6056,
-          "heightCoverage": 0.6496,
-          "maxEdgeRatio": 0,
-          "avgDelta": 0.3138,
-          "maxDelta": 0.3205
-        },
-        "attack": {
-          "frames": 9,
-          "frameWidth": 380,
-          "frameHeight": 320,
-          "occupancy": 0.141,
-          "widthCoverage": 0.6614,
-          "heightCoverage": 0.6507,
-          "maxEdgeRatio": 0,
-          "avgDelta": 0.1664,
-          "maxDelta": 0.4178
         }
       }
     }
@@ -2594,12 +2599,12 @@
       "score": 81,
       "reasons": [
         "low-attack:0.0343",
-        "high-similarity:0.9131"
+        "high-similarity:0.9174"
       ],
       "nearestOther": {
-        "targetKey": "enemy_ch2_bonewheel",
-        "rootUnitId": "enemy_ch2_bonewheel",
-        "similarity": 0.9131
+        "targetKey": "pyromancer/pyromancer_f3",
+        "rootUnitId": "pyromancer",
+        "similarity": 0.9174
       },
       "motions": {
         "idle": {
@@ -4053,12 +4058,12 @@
       "formOrder": null,
       "score": 91,
       "reasons": [
-        "high-similarity:0.9131"
+        "high-similarity:0.932"
       ],
       "nearestOther": {
-        "targetKey": "boss_ch4_zero_engine",
-        "rootUnitId": "boss_ch4_zero_engine",
-        "similarity": 0.9131
+        "targetKey": "pyromancer/pyromancer_f3",
+        "rootUnitId": "pyromancer",
+        "similarity": 0.932
       },
       "motions": {
         "idle": {
@@ -4093,6 +4098,58 @@
           "maxEdgeRatio": 0.0015,
           "avgDelta": 0.1591,
           "maxDelta": 0.2809
+        }
+      }
+    },
+    {
+      "metadataFile": "special-content-runtime-metadata.json",
+      "targetKey": "enemy_sp_evo_mirror_seal",
+      "assetId": "unit:enemy_sp_evo_mirror_seal",
+      "unitId": "enemy_sp_evo_mirror_seal",
+      "formId": null,
+      "formOrder": null,
+      "score": 91,
+      "reasons": [
+        "high-similarity:0.8814"
+      ],
+      "nearestOther": {
+        "targetKey": "pyromancer/pyromancer_f3",
+        "rootUnitId": "pyromancer",
+        "similarity": 0.8814
+      },
+      "motions": {
+        "idle": {
+          "frames": 7,
+          "frameWidth": 280,
+          "frameHeight": 250,
+          "occupancy": 0.3957,
+          "widthCoverage": 0.7536,
+          "heightCoverage": 0.7411,
+          "maxEdgeRatio": 0,
+          "avgDelta": 0.0028,
+          "maxDelta": 0.0044
+        },
+        "move": {
+          "frames": 8,
+          "frameWidth": 280,
+          "frameHeight": 250,
+          "occupancy": 0.4593,
+          "widthCoverage": 0.9902,
+          "heightCoverage": 0.8325,
+          "maxEdgeRatio": 0.0038,
+          "avgDelta": 0.1565,
+          "maxDelta": 0.1808
+        },
+        "attack": {
+          "frames": 8,
+          "frameWidth": 280,
+          "frameHeight": 250,
+          "occupancy": 0.5147,
+          "widthCoverage": 0.9161,
+          "heightCoverage": 0.83,
+          "maxEdgeRatio": 0,
+          "avgDelta": 0.0943,
+          "maxDelta": 0.2069
         }
       }
     },
@@ -4145,6 +4202,58 @@
           "maxEdgeRatio": 0,
           "avgDelta": 0.1737,
           "maxDelta": 0.2759
+        }
+      }
+    },
+    {
+      "metadataFile": "fourth-slice-runtime-metadata.json",
+      "targetKey": "pyromancer/pyromancer_f3",
+      "assetId": "unit:pyromancer:pyromancer_f3",
+      "unitId": "pyromancer",
+      "formId": "pyromancer_f3",
+      "formOrder": 3,
+      "score": 91,
+      "reasons": [
+        "high-similarity:0.932"
+      ],
+      "nearestOther": {
+        "targetKey": "enemy_ch2_bonewheel",
+        "rootUnitId": "enemy_ch2_bonewheel",
+        "similarity": 0.932
+      },
+      "motions": {
+        "idle": {
+          "frames": 8,
+          "frameWidth": 330,
+          "frameHeight": 270,
+          "occupancy": 0.1372,
+          "widthCoverage": 0.4178,
+          "heightCoverage": 0.463,
+          "maxEdgeRatio": 0,
+          "avgDelta": 0.0111,
+          "maxDelta": 0.0183
+        },
+        "move": {
+          "frames": 8,
+          "frameWidth": 330,
+          "frameHeight": 270,
+          "occupancy": 0.1743,
+          "widthCoverage": 0.753,
+          "heightCoverage": 0.6,
+          "maxEdgeRatio": 0,
+          "avgDelta": 0.3666,
+          "maxDelta": 0.3695
+        },
+        "attack": {
+          "frames": 8,
+          "frameWidth": 330,
+          "frameHeight": 270,
+          "occupancy": 0.1868,
+          "widthCoverage": 0.7083,
+          "heightCoverage": 0.5019,
+          "maxEdgeRatio": 0,
+          "avgDelta": 0.1472,
+          "maxDelta": 0.2267
         }
       }
     },
@@ -4560,9 +4669,9 @@
       "score": 100,
       "reasons": [],
       "nearestOther": {
-        "targetKey": "enemy_ch2_bonewheel",
-        "rootUnitId": "enemy_ch2_bonewheel",
-        "similarity": 0.8004
+        "targetKey": "pyromancer/pyromancer_f3",
+        "rootUnitId": "pyromancer",
+        "similarity": 0.806
       },
       "motions": {
         "idle": {
@@ -10760,9 +10869,9 @@
       "score": 100,
       "reasons": [],
       "nearestOther": {
-        "targetKey": "enemy_ch2_bonewheel",
-        "rootUnitId": "enemy_ch2_bonewheel",
-        "similarity": 0.7913
+        "targetKey": "pyromancer/pyromancer_f3",
+        "rootUnitId": "pyromancer",
+        "similarity": 0.7963
       },
       "motions": {
         "idle": {
@@ -11660,9 +11769,9 @@
       "score": 100,
       "reasons": [],
       "nearestOther": {
-        "targetKey": "char_common_c_turnip_rider_f3",
-        "rootUnitId": "char_common_c_turnip_rider",
-        "similarity": 0.7929
+        "targetKey": "pyromancer/pyromancer_f3",
+        "rootUnitId": "pyromancer",
+        "similarity": 0.7979
       },
       "motions": {
         "idle": {
@@ -12302,56 +12411,6 @@
     },
     {
       "metadataFile": "special-content-runtime-metadata.json",
-      "targetKey": "enemy_sp_evo_mirror_seal",
-      "assetId": "unit:enemy_sp_evo_mirror_seal",
-      "unitId": "enemy_sp_evo_mirror_seal",
-      "formId": null,
-      "formOrder": null,
-      "score": 100,
-      "reasons": [],
-      "nearestOther": {
-        "targetKey": "enemy_ch2_bonewheel",
-        "rootUnitId": "enemy_ch2_bonewheel",
-        "similarity": 0.8668
-      },
-      "motions": {
-        "idle": {
-          "frames": 7,
-          "frameWidth": 280,
-          "frameHeight": 250,
-          "occupancy": 0.3957,
-          "widthCoverage": 0.7536,
-          "heightCoverage": 0.7411,
-          "maxEdgeRatio": 0,
-          "avgDelta": 0.0028,
-          "maxDelta": 0.0044
-        },
-        "move": {
-          "frames": 8,
-          "frameWidth": 280,
-          "frameHeight": 250,
-          "occupancy": 0.4593,
-          "widthCoverage": 0.9902,
-          "heightCoverage": 0.8325,
-          "maxEdgeRatio": 0.0038,
-          "avgDelta": 0.1565,
-          "maxDelta": 0.1808
-        },
-        "attack": {
-          "frames": 8,
-          "frameWidth": 280,
-          "frameHeight": 250,
-          "occupancy": 0.5147,
-          "widthCoverage": 0.9161,
-          "heightCoverage": 0.83,
-          "maxEdgeRatio": 0,
-          "avgDelta": 0.0943,
-          "maxDelta": 0.2069
-        }
-      }
-    },
-    {
-      "metadataFile": "special-content-runtime-metadata.json",
       "targetKey": "enemy_sp_evo_seal_guard",
       "assetId": "unit:enemy_sp_evo_seal_guard",
       "unitId": "enemy_sp_evo_seal_guard",
@@ -12610,9 +12669,9 @@
       "score": 100,
       "reasons": [],
       "nearestOther": {
-        "targetKey": "enemy_ch2_revivedarmor",
-        "rootUnitId": "enemy_ch2_revivedarmor",
-        "similarity": 0.7687
+        "targetKey": "enemy-knight",
+        "rootUnitId": "enemy-knight",
+        "similarity": 0.7773
       },
       "motions": {
         "idle": {
@@ -12860,9 +12919,9 @@
       "score": 100,
       "reasons": [],
       "nearestOther": {
-        "targetKey": "enemy_ch4_railworm",
-        "rootUnitId": "enemy_ch4_railworm",
-        "similarity": 0.5905
+        "targetKey": "enemy-berserker",
+        "rootUnitId": "enemy-berserker",
+        "similarity": 0.6433
       },
       "motions": {
         "idle": {
@@ -12947,6 +13006,56 @@
           "maxEdgeRatio": 0,
           "avgDelta": 0.2577,
           "maxDelta": 0.6126
+        }
+      }
+    },
+    {
+      "metadataFile": "fourth-slice-runtime-metadata.json",
+      "targetKey": "enemy-berserker",
+      "assetId": "unit:enemy-berserker",
+      "unitId": "enemy-berserker",
+      "formId": null,
+      "formOrder": null,
+      "score": 100,
+      "reasons": [],
+      "nearestOther": {
+        "targetKey": "enemy_sp_soul_hammer",
+        "rootUnitId": "enemy_sp_soul_hammer",
+        "similarity": 0.6433
+      },
+      "motions": {
+        "idle": {
+          "frames": 10,
+          "frameWidth": 255,
+          "frameHeight": 185,
+          "occupancy": 0.0548,
+          "widthCoverage": 0.52,
+          "heightCoverage": 0.3622,
+          "maxEdgeRatio": 0,
+          "avgDelta": 0.036,
+          "maxDelta": 0.0458
+        },
+        "move": {
+          "frames": 8,
+          "frameWidth": 255,
+          "frameHeight": 185,
+          "occupancy": 0.0591,
+          "widthCoverage": 0.5877,
+          "heightCoverage": 0.3601,
+          "maxEdgeRatio": 0,
+          "avgDelta": 0.1209,
+          "maxDelta": 0.155
+        },
+        "attack": {
+          "frames": 7,
+          "frameWidth": 255,
+          "frameHeight": 185,
+          "occupancy": 0.0609,
+          "widthCoverage": 0.5658,
+          "heightCoverage": 0.4772,
+          "maxEdgeRatio": 0.0049,
+          "avgDelta": 0.5388,
+          "maxDelta": 0.9565
         }
       }
     },
@@ -13047,6 +13156,56 @@
           "maxEdgeRatio": 0,
           "avgDelta": 0.2922,
           "maxDelta": 0.3489
+        }
+      }
+    },
+    {
+      "metadataFile": "fourth-slice-runtime-metadata.json",
+      "targetKey": "enemy-knight",
+      "assetId": "unit:enemy-knight",
+      "unitId": "enemy-knight",
+      "formId": null,
+      "formOrder": null,
+      "score": 100,
+      "reasons": [],
+      "nearestOther": {
+        "targetKey": "pyromancer/pyromancer_f3",
+        "rootUnitId": "pyromancer",
+        "similarity": 0.8054
+      },
+      "motions": {
+        "idle": {
+          "frames": 6,
+          "frameWidth": 230,
+          "frameHeight": 150,
+          "occupancy": 0.2523,
+          "widthCoverage": 0.6609,
+          "heightCoverage": 0.64,
+          "maxEdgeRatio": 0,
+          "avgDelta": 0,
+          "maxDelta": 0
+        },
+        "move": {
+          "frames": 8,
+          "frameWidth": 230,
+          "frameHeight": 150,
+          "occupancy": 0.2539,
+          "widthCoverage": 0.6609,
+          "heightCoverage": 0.6433,
+          "maxEdgeRatio": 0,
+          "avgDelta": 0.1663,
+          "maxDelta": 0.1663
+        },
+        "attack": {
+          "frames": 6,
+          "frameWidth": 230,
+          "frameHeight": 150,
+          "occupancy": 0.2586,
+          "widthCoverage": 0.6761,
+          "heightCoverage": 0.64,
+          "maxEdgeRatio": 0.0026,
+          "avgDelta": 0.236,
+          "maxDelta": 0.3795
         }
       }
     },
@@ -13997,6 +14156,256 @@
           "maxEdgeRatio": 0.0238,
           "avgDelta": 0.7611,
           "maxDelta": 0.9131
+        }
+      }
+    },
+    {
+      "metadataFile": "fourth-slice-runtime-metadata.json",
+      "targetKey": "pyromancer/pyromancer_f1",
+      "assetId": "unit:pyromancer:pyromancer_f1",
+      "unitId": "pyromancer",
+      "formId": "pyromancer_f1",
+      "formOrder": 1,
+      "score": 100,
+      "reasons": [],
+      "nearestOther": {
+        "targetKey": "enemy_ev_ze_shield",
+        "rootUnitId": "enemy_ev_ze_shield",
+        "similarity": 0.6978
+      },
+      "motions": {
+        "idle": {
+          "frames": 8,
+          "frameWidth": 300,
+          "frameHeight": 260,
+          "occupancy": 0.0767,
+          "widthCoverage": 0.4029,
+          "heightCoverage": 0.3894,
+          "maxEdgeRatio": 0,
+          "avgDelta": 0.0549,
+          "maxDelta": 0.0791
+        },
+        "move": {
+          "frames": 8,
+          "frameWidth": 300,
+          "frameHeight": 260,
+          "occupancy": 0.0717,
+          "widthCoverage": 0.3867,
+          "heightCoverage": 0.3928,
+          "maxEdgeRatio": 0,
+          "avgDelta": 0.1009,
+          "maxDelta": 0.1131
+        },
+        "attack": {
+          "frames": 8,
+          "frameWidth": 300,
+          "frameHeight": 260,
+          "occupancy": 0.0955,
+          "widthCoverage": 0.6375,
+          "heightCoverage": 0.4322,
+          "maxEdgeRatio": 0,
+          "avgDelta": 0.2366,
+          "maxDelta": 0.4455
+        }
+      }
+    },
+    {
+      "metadataFile": "fourth-slice-runtime-metadata.json",
+      "targetKey": "pyromancer/pyromancer_f2",
+      "assetId": "unit:pyromancer:pyromancer_f2",
+      "unitId": "pyromancer",
+      "formId": "pyromancer_f2",
+      "formOrder": 2,
+      "score": 100,
+      "reasons": [],
+      "nearestOther": {
+        "targetKey": "boss_sp_evo_gatekeeper",
+        "rootUnitId": "boss_sp_evo_gatekeeper",
+        "similarity": 0.7343
+      },
+      "motions": {
+        "idle": {
+          "frames": 8,
+          "frameWidth": 310,
+          "frameHeight": 260,
+          "occupancy": 0.0815,
+          "widthCoverage": 0.419,
+          "heightCoverage": 0.3841,
+          "maxEdgeRatio": 0,
+          "avgDelta": 0.0487,
+          "maxDelta": 0.0713
+        },
+        "move": {
+          "frames": 8,
+          "frameWidth": 310,
+          "frameHeight": 260,
+          "occupancy": 0.0752,
+          "widthCoverage": 0.4032,
+          "heightCoverage": 0.312,
+          "maxEdgeRatio": 0,
+          "avgDelta": 0.0682,
+          "maxDelta": 0.0789
+        },
+        "attack": {
+          "frames": 8,
+          "frameWidth": 310,
+          "frameHeight": 260,
+          "occupancy": 0.0998,
+          "widthCoverage": 0.6831,
+          "heightCoverage": 0.3938,
+          "maxEdgeRatio": 0,
+          "avgDelta": 0.2173,
+          "maxDelta": 0.398
+        }
+      }
+    },
+    {
+      "metadataFile": "fourth-slice-runtime-metadata.json",
+      "targetKey": "royal/royal_f1",
+      "assetId": "unit:royal:royal_f1",
+      "unitId": "royal",
+      "formId": "royal_f1",
+      "formOrder": 1,
+      "score": 100,
+      "reasons": [],
+      "nearestOther": {
+        "targetKey": "enemy_ch3_inkdemon",
+        "rootUnitId": "enemy_ch3_inkdemon",
+        "similarity": 0.3404
+      },
+      "motions": {
+        "idle": {
+          "frames": 11,
+          "frameWidth": 250,
+          "frameHeight": 205,
+          "occupancy": 0.04,
+          "widthCoverage": 0.488,
+          "heightCoverage": 0.5756,
+          "maxEdgeRatio": 0,
+          "avgDelta": 0.0357,
+          "maxDelta": 0.0875
+        },
+        "move": {
+          "frames": 8,
+          "frameWidth": 250,
+          "frameHeight": 205,
+          "occupancy": 0.0404,
+          "widthCoverage": 0.48,
+          "heightCoverage": 0.5756,
+          "maxEdgeRatio": 0,
+          "avgDelta": 0.1704,
+          "maxDelta": 0.2035
+        },
+        "attack": {
+          "frames": 7,
+          "frameWidth": 250,
+          "frameHeight": 205,
+          "occupancy": 0.0498,
+          "widthCoverage": 0.5149,
+          "heightCoverage": 0.5916,
+          "maxEdgeRatio": 0,
+          "avgDelta": 0.3685,
+          "maxDelta": 0.6066
+        }
+      }
+    },
+    {
+      "metadataFile": "fourth-slice-runtime-metadata.json",
+      "targetKey": "royal/royal_f2",
+      "assetId": "unit:royal:royal_f2",
+      "unitId": "royal",
+      "formId": "royal_f2",
+      "formOrder": 2,
+      "score": 100,
+      "reasons": [],
+      "nearestOther": {
+        "targetKey": "char_common_a_paper_dragon_f3",
+        "rootUnitId": "char_common_a_paper_dragon",
+        "similarity": 0.5786
+      },
+      "motions": {
+        "idle": {
+          "frames": 11,
+          "frameWidth": 255,
+          "frameHeight": 210,
+          "occupancy": 0.0642,
+          "widthCoverage": 0.3961,
+          "heightCoverage": 0.5524,
+          "maxEdgeRatio": 0,
+          "avgDelta": 0.0128,
+          "maxDelta": 0.0314
+        },
+        "move": {
+          "frames": 8,
+          "frameWidth": 255,
+          "frameHeight": 210,
+          "occupancy": 0.0649,
+          "widthCoverage": 0.3961,
+          "heightCoverage": 0.5524,
+          "maxEdgeRatio": 0,
+          "avgDelta": 0.0806,
+          "maxDelta": 0.0925
+        },
+        "attack": {
+          "frames": 7,
+          "frameWidth": 255,
+          "frameHeight": 210,
+          "occupancy": 0.0738,
+          "widthCoverage": 0.5731,
+          "heightCoverage": 0.5776,
+          "maxEdgeRatio": 0,
+          "avgDelta": 0.2122,
+          "maxDelta": 0.3849
+        }
+      }
+    },
+    {
+      "metadataFile": "fourth-slice-runtime-metadata.json",
+      "targetKey": "royal/royal_f3",
+      "assetId": "unit:royal:royal_f3",
+      "unitId": "royal",
+      "formId": "royal_f3",
+      "formOrder": 3,
+      "score": 100,
+      "reasons": [],
+      "nearestOther": {
+        "targetKey": "hunter/hunter_f3",
+        "rootUnitId": "hunter",
+        "similarity": 0.4095
+      },
+      "motions": {
+        "idle": {
+          "frames": 11,
+          "frameWidth": 265,
+          "frameHeight": 205,
+          "occupancy": 0.0347,
+          "widthCoverage": 0.4642,
+          "heightCoverage": 0.5659,
+          "maxEdgeRatio": 0,
+          "avgDelta": 0.038,
+          "maxDelta": 0.0914
+        },
+        "move": {
+          "frames": 8,
+          "frameWidth": 265,
+          "frameHeight": 205,
+          "occupancy": 0.0347,
+          "widthCoverage": 0.4665,
+          "heightCoverage": 0.5659,
+          "maxEdgeRatio": 0,
+          "avgDelta": 0.1761,
+          "maxDelta": 0.2098
+        },
+        "attack": {
+          "frames": 7,
+          "frameWidth": 265,
+          "frameHeight": 205,
+          "occupancy": 0.0434,
+          "widthCoverage": 0.4992,
+          "heightCoverage": 0.5659,
+          "maxEdgeRatio": 0,
+          "avgDelta": 0.358,
+          "maxDelta": 0.599
         }
       }
     },

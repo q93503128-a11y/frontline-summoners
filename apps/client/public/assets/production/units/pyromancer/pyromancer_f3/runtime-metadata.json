@@ -32,7 +32,7 @@
       "frames": 8,
       "width": 2640,
       "height": 270,
-      "sha256": "9ab7b90763513deb8aee0861d86f3794b75f8d3d64eb69e382698e5cefbdfa3b"
+      "sha256": "af1b26c72e9d4d1b07979a5711a717528e7577587974bd543bdf8641f337ec3e"
     },
     "attack": {
       "frames": 8,
@@ -52,5 +52,11 @@
       "height": 270,
       "sha256": "c6fb8fc8a2e6386a9cde68fbc520ca33dee5d8afa738df2d47b3f6d31eaa9348"
     }
+  },
+  "visualPolishPyromancerF3Move": {
+    "version": 1,
+    "kind": "ALTERNATING_LATERAL_FURNACE_EXHAUST",
+    "reviewStatus": "UNREVIEWED_RUNTIME_FILES",
+    "normalRuntimeAuthoritative": false
   }
 }
