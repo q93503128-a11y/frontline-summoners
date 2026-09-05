@@ -1,3 +1,4 @@
+import { readFile } from 'node:fs/promises';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import {
@@ -8,6 +9,7 @@ import {
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const targetIndex = await loadProductionTargetIndex(root);
+const reviewMaster = JSON.parse(await readFile(resolve(root, 'apps/client/public/assets/production/review/production-review-master.json'), 'utf8'));
 
 function assert(ok, message) {
   if (!ok) throw new Error(`[production-rework-intake-contract] ${message}`);
@@ -19,7 +21,14 @@ function expectFail(label, fn) {
   assert(failed, `${label} must fail`);
 }
 
-assert(targetIndex.size === 242, `expected 242 current review targets/forms, got ${targetIndex.size}`);
+const reviewSurfaceCount = reviewMaster.modes.reduce((sum, mode) => sum + mode.targetCount, 0);
+assert(reviewMaster.modes.length === 11, `expected 11 review modes, got ${reviewMaster.modes.length}`);
+assert(targetIndex.size === reviewSurfaceCount, `review surface mismatch: runtime index=${targetIndex.size}, hub=${reviewSurfaceCount}`);
+assert(reviewSurfaceCount === 209, `current canonical review surface expected 209 targets/forms, got ${reviewSurfaceCount}`);
+assert(reviewMaster.audit.summary.totalTargets === 242, `machine audit target count drift: ${reviewMaster.audit.summary.totalTargets}`);
+assert(reviewMaster.audit.summary.totalTargets - reviewSurfaceCount === 33, 'expected 33 audited recruitment root/support targets outside canonical form queue');
+assert(reviewMaster.audit.summary.healthy === reviewMaster.audit.summary.totalTargets, 'machine audit must remain fully healthy');
+
 const first = targetIndex.get('first-slice:militia/militia_f1');
 assert(first, 'first-slice test target missing');
 const recruitmentEntry = [...targetIndex.values()].find((entry) => entry.modeId === 'recruitment');
@@ -85,4 +94,4 @@ expectFail('unknown target', () => normalizeLocalDraftToIntake({
   entries: [{ ...validDraft.entries[0], targetKey: 'missing-target' }],
 }, targetIndex));
 
-console.log(`[production-rework-intake-contract] validated ${targetIndex.size} current targets/forms + positive/negative import boundaries`);
+console.log(`[production-rework-intake-contract] validated ${targetIndex.size} canonical review targets/forms + 33 audit-only recruitment support targets + positive/negative import boundaries`);
