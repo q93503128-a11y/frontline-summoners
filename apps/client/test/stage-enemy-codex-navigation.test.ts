@@ -41,6 +41,6 @@ test('catalog accepts focused enemy navigation while preserving undiscovered sil
   assert.match(source, /discovered \? enemy\.displayName : '\?\?\?'/);
   assert.match(source, /portrait\.setTint\(0x07080b\)/);
   assert.match(source, /portrait\.setTintFill\(\)/);
-  assert.match(source, /this\.returnTo \? '스테이지' : '메인'/);
+  assert.match(source, /this\.returnTo \? '스테이지' : '지휘소'/);
   assert.match(source, /this\.scene\.start\(this\.returnTo\.scene, this\.returnTo\.data \?\? \{\}\)/);
 });
