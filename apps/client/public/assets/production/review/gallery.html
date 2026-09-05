@@ -19,6 +19,7 @@
       <div class="grow"><div class="eyebrow">Frontline Summoners / production art</div><h1 class="title" id="title">Motion Review Gallery</h1></div>
       <div class="warn">UNAPPROVED · LOCAL REVIEW AID ONLY</div>
       <a class="btn" href="index.html">← HUB</a>
+      <a class="btn" id="compare" href="compare.html">COMPARE LAB</a>
       <a class="btn primary" id="battle" href="../../../">OPEN BATTLE REVIEW</a>
     </div>
     <div class="row controls">
@@ -45,6 +46,7 @@
   const grid=document.getElementById('grid');
   const title=document.getElementById('title');
   const battle=document.getElementById('battle');
+  const compare=document.getElementById('compare');
   const search=document.getElementById('search');
   const metric=document.getElementById('metric');
   const progress=document.getElementById('progress');
@@ -87,13 +89,32 @@
     setFlag(targetKey,'checked',done);setFlag(targetKey,'revisit',revisit);applyFilter();
   }
 
+  function publicUrlFromFile(file){
+    const prefix='apps/client/public/';
+    return typeof file==='string'&&file.startsWith(prefix)?'/'+file.slice(prefix.length):null;
+  }
+
+  function assetUrlFallback(assetId,motionName){
+    return typeof assetId==='string'&&assetId.startsWith('unit:')?'/assets/production/units/'+assetId.slice(5).split(':').join('/')+'/'+motionName+'.png':null;
+  }
+
+  function resolveMotion(target,motionName,motion){
+    const fileUrl=publicUrlFromFile(motion.file);
+    const recruitmentFallback=modeId==='recruitment'&&target.unitId&&target.formId?'/assets/production/units/'+target.unitId+'/'+target.formId+'/'+motionName+'.png':null;
+    const assetFallback=assetUrlFallback(target.assetId,motionName);
+    const url=motion.url||fileUrl||recruitmentFallback||assetFallback;const frameWidth=Number(motion.frameWidth??target.frameWidth);const frameHeight=Number(motion.frameHeight??target.frameHeight);const frames=Number(motion.frames);
+    if(!url||!Number.isFinite(frameWidth)||frameWidth<=0||!Number.isFinite(frameHeight)||frameHeight<=0||!Number.isInteger(frames)||frames<=0)throw new Error('unresolvable runtime strip '+motionName+' for '+(target.assetId||'target'));
+    return {url:url,frameWidth:frameWidth,frameHeight:frameHeight,frames:frames};
+  }
+
   function makeMotion(target,motionName,motion){
+    const resolved=resolveMotion(target,motionName,motion);
     const box=document.createElement('div');box.className='motion';
     const head=document.createElement('div');head.className='motion-head';
-    head.innerHTML='<strong>'+esc(motionName)+'</strong><span>'+motion.frames+'f · '+motion.frameWidth+'×'+motion.frameHeight+'</span>';
+    head.innerHTML='<strong>'+esc(motionName)+'</strong><span>'+resolved.frames+'f · '+resolved.frameWidth+'×'+resolved.frameHeight+'</span>';
     const stage=document.createElement('div');stage.className='stage';
     const canvas=document.createElement('canvas');canvas.width=240;canvas.height=150;
-    canvas.dataset.url=motion.url;canvas.dataset.frames=String(motion.frames);canvas.dataset.frameWidth=String(motion.frameWidth);canvas.dataset.frameHeight=String(motion.frameHeight);canvas.dataset.motion=motionName;canvas.dataset.contact=String(target.attackContactFrame??-1);
+    canvas.dataset.url=resolved.url;canvas.dataset.frames=String(resolved.frames);canvas.dataset.frameWidth=String(resolved.frameWidth);canvas.dataset.frameHeight=String(resolved.frameHeight);canvas.dataset.motion=motionName;canvas.dataset.contact=String(target.attackContactFrame??-1);
     stage.appendChild(canvas);box.appendChild(head);box.appendChild(stage);return box;
   }
 
@@ -105,7 +126,8 @@
     const local=document.createElement('div');local.className='local';
     const doneLabel=document.createElement('label'),doneInput=document.createElement('input');doneInput.type='checkbox';doneInput.checked=done;doneLabel.append(doneInput,document.createTextNode(' LOCAL CHECKED'));
     const revisitLabel=document.createElement('label'),revisitInput=document.createElement('input');revisitInput.type='checkbox';revisitInput.checked=revisit;revisitLabel.append(revisitInput,document.createTextNode(' REVISIT'));
-    local.append(doneLabel,revisitLabel);head.append(identity,local);card.appendChild(head);
+    const compareLink=document.createElement('a');compareLink.className='btn';compareLink.textContent='COMPARE';compareLink.href='compare.html?mode='+encodeURIComponent(modeId)+'&a='+encodeURIComponent(targetKey);
+    local.append(doneLabel,revisitLabel,compareLink);head.append(identity,local);card.appendChild(head);
     const motions=document.createElement('div');motions.className='motions';
     MOTIONS.forEach(function(name){if(target.motions&&target.motions[name])motions.appendChild(makeMotion(target,name,target.motions[name]));});card.appendChild(motions);
     doneInput.addEventListener('change',function(){syncCardState(card,targetKey,doneInput.checked,revisitInput.checked);});
@@ -133,7 +155,7 @@
 
   async function boot(){
     if(!mode){grid.innerHTML='<div class="fatal">알 수 없는 mode다. HUB에서 review mode를 다시 선택해라.</div>';battle.hidden=true;return;}
-    title.textContent=mode.label+' · Motion Review Gallery';battle.href='../../../?productionReview='+encodeURIComponent(mode.id);
+    title.textContent=mode.label+' · Motion Review Gallery';compare.href='compare.html?mode='+encodeURIComponent(mode.id);battle.href='../../../?productionReview='+encodeURIComponent(mode.id);
     try{
       const response=await fetch('../units/'+encodeURIComponent(mode.metadataFile),{cache:'no-store'});if(!response.ok)throw new Error('metadata HTTP '+response.status);const metadata=await response.json();
       const entries=Object.entries(metadata.targets||{});if(!entries.length)throw new Error('metadata has no targets');

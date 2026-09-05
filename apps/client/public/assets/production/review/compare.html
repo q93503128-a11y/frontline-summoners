@@ -1,0 +1,119 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Frontline Summoners · Production Comparison Lab</title>
+  <style>
+    :root{color-scheme:dark;font-family:"Malgun Gothic",system-ui,sans-serif;background:#090d13;color:#edf2f8}
+    *{box-sizing:border-box}body{margin:0;background:#090d13;min-height:100vh}.shell{width:min(1500px,calc(100% - 28px));margin:0 auto;padding:22px 0 54px}
+    .top{display:flex;gap:10px;align-items:center;flex-wrap:wrap;border-bottom:1px solid #2c3848;padding-bottom:14px}.grow{flex:1}.eyebrow{font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:#8fa0b5}.title{font-size:25px;margin:3px 0 0}.warn{border:1px solid #a8782c;background:#2b2113;color:#ffd78a;border-radius:9px;padding:8px 10px;font-size:12px;font-weight:800}.btn{appearance:none;border:1px solid #405069;background:#182230;color:#d8e1ec;border-radius:8px;padding:8px 10px;text-decoration:none;cursor:pointer;font-weight:700}.btn:hover{background:#213047}.btn.primary{background:#d9b35e;color:#191309;border-color:#d9b35e}
+    .controls{display:grid;grid-template-columns:1fr 1fr 170px auto auto;gap:10px;margin:16px 0}.control{display:flex;flex-direction:column;gap:5px}.control span{font-size:10px;color:#95a4b6;text-transform:uppercase;letter-spacing:.08em}.select,.range{width:100%;background:#111923;border:1px solid #354255;color:#eaf0f7;border-radius:8px;padding:9px 10px}.range{padding:8px}.buttons{display:flex;gap:7px;align-items:end;flex-wrap:wrap}
+    .toolbar{display:flex;gap:10px;align-items:center;flex-wrap:wrap;border:1px solid #283547;background:#101720;border-radius:11px;padding:10px;margin-bottom:12px}.toolbar label{font-size:12px;color:#aab7c6;display:flex;align-items:center;gap:6px}.toolbar .range{width:180px}.metric{font-size:11px;color:#9eadbd;margin-left:auto}.hint{font-size:12px;color:#8f9eaf;line-height:1.55;margin:10px 0 14px}
+    .compare-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}.panel{border:1px solid #2d3949;background:#101720;border-radius:13px;padding:12px}.panel.contact{border-color:#d9b35e;box-shadow:inset 0 0 0 1px #d9b35e55}.panel.overlay{grid-column:1/-1}.panel-head{display:flex;justify-content:space-between;gap:10px;align-items:flex-start;margin-bottom:8px}.name{font-size:15px;font-weight:800;word-break:break-all}.sub{font-size:11px;color:#8fa0b2;line-height:1.45;margin-top:3px;word-break:break-all}.badge{font-size:10px;border:1px solid #3a495d;border-radius:999px;padding:4px 7px;color:#b8c4d1;white-space:nowrap}
+    .stage{height:370px;background:linear-gradient(180deg,#151d28,#0a0f16);border-radius:8px;overflow:hidden;display:flex;align-items:center;justify-content:center;position:relative}.stage canvas{width:100%;height:100%;image-rendering:pixelated}.stage .axis{position:absolute;left:50%;top:0;bottom:0;border-left:1px dashed #52617455;pointer-events:none}.stage .ground{position:absolute;left:0;right:0;top:80%;border-top:1px dashed #52617455;pointer-events:none}.legend{display:flex;gap:12px;flex-wrap:wrap;margin-top:7px;font-size:11px;color:#91a0b1}.legend b{color:#e5ebf2}.fatal{border:1px solid #7e4141;background:#2a1515;color:#ffc5c5;border-radius:9px;padding:14px;margin-top:18px}
+    @media(max-width:980px){.controls{grid-template-columns:1fr 1fr}.buttons{align-items:center}.compare-grid{grid-template-columns:1fr}.panel.overlay{grid-column:auto}.stage{height:310px}}@media(max-width:620px){.controls{grid-template-columns:1fr}.toolbar .range{width:130px}.metric{width:100%;margin-left:0}.stage{height:260px}}
+  </style>
+</head>
+<body>
+<div class="shell">
+  <div class="top">
+    <div class="grow"><div class="eyebrow">Frontline Summoners / production art</div><h1 class="title" id="title">Production Comparison Lab</h1></div>
+    <div class="warn">UNAPPROVED · READ-ONLY REVIEW AID</div>
+    <a class="btn" id="gallery" href="gallery.html">← MOTION GALLERY</a>
+    <a class="btn" href="index.html">HUB</a>
+    <a class="btn primary" id="battle" href="../../../">BATTLE REVIEW</a>
+  </div>
+
+  <div class="controls">
+    <label class="control"><span>Target A</span><select class="select" id="targetA"></select></label>
+    <label class="control"><span>Target B</span><select class="select" id="targetB"></select></label>
+    <label class="control"><span>Motion</span><select class="select" id="motion"><option>idle</option><option>move</option><option>attack</option><option>knockback</option><option>death</option></select></label>
+    <div class="buttons"><button class="btn" id="related">RELATED / NEXT</button><button class="btn" id="swap">SWAP A/B</button></div>
+    <div class="buttons"><button class="btn" id="play">PAUSE</button><button class="btn" id="resetPhase">RESET PHASE</button></div>
+  </div>
+
+  <div class="toolbar">
+    <label><input type="radio" name="scale" value="runtime" checked> RUNTIME HEIGHT</label>
+    <label><input type="radio" name="scale" value="fit"> FRAME FIT</label>
+    <label><input type="radio" name="blend" value="overlay" checked> OVERLAY</label>
+    <label><input type="radio" name="blend" value="blink"> BLINK</label>
+    <label>Overlay B <input class="range" id="opacity" type="range" min="10" max="90" value="50"></label>
+    <label>Phase <input class="range" id="phase" type="range" min="0" max="999" value="0"></label>
+    <span class="metric" id="metric"></span>
+  </div>
+
+  <div class="hint">A/B는 동일한 normalized motion phase로 동기화된다. <b>RUNTIME HEIGHT</b>는 실제 battle runtime의 displayHeight 비율을 같은 pixels-per-unit 기준으로 비교하고, <b>FRAME FIT</b>은 실루엣 자체를 최대 크기로 비교한다. Overlay/Blink는 형태 차이와 진화폼 구분을 빠르게 보는 보조 수단이다. 이 화면은 정본을 수정하지 않는다.</div>
+
+  <main class="compare-grid" id="grid">
+    <section class="panel" id="panelA"><div class="panel-head"><div><div class="name" id="nameA"></div><div class="sub" id="subA"></div></div><span class="badge">A</span></div><div class="stage"><canvas id="canvasA" width="560" height="370"></canvas><i class="axis"></i><i class="ground"></i></div><div class="legend" id="legendA"></div></section>
+    <section class="panel" id="panelB"><div class="panel-head"><div><div class="name" id="nameB"></div><div class="sub" id="subB"></div></div><span class="badge">B</span></div><div class="stage"><canvas id="canvasB" width="560" height="370"></canvas><i class="axis"></i><i class="ground"></i></div><div class="legend" id="legendB"></div></section>
+    <section class="panel overlay" id="panelOverlay"><div class="panel-head"><div><div class="name">A/B Overlay Inspector</div><div class="sub">같은 중심/기준선에서 normalized phase를 겹쳐 본다.</div></div><span class="badge" id="blendBadge">OVERLAY</span></div><div class="stage"><canvas id="canvasOverlay" width="1140" height="370"></canvas><i class="axis"></i><i class="ground"></i></div><div class="legend"><span>A = base</span><span>B = opacity/blink layer</span><span id="overlayContact"></span></div></section>
+  </main>
+  <div class="fatal" id="fatal" hidden></div>
+</div>
+<script>
+  const MODES={"first-slice":{"id":"first-slice","label":"First Slice","metadataFile":"first-slice-runtime-metadata.json"},"second-slice":{"id":"second-slice","label":"Second Slice","metadataFile":"second-slice-runtime-metadata.json"},"third-slice":{"id":"third-slice","label":"Third Slice","metadataFile":"third-slice-runtime-metadata.json"},"fourth-slice":{"id":"fourth-slice","label":"Fourth Slice","metadataFile":"fourth-slice-runtime-metadata.json"},"fifth-slice":{"id":"fifth-slice","label":"Fifth Slice","metadataFile":"fifth-slice-runtime-metadata.json"},"sixth-slice":{"id":"sixth-slice","label":"Chapter 1 Finale","metadataFile":"sixth-slice-runtime-metadata.json"},"chapter-02":{"id":"chapter-02","label":"Chapter 2","metadataFile":"chapter-02-runtime-metadata.json"},"chapter-03":{"id":"chapter-03","label":"Chapter 3","metadataFile":"chapter-03-runtime-metadata.json"},"chapter-04":{"id":"chapter-04","label":"Chapter 4","metadataFile":"chapter-04-runtime-metadata.json"},"special-content":{"id":"special-content","label":"Special Content","metadataFile":"special-content-runtime-metadata.json"},"recruitment":{"id":"recruitment","label":"Recruitment","metadataFile":"recruitment-form-runtime-metadata.json"}};
+  const MOTIONS=['idle','move','attack','knockback','death'];
+  const params=new URLSearchParams(location.search);
+  const modeId=params.get('mode');
+  const mode=MODES[modeId];
+  const els={
+    title:document.getElementById('title'),gallery:document.getElementById('gallery'),battle:document.getElementById('battle'),fatal:document.getElementById('fatal'),grid:document.getElementById('grid'),
+    a:document.getElementById('targetA'),b:document.getElementById('targetB'),motion:document.getElementById('motion'),play:document.getElementById('play'),phase:document.getElementById('phase'),opacity:document.getElementById('opacity'),metric:document.getElementById('metric'),blendBadge:document.getElementById('blendBadge'),overlayContact:document.getElementById('overlayContact'),
+    panelA:document.getElementById('panelA'),panelB:document.getElementById('panelB'),panelOverlay:document.getElementById('panelOverlay'),nameA:document.getElementById('nameA'),nameB:document.getElementById('nameB'),subA:document.getElementById('subA'),subB:document.getElementById('subB'),legendA:document.getElementById('legendA'),legendB:document.getElementById('legendB'),canvasA:document.getElementById('canvasA'),canvasB:document.getElementById('canvasB'),canvasOverlay:document.getElementById('canvasOverlay')
+  };
+  let targets=[];let targetMap=new Map();let paused=false;let phase=0;let last=0;let scaleMode='runtime';let blendMode='overlay';const images=new Map();
+
+  function esc(value){return String(value??'').replace(/[&<>"']/g,function(ch){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch];});}
+  function publicUrlFromFile(file){
+    const prefix='apps/client/public/';
+    return typeof file==='string'&&file.startsWith(prefix)?'/'+file.slice(prefix.length):null;
+  }
+  function assetUrlFallback(assetId,motionName){
+    return typeof assetId==='string'&&assetId.startsWith('unit:')?'/assets/production/units/'+assetId.slice(5).split(':').join('/')+'/'+motionName+'.png':null;
+  }
+  function resolveMotion(target,motionName){
+    const motion=target.motions&&target.motions[motionName];if(!motion)throw new Error('missing motion '+motionName);
+    const fileUrl=publicUrlFromFile(motion.file);
+    const recruitmentFallback=modeId==='recruitment'&&target.unitId&&target.formId?'/assets/production/units/'+target.unitId+'/'+target.formId+'/'+motionName+'.png':null;
+    const assetFallback=assetUrlFallback(target.assetId,motionName);
+    const url=motion.url||fileUrl||recruitmentFallback||assetFallback;const frameWidth=Number(motion.frameWidth??target.frameWidth);const frameHeight=Number(motion.frameHeight??target.frameHeight);const frames=Number(motion.frames);
+    if(!url||!Number.isFinite(frameWidth)||frameWidth<=0||!Number.isFinite(frameHeight)||frameHeight<=0||!Number.isInteger(frames)||frames<=0)throw new Error('unresolvable runtime strip '+motionName+' for '+(target.assetId||'target'));
+    return {url,frameWidth,frameHeight,frames};
+  }
+  function imageFor(url){let image=images.get(url);if(image)return image;image=new Image();image.src=url;images.set(url,image);image.addEventListener('load',render);return image;}
+  function labelFor(key,target){const form=target.formOrder?' · F'+target.formOrder:'';const name=target.displayName?' · '+target.displayName:'';return key+name+form;}
+  function chosen(select){return targetMap.get(select.value);}
+  function frameAt(spec,p){return Math.min(spec.frames-1,Math.floor(Math.max(0,Math.min(.999999,p))*spec.frames));}
+  function runtimeScale(target,spec,ppu){const display=Number(target.displayHeight)||spec.frameHeight;return display/spec.frameHeight*ppu;}
+  function drawTarget(canvas,target,spec,p,options={}){
+    const ctx=canvas.getContext('2d');ctx.imageSmoothingEnabled=false;if(options.clear!==false)ctx.clearRect(0,0,canvas.width,canvas.height);const image=imageFor(spec.url);const frame=frameAt(spec,p);if(!image.complete||!image.naturalWidth)return frame;
+    let scale;if(scaleMode==='runtime')scale=runtimeScale(target,spec,options.ppu||1);else scale=Math.min((canvas.width-24)/spec.frameWidth,(canvas.height-24)/spec.frameHeight);
+    const dw=Math.max(1,Math.floor(spec.frameWidth*scale)),dh=Math.max(1,Math.floor(spec.frameHeight*scale));const dx=Math.floor((canvas.width-dw)/2),dy=Math.floor(canvas.height*.8-dh);ctx.save();ctx.globalAlpha=options.alpha??1;ctx.drawImage(image,frame*spec.frameWidth,0,spec.frameWidth,spec.frameHeight,dx,dy,dw,dh);ctx.restore();return frame;
+  }
+  function contact(target,motionName,frame){return motionName==='attack'&&Number(target.attackContactFrame)===frame;}
+  function detail(key,target,spec,frame){return esc(target.assetId||'no assetId')+'<br>display '+esc(target.displayHeight??'?')+' · '+spec.frameWidth+'×'+spec.frameHeight+' · '+spec.frames+'f · frame '+frame+(target.formOrder?' · form '+target.formOrder:'');}
+  function legend(target,spec,frame,isContact){return '<span><b>frame</b> '+frame+'/'+(spec.frames-1)+'</span><span><b>displayHeight</b> '+esc(target.displayHeight??'?')+'</span><span><b>contact</b> '+(isContact?'NOW':esc(target.attackContactFrame??'—'))+'</span>';}
+  function updateUrl(){const next=new URLSearchParams(location.search);next.set('mode',modeId);next.set('a',els.a.value);next.set('b',els.b.value);next.set('motion',els.motion.value);history.replaceState(null,'',location.pathname+'?'+next.toString());els.gallery.href='gallery.html?mode='+encodeURIComponent(modeId);els.battle.href='../../../?productionReview='+encodeURIComponent(modeId);}
+  function render(){
+    if(!mode||!targets.length)return;const pairA=chosen(els.a),pairB=chosen(els.b);if(!pairA||!pairB)return;const motionName=els.motion.value;let specA,specB;try{specA=resolveMotion(pairA.target,motionName);specB=resolveMotion(pairB.target,motionName);}catch(error){showFatal(error);return;}
+    const maxDisplay=Math.max(Number(pairA.target.displayHeight)||specA.frameHeight,Number(pairB.target.displayHeight)||specB.frameHeight,1);const ppu=280/maxDisplay;const frameA=drawTarget(els.canvasA,pairA.target,specA,phase,{ppu});const frameB=drawTarget(els.canvasB,pairB.target,specB,phase,{ppu});const contactA=contact(pairA.target,motionName,frameA),contactB=contact(pairB.target,motionName,frameB);
+    els.panelA.classList.toggle('contact',contactA);els.panelB.classList.toggle('contact',contactB);els.nameA.textContent=pairA.key;els.nameB.textContent=pairB.key;els.subA.innerHTML=detail(pairA.key,pairA.target,specA,frameA);els.subB.innerHTML=detail(pairB.key,pairB.target,specB,frameB);els.legendA.innerHTML=legend(pairA.target,specA,frameA,contactA);els.legendB.innerHTML=legend(pairB.target,specB,frameB,contactB);
+    const overlay=els.canvasOverlay,ctx=overlay.getContext('2d');ctx.clearRect(0,0,overlay.width,overlay.height);const overlayPpu=280/maxDisplay;const blinkShowB=Math.floor(performance.now()/550)%2===1;const opacity=Number(els.opacity.value)/100;if(blendMode==='overlay'){drawTarget(overlay,pairA.target,specA,phase,{ppu:overlayPpu,clear:false,alpha:1});drawTarget(overlay,pairB.target,specB,phase,{ppu:overlayPpu,clear:false,alpha:opacity});}else{drawTarget(overlay,blinkShowB?pairB.target:pairA.target,blinkShowB?specB:specA,phase,{ppu:overlayPpu,clear:false,alpha:1});}
+    els.panelOverlay.classList.toggle('contact',contactA||contactB);els.blendBadge.textContent=blendMode.toUpperCase();els.overlayContact.textContent=contactA||contactB?'ATTACK CONTACT · '+(contactA?'A ':'')+(contactB?'B':''):'contact not active';els.metric.textContent=Math.round(phase*100)+'% phase · '+scaleMode+' scale · '+blendMode;els.phase.value=String(Math.floor(phase*999));updateUrl();
+  }
+  function showFatal(error){els.fatal.hidden=false;els.grid.hidden=true;els.fatal.textContent='Comparison lab error: '+(error&&error.message?error.message:error);}
+  function related(){const pairA=chosen(els.a);if(!pairA)return;let candidates=[];if(modeId==='recruitment'&&pairA.target.unitId)candidates=targets.filter(function(pair){return pair.target.unitId===pairA.target.unitId&&pair.key!==pairA.key;}).sort(function(x,y){return Number(x.target.formOrder||0)-Number(y.target.formOrder||0);});if(!candidates.length){const index=targets.findIndex(function(pair){return pair.key===pairA.key;});candidates=[targets[(index+1)%targets.length]];}if(candidates[0]){els.b.value=candidates[0].key;render();}}
+  function fillOptions(){const options=targets.map(function(pair){return '<option value="'+esc(pair.key)+'">'+esc(labelFor(pair.key,pair.target))+'</option>';}).join('');els.a.innerHTML=options;els.b.innerHTML=options;const requestedA=params.get('a'),requestedB=params.get('b');els.a.value=targetMap.has(requestedA)?requestedA:targets[0].key;if(targetMap.has(requestedB))els.b.value=requestedB;else related();const requestedMotion=params.get('motion');if(MOTIONS.includes(requestedMotion))els.motion.value=requestedMotion;}
+  async function boot(){
+    if(!mode){showFatal(new Error('unknown mode; open from the review hub or motion gallery'));return;}els.title.textContent=mode.label+' · Production Comparison Lab';els.gallery.href='gallery.html?mode='+encodeURIComponent(modeId);els.battle.href='../../../?productionReview='+encodeURIComponent(modeId);
+    try{const response=await fetch('../units/'+encodeURIComponent(mode.metadataFile),{cache:'no-store'});if(!response.ok)throw new Error('metadata HTTP '+response.status);const metadata=await response.json();targets=Object.entries(metadata.targets||{}).map(function(pair){return {key:pair[0],target:pair[1]};});if(!targets.length)throw new Error('metadata has no targets');targetMap=new Map(targets.map(function(pair){return [pair.key,pair];}));fillOptions();render();requestAnimationFrame(tick);}catch(error){showFatal(error);}
+  }
+  function tick(now){if(!paused&&now-last>=85){last=now;phase=(phase+.018)%1;render();}else if(blendMode==='blink'&&now-last>=42)render();requestAnimationFrame(tick);}
+
+  [els.a,els.b,els.motion].forEach(function(input){input.addEventListener('change',render);});els.opacity.addEventListener('input',render);els.phase.addEventListener('input',function(){phase=Number(els.phase.value)/1000;render();});document.getElementById('related').addEventListener('click',related);document.getElementById('swap').addEventListener('click',function(){const a=els.a.value;els.a.value=els.b.value;els.b.value=a;render();});els.play.addEventListener('click',function(){paused=!paused;els.play.textContent=paused?'PLAY':'PAUSE';});document.getElementById('resetPhase').addEventListener('click',function(){phase=0;render();});document.querySelectorAll('input[name="scale"]').forEach(function(input){input.addEventListener('change',function(){scaleMode=input.value;render();});});document.querySelectorAll('input[name="blend"]').forEach(function(input){input.addEventListener('change',function(){blendMode=input.value;render();});});document.addEventListener('keydown',function(event){if(event.target instanceof HTMLSelectElement||event.target instanceof HTMLInputElement)return;if(event.code==='Space'){event.preventDefault();paused=!paused;els.play.textContent=paused?'PLAY':'PAUSE';}else if(event.key.toLowerCase()==='s'){event.preventDefault();document.getElementById('swap').click();}else if(event.key.toLowerCase()==='n'){event.preventDefault();related();}});
+  boot();
+</script>
+</body>
+</html>
