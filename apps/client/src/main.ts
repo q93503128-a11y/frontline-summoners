@@ -12,7 +12,7 @@ import {
   StoryFriendCoopBattleScene as FriendCoopBattleScene,
   StoryFriendCoopLobbyScene as FriendCoopLobbyScene,
   StoryPublicCoopLobbyScene as PublicCoopLobbyScene,
-} from './coop-story-scenes';
+} from './coop-command-battle-scenes';
 import { DeckScene } from './deck-scene';
 import { FirstSliceProductionCaptureScene, isFirstSliceCaptureMode } from './first-slice-production-capture-scene.ts';
 import { isFirstSliceProductionReviewMode } from './first-slice-production-review-runtime.ts';
