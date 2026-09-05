@@ -2,6 +2,7 @@ import { readFile, writeFile } from 'node:fs/promises';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { sha256 } from './lib/production-png.mjs';
+import './polish-fourth-slice-pyromancer-f3-move.mjs';
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const unitsRoot = resolve(root, 'apps/client/public/assets/production/units');
