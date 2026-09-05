@@ -141,7 +141,7 @@ export class PvpLeaderboardScene extends Phaser.Scene {
     this.content.add(addText(this, 145, y + 1, `#${entry.rank}`, compact ? 18 : 15, entry.rank <= 3 ? '#f0d67d' : main));
     this.content.add(addText(this, 245, y + 1, `${entry.displayName}${entry.isSelf ? ' · 나' : ''}`.slice(0, 24), compact ? 18 : 15, main));
     this.content.add(addText(this, 690, y + 1, tierName(entry.displayedTier), compact ? 17 : 14, '#cfe0f6'));
-    this.content.add(addText(this, 945, y + 1, `${entry.mmr} MMR`, compact ? 17 : 14, '#f2d998', 'right').setOrigin(1, 0));
+    this.content.add(addText(this, 945, y + 1, `${entry.mmr} 평점`, compact ? 17 : 14, '#f2d998', 'right').setOrigin(1, 0));
     this.content.add(addText(this, 1180, y + 1, `${entry.rankedWins}승`, compact ? 17 : 14, '#9fd7b2', 'right').setOrigin(1, 0));
   }
 
@@ -160,7 +160,7 @@ export class PvpLeaderboardScene extends Phaser.Scene {
     this.content.add(addText(this, 145, 226, '순위', compact ? 15 : 13, '#8593a4'));
     this.content.add(addText(this, 245, 226, '지휘관', compact ? 15 : 13, '#8593a4'));
     this.content.add(addText(this, 690, 226, '티어', compact ? 15 : 13, '#8593a4'));
-    this.content.add(addText(this, 945, 226, 'MMR', compact ? 15 : 13, '#8593a4', 'right').setOrigin(1, 0));
+    this.content.add(addText(this, 945, 226, '평점', compact ? 15 : 13, '#8593a4', 'right').setOrigin(1, 0));
     this.content.add(addText(this, 1180, 226, '시즌 승수', compact ? 15 : 13, '#8593a4', 'right').setOrigin(1, 0));
 
     const route = this.add.graphics();
