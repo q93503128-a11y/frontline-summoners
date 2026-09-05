@@ -68,6 +68,10 @@ function mix(a: number, b: number, amount: number): number {
   );
 }
 
+function isCommandButtonInactive(state: CommandButtonState): boolean {
+  return state === 'disabled' || state === 'locked' || state === 'loading';
+}
+
 export function addText(
   scene: Phaser.Scene,
   x: number,
@@ -120,11 +124,52 @@ export function addButton(
 
   let hovered = false;
   let pressed = false;
+  let reasonBubble: Phaser.GameObjects.Container | undefined;
+  let reasonTimer: Phaser.Time.TimerEvent | undefined;
+
+  const hideReasonBubble = (): void => {
+    reasonTimer?.destroy();
+    reasonTimer = undefined;
+    reasonBubble?.destroy(true);
+    reasonBubble = undefined;
+  };
+
+  const showReasonBubble = (pointer: Phaser.Input.Pointer): void => {
+    if (!isCommandButtonInactive(controller.state)) return;
+    const reason = controller.reason?.trim();
+    if (!reason) return;
+    hideReasonBubble();
+
+    const reasonText = addText(scene, 0, 0, reason, compact ? 16 : 14, '#f2e7ce', 'center')
+      .setOrigin(0.5)
+      .setWordWrapWidth(compact ? 350 : 300);
+    const bubbleWidth = Math.min(compact ? 390 : 340, Math.max(160, reasonText.width + 34));
+    const bubbleHeight = Math.max(44, reasonText.height + 22);
+    const reasonAccent = controller.state === 'locked'
+      ? hex(COLORS.warning)
+      : controller.state === 'loading'
+        ? hex(COLORS.blue)
+        : 0x748196;
+    const bg = scene.add.rectangle(0, 0, bubbleWidth, bubbleHeight, 0x111720, 0.98).setStrokeStyle(2, reasonAccent, 0.78);
+    const rail = scene.add.rectangle(-bubbleWidth / 2 + 4, 0, 6, bubbleHeight - 10, reasonAccent, 0.9);
+    reasonBubble = scene.add.container(0, 0, [bg, rail, reasonText]).setDepth(5000);
+
+    const pointerX = Phaser.Math.Clamp(pointer.x, 12, INTERNAL_WIDTH - 12);
+    const preferAbove = pointer.y > bubbleHeight + 78;
+    const proposedY = preferAbove
+      ? pointer.y - bubbleHeight / 2 - 28
+      : pointer.y + bubbleHeight / 2 + 28;
+    reasonBubble.setPosition(
+      Phaser.Math.Clamp(pointerX, bubbleWidth / 2 + 10, INTERNAL_WIDTH - bubbleWidth / 2 - 10),
+      Phaser.Math.Clamp(proposedY, bubbleHeight / 2 + 10, INTERNAL_HEIGHT - bubbleHeight / 2 - 10),
+    );
+    reasonTimer = scene.time.delayedCall(compact ? 2200 : 1600, hideReasonBubble);
+  };
 
   const render = (): void => {
     visual.clear();
     const state = controller.state;
-    const inactive = state === 'disabled' || state === 'locked' || state === 'loading';
+    const inactive = isCommandButtonInactive(state);
     const danger = tone === 'danger' || state === 'error';
     const positive = state === 'success';
     const warning = state === 'warning' || state === 'locked';
@@ -183,16 +228,24 @@ export function addButton(
   controller.render = render;
   container.setData('frontlineCommandButton', controller);
 
-  hit.setInteractive({ useHandCursor: controller.state !== 'disabled' && controller.state !== 'locked' && controller.state !== 'loading' });
-  hit.on('pointerover', () => { hovered = true; render(); });
+  hit.setInteractive({ useHandCursor: true });
+  hit.on('pointerover', (pointer: Phaser.Input.Pointer) => {
+    hovered = true;
+    render();
+    if (isCommandButtonInactive(controller.state)) showReasonBubble(pointer);
+  });
   hit.on('pointerout', () => {
     hovered = false;
     pressed = false;
     container.setScale(1);
+    if (!compact) hideReasonBubble();
     render();
   });
-  hit.on('pointerdown', () => {
-    if (controller.state === 'disabled' || controller.state === 'locked' || controller.state === 'loading') return;
+  hit.on('pointerdown', (pointer: Phaser.Input.Pointer) => {
+    if (isCommandButtonInactive(controller.state)) {
+      showReasonBubble(pointer);
+      return;
+    }
     pressed = true;
     if (!shouldUseReducedMotion()) container.setScale(0.985);
     render();
@@ -202,13 +255,18 @@ export function addButton(
     container.setScale(1);
     render();
   });
-  hit.on('pointerup', () => {
+  hit.on('pointerup', (pointer: Phaser.Input.Pointer) => {
     pressed = false;
     container.setScale(1);
     render();
-    if (controller.state === 'disabled' || controller.state === 'locked' || controller.state === 'loading') return;
+    if (isCommandButtonInactive(controller.state)) {
+      showReasonBubble(pointer);
+      return;
+    }
+    hideReasonBubble();
     onClick();
   });
+  container.once(Phaser.GameObjects.Events.DESTROY, hideReasonBubble);
 
   render();
   return container;
