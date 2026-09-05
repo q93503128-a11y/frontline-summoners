@@ -4,23 +4,24 @@ import test from 'node:test';
 
 const readSource = (relative: string): Promise<string> => readFile(new URL(relative, import.meta.url), 'utf8');
 
-test('stage cards expose an encounter-codex path without leaking undiscovered enemy identity', async () => {
+test('stage briefing exposes an encounter-codex path without leaking undiscovered enemy identity', async () => {
   const source = await readSource('../src/stage-select-scene.ts');
 
   assert.match(source, /function getStageEnemyIds\(stage: PrototypeStage\)/);
   assert.match(source, /for \(const wave of stage\.waves\)/);
   assert.match(source, /if \(seen\.has\(wave\.spawn\.enemyId\)\) continue/);
-  assert.match(source, /const discoveredEnemyIds = new Set\(this\.progress\.discoveredEnemyIds \?\? \[\]\)/);
-  assert.match(source, /출현 적 \$\{discoveredStageEnemyCount\}\/\$\{stageEnemyIds\.length\} ▶/);
+  assert.match(source, /new Set\(this\.progress\.discoveredEnemyIds \?\? \[\]\)/);
+  assert.match(source, /`출현 적 · 발견 \$\{discoveredCount\}\/\$\{enemyIds\.length\}`/);
   assert.match(source, /private showStageEnemies\(stage: PrototypeStage\): void/);
-  assert.match(source, /discovered \? enemy\.displayName : '\?\?\?'/);
-  assert.match(source, /discovered \? \(boss \? 'BOSS · 도감 열기' : '발견됨 · 도감 열기'\) : '미발견 · 정보 비공개'/);
+  assert.match(source, /discovered \? enemy\.displayName : '미발견'/);
+  assert.match(source, /discovered \? \(boss \? '우두머리 · 도감 열기' : '발견됨 · 도감 열기'\) : '정보 비공개'/);
+  assert.match(source, /if \(!discovered\) setButtonState\(enemyButton, 'locked'/);
 });
 
 test('stage encounter entries open the exact enemy codex card and return to the same stage page', async () => {
   const source = await readSource('../src/stage-select-scene.ts');
 
-  assert.match(source, /this\.scene\.start\('catalog', \{ mode: 'ENEMIES', focusEnemyId: enemyId, returnTo: \{ scene: 'stage-select', data: \{ collectionId: this\.collection\.id, page: this\.page \} \} \}\)/);
+  assert.match(source, /this\.scene\.start\('catalog', \{[\s\S]*?mode: 'ENEMIES',[\s\S]*?focusEnemyId: enemyId,[\s\S]*?returnTo: \{ scene: 'stage-select', data: \{ collectionId: this\.collection\.id, page: this\.page \} \},[\s\S]*?\}\);/);
   assert.match(source, /init\(data: \{ collectionId\?: string; page\?: number \} = \{\}\)/);
   assert.match(source, /this\.requestedPage = Number\.isInteger\(data\.page\)/);
   assert.match(source, /this\.page = Math\.min\(this\.pageCount\(\) - 1, this\.requestedPage\)/);
