@@ -48,15 +48,19 @@ for (const key of ['severe', 'atRisk', 'weakEvolution', 'watchEvolution', 'clipp
 assert(audit.healthy === audit.totalTargets, 'all audited targets must be healthy before review hub publication');
 
 const seenRoutes = new Set();
+const seenGalleryRoutes = new Set();
 const byId = new Map(manifest.modes.map((mode) => [mode.id, mode]));
 for (const [id, metadataFile, runtimeFile] of EXPECTED) {
   const mode = byId.get(id);
   assert(mode, `missing review mode ${id}`);
   assert(mode.route === `?productionReview=${id}`, `${id} route drift`);
+  assert(mode.galleryRoute === `gallery.html?mode=${id}`, `${id} gallery route drift`);
   assert(mode.metadataFile === metadataFile, `${id} metadata mapping drift`);
   assert(mode.runtimeFile === runtimeFile, `${id} runtime mapping drift`);
   assert(!seenRoutes.has(mode.route), `duplicate review route ${mode.route}`);
+  assert(!seenGalleryRoutes.has(mode.galleryRoute), `duplicate gallery route ${mode.galleryRoute}`);
   seenRoutes.add(mode.route);
+  seenGalleryRoutes.add(mode.galleryRoute);
 
   const metadata = JSON.parse(await readFile(resolve(unitsRoot, metadataFile), 'utf8'));
   const targetEntries = Object.entries(metadata.targets ?? {});
@@ -80,11 +84,14 @@ for (const [id, metadataFile, runtimeFile] of EXPECTED) {
   const runtime = await readFile(resolve(root, runtimeFile), 'utf8');
   assert(runtime.includes('productionReview'), `${id} runtime no longer checks productionReview`);
   assert(runtime.includes(`'${id}'`) || runtime.includes(`\"${id}\"`), `${id} runtime route value missing`);
-  assert(html.includes(`productionReview=${id}`), `${id} launch link missing from hub HTML`);
+  assert(html.includes(`productionReview=${id}`), `${id} battle review launch link missing from hub HTML`);
+  assert(html.includes(`gallery.html?mode=${id}`), `${id} motion gallery launch link missing from hub HTML`);
 }
 
 assert(html.includes('UNAPPROVED · HUMAN REVIEW REQUIRED'), 'unapproved warning missing');
 assert(html.includes('NOT APPROVAL EVIDENCE'), 'approval-evidence boundary warning missing');
+assert(html.includes('MOTION GALLERY'), 'motion gallery call-to-action missing');
+assert(html.includes('OPEN BATTLE REVIEW'), 'battle review call-to-action missing');
 assert(html.includes('localStorage'), 'local-only checklist implementation missing');
 assert(html.includes('frontline-production-review-local-v1:'), 'local checklist namespace missing');
 assert(!html.includes('reviewedAt'), 'hub must not write reviewedAt');
@@ -92,6 +99,8 @@ assert(!html.includes('reviewerId'), 'hub must not write reviewer identity');
 
 const htmlInfo = await stat(resolve(reviewRoot, 'index.html'));
 const manifestInfo = await stat(resolve(reviewRoot, 'production-review-master.json'));
+const galleryInfo = await stat(resolve(reviewRoot, 'gallery.html'));
 assert(htmlInfo.size > 4000, 'hub HTML unexpectedly small');
 assert(manifestInfo.size > 1000, 'hub manifest unexpectedly small');
-console.log(`[production-review-hub] validated ${manifest.modes.length} routes / ${manifest.modes.reduce((sum, mode) => sum + mode.targetCount, 0)} listed targets/forms / human approval authority=false`);
+assert(galleryInfo.size > 9000, 'gallery HTML unexpectedly small');
+console.log(`[production-review-hub] validated ${manifest.modes.length} battle + gallery routes / ${manifest.modes.reduce((sum, mode) => sum + mode.targetCount, 0)} listed targets/forms / human approval authority=false`);
