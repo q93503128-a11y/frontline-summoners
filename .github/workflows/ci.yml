@@ -98,7 +98,7 @@ jobs:
             apps/client/public/assets/production/units
             apps/client/public/assets/production/battlefields
             apps/client/public/assets/production/audio
-            apps/client/public/assets/production/review/vertical-slice-01/preflight
+            apps/client/public/assets/production/review
             assets/raw/production/review/vertical-slice-01/preflight
           )
           for path in "${generated_paths[@]}"; do
