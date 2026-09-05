@@ -4,16 +4,17 @@ import test from 'node:test';
 
 const readSource = (relative: string): Promise<string> => readFile(new URL(relative, import.meta.url), 'utf8');
 
-test('main menu coop shortcut cannot bypass active-progress stage flow into guest lobby', async () => {
+test('main menu routes sortie through active-progress stage flow instead of a stage-agnostic coop lobby', async () => {
   const main = await readSource('../src/main.ts');
-  assert.match(main, /'협동 출정', \(\) => this\.scene\.start\('stage-hub'\)/);
-  assert.doesNotMatch(main, /'2인 협동', \(\) => this\.scene\.start\('coop-lobby'\)/);
+  assert.match(main, /'출 정 · 전선 지도 열기', \(\) => this\.scene\.start\('stage-hub'\)/);
+  assert.doesNotMatch(main, /this\.scene\.start\('coop-lobby'\)/);
+  assert.doesNotMatch(main, /this\.scene\.start\('public-coop-matchmaking'\)/);
 });
 
 test('sortie hub no longer exposes a stage-agnostic public coop shortcut', async () => {
   const hub = await readSource('../src/stage-hub-scene.ts');
   assert.doesNotMatch(hub, /this\.scene\.start\('public-coop-matchmaking'\)/);
-  assert.match(hub, /협동 가능 스테이지에서 혼자·친구·공개 협동을 선택한다/);
+  assert.match(hub, /협동 여부는 스테이지에서 결정한다/);
 });
 
 test('stage context remains the single player-facing authority for coop mode selection', async () => {
