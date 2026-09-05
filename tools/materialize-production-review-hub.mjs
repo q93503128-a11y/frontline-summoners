@@ -120,7 +120,7 @@ const html = `<!doctype html>
 <body>
 <main>
   <section class="top">
-    <div><div class="eyebrow">Frontline Summoners / 전선소환전</div><h1>Production Art · Human Review Hub</h1><div class="sub">자동 구조/품질 검사를 통과한 production 후보를 한 곳에서 여는 검수용 인덱스다. 아래 체크박스는 이 브라우저의 로컬 진행 메모일 뿐이며 provenance, reviewer, reviewedAt 또는 human approval 증거가 아니다.</div></div>
+    <div><div class="eyebrow">Frontline Summoners / 전선소환전</div><h1>Production Art · Human Review Hub</h1><div class="sub">자동 구조/품질 검사를 통과한 production 후보를 한 곳에서 여는 검수용 인덱스다. 아래 체크박스는 이 브라우저의 로컬 진행 메모일 뿐이며 provenance, reviewer identity 또는 승인 시각 증거가 아니다.</div></div>
     <div class="warning">UNAPPROVED · HUMAN REVIEW REQUIRED</div>
   </section>
   <section class="audit" aria-label="machine audit summary">
