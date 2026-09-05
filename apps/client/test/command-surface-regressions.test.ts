@@ -30,3 +30,19 @@ test('guest coop post-story waits for persisted clear state instead of player-fa
   assert.match(command, /협동 클리어 저장 완료/);
   assert.match(command, /저장에 실패해 이번 실행에서만 클리어가 유지됩니다/);
 });
+
+test('direct battle installs a presentation-only frontline pressure overlay without mutating simulation', async () => {
+  const [replay, overlay] = await Promise.all([
+    readSource('../src/replay-battle-scene.ts'),
+    readSource('../src/battle-frontline-overlay.ts'),
+  ]);
+
+  assert.match(replay, /installBattleFrontlineOverlay\(this\)/);
+  assert.match(overlay, /아군 전진/);
+  assert.match(overlay, /적 압박/);
+  assert.match(overlay, /교착/);
+  assert.match(overlay, /전선 확보/);
+  assert.match(overlay, /전선 붕괴/);
+  assert.match(overlay, /state\.battle\.units\.filter/);
+  assert.doesNotMatch(overlay, /stepPlayableBattle|trySpawnPlayerUnit|tryUpgradeSupply|tryFireBaseWeapon/);
+});
