@@ -111,5 +111,6 @@ test('main menu registers settings and shared UI consumes accessibility preferen
   assert.match(scene, /강한 번쩍임 줄이기/);
   assert.match(scene, /화면 흔들림/);
   assert.match(scene, /배터리 절약/);
-  assert.match(scene, /Master/);
+  assert.match(scene, /전체 음량/);
+  assert.match(scene, /메뉴·알림/);
 });
