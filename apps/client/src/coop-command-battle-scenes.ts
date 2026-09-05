@@ -32,7 +32,7 @@ function visitTexts(object: Phaser.GameObjects.GameObject, action: (text: Phaser
   }
 }
 
-function seatName(seatId: string, ownSeatId: string | undefined): string {
+function seatName(seatId: string, ownSeatId: string | null | undefined): string {
   return seatId === ownSeatId ? '나' : '동료';
 }
 
