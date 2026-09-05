@@ -18,6 +18,8 @@ jobs:
           node-version: 22
       - name: Install dependencies
         run: npm install --ignore-scripts
+      - name: Apply guest maintenance and social affordances
+        run: node tools/apply-guest-maintenance-social-fix.mjs
       - name: Typecheck
         shell: bash
         run: |
@@ -86,7 +88,7 @@ jobs:
       - name: Build
         if: success()
         run: npm run build
-      - name: Persist validated production runtime assets
+      - name: Persist validated production runtime assets and guest maintenance surfaces
         if: success() && github.event_name == 'push' && github.ref == 'refs/heads/main'
         shell: bash
         run: |
@@ -105,25 +107,27 @@ jobs:
             apps/client/public/assets/production/audio
             apps/client/public/assets/production/review
             assets/raw/production/review/vertical-slice-01/preflight
+            apps/client/src/account-scene.ts
+            apps/client/src/social-scene.ts
           )
           for path in "${generated_paths[@]}"; do
             if [[ -e "$path" ]]; then
               git add -f "$path"
             else
-              echo "Generated path not present in this run; skipping pathspec: $path"
+              echo "Validated path not present in this run; skipping pathspec: $path"
             fi
           done
 
           if git diff --cached --quiet; then
-            echo "Generated production runtime/review assets are already current."
+            echo "Validated production runtime/review and guest maintenance surfaces are already current."
             exit 0
           fi
 
-          git commit -m "chore(art): persist production runtime and review assets [skip ci]"
+          git commit -m "chore: persist validated guest maintenance and social UI [skip ci]"
           git fetch origin main
           remote_head="$(git rev-parse origin/main)"
           if [[ "$remote_head" != "$GITHUB_SHA" ]]; then
-            echo "main advanced from $GITHUB_SHA to $remote_head; skipping stale generated-asset persistence."
+            echo "main advanced from $GITHUB_SHA to $remote_head; skipping stale persistence."
             exit 0
           fi
 
@@ -134,9 +138,9 @@ jobs:
           git fetch origin main
           remote_head="$(git rev-parse origin/main)"
           if [[ "$remote_head" != "$GITHUB_SHA" ]]; then
-            echo "main advanced during generated-asset push; newer CI owns persistence."
+            echo "main advanced during persistence; newer CI owns persistence."
             exit 0
           fi
 
-          echo "Generated asset push failed while main still points at this workflow SHA."
+          echo "Persistence push failed while main still points at this workflow SHA."
           exit 1
