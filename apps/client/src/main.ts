@@ -32,7 +32,7 @@ import { QuirkRecordBattleScene as RecordBattleScene } from './quirk-record-batt
 import { RecordHubScene } from './record-hub-scene';
 import { RecordResultScene } from './record-result-scene';
 import { getOwnedCharacterIds } from './save';
-import { SocialScene } from './social-scene';
+import { SocialCommandScene as SocialScene } from './social-command-scene';
 import { StageHubScene } from './stage-hub-scene';
 import { StageSortieModeScene } from './stage-sortie-mode-scene';
 import { StoryStageSelectScene as StageSelectScene } from './story-stage-select-scene';
@@ -55,7 +55,6 @@ import { isCompactMobileViewport } from './viewport';
 
 class BootScene extends BaseBootScene {
   override create(): void {
-    // Review tooling stays dynamically registered so canonical gameplay scene ordering remains untouched.
     this.scene.add('first-slice-capture', FirstSliceProductionCaptureScene, false);
     void restoreAuthenticatedAccountSession().finally(() => {
       if (!this.scene.isActive()) return;
