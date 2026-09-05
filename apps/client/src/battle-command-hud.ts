@@ -165,21 +165,27 @@ function installProductionRail(scene: BattleHudCarrier): void {
     const shade = scene.add.rectangle(x, y, slotWidth, slotHeight, 0x05070b, 0).setDepth(7);
 
     const art = familyForUnit(slot.definition.id);
-    const portraitHeight = useTwoRows ? 48 : compact ? 45 : 40;
-    const portrait = scene.add.sprite(x, y - slotHeight * 0.19, art.family.idle.key, 0).setTint(art.tint).setDepth(4);
+    const portraitHeight = useTwoRows ? 48 : compact ? 38 : 40;
+    const portrait = scene.add.sprite(x, y - slotHeight * 0.2, art.family.idle.key, 0).setTint(art.tint).setDepth(4);
     portrait.setScale((portraitHeight / art.family.idle.frameHeight) * art.displayScale);
 
-    addText(scene, x - slotWidth / 2 + 7, y - slotHeight / 2 + 7, badge.label, battleUiFontSize(10, 14), badge.color)
-      .setDepth(8);
+    if (!compact || useTwoRows) {
+      addText(scene, x - slotWidth / 2 + 7, y - slotHeight / 2 + 7, badge.label, battleUiFontSize(10, 14), badge.color)
+        .setDepth(8);
+    }
+    const displayName = compact && !useTwoRows && slot.displayName.length > 5
+      ? `${slot.displayName.slice(0, 4)}…`
+      : slot.displayName;
     const nameSize = useTwoRows ? battleUiFontSize(13, 18) : battleUiFontSize(12, 16);
-    addText(scene, x, y + slotHeight * 0.08, slot.displayName, nameSize, '#ffffff', 'center')
+    addText(scene, x, y + slotHeight * 0.04, displayName, nameSize, '#ffffff', 'center')
       .setOrigin(0.5, 0)
       .setDepth(5);
-    const cost = addText(scene, x, y + slotHeight * 0.27, `보급 ${slot.cost}`, battleUiFontSize(11, 15), '#f0cf78', 'center')
-      .setOrigin(0.5)
+    const statusY = y + slotHeight * 0.37;
+    const cost = addText(scene, x - slotWidth / 2 + 8, statusY, `◆${slot.cost}`, battleUiFontSize(11, 15), '#f0cf78')
+      .setOrigin(0, 0.5)
       .setDepth(5);
-    const cooldown = addText(scene, x, y + slotHeight * 0.41, '', battleUiFontSize(11, 15), '#d8e1ef', 'center')
-      .setOrigin(0.5)
+    const cooldown = addText(scene, x + slotWidth / 2 - 8, statusY, '', battleUiFontSize(11, 15), '#d8e1ef', 'right')
+      .setOrigin(1, 0.5)
       .setDepth(8);
 
     if (!compact) {
