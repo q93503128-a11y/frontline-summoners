@@ -48,10 +48,10 @@ export class RecruitmentScene extends Phaser.Scene {
   private progressText?: Phaser.GameObjects.Text;
   private resultsLayer: Phaser.GameObjects.Container | undefined;
   private seriesTabs: Phaser.GameObjects.Container[] = [];
-  private plusPolicyButton?: Phaser.GameObjects.Container;
-  private dismantlePolicyButton?: Phaser.GameObjects.Container;
-  private pullOneButton?: Phaser.GameObjects.Container;
-  private pullTenButton?: Phaser.GameObjects.Container;
+  private plusPolicyButton: Phaser.GameObjects.Container | undefined;
+  private dismantlePolicyButton: Phaser.GameObjects.Container | undefined;
+  private pullOneButton: Phaser.GameObjects.Container | undefined;
+  private pullTenButton: Phaser.GameObjects.Container | undefined;
   private busy = false;
 
   constructor() { super('recruitment'); }
