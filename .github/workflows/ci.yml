@@ -9,33 +9,6 @@ permissions:
   contents: write
 
 jobs:
-  production-art-diagnostic:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 22
-      - name: Install dependencies
-        run: npm install --ignore-scripts
-      - name: Run focused production asset gate
-        shell: bash
-        run: |
-          set +e
-          log="$RUNNER_TEMP/production-assets.log"
-          npm run assets:production:check > "$log" 2>&1
-          status=$?
-          set -e
-          if [[ $status -ne 0 ]]; then
-            echo "===== production asset gate failure tail ====="
-            tail -n 160 "$log"
-            echo "===== filtered failure signals ====="
-            grep -nE 'Error:|ERR!|\[production-|failed|FAIL|unresolved|missing|invalid' "$log" | tail -n 100 || true
-            exit "$status"
-          fi
-          echo "Production asset gate passed."
-          tail -n 30 "$log"
-
   verify:
     runs-on: ubuntu-latest
     steps:
