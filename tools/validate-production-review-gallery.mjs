@@ -23,9 +23,16 @@ const EXPECTED = [
   ['recruitment', 'recruitment-form-runtime-metadata.json'],
 ];
 const MOTIONS = ['idle', 'move', 'attack', 'knockback', 'death'];
+const PUBLIC_PREFIX = 'apps/client/public/';
 
 function assert(ok, message) {
   if (!ok) throw new Error(`[production-review-gallery] ${message}`);
+}
+
+function publicUrlFromFile(file) {
+  return typeof file === 'string' && file.startsWith(PUBLIC_PREFIX)
+    ? `/${file.slice(PUBLIC_PREFIX.length)}`
+    : null;
 }
 
 for (const [id, metadataFile] of EXPECTED) {
@@ -48,6 +55,8 @@ assert(html.includes('attackContactFrame'), 'attack contact-frame review aid mis
 assert(html.includes("cache:'no-store'"), 'metadata must be loaded fresh');
 assert(html.includes('COMPARE LAB'), 'comparison lab navigation missing');
 assert(html.includes("modeId==='recruitment'"), 'recruitment runtime fallback resolver missing');
+assert(html.includes("prefix='apps/client/public/'"), 'file-backed runtime resolver missing');
+assert(html.includes('motion.url||fileUrl||recruitmentFallback'), 'runtime resolver precedence missing');
 assert(html.includes("data-filter=\"pending\""), 'pending filter missing');
 assert(html.includes("data-filter=\"revisit\""), 'revisit filter missing');
 assert(html.includes("event.key.toLowerCase()"), 'keyboard review navigation missing');
@@ -58,6 +67,7 @@ assert(!/\b(POST|PUT|PATCH|DELETE)\b/.test(html), 'gallery must remain read-only
 
 let targetCount = 0;
 let stripCount = 0;
+let fileBackedStrips = 0;
 let recruitmentFallbackStrips = 0;
 const filesToCheck = [];
 for (const [modeId, metadataFile] of EXPECTED) {
@@ -68,10 +78,11 @@ for (const [modeId, metadataFile] of EXPECTED) {
     for (const motionName of MOTIONS) {
       const motion = target.motions?.[motionName];
       assert(motion, `${modeId}:${targetKey} missing ${motionName}`);
-      const fallbackUrl = modeId === 'recruitment' && target.unitId && target.formId
+      const fileUrl = publicUrlFromFile(motion.file);
+      const recruitmentFallback = modeId === 'recruitment' && target.unitId && target.formId
         ? `/assets/production/units/${target.unitId}/${target.formId}/${motionName}.png`
         : null;
-      const url = motion.url ?? fallbackUrl;
+      const url = motion.url ?? fileUrl ?? recruitmentFallback;
       const frameWidth = Number(motion.frameWidth ?? target.frameWidth);
       const frameHeight = Number(motion.frameHeight ?? target.frameHeight);
       const frames = Number(motion.frames);
@@ -79,7 +90,8 @@ for (const [modeId, metadataFile] of EXPECTED) {
       assert(Number.isFinite(frameWidth) && frameWidth > 0, `${modeId}:${targetKey}:${motionName} unresolved frameWidth`);
       assert(Number.isFinite(frameHeight) && frameHeight > 0, `${modeId}:${targetKey}:${motionName} unresolved frameHeight`);
       assert(Number.isInteger(frames) && frames > 0, `${modeId}:${targetKey}:${motionName} invalid frame count`);
-      if (!motion.url) recruitmentFallbackStrips += 1;
+      if (!motion.url && fileUrl) fileBackedStrips += 1;
+      if (!motion.url && !fileUrl && recruitmentFallback) recruitmentFallbackStrips += 1;
       filesToCheck.push([`${modeId}:${targetKey}:${motionName}`, resolve(publicRoot, url.slice(1))]);
       stripCount += 1;
     }
@@ -90,7 +102,8 @@ for (const [modeId, metadataFile] of EXPECTED) {
 
 assert(targetCount === 209, `expected 209 canonical review targets/forms, got ${targetCount}`);
 assert(stripCount === 1045, `expected 1045 five-motion strips, got ${stripCount}`);
-assert(recruitmentFallbackStrips === 495, `expected 495 recruitment fallback strips, got ${recruitmentFallbackStrips}`);
+assert(fileBackedStrips > 0, 'expected at least one file-backed canonical runtime strip');
+assert(recruitmentFallbackStrips === 495, `expected 495 recruitment derived runtime strips, got ${recruitmentFallbackStrips}`);
 await Promise.all(filesToCheck.map(async ([label, path]) => {
   const info = await stat(path);
   assert(info.isFile() && info.size > 0, `${label} runtime PNG missing or empty`);
@@ -98,4 +111,4 @@ await Promise.all(filesToCheck.map(async ([label, path]) => {
 
 const info = await stat(htmlPath);
 assert(info.size > 10000, 'gallery HTML unexpectedly small');
-console.log(`[production-review-gallery] validated ${EXPECTED.length} modes / ${targetCount} targets/forms / ${stripCount} live strips / ${recruitmentFallbackStrips} recruitment runtime fallbacks`);
+console.log(`[production-review-gallery] validated ${EXPECTED.length} modes / ${targetCount} targets/forms / ${stripCount} live strips / ${fileBackedStrips} file-backed / ${recruitmentFallbackStrips} recruitment derived`);
