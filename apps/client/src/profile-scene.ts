@@ -67,7 +67,7 @@ export class ProfileScene extends Phaser.Scene {
   private authority: ActiveProgressAuthority = 'GUEST_LOCAL';
   private state: AchievementProfileState | null = null;
   private layer?: Phaser.GameObjects.Container;
-  private loadingText?: Phaser.GameObjects.Text;
+  private loadingText: Phaser.GameObjects.Text | undefined;
   private categoryIndex = 0;
   private page = 0;
   private accountMutationPending = false;
