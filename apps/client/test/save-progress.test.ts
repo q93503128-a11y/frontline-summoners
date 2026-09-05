@@ -155,6 +155,6 @@ test('result screen never labels a failed durable write as saved', async () => {
   const source = await readFile(new URL('../src/result-scene.ts', import.meta.url), 'utf8');
   assert.match(source, /if \(result\.persisted\)/);
   assert.match(source, /브라우저 영구 저장 실패 · 현재 탭에서는 진행 유지/);
-  assert.match(source, /status\.setColor\('#ffb37c'\)/);
+  assert.match(source, /setColor\(COLORS\.warning\)/);
   assert.match(source, /재클리어 보상 저장 완료/);
 });
