@@ -57,7 +57,7 @@ test('runtime and catalog share the coarse-pointer compact-mobile classifier ins
   ]);
 
   assert.match(battle, /import \{ isCompactMobileViewport, isPortraitMobileViewport \} from '\.\/viewport';/);
-  assert.match(ui, /import \{ isCompactMobileViewport \} from '\.\/viewport';/);
+  assert.match(ui, /import \{[^}]*isCompactMobileViewport[^}]*\} from '\.\/viewport';/);
   assert.match(catalog, /import \{ isCompactMobileViewport \} from '\.\/viewport';/);
   assert.doesNotMatch(`${battle}\n${ui}\n${catalog}`, /function isCompactMobileViewport\(/);
   assert.doesNotMatch(battle, /function isPortraitMobileViewport\(/);
