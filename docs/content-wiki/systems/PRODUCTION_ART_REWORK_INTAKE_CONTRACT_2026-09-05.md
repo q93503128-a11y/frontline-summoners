@@ -4,6 +4,10 @@
 
 Human review tools can identify candidates that need another art pass, but those local notes are not canonical approval or production evidence. This contract defines the only supported bridge from a browser-local `LOCAL_REWORK_TRIAGE_DRAFT` into a repository workbench intake.
 
+## Coverage distinction
+
+The machine quality audit currently covers 242 targets: the 209 targets/forms exposed by the 11 Human Review/Rework Queue modes plus 33 recruitment root/support targets used by the broader automated audit. The rework intake contract intentionally follows the canonical human-review surface, so it validates the 209 queue-addressable targets/forms and separately checks that the 33 audit-only recruitment support targets remain accounted for by the machine audit.
+
 ## Boundaries
 
 - Source draft must remain `humanApprovalAuthority: false`, `canonicalWrite: false`, `approvalEvidence: false`.
@@ -35,7 +39,8 @@ npm run assets:production:rework-intake:import -- --input=<draft.json> --output=
 
 - review queue materialization,
 - exported asset-identity preservation validation,
-- the 242-target/form rework-intake contract test,
+- dynamic agreement between the 209-target/form canonical review surface and the review-master mode totals,
+- explicit accounting for the additional 33 recruitment root/support targets in the 242-target machine audit,
 - positive and negative import-boundary cases.
 
 The older `first-slice-rework-01.json` and `validate-production-rework-plan.mjs` remain unchanged as the historical first-slice workbench contract; this new intake contract covers the current 11-mode review surface without rewriting that legacy schema.
