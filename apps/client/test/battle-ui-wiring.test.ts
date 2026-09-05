@@ -91,7 +91,7 @@ test('mouse and keyboard battle actions share quiet failure paths without camera
 
 test('locked-stage and save-pending clicks are quiet; camera shake stays limited to combat impact paths', async () => {
   const { stageSelect, result, battle } = await readRuntime();
-  assert.match(stageSelect, /if \(!unlocked\) return;/);
+  assert.match(stageSelect, /if \(!this\.progressLoaded \|\| !unlocked\) return;/);
   assert.match(stageSelect, /if \(!onlineWritable\) \{ this\.scene\.start\('account'\); return; \}/);
   assert.doesNotMatch(stageSelect, /cameras\.main\.shake/);
   assert.match(result, /if \(!this\.resultRecorded\) return;/);
@@ -146,7 +146,7 @@ test('compact mobile battle HUD uses shared viewport classification and keeps to
   const { main, battle, ui } = await readRuntime();
   const viewport = await readSource('../src/viewport.ts');
   assert.match(battle, /import \{ isCompactMobileViewport, isPortraitMobileViewport \} from '\.\/viewport';/);
-  assert.match(ui, /import \{ isCompactMobileViewport \} from '\.\/viewport';/);
+  assert.match(ui, /import \{[^}]*isCompactMobileViewport[^}]*\} from '\.\/viewport';/);
   assert.match(viewport, /COMPACT_MOBILE_SHORT_SIDE = 540/);
   assert.match(viewport, /coarsePointer && Math\.min\(width, height\) <= COMPACT_MOBILE_SHORT_SIDE/);
   assert.match(battle, /const buttonHeight = compact \? 84 : 62;/);
@@ -170,26 +170,24 @@ test('compact mobile battle HUD uses shared viewport classification and keeps to
 });
 
 test('compact navigation and result controls remain finger-sized', async () => {
-  const { stageHub, stageSelect, deck, battle, result } = await readRuntime();
-  const stageNavigation = `${stageHub}\n${stageSelect}`;
-  assert.match(stageNavigation, /compact \? 84 : 50/);
-  assert.match(stageNavigation, /compact \? 84 : 52/);
-  assert.match(stageNavigation, /compact \? 82 : 52/);
+  const { deck, battle, result, ui } = await readRuntime();
+  assert.match(ui, /const minimumTouch = compact \? getCurrentMinimumInternalTouchTarget\(\) : 0;/);
+  assert.match(ui, /Math\.max\(height, minimumTouch\)/);
   assert.match(deck, /compact \? 84 : 48/);
   assert.match(battle, /compact \? 84 : 42, '일시정지'/);
   assert.match(result, /const resultButtonHeight = compact \? 84 : 68;/);
   assert.ok(84 * (390 / 720) >= 44);
 });
 
-test('stage cards expose permanent reward state for main stages and separate clear records for special stages', async () => {
+test('stage briefing exposes permanent reward state for main stages and separate clear records for special stages', async () => {
   const { stageSelect } = await readRuntime();
   assert.match(stageSelect, /const special = this\.collection\.stageType === 'SPECIAL'/);
   assert.match(stageSelect, /const rewardOwned = !special && stage\.permanentRewardId !== undefined && this\.progress\.permanentRewardIds\.includes\(stage\.permanentRewardId\);/);
   assert.match(stageSelect, /const rewardText = getPermanentRewardEffectText\(stage\.permanentRewardId\);/);
-  assert.match(stageSelect, /'첫 NORMAL_CLEAR 영구 보상'/);
+  assert.match(stageSelect, /첫 직접 클리어/);
   assert.match(stageSelect, /클리어 기록 완료|메인 진도와 별도 클리어 기록/);
   assert.match(stageSelect, /BATTLEFIELD_THEME_LABELS\[stage\.theme\]/);
-  assert.match(stageSelect, /`전장 \$\{stage\.mapLength\}m`/);
+  assert.match(stageSelect, /전장 \$\{stage\.mapLength\}m/);
   assert.match(stageSelect, /동시 출격 \$\{effectiveCap\}기/);
   assert.doesNotMatch(stageSelect, /확정 보물|stage\.treasure/);
 });
@@ -206,7 +204,7 @@ test('manual deck cards keep level, plus level, form, rarity, role, and combat i
   assert.doesNotMatch(deck, /모집 미획득|LOCK|미보유/);
 });
 
-test('main and result scenes use current permanent-reward and SPECIAL resource-clear wording', async () => {
+test('main and result scenes use player-facing permanent reward and special-operation wording', async () => {
   const { navigation, result } = await readRuntime();
   assert.match(navigation, /const menuButtonHeight = compact \? 108 : 92;/);
   assert.match(navigation, /const owned = getOwnedCharacterIds\(progress\)\.length;/);
@@ -215,11 +213,11 @@ test('main and result scenes use current permanent-reward and SPECIAL resource-c
   assert.match(result, /const compact = isCompactMobileViewport\(\);/);
   assert.match(result, /'영구 보상 획득'/);
   assert.match(result, /getPermanentRewardEffectText\(this\.stage\.permanentRewardId\)/);
-  assert.match(result, /NORMAL_CLEAR 저장 완료 · 다음 스테이지 개방\$\{storySuffix\}/);
+  assert.match(result, /진행 저장 완료 · 다음 전장 개방\$\{storySuffix\}/);
   assert.match(result, /'브라우저 영구 저장 실패 · 현재 탭에서는 진행 유지'/);
-  assert.match(result, /'SPECIAL 클리어'/);
-  assert.match(result, /'SPECIAL 첫 클리어 저장 완료'/);
-  assert.match(result, /'SPECIAL 재클리어 보상 저장 완료'/);
+  assert.match(result, /'특수 작전 클리어'/);
+  assert.match(result, /'특수 작전 첫 클리어 저장 완료'/);
+  assert.match(result, /'특수 작전 재클리어 보상 저장 완료'/);
   assert.doesNotMatch(result, /훈장 획득|stage\.treasure/);
 });
 
@@ -229,10 +227,11 @@ test('shared buttons recover from touch or pointer cancellation instead of stayi
   const backdropStart = ui.indexOf('export function drawBackdrop');
   assert.ok(buttonStart >= 0 && backdropStart > buttonStart);
   const buttonBlock = ui.slice(buttonStart, backdropStart);
-  assert.match(buttonBlock, /bg\.on\('pointerout', \(\) => \{/);
+  assert.match(buttonBlock, /hit\.on\('pointerout', \(\) => \{/);
+  assert.match(buttonBlock, /pressed = false;/);
   assert.match(buttonBlock, /container\.setScale\(1\);/);
-  assert.match(buttonBlock, /bg\.on\('pointerupoutside', \(\) => container\.setScale\(1\)\);/);
-  assert.match(buttonBlock, /bg\.on\('pointerdown', \(\) => \{[\s\S]*?if \(!shouldUseReducedMotion\(\)\) container\.setScale\(0\.98\);[\s\S]*?\}\);/);
+  assert.match(buttonBlock, /hit\.on\('pointerupoutside', \(\) => \{[\s\S]*?container\.setScale\(1\);[\s\S]*?\}\);/);
+  assert.match(buttonBlock, /hit\.on\('pointerdown', \(\) => \{[\s\S]*?if \(!shouldUseReducedMotion\(\)\) container\.setScale\(0\.985\);[\s\S]*?\}\);/);
 });
 
 test('Phaser uses smooth filtering for current non-pixel-art character sheets', async () => {
@@ -243,8 +242,8 @@ test('Phaser uses smooth filtering for current non-pixel-art character sheets', 
   assert.doesNotMatch(main, /pixelArt:\s*true|roundPixels:\s*true/);
 });
 
-test('stage cards render the twelve-step difficulty scale without legacy five-star overflow', async () => {
+test('stage briefing renders the twelve-step difficulty scale without legacy five-star overflow', async () => {
   const { stageSelect } = await readRuntime();
-  assert.match(stageSelect, /`난이도 \$\{stage\.difficulty\} \/ 12`/);
+  assert.match(stageSelect, /`난이도 \$\{stage\.difficulty\}\/12/);
   assert.doesNotMatch(stageSelect, /const stars = '★'\.repeat/);
 });
