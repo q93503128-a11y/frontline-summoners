@@ -73,13 +73,13 @@ function drawWeaponSchematic(scene: Phaser.Scene, x: number, y: number, id: Base
     g.fillStyle(0x1b2631, 1).fillCircle(x - 35, y + 31, 22).fillCircle(x + 23, y + 31, 22);
     g.lineStyle(4, accent, 0.7).lineBetween(x - 70, y + 55, x + 82, y + 55);
   } else if (weapon.kind === 'AEGIS_EMITTER') {
-    g.lineStyle(7, accent, 0.52).strokeArc(x, y, 58, Phaser.Math.DegToRad(195), Phaser.Math.DegToRad(345));
-    g.lineStyle(3, 0xcfefff, 0.72).strokeArc(x, y, 42, Phaser.Math.DegToRad(200), Phaser.Math.DegToRad(340));
+    g.lineStyle(7, accent, 0.52).strokeEllipse(x, y - 3, 116, 76);
+    g.lineStyle(3, 0xcfefff, 0.72).strokeEllipse(x, y - 3, 84, 54);
     g.fillStyle(accent, 0.9).fillCircle(x, y + 24, 17);
     g.fillStyle(0xe9f8ff, 0.82).fillCircle(x, y + 24, 6);
     g.lineStyle(4, accent, 0.6).lineBetween(x, y + 40, x, y + 78);
   } else {
-    g.lineStyle(4, 0xdce8f2, 0.75).strokeArc(x, y - 24, 60, Phaser.Math.DegToRad(185), Phaser.Math.DegToRad(355));
+    g.lineStyle(4, 0xdce8f2, 0.75).strokeEllipse(x, y - 24, 120, 54);
     g.lineStyle(2, 0xdce8f2, 0.55).lineBetween(x - 52, y - 18, x - 24, y + 25);
     g.lineStyle(2, 0xdce8f2, 0.55).lineBetween(x + 52, y - 18, x + 24, y + 25);
     g.fillStyle(accent, 0.82).fillRect(x - 34, y + 20, 68, 56);
