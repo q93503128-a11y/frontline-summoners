@@ -27,8 +27,8 @@ test('catalog pages active-authority allies, discovered enemies, permanent rewar
   assert.match(source, /`특수 기록 \$\{SPECIAL_STAGES\.length\}개`/);
   assert.match(source, /loadActiveProgress\(\)/);
   assert.doesNotMatch(source, /loadGuestProgress\(\)/);
-  assert.match(source, /로그인 계정 · 서버 도감/);
-  assert.match(source, /로그인 계정 · 오프라인 캐시 도감/);
+  assert.match(source, /계정 · 서버 기록/);
+  assert.match(source, /계정 · 오프라인 기록/);
   assert.match(source, /new Set\(getOwnedCharacterIds\(this\.progress\)\)/);
   assert.match(source, /ALL_PLAYER_SLOTS\.slice\(start, start \+ ALLY_PAGE_SIZE\)/);
   assert.match(source, /owned \? slot\.displayName : '\?\?\?'/);
@@ -43,12 +43,13 @@ test('catalog pages active-authority allies, discovered enemies, permanent rewar
   assert.match(source, /new Set\(this\.progress\.specialClearedStageIds\)/);
   assert.match(source, /formatCombatTraits\(slot\.definition\)/);
   assert.match(source, /formatDamageSpecialty\(slot\.definition\)/);
-  assert.match(source, /NORMAL_CLEAR 첫 승리 시 확정/);
+  assert.match(source, /첫 직접 클리어 시 확정/);
   assert.match(source, /메인 영구 성장과 별도 기록/);
+  assert.doesNotMatch(source, /NORMAL_CLEAR 첫 승리 시 확정/);
   assert.doesNotMatch(source, /getUnlockedSlotIds\(this\.progress\.clearedStageIds\)/);
 });
 
-test('runtime and catalog share the coarse-pointer compact-mobile classifier instead of treating short desktop windows as phones', async () => {
+test('runtime and catalog share the coarse-pointer compact-mobile classifier and common command primitives', async () => {
   const [battle, ui, catalog, viewport] = await Promise.all([
     readSource('../src/battle-scene.ts'),
     readSource('../src/scene-ui.ts'),
@@ -59,6 +60,10 @@ test('runtime and catalog share the coarse-pointer compact-mobile classifier ins
   assert.match(battle, /import \{ isCompactMobileViewport, isPortraitMobileViewport \} from '\.\/viewport';/);
   assert.match(ui, /import \{[^}]*isCompactMobileViewport[^}]*\} from '\.\/viewport';/);
   assert.match(catalog, /import \{ isCompactMobileViewport \} from '\.\/viewport';/);
+  assert.match(catalog, /addButton,[\s\S]*addText,[\s\S]*drawBackdrop,[\s\S]*setButtonState,[\s\S]*from '\.\/scene-ui';/);
+  assert.doesNotMatch(catalog, /function addText\(/);
+  assert.doesNotMatch(catalog, /function addButton\(/);
+  assert.doesNotMatch(catalog, /function drawBackdrop\(/);
   assert.doesNotMatch(`${battle}\n${ui}\n${catalog}`, /function isCompactMobileViewport\(/);
   assert.doesNotMatch(battle, /function isPortraitMobileViewport\(/);
 
@@ -70,32 +75,37 @@ test('runtime and catalog share the coarse-pointer compact-mobile classifier ins
   assert.match(ui, /const renderedSize = isCompactMobileViewport\(\) \? Math\.max\(scaledSize, 16\) : Math\.max\(scaledSize, 12\);/);
   assert.match(ui, /fontSize: `\$\{renderedSize\}px`/);
   assert.match(ui, /strokeThickness: highContrast \?/);
-  assert.match(catalog, /const renderedSize = isCompactMobileViewport\(\) \? Math\.max\(size, 16\) : size;/);
-  assert.match(catalog, /fontSize: `\$\{renderedSize\}px`/);
 });
 
-test('catalog keeps desktop descriptions while compact cards prioritize readable identity and stats', async () => {
+test('catalog keeps desktop descriptions while compact dossiers prioritize readable identity and stats', async () => {
   const source = await readSource('../src/catalog-scene.ts');
+  assert.match(source, /function addDossierCard\(/);
+  assert.match(source, /const spine = scene\.add\.rectangle/);
   assert.match(source, /const compact = isCompactMobileViewport\(\);/);
   assert.match(source, /compact \? 27 : 22/);
   assert.match(source, /compact \? 21 : 14/);
   assert.match(source, /if \(compact\) \{[\s\S]*?HP \$\{slot\.definition\.maxHp\} · 공격 \$\{slot\.definition\.attackDamage\}/);
   assert.match(source, /else \{[\s\S]*?slot\.description/);
   assert.match(source, /재생산 \$\{\(slot\.rechargeFrames \/ 30\)\.toFixed\(1\)\}초/);
-  assert.match(source, /if \(!compact\) this\.contentLayer!\.add\(addText\(this, x, 548, `\$\{stage\.name\}\\nNORMAL_CLEAR 첫 승리 시 확정`/);
+  assert.match(source, /if \(!compact\) this\.contentLayer!\.add\(addText\(this, x, 548, `\$\{stage\.name\}\\n첫 직접 클리어 시 확정`/);
   assert.match(source, /private renderSpecialRecords\(\): void/);
-  assert.match(source, /`SPECIAL \$\{specialNumber\}`/);
+  assert.match(source, /`특수 작전 \$\{specialNumber\}`/);
   assert.match(source, /`난이도 \$\{stage\.difficulty\} \/ 12`/);
+  assert.match(source, /isBoss \? '우두머리' : '적'/);
 });
 
-test('compact catalog navigation stays finger-sized, drops decorative header copy, and cancelled drags restore button scale', async () => {
-  const source = await readSource('../src/catalog-scene.ts');
+test('compact catalog navigation stays finger-sized and delegates cancellation recovery to shared buttons', async () => {
+  const [source, ui] = await Promise.all([
+    readSource('../src/catalog-scene.ts'),
+    readSource('../src/scene-ui.ts'),
+  ]);
   assert.match(source, /const navigationHeight = compact \? 84 : 50;/);
   assert.match(source, /const tabHeight = compact \? 84 : 54;/);
-  assert.match(source, /isCompactMobileViewport\(\) \? 26 : 18/);
-  assert.match(source, /if \(!compact\) addText\(this, 56, 88, '획득 동료와 실제로 조우한 적만 상세 정보가 공개된다\.'/);
-  assert.match(source, /bg\.on\('pointerout', \(\) => \{[\s\S]*?container\.setScale\(1\);/);
-  assert.match(source, /bg\.on\('pointerupoutside', \(\) => container\.setScale\(1\)\);/);
+  assert.match(source, /if \(!compact\) addText\(this, 56, 88, '획득한 동료와 실제로 조우한 적, 확보한 전과만 기록된다\.'/);
+  assert.match(source, /setButtonState\(this\.allyTab, this\.mode === 'ALLIES' \? 'selected' : 'default'\)/);
+  assert.match(ui, /hit\.on\('pointerout', \(\) => \{/);
+  assert.match(ui, /hit\.on\('pointerupoutside', \(\) => \{/);
+  assert.match(ui, /const minimumTouch = compact \? getCurrentMinimumInternalTouchTarget\(\) : 0;/);
   assert.ok(84 * (390 / 720) >= 44);
 });
 
