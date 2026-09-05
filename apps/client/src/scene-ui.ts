@@ -241,7 +241,8 @@ export function addButton(
     if (!compact) hideReasonBubble();
     render();
   });
-  hit.on('pointerdown', (pointer: Phaser.Input.Pointer) => {
+  hit.on('pointerdown', () => {
+    const pointer = scene.input.activePointer;
     if (isCommandButtonInactive(controller.state)) {
       showReasonBubble(pointer);
       return;
