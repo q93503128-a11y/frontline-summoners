@@ -2,7 +2,7 @@ import Phaser from 'phaser';
 import { INTERNAL_HEIGHT, INTERNAL_WIDTH } from '@frontline/shared';
 import { loadActiveProgress } from './active-progress';
 import { restoreAuthenticatedAccountSession } from './account-network';
-import { AccountScene } from './account-scene';
+import { AccountCommandScene as AccountScene } from './account-command-scene';
 import { ReplayBattleScene as BattleScene } from './replay-battle-scene';
 import { BaseWeaponScene } from './base-weapon-scene';
 import { CatalogScene } from './catalog-scene';
