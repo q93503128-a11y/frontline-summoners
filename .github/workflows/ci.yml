@@ -18,8 +18,6 @@ jobs:
           node-version: 22
       - name: Install dependencies
         run: npm install --ignore-scripts
-      - name: Apply canonical battle speed policy
-        run: node tools/apply-battle-speed-policy-doc-update.mjs
       - name: Typecheck
         shell: bash
         run: |
@@ -88,7 +86,7 @@ jobs:
       - name: Build
         if: success()
         run: npm run build
-      - name: Persist validated generated assets and canonical speed docs
+      - name: Persist validated production runtime assets
         if: success() && github.event_name == 'push' && github.ref == 'refs/heads/main'
         shell: bash
         run: |
@@ -107,9 +105,6 @@ jobs:
             apps/client/public/assets/production/audio
             apps/client/public/assets/production/review
             assets/raw/production/review/vertical-slice-01/preflight
-            docs/CANONICAL.md
-            docs/GAME_DESIGN_FULL.md
-            docs/STAGE_SYSTEM_DESIGN.md
           )
           for path in "${generated_paths[@]}"; do
             if [[ -e "$path" ]]; then
@@ -120,15 +115,15 @@ jobs:
           done
 
           if git diff --cached --quiet; then
-            echo "Validated generated assets and canonical docs are already current."
+            echo "Generated production runtime/review assets are already current."
             exit 0
           fi
 
-          git commit -m "chore: persist validated generated assets and canonical docs [skip ci]"
+          git commit -m "chore(art): persist production runtime and review assets [skip ci]"
           git fetch origin main
           remote_head="$(git rev-parse origin/main)"
           if [[ "$remote_head" != "$GITHUB_SHA" ]]; then
-            echo "main advanced from $GITHUB_SHA to $remote_head; skipping stale persistence."
+            echo "main advanced from $GITHUB_SHA to $remote_head; skipping stale generated-asset persistence."
             exit 0
           fi
 
@@ -139,9 +134,9 @@ jobs:
           git fetch origin main
           remote_head="$(git rev-parse origin/main)"
           if [[ "$remote_head" != "$GITHUB_SHA" ]]; then
-            echo "main advanced during persistence; newer CI owns persistence."
+            echo "main advanced during generated-asset push; newer CI owns persistence."
             exit 0
           fi
 
-          echo "Persistence push failed while main still points at this workflow SHA."
+          echo "Generated asset push failed while main still points at this workflow SHA."
           exit 1
