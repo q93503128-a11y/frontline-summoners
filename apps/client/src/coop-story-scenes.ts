@@ -1,4 +1,6 @@
 import Phaser from 'phaser';
+import type { BaseWeaponId } from '@frontline/sim/playable';
+import { BASE_WEAPON_UNLOCKS } from './base-weapon-progression';
 import { CoopBattleScene, CoopLobbyScene } from './coop-scenes';
 import { getAuthenticatedCoopClientProgress } from './coop-account-progress';
 import { CoopSession, type CoopServerMessage } from './coop-network';
@@ -27,6 +29,11 @@ type GuestLobbyPageCarrier = Phaser.Scene & {
 type GuestLobbyPresentationCarrier = GuestLobbyCarrier & GuestLobbyPageCarrier & {
   host?: (stageId: string) => Promise<void>;
   promptJoin?: () => void;
+  readonly inviteCode?: string | null;
+  copyInvite?: () => Promise<void>;
+  cycleBaseWeapon?: () => void;
+  toggleReady?: () => void;
+  leaveRoom?: () => void;
 };
 type GuestBattleResultCarrier = Phaser.Scene & {
   readonly resultLayer?: Phaser.GameObjects.Container;
@@ -41,6 +48,10 @@ function lobbySession(scene: Phaser.Scene): CoopSession | null {
 function formatCoopPermille(permille: number): string {
   const percent = permille / 10;
   return `${Number.isInteger(percent) ? percent.toFixed(0) : percent.toFixed(1)}%`;
+}
+
+function coopWeaponName(id: BaseWeaponId | null | undefined): string {
+  return BASE_WEAPON_UNLOCKS.find((entry) => entry.id === id)?.displayName ?? '기본 거점 병기';
 }
 
 function attachLobbyPreStory(scene: Phaser.Scene): void {
@@ -151,11 +162,10 @@ export class StoryGuestCoopLobbyScene extends CoopLobbyScene {
     const overlay = this.commandOverlay;
     const compact = isCompactMobileViewport();
     const carrier = this as unknown as GuestLobbyPresentationCarrier;
+    const session = lobbySession(this);
 
-    if (lobbySession(this)) {
-      const roomFooter = this.add.rectangle(640, 666, 1240, 78, 0x0f151d, 1).setStrokeStyle(2, 0x354356, 0.55).setInteractive();
-      overlay.add(roomFooter);
-      overlay.add(addText(this, 640, 662, '협동 방 준비 중 · 전장 선택과 참가 코드 입력은 방을 나간 뒤 다시 사용할 수 있습니다.', compact ? 17 : 14, '#9eabba', 'center').setOrigin(0.5));
+    if (session) {
+      this.renderGuestRoomCommandBoard(overlay, carrier, session, compact);
       return;
     }
 
@@ -213,6 +223,78 @@ export class StoryGuestCoopLobbyScene extends CoopLobbyScene {
     if (page <= 0) setButtonState(previous, 'disabled', '첫 번째 협동 전선 묶음입니다.');
     if (page >= pageCount - 1) setButtonState(next, 'disabled', '마지막 협동 전선 묶음입니다.');
     if (!carrier.promptJoin) setButtonState(join, 'disabled', '참가 코드 입력 기능을 불러오지 못했습니다.');
+  }
+
+  private renderGuestRoomCommandBoard(
+    overlay: Phaser.GameObjects.Container,
+    carrier: GuestLobbyPresentationCarrier,
+    session: CoopSession,
+    compact: boolean,
+  ): void {
+    const blocker = this.add.rectangle(640, 374, 1220, 438, 0x131a22, 1).setStrokeStyle(3, 0x526474, 0.9).setInteractive();
+    overlay.add(blocker);
+    overlay.add(addCommandPanel(this, 640, 374, 1200, 422, 0x647a90, 0x18212b, 0.995));
+
+    const room = session.room;
+    if (!room) {
+      overlay.add(addSectionHeading(this, 74, 174, '협동 지휘선 연결', 1105, 0x647a90));
+      overlay.add(addText(this, 640, 360, '협동 방 정보를 받는 중…', compact ? 28 : 23, '#c8d3df', 'center').setOrigin(0.5));
+      overlay.add(addText(this, 640, 402, '연결이 복구되면 지휘관 좌석과 공유 병기 합의 상태가 표시됩니다.', compact ? 17 : 14, '#8f9baa', 'center').setOrigin(0.5));
+      const leave = addButton(this, 640, 550, 230, compact ? 80 : 56, '방 나가기', () => carrier.leaveRoom?.(), 0x8d5f64, { tone: 'danger' });
+      overlay.add(leave);
+      if (!carrier.leaveRoom) setButtonState(leave, 'disabled', '방 나가기 기능을 불러오지 못했습니다.');
+      return;
+    }
+
+    const stage = ALL_STAGES.find((entry) => entry.id === room.stageId);
+    overlay.add(addSectionHeading(this, 74, 174, `협동 준비 · ${stage?.name ?? '협동 전장'}`, 1105, 0x718da5));
+    overlay.add(addText(this, 1175, 164, session.connectionState === 'OPEN' ? '서버 연결됨' : session.connectionState === 'RECONNECTING' ? '재접속 중…' : '연결 중…', compact ? 17 : 14, session.connectionState === 'OPEN' ? '#8ee3aa' : '#ffd493', 'right').setOrigin(1, 0));
+
+    const route = this.add.graphics();
+    route.lineStyle(5, 0x65798e, 0.5).lineBetween(265, 337, 1015, 337);
+    route.fillStyle(room.agreedBaseWeaponId ? 0x62a37b : 0xb28a4d, 0.96).fillCircle(640, 337, 28);
+    route.lineStyle(3, 0xe8dcc0, 0.55).strokeCircle(640, 337, 28);
+    overlay.add(route);
+
+    room.seats.slice(0, 2).forEach((seat, index) => {
+      const x = index === 0 ? 300 : 980;
+      const mine = seat.seatId === session.seatId;
+      const accent = mine ? 0x6fa2d0 : 0x627184;
+      overlay.add(this.add.circle(x, 337, 34, accent, 0.96).setStrokeStyle(3, mine ? 0xd7eaff : 0xa9b4c1, 0.55));
+      overlay.add(addText(this, x, 324, String(index + 1), compact ? 20 : 17, '#ffffff', 'center').setOrigin(0.5));
+      overlay.add(addText(this, x, 220, `${index + 1}번 지휘관${mine ? ' · 나' : ''}`, compact ? 23 : 20, '#ffffff', 'center').setOrigin(0.5));
+      overlay.add(addText(this, x, 258, seat.connected ? '● 접속됨' : '○ 접속 대기', compact ? 17 : 14, seat.connected ? '#8ee3aa' : '#a3adba', 'center').setOrigin(0.5));
+      overlay.add(addText(this, x, 286, `편성 ${seat.deckSize}/5 · ${seat.ready ? '준비 완료' : '준비 전'}`, compact ? 17 : 14, seat.ready ? '#f0d67d' : '#b8c2cf', 'center').setOrigin(0.5));
+      overlay.add(addText(this, x, 388, coopWeaponName(seat.selectedBaseWeaponId), compact ? 18 : 15, '#bfe8ff', 'center').setOrigin(0.5));
+      overlay.add(addText(this, x, 418, seat.control === 'AI' ? '연결 이탈 · 임시 지휘' : '플레이어 지휘', compact ? 15 : 12, seat.control === 'AI' ? '#ffd493' : '#8fa4b8', 'center').setOrigin(0.5));
+    });
+
+    const agreementText = room.agreedBaseWeaponId
+      ? `공유 병기 합의\n${coopWeaponName(room.agreedBaseWeaponId)}`
+      : '병기 불일치\n같은 병기로 맞추기';
+    overlay.add(addText(this, 640, 306, agreementText, compact ? 17 : 14, room.agreedBaseWeaponId ? '#c9f1d6' : '#ffe0a0', 'center').setOrigin(0.5));
+
+    const mine = room.seats.find((seat) => seat.seatId === session.seatId);
+    if (carrier.inviteCode) {
+      overlay.add(addText(this, 82, 472, `친구 참가 코드 · ${carrier.inviteCode}`, compact ? 16 : 13, '#cbd4e1').setWordWrapWidth(590));
+    } else {
+      overlay.add(addText(this, 82, 472, '참가자로 연결됨 · 방장의 준비 신호를 함께 기다립니다.', compact ? 16 : 13, '#95a4b4'));
+    }
+
+    const weapon = addButton(this, 285, 548, 250, compact ? 80 : 58, '공유 병기 변경', () => carrier.cycleBaseWeapon?.(), 0x4f7894, { tone: 'secondary' });
+    const ready = addButton(this, 560, 548, 220, compact ? 80 : 58, mine?.ready ? '준비 취소' : '준비 완료', () => carrier.toggleReady?.(), 0x5f8f75, { tone: 'primary' });
+    const invite = addButton(this, 810, 548, 210, compact ? 80 : 58, carrier.inviteCode ? '참가 코드 복사' : '코드 없음', () => { void carrier.copyInvite?.(); }, 0x6b628f, { tone: 'quiet' });
+    const leave = addButton(this, 1070, 548, 190, compact ? 80 : 58, '방 나가기', () => carrier.leaveRoom?.(), 0x8d5f64, { tone: 'danger' });
+    overlay.add([weapon, ready, invite, leave]);
+
+    if (mine?.ready) {
+      setButtonState(weapon, 'locked', '준비를 취소한 뒤 공유 병기를 변경할 수 있습니다.');
+      setButtonState(ready, 'selected');
+    }
+    if (!carrier.cycleBaseWeapon) setButtonState(weapon, 'disabled', '병기 변경 기능을 불러오지 못했습니다.');
+    if (!carrier.toggleReady) setButtonState(ready, 'disabled', '준비 상태 변경 기능을 불러오지 못했습니다.');
+    if (!carrier.inviteCode || !carrier.copyInvite) setButtonState(invite, 'disabled', carrier.inviteCode ? '코드 복사 기능을 불러오지 못했습니다.' : '참가자는 별도 초대 코드를 공유하지 않습니다.');
+    if (!carrier.leaveRoom) setButtonState(leave, 'disabled', '방 나가기 기능을 불러오지 못했습니다.');
   }
 }
 
