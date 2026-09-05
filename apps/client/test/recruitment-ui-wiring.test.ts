@@ -67,7 +67,7 @@ test('recruitment result screen distinguishes new, direct plus, dismantle, and p
   assert.match(source, /pull\.duplicateResolution === 'DISMANTLE'/);
   assert.match(source, /pull\.duplicateResolution === 'PLUS'/);
   assert.match(source, /result\.results\.filter\(\(pull\) => !pull\.duplicate\)\.length/);
-  assert.match(source, /result\.persisted \? '저장 완료' : '저장 실패'/);
+  assert.match(source, /result\.persisted \? '저장 완료' : '영구 저장 실패 · 현재 실행에서는 결과 유지'/);
   assert.match(source, /result\.dismantledSoulEssence/);
   assert.doesNotMatch(source, /GUARANTEE_LABELS|guaranteedBy|selectionCreditGranted/);
 });
