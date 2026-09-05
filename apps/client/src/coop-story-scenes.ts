@@ -35,9 +35,16 @@ type GuestLobbyPresentationCarrier = GuestLobbyCarrier & GuestLobbyPageCarrier &
   toggleReady?: () => void;
   leaveRoom?: () => void;
 };
+type AccountLobbyPresentationCarrier = CoopLobbySessionCarrier & {
+  render?: () => void;
+  cycleWeapon?: () => void;
+  toggleReady?: () => void;
+  leave?: (scene?: string) => void;
+};
 type GuestBattleResultCarrier = Phaser.Scene & {
   readonly resultLayer?: Phaser.GameObjects.Container;
 };
+type AccountCoopMode = 'FRIEND' | 'PUBLIC';
 
 const guestClearSnapshotBySession = new WeakMap<CoopSession, ReadonlySet<string>>();
 
@@ -52,6 +59,91 @@ function formatCoopPermille(permille: number): string {
 
 function coopWeaponName(id: BaseWeaponId | null | undefined): string {
   return BASE_WEAPON_UNLOCKS.find((entry) => entry.id === id)?.displayName ?? '기본 거점 병기';
+}
+
+function installAccountCoopCommandBoard(scene: Phaser.Scene, mode: AccountCoopMode): void {
+  const carrier = scene as AccountLobbyPresentationCarrier;
+  const originalRender = carrier.render;
+  if (!originalRender) return;
+  let overlay: Phaser.GameObjects.Container | undefined;
+
+  const renderOverlay = (): void => {
+    overlay?.destroy(true);
+    overlay = scene.add.container(0, 0).setDepth(60);
+    const compact = isCompactMobileViewport();
+    const session = lobbySession(scene);
+    const room = session?.room;
+    const title = mode === 'FRIEND' ? '친구 협동 준비' : '공개 협동 준비';
+    const accent = mode === 'FRIEND' ? 0x766e9d : 0x6388a5;
+
+    const blocker = scene.add.rectangle(640, 374, 1220, 438, 0x131a22, 1).setStrokeStyle(3, 0x526474, 0.9).setInteractive();
+    overlay.add(blocker);
+    overlay.add(addCommandPanel(scene, 640, 374, 1200, 422, accent, 0x18212b, 0.995));
+    overlay.add(addSectionHeading(scene, 74, 174, title, 1105, accent));
+
+    if (!session || !room) {
+      overlay.add(addText(scene, 640, 355, mode === 'FRIEND' ? '친구 협동 방에 연결하는 중…' : '매칭된 지휘관과 연결하는 중…', compact ? 28 : 23, '#c8d3df', 'center').setOrigin(0.5));
+      overlay.add(addText(scene, 640, 402, '연결되면 두 지휘관의 편성·준비·공유 병기 합의 상태가 표시됩니다.', compact ? 17 : 14, '#8f9baa', 'center').setOrigin(0.5));
+      const leave = addButton(scene, 640, 550, 230, compact ? 80 : 56, mode === 'FRIEND' ? '친구 화면으로' : '매칭으로 돌아가기', () => carrier.leave?.(mode === 'FRIEND' ? 'social' : undefined), 0x8d5f64, { tone: 'danger' });
+      overlay.add(leave);
+      if (!carrier.leave) setButtonState(leave, 'disabled', '나가기 기능을 불러오지 못했습니다.');
+      return;
+    }
+
+    const stage = ALL_STAGES.find((entry) => entry.id === room.stageId);
+    overlay.add(addText(scene, 1175, 164, session.connectionState === 'OPEN' ? '서버 연결됨' : session.connectionState === 'RECONNECTING' ? '재접속 중…' : '연결 중…', compact ? 17 : 14, session.connectionState === 'OPEN' ? '#8ee3aa' : '#ffd493', 'right').setOrigin(1, 0));
+    overlay.add(addText(scene, 640, 202, stage?.name ?? '협동 전장', compact ? 25 : 22, '#fff4cf', 'center').setOrigin(0.5));
+
+    const rail = scene.add.graphics();
+    rail.lineStyle(5, accent, 0.5).lineBetween(265, 337, 1015, 337);
+    rail.fillStyle(room.agreedBaseWeaponId ? 0x62a37b : 0xb28a4d, 0.96).fillCircle(640, 337, 28);
+    rail.lineStyle(3, 0xe8dcc0, 0.55).strokeCircle(640, 337, 28);
+    overlay.add(rail);
+
+    room.seats.slice(0, 2).forEach((seat, index) => {
+      const x = index === 0 ? 300 : 980;
+      const mine = seat.seatId === session.seatId;
+      const seatAccent = mine ? 0x6fa2d0 : 0x627184;
+      overlay!.add(scene.add.circle(x, 337, 34, seatAccent, 0.96).setStrokeStyle(3, mine ? 0xd7eaff : 0xa9b4c1, 0.55));
+      overlay!.add(addText(scene, x, 324, String(index + 1), compact ? 20 : 17, '#ffffff', 'center').setOrigin(0.5));
+      overlay!.add(addText(scene, x, 240, `${index + 1}번 지휘관${mine ? ' · 나' : ''}`, compact ? 23 : 20, '#ffffff', 'center').setOrigin(0.5));
+      overlay!.add(addText(scene, x, 275, seat.connected ? '● 접속됨' : '○ 접속 대기', compact ? 17 : 14, seat.connected ? '#8ee3aa' : '#a3adba', 'center').setOrigin(0.5));
+      overlay!.add(addText(scene, x, 302, `편성 ${seat.deckSize}/5 · ${seat.ready ? '준비 완료' : '준비 전'}`, compact ? 17 : 14, seat.ready ? '#f0d67d' : '#b8c2cf', 'center').setOrigin(0.5));
+      overlay!.add(addText(scene, x, 388, coopWeaponName(seat.selectedBaseWeaponId), compact ? 18 : 15, '#bfe8ff', 'center').setOrigin(0.5));
+      overlay!.add(addText(scene, x, 418, seat.control === 'AI' ? '연결 이탈 · 임시 지휘' : '플레이어 지휘', compact ? 15 : 12, seat.control === 'AI' ? '#ffd493' : '#8fa4b8', 'center').setOrigin(0.5));
+    });
+
+    const agreementText = room.agreedBaseWeaponId
+      ? `공유 병기 합의\n${coopWeaponName(room.agreedBaseWeaponId)}`
+      : '병기 불일치\n같은 병기로 맞추기';
+    overlay.add(addText(scene, 640, 306, agreementText, compact ? 17 : 14, room.agreedBaseWeaponId ? '#c9f1d6' : '#ffe0a0', 'center').setOrigin(0.5));
+    overlay.add(addText(scene, 640, 464, mode === 'FRIEND' ? '친구 계정 편성 · 개인 보급 · 공유 기지와 거점 병기' : '자동 매칭 계정 편성 · 개인 보급 · 공유 기지와 거점 병기', compact ? 16 : 13, '#9aa8b8', 'center').setOrigin(0.5));
+
+    const mine = room.seats.find((seat) => seat.seatId === session.seatId);
+    const weapon = addButton(scene, 375, 548, 250, compact ? 80 : 58, '공유 병기 변경', () => carrier.cycleWeapon?.(), 0x4f7894, { tone: 'secondary' });
+    const ready = addButton(scene, 650, 548, 220, compact ? 80 : 58, mine?.ready ? '준비 취소' : '준비 완료', () => carrier.toggleReady?.(), 0x5f8f75, { tone: 'primary' });
+    const leave = addButton(scene, 930, 548, 230, compact ? 80 : 58, mode === 'FRIEND' ? '친구 화면으로' : '매칭으로 돌아가기', () => carrier.leave?.(mode === 'FRIEND' ? 'social' : undefined), 0x8d5f64, { tone: 'danger' });
+    overlay.add([weapon, ready, leave]);
+
+    if (mine?.ready) {
+      setButtonState(weapon, 'locked', '준비를 취소한 뒤 공유 병기를 변경할 수 있습니다.');
+      setButtonState(ready, 'selected');
+    }
+    if (!carrier.cycleWeapon) setButtonState(weapon, 'disabled', '병기 변경 기능을 불러오지 못했습니다.');
+    if (!carrier.toggleReady) setButtonState(ready, 'disabled', '준비 상태 변경 기능을 불러오지 못했습니다.');
+    if (!carrier.leave) setButtonState(leave, 'disabled', '나가기 기능을 불러오지 못했습니다.');
+  };
+
+  carrier.render = () => {
+    originalRender.call(scene);
+    renderOverlay();
+  };
+  scene.events.once(Phaser.Scenes.Events.SHUTDOWN, () => {
+    overlay?.destroy(true);
+    overlay = undefined;
+    carrier.render = originalRender;
+  });
+  carrier.render();
 }
 
 function attachLobbyPreStory(scene: Phaser.Scene): void {
@@ -124,8 +216,6 @@ export class StoryGuestCoopLobbyScene extends CoopLobbyScene {
     const preferredStageId = this.preferredStageId;
     if (!preferredStageId) return;
 
-    // CoopLobbyScene keeps guest save/session authority private. This adapter only focuses its existing stage picker
-    // after the base async progress load; it does not create a second room path or mutate the chosen stage later.
     void Promise.resolve().then(() => loadGuestProgress()).then((progress) => {
       if (!this.scene.isActive()) return;
       const eligible = ALL_STAGES.filter((stage) => stage.multiplayerPolicy === 'SOLO_OR_COOP' && isSortieStageUnlocked(stage.id, progress.clearedStageIds));
@@ -310,8 +400,6 @@ export class StoryGuestCoopBattleScene extends CoopBattleScene {
     this.storySession = data.session;
     this.storyStageId = data.session?.room?.stageId ?? '';
     const preBattleClears = data.session ? guestClearSnapshotBySession.get(data.session) : undefined;
-    // Missing snapshot is treated as already-cleared: presentation may be omitted, but a reconnect/race can never
-    // fabricate a first-clear chapter outro.
     this.stageWasClearedBeforeBattle = preBattleClears?.has(this.storyStageId) ?? true;
     this.storySubscription = undefined;
     this.postStoryPoll = undefined;
@@ -338,9 +426,6 @@ export class StoryGuestCoopBattleScene extends CoopBattleScene {
     const story = getPostStageStory(this.storyStageId);
     if (!story) return;
 
-    // Guest completion is local IndexedDB authority. Base CoopBattleScene writes the clear first and only then
-    // renders the exact success text. Polling that presentation boundary keeps the story adapter out of save logic
-    // while still refusing to show a false chapter outro after a failed durable write.
     let checks = 0;
     this.postStoryPoll?.destroy();
     this.postStoryPoll = this.time.addEvent({
@@ -369,6 +454,7 @@ export class StoryFriendCoopLobbyScene extends FriendCoopLobbyScene {
   override create(): void {
     super.create();
     attachLobbyPreStory(this);
+    installAccountCoopCommandBoard(this, 'FRIEND');
   }
 }
 
@@ -376,6 +462,7 @@ export class StoryPublicCoopLobbyScene extends PublicCoopLobbyScene {
   override create(): void {
     super.create();
     attachLobbyPreStory(this);
+    installAccountCoopCommandBoard(this, 'PUBLIC');
   }
 }
 
@@ -413,8 +500,6 @@ export class StoryFriendCoopBattleScene extends FriendCoopBattleScene {
     const session = this.storySession;
     if (!session || message.seatId !== session.seatId || message.stageId !== this.storyStageId) return;
 
-    // ACCOUNT_SETTLED is the authoritative per-seat persistence signal. Only a genuine first cooperative
-    // NORMAL_CLEAR may open a chapter outro; reconnects/reclears cannot replay it as a new completion.
     if (session.battle?.winner !== 'PLAYER' || this.stageWasClearedBeforeBattle) return;
     const story = getPostStageStory(this.storyStageId);
     if (!story) return;
