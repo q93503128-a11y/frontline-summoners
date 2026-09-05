@@ -26,7 +26,9 @@ test('record hub reads canonical unlock rules and durable personal-best high-wat
   assert.match(hub, /record\?\.endlessRewardedMinute/);
   assert.match(hub, /record\?\.bossRushBestDefeated/);
   assert.match(hub, /record\?\.bossRushRewardedDefeated/);
-  assert.match(hub, /1× 고정 · SOLO_ONLY · 소탕 불가/);
+  assert.match(hub, /1× 고정 · 혼자 도전 · 소탕 불가/);
+  assert.doesNotMatch(hub, /SOLO_ONLY|NORMAL_CLEAR|RECORD SPECIAL|LOCKED/);
+  assert.match(hub, /setButtonState\(action, 'locked', unlockText\(mode\.id\)\)/);
   assert.match(hub, /this\.scene\.start\('record-battle', \{ modeId: mode\.id \}\)/);
 });
 
