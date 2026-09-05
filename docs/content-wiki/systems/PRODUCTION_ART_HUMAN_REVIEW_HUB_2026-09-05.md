@@ -2,7 +2,9 @@
 
 ## 목적
 
-production art의 자동 구조/품질 감사가 전 범위에서 `severe=0`, `atRisk=0`, `weakEvolution=0`, `watchEvolution=0`, `clippingRisk=0`까지 정리된 뒤, 실제 사람 검수를 시작하기 위한 단일 진입점을 제공한다.
+production art의 자동 구조/품질 감사를 통과한 후보를 실제 사람 검수로 넘기기 위한 단일 진입점을 제공한다.
+
+이 허브를 묶는 과정에서 기존 전역 품질 감사가 Fourth Slice의 per-target `runtime-metadata.json` 8개를 root metadata scan에 포함하지 못하고 있던 사실을 발견했다. 따라서 허브 공개와 동시에 `fourth-slice-runtime-metadata.json` aggregate index를 생성하도록 보강하여 Fourth Slice 8타깃 / 40 strips도 전역 audit과 review manifest에 포함한다.
 
 이 허브는 승인 시스템이 아니다. review mode를 빠르게 열고 브라우저 로컬 체크를 남길 수 있게 할 뿐이며, provenance / reviewer / reviewedAt / approval evidence를 생성하거나 수정하지 않는다.
 
@@ -24,6 +26,17 @@ production art의 자동 구조/품질 감사가 전 범위에서 `severe=0`, `a
 9. `?productionReview=chapter-04`
 10. `?productionReview=special-content`
 11. `?productionReview=recruitment`
+
+## Fourth Slice 전역 감사 누락 보강
+
+기존 Fourth Slice materializer는 각 대상 폴더에 `runtime-metadata.json`만 생성했다. 반면 `tools/audit-production-art-quality.mjs`는 production units root의 `*-runtime-metadata.json`을 전역 감사 입력으로 사용한다. 그 결과 Fourth Slice의 다음 8타깃은 개별 runtime validator에는 포함됐지만 전역 silhouette/motion quality audit에는 포함되지 않았다.
+
+- pyromancer F1/F2/F3
+- royal F1/F2/F3
+- enemy-berserker
+- enemy-knight
+
+`tools/materialize-fourth-slice-runtime-index.mjs`가 이 8타깃을 aggregate root metadata로 변환한다. URL, frame dimensions/count, byte length, SHA-256, review lifecycle를 실제 per-target metadata와 PNG에서 다시 읽어 작성하며, `tools/validate-fourth-slice-runtime-files.mjs`가 aggregate와 원본 파일의 정합도 함께 검증한다.
 
 ## 허브가 표시하는 정보
 
