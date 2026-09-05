@@ -59,6 +59,6 @@ test('profile scene loads server profile online, mutates loadout, and keeps offl
   assert.match(profile, /deriveAccountAchievementProfile\(view\.progress, remote\.profile, view\.authority === 'ACCOUNT_ONLINE'\)/);
   assert.match(profile, /mutateAuthenticatedAccountProfile\(\{ requestId: newRequestId\(\), profileLoadout: next \}\)/);
   assert.match(profile, /this\.authority !== 'ACCOUNT_ONLINE'/);
-  assert.match(profile, /계정 지휘관 · 오프라인 캐시/);
+  assert.match(profile, /계정 지휘관 · 오프라인 기록/);
   assert.match(profile, /계정 프로필 서버 저장 완료/);
 });
