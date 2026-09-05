@@ -2,6 +2,7 @@
   "schemaVersion": 1,
   "generatedBy": "tools/materialize-production-review-hub.mjs",
   "reviewHubPath": "/assets/production/review/index.html",
+  "reworkQueuePath": "/assets/production/review/rework-queue.html",
   "humanApprovalAuthority": false,
   "note": "This hub is a navigation and local checklist surface only. It is not review evidence and cannot grant approval.",
   "audit": {
