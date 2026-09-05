@@ -19,7 +19,7 @@
     "assets:production:runtime:second-slice:check": "npm run assets:production:materialize:second-slice && node tools/validate-second-slice-runtime-files.mjs",
     "assets:production:materialize:third-slice": "node tools/materialize-third-slice-production-art.mjs && node tools/assemble-third-slice-horizontal-strips.mjs && node tools/materialize-third-slice-battlefields.mjs",
     "assets:production:runtime:third-slice:check": "npm run assets:production:materialize:third-slice && node tools/validate-third-slice-runtime-files.mjs",
-    "assets:production:materialize:fourth-slice": "node tools/materialize-fourth-slice-production-art.mjs && node tools/materialize-fourth-slice-battlefield.mjs",
+    "assets:production:materialize:fourth-slice": "node tools/materialize-fourth-slice-production-art.mjs && node tools/materialize-fourth-slice-battlefield.mjs && node tools/materialize-fourth-slice-runtime-index.mjs",
     "assets:production:runtime:fourth-slice:check": "npm run assets:production:materialize:fourth-slice && node tools/validate-fourth-slice-runtime-files.mjs",
     "assets:production:materialize:fifth-slice": "node tools/materialize-fifth-slice-production-art.mjs",
     "assets:production:runtime:fifth-slice:check": "npm run assets:production:materialize:fifth-slice && node tools/validate-fifth-slice-runtime-files.mjs",
