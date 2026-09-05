@@ -7,7 +7,7 @@ const readSource = (relative: string): Promise<string> => readFile(new URL(relat
 
 test('main menu registers friends and account-bound friend coop scenes', async () => {
   const source = await readSource('../src/main.ts');
-  assert.match(source, /'친구·초대'/);
+  assert.match(source, /'친구 · 초대'/);
   assert.match(source, /game\.scene\.add\('social', SocialScene/);
   assert.match(source, /game\.scene\.add\('friend-coop-lobby', FriendCoopLobbyScene/);
   assert.match(source, /game\.scene\.add\('friend-coop-battle', FriendCoopBattleScene/);
