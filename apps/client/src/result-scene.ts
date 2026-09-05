@@ -57,7 +57,7 @@ export class ResultScene extends Phaser.Scene {
   private resultRecorded = false;
   private postStoryId: string | undefined;
   private actionButtons: Phaser.GameObjects.Container[] = [];
-  private settlementPill?: Phaser.GameObjects.Container;
+  private settlementPill: Phaser.GameObjects.Container | undefined;
 
   constructor() { super('result'); }
 
@@ -93,15 +93,18 @@ export class ResultScene extends Phaser.Scene {
     else this.renderDefeat();
 
     const buttonY = compact ? 630 : 620;
-    const h = compact ? 86 : 64;
-    const retry = addButton(this, 350, buttonY, 250, h, '다시 도전', () => {
-      if (this.resultRecorded) this.leaveResult('battle', { stageId: this.stage.id });
+    const resultButtonHeight = compact ? 84 : 68;
+    const retry = addButton(this, 350, buttonY, 250, resultButtonHeight, '다시 도전', () => {
+      if (!this.resultRecorded) return;
+      this.leaveResult('battle', { stageId: this.stage.id });
     }, 0x668aa8, { tone: 'primary' });
-    const stageButton = addButton(this, 640, buttonY, 240, h, '스테이지 선택', () => {
-      if (this.resultRecorded) this.leaveResult('stage-select', { collectionId: collection.id });
+    const stageButton = addButton(this, 640, buttonY, 240, resultButtonHeight, '스테이지 선택', () => {
+      if (!this.resultRecorded) return;
+      this.leaveResult('stage-select', { collectionId: collection.id });
     }, special ? 0x846598 : 0x66788d, { tone: 'secondary' });
-    const home = addButton(this, 920, buttonY, 220, h, '지휘소', () => {
-      if (this.resultRecorded) this.leaveResult('main-menu');
+    const home = addButton(this, 920, buttonY, 220, resultButtonHeight, '지휘소', () => {
+      if (!this.resultRecorded) return;
+      this.leaveResult('main-menu');
     }, 0x5c6878, { tone: 'quiet' });
     this.actionButtons = [retry, stageButton, home];
     this.updateActionStates();
@@ -122,10 +125,10 @@ export class ResultScene extends Phaser.Scene {
       const profileReward = result.firstClear ? formatSpecialProfileReward(this.stage.id) : undefined;
       rewardText.setText(`${result.firstClear ? '첫 클리어 · ' : '재클리어 · '}${formatResourceReward(result.resourceReward)}${profileReward ? `\n${profileReward}` : ''}`);
       if (result.persisted) {
-        status.setText(result.firstClear ? '첫 클리어와 보상을 저장했습니다.' : '재클리어 보상을 저장했습니다.').setColor(COLORS.green);
+        status.setText(result.firstClear ? '특수 작전 첫 클리어 저장 완료' : '특수 작전 재클리어 보상 저장 완료').setColor(COLORS.green);
         this.replaceSettlementPill(result.firstClear ? '첫 클리어 저장됨' : '보상 저장됨', 'online');
       } else {
-        status.setText('영구 저장에 실패했습니다. 현재 실행에서는 결과를 유지합니다.').setColor(COLORS.warning);
+        status.setText('브라우저 영구 저장 실패 · 현재 탭에서는 결과 유지').setColor(COLORS.warning);
         this.replaceSettlementPill('저장 확인 필요', 'warning');
       }
       this.updateActionStates();
@@ -166,12 +169,13 @@ export class ResultScene extends Phaser.Scene {
       const quirkText = storyTenQuirk ? `\n${storyTenNew ? '숨겨진 업적 달성' : '숨겨진 업적 조건 재달성'} · 열 명의 이야기` : '';
       rewardText.setText(`${result.firstClear ? '첫 클리어 · ' : '재클리어 · '}${formatResourceReward(result.resourceReward)}${quirkText}`);
       if (result.persisted) {
+        const storySuffix = this.postStoryId ? ' · 장 완료 이야기 예정' : '';
         status.setText(result.firstClear
-          ? `진행 저장 완료 · 다음 전장 개방${this.postStoryId ? ' · 장 완료 이야기 예정' : ''}`
+          ? `진행 저장 완료 · 다음 전장 개방${storySuffix}`
           : '재클리어 보상 저장 완료 · 영구 보상은 반복 지급되지 않습니다.').setColor(COLORS.green);
         this.replaceSettlementPill(result.firstClear ? '새 전선 개방' : '보상 저장됨', 'online');
       } else {
-        status.setText('영구 저장에 실패했습니다. 현재 실행에서는 진행을 유지합니다.').setColor(COLORS.warning);
+        status.setText('브라우저 영구 저장 실패 · 현재 탭에서는 진행 유지').setColor(COLORS.warning);
         this.replaceSettlementPill('저장 확인 필요', 'warning');
       }
       if (unlockSlot) unlockText.setText(result.firstClear ? `신규 동료 · ${unlockSlot.displayName}` : `보유 동료 · ${unlockSlot.displayName}`);
