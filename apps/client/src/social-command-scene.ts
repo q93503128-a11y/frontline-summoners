@@ -6,34 +6,32 @@ import { SocialScene } from './social-scene.ts';
  * this layer only removes implementation vocabulary that should never leak into player-facing copy.
  */
 export class SocialCommandScene extends SocialScene {
-  private vocabularyTimer: Phaser.Time.TimerEvent | undefined;
-
   override create(): void {
-    super.create();
-    this.sanitizePlayerFacingVocabulary();
-    this.vocabularyTimer = this.time.addEvent({
-      delay: 120,
-      loop: true,
-      callback: () => this.sanitizePlayerFacingVocabulary(),
-    });
+    const factory = this.add;
+    const originalText = factory.text;
+    const wrappedText: typeof originalText = (x, y, text, style) => originalText.call(
+      factory,
+      x,
+      y,
+      this.sanitizePlayerFacingText(text),
+      style,
+    );
+    factory.text = wrappedText;
+
     this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => {
-      this.vocabularyTimer?.destroy();
-      this.vocabularyTimer = undefined;
+      factory.text = originalText;
     });
+    super.create();
   }
 
-  private sanitizePlayerFacingVocabulary(): void {
-    const visit = (child: Phaser.GameObjects.GameObject): void => {
-      if (child instanceof Phaser.GameObjects.Text) {
-        if (/^내 상태 (온라인|오프라인) · 프레임 /.test(child.text)) {
-          child.setText(child.text.replace(/ · 프레임 .+$/, ' · 프로필 장식 적용'));
-        }
-        return;
-      }
-      if (child instanceof Phaser.GameObjects.Container) {
-        for (const nested of child.list) visit(nested);
-      }
-    };
-    for (const child of this.children.list) visit(child);
+  private sanitizePlayerFacingText(value: string | string[]): string | string[] {
+    if (Array.isArray(value)) return value.map((entry) => this.sanitizePlayerFacingLine(entry));
+    return this.sanitizePlayerFacingLine(value);
+  }
+
+  private sanitizePlayerFacingLine(text: string): string {
+    return text
+      .replace(/^내 상태 (온라인|오프라인) · 프레임 .+$/, '내 상태 $1 · 프로필 장식 적용')
+      .replace(/\b(?:main|special)_[a-z0-9_]+\b/gi, '알 수 없는 전장');
   }
 }
