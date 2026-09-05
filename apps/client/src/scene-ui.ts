@@ -50,7 +50,7 @@ export interface CommandButtonOptions {
 
 interface CommandButtonController {
   state: CommandButtonState;
-  reason?: string;
+  reason: string | undefined;
   render(): void;
 }
 
@@ -158,20 +158,20 @@ export function addButton(
 
     visual.fillStyle(0x080b10, inactive ? 0.24 : 0.36);
     visual.fillPoints([
-      new Phaser.Geom.Point(left + notch + 2, top + 5),
-      new Phaser.Geom.Point(right + 2, top + 5),
-      new Phaser.Geom.Point(right - notch + 2, bottom + 5),
-      new Phaser.Geom.Point(left + 2, bottom + 5),
-      new Phaser.Geom.Point(left + notch + 2, top + 5),
+      { x: left + notch + 2, y: top + 5 },
+      { x: right + 2, y: top + 5 },
+      { x: right - notch + 2, y: bottom + 5 },
+      { x: left + 2, y: bottom + 5 },
+      { x: left + notch + 2, y: top + 5 },
     ], true);
 
     visual.fillStyle(fill, inactive ? 0.82 : 0.99);
     visual.fillPoints([
-      new Phaser.Geom.Point(left + notch, top),
-      new Phaser.Geom.Point(right, top),
-      new Phaser.Geom.Point(right - notch, bottom),
-      new Phaser.Geom.Point(left, bottom),
-      new Phaser.Geom.Point(left + notch, top),
+      { x: left + notch, y: top },
+      { x: right, y: top },
+      { x: right - notch, y: bottom },
+      { x: left, y: bottom },
+      { x: left + notch, y: top },
     ], true);
 
     const railAlpha = inactive ? 0.32 : selected ? 1 : 0.72;
