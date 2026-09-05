@@ -1,5 +1,5 @@
 import Phaser from 'phaser';
-import { INTERNAL_HEIGHT, INTERNAL_WIDTH } from '@frontline/shared';
+import { INTERNAL_WIDTH } from '@frontline/shared';
 import { loadActiveProgress } from './active-progress';
 import { recordActiveDeck, resetActiveDeckToAutomatic } from './active-meta-progression';
 import { buildCharacterCombatSlot, getEvolutionForm } from './character-growth';
@@ -38,16 +38,16 @@ import {
   getOwnedCharacterIds,
   type GuestProgress,
 } from './save';
+import {
+  addButton as button,
+  addSectionHeading,
+  addText as text,
+  COLORS,
+  drawBackdrop,
+  rarityColor,
+} from './scene-ui';
 import { isCompactMobileViewport } from './viewport';
 
-const FONT = '"Malgun Gothic", "Apple SD Gothic Neo", "Noto Sans KR", sans-serif';
-const rarityColor: Record<string, string> = {
-  C: '#b9c2cf',
-  B: '#8bd6a3',
-  A: '#79baff',
-  S: '#d79aff',
-  SS: '#ffd56f',
-};
 const STORY_BADGE_COLOR = '#d7c79f';
 const SPECIAL_BADGE_COLOR = '#9fd7d0';
 const ROSTER_ID_SET = new Set(ALL_PLAYER_SLOTS.map((slot) => slot.slotId));
@@ -61,58 +61,6 @@ const COUNTER_LABELS: Readonly<Record<RosterCounterFilter, string>> = {
 const COST_LABELS: Readonly<Record<RosterCostFilter, string>> = { ALL: '전체', LOW: '저', MID: '중', HIGH: '고' };
 const RANGE_LABELS: Readonly<Record<RosterRangeFilter, string>> = { ALL: '전체', SHORT: '근', MID: '중', LONG: '장' };
 const GROWTH_LABELS: Readonly<Record<RosterGrowthFilter, string>> = { ALL: '전체', PLUS: '+레벨', EVOLVED: '진화' };
-
-function text(
-  scene: Phaser.Scene,
-  x: number,
-  y: number,
-  value: string,
-  size = 24,
-  color = '#ffffff',
-  align: 'left' | 'center' | 'right' = 'left',
-): Phaser.GameObjects.Text {
-  const renderedSize = isCompactMobileViewport() ? Math.max(size, 16) : size;
-  return scene.add.text(x, y, value, {
-    fontFamily: FONT,
-    fontSize: `${renderedSize}px`,
-    color,
-    align,
-    stroke: '#11151d',
-    strokeThickness: renderedSize >= 30 ? 4 : 0,
-  });
-}
-
-function button(
-  scene: Phaser.Scene,
-  x: number,
-  y: number,
-  width: number,
-  height: number,
-  label: string,
-  onClick: () => void,
-  accent = 0x59677f,
-): Phaser.GameObjects.Container {
-  const bg = scene.add.rectangle(0, 0, width, height, 0x252b38, 0.98).setStrokeStyle(3, accent, 1);
-  const labelText = text(scene, 0, 0, label, Math.max(17, Math.floor(height * 0.3)), '#ffffff', 'center').setOrigin(0.5);
-  const container = scene.add.container(x, y, [bg, labelText]);
-  bg.setInteractive({ useHandCursor: true });
-  bg.on('pointerover', () => bg.setFillStyle(0x343c4d, 1));
-  bg.on('pointerout', () => { bg.setFillStyle(0x252b38, 0.98); container.setScale(1); });
-  bg.on('pointerdown', () => container.setScale(0.98));
-  bg.on('pointerupoutside', () => container.setScale(1));
-  bg.on('pointerup', () => { container.setScale(1); onClick(); });
-  return container;
-}
-
-function drawBackdrop(scene: Phaser.Scene): void {
-  scene.cameras.main.setBackgroundColor('#171c27');
-  const g = scene.add.graphics();
-  g.fillStyle(0x171c27).fillRect(0, 0, INTERNAL_WIDTH, INTERNAL_HEIGHT);
-  g.fillStyle(0x26344a, 1).fillCircle(1090, 125, 230);
-  g.fillStyle(0x263247, 1).fillTriangle(0, 570, 330, 250, 630, 570);
-  g.fillStyle(0x222d40, 1).fillTriangle(430, 570, 760, 200, 1080, 570);
-  g.fillStyle(0x111722).fillRect(0, 570, INTERNAL_WIDTH, 150);
-}
 
 function hotkeyLabel(index: number): string {
   return index === 9 ? '0' : String(index + 1);
@@ -163,11 +111,11 @@ export class DeckScene extends Phaser.Scene {
   constructor() { super('deck'); }
 
   create(): void {
-    drawBackdrop(this);
+    drawBackdrop(this, 'menu');
     const compact = isCompactMobileViewport();
     this.input.dragDistanceThreshold = compact ? 18 : 8;
     this.favoriteIds = [...loadRosterFavoriteIds(ROSTER_ID_SET)];
-    this.header = text(this, 52, 28, '편성 불러오는 중…', compact ? 36 : 38, '#fff4cf');
+    this.header = text(this, 52, 28, '편성 불러오는 중…', compact ? 36 : 38, COLORS.cream);
     text(
       this,
       54,
@@ -176,17 +124,20 @@ export class DeckScene extends Phaser.Scene {
         ? '탭 추가·제외 · 길게 끌어 슬롯 배치 · ★ 즐겨찾기 · 필터 조합 가능'
         : '보유 캐릭터만 표시 · 드래그로 1~0 슬롯 배치 · 빠른/상세 필터와 검색·즐겨찾기를 조합할 수 있다.',
       compact ? 20 : 17,
-      '#b8c0ce',
+      COLORS.muted,
     );
-    button(this, 1180, compact ? 58 : 55, 150, compact ? 84 : 48, '메인', () => this.scene.start('main-menu'), 0x586275);
+    button(this, 1180, compact ? 58 : 55, 150, compact ? 84 : 48, '지휘소', () => this.scene.start('main-menu'), 0x586275, { tone: 'quiet' });
+
+    addSectionHeading(this, 52, 112, '출격 순서 · 1 → 0', 1176, 0xb69a56);
+    addSectionHeading(this, 52, 274, '보유 명부 · 필터와 드래그로 편성', 1176, 0x6284a2);
 
     this.pageText = text(this, 640, 632, '', compact ? 20 : 17, '#9ca9bb', 'center').setOrigin(0.5);
-    this.statusText = text(this, 640, compact ? 604 : 604, '저장 데이터를 불러오는 중…', compact ? 18 : 14, '#9ca9bb', 'center').setOrigin(0.5);
+    this.statusText = text(this, 640, 604, '저장 데이터를 불러오는 중…', compact ? 18 : 14, '#9ca9bb', 'center').setOrigin(0.5);
 
-    button(this, 86, 660, 120, compact ? 84 : 48, '◀ 이전', () => this.changePage(-1), 0x586275);
-    button(this, 235, 660, 140, compact ? 84 : 48, '다음 ▶', () => this.changePage(1), 0x586275);
-    button(this, 910, 660, 170, compact ? 84 : 48, '자동 편성', () => { void this.resetAutomatic(); }, 0x6d6b55);
-    button(this, 1120, 660, 190, compact ? 84 : 48, '편성 저장', () => { void this.saveDeck(); }, 0x5f8fb8);
+    button(this, 86, 660, 120, compact ? 84 : 48, '◀ 이전', () => this.changePage(-1), 0x586275, { tone: 'quiet' });
+    button(this, 235, 660, 140, compact ? 84 : 48, '다음 ▶', () => this.changePage(1), 0x586275, { tone: 'quiet' });
+    button(this, 910, 660, 170, compact ? 84 : 48, '자동 편성', () => { void this.resetAutomatic(); }, 0x6d6b55, { tone: 'secondary' });
+    button(this, 1120, 660, 190, compact ? 84 : 48, '편성 저장', () => { void this.saveDeck(); }, 0x5f8fb8, { tone: 'primary' });
 
     void loadActiveProgress().then((view) => {
       if (!this.scene.isActive()) return;
@@ -200,7 +151,7 @@ export class DeckScene extends Phaser.Scene {
           : progress.deckSlotIds === undefined
             ? '기존 자동 편성을 불러왔습니다. 저장하면 수동 편성이 권위가 됩니다.'
             : '저장된 수동 편성을 불러왔습니다.');
-      this.statusText?.setColor(view.authority === 'ACCOUNT_OFFLINE_CACHE' ? '#ffcf8a' : '#9fcfff');
+      this.statusText?.setColor(view.authority === 'ACCOUNT_OFFLINE_CACHE' ? COLORS.warning : COLORS.blue);
       this.renderAll();
     });
   }
@@ -241,7 +192,7 @@ export class DeckScene extends Phaser.Scene {
     const ownedCount = this.getOwnedSlots().length;
     const filteredCount = this.getFilteredSlots().length;
     this.page = Math.min(this.page, this.pageCount - 1);
-    this.header?.setText(`수동 10칸 편성 · 보유 ${ownedCount}명 · 표시 ${filteredCount}명 · 선택 ${this.selectedIds.length}/${MAX_DECK_SLOTS}`);
+    this.header?.setText(`출격 편성 · 보유 ${ownedCount}명 · 표시 ${filteredCount}명 · 선택 ${this.selectedIds.length}/${MAX_DECK_SLOTS}`);
     this.renderDeckOrder();
     this.renderFilters();
     this.renderCards();
@@ -252,7 +203,7 @@ export class DeckScene extends Phaser.Scene {
     this.deckLayer = this.add.container(0, 0);
     const compact = isCompactMobileViewport();
     const startX = DECK_START_X;
-    const y = compact ? 140 : 142;
+    const y = compact ? 160 : 160;
 
     for (let index = 0; index < MAX_DECK_SLOTS; index += 1) {
       const slotId = this.selectedIds[index];
@@ -260,9 +211,9 @@ export class DeckScene extends Phaser.Scene {
       const x = startX + index * DECK_SLOT_WIDTH + DECK_SLOT_WIDTH / 2;
       const badge = rosterSlot ? acquisitionBadge(rosterSlot) : undefined;
       const border = badge ? Phaser.Display.Color.HexStringToColor(badge.color).color : 0x4b5666;
-      const bg = this.add.rectangle(x, y, DECK_SLOT_WIDTH - 8, compact ? 68 : 54, rosterSlot ? 0x293242 : 0x1d232d, 0.98).setStrokeStyle(2, border, 0.9);
+      const bg = this.add.rectangle(x, y, DECK_SLOT_WIDTH - 8, compact ? 72 : 58, rosterSlot ? 0x293242 : 0x1d232d, 0.98).setStrokeStyle(2, border, 0.9);
       this.deckLayer.add(bg);
-      this.deckLayer.add(text(this, x - 44, y - (compact ? 27 : 22), hotkeyLabel(index), compact ? 17 : 14, rosterSlot ? '#f0d67d' : '#667181'));
+      this.deckLayer.add(text(this, x - 44, y - (compact ? 29 : 24), hotkeyLabel(index), compact ? 17 : 14, rosterSlot ? COLORS.gold : '#667181'));
       this.deckLayer.add(text(this, x, y + 4, rosterSlot?.displayName ?? '빈 칸', compact ? 16 : 13, rosterSlot ? '#ffffff' : '#6f7987', 'center').setOrigin(0.5));
       if (rosterSlot) this.wireDragSurface(bg, rosterSlot.slotId, x, y);
     }
@@ -272,7 +223,7 @@ export class DeckScene extends Phaser.Scene {
     this.filterLayer?.destroy(true);
     this.filterLayer = this.add.container(0, 0);
     const compact = isCompactMobileViewport();
-    const y = compact ? 222 : 215;
+    const y = compact ? 242 : 238;
     const width = 142;
     const height = compact ? 56 : 42;
     const startX = 82;
@@ -298,7 +249,7 @@ export class DeckScene extends Phaser.Scene {
       () => this.promptSearch(),
     ];
     labels.forEach((label, index) => {
-      this.filterLayer!.add(button(this, startX + index * gap, y, width, height, label, actions[index]!, index === 7 ? 0x6e668c : 0x52677f));
+      this.filterLayer!.add(button(this, startX + index * gap, y, width, height, label, actions[index]!, index === 7 ? 0x6e668c : 0x52677f, { tone: 'quiet' }));
     });
   }
 
@@ -315,7 +266,7 @@ export class DeckScene extends Phaser.Scene {
       search: this.searchText,
       favoriteIds: new Set(this.favoriteIds),
     }));
-    this.statusText?.setColor('#9fcfff');
+    this.statusText?.setColor(COLORS.blue);
     this.renderAll();
   }
 
@@ -337,15 +288,15 @@ export class DeckScene extends Phaser.Scene {
     const visible = filteredSlots.slice(start, start + this.pageSize);
     const columns = compact ? 4 : 5;
     const cardWidth = compact ? 282 : 222;
-    const cardHeight = compact ? 166 : 174;
+    const cardHeight = compact ? 150 : 154;
     const xGap = compact ? 300 : 236;
     const startX = compact ? 190 : 168;
-    const startY = compact ? 342 : 332;
-    const yGap = compact ? 168 : 174;
+    const startY = compact ? 370 : 354;
+    const yGap = compact ? 154 : 154;
     this.pageText?.setText(`${this.page + 1} / ${this.pageCount} · 표시 ${filteredSlots.length}/${ownedSlots.length}명`);
 
     if (visible.length === 0) {
-      this.cardsLayer.add(text(this, INTERNAL_WIDTH / 2, 430, '현재 필터에 맞는 보유 캐릭터가 없습니다.', compact ? 24 : 20, '#9ca9bb', 'center').setOrigin(0.5));
+      this.cardsLayer.add(text(this, INTERNAL_WIDTH / 2, 430, '현재 필터에 맞는 보유 캐릭터가 없습니다.', compact ? 24 : 20, COLORS.muted, 'center').setOrigin(0.5));
       return;
     }
 
@@ -360,7 +311,7 @@ export class DeckScene extends Phaser.Scene {
       const badge = acquisitionBadge(slot);
       const baseBorder = Phaser.Display.Color.HexStringToColor(badge.color).color;
       const border = selected ? 0xf2d56f : baseBorder;
-      const bg = this.add.rectangle(x, y, cardWidth, cardHeight, selected ? 0x343329 : 0x252c3a, 0.98).setStrokeStyle(selected ? 4 : 3, border, 0.95);
+      const bg = this.add.rectangle(x, y, cardWidth, cardHeight, selected ? 0x343329 : 0x252c3a, 0.98).setStrokeStyle(selected ? 4 : 2, border, 0.95);
       this.cardsLayer!.add(bg);
 
       const meta = this.progress.characterProgressById?.[slot.slotId];
@@ -370,9 +321,9 @@ export class DeckScene extends Phaser.Scene {
       this.cardsLayer!.add(portrait);
 
       this.cardsLayer!.add(text(this, x - cardWidth / 2 + 12, y - cardHeight / 2 + 8, badge.label, compact ? 17 : 14, badge.color));
-      if (selected) this.cardsLayer!.add(text(this, x + cardWidth / 2 - 12, y - cardHeight / 2 + 8, `#${hotkeyLabel(selectedIndex)}`, compact ? 18 : 15, '#ffe18a', 'right').setOrigin(1, 0));
+      if (selected) this.cardsLayer!.add(text(this, x + cardWidth / 2 - 12, y - cardHeight / 2 + 8, `#${hotkeyLabel(selectedIndex)}`, compact ? 18 : 15, COLORS.gold, 'right').setOrigin(1, 0));
 
-      const favoriteStar = text(this, x + cardWidth / 2 - 16, y - cardHeight / 2 + (selected ? 37 : 12), favorite ? '★' : '☆', compact ? 25 : 21, favorite ? '#ffe18a' : '#7f8998', 'right').setOrigin(1, 0);
+      const favoriteStar = text(this, x + cardWidth / 2 - 16, y - cardHeight / 2 + (selected ? 37 : 12), favorite ? '★' : '☆', compact ? 25 : 21, favorite ? COLORS.gold : '#7f8998', 'right').setOrigin(1, 0);
       favoriteStar.setInteractive({ useHandCursor: true });
       favoriteStar.on('pointerdown', (_pointer: Phaser.Input.Pointer, _localX: number, _localY: number, event: Phaser.Types.Input.EventData) => event.stopPropagation());
       favoriteStar.on('pointerup', (_pointer: Phaser.Input.Pointer, _localX: number, _localY: number, event: Phaser.Types.Input.EventData) => {
@@ -389,11 +340,11 @@ export class DeckScene extends Phaser.Scene {
       const currentSlot = buildCharacterCombatSlot(slot, level, meta?.selectedFormId, plusLevel);
       const form = selectedFormName(this.progress, slot.slotId);
       const levelText = plusLevel > 0 ? `Lv${level} +${plusLevel}` : `Lv${level}`;
-      this.cardsLayer!.add(text(this, infoX, y - 29, `${slot.role} · ${levelText} · ${form}`, compact ? 16 : 13, '#acd2f3'));
-      this.cardsLayer!.add(text(this, infoX, y - 1, `${currentSlot.cost} 보급 · ${formatCombatTraits(currentSlot.definition)}`, compact ? 15 : 12, '#f2d37c'));
+      this.cardsLayer!.add(text(this, infoX, y - 25, `${slot.role} · ${levelText} · ${form}`, compact ? 16 : 13, COLORS.blue));
+      this.cardsLayer!.add(text(this, infoX, y + 1, `${currentSlot.cost} 보급 · ${formatCombatTraits(currentSlot.definition)}`, compact ? 15 : 12, COLORS.gold));
       const specialty = formatDamageSpecialty(currentSlot.definition);
       this.cardsLayer!.add(text(this, infoX, y + 26, specialty || '범용 공격', compact ? 15 : 12, specialty ? '#ffd493' : '#9da8b8'));
-      if (!compact) this.cardsLayer!.add(text(this, infoX, y + 51, selected ? '클릭 제외 · 드래그 슬롯 교환' : '클릭 추가 · 드래그 슬롯 배치', 11, selected ? '#ffe18a' : '#9aa7b8'));
+      if (!compact) this.cardsLayer!.add(text(this, infoX, y + 49, selected ? '클릭 제외 · 드래그 슬롯 교환' : '클릭 추가 · 드래그 슬롯 배치', 11, selected ? COLORS.gold : '#9aa7b8'));
       this.wireDragSurface(bg, slot.slotId, x, y);
     });
   }
@@ -402,7 +353,7 @@ export class DeckScene extends Phaser.Scene {
     this.favoriteIds = [...toggleRosterFavoriteId(this.favoriteIds, slotId, ROSTER_ID_SET)];
     const favorite = this.favoriteIds.includes(slotId);
     this.statusText?.setText(`${getSlotById(slotId)?.displayName ?? slotId} · 즐겨찾기 ${favorite ? '등록' : '해제'} · 기기 UI 선호에 저장`);
-    this.statusText?.setColor('#f2d37c');
+    this.statusText?.setColor(COLORS.gold);
     this.page = Math.min(this.page, this.pageCount - 1);
     this.renderAll();
   }
@@ -444,12 +395,12 @@ export class DeckScene extends Phaser.Scene {
     const next = placeCharacterAtDeckIndex(this.selectedIds, slotId, targetIndex, MAX_DECK_SLOTS);
     if (sameOrder(next, this.selectedIds)) {
       this.statusText?.setText(`슬롯 ${hotkeyLabel(targetIndex)} 위치를 유지합니다.`);
-      this.statusText?.setColor('#9fcfff');
+      this.statusText?.setColor(COLORS.blue);
       this.renderAll();
       return;
     }
     this.selectedIds = next;
-    this.statusText?.setText(`드래그 편성 변경 · ${slotId}을(를) 슬롯 ${hotkeyLabel(targetIndex)} 위치에 배치했습니다. 저장 전까지 전투에는 반영되지 않습니다.`);
+    this.statusText?.setText(`드래그 편성 변경 · ${getSlotById(slotId)?.displayName ?? '동료'}를 슬롯 ${hotkeyLabel(targetIndex)} 위치에 배치했습니다. 저장 전까지 전투에는 반영되지 않습니다.`);
     this.statusText?.setColor('#ffd493');
     this.renderAll();
   }
@@ -466,7 +417,7 @@ export class DeckScene extends Phaser.Scene {
     }
     if (this.selectedIds.length >= MAX_DECK_SLOTS) {
       this.statusText?.setText('덱은 최대 10칸입니다. 기존 캐릭터를 먼저 제외하거나 원하는 슬롯에 드래그해 교체하세요.');
-      this.statusText?.setColor('#ff9a91');
+      this.statusText?.setColor(COLORS.red);
       return;
     }
     this.selectedIds.push(slotId);
@@ -479,24 +430,24 @@ export class DeckScene extends Phaser.Scene {
     if (this.saving) return;
     if (this.selectedIds.length < 1) {
       this.statusText?.setText('최소 1명의 캐릭터를 편성해야 합니다.');
-      this.statusText?.setColor('#ff9a91');
+      this.statusText?.setColor(COLORS.red);
       return;
     }
     this.saving = true;
     this.statusText?.setText('편성 저장 중…');
-    this.statusText?.setColor('#9ca9bb');
+    this.statusText?.setColor(COLORS.muted);
     try {
       const result = await recordActiveDeck(this.selectedIds);
       this.progress = result.guestProgress;
       this.selectedIds = [...result.deckSlotIds];
       if (!this.scene.isActive()) return;
       this.statusText?.setText(result.persisted ? '수동 편성 저장 완료 · 다음 전투부터 이 순서가 적용됩니다.' : '영구 저장 실패 · 현재 탭에서는 수동 편성을 유지합니다.');
-      this.statusText?.setColor(result.persisted ? '#8ee3aa' : '#ffb37c');
+      this.statusText?.setColor(result.persisted ? COLORS.green : COLORS.warning);
       this.renderAll();
     } catch (error) {
       if (!this.scene.isActive()) return;
       this.statusText?.setText(error instanceof Error ? error.message : '편성을 저장하지 못했습니다.');
-      this.statusText?.setColor('#ff9a91');
+      this.statusText?.setColor(COLORS.red);
     } finally {
       this.saving = false;
     }
@@ -506,19 +457,19 @@ export class DeckScene extends Phaser.Scene {
     if (this.saving) return;
     this.saving = true;
     this.statusText?.setText('자동 편성을 계산하는 중…');
-    this.statusText?.setColor('#9ca9bb');
+    this.statusText?.setColor(COLORS.muted);
     try {
       const result = await resetActiveDeckToAutomatic();
       this.progress = result.guestProgress;
       this.selectedIds = [...result.deckSlotIds];
       if (!this.scene.isActive()) return;
       this.statusText?.setText(result.persisted ? '현재 보유 순서 기준 자동 편성을 적용했습니다.' : '영구 저장 실패 · 현재 탭에서는 자동 편성을 유지합니다.');
-      this.statusText?.setColor(result.persisted ? '#8ee3aa' : '#ffb37c');
+      this.statusText?.setColor(result.persisted ? COLORS.green : COLORS.warning);
       this.renderAll();
     } catch (error) {
       if (!this.scene.isActive()) return;
       this.statusText?.setText(error instanceof Error ? error.message : '자동 편성을 적용하지 못했습니다.');
-      this.statusText?.setColor('#ff9a91');
+      this.statusText?.setColor(COLORS.red);
     } finally {
       this.saving = false;
     }
