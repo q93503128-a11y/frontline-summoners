@@ -4,6 +4,8 @@ import { fileURLToPath } from 'node:url';
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const reviewRoot = resolve(root, 'apps/client/public/assets/production/review');
+const unitsRoot = resolve(root, 'apps/client/public/assets/production/units');
+const publicRoot = resolve(root, 'apps/client/public');
 const htmlPath = resolve(reviewRoot, 'gallery.html');
 const html = await readFile(htmlPath, 'utf8');
 
@@ -20,6 +22,7 @@ const EXPECTED = [
   ['special-content', 'special-content-runtime-metadata.json'],
   ['recruitment', 'recruitment-form-runtime-metadata.json'],
 ];
+const MOTIONS = ['idle', 'move', 'attack', 'knockback', 'death'];
 
 function assert(ok, message) {
   if (!ok) throw new Error(`[production-review-gallery] ${message}`);
@@ -30,7 +33,7 @@ for (const [id, metadataFile] of EXPECTED) {
   assert(html.includes(metadataFile), `missing metadata mapping ${metadataFile}`);
 }
 
-for (const motion of ['idle', 'move', 'attack', 'knockback', 'death']) {
+for (const motion of MOTIONS) {
   assert(html.includes(`'${motion}'`) || html.includes(`\"${motion}\"`), `missing motion ${motion}`);
 }
 
@@ -43,6 +46,8 @@ assert(html.includes('IntersectionObserver'), 'lazy animation loading missing');
 assert(html.includes('canvas'), 'frame canvas preview missing');
 assert(html.includes('attackContactFrame'), 'attack contact-frame review aid missing');
 assert(html.includes("cache:'no-store'"), 'metadata must be loaded fresh');
+assert(html.includes('COMPARE LAB'), 'comparison lab navigation missing');
+assert(html.includes("modeId==='recruitment'"), 'recruitment runtime fallback resolver missing');
 assert(html.includes("data-filter=\"pending\""), 'pending filter missing');
 assert(html.includes("data-filter=\"revisit\""), 'revisit filter missing');
 assert(html.includes("event.key.toLowerCase()"), 'keyboard review navigation missing');
@@ -51,6 +56,46 @@ assert(!html.includes('reviewedAt'), 'gallery must not capture review timestamps
 assert(!/\bAPPROVED\b/.test(html), 'gallery must not claim approval state');
 assert(!/\b(POST|PUT|PATCH|DELETE)\b/.test(html), 'gallery must remain read-only toward canonical data');
 
+let targetCount = 0;
+let stripCount = 0;
+let recruitmentFallbackStrips = 0;
+const filesToCheck = [];
+for (const [modeId, metadataFile] of EXPECTED) {
+  const metadata = JSON.parse(await readFile(resolve(unitsRoot, metadataFile), 'utf8'));
+  const entries = Object.entries(metadata.targets ?? {});
+  targetCount += entries.length;
+  for (const [targetKey, target] of entries) {
+    for (const motionName of MOTIONS) {
+      const motion = target.motions?.[motionName];
+      assert(motion, `${modeId}:${targetKey} missing ${motionName}`);
+      const fallbackUrl = modeId === 'recruitment' && target.unitId && target.formId
+        ? `/assets/production/units/${target.unitId}/${target.formId}/${motionName}.png`
+        : null;
+      const url = motion.url ?? fallbackUrl;
+      const frameWidth = Number(motion.frameWidth ?? target.frameWidth);
+      const frameHeight = Number(motion.frameHeight ?? target.frameHeight);
+      const frames = Number(motion.frames);
+      assert(typeof url === 'string' && url.startsWith('/assets/production/units/'), `${modeId}:${targetKey}:${motionName} unresolved URL`);
+      assert(Number.isFinite(frameWidth) && frameWidth > 0, `${modeId}:${targetKey}:${motionName} unresolved frameWidth`);
+      assert(Number.isFinite(frameHeight) && frameHeight > 0, `${modeId}:${targetKey}:${motionName} unresolved frameHeight`);
+      assert(Number.isInteger(frames) && frames > 0, `${modeId}:${targetKey}:${motionName} invalid frame count`);
+      if (!motion.url) recruitmentFallbackStrips += 1;
+      filesToCheck.push([`${modeId}:${targetKey}:${motionName}`, resolve(publicRoot, url.slice(1))]);
+      stripCount += 1;
+    }
+    const attackFrames = Number(target.motions?.attack?.frames);
+    assert(Number.isInteger(target.attackContactFrame) && target.attackContactFrame >= 0 && target.attackContactFrame < attackFrames, `${modeId}:${targetKey} invalid attackContactFrame`);
+  }
+}
+
+assert(targetCount === 209, `expected 209 canonical review targets/forms, got ${targetCount}`);
+assert(stripCount === 1045, `expected 1045 five-motion strips, got ${stripCount}`);
+assert(recruitmentFallbackStrips === 495, `expected 495 recruitment fallback strips, got ${recruitmentFallbackStrips}`);
+await Promise.all(filesToCheck.map(async ([label, path]) => {
+  const info = await stat(path);
+  assert(info.isFile() && info.size > 0, `${label} runtime PNG missing or empty`);
+}));
+
 const info = await stat(htmlPath);
-assert(info.size > 9000, 'gallery HTML unexpectedly small');
-console.log(`[production-review-gallery] validated ${EXPECTED.length} modes / five-motion lazy canvas review / local-only progress`);
+assert(info.size > 10000, 'gallery HTML unexpectedly small');
+console.log(`[production-review-gallery] validated ${EXPECTED.length} modes / ${targetCount} targets/forms / ${stripCount} live strips / ${recruitmentFallbackStrips} recruitment runtime fallbacks`);
