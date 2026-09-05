@@ -203,7 +203,7 @@ export class AccountCommandScene extends Phaser.Scene {
     const compact = isCompactMobileViewport();
     const summary = stateSummary(state);
     this.stateLayer.add(addStatusPill(this, 88, 200, summary.title, summary.kind));
-    this.stateLayer.add(addText(this, 88, 243, summary.detail, compact ? 21 : 18, state.kind === 'AUTHENTICATED_OFFLINE' ? COLORS.warning : '#d9e2ec'));
+    this.stateLayer.add(addText(this, 88, 243, summary.detail, compact ? 21 : 18, state.kind === 'AUTHENTICATED_OFFLINE_CACHE' ? COLORS.warning : '#d9e2ec'));
     const support = state.kind === 'GUEST_LOCAL'
       ? '로그인하지 않아도 플레이할 수 있습니다. 나중에 계정으로 이전할 수 있습니다.'
       : state.kind === 'AUTHENTICATED_ONLINE'
@@ -226,7 +226,7 @@ export class AccountCommandScene extends Phaser.Scene {
       return;
     }
 
-    if (state.kind === 'AUTHENTICATED_OFFLINE') {
+    if (state.kind === 'AUTHENTICATED_OFFLINE_CACHE') {
       this.actionLayer.add(addText(this, 110, 385, '온라인 연결이 필요합니다.', compact ? 28 : 24, COLORS.warning));
       this.actionLayer.add(addText(this, 110, 425, '현재 화면은 읽기 전용입니다. 서버 연결을 복구한 뒤 진행을 변경할 수 있습니다.', compact ? 19 : 16, '#b8c1cd'));
       this.actionLayer.add(addButton(this, 430, 500, 280, h, '다시 연결', () => { void this.refresh(); }, 0x5f86a7, { tone: 'primary' }));
@@ -235,19 +235,20 @@ export class AccountCommandScene extends Phaser.Scene {
     }
 
     this.actionLayer.add(addText(this, 110, 370, '온라인 계정 관리', compact ? 27 : 24, '#ffffff'));
-    this.actionLayer.add(addButton(this, 240, 430, 240, h, '서버 새로고침', () => { void this.refresh(); }, 0x5f86a7, { tone: 'primary' }));
-    this.actionLayer.add(addButton(this, 1020, 430, 240, h, '로그아웃', () => { void this.logout(); }, 0x815d61, { tone: 'danger' }));
+    this.actionLayer.add(addButton(this, 230, 430, 220, h, '서버 새로고침', () => { void this.refresh(); }, 0x5f86a7, { tone: 'primary' }));
+    this.actionLayer.add(addButton(this, 640, 430, 270, h, '게스트 장식 취향 가져오기', () => { void this.importGuestProfilePreferences(); }, 0x6f7194, { tone: 'quiet' }));
+    this.actionLayer.add(addButton(this, 1050, 430, 220, h, '로그아웃', () => { void this.logout(); }, 0x815d61, { tone: 'danger' }));
 
     if (!this.migrationPreview) {
-      this.actionLayer.add(addText(this, 640, 430, '이전할 게스트 진행이 있으면 자동으로 비교 항목이 나타납니다.', compact ? 18 : 15, '#9ba6b4', 'center').setOrigin(0.5));
+      this.actionLayer.add(addText(this, 640, 510, '이전할 게스트 진행이 있으면 비교 항목이 자동으로 나타납니다.', compact ? 18 : 15, '#9ba6b4', 'center').setOrigin(0.5));
       return;
     }
 
-    this.actionLayer.add(addButton(this, 390, 505, 250, h, '게스트 진행 다시 비교', () => { void this.prepareMigrationPreview(false); }, 0x687d98));
-    this.actionLayer.add(addButton(this, 665, 505, 250, h, this.replacementArmed ? '한 번 더 눌러 교체' : '게스트 진행 적용', () => { void this.applyGuestMigration(); }, 0x70845f, { tone: 'primary', state: this.replacementArmed ? 'warning' : 'default' }));
-    this.actionLayer.add(addButton(this, 940, 505, 250, h, '서버 진행 유지', () => this.keepServerProgress(), 0x6e6974, { tone: 'quiet' }));
+    this.actionLayer.add(addButton(this, 390, 510, 250, h, '게스트 진행 다시 비교', () => { void this.prepareMigrationPreview(false); }, 0x687d98));
+    this.actionLayer.add(addButton(this, 665, 510, 250, h, this.replacementArmed ? '한 번 더 눌러 교체' : '게스트 진행 적용', () => { void this.applyGuestMigration(); }, 0x70845f, { tone: 'primary', state: this.replacementArmed ? 'warning' : 'default' }));
+    this.actionLayer.add(addButton(this, 940, 510, 250, h, '서버 진행 유지', () => this.keepServerProgress(), 0x6e6974, { tone: 'quiet' }));
     if (this.lastMigrationId) {
-      this.actionLayer.add(addButton(this, 665, 560, 270, compact ? 72 : 48, '직전 이전 되돌리기', () => { void this.rollbackGuestMigration(); }, 0x8a6262, { tone: 'danger' }));
+      this.actionLayer.add(addButton(this, 665, 562, 270, compact ? 72 : 46, '직전 이전 되돌리기', () => { void this.rollbackGuestMigration(); }, 0x8a6262, { tone: 'danger' }));
     }
   }
 
