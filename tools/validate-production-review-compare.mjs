@@ -41,6 +41,8 @@ assert(html.includes('normalized motion phase'), 'normalized phase explanation m
 assert(html.includes('displayHeight'), 'runtime display-height scaling missing');
 assert(html.includes('attackContactFrame'), 'attack contact comparison missing');
 assert(html.includes("modeId==='recruitment'"), 'recruitment fallback resolution missing');
+assert(html.includes("prefix='apps/client/public/'"), 'file-backed runtime resolver missing');
+assert(html.includes('motion.url||fileUrl||recruitmentFallback'), 'runtime resolver precedence missing');
 assert(html.includes("cache:'no-store'"), 'metadata must be loaded fresh');
 assert(html.includes("history.replaceState"), 'deep-link synchronization missing');
 assert(html.includes("pair.target.unitId===pairA.target.unitId"), 'recruitment same-unit related comparison missing');
@@ -53,4 +55,4 @@ assert(!/\b(POST|PUT|PATCH|DELETE)\b/.test(html), 'comparison lab must remain re
 
 const info = await stat(htmlPath);
 assert(info.size > 12000, 'comparison lab HTML unexpectedly small');
-console.log(`[production-review-compare] validated ${EXPECTED.length} modes / synchronized five-motion A-B overlay-blink inspection / read-only authority boundary`);
+console.log(`[production-review-compare] validated ${EXPECTED.length} modes / synchronized five-motion A-B overlay-blink inspection / url-file-recruitment resolver / read-only authority boundary`);
