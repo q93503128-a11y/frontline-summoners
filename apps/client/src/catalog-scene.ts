@@ -1,5 +1,5 @@
 import Phaser from 'phaser';
-import { INTERNAL_HEIGHT, INTERNAL_WIDTH } from '@frontline/shared';
+import { INTERNAL_WIDTH } from '@frontline/shared';
 import { loadActiveProgress } from './active-progress';
 import { ART_BY_ID, ART_FAMILIES, UNIT_ART, type UnitArtVariant } from './assets';
 import { formatCombatTraits, formatDamageSpecialty } from './combat-trait-labels';
@@ -13,9 +13,15 @@ import {
   getStageNumber,
 } from './prototype';
 import { getOwnedCharacterIds, type GuestProgress } from './save';
+import {
+  addButton,
+  addText,
+  COLORS,
+  drawBackdrop,
+  setButtonState,
+} from './scene-ui';
 import { isCompactMobileViewport } from './viewport';
 
-const FONT = '"Malgun Gothic", "Apple SD Gothic Neo", "Noto Sans KR", sans-serif';
 const EMPTY_PROGRESS: GuestProgress = { clearedStageIds: [], specialClearedStageIds: [], permanentRewardIds: [], discoveredEnemyIds: [] };
 const ALLY_PAGE_SIZE = 5;
 const ENEMY_PAGE_SIZE = 5;
@@ -43,62 +49,6 @@ interface CatalogSceneData {
   readonly returnTo?: CatalogReturnTarget;
 }
 
-function addText(
-  scene: Phaser.Scene,
-  x: number,
-  y: number,
-  text: string,
-  size = 24,
-  color = '#ffffff',
-  align: 'left' | 'center' | 'right' = 'left',
-): Phaser.GameObjects.Text {
-  const renderedSize = isCompactMobileViewport() ? Math.max(size, 16) : size;
-  return scene.add.text(x, y, text, {
-    fontFamily: FONT,
-    fontSize: `${renderedSize}px`,
-    color,
-    align,
-  });
-}
-
-function addButton(
-  scene: Phaser.Scene,
-  x: number,
-  y: number,
-  width: number,
-  height: number,
-  label: string,
-  onClick: () => void,
-  accent = 0x657086,
-): Phaser.GameObjects.Container {
-  const bg = scene.add.rectangle(0, 0, width, height, 0x252b38, 0.98).setStrokeStyle(3, accent, 1);
-  const text = addText(scene, 0, 0, label, isCompactMobileViewport() ? 26 : 18, '#ffffff', 'center').setOrigin(0.5);
-  const container = scene.add.container(x, y, [bg, text]);
-  bg.setInteractive({ useHandCursor: true });
-  bg.on('pointerover', () => bg.setFillStyle(0x343c4d, 1));
-  bg.on('pointerout', () => {
-    bg.setFillStyle(0x252b38, 0.98);
-    container.setScale(1);
-  });
-  bg.on('pointerdown', () => container.setScale(0.98));
-  bg.on('pointerupoutside', () => container.setScale(1));
-  bg.on('pointerup', () => {
-    container.setScale(1);
-    onClick();
-  });
-  return container;
-}
-
-function drawBackdrop(scene: Phaser.Scene): void {
-  scene.cameras.main.setBackgroundColor('#171c27');
-  const g = scene.add.graphics();
-  g.fillStyle(0x171c27).fillRect(0, 0, INTERNAL_WIDTH, INTERNAL_HEIGHT);
-  g.fillStyle(0x25334a, 1).fillCircle(1110, 105, 230);
-  g.fillStyle(0x283348, 1).fillTriangle(0, 585, 330, 260, 650, 585);
-  g.fillStyle(0x222d40, 1).fillTriangle(430, 585, 790, 205, 1120, 585);
-  g.fillStyle(0x111722).fillRect(0, 585, INTERNAL_WIDTH, 135);
-}
-
 function getArt(slotId: string) {
   const variant: UnitArtVariant = UNIT_ART[slotId] ?? {
     familyId: 'warrior',
@@ -117,6 +67,23 @@ function allyBadge(slot: (typeof ALL_PLAYER_SLOTS)[number]): { label: string; co
 
 function isCatalogMode(value: unknown): value is CatalogMode {
   return value === 'ALLIES' || value === 'ENEMIES' || value === 'REWARDS' || value === 'SPECIAL';
+}
+
+function addDossierCard(
+  scene: Phaser.Scene,
+  x: number,
+  y: number,
+  width: number,
+  height: number,
+  fill: number,
+  accent: number,
+  active: boolean,
+): Phaser.GameObjects.Container {
+  const shadow = scene.add.rectangle(4, 5, width, height, 0x070a0f, 0.3);
+  const paper = scene.add.rectangle(0, 0, width, height, fill, active ? 0.98 : 0.84);
+  const spine = scene.add.rectangle(-width / 2 + 3, 0, 5, height - 14, accent, active ? 0.92 : 0.45);
+  const rule = scene.add.rectangle(0, -height / 2 + 3, width - 12, 2, accent, active ? 0.5 : 0.24);
+  return scene.add.container(x, y, [shadow, paper, spine, rule]);
 }
 
 export class CatalogScene extends Phaser.Scene {
@@ -152,21 +119,21 @@ export class CatalogScene extends Phaser.Scene {
   }
 
   create(): void {
-    drawBackdrop(this);
+    drawBackdrop(this, 'menu');
     const compact = isCompactMobileViewport();
     const navigationHeight = compact ? 84 : 50;
     const tabHeight = compact ? 84 : 54;
-    addText(this, 54, 34, '도 감', 44, '#fff4cf');
-    if (!compact) addText(this, 56, 88, '획득 동료와 실제로 조우한 적만 상세 정보가 공개된다.', 18, '#b8c0ce');
-    const authorityText = addText(this, compact ? 1040 : 910, compact ? 112 : 102, '진행 불러오는 중…', compact ? 17 : 14, '#8f9aac', 'right').setOrigin(1, 0.5);
-    addButton(this, 1165, compact ? 70 : 62, 160, navigationHeight, this.returnTo ? '스테이지' : '메인', () => this.exitCatalog(), 0x586275);
+    addText(this, 54, 34, '도 감', 44, COLORS.cream);
+    if (!compact) addText(this, 56, 88, '획득한 동료와 실제로 조우한 적, 확보한 전과만 기록된다.', 18, COLORS.muted);
+    const authorityText = addText(this, compact ? 1040 : 910, compact ? 112 : 102, '진행 불러오는 중…', compact ? 17 : 14, COLORS.dim, 'right').setOrigin(1, 0.5);
+    addButton(this, 1165, compact ? 70 : 62, 160, navigationHeight, this.returnTo ? '스테이지' : '지휘소', () => this.exitCatalog(), 0x586275, { tone: 'quiet' });
 
-    this.allyTab = addButton(this, 165, 135, 210, tabHeight, `동료 ${ALL_PLAYER_SLOTS.length}종`, () => this.setMode('ALLIES'), 0x6d91b5);
-    this.enemyTab = addButton(this, 405, 135, 210, tabHeight, `적 ${ENEMIES.length}종`, () => this.setMode('ENEMIES'), 0xb56d72);
-    this.rewardTab = addButton(this, 645, 135, 210, tabHeight, `영구 보상 ${STAGES.length}개`, () => this.setMode('REWARDS'), 0xb69755);
-    this.specialTab = addButton(this, 885, 135, 210, tabHeight, `특수 기록 ${SPECIAL_STAGES.length}개`, () => this.setMode('SPECIAL'), 0x9569a5);
-    addButton(this, 92, compact ? 660 : 664, 140, navigationHeight, '◀ 이전', () => this.changePage(-1), 0x586275);
-    addButton(this, 1188, compact ? 660 : 664, 140, navigationHeight, '다음 ▶', () => this.changePage(1), 0x586275);
+    this.allyTab = addButton(this, 165, 135, 210, tabHeight, `동료 ${ALL_PLAYER_SLOTS.length}종`, () => this.setMode('ALLIES'), 0x6d91b5, { tone: 'quiet' });
+    this.enemyTab = addButton(this, 405, 135, 210, tabHeight, `적 ${ENEMIES.length}종`, () => this.setMode('ENEMIES'), 0xb56d72, { tone: 'quiet' });
+    this.rewardTab = addButton(this, 645, 135, 210, tabHeight, `영구 보상 ${STAGES.length}개`, () => this.setMode('REWARDS'), 0xb69755, { tone: 'quiet' });
+    this.specialTab = addButton(this, 885, 135, 210, tabHeight, `특수 기록 ${SPECIAL_STAGES.length}개`, () => this.setMode('SPECIAL'), 0x9569a5, { tone: 'quiet' });
+    addButton(this, 92, compact ? 660 : 664, 140, navigationHeight, '◀ 이전', () => this.changePage(-1), 0x586275, { tone: 'quiet' });
+    addButton(this, 1188, compact ? 660 : 664, 140, navigationHeight, '다음 ▶', () => this.changePage(1), 0x586275, { tone: 'quiet' });
     this.pageText = addText(this, INTERNAL_WIDTH / 2, 652, '', compact ? 22 : 18, '#aab4c3', 'center').setOrigin(0.5);
 
     this.render();
@@ -174,15 +141,15 @@ export class CatalogScene extends Phaser.Scene {
       if (!this.scene.isActive()) return;
       this.progress = view.progress;
       authorityText.setText(view.authority === 'GUEST_LOCAL'
-        ? '게스트 로컬 도감'
+        ? '게스트 · 로컬 기록'
         : view.authority === 'ACCOUNT_ONLINE'
-          ? '로그인 계정 · 서버 도감'
-          : '로그인 계정 · 오프라인 캐시 도감');
-      authorityText.setColor(view.authority === 'ACCOUNT_ONLINE' ? '#8ee3aa' : view.authority === 'ACCOUNT_OFFLINE_CACHE' ? '#f2d37c' : '#8f9aac');
+          ? '계정 · 서버 기록'
+          : '계정 · 오프라인 기록');
+      authorityText.setColor(view.authority === 'ACCOUNT_ONLINE' ? COLORS.green : view.authority === 'ACCOUNT_OFFLINE_CACHE' ? COLORS.warning : COLORS.dim);
       this.render();
     }).catch((error: unknown) => {
       if (!this.scene.isActive()) return;
-      authorityText.setText(error instanceof Error ? error.message : '도감 진행을 읽지 못했습니다.').setColor('#ff9a91');
+      authorityText.setText(error instanceof Error ? error.message : '도감 진행을 읽지 못했습니다.').setColor(COLORS.red);
     });
   }
 
@@ -218,17 +185,17 @@ export class CatalogScene extends Phaser.Scene {
     this.contentLayer = this.add.container(0, 0);
     this.page = Phaser.Math.Clamp(this.page, 0, Math.max(0, this.getPageCount() - 1));
     const modeLabel = this.mode === 'ALLIES'
-      ? '동료'
+      ? '동료 명부'
       : this.mode === 'ENEMIES'
-        ? '적'
+        ? '조우 기록'
         : this.mode === 'REWARDS'
-          ? '영구 보상'
-          : '특수 기록';
+          ? '영구 전과'
+          : '특수 작전 기록';
     this.pageText?.setText(`${modeLabel} · ${this.page + 1} / ${this.getPageCount()}`);
-    this.allyTab?.setAlpha(this.mode === 'ALLIES' ? 1 : 0.62);
-    this.enemyTab?.setAlpha(this.mode === 'ENEMIES' ? 1 : 0.62);
-    this.rewardTab?.setAlpha(this.mode === 'REWARDS' ? 1 : 0.62);
-    this.specialTab?.setAlpha(this.mode === 'SPECIAL' ? 1 : 0.62);
+    if (this.allyTab) setButtonState(this.allyTab, this.mode === 'ALLIES' ? 'selected' : 'default');
+    if (this.enemyTab) setButtonState(this.enemyTab, this.mode === 'ENEMIES' ? 'selected' : 'default');
+    if (this.rewardTab) setButtonState(this.rewardTab, this.mode === 'REWARDS' ? 'selected' : 'default');
+    if (this.specialTab) setButtonState(this.specialTab, this.mode === 'SPECIAL' ? 'selected' : 'default');
 
     if (this.mode === 'ALLIES') this.renderAllies();
     else if (this.mode === 'ENEMIES') this.renderEnemies();
@@ -247,9 +214,7 @@ export class CatalogScene extends Phaser.Scene {
       const owned = ownedIds.has(slot.slotId);
       const badge = allyBadge(slot);
       const border = owned ? Phaser.Display.Color.HexStringToColor(badge.color).color : 0x46505e;
-      const card = this.add.rectangle(x, 398, 220, 430, owned ? 0x252c3a : 0x1d222b, 0.98)
-        .setStrokeStyle(3, border, owned ? 0.95 : 0.65);
-      this.contentLayer!.add(card);
+      this.contentLayer!.add(addDossierCard(this, x, 398, 220, 430, owned ? 0x252c3a : 0x1d222b, border, owned));
 
       const art = getArt(slot.definition.id);
       const portrait = this.add.sprite(x, compact ? 285 : 270, art.family.idle.key, 0);
@@ -268,8 +233,8 @@ export class CatalogScene extends Phaser.Scene {
       this.contentLayer!.add(addText(this, x, compact ? 360 : 342, owned ? slot.displayName : '???', compact ? 27 : 22, owned ? '#ffffff' : '#747d89', 'center').setOrigin(0.5));
 
       if (owned) {
-        this.contentLayer!.add(addText(this, x, compact ? 400 : 376, `${slot.role} · ${slot.cost} 보급`, compact ? 21 : 14, '#f2d37c', 'center').setOrigin(0.5));
-        this.contentLayer!.add(addText(this, x, compact ? 438 : 402, formatCombatTraits(slot.definition), compact ? 19 : 13, '#9fcfff', 'center').setOrigin(0.5));
+        this.contentLayer!.add(addText(this, x, compact ? 400 : 376, `${slot.role} · ${slot.cost} 보급`, compact ? 21 : 14, COLORS.gold, 'center').setOrigin(0.5));
+        this.contentLayer!.add(addText(this, x, compact ? 438 : 402, formatCombatTraits(slot.definition), compact ? 19 : 13, COLORS.blue, 'center').setOrigin(0.5));
         const specialty = formatDamageSpecialty(slot.definition);
         if (specialty) this.contentLayer!.add(addText(this, x, compact ? 474 : 430, specialty, compact ? 19 : 13, '#ffd493', 'center').setOrigin(0.5));
         if (compact) {
@@ -297,9 +262,7 @@ export class CatalogScene extends Phaser.Scene {
       const focused = enemy.enemyId === this.focusEnemyId;
       const isBoss = (enemy.definition.combatTags ?? []).includes('BOSS');
       const border = focused ? 0xf0c967 : discovered ? (isBoss ? 0xc97772 : 0xa45f64) : 0x46505e;
-      const card = this.add.rectangle(x, 398, 220, 430, discovered ? 0x30262a : 0x1d222b, 0.98)
-        .setStrokeStyle(focused ? 5 : 3, border, focused ? 1 : discovered ? 0.95 : 0.65);
-      this.contentLayer!.add(card);
+      this.contentLayer!.add(addDossierCard(this, x, 398, 220, 430, discovered ? 0x30262a : 0x1d222b, border, discovered || focused));
 
       const art = getArt(enemy.definition.id);
       const portrait = this.add.sprite(x, compact ? 285 : 270, art.family.idle.key, 0);
@@ -314,12 +277,12 @@ export class CatalogScene extends Phaser.Scene {
       portrait.setScale(((compact ? 132 : 145) / art.family.idle.frameHeight) * art.displayScale);
       this.contentLayer!.add(portrait);
 
-      const categoryLabel = discovered ? (isBoss ? 'BOSS' : 'ENEMY') : '???';
+      const categoryLabel = discovered ? (isBoss ? '우두머리' : '적') : '???';
       this.contentLayer!.add(addText(this, x - 96, 200, focused ? `▶ ${categoryLabel}` : categoryLabel, compact ? 20 : 15, focused ? '#ffe39a' : discovered ? (isBoss ? '#ff9b92' : '#d5a0a4') : '#69727e'));
       this.contentLayer!.add(addText(this, x, compact ? 360 : 342, discovered ? enemy.displayName : '???', compact ? 27 : 22, discovered ? '#ffffff' : '#747d89', 'center').setOrigin(0.5));
 
       if (discovered) {
-        this.contentLayer!.add(addText(this, x, compact ? 400 : 376, `처치 보급 +${enemy.rewardSupply}`, compact ? 21 : 14, '#f2d37c', 'center').setOrigin(0.5));
+        this.contentLayer!.add(addText(this, x, compact ? 400 : 376, `처치 보급 +${enemy.rewardSupply}`, compact ? 21 : 14, COLORS.gold, 'center').setOrigin(0.5));
         this.contentLayer!.add(addText(this, x, compact ? 438 : 402, formatCombatTraits(enemy.definition), compact ? 19 : 13, '#ffb4ae', 'center').setOrigin(0.5));
         const specialty = formatDamageSpecialty(enemy.definition);
         if (specialty) this.contentLayer!.add(addText(this, x, compact ? 474 : 430, specialty, compact ? 19 : 13, '#ffd493', 'center').setOrigin(0.5));
@@ -341,9 +304,7 @@ export class CatalogScene extends Phaser.Scene {
       const x = 145 + localIndex * 247;
       const stageNumber = getStageNumber(stage.id);
       const isOwned = !!stage.permanentRewardId && owned.has(stage.permanentRewardId);
-      const card = this.add.rectangle(x, 398, 220, 430, isOwned ? 0x2a302f : 0x1d222b, 0.98)
-        .setStrokeStyle(3, isOwned ? 0xb79958 : 0x46505e, isOwned ? 0.95 : 0.65);
-      this.contentLayer!.add(card);
+      this.contentLayer!.add(addDossierCard(this, x, 398, 220, 430, isOwned ? 0x2a302f : 0x1d222b, isOwned ? 0xb79958 : 0x46505e, isOwned));
 
       const seal = this.add.circle(x, compact ? 290 : 280, compact ? 58 : 64, isOwned ? 0xd4aa58 : 0x39414d, isOwned ? 0.92 : 0.7)
         .setStrokeStyle(5, isOwned ? 0xffe0a0 : 0x5c6572, 0.9);
@@ -352,11 +313,11 @@ export class CatalogScene extends Phaser.Scene {
       this.contentLayer!.add(core);
       this.contentLayer!.add(addText(this, x, compact ? 290 : 280, isOwned ? '✓' : '?', compact ? 36 : 34, isOwned ? '#fff1bd' : '#747e8b', 'center').setOrigin(0.5));
 
-      this.contentLayer!.add(addText(this, x, 205, `STAGE ${stageNumber}`, compact ? 20 : 15, isOwned ? '#d7bd82' : '#6f7987', 'center').setOrigin(0.5));
+      this.contentLayer!.add(addText(this, x, 205, `전장 ${stageNumber}`, compact ? 20 : 15, isOwned ? '#d7bd82' : '#6f7987', 'center').setOrigin(0.5));
       this.contentLayer!.add(addText(this, x, compact ? 382 : 365, `영구 보상 #${String(stageNumber).padStart(2, '0')}`, compact ? 24 : 20, isOwned ? '#ffe19a' : '#8b939e', 'center').setOrigin(0.5).setWordWrapWidth(190));
       this.contentLayer!.add(addText(this, x, compact ? 445 : 425, getPermanentRewardEffectText(stage.permanentRewardId), compact ? 19 : 15, isOwned ? '#dce6d7' : '#6f7885', 'center').setOrigin(0.5).setWordWrapWidth(188));
-      this.contentLayer!.add(addText(this, x, compact ? 520 : 505, isOwned ? '획득 완료' : '미획득', compact ? 20 : 14, isOwned ? '#8ee3aa' : '#7b8591', 'center').setOrigin(0.5));
-      if (!compact) this.contentLayer!.add(addText(this, x, 548, `${stage.name}\nNORMAL_CLEAR 첫 승리 시 확정`, 12, isOwned ? '#aab6c5' : '#687381', 'center').setOrigin(0.5).setWordWrapWidth(188));
+      this.contentLayer!.add(addText(this, x, compact ? 520 : 505, isOwned ? '획득 완료' : '미획득', compact ? 20 : 14, isOwned ? COLORS.green : '#7b8591', 'center').setOrigin(0.5));
+      if (!compact) this.contentLayer!.add(addText(this, x, 548, `${stage.name}\n첫 직접 클리어 시 확정`, 12, isOwned ? '#aab6c5' : '#687381', 'center').setOrigin(0.5).setWordWrapWidth(188));
     });
   }
 
@@ -370,9 +331,7 @@ export class CatalogScene extends Phaser.Scene {
       const x = 145 + localIndex * 247;
       const specialNumber = getSpecialStageNumber(stage.id);
       const isCleared = cleared.has(stage.id);
-      const card = this.add.rectangle(x, 398, 220, 430, isCleared ? 0x30283a : 0x1d222b, 0.98)
-        .setStrokeStyle(3, isCleared ? 0xa879ba : 0x46505e, isCleared ? 0.95 : 0.65);
-      this.contentLayer!.add(card);
+      this.contentLayer!.add(addDossierCard(this, x, 398, 220, 430, isCleared ? 0x30283a : 0x1d222b, isCleared ? 0xa879ba : 0x46505e, isCleared));
 
       const outer = this.add.circle(x, compact ? 290 : 280, compact ? 58 : 64, isCleared ? 0x8f60a4 : 0x39414d, isCleared ? 0.92 : 0.7)
         .setStrokeStyle(5, isCleared ? 0xe4b7f2 : 0x5c6572, 0.9);
@@ -381,11 +340,11 @@ export class CatalogScene extends Phaser.Scene {
       this.contentLayer!.add(inner);
       this.contentLayer!.add(addText(this, x, compact ? 290 : 280, isCleared ? '★' : '?', compact ? 34 : 32, isCleared ? '#f3d5ff' : '#747e8b', 'center').setOrigin(0.5));
 
-      this.contentLayer!.add(addText(this, x, 205, `SPECIAL ${specialNumber}`, compact ? 20 : 15, isCleared ? '#d6b5e3' : '#6f7987', 'center').setOrigin(0.5));
+      this.contentLayer!.add(addText(this, x, 205, `특수 작전 ${specialNumber}`, compact ? 20 : 15, isCleared ? '#d6b5e3' : '#6f7987', 'center').setOrigin(0.5));
       this.contentLayer!.add(addText(this, x, compact ? 374 : 360, stage.name, compact ? 23 : 19, isCleared ? '#f1ceff' : '#8b939e', 'center').setOrigin(0.5).setWordWrapWidth(190));
-      this.contentLayer!.add(addText(this, x, compact ? 435 : 418, '특수전 클리어 기록', compact ? 20 : 15, isCleared ? '#d8ddea' : '#737c89', 'center').setOrigin(0.5).setWordWrapWidth(188));
+      this.contentLayer!.add(addText(this, x, compact ? 435 : 418, '특수 작전 클리어 기록', compact ? 20 : 15, isCleared ? '#d8ddea' : '#737c89', 'center').setOrigin(0.5).setWordWrapWidth(188));
       this.contentLayer!.add(addText(this, x, compact ? 482 : 462, `난이도 ${stage.difficulty} / 12`, compact ? 19 : 14, isCleared ? '#efb6ff' : '#707886', 'center').setOrigin(0.5));
-      this.contentLayer!.add(addText(this, x, compact ? 528 : 510, isCleared ? '도전 완료' : '미클리어', compact ? 20 : 14, isCleared ? '#8ee3aa' : '#7b8591', 'center').setOrigin(0.5));
+      this.contentLayer!.add(addText(this, x, compact ? 528 : 510, isCleared ? '도전 완료' : '미클리어', compact ? 20 : 14, isCleared ? COLORS.green : '#7b8591', 'center').setOrigin(0.5));
       if (!compact) this.contentLayer!.add(addText(this, x, 548, '메인 영구 성장과 별도 기록', 12, isCleared ? '#aa9bb5' : '#687381', 'center').setOrigin(0.5));
     });
   }
