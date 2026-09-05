@@ -70,6 +70,7 @@ const manifest = {
   schemaVersion: 1,
   generatedBy: 'tools/materialize-production-review-hub.mjs',
   reviewHubPath: '/assets/production/review/index.html',
+  reworkQueuePath: '/assets/production/review/rework-queue.html',
   humanApprovalAuthority: false,
   note: 'This hub is a navigation and local checklist surface only. It is not review evidence and cannot grant approval.',
   audit: {
@@ -113,19 +114,19 @@ const html = `<!doctype html>
   <style>
     :root{color-scheme:dark;font-family:"Malgun Gothic",system-ui,sans-serif;background:#0c1017;color:#edf1f7}
     *{box-sizing:border-box}body{margin:0;background:radial-gradient(circle at top,#202a38 0,#0c1017 48%,#080b10 100%);min-height:100vh}
-    main{width:min(1180px,calc(100% - 32px));margin:0 auto;padding:36px 0 60px}.top{display:flex;justify-content:space-between;gap:22px;align-items:flex-start;margin-bottom:22px}
-    h1{font-size:34px;margin:4px 0 8px}.sub{color:#aab5c6;max-width:800px;line-height:1.6}.warning{border:1px solid #b98738;background:#2d2415;color:#ffd98d;padding:11px 14px;border-radius:10px;font-weight:700;white-space:nowrap}
+    main{width:min(1180px,calc(100% - 32px));margin:0 auto;padding:36px 0 60px}.top{display:flex;justify-content:space-between;gap:22px;align-items:flex-start;margin-bottom:22px}.top-actions{display:flex;gap:8px;align-items:flex-start;flex-wrap:wrap;justify-content:flex-end}
+    h1{font-size:34px;margin:4px 0 8px}.sub{color:#aab5c6;max-width:800px;line-height:1.6}.warning{border:1px solid #b98738;background:#2d2415;color:#ffd98d;padding:11px 14px;border-radius:10px;font-weight:700;white-space:nowrap}.queue{display:inline-block;text-decoration:none;font-weight:800;border-radius:10px;padding:11px 14px;background:#26384f;color:#dce9f7;border:1px solid #4b6d91;white-space:nowrap}.queue:hover{filter:brightness(1.08)}
     .audit{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:8px;margin:20px 0 28px}.metric{background:#151c26;border:1px solid #303b4b;border-radius:10px;padding:12px}.metric b{display:block;font-size:24px}.metric span{font-size:12px;color:#98a6b9}
     .grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}.card{background:#121923;border:1px solid #2c3849;border-radius:14px;padding:18px;box-shadow:0 10px 26px #0005}.card-head{display:flex;justify-content:space-between;gap:14px}.eyebrow{font-size:11px;letter-spacing:.12em;color:#8fa3bd;text-transform:uppercase}.card h2{margin:4px 0 0;font-size:22px}.card p{color:#aab5c6;min-height:42px;line-height:1.5}.state{font-size:11px;border:1px solid #806d42;background:#2a251a;color:#f3d58f;border-radius:999px;padding:6px 9px;height:max-content}.stats{display:flex;gap:8px;margin:12px 0}.stats span{background:#1d2734;border-radius:999px;padding:6px 9px;font-size:12px;color:#c7d2e0}.checks{display:grid;grid-template-columns:1fr 1fr;gap:7px 12px;margin:14px 0 18px;color:#cbd4df;font-size:13px}.checks label{display:flex;gap:7px;align-items:flex-start}.checks input{margin-top:2px}.actions{display:flex;gap:8px;flex-wrap:wrap}.open,.gallery{display:inline-block;text-decoration:none;font-weight:800;border-radius:8px;padding:10px 13px}.open{background:#d6b15a;color:#17130a}.gallery{background:#24364c;color:#dce9f7;border:1px solid #486582}.open:hover,.gallery:hover{filter:brightness(1.08)}
     footer{margin-top:24px;border-top:1px solid #283240;padding-top:18px;color:#8d9aad;font-size:12px;line-height:1.6}.reset{margin-top:10px;background:#202a37;color:#d9e1eb;border:1px solid #435067;border-radius:8px;padding:8px 11px;cursor:pointer}
-    @media(max-width:820px){.top{display:block}.warning{display:inline-block;margin-top:12px}.audit{grid-template-columns:repeat(3,1fr)}.grid{grid-template-columns:1fr}.checks{grid-template-columns:1fr}}
+    @media(max-width:820px){.top{display:block}.top-actions{justify-content:flex-start;margin-top:12px}.warning{display:inline-block}.audit{grid-template-columns:repeat(3,1fr)}.grid{grid-template-columns:1fr}.checks{grid-template-columns:1fr}}
   </style>
 </head>
 <body>
 <main>
   <section class="top">
-    <div><div class="eyebrow">Frontline Summoners / 전선소환전</div><h1>Production Art · Human Review Hub</h1><div class="sub">자동 구조/품질 검사를 통과한 production 후보를 한 곳에서 여는 검수용 인덱스다. MOTION GALLERY에서는 타깃별 5모션을 빠르게 전수 확인하고, BATTLE REVIEW에서는 실제 전투 문맥을 확인한다. 아래 체크박스는 이 브라우저의 로컬 진행 메모일 뿐이며 provenance 또는 승인 증거가 아니다.</div></div>
-    <div class="warning">UNAPPROVED · HUMAN REVIEW REQUIRED</div>
+    <div><div class="eyebrow">Frontline Summoners / 전선소환전</div><h1>Production Art · Human Review Hub</h1><div class="sub">자동 구조/품질 검사를 통과한 production 후보를 한 곳에서 여는 검수용 인덱스다. MOTION GALLERY에서는 타깃별 5모션을 빠르게 전수 확인하고, BATTLE REVIEW에서는 실제 전투 문맥을 확인한다. LOCAL REWORK QUEUE에서는 발견한 문제를 사유별 재작업 초안으로 묶는다. 모든 로컬 체크/큐 상태는 provenance 또는 승인 증거가 아니다.</div></div>
+    <div class="top-actions"><div class="warning">UNAPPROVED · HUMAN REVIEW REQUIRED</div><a class="queue" href="rework-queue.html">OPEN LOCAL REWORK QUEUE</a></div>
   </section>
   <section class="audit" aria-label="machine audit summary">
     <div class="metric"><b>${summary.totalTargets}</b><span>audited targets</span></div>
@@ -138,7 +139,7 @@ const html = `<!doctype html>
   <section class="grid">${cards}
   </section>
   <footer>
-    <strong>NOT APPROVAL EVIDENCE.</strong> 이 페이지와 motion gallery는 review 탐색과 개인 로컬 체크만 제공한다. 체크 상태는 localStorage에만 저장되며 정본 JSON, provenance, review package 또는 승인 상태를 수정하지 않는다.<br>
+    <strong>NOT APPROVAL EVIDENCE.</strong> 이 페이지, motion gallery, local rework queue는 review 탐색과 개인 로컬 체크/재작업 정리만 제공한다. 상태는 localStorage에만 저장되며 정본 JSON, provenance, review package 또는 승인 상태를 수정하지 않는다.<br>
     Machine audit: severe ${summary.severe} · atRisk ${summary.atRisk} · weakEvolution ${summary.weakEvolution} · watchEvolution ${summary.watchEvolution} · clippingRisk ${summary.clippingRisk}.
     <br><button class="reset" id="reset">로컬 체크 초기화</button>
   </footer>
