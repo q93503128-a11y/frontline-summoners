@@ -35,9 +35,15 @@ replaceOnce(
     canvas.dataset.url=motion.url;canvas.dataset.frames=String(motion.frames);canvas.dataset.frameWidth=String(motion.frameWidth);canvas.dataset.frameHeight=String(motion.frameHeight);canvas.dataset.motion=motionName;canvas.dataset.contact=String(target.attackContactFrame??-1);
     stage.appendChild(canvas);box.appendChild(head);box.appendChild(stage);return box;
   }`,
-  `  function resolveMotion(target,motionName,motion){
-    const fallback=modeId==='recruitment'&&target.unitId&&target.formId?'/assets/production/units/'+target.unitId+'/'+target.formId+'/'+motionName+'.png':null;
-    const url=motion.url||fallback;const frameWidth=Number(motion.frameWidth??target.frameWidth);const frameHeight=Number(motion.frameHeight??target.frameHeight);const frames=Number(motion.frames);
+  `  function publicUrlFromFile(file){
+    const prefix='apps/client/public/';
+    return typeof file==='string'&&file.startsWith(prefix)?'/'+file.slice(prefix.length):null;
+  }
+
+  function resolveMotion(target,motionName,motion){
+    const fileUrl=publicUrlFromFile(motion.file);
+    const recruitmentFallback=modeId==='recruitment'&&target.unitId&&target.formId?'/assets/production/units/'+target.unitId+'/'+target.formId+'/'+motionName+'.png':null;
+    const url=motion.url||fileUrl||recruitmentFallback;const frameWidth=Number(motion.frameWidth??target.frameWidth);const frameHeight=Number(motion.frameHeight??target.frameHeight);const frames=Number(motion.frames);
     if(!url||!Number.isFinite(frameWidth)||frameWidth<=0||!Number.isFinite(frameHeight)||frameHeight<=0||!Number.isInteger(frames)||frames<=0)throw new Error('unresolvable runtime strip '+motionName+' for '+(target.assetId||'target'));
     return {url:url,frameWidth:frameWidth,frameHeight:frameHeight,frames:frames};
   }
@@ -68,4 +74,4 @@ replaceOnce(
 );
 
 await writeFile(htmlPath, html);
-console.log('[production-review-gallery-patch] added comparison routes and runtime-safe recruitment strip resolution');
+console.log('[production-review-gallery-patch] added comparison routes and runtime-safe url/file/recruitment strip resolution');
