@@ -94,6 +94,11 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
 
+          # Re-materialize the human-review surfaces immediately before staging so
+          # the repository receives the exact files that passed their validators,
+          # even if a later test/build step touched the public directory.
+          npm run assets:production:review-hub:check
+
           generated_paths=(
             apps/client/public/assets/production/units
             apps/client/public/assets/production/battlefields
@@ -103,7 +108,7 @@ jobs:
           )
           for path in "${generated_paths[@]}"; do
             if [[ -e "$path" ]]; then
-              git add "$path"
+              git add -f "$path"
             else
               echo "Generated path not present in this run; skipping pathspec: $path"
             fi
