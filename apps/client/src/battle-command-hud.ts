@@ -136,26 +136,26 @@ function installProductionRail(scene: BattleHudCarrier): void {
   const minimumTouch = compact ? getCurrentMinimumInternalTouchTarget() : 0;
   const singleRowSlotWidth = Math.max(82, minimumTouch);
   const useTwoRows = compact && singleRowSlotWidth * 10 + 36 > 870;
-  const g = scene.add.graphics();
-
-  const bottomTop = useTwoRows ? 506 : 604;
-  g.fillStyle(0x0b1017, 0.94).fillRect(0, bottomTop, 1280, 720 - bottomTop);
-  g.lineStyle(3, 0x46566a, 0.6).lineBetween(0, bottomTop + 2, 1280, bottomTop + 2);
-  g.lineStyle(1, 0xb89b5e, 0.32).lineBetween(20, bottomTop + 9, useTwoRows ? 754 : 876, bottomTop + 9);
-
   const slots = scene.activeSlots.slice(0, BATTLE_UNIT_HOTKEY_CODES.length);
   const slotWidth = useTwoRows ? 142 : singleRowSlotWidth;
   const slotHeight = useTwoRows ? Math.max(92, minimumTouch) : compact ? Math.max(96, minimumTouch) : 96;
   const gap = useTwoRows ? 8 : 4;
   const columns = useTwoRows ? 5 : 10;
-  const startLeft = 20;
   const rowGap = useTwoRows ? 8 : 0;
-  const firstY = useTwoRows ? 562 : 660;
+  const bottomTop = useTwoRows
+    ? Math.max(456, 720 - (slotHeight * 2 + rowGap + 12))
+    : 604;
+  const firstY = bottomTop + 8 + slotHeight / 2;
+  const g = scene.add.graphics();
+
+  g.fillStyle(0x0b1017, 0.94).fillRect(0, bottomTop, 1280, 720 - bottomTop);
+  g.lineStyle(3, 0x46566a, 0.6).lineBetween(0, bottomTop + 2, 1280, bottomTop + 2);
+  g.lineStyle(1, 0xb89b5e, 0.32).lineBetween(20, bottomTop + 9, useTwoRows ? 762 : 876, bottomTop + 9);
 
   slots.forEach((slot, index) => {
     const row = Math.floor(index / columns);
     const col = index % columns;
-    const x = startLeft + slotWidth / 2 + col * (slotWidth + gap);
+    const x = 20 + slotWidth / 2 + col * (slotWidth + gap);
     const y = firstY + row * (slotHeight + rowGap);
     const badge = getSlotBadge(slot);
     const border = Phaser.Display.Color.HexStringToColor(badge.color).color;
@@ -166,19 +166,20 @@ function installProductionRail(scene: BattleHudCarrier): void {
 
     const art = familyForUnit(slot.definition.id);
     const portraitHeight = useTwoRows ? 48 : compact ? 45 : 40;
-    const portraitY = y - (useTwoRows ? 15 : 16);
-    const portrait = scene.add.sprite(x, portraitY, art.family.idle.key, 0).setTint(art.tint).setDepth(4);
+    const portrait = scene.add.sprite(x, y - slotHeight * 0.19, art.family.idle.key, 0).setTint(art.tint).setDepth(4);
     portrait.setScale((portraitHeight / art.family.idle.frameHeight) * art.displayScale);
 
+    addText(scene, x - slotWidth / 2 + 7, y - slotHeight / 2 + 7, badge.label, battleUiFontSize(10, 14), badge.color)
+      .setDepth(8);
     const nameSize = useTwoRows ? battleUiFontSize(13, 18) : battleUiFontSize(12, 16);
-    addText(scene, x, y + (useTwoRows ? 17 : 13), slot.displayName, nameSize, '#ffffff', 'center')
+    addText(scene, x, y + slotHeight * 0.08, slot.displayName, nameSize, '#ffffff', 'center')
       .setOrigin(0.5, 0)
       .setDepth(5);
-    const cost = addText(scene, x, y + (useTwoRows ? 39 : 35), `보급 ${slot.cost}`, battleUiFontSize(11, 15), '#f0cf78', 'center')
-      .setOrigin(0.5, 0)
+    const cost = addText(scene, x, y + slotHeight * 0.27, `보급 ${slot.cost}`, battleUiFontSize(11, 15), '#f0cf78', 'center')
+      .setOrigin(0.5)
       .setDepth(5);
-    const cooldown = addText(scene, x, y + (useTwoRows ? 60 : 55), '', battleUiFontSize(11, 15), '#d8e1ef', 'center')
-      .setOrigin(0.5, 0)
+    const cooldown = addText(scene, x, y + slotHeight * 0.41, '', battleUiFontSize(11, 15), '#d8e1ef', 'center')
+      .setOrigin(0.5)
       .setDepth(8);
 
     if (!compact) {
@@ -202,8 +203,8 @@ function installProductionRail(scene: BattleHudCarrier): void {
     scene.buttons.set(slot.slotId, { bg, shade, cooldown, cost });
   });
 
-  const commandY = useTwoRows ? 615 : 659;
-  const commandHeight = useTwoRows ? Math.max(128, minimumTouch) : compact ? Math.max(96, minimumTouch) : 96;
+  const commandY = useTwoRows ? (bottomTop + 720) / 2 : 659;
+  const commandHeight = useTwoRows ? Math.min(190, Math.max(128, minimumTouch)) : compact ? Math.max(96, minimumTouch) : 96;
   const supplyX = useTwoRows ? 890 : 961;
   const supplyWidth = useTwoRows ? 214 : 158;
   const weaponX = useTwoRows ? 1142 : 1154;
