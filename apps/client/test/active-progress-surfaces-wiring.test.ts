@@ -27,8 +27,8 @@ test('catalog reads active progress so account ownership, discovery and reward r
   const catalog = await readSource('../src/catalog-scene.ts');
   assert.match(catalog, /loadActiveProgress\(\)/);
   assert.doesNotMatch(catalog, /loadGuestProgress\(\)/);
-  assert.match(catalog, /로그인 계정 · 서버 도감/);
-  assert.match(catalog, /로그인 계정 · 오프라인 캐시 도감/);
+  assert.match(catalog, /계정 · 서버 기록/);
+  assert.match(catalog, /계정 · 오프라인 기록/);
 });
 
 test('actual sortie hub and stage selector use active progress authority', async () => {
