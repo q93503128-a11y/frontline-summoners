@@ -103,6 +103,8 @@ export class ProfileScene extends Phaser.Scene {
     }).catch((error: unknown) => {
       if (!this.scene.isActive()) return;
       this.loadingText?.setText(error instanceof Error ? error.message : '지휘관 기록을 불러오지 못했습니다.').setColor(COLORS.red);
+      const retry = addButton(this, INTERNAL_WIDTH / 2, INTERNAL_HEIGHT / 2 + 72, 230, compact ? 80 : 54, '다시 불러오기', () => this.scene.restart(), 0x8f6a64, { tone: 'primary' });
+      retry.setDepth(20);
     });
   }
 
@@ -206,13 +208,13 @@ export class ProfileScene extends Phaser.Scene {
 
     const authorityLabel = this.authority === 'GUEST_LOCAL'
       ? '게스트 지휘관'
-      : this.authority === 'ACCOUNT_ONLINE' ? '계정 지휘관 · 서버' : '계정 지휘관 · 오프라인 캐시';
+      : this.authority === 'ACCOUNT_ONLINE' ? '계정 지휘관 · 서버' : '계정 지휘관 · 오프라인 기록';
     const authorityKind = this.authority === 'ACCOUNT_ONLINE' ? 'online' : this.authority === 'ACCOUNT_OFFLINE_CACHE' ? 'warning' : 'neutral';
     this.layer!.add(addStatusPill(this, x - 188, y - 246, authorityLabel, authorityKind));
 
     const titleName = state.profileLoadout.titleId ? getProfileCosmetic(state.profileLoadout.titleId).name : '칭호 없음';
     this.layer!.add(addText(this, x, y - 197, titleName, compact ? 25 : 23, COLORS.gold, 'center').setOrigin(0.5));
-    this.layer!.add(addText(this, x, y - 165, 'FIELD SERVICE RECORD', compact ? 15 : 12, '#c8d0db', 'center').setOrigin(0.5));
+    this.layer!.add(addText(this, x, y - 165, '전선 복무 기록', compact ? 15 : 12, '#c8d0db', 'center').setOrigin(0.5));
 
     const portraitId = state.profileLoadout.portraitCharacterId;
     if (portraitId) {
@@ -238,20 +240,32 @@ export class ProfileScene extends Phaser.Scene {
     this.layer!.add(addSectionHeading(this, x - 188, y + 154, '장식 변경', 376, 0x627f9a));
     const controlsEnabled = state.editable && !this.accountMutationPending;
     const controlY = y + 194;
-    const buttons = [
-      addButton(this, x - 126, controlY, 112, compact ? 68 : 46, '대표 인물', () => this.cyclePortrait(), 0x6d86a7, { tone: 'quiet' }),
-      addButton(this, x, controlY, 112, compact ? 68 : 46, '칭호', () => this.cycleCosmetic('TITLE'), 0x6d86a7, { tone: 'quiet' }),
-      addButton(this, x + 126, controlY, 112, compact ? 68 : 46, '프레임', () => this.cycleCosmetic('FRAME'), 0x6d86a7, { tone: 'quiet' }),
-      addButton(this, x - 126, controlY + 56, 112, compact ? 68 : 46, '배너', () => this.cycleCosmetic('BANNER'), 0x6d86a7, { tone: 'quiet' }),
-      addButton(this, x, controlY + 56, 112, compact ? 68 : 46, '문장', () => this.cycleCosmetic('EMBLEM'), 0x6d86a7, { tone: 'quiet' }),
-      addButton(this, x + 126, controlY + 56, 112, compact ? 68 : 46, '배지', () => this.cycleBadges(), 0x6d86a7, { tone: 'quiet' }),
-    ];
+    const portraitOptions = getOwnedCharacterIds(progress);
+    const titleOptions = getOwnedCosmeticsByKind(state, 'TITLE');
+    const frameOptions = getOwnedCosmeticsByKind(state, 'FRAME');
+    const bannerOptions = getOwnedCosmeticsByKind(state, 'BANNER');
+    const emblemOptions = getOwnedCosmeticsByKind(state, 'EMBLEM');
+    const badgeOptions = getOwnedCosmeticsByKind(state, 'BADGE');
+    const portraitButton = addButton(this, x - 126, controlY, 112, compact ? 68 : 46, '대표 인물', () => this.cyclePortrait(), 0x6d86a7, { tone: 'quiet' });
+    const titleButton = addButton(this, x, controlY, 112, compact ? 68 : 46, '칭호', () => this.cycleCosmetic('TITLE'), 0x6d86a7, { tone: 'quiet' });
+    const frameButton = addButton(this, x + 126, controlY, 112, compact ? 68 : 46, '프레임', () => this.cycleCosmetic('FRAME'), 0x6d86a7, { tone: 'quiet' });
+    const bannerButton = addButton(this, x - 126, controlY + 56, 112, compact ? 68 : 46, '배너', () => this.cycleCosmetic('BANNER'), 0x6d86a7, { tone: 'quiet' });
+    const emblemButton = addButton(this, x, controlY + 56, 112, compact ? 68 : 46, '문장', () => this.cycleCosmetic('EMBLEM'), 0x6d86a7, { tone: 'quiet' });
+    const badgeButton = addButton(this, x + 126, controlY + 56, 112, compact ? 68 : 46, '배지', () => this.cycleBadges(), 0x6d86a7, { tone: 'quiet' });
+    const buttons = [portraitButton, titleButton, frameButton, bannerButton, emblemButton, badgeButton];
     this.layer!.add(buttons);
 
     if (this.accountMutationPending) {
       buttons.forEach((button) => setButtonState(button, 'loading', '계정 프로필 저장 중'));
     } else if (!controlsEnabled) {
       buttons.forEach((button) => setButtonState(button, 'disabled', '현재 프로필은 읽기 전용입니다.'));
+    } else {
+      if (portraitOptions.length <= 1) setButtonState(portraitButton, 'disabled', '변경할 다른 대표 인물이 없습니다.');
+      if (titleOptions.length === 0) setButtonState(titleButton, 'disabled', '아직 사용할 수 있는 칭호가 없습니다.');
+      if (frameOptions.length <= 1) setButtonState(frameButton, 'disabled', '변경할 다른 프레임이 없습니다.');
+      if (bannerOptions.length <= 1) setButtonState(bannerButton, 'disabled', '변경할 다른 배너가 없습니다.');
+      if (emblemOptions.length <= 1) setButtonState(emblemButton, 'disabled', '변경할 다른 문장이 없습니다.');
+      if (badgeOptions.length === 0) setButtonState(badgeButton, 'disabled', '아직 사용할 수 있는 대표 배지가 없습니다.');
     }
 
     const footer = this.statusMessage || (!state.editable ? '오프라인/불완전 계정 프로필은 읽기 전용' : '장식 변경은 즉시 현재 프로필에 반영됩니다.');
@@ -285,9 +299,11 @@ export class ProfileScene extends Phaser.Scene {
       this.page = 0;
       this.render();
     }, 0x6d7891, { tone: 'secondary' });
-    this.layer!.add(categoryButton);
-    this.layer!.add(addButton(this, 1046, 166, 112, compact ? 70 : 48, '◀ 이전', () => { this.page = Math.max(0, this.page - 1); this.render(); }, 0x56657d, { tone: 'quiet' }));
-    this.layer!.add(addButton(this, 1173, 166, 112, compact ? 70 : 48, '다음 ▶', () => { this.page = Math.min(pageCount - 1, this.page + 1); this.render(); }, 0x56657d, { tone: 'quiet' }));
+    const prevButton = addButton(this, 1046, 166, 112, compact ? 70 : 48, '◀ 이전', () => { this.page = Math.max(0, this.page - 1); this.render(); }, 0x56657d, { tone: 'quiet' });
+    const nextButton = addButton(this, 1173, 166, 112, compact ? 70 : 48, '다음 ▶', () => { this.page = Math.min(pageCount - 1, this.page + 1); this.render(); }, 0x56657d, { tone: 'quiet' });
+    this.layer!.add([categoryButton, prevButton, nextButton]);
+    if (this.page === 0) setButtonState(prevButton, 'disabled', '첫 페이지입니다.');
+    if (this.page >= pageCount - 1) setButtonState(nextButton, 'disabled', '마지막 페이지입니다.');
     this.layer!.add(addText(this, 910, 166, `${this.page + 1} / ${pageCount}`, compact ? 17 : 14, '#93a0b2', 'center').setOrigin(0.5));
 
     const ledger = addCommandPanel(this, 866, 440, 748, 486, 0x665d52, 0x1d242d, 0.9);
