@@ -78,7 +78,7 @@
   }
 
   function makeCard(mode,targetKey,target){
-    const card=document.createElement('article');card.className='card';card.dataset.mode=mode.id;card.dataset.target=targetKey;card.dataset.search=(mode.id+' '+mode.label+' '+targetKey+' '+(target.assetId||'')).toLowerCase();
+    const card=document.createElement('article');card.className='card';card.dataset.mode=mode.id;card.dataset.target=targetKey;card.dataset.assetId=target.assetId||'';card.dataset.search=(mode.id+' '+mode.label+' '+targetKey+' '+(target.assetId||'')).toLowerCase();
     const galleryChecked=readGallery(mode.id,targetKey,'checked');
     const galleryRevisit=readGallery(mode.id,targetKey,'revisit');
     card.dataset.galleryRevisit=galleryRevisit?'1':'0';
