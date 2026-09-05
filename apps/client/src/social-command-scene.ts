@@ -6,7 +6,7 @@ import { SocialScene } from './social-scene.ts';
  * this layer only removes implementation vocabulary that should never leak into player-facing copy.
  */
 export class SocialCommandScene extends SocialScene {
-  private vocabularyTimer?: Phaser.Time.TimerEvent;
+  private vocabularyTimer: Phaser.Time.TimerEvent | undefined;
 
   override create(): void {
     super.create();
@@ -23,11 +23,17 @@ export class SocialCommandScene extends SocialScene {
   }
 
   private sanitizePlayerFacingVocabulary(): void {
-    for (const child of this.children.list) {
-      if (!(child instanceof Phaser.GameObjects.Text)) continue;
-      if (/^내 상태 (온라인|오프라인) · 프레임 /.test(child.text)) {
-        child.setText(child.text.replace(/ · 프레임 .+$/, ' · 프로필 장식 적용'));
+    const visit = (child: Phaser.GameObjects.GameObject): void => {
+      if (child instanceof Phaser.GameObjects.Text) {
+        if (/^내 상태 (온라인|오프라인) · 프레임 /.test(child.text)) {
+          child.setText(child.text.replace(/ · 프레임 .+$/, ' · 프로필 장식 적용'));
+        }
+        return;
       }
-    }
+      if (child instanceof Phaser.GameObjects.Container) {
+        for (const nested of child.list) visit(nested);
+      }
+    };
+    for (const child of this.children.list) visit(child);
   }
 }
