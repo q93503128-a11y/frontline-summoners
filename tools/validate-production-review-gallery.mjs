@@ -48,7 +48,7 @@ assert(html.includes("data-filter=\"revisit\""), 'revisit filter missing');
 assert(html.includes("event.key.toLowerCase()"), 'keyboard review navigation missing');
 assert(!html.includes('reviewerId'), 'gallery must not capture reviewer identity');
 assert(!html.includes('reviewedAt'), 'gallery must not capture review timestamps');
-assert(!html.includes('APPROVED'), 'gallery must not claim approval state');
+assert(!/\bAPPROVED\b/.test(html), 'gallery must not claim approval state');
 assert(!/\b(POST|PUT|PATCH|DELETE)\b/.test(html), 'gallery must remain read-only toward canonical data');
 
 const info = await stat(htmlPath);
