@@ -12,7 +12,16 @@ import {
 import { CoopSession, type CoopServerMessage } from './coop-network.ts';
 import { BASE_WEAPON_UNLOCKS, getUnlockedBaseWeaponIds } from './base-weapon-progression.ts';
 import { ALL_STAGES, getStage } from './prototype.ts';
-import { addButton, addText, COLORS, drawBackdrop } from './scene-ui.ts';
+import {
+  addButton,
+  addCommandPanel,
+  addSectionHeading,
+  addStatusPill,
+  addText,
+  COLORS,
+  drawBackdrop,
+  setButtonState,
+} from './scene-ui.ts';
 import { isSortieStageUnlocked } from './stage-navigation.ts';
 import { isCompactMobileViewport } from './viewport.ts';
 
@@ -43,7 +52,9 @@ export class PublicCoopMatchmakingScene extends Phaser.Scene {
   private state: PublicCoopMatchmakingState = { state: 'IDLE' };
   private content?: Phaser.GameObjects.Container;
   private status?: Phaser.GameObjects.Text;
+  private leaveButton?: Phaser.GameObjects.Container;
   private polling = false;
+  private commandPending: 'JOIN' | 'CANCEL' | null = null;
   private pollEvent: Phaser.Time.TimerEvent | undefined;
 
   constructor() { super('public-coop-matchmaking'); }
@@ -53,7 +64,7 @@ export class PublicCoopMatchmakingScene extends Phaser.Scene {
     const compact = isCompactMobileViewport();
     addText(this, 48, 34, '공개 협동 매칭', compact ? 42 : 44, COLORS.cream);
     addText(this, 50, 86, '같은 전장의 온라인 지휘관과 자동 매칭 · 계정 귀속 전투', compact ? 19 : 16, COLORS.muted);
-    addButton(this, 1170, 60, 160, compact ? 78 : 50, '출정', () => { void this.cancelAndLeave(); }, 0x586275);
+    this.leaveButton = addButton(this, 1170, 60, 160, compact ? 78 : 50, '출정', () => { void this.cancelAndLeave(); }, 0x586275, { tone: 'quiet' });
     this.status = addText(this, INTERNAL_WIDTH / 2, 640, '', compact ? 19 : 15, '#a9b5c5', 'center').setOrigin(0.5);
     this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => this.pollEvent?.destroy());
 
@@ -93,25 +104,96 @@ export class PublicCoopMatchmakingScene extends Phaser.Scene {
     this.content?.destroy(true);
     this.content = this.add.container(0, 0);
     const compact = isCompactMobileViewport();
+    this.syncLeaveButtonState();
+
     if (!this.progress || this.stageIds.length === 0) {
       this.content.add(addText(this, INTERNAL_WIDTH / 2, 350, this.progress ? '현재 협동 가능한 전장이 없습니다.' : '온라인 계정이 필요합니다.', compact ? 27 : 23, '#b3bdca', 'center').setOrigin(0.5));
       return;
     }
+
     const stageId = this.selectedStageId()!;
     const stage = getStage(stageId);
-    const locked = this.state.state !== 'IDLE';
-    this.content.add(this.add.rectangle(INTERNAL_WIDTH / 2, 340, 760, 330, 0x242c39, 0.98).setStrokeStyle(3, 0x5d7593, 1));
-    this.content.add(addText(this, INTERNAL_WIDTH / 2, 235, stage.name, compact ? 34 : 31, '#fff4cf', 'center').setOrigin(0.5));
-    this.content.add(addText(this, INTERNAL_WIDTH / 2, 280, `${stage.chapter} · 난이도 ${stage.difficulty}/12`, compact ? 21 : 17, '#b9c7d8', 'center').setOrigin(0.5));
-    this.content.add(addText(this, INTERNAL_WIDTH / 2, 330, `협동 가능 전장 ${this.selected + 1} / ${this.stageIds.length}`, compact ? 19 : 15, '#9ca8b8', 'center').setOrigin(0.5));
-    this.content.add(addButton(this, 380, 405, 150, compact ? 76 : 52, '◀ 전장', () => this.moveStage(-1), locked ? 0x424a56 : 0x586d86));
-    this.content.add(addButton(this, 900, 405, 150, compact ? 76 : 52, '전장 ▶', () => this.moveStage(1), locked ? 0x424a56 : 0x586d86));
+    const stageLocked = this.state.state !== 'IDLE';
+    const stateLabel = this.state.state === 'IDLE'
+      ? '전장 선택 가능'
+      : this.state.state === 'QUEUED'
+        ? '대기열 참가 중'
+        : this.state.state === 'PAIRING'
+          ? '상대 좌석 확정 중'
+          : '상대 배정 완료';
+    const stateKind = this.state.state === 'IDLE' ? 'neutral' : this.state.state === 'QUEUED' || this.state.state === 'PAIRING' ? 'warning' : 'online';
 
-    const stateLabel = this.state.state === 'IDLE' ? '대기열 참가' : this.state.state === 'QUEUED' ? '매칭 취소' : this.state.state === 'PAIRING' ? '상대 확정 중…' : '상대 찾음';
-    this.content.add(addButton(this, INTERNAL_WIDTH / 2, 470, 320, compact ? 84 : 62, stateLabel, () => {
+    this.content.add(addCommandPanel(this, INTERNAL_WIDTH / 2, 360, 940, 390, 0x6388a5, 0x19232d, 0.97));
+    this.content.add(addSectionHeading(this, 190, 184, '공개 협동 전선', 900, 0x6388a5));
+    this.content.add(addStatusPill(this, 915, 182, stateLabel, stateKind));
+
+    const rail = this.add.graphics();
+    rail.lineStyle(5, 0x6388a5, 0.45).lineBetween(350, 348, 930, 348);
+    rail.fillStyle(stageLocked ? 0x8a784f : 0x6388a5, 0.96).fillCircle(640, 348, 31);
+    rail.lineStyle(3, 0xd6e1eb, 0.55).strokeCircle(640, 348, 31);
+    this.content.add(rail);
+
+    this.content.add(addText(this, INTERNAL_WIDTH / 2, 230, stage.name, compact ? 34 : 31, '#fff4cf', 'center').setOrigin(0.5));
+    this.content.add(addText(this, INTERNAL_WIDTH / 2, 277, `${stage.chapter} · 난이도 ${stage.difficulty}/12 · 전장 ${stage.mapLength}m`, compact ? 20 : 17, '#b9c7d8', 'center').setOrigin(0.5));
+    this.content.add(addText(this, INTERNAL_WIDTH / 2, 316, `협동 가능 전장 ${this.selected + 1} / ${this.stageIds.length}`, compact ? 18 : 15, '#9ca8b8', 'center').setOrigin(0.5));
+    this.content.add(addText(this, INTERNAL_WIDTH / 2, 337, String(this.selected + 1), compact ? 18 : 15, '#ffffff', 'center').setOrigin(0.5));
+
+    const previous = addButton(this, 330, 420, 180, compact ? 80 : 56, '◀ 이전 전장', () => this.moveStage(-1), 0x586d86, { tone: 'quiet' });
+    const next = addButton(this, 950, 420, 180, compact ? 80 : 56, '다음 전장 ▶', () => this.moveStage(1), 0x586d86, { tone: 'quiet' });
+    this.content.add([previous, next]);
+    if (this.stageIds.length <= 1) {
+      setButtonState(previous, 'disabled', '현재 선택 가능한 협동 전장이 하나뿐입니다.');
+      setButtonState(next, 'disabled', '현재 선택 가능한 협동 전장이 하나뿐입니다.');
+    } else if (stageLocked) {
+      const reason = this.state.state === 'QUEUED'
+        ? '대기열을 취소한 뒤 전장을 바꿀 수 있습니다.'
+        : '상대 좌석을 확정하는 동안 전장을 바꿀 수 없습니다.';
+      setButtonState(previous, 'locked', reason);
+      setButtonState(next, 'locked', reason);
+    }
+
+    const primaryLabel = this.state.state === 'IDLE'
+      ? this.commandPending === 'JOIN' ? '대기열 참가 요청 중…' : '이 전장으로 매칭 시작'
+      : this.state.state === 'QUEUED'
+        ? this.commandPending === 'CANCEL' ? '매칭 취소 요청 중…' : '대기열 취소'
+        : this.state.state === 'PAIRING'
+          ? '상대 좌석 확정 중…'
+          : '협동 로비로 이동 중…';
+    const primary = addButton(this, INTERNAL_WIDTH / 2, 505, 350, compact ? 88 : 66, primaryLabel, () => {
       if (this.state.state === 'IDLE') void this.join();
       else if (this.state.state === 'QUEUED') void this.cancel();
-    }, this.state.state === 'IDLE' ? 0x5f8f75 : this.state.state === 'QUEUED' ? 0x8d6e59 : 0x56606c));
+    }, this.state.state === 'IDLE' ? 0x5f8f75 : this.state.state === 'QUEUED' ? 0x8d6e59 : 0x56606c, { tone: this.state.state === 'QUEUED' ? 'danger' : 'primary' });
+    this.content.add(primary);
+
+    if (this.commandPending !== null || this.state.state === 'PAIRING' || this.state.state === 'MATCHED') {
+      const reason = this.commandPending === 'JOIN'
+        ? '대기열 참가 요청을 서버에 보내고 있습니다.'
+        : this.commandPending === 'CANCEL'
+          ? '대기열 취소 요청을 서버에 보내고 있습니다.'
+          : this.state.state === 'PAIRING'
+            ? '상대 지휘관의 좌석을 확정하고 있습니다.'
+            : '상대가 배정되어 협동 로비로 이동합니다.';
+      setButtonState(primary, 'loading', reason);
+    } else if (this.state.state === 'QUEUED') {
+      setButtonState(primary, 'warning');
+    }
+  }
+
+  private syncLeaveButtonState(): void {
+    if (!this.leaveButton) return;
+    if (this.commandPending !== null) {
+      setButtonState(this.leaveButton, 'loading', '현재 매칭 요청 처리가 끝난 뒤 이동할 수 있습니다.');
+      return;
+    }
+    if (this.state.state === 'PAIRING') {
+      setButtonState(this.leaveButton, 'locked', '상대 좌석을 확정하는 동안 잠시 기다려주세요.');
+      return;
+    }
+    if (this.state.state === 'MATCHED') {
+      setButtonState(this.leaveButton, 'loading', '상대가 배정되어 협동 로비로 이동합니다.');
+      return;
+    }
+    setButtonState(this.leaveButton, 'default');
   }
 
   private moveStage(delta: number): void {
@@ -122,15 +204,20 @@ export class PublicCoopMatchmakingScene extends Phaser.Scene {
 
   private async join(): Promise<void> {
     const stageId = this.selectedStageId();
-    if (!stageId || this.polling) return;
-    this.polling = true;
+    if (!stageId || this.commandPending !== null) return;
+    this.commandPending = 'JOIN';
+    this.status?.setText('공개 협동 대기열 참가를 요청하는 중…').setColor('#a9b5c5');
+    this.render();
     try {
       this.state = await joinPublicCoopMatchmaking(stageId);
       if (!this.scene.isActive()) return;
       this.handleState();
     } catch (error) {
       if (this.scene.isActive()) this.status?.setText(matchmakingError(error)).setColor('#ff9a91');
-    } finally { this.polling = false; }
+    } finally {
+      this.commandPending = null;
+      if (this.scene.isActive()) this.render();
+    }
   }
 
   private async poll(): Promise<void> {
@@ -148,6 +235,7 @@ export class PublicCoopMatchmakingScene extends Phaser.Scene {
     if (this.state.state === 'MATCHED') {
       this.pollEvent?.destroy();
       this.status?.setText('상대를 찾았습니다. 협동 로비로 이동합니다.').setColor('#8ee3aa');
+      this.render();
       const path = this.state.websocketPath;
       this.time.delayedCall(120, () => this.scene.start('public-coop-lobby', { websocketPath: path }));
       return;
@@ -164,15 +252,23 @@ export class PublicCoopMatchmakingScene extends Phaser.Scene {
   }
 
   private async cancel(): Promise<void> {
+    if (this.commandPending !== null) return;
+    this.commandPending = 'CANCEL';
+    this.status?.setText('공개 협동 대기열을 취소하는 중…').setColor('#ffd493');
+    this.render();
     try {
       this.state = await leavePublicCoopMatchmaking();
       if (this.scene.isActive()) this.handleState();
     } catch (error) {
       if (this.scene.isActive()) this.status?.setText(matchmakingError(error)).setColor('#ff9a91');
+    } finally {
+      this.commandPending = null;
+      if (this.scene.isActive()) this.render();
     }
   }
 
   private async cancelAndLeave(): Promise<void> {
+    if (this.commandPending !== null || this.state.state === 'PAIRING' || this.state.state === 'MATCHED') return;
     if (this.state.state === 'QUEUED') await this.cancel().catch(() => undefined);
     if (this.scene.isActive()) this.scene.start('stage-hub');
   }
