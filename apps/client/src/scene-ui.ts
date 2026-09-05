@@ -13,26 +13,64 @@ import { resolveUnitArt, type ResolvedUnitArt } from './production-assets.ts';
 import { isCompactMobileViewport } from './viewport';
 
 export const FONT = '"Malgun Gothic", "Apple SD Gothic Neo", "Noto Sans KR", sans-serif';
+
+/**
+ * Frontline command palette.
+ * Keep semantic colors distinct from decorative accents so state does not rely on hue alone.
+ */
 export const COLORS = {
-  ink: 0x14171f,
-  panel: 0x242936,
-  panel2: 0x303746,
+  ink: 0x10141c,
+  panel: 0x202735,
+  panel2: 0x2a3342,
   line: 0x657086,
-  cream: '#fff4cf',
-  gold: '#f5cf68',
-  blue: '#7ec8ff',
-  green: '#8ee3aa',
-  red: '#ff8d86',
-  muted: '#b8c0ce',
+  mapPaper: 0x202a31,
+  mapLine: 0x637568,
+  cream: '#fff0c9',
+  gold: '#f1cf73',
+  blue: '#8bc9f2',
+  green: '#8fdca8',
+  red: '#ff938d',
+  warning: '#f0c77a',
+  muted: '#b6c0cc',
+  dim: '#7f8997',
 } as const;
 
 export const rarityColor: Readonly<Record<string, string>> = {
   C: '#b9c2cf', B: '#8bd6a3', A: '#79baff', S: '#d79aff', SS: '#ffd56f',
 };
 
+export type CommandButtonState = 'default' | 'selected' | 'disabled' | 'locked' | 'loading' | 'success' | 'warning' | 'error';
+export type CommandButtonTone = 'primary' | 'secondary' | 'quiet' | 'danger';
+
+export interface CommandButtonOptions {
+  readonly state?: CommandButtonState;
+  readonly tone?: CommandButtonTone;
+  readonly reason?: string;
+}
+
+interface CommandButtonController {
+  state: CommandButtonState;
+  reason?: string;
+  render(): void;
+}
+
 export const BATTLE_UNIT_HOTKEY_CODES: readonly string[] = [
   'Digit1', 'Digit2', 'Digit3', 'Digit4', 'Digit5', 'Digit6', 'Digit7', 'Digit8', 'Digit9', 'Digit0',
 ];
+
+function hex(color: string): number {
+  return Phaser.Display.Color.HexStringToColor(color).color;
+}
+
+function mix(a: number, b: number, amount: number): number {
+  const ca = Phaser.Display.Color.IntegerToColor(a);
+  const cb = Phaser.Display.Color.IntegerToColor(b);
+  return Phaser.Display.Color.GetColor(
+    Math.round(Phaser.Math.Linear(ca.red, cb.red, amount)),
+    Math.round(Phaser.Math.Linear(ca.green, cb.green, amount)),
+    Math.round(Phaser.Math.Linear(ca.blue, cb.blue, amount)),
+  );
+}
 
 export function addText(
   scene: Phaser.Scene,
@@ -53,10 +91,14 @@ export function addText(
     color,
     align,
     stroke: highContrast ? '#000000' : '#11151d',
-    strokeThickness: highContrast ? Math.max(2, renderedSize >= 30 ? 5 : 3) : renderedSize >= 30 ? 4 : 0,
+    strokeThickness: highContrast ? Math.max(2, renderedSize >= 30 ? 5 : 3) : renderedSize >= 34 ? 3 : 0,
   });
 }
 
+/**
+ * Shared command button. Existing call-sites stay source-compatible while gaining a production state model.
+ * The visual is intentionally a clipped command ribbon instead of the old bordered rectangle.
+ */
 export function addButton(
   scene: Phaser.Scene,
   x: number,
@@ -66,58 +108,228 @@ export function addButton(
   label: string,
   onClick: () => void,
   accent = 0x59677f,
+  options: CommandButtonOptions = {},
 ): Phaser.GameObjects.Container {
   const settings = getClientSettings();
   const highContrast = settings.highContrast;
-  const bg = scene.add.rectangle(0, 0, width, height, highContrast ? 0x161b24 : 0x252b38, 0.98)
-    .setStrokeStyle(highContrast ? 4 : 3, accent, 1);
-  const shine = scene.add.rectangle(0, -height / 2 + 4, width - 8, highContrast ? 7 : 5, accent, highContrast ? 0.75 : 0.45);
-  const text = addText(scene, 0, 0, label, Math.max(18, Math.floor(height * 0.3)), '#ffffff', 'center').setOrigin(0.5);
-  const container = scene.add.container(x, y, [bg, shine, text]);
-  bg.setInteractive({ useHandCursor: true });
-  bg.on('pointerover', () => bg.setFillStyle(highContrast ? 0x303946 : 0x343c4d, 1));
-  bg.on('pointerout', () => {
-    bg.setFillStyle(highContrast ? 0x161b24 : 0x252b38, 0.98);
+  const tone = options.tone ?? 'secondary';
+  const visual = scene.add.graphics();
+  const labelText = addText(scene, 0, 0, label, Math.max(17, Math.floor(height * 0.29)), '#ffffff', 'center').setOrigin(0.5);
+  const hit = scene.add.rectangle(0, 0, width, height, 0xffffff, 0.001);
+  const marker = scene.add.triangle(-width / 2 + 10, 0, 0, -7, 0, 7, 8, 0, accent, 0.95);
+  const container = scene.add.container(x, y, [visual, marker, labelText, hit]);
+  const controller: CommandButtonController = {
+    state: options.state ?? 'default',
+    reason: options.reason,
+    render: () => undefined,
+  };
+
+  let hovered = false;
+  let pressed = false;
+
+  const render = (): void => {
+    visual.clear();
+    const state = controller.state;
+    const inactive = state === 'disabled' || state === 'locked' || state === 'loading';
+    const danger = tone === 'danger' || state === 'error';
+    const positive = state === 'success';
+    const warning = state === 'warning' || state === 'locked';
+    const selected = state === 'selected';
+
+    let stateAccent = accent;
+    if (danger) stateAccent = hex(COLORS.red);
+    else if (positive) stateAccent = hex(COLORS.green);
+    else if (warning) stateAccent = hex(COLORS.warning);
+
+    const base = highContrast
+      ? 0x151b24
+      : tone === 'primary'
+        ? mix(0x242c36, stateAccent, 0.18)
+        : tone === 'quiet'
+          ? 0x1b222d
+          : 0x222a36;
+    const hoverBase = mix(base, stateAccent, selected ? 0.27 : hovered ? 0.16 : 0.07);
+    const fill = inactive ? mix(base, 0x11151c, 0.45) : pressed ? mix(hoverBase, 0xffffff, 0.06) : hoverBase;
+    const notch = Math.min(18, Math.max(10, height * 0.2));
+    const left = -width / 2;
+    const right = width / 2;
+    const top = -height / 2;
+    const bottom = height / 2;
+
+    visual.fillStyle(0x080b10, inactive ? 0.24 : 0.36);
+    visual.fillPoints([
+      new Phaser.Geom.Point(left + notch + 2, top + 5),
+      new Phaser.Geom.Point(right + 2, top + 5),
+      new Phaser.Geom.Point(right - notch + 2, bottom + 5),
+      new Phaser.Geom.Point(left + 2, bottom + 5),
+      new Phaser.Geom.Point(left + notch + 2, top + 5),
+    ], true);
+
+    visual.fillStyle(fill, inactive ? 0.82 : 0.99);
+    visual.fillPoints([
+      new Phaser.Geom.Point(left + notch, top),
+      new Phaser.Geom.Point(right, top),
+      new Phaser.Geom.Point(right - notch, bottom),
+      new Phaser.Geom.Point(left, bottom),
+      new Phaser.Geom.Point(left + notch, top),
+    ], true);
+
+    const railAlpha = inactive ? 0.32 : selected ? 1 : 0.72;
+    visual.lineStyle(highContrast ? 4 : selected ? 4 : 2, stateAccent, railAlpha);
+    visual.lineBetween(left + notch + 3, top + 2, right - 3, top + 2);
+    if (selected || tone === 'primary') {
+      visual.lineStyle(highContrast ? 5 : 3, stateAccent, inactive ? 0.26 : 0.9);
+      visual.lineBetween(left + 4, bottom - 2, right - notch - 3, bottom - 2);
+    }
+
+    marker.setFillStyle(stateAccent, inactive ? 0.35 : 0.95);
+    labelText.setColor(inactive ? '#8f98a6' : '#ffffff');
+    container.setAlpha(1);
+  };
+  controller.render = render;
+  container.setData('frontlineCommandButton', controller);
+
+  hit.setInteractive({ useHandCursor: controller.state !== 'disabled' && controller.state !== 'locked' && controller.state !== 'loading' });
+  hit.on('pointerover', () => { hovered = true; render(); });
+  hit.on('pointerout', () => {
+    hovered = false;
+    pressed = false;
     container.setScale(1);
+    render();
   });
-  bg.on('pointerdown', () => {
-    if (!shouldUseReducedMotion()) container.setScale(0.98);
+  hit.on('pointerdown', () => {
+    if (controller.state === 'disabled' || controller.state === 'locked' || controller.state === 'loading') return;
+    pressed = true;
+    if (!shouldUseReducedMotion()) container.setScale(0.985);
+    render();
   });
-  bg.on('pointerupoutside', () => container.setScale(1));
-  bg.on('pointerup', () => { container.setScale(1); onClick(); });
+  hit.on('pointerupoutside', () => {
+    pressed = false;
+    container.setScale(1);
+    render();
+  });
+  hit.on('pointerup', () => {
+    pressed = false;
+    container.setScale(1);
+    render();
+    if (controller.state === 'disabled' || controller.state === 'locked' || controller.state === 'loading') return;
+    onClick();
+  });
+
+  render();
   return container;
+}
+
+export function setButtonState(
+  button: Phaser.GameObjects.Container,
+  state: CommandButtonState,
+  reason?: string,
+): Phaser.GameObjects.Container {
+  const controller = button.getData('frontlineCommandButton') as CommandButtonController | undefined;
+  if (!controller) return button;
+  controller.state = state;
+  controller.reason = reason;
+  controller.render();
+  return button;
+}
+
+/** Low-chrome grouping surface. Use only when separation cannot be achieved by spacing/dividers. */
+export function addCommandPanel(
+  scene: Phaser.Scene,
+  x: number,
+  y: number,
+  width: number,
+  height: number,
+  accent = 0x657086,
+  fill = 0x202735,
+  alpha = 0.96,
+): Phaser.GameObjects.Container {
+  const shadow = scene.add.rectangle(4, 5, width, height, 0x080b10, 0.3);
+  const body = scene.add.rectangle(0, 0, width, height, fill, alpha);
+  const rail = scene.add.rectangle(-width / 2 + 3, 0, 5, height - 18, accent, 0.82);
+  const top = scene.add.rectangle(0, -height / 2 + 2, width - 10, 3, accent, 0.36);
+  return scene.add.container(x, y, [shadow, body, rail, top]);
+}
+
+export function addSectionHeading(
+  scene: Phaser.Scene,
+  x: number,
+  y: number,
+  label: string,
+  width: number,
+  accent = 0x657086,
+): Phaser.GameObjects.Container {
+  const line = scene.add.rectangle(0, 14, width, 2, accent, 0.45).setOrigin(0, 0.5);
+  const flag = scene.add.triangle(0, 0, 0, 0, 14, 7, 0, 14, accent, 0.9).setOrigin(0, 0.5);
+  const text = addText(scene, 24, 0, label, 18, '#dfe6ef').setOrigin(0, 0.5);
+  return scene.add.container(x, y, [line, flag, text]);
+}
+
+export function addStatusPill(
+  scene: Phaser.Scene,
+  x: number,
+  y: number,
+  label: string,
+  kind: 'neutral' | 'online' | 'offline' | 'warning' | 'danger' = 'neutral',
+): Phaser.GameObjects.Container {
+  const palette = kind === 'online'
+    ? { accent: hex(COLORS.green), text: '#c9f3d5' }
+    : kind === 'offline' || kind === 'warning'
+      ? { accent: hex(COLORS.warning), text: '#f5dfad' }
+      : kind === 'danger'
+        ? { accent: hex(COLORS.red), text: '#ffd3cf' }
+        : { accent: 0x758399, text: '#d7dee8' };
+  const text = addText(scene, 12, 0, label, 15, palette.text).setOrigin(0, 0.5);
+  const width = Math.max(82, text.width + 34);
+  const bg = scene.add.rectangle(width / 2, 0, width, 30, 0x171d27, 0.9);
+  const dot = scene.add.circle(13, 0, 5, palette.accent, 1);
+  return scene.add.container(x, y, [bg, dot, text]);
 }
 
 export function drawBackdrop(scene: Phaser.Scene, variant: 'menu' | 'map' = 'menu'): void {
   const settings = getClientSettings();
   const highContrast = settings.highContrast;
   const reducedEffects = shouldReduceDecorativeEffects(settings);
-  const background = highContrast ? 0x090d14 : 0x171c27;
+  const background = highContrast ? 0x080b10 : variant === 'map' ? 0x141b20 : 0x141923;
   scene.cameras.main.setBackgroundColor(background);
   const g = scene.add.graphics();
   g.fillStyle(background).fillRect(0, 0, INTERNAL_WIDTH, INTERNAL_HEIGHT);
-  if (!reducedEffects) {
-    g.fillStyle(variant === 'map' ? (highContrast ? 0x1f3550 : 0x26344a) : (highContrast ? 0x17283e : 0x20283a), 1)
-      .fillCircle(1080, 130, 240);
-    g.fillStyle(highContrast ? 0x18283d : 0x263247, 1).fillTriangle(0, 570, 330, 250, 630, 570);
-    g.fillStyle(highContrast ? 0x142338 : 0x222d40, 1).fillTriangle(430, 570, 760, 200, 1080, 570);
-    g.fillStyle(highContrast ? 0x101e30 : 0x1f2939, 1).fillTriangle(870, 570, 1110, 300, 1280, 570);
-  } else {
-    g.fillStyle(highContrast ? 0x101c2a : 0x202a39, 1).fillTriangle(0, 570, 430, 325, 820, 570);
-    g.fillStyle(highContrast ? 0x0e1926 : 0x1c2635, 1).fillTriangle(600, 570, 980, 350, 1280, 570);
-  }
-  g.fillStyle(highContrast ? 0x05080d : 0x111722).fillRect(0, 570, INTERNAL_WIDTH, 150);
+
   if (variant === 'map') {
-    g.lineStyle(highContrast ? 6 : 5, highContrast ? 0x8ea7ca : 0x53627a, highContrast ? 0.75 : 0.5);
-    const nodeCount = reducedEffects ? 5 : 9;
-    const spacing = reducedEffects ? 250 : 145;
-    for (let i = 0; i < nodeCount; i += 1) {
-      const x = 100 + i * spacing;
-      g.lineBetween(x, 485 - (i % 3) * 24, Math.min(1250, x + (reducedEffects ? 145 : 80)), 450 - ((i + 1) % 3) * 24);
-      g.fillStyle(i % 2 === 0 ? (highContrast ? 0xa9c7ef : 0x788aa5) : (highContrast ? 0x829dc1 : 0x64758f), highContrast ? 0.9 : 0.6)
-        .fillCircle(x, 485 - (i % 3) * 24, highContrast ? 9 : 7);
+    g.fillStyle(highContrast ? 0x111b20 : 0x1b2529, 1).fillRect(0, 105, INTERNAL_WIDTH, 520);
+    g.lineStyle(highContrast ? 3 : 2, highContrast ? 0x617264 : 0x394a42, highContrast ? 0.42 : 0.28);
+    for (let x = -120; x < INTERNAL_WIDTH + 140; x += 120) g.lineBetween(x, 115, x + 270, 625);
+    for (let y = 145; y < 625; y += 90) g.lineBetween(0, y, INTERNAL_WIDTH, y - 42);
+
+    if (!reducedEffects) {
+      const route = [
+        [70, 530], [210, 470], [350, 495], [500, 405], [650, 435], [810, 340], [960, 375], [1110, 255], [1240, 290],
+      ] as const;
+      g.lineStyle(highContrast ? 7 : 5, highContrast ? 0xb3c1a5 : 0x657b67, highContrast ? 0.65 : 0.5);
+      for (let i = 0; i < route.length - 1; i += 1) {
+        const a = route[i]!;
+        const b = route[i + 1]!;
+        g.lineBetween(a[0], a[1], b[0], b[1]);
+      }
+      route.forEach(([x, y], index) => {
+        g.fillStyle(index % 3 === 0 ? 0xd0a95f : 0x8ea58d, 0.7).fillCircle(x, y, index % 3 === 0 ? 7 : 5);
+      });
     }
+    g.fillStyle(0x0f151d, 0.96).fillRect(0, 625, INTERNAL_WIDTH, 95);
+    return;
   }
+
+  // Command-tent/menu background: layered canvas and distant ridge, not a generic gradient card field.
+  if (!reducedEffects) {
+    g.fillStyle(highContrast ? 0x15202a : 0x1b2631, 1).fillTriangle(0, 600, 260, 300, 520, 600);
+    g.fillStyle(highContrast ? 0x111b25 : 0x17232d, 1).fillTriangle(310, 600, 700, 220, 1040, 600);
+    g.fillStyle(highContrast ? 0x0f1821 : 0x151f28, 1).fillTriangle(820, 600, 1110, 330, 1280, 600);
+    g.fillStyle(0xd6b560, highContrast ? 0.18 : 0.09).fillCircle(1085, 140, 190);
+  }
+  g.fillStyle(highContrast ? 0x06090d : 0x0e141d, 0.98).fillRect(0, 600, INTERNAL_WIDTH, 120);
+  g.lineStyle(highContrast ? 3 : 2, highContrast ? 0x788ba3 : 0x354356, 0.42);
+  g.lineBetween(42, 116, 590, 116);
+  g.lineBetween(690, 116, 1238, 116);
 }
 
 /** Accessibility-safe camera shake. Callers may keep their authored duration/intensity; 0% disables it. */
