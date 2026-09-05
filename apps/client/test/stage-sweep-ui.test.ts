@@ -11,5 +11,5 @@ test('stage selection exposes sweep only after clear and routes it through save 
   assert.match(source, /보상 충전 \$\{periodicCharges\}\/4/);
   assert.match(source, /if \(canSweep\) void this\.executeSweep\(stage\)/);
   assert.match(source, /소탕 완료/);
-  assert.match(source, /영구 저장 실패\(현재 탭 유지\)/);
+  assert.match(source, /저장 실패\(현재 실행에서는 유지\)/);
 });
