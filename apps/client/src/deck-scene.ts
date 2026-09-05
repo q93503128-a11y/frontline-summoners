@@ -1,6 +1,6 @@
 import Phaser from 'phaser';
 import { INTERNAL_WIDTH } from '@frontline/shared';
-import { loadActiveProgress } from './active-progress';
+import { loadActiveProgress, type ActiveProgressAuthority } from './active-progress';
 import { recordActiveDeck, resetActiveDeckToAutomatic } from './active-meta-progression';
 import { buildCharacterCombatSlot, getEvolutionForm } from './character-growth';
 import { formatCombatTraits, formatDamageSpecialty } from './combat-trait-labels';
@@ -45,6 +45,7 @@ import {
   COLORS,
   drawBackdrop,
   rarityColor,
+  setButtonState,
 } from './scene-ui';
 import { isCompactMobileViewport } from './viewport';
 
@@ -89,6 +90,7 @@ function sameOrder(a: readonly string[], b: readonly string[]): boolean {
 
 export class DeckScene extends Phaser.Scene {
   private progress: GuestProgress = { clearedStageIds: [], specialClearedStageIds: [], permanentRewardIds: [] };
+  private authority: ActiveProgressAuthority = 'GUEST_LOCAL';
   private selectedIds: string[] = [];
   private favoriteIds: string[] = [];
   private quickFilter: RosterQuickFilter = DEFAULT_ROSTER_BROWSER_QUERY.quick;
@@ -100,13 +102,16 @@ export class DeckScene extends Phaser.Scene {
   private growthFilter: RosterGrowthFilter = DEFAULT_ROSTER_BROWSER_QUERY.growth;
   private searchText = DEFAULT_ROSTER_BROWSER_QUERY.search;
   private page = 0;
-  private cardsLayer?: Phaser.GameObjects.Container;
-  private deckLayer?: Phaser.GameObjects.Container;
-  private filterLayer?: Phaser.GameObjects.Container;
-  private header?: Phaser.GameObjects.Text;
-  private pageText?: Phaser.GameObjects.Text;
-  private statusText?: Phaser.GameObjects.Text;
+  private cardsLayer: Phaser.GameObjects.Container | undefined;
+  private deckLayer: Phaser.GameObjects.Container | undefined;
+  private filterLayer: Phaser.GameObjects.Container | undefined;
+  private header: Phaser.GameObjects.Text | undefined;
+  private pageText: Phaser.GameObjects.Text | undefined;
+  private statusText: Phaser.GameObjects.Text | undefined;
+  private saveButton: Phaser.GameObjects.Container | undefined;
+  private autoButton: Phaser.GameObjects.Container | undefined;
   private saving = false;
+  private progressReady = false;
 
   constructor() { super('deck'); }
 
@@ -115,35 +120,51 @@ export class DeckScene extends Phaser.Scene {
     const compact = isCompactMobileViewport();
     this.input.dragDistanceThreshold = compact ? 18 : 8;
     this.favoriteIds = [...loadRosterFavoriteIds(ROSTER_ID_SET)];
-    this.header = text(this, 52, 28, '편성 불러오는 중…', compact ? 36 : 38, COLORS.cream);
+
+    text(this, 52, 24, '출격 편성', compact ? 39 : 42, COLORS.cream);
+    this.header = text(this, 54, compact ? 76 : 74, '전선 명부를 불러오는 중…', compact ? 19 : 16, '#c8d2df');
     text(
       this,
       54,
-      compact ? 78 : 80,
+      compact ? 96 : 94,
       compact
         ? '탭 추가·제외 · 길게 끌어 슬롯 배치 · ★ 즐겨찾기 · 필터 조합 가능'
         : '보유 캐릭터만 표시 · 드래그로 1~0 슬롯 배치 · 빠른/상세 필터와 검색·즐겨찾기를 조합할 수 있다.',
-      compact ? 20 : 17,
+      compact ? 17 : 14,
       COLORS.muted,
     );
     button(this, 1180, compact ? 58 : 55, 150, compact ? 84 : 48, '지휘소', () => this.scene.start('main-menu'), 0x586275, { tone: 'quiet' });
 
-    addSectionHeading(this, 52, 112, '출격 순서 · 1 → 0', 1176, 0xb69a56);
-    addSectionHeading(this, 52, 274, '보유 명부 · 필터와 드래그로 편성', 1176, 0x6284a2);
+    addSectionHeading(this, 52, 112, '출격 열 · 왼쪽부터 1 → 0 소환 순서', 1176, 0xb69a56);
+    this.add.rectangle(640, 164, 1190, compact ? 92 : 86, 0x171d25, 0.94).setStrokeStyle(2, 0x74694d, 0.72);
+    const sortieRail = this.add.graphics();
+    sortieRail.lineStyle(4, 0x9d8750, 0.28).lineBetween(72, 160, 1208, 160);
+    for (let index = 0; index < 9; index += 1) {
+      const x = DECK_START_X + DECK_SLOT_WIDTH * (index + 1) - 3;
+      sortieRail.fillStyle(0xc7aa63, 0.38).fillTriangle(x - 5, 155, x + 5, 160, x - 5, 165);
+    }
 
-    this.pageText = text(this, 640, 632, '', compact ? 20 : 17, '#9ca9bb', 'center').setOrigin(0.5);
-    this.statusText = text(this, 640, 604, '저장 데이터를 불러오는 중…', compact ? 18 : 14, '#9ca9bb', 'center').setOrigin(0.5);
+    const filterBandY = compact ? 272 : 250;
+    const filterBandHeight = compact ? 116 : 68;
+    this.add.rectangle(640, filterBandY, 1190, filterBandHeight, 0x121923, 0.9).setStrokeStyle(2, 0x536b82, 0.58);
+    addSectionHeading(this, 52, compact ? 340 : 296, '보유 명부 · 전선에 올릴 동료 선택', 1176, 0x6284a2);
 
-    button(this, 86, 660, 120, compact ? 84 : 48, '◀ 이전', () => this.changePage(-1), 0x586275, { tone: 'quiet' });
-    button(this, 235, 660, 140, compact ? 84 : 48, '다음 ▶', () => this.changePage(1), 0x586275, { tone: 'quiet' });
-    button(this, 910, 660, 170, compact ? 84 : 48, '자동 편성', () => { void this.resetAutomatic(); }, 0x6d6b55, { tone: 'secondary' });
-    button(this, 1120, 660, 190, compact ? 84 : 48, '편성 저장', () => { void this.saveDeck(); }, 0x5f8fb8, { tone: 'primary' });
+    this.statusText = text(this, 640, compact ? 624 : 620, '저장 데이터를 불러오는 중…', compact ? 17 : 14, '#9ca9bb', 'center').setOrigin(0.5).setWordWrapWidth(900);
+    this.pageText = text(this, 640, compact ? 648 : 644, '', compact ? 18 : 16, '#8290a2', 'center').setOrigin(0.5);
+
+    button(this, 86, 680, 120, compact ? 84 : 48, '◀ 이전', () => this.changePage(-1), 0x586275, { tone: 'quiet' });
+    button(this, 235, 680, 140, compact ? 84 : 48, '다음 ▶', () => this.changePage(1), 0x586275, { tone: 'quiet' });
+    this.autoButton = button(this, 910, 680, 170, compact ? 84 : 48, '자동 편성', () => { void this.resetAutomatic(); }, 0x756d4f, { tone: 'secondary', state: 'disabled' });
+    this.saveButton = button(this, 1120, 680, 190, compact ? 84 : 48, '편성 저장', () => { void this.saveDeck(); }, 0x5f8fb8, { tone: 'primary', state: 'disabled' });
+    this.refreshCommandStates();
 
     void loadActiveProgress().then((view) => {
       if (!this.scene.isActive()) return;
       const progress = view.progress;
       this.progress = progress;
+      this.authority = view.authority;
       this.selectedIds = [...getEffectiveDeckSlotIds(progress)];
+      this.progressReady = true;
       this.statusText?.setText(view.authority === 'ACCOUNT_OFFLINE_CACHE'
         ? '계정 편성을 읽기 전용으로 불러왔습니다. 저장하려면 온라인 연결이 필요합니다.'
         : view.authority === 'ACCOUNT_ONLINE'
@@ -153,6 +174,12 @@ export class DeckScene extends Phaser.Scene {
             : '저장된 수동 편성을 불러왔습니다.');
       this.statusText?.setColor(view.authority === 'ACCOUNT_OFFLINE_CACHE' ? COLORS.warning : COLORS.blue);
       this.renderAll();
+      this.refreshCommandStates();
+    }).catch((error: unknown) => {
+      if (!this.scene.isActive()) return;
+      this.progressReady = false;
+      this.statusText?.setText(error instanceof Error ? error.message : '편성 데이터를 불러오지 못했습니다.').setColor(COLORS.red);
+      this.refreshCommandStates();
     });
   }
 
@@ -192,30 +219,41 @@ export class DeckScene extends Phaser.Scene {
     const ownedCount = this.getOwnedSlots().length;
     const filteredCount = this.getFilteredSlots().length;
     this.page = Math.min(this.page, this.pageCount - 1);
-    this.header?.setText(`출격 편성 · 보유 ${ownedCount}명 · 표시 ${filteredCount}명 · 선택 ${this.selectedIds.length}/${MAX_DECK_SLOTS}`);
+    this.header?.setText(`출격 열 ${this.selectedIds.length}/${MAX_DECK_SLOTS} · 보유 ${ownedCount}명 · 현재 명부 ${filteredCount}명`);
     this.renderDeckOrder();
     this.renderFilters();
     this.renderCards();
+    this.refreshCommandStates();
   }
 
   private renderDeckOrder(): void {
     this.deckLayer?.destroy(true);
     this.deckLayer = this.add.container(0, 0);
     const compact = isCompactMobileViewport();
-    const startX = DECK_START_X;
-    const y = compact ? 160 : 160;
+    const y = 160;
 
     for (let index = 0; index < MAX_DECK_SLOTS; index += 1) {
       const slotId = this.selectedIds[index];
       const rosterSlot = slotId ? getSlotById(slotId) : undefined;
-      const x = startX + index * DECK_SLOT_WIDTH + DECK_SLOT_WIDTH / 2;
+      const x = DECK_START_X + index * DECK_SLOT_WIDTH + DECK_SLOT_WIDTH / 2;
       const badge = rosterSlot ? acquisitionBadge(rosterSlot) : undefined;
-      const border = badge ? Phaser.Display.Color.HexStringToColor(badge.color).color : 0x4b5666;
-      const bg = this.add.rectangle(x, y, DECK_SLOT_WIDTH - 8, compact ? 72 : 58, rosterSlot ? 0x293242 : 0x1d232d, 0.98).setStrokeStyle(2, border, 0.9);
+      const border = badge ? Phaser.Display.Color.HexStringToColor(badge.color).color : 0x46515f;
+      const height = compact ? 76 : 68;
+      const bg = this.add.rectangle(x, y, DECK_SLOT_WIDTH - 8, height, rosterSlot ? 0x283342 : 0x181e27, 0.99).setStrokeStyle(rosterSlot ? 3 : 2, border, rosterSlot ? 0.9 : 0.56);
       this.deckLayer.add(bg);
-      this.deckLayer.add(text(this, x - 44, y - (compact ? 29 : 24), hotkeyLabel(index), compact ? 17 : 14, rosterSlot ? COLORS.gold : '#667181'));
-      this.deckLayer.add(text(this, x, y + 4, rosterSlot?.displayName ?? '빈 칸', compact ? 16 : 13, rosterSlot ? '#ffffff' : '#6f7987', 'center').setOrigin(0.5));
-      if (rosterSlot) this.wireDragSurface(bg, rosterSlot.slotId, x, y);
+      this.deckLayer.add(this.add.rectangle(x, y - height / 2 + 3, DECK_SLOT_WIDTH - 18, 4, border, rosterSlot ? 0.92 : 0.3));
+      const keyCircle = this.add.circle(x - 41, y - height / 2 + 14, compact ? 13 : 11, rosterSlot ? 0x3b321d : 0x202731, 0.98).setStrokeStyle(1, rosterSlot ? 0xc8a85a : 0x566272, 0.85);
+      this.deckLayer.add(keyCircle);
+      this.deckLayer.add(text(this, keyCircle.x, keyCircle.y - 1, hotkeyLabel(index), compact ? 14 : 12, rosterSlot ? COLORS.gold : '#8792a0', 'center').setOrigin(0.5));
+
+      if (rosterSlot) {
+        const displayName = rosterSlot.displayName.length > 6 ? `${rosterSlot.displayName.slice(0, 5)}…` : rosterSlot.displayName;
+        this.deckLayer.add(text(this, x, y - 10, displayName, compact ? 16 : 14, '#ffffff', 'center').setOrigin(0.5));
+        this.deckLayer.add(text(this, x, y + 18, `${rosterSlot.role} · ◆${rosterSlot.cost}`, compact ? 12 : 11, '#cdbd91', 'center').setOrigin(0.5));
+        this.wireDragSurface(bg, rosterSlot.slotId, x, y);
+      } else {
+        this.deckLayer.add(text(this, x, y + 4, '빈 칸', compact ? 15 : 13, '#687482', 'center').setOrigin(0.5));
+      }
     }
   }
 
@@ -223,20 +261,28 @@ export class DeckScene extends Phaser.Scene {
     this.filterLayer?.destroy(true);
     this.filterLayer = this.add.container(0, 0);
     const compact = isCompactMobileViewport();
-    const y = compact ? 242 : 238;
-    const width = 142;
-    const height = compact ? 56 : 42;
-    const startX = 82;
-    const gap = 156;
+    const summary = summarizeRosterBrowserQuery({
+      quick: this.quickFilter,
+      role: this.roleFilter,
+      attack: this.attackFilter,
+      counter: this.counterFilter,
+      cost: this.costFilter,
+      range: this.rangeFilter,
+      growth: this.growthFilter,
+      search: this.searchText,
+      favoriteIds: new Set(this.favoriteIds),
+    });
+    this.filterLayer.add(text(this, 66, compact ? 218 : 220, `명부 조건 · ${summary}`, compact ? 16 : 13, '#9db2c8').setWordWrapWidth(1120));
+
     const labels = [
-      `분류·${QUICK_LABELS[this.quickFilter]}`,
-      `역할·${this.roleFilter === 'ALL' ? '전체' : this.roleFilter}`,
-      `공격·${ATTACK_LABELS[this.attackFilter]}`,
-      `대항·${COUNTER_LABELS[this.counterFilter]}`,
-      `비용·${COST_LABELS[this.costFilter]}`,
-      `사거리·${RANGE_LABELS[this.rangeFilter]}`,
-      `성장·${GROWTH_LABELS[this.growthFilter]}`,
-      this.searchText.trim() ? `검색·${this.searchText.trim().slice(0, 5)}` : '검색·없음',
+      `빠른 분류 · ${QUICK_LABELS[this.quickFilter]}`,
+      `역할 · ${this.roleFilter === 'ALL' ? '전체' : this.roleFilter}`,
+      `공격 · ${ATTACK_LABELS[this.attackFilter]}`,
+      `대항 · ${COUNTER_LABELS[this.counterFilter]}`,
+      `비용 · ${COST_LABELS[this.costFilter]}`,
+      `사거리 · ${RANGE_LABELS[this.rangeFilter]}`,
+      `성장 · ${GROWTH_LABELS[this.growthFilter]}`,
+      this.searchText.trim() ? `검색 · ${this.searchText.trim().slice(0, 6)}` : '검색 · 없음',
     ];
     const actions = [
       () => { this.quickFilter = cycleRosterFilter(ROSTER_QUICK_FILTERS, this.quickFilter); this.resetFilterPage(); },
@@ -248,8 +294,43 @@ export class DeckScene extends Phaser.Scene {
       () => { this.growthFilter = cycleRosterFilter(ROSTER_GROWTH_FILTERS, this.growthFilter); this.resetFilterPage(); },
       () => this.promptSearch(),
     ];
+    const active = [
+      this.quickFilter !== 'ALL',
+      this.roleFilter !== 'ALL',
+      this.attackFilter !== 'ALL',
+      this.counterFilter !== 'ALL',
+      this.costFilter !== 'ALL',
+      this.rangeFilter !== 'ALL',
+      this.growthFilter !== 'ALL',
+      this.searchText.trim().length > 0,
+    ];
+
+    if (compact) {
+      const width = 276;
+      const height = 50;
+      labels.forEach((label, index) => {
+        const col = index % 4;
+        const row = Math.floor(index / 4);
+        const x = 64 + width / 2 + col * 292;
+        const y = 252 + row * 52;
+        this.filterLayer!.add(button(this, x, y, width, height, label, actions[index]!, index === 0 ? 0x9a8150 : index === 7 ? 0x76668f : 0x50667e, {
+          tone: index === 0 ? 'secondary' : 'quiet',
+          state: active[index] ? 'selected' : 'default',
+        }));
+      });
+      return;
+    }
+
+    const widths = [176, 132, 132, 142, 116, 126, 126, 154] as const;
+    let cursor = 52;
     labels.forEach((label, index) => {
-      this.filterLayer!.add(button(this, startX + index * gap, y, width, height, label, actions[index]!, index === 7 ? 0x6e668c : 0x52677f, { tone: 'quiet' }));
+      const width = widths[index]!;
+      const x = cursor + width / 2;
+      this.filterLayer!.add(button(this, x, 254, width, 42, label, actions[index]!, index === 0 ? 0x9a8150 : index === 7 ? 0x76668f : 0x50667e, {
+        tone: index === 0 ? 'secondary' : 'quiet',
+        state: active[index] ? 'selected' : 'default',
+      }));
+      cursor += width + 8;
     });
   }
 
@@ -287,16 +368,17 @@ export class DeckScene extends Phaser.Scene {
     const start = this.page * this.pageSize;
     const visible = filteredSlots.slice(start, start + this.pageSize);
     const columns = compact ? 4 : 5;
-    const cardWidth = compact ? 282 : 222;
-    const cardHeight = compact ? 150 : 154;
+    const cardWidth = compact ? 280 : 222;
+    const cardHeight = compact ? 132 : 144;
     const xGap = compact ? 300 : 236;
     const startX = compact ? 190 : 168;
-    const startY = compact ? 370 : 354;
-    const yGap = compact ? 154 : 154;
+    const startY = compact ? 412 : 392;
+    const yGap = compact ? 136 : 148;
     this.pageText?.setText(`${this.page + 1} / ${this.pageCount} · 표시 ${filteredSlots.length}/${ownedSlots.length}명`);
 
     if (visible.length === 0) {
-      this.cardsLayer.add(text(this, INTERNAL_WIDTH / 2, 430, '현재 필터에 맞는 보유 캐릭터가 없습니다.', compact ? 24 : 20, COLORS.muted, 'center').setOrigin(0.5));
+      this.cardsLayer.add(text(this, INTERNAL_WIDTH / 2, compact ? 480 : 455, '현재 조건에 맞는 보유 캐릭터가 없습니다.', compact ? 24 : 20, COLORS.muted, 'center').setOrigin(0.5));
+      this.cardsLayer.add(text(this, INTERNAL_WIDTH / 2, compact ? 518 : 490, '위 조건 명령을 눌러 다른 분류로 전환하세요.', compact ? 17 : 14, '#7f8da0', 'center').setOrigin(0.5));
       return;
     }
 
@@ -311,19 +393,20 @@ export class DeckScene extends Phaser.Scene {
       const badge = acquisitionBadge(slot);
       const baseBorder = Phaser.Display.Color.HexStringToColor(badge.color).color;
       const border = selected ? 0xf2d56f : baseBorder;
-      const bg = this.add.rectangle(x, y, cardWidth, cardHeight, selected ? 0x343329 : 0x252c3a, 0.98).setStrokeStyle(selected ? 4 : 2, border, 0.95);
+      const bg = this.add.rectangle(x, y, cardWidth, cardHeight, selected ? 0x343329 : 0x222a35, 0.98).setStrokeStyle(selected ? 4 : 2, border, 0.95);
       this.cardsLayer!.add(bg);
+      this.cardsLayer!.add(this.add.rectangle(x, y - cardHeight / 2 + 3, cardWidth - 12, selected ? 5 : 3, border, selected ? 0.95 : 0.72));
 
       const meta = this.progress.characterProgressById?.[slot.slotId];
       const art = resolveUnitArt(slot.definition.id, meta?.selectedFormId);
-      const portrait = this.add.sprite(x - cardWidth / 2 + (compact ? 54 : 48), y - 8, art.family.idle.key, 0).setTint(art.tint);
-      portrait.setScale(((compact ? 76 : 70) / art.family.idle.frameHeight) * art.displayScale);
+      const portrait = this.add.sprite(x - cardWidth / 2 + (compact ? 54 : 48), y - 4, art.family.idle.key, 0).setTint(art.tint);
+      portrait.setScale(((compact ? 70 : 66) / art.family.idle.frameHeight) * art.displayScale);
       this.cardsLayer!.add(portrait);
 
-      this.cardsLayer!.add(text(this, x - cardWidth / 2 + 12, y - cardHeight / 2 + 8, badge.label, compact ? 17 : 14, badge.color));
-      if (selected) this.cardsLayer!.add(text(this, x + cardWidth / 2 - 12, y - cardHeight / 2 + 8, `#${hotkeyLabel(selectedIndex)}`, compact ? 18 : 15, COLORS.gold, 'right').setOrigin(1, 0));
+      this.cardsLayer!.add(text(this, x - cardWidth / 2 + 12, y - cardHeight / 2 + 8, badge.label, compact ? 16 : 13, badge.color));
+      if (selected) this.cardsLayer!.add(text(this, x + cardWidth / 2 - 12, y - cardHeight / 2 + 8, `출격 ${hotkeyLabel(selectedIndex)}`, compact ? 16 : 13, COLORS.gold, 'right').setOrigin(1, 0));
 
-      const favoriteStar = text(this, x + cardWidth / 2 - 16, y - cardHeight / 2 + (selected ? 37 : 12), favorite ? '★' : '☆', compact ? 25 : 21, favorite ? COLORS.gold : '#7f8998', 'right').setOrigin(1, 0);
+      const favoriteStar = text(this, x + cardWidth / 2 - 16, y - cardHeight / 2 + (selected ? 34 : 10), favorite ? '★' : '☆', compact ? 24 : 20, favorite ? COLORS.gold : '#7f8998', 'right').setOrigin(1, 0);
       favoriteStar.setInteractive({ useHandCursor: true });
       favoriteStar.on('pointerdown', (_pointer: Phaser.Input.Pointer, _localX: number, _localY: number, event: Phaser.Types.Input.EventData) => event.stopPropagation());
       favoriteStar.on('pointerup', (_pointer: Phaser.Input.Pointer, _localX: number, _localY: number, event: Phaser.Types.Input.EventData) => {
@@ -332,19 +415,19 @@ export class DeckScene extends Phaser.Scene {
       });
       this.cardsLayer!.add(favoriteStar);
 
-      const infoX = x - cardWidth / 2 + (compact ? 100 : 88);
-      this.cardsLayer!.add(text(this, infoX, y - cardHeight / 2 + 30, slot.displayName, compact ? 21 : 18, '#ffffff'));
+      const infoX = x - cardWidth / 2 + (compact ? 96 : 88);
+      this.cardsLayer!.add(text(this, infoX, y - cardHeight / 2 + 24, slot.displayName, compact ? 20 : 17, '#ffffff'));
 
       const level = meta?.level ?? 1;
       const plusLevel = meta?.plusLevel ?? 0;
       const currentSlot = buildCharacterCombatSlot(slot, level, meta?.selectedFormId, plusLevel);
       const form = selectedFormName(this.progress, slot.slotId);
       const levelText = plusLevel > 0 ? `Lv${level} +${plusLevel}` : `Lv${level}`;
-      this.cardsLayer!.add(text(this, infoX, y - 25, `${slot.role} · ${levelText} · ${form}`, compact ? 16 : 13, COLORS.blue));
-      this.cardsLayer!.add(text(this, infoX, y + 1, `${currentSlot.cost} 보급 · ${formatCombatTraits(currentSlot.definition)}`, compact ? 15 : 12, COLORS.gold));
+      this.cardsLayer!.add(text(this, infoX, y - 20, `${slot.role} · ${levelText} · ${form}`, compact ? 15 : 12, COLORS.blue));
+      this.cardsLayer!.add(text(this, infoX, y + 4, `◆${currentSlot.cost} · ${formatCombatTraits(currentSlot.definition)}`, compact ? 14 : 12, COLORS.gold));
       const specialty = formatDamageSpecialty(currentSlot.definition);
-      this.cardsLayer!.add(text(this, infoX, y + 26, specialty || '범용 공격', compact ? 15 : 12, specialty ? '#ffd493' : '#9da8b8'));
-      if (!compact) this.cardsLayer!.add(text(this, infoX, y + 49, selected ? '클릭 제외 · 드래그 슬롯 교환' : '클릭 추가 · 드래그 슬롯 배치', 11, selected ? COLORS.gold : '#9aa7b8'));
+      this.cardsLayer!.add(text(this, infoX, y + 28, specialty || '범용 공격', compact ? 14 : 12, specialty ? '#ffd493' : '#9da8b8'));
+      if (!compact) this.cardsLayer!.add(text(this, infoX, y + 48, selected ? '탭 제외 · 드래그로 순서 교환' : '탭 추가 · 드래그로 슬롯 배치', 11, selected ? COLORS.gold : '#9aa7b8'));
       this.wireDragSurface(bg, slot.slotId, x, y);
     });
   }
@@ -426,14 +509,40 @@ export class DeckScene extends Phaser.Scene {
     this.renderAll();
   }
 
+  private refreshCommandStates(): void {
+    if (!this.saveButton || !this.autoButton) return;
+    if (this.saving) {
+      setButtonState(this.saveButton, 'loading', '편성 저장 처리 중');
+      setButtonState(this.autoButton, 'loading', '편성 저장 처리 중');
+      return;
+    }
+    if (!this.progressReady) {
+      setButtonState(this.saveButton, 'disabled', '편성 데이터가 준비되지 않았습니다.');
+      setButtonState(this.autoButton, 'disabled', '편성 데이터가 준비되지 않았습니다.');
+      return;
+    }
+    if (this.authority === 'ACCOUNT_OFFLINE_CACHE') {
+      setButtonState(this.saveButton, 'disabled', '온라인 계정 연결이 필요합니다.');
+      setButtonState(this.autoButton, 'disabled', '온라인 계정 연결이 필요합니다.');
+      return;
+    }
+    setButtonState(this.saveButton, 'default');
+    setButtonState(this.autoButton, 'default');
+  }
+
   private async saveDeck(): Promise<void> {
     if (this.saving) return;
+    if (this.authority === 'ACCOUNT_OFFLINE_CACHE') {
+      this.statusText?.setText('오프라인 계정 기록은 읽기 전용입니다. 온라인 연결 후 편성을 저장할 수 있습니다.').setColor(COLORS.warning);
+      return;
+    }
     if (this.selectedIds.length < 1) {
       this.statusText?.setText('최소 1명의 캐릭터를 편성해야 합니다.');
       this.statusText?.setColor(COLORS.red);
       return;
     }
     this.saving = true;
+    this.refreshCommandStates();
     this.statusText?.setText('편성 저장 중…');
     this.statusText?.setColor(COLORS.muted);
     try {
@@ -450,12 +559,18 @@ export class DeckScene extends Phaser.Scene {
       this.statusText?.setColor(COLORS.red);
     } finally {
       this.saving = false;
+      if (this.scene.isActive()) this.refreshCommandStates();
     }
   }
 
   private async resetAutomatic(): Promise<void> {
     if (this.saving) return;
+    if (this.authority === 'ACCOUNT_OFFLINE_CACHE') {
+      this.statusText?.setText('오프라인 계정 기록은 읽기 전용입니다. 온라인 연결 후 자동 편성을 적용할 수 있습니다.').setColor(COLORS.warning);
+      return;
+    }
     this.saving = true;
+    this.refreshCommandStates();
     this.statusText?.setText('자동 편성을 계산하는 중…');
     this.statusText?.setColor(COLORS.muted);
     try {
@@ -472,6 +587,7 @@ export class DeckScene extends Phaser.Scene {
       this.statusText?.setColor(COLORS.red);
     } finally {
       this.saving = false;
+      if (this.scene.isActive()) this.refreshCommandStates();
     }
   }
 }
