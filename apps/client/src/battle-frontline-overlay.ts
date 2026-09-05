@@ -2,6 +2,7 @@ import Phaser from 'phaser';
 import { UnitState } from '@frontline/sim';
 import type { PlayableBattleState } from '@frontline/sim/playable';
 import { addText, battleUiFontSize } from './scene-ui';
+import { isCompactMobileViewport } from './viewport';
 
 interface BattleFrontlineCarrier extends Phaser.Scene {
   state: PlayableBattleState;
@@ -12,8 +13,6 @@ interface BattleFrontlineCarrier extends Phaser.Scene {
 const INSTALLED = Symbol('frontline-pressure-overlay-installed');
 const LANE_LEFT = 112;
 const LANE_RIGHT = 1168;
-const RAIL_Y = 558;
-const SUPPLY_Y = 572;
 
 function toScreenX(state: PlayableBattleState, anchorX: number): number {
   const length = Math.max(1, state.battle.mapLength);
@@ -49,6 +48,10 @@ export function installBattleFrontlineOverlay(scene: Phaser.Scene): void {
   if (typeof carrier.drawBases !== 'function' || typeof carrier.syncHud !== 'function') return;
   carrier[INSTALLED] = true;
 
+  const compact = isCompactMobileViewport();
+  const railY = compact ? 414 : 558;
+  const supplyY = railY + 14;
+  const labelY = compact ? 386 : 578;
   const originalDrawBases = carrier.drawBases.bind(carrier);
   const originalSyncHud = carrier.syncHud.bind(carrier);
   let layer: Phaser.GameObjects.Container | undefined;
@@ -64,10 +67,10 @@ export function installBattleFrontlineOverlay(scene: Phaser.Scene): void {
 
     const diamond = carrier.add.rectangle(0, 0, 12, 12, 0xe8c66d, 0.95).setAngle(45).setStrokeStyle(2, 0xffe7a4, 0.72);
     const stem = carrier.add.rectangle(0, 13, 2, 18, 0xe8c66d, 0.62);
-    marker = carrier.add.container(0, RAIL_Y, [diamond, stem]);
+    marker = carrier.add.container(0, railY, [diamond, stem]);
     layer.add(marker);
 
-    label = addText(carrier, 640, 578, '', battleUiFontSize(11, 14), '#f0d99b', 'center')
+    label = addText(carrier, 640, labelY, '', battleUiFontSize(11, 14), '#f0d99b', 'center')
       .setOrigin(0.5, 0)
       .setDepth(1);
     layer.add(label);
@@ -83,29 +86,29 @@ export function installBattleFrontlineOverlay(scene: Phaser.Scene): void {
     const pressure = pressureLabel(state, front.ratio);
 
     rail.clear();
-    rail.lineStyle(6, 0x10151c, 0.56).lineBetween(LANE_LEFT, RAIL_Y, LANE_RIGHT, RAIL_Y);
-    rail.lineStyle(3, 0x70b9e8, 0.54).lineBetween(LANE_LEFT, RAIL_Y, contactX, RAIL_Y);
-    rail.lineStyle(3, 0xd97973, 0.54).lineBetween(contactX, RAIL_Y, LANE_RIGHT, RAIL_Y);
+    rail.lineStyle(6, 0x10151c, 0.56).lineBetween(LANE_LEFT, railY, LANE_RIGHT, railY);
+    rail.lineStyle(3, 0x70b9e8, 0.54).lineBetween(LANE_LEFT, railY, contactX, railY);
+    rail.lineStyle(3, 0xd97973, 0.54).lineBetween(contactX, railY, LANE_RIGHT, railY);
 
     for (const fraction of [0.25, 0.5, 0.75]) {
       const x = LANE_LEFT + (LANE_RIGHT - LANE_LEFT) * fraction;
-      rail.lineStyle(fraction === 0.5 ? 2 : 1, 0xe4d9bf, fraction === 0.5 ? 0.28 : 0.16).lineBetween(x, RAIL_Y - 6, x, RAIL_Y + 6);
+      rail.lineStyle(fraction === 0.5 ? 2 : 1, 0xe4d9bf, fraction === 0.5 ? 0.28 : 0.16).lineBetween(x, railY - 6, x, railY + 6);
     }
 
-    rail.lineStyle(2, 0xe0bb61, 0.34).lineBetween(LANE_LEFT, SUPPLY_Y, playerX, SUPPLY_Y);
+    rail.lineStyle(2, 0xe0bb61, 0.34).lineBetween(LANE_LEFT, supplyY, playerX, supplyY);
     const supplySpan = Math.max(0, playerX - LANE_LEFT);
     if (supplySpan > 90) {
       for (const fraction of [0.36, 0.66, 0.9]) {
         const x = LANE_LEFT + supplySpan * fraction;
-        rail.fillStyle(0xe0bb61, 0.44).fillTriangle(x - 5, SUPPLY_Y - 4, x + 4, SUPPLY_Y, x - 5, SUPPLY_Y + 4);
+        rail.fillStyle(0xe0bb61, 0.44).fillTriangle(x - 5, supplyY - 4, x + 4, supplyY, x - 5, supplyY + 4);
       }
     }
 
     if (enemyX - playerX < 170) {
-      rail.fillStyle(0xe6c96e, 0.08).fillRect(Math.min(playerX, enemyX), 540, Math.max(12, Math.abs(enemyX - playerX)), 30);
+      rail.fillStyle(0xe6c96e, 0.08).fillRect(Math.min(playerX, enemyX), railY - 18, Math.max(12, Math.abs(enemyX - playerX)), 30);
     }
 
-    marker.setPosition(contactX, RAIL_Y);
+    marker.setPosition(contactX, railY);
     marker.setAlpha(state.battle.winner === null ? 0.92 : 1);
     label.setText(`전선 ${Math.round(front.ratio * 100)}% · ${pressure.label}`);
     label.setColor(pressure.color);
