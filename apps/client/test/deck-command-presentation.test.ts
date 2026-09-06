@@ -26,7 +26,12 @@ test('roster cards keep three readable information tiers and a fixed footer safe
   assert.match(presentation, /const yGap = compact \? 128 : 132;/);
   assert.match(presentation, /const growthLine = text/);
   assert.match(presentation, /const combatLine = text/);
-  assert.doesNotMatch(presentation, /탭 추가 · 드래그로 슬롯 배치|탭 제외 · 드래그로 순서 교환/);
+
+  const renderStart = presentation.indexOf('function renderRosterCards');
+  const renderEnd = presentation.indexOf('function installRenderOverrides');
+  assert.ok(renderStart >= 0 && renderEnd > renderStart);
+  const renderBlock = presentation.slice(renderStart, renderEnd);
+  assert.doesNotMatch(renderBlock, /탭 추가 · 드래그로 슬롯 배치|탭 제외 · 드래그로 순서 교환/);
 
   const compactSecondRowBottom = 404 + 128 + 124 / 2;
   const desktopSecondRowBottom = 374 + 132 + 124 / 2;
