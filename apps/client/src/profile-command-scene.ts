@@ -52,7 +52,7 @@ function completedAchievements(carrier: ProfilePresentationCarrier): number | un
 /** Presentation-only guard over the existing profile/account authority. */
 export class ProfileScene extends BaseProfileScene {
   private restoreProfileRender: (() => void) | undefined;
-  private achievementProgress?: Phaser.GameObjects.Graphics;
+  private achievementProgress: Phaser.GameObjects.Graphics | undefined;
 
   override create(): void {
     const factory = this.add;
