@@ -24,7 +24,7 @@ import { Pvp2v2BattleScene, Pvp2v2MatchmakingScene } from './pvp-2v2-command-sce
 import { PvpMatchScene } from './pvp-command-match-scene';
 import { PvpHubScene } from './pvp-expanded-hub-scene';
 import { FriendlyPvp2v2LobbyScene } from './pvp-friendly-2v2-scene';
-import { FriendlyPvpLobbyScene, FriendlyPvpMatchScene } from './pvp-friendly-scenes';
+import { FriendlyPvpLobbyScene, FriendlyPvpMatchScene } from './pvp-friendly-command-scenes';
 import { PvpLeaderboardScene } from './pvp-leaderboard-scene';
 import { PvpMatchmakingScene } from './pvp-scenes';
 import { PvpSeasonScene } from './pvp-season-scene';
