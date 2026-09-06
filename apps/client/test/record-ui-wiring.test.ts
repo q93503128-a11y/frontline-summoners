@@ -5,17 +5,19 @@ import test from 'node:test';
 const readSource = (relative: string): Promise<string> => readFile(new URL(relative, import.meta.url), 'utf8');
 
 test('record SPECIAL is reachable from sortie and all three player-facing scenes are registered', async () => {
-  const [main, hub] = await Promise.all([
+  const [main, hub, presentation] = await Promise.all([
     readSource('../src/main.ts'),
     readSource('../src/stage-hub-scene.ts'),
+    readSource('../src/record-command-scenes.ts'),
   ]);
   assert.match(hub, /'기록전', \(\) => this\.scene\.start\('record-hub'\)/);
-  assert.match(main, /import \{ RecordHubScene \} from '\.\/record-hub-scene';/);
+  assert.match(main, /import \{ RecordHubScene, RecordResultScene \} from '\.\/record-command-scenes';/);
   assert.match(main, /import \{ QuirkRecordBattleScene as RecordBattleScene \} from '\.\/quirk-record-battle-scene';/);
-  assert.match(main, /import \{ RecordResultScene \} from '\.\/record-result-scene';/);
   assert.match(main, /game\.scene\.add\('record-hub', RecordHubScene, false\)/);
   assert.match(main, /game\.scene\.add\('record-battle', RecordBattleScene, false\)/);
   assert.match(main, /game\.scene\.add\('record-result', RecordResultScene, false\)/);
+  assert.match(presentation, /extends BaseRecordHubScene/);
+  assert.match(presentation, /extends BaseRecordResultScene/);
 });
 
 test('record hub reads canonical unlock rules and durable personal-best high-water state', async () => {
