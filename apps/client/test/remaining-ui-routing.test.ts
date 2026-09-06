@@ -31,7 +31,7 @@ test('runtime routes season leaderboard sortie and settings through presentation
   assert.match(sortie, /\['renderLoading', 'renderBlocked', 'renderHome', 'renderFriends'\]/);
 
   assert.match(settings, /extends BaseSettingsScene/);
-  assert.match(settings, /'변경 내용은 이 기기에 저장':/);
+  assert.match(settings, /'변경 내용은 이 기기에 저장됩니다\.': '변경 내용은 이 기기에 저장'/);
 });
 
 test('presentation wrappers do not replace gameplay or persistence authority', async () => {
