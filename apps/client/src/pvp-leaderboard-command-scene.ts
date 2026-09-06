@@ -57,7 +57,7 @@ function polishLeaderboard(scene: Phaser.Scene): void {
         object.setColor('#dbe4ee').setAlpha(0.9);
       }
       if (object.text.includes(' · 나')) object.setColor('#fff0b8').setAlpha(1);
-      if (/^#(1|2|3)$/.test(object.text)) object.setFontSize(Math.max(object.fontSize, 17)).setAlpha(1);
+      if (/^#(1|2|3)$/.test(object.text)) object.setAlpha(1).setColor('#f0d67d');
       if (['순위', '지휘관', '티어', '평점', '승수'].includes(object.text)) object.setAlpha(0.68);
     }
   });
