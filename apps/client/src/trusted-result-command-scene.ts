@@ -1,5 +1,12 @@
 import Phaser from 'phaser';
+import { setButtonState } from './scene-ui.ts';
 import { TrustedBattleResultScene as BaseTrustedBattleResultScene } from './trusted-battle-result-scene.ts';
+
+type TrustedResultPresentationCarrier = Phaser.Scene & {
+  finalized?: boolean;
+  finalizing?: boolean;
+  finalizeTrustedResult?: () => Promise<void>;
+};
 
 function rewriteTrustedResultLine(value: string): string {
   const direct: Readonly<Record<string, string>> = {
@@ -10,6 +17,7 @@ function rewriteTrustedResultLine(value: string): string {
     '전투 검증 완료 · 계정 보상 claim 중…': '전투 확인 완료 · 보상을 정산하는 중…',
     '보상은 서버 검증이 완료될 때까지 지급되지 않는다.': '결과 확인이 끝날 때까지 보상은 지급되지 않습니다.',
     '결과 검증 재시도': '결과 다시 확인',
+    '메인': '지휘소',
   };
   if (direct[value]) return direct[value]!;
   if (/^전투\s+[a-z0-9]+…\s+·\s+[\d,]+F$/i.test(value)) return '계정 전투 기록 확인 중';
@@ -34,6 +42,8 @@ function rewriteTrustedResultText(value: string | string[]): string | string[] {
 
 /** Player-facing presentation adapter. Server authority and settlement logic stay in the base scene. */
 export class TrustedBattleResultScene extends BaseTrustedBattleResultScene {
+  private restoreFinalize: (() => void) | undefined;
+
   override create(): void {
     const factory = this.add;
     const originalText = factory.text;
@@ -44,7 +54,54 @@ export class TrustedBattleResultScene extends BaseTrustedBattleResultScene {
       return text;
     }) as typeof factory.text;
 
-    this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => { factory.text = originalText; });
+    this.installFinalizeStateBridge();
     super.create();
+    this.polishTrustedGeometry();
+    this.syncActionStates();
+
+    this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => {
+      factory.text = originalText;
+      this.restoreFinalize?.();
+      this.restoreFinalize = undefined;
+    });
+  }
+
+  private installFinalizeStateBridge(): void {
+    const carrier = this as unknown as TrustedResultPresentationCarrier;
+    const originalFinalize = carrier.finalizeTrustedResult;
+    if (!originalFinalize) return;
+    carrier.finalizeTrustedResult = async () => {
+      this.syncActionStates('loading');
+      await originalFinalize.call(this);
+      this.syncActionStates();
+    };
+    this.restoreFinalize = () => { carrier.finalizeTrustedResult = originalFinalize; };
+  }
+
+  private syncActionStates(force?: 'loading'): void {
+    const carrier = this as unknown as TrustedResultPresentationCarrier;
+    const actionButtons = this.children.list.filter((child): child is Phaser.GameObjects.Container => (
+      child instanceof Phaser.GameObjects.Container
+      && child.y >= 560
+      && child.getData('frontlineCommandButton') !== undefined
+    ));
+    for (const button of actionButtons) {
+      if (force === 'loading' || carrier.finalizing) {
+        setButtonState(button, 'loading', '결과 확인이 끝난 뒤 이동할 수 있습니다.');
+      } else if (carrier.finalized) {
+        setButtonState(button, 'default');
+      } else {
+        setButtonState(button, 'disabled', '결과 확인을 완료하거나 다시 확인한 뒤 이동할 수 있습니다.');
+      }
+    }
+  }
+
+  private polishTrustedGeometry(): void {
+    for (const child of this.children.list) {
+      if (child instanceof Phaser.GameObjects.Rectangle && child.width >= 700 && child.height >= 280) {
+        child.setFillStyle(0x171f29, 0.86).setStrokeStyle(1, 0x708197, 0.42);
+      }
+      if (child instanceof Phaser.GameObjects.Text && child.text === '전투 결과 확인') child.setAlpha(0.78);
+    }
   }
 }
