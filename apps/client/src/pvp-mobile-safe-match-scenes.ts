@@ -69,21 +69,34 @@ function renderCompactPager(scene: PagedCarrier): void {
   });
 
   const pageIndex = geometry.pageSize;
-  const pageButton = addButton(
-    scene,
-    xFor(pageIndex),
-    geometry.buttonY,
-    geometry.buttonWidth,
-    geometry.buttonHeight,
-    geometry.pageCount > 1 ? `병력 전환\n${page + 1}/${geometry.pageCount}` : '병력 명령\n전체',
-    () => {
-      if (geometry.pageCount <= 1) return;
-      scene[PAGE] = (page + 1) % geometry.pageCount;
-      scene.renderControls();
-    },
-    0x6b668a,
-    { tone: 'secondary', state: geometry.pageCount > 1 ? 'selected' : 'disabled', reason: geometry.pageCount > 1 ? undefined : '모든 소환 명령이 한 줄에 표시되어 있습니다.' },
-  );
+  const cyclePage = (): void => {
+    if (geometry.pageCount <= 1) return;
+    scene[PAGE] = (page + 1) % geometry.pageCount;
+    scene.renderControls();
+  };
+  const pageButton = geometry.pageCount > 1
+    ? addButton(
+        scene,
+        xFor(pageIndex),
+        geometry.buttonY,
+        geometry.buttonWidth,
+        geometry.buttonHeight,
+        `병력 전환\n${page + 1}/${geometry.pageCount}`,
+        cyclePage,
+        0x6b668a,
+        { tone: 'secondary', state: 'selected' },
+      )
+    : addButton(
+        scene,
+        xFor(pageIndex),
+        geometry.buttonY,
+        geometry.buttonWidth,
+        geometry.buttonHeight,
+        '병력 명령\n전체',
+        cyclePage,
+        0x6b668a,
+        { tone: 'secondary', state: 'disabled', reason: '모든 소환 명령이 한 줄에 표시되어 있습니다.' },
+      );
   layer.add(pageButton);
 
   const canUpgrade = side.nextSupplyUpgradeCost !== null && side.supply >= side.nextSupplyUpgradeCost;
