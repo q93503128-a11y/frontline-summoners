@@ -80,9 +80,9 @@ export class QuirkRecordBattleScene extends RecordBattleScene {
     }
   }
 
-  private showQuirkToast(factId: CombatQuirkFactId, pendingServerVerification: boolean): void {
+  private showQuirkToast(factId: CombatQuirkFactId, pendingAccountConfirmation: boolean): void {
     this.quirkToast?.destroy();
-    const suffix = pendingServerVerification ? ' · 서버 검증 대기' : '';
+    const suffix = pendingAccountConfirmation ? ' · 계정 확인 중' : '';
     this.quirkToast = addText(
       this,
       640,
