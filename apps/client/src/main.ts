@@ -20,7 +20,7 @@ import { RecruitmentScene } from './recruitment-scene';
 import { BootScene as BaseBootScene, MainMenuScene as BaseMainMenuScene } from './navigation-scenes';
 import { ProfileScene } from './profile-command-scene';
 import { PublicCoopMatchmakingScene } from './public-coop-scenes';
-import { Pvp2v2BattleScene, Pvp2v2MatchmakingScene } from './pvp-2v2-command-scenes';
+import { Pvp2v2BattleScene, Pvp2v2MatchmakingScene } from './pvp-2v2-mobile-safe-scenes';
 import { PvpHubScene } from './pvp-expanded-hub-scene';
 import { FriendlyPvp2v2LobbyScene } from './pvp-friendly-2v2-command-scene';
 import { FriendlyPvpLobbyScene, FriendlyPvpMatchScene, PvpMatchScene } from './pvp-mobile-safe-match-scenes';
