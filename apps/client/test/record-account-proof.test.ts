@@ -62,7 +62,9 @@ test('record result completes server replay before claim, recovers online state 
   assert.match(result, /claimAuthenticatedTrustedBattle\(battleId\)/);
   assert.match(result, /assertTrustedCompletion\(this\.modeId, completed\.result\)/);
   assert.match(result, /accountSnapshotToGuestProgress\(claim\.snapshot\)/);
-  assert.match(result, /서버 재생 검증 · 계정 기록\/도감\/새 구간 보상 저장 완료/);
+  assert.match(result, /계정 기록·도감·새 구간 보상 저장 완료/);
+  assert.match(result, /계정 기록 확인에 실패했습니다\. 연결 상태를 확인한 뒤 결과 재전송을 시도하세요/);
+  assert.match(result, /setActionsDisabled/);
   assert.match(result, /결과 재전송/);
   assert.match(result, /this\.trustedBattleId[\s\S]*\? this\.recordAuthenticatedResult/);
 });
