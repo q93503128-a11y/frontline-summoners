@@ -12,10 +12,11 @@ import {
   StoryFriendCoopLobbyScene as FriendCoopLobbyScene,
   StoryPublicCoopLobbyScene as PublicCoopLobbyScene,
 } from './coop-command-battle-scenes';
+import { CatalogScene } from './catalog-command-scene';
 import { DeckScene } from './deck-command-scene';
 import { FirstSliceProductionCaptureScene, isFirstSliceCaptureMode } from './first-slice-production-capture-scene.ts';
 import { isFirstSliceProductionReviewMode } from './first-slice-production-review-runtime.ts';
-import { CatalogScene, GrowthScene } from './meta-command-scenes';
+import { GrowthScene } from './meta-command-scenes';
 import { RecruitmentScene } from './recruitment-command-scene';
 import { BootScene as BaseBootScene, MainMenuScene as BaseMainMenuScene } from './navigation-scenes';
 import { ProfileScene } from './profile-command-scene';
