@@ -24,6 +24,8 @@ function rewriteAccountLine(value: string): string {
     '서버 진행 유지': '계정 진행 유지',
     '게스트 저장 초기화': '로컬 진행 초기화',
     'Google 계정으로 로그인': 'Google 계정 연결',
+    'Google 로그인이 아직 서버에 설정되지 않았습니다.': '현재 Google 계정 연결을 사용할 수 없습니다. 잠시 후 다시 시도해 주세요.',
+    'Google 로그인 API를 찾지 못했습니다.': 'Google 계정 연결을 시작하지 못했습니다. 잠시 후 다시 시도해 주세요.',
   };
   if (direct[normalized]) return direct[normalized]!;
   if (/^로그인 후 서버 진행이 비어 있으면/.test(normalized)) return '계정 진행이 비어 있으면 현재 게스트 진행을 옮길 수 있습니다.';
@@ -31,7 +33,7 @@ function rewriteAccountLine(value: string): string {
   if (/^전투·모집·성장·소셜 변경이 서버 진행에 저장됩니다\.$/.test(normalized)) return '플레이 진행이 계정에 저장됩니다.';
   if (/^오프라인에서는 진행을 확인할 수 있지만/.test(normalized)) return '오프라인에서는 진행을 볼 수 있지만 변경할 수 없습니다.';
   if (/^현재 화면은 읽기 전용입니다\./.test(normalized)) return '현재는 읽기 전용입니다. 온라인 연결을 복구하면 다시 변경할 수 있습니다.';
-  if (/HTTP_|revision|requestId|migrationId|state hash|account_|profile_|guest_/i.test(normalized)) {
+  if (/HTTP_|fetch|network|websocket|revision|requestId|migrationId|state hash|account_|profile_|guest_/i.test(normalized)) {
     return '계정 작업을 완료하지 못했습니다. 연결 상태를 확인한 뒤 다시 시도해 주세요.';
   }
   return normalized;
