@@ -58,7 +58,8 @@ test('growth scene exposes paid base level, shared plus growth, evolution unlock
     readFile(new URL('../src/meta-command-scenes.ts', import.meta.url), 'utf8'),
     readFile(new URL('../src/growth-scene.ts', import.meta.url), 'utf8'),
   ]);
-  assert.match(main, /import \{ CatalogScene, GrowthScene \} from '\.\/meta-command-scenes';/);
+  assert.match(main, /import \{ CatalogScene \} from '\.\/catalog-command-scene';/);
+  assert.match(main, /import \{ GrowthScene \} from '\.\/meta-command-scenes';/);
   assert.match(adapter, /GrowthScene as BaseGrowthScene/);
   assert.match(main, /game\.scene\.add\('growth', GrowthScene, false\);/);
   assert.match(growth, /getOwnedCharacterIds\(this\.progress\)/);
