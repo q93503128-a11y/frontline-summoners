@@ -4,7 +4,7 @@ import { loadActiveProgress } from './active-progress';
 import { restoreAuthenticatedAccountSession } from './account-network';
 import { AccountScene } from './account-refined-scene';
 import { ReplayBattleScene as BattleScene } from './replay-battle-scene';
-import { BaseWeaponScene } from './base-weapon-scene';
+import { BaseWeaponScene } from './base-weapon-command-scene';
 import {
   StoryGuestCoopBattleScene as CoopBattleScene,
   StoryGuestCoopLobbyScene as CoopLobbyScene,
@@ -28,8 +28,7 @@ import { PvpLeaderboardScene } from './pvp-leaderboard-scene';
 import { PvpMatchmakingScene } from './pvp-matchmaking-command-scene';
 import { PvpSeasonScene } from './pvp-season-scene';
 import { QuirkRecordBattleScene as RecordBattleScene } from './quirk-record-battle-scene';
-import { RecordHubScene } from './record-hub-scene';
-import { RecordResultScene } from './record-result-scene';
+import { RecordHubScene, RecordResultScene } from './record-command-scenes';
 import { ResultScene } from './result-command-scene';
 import { getOwnedCharacterIds } from './save';
 import { SocialCommandScene as SocialScene } from './social-command-scene';
