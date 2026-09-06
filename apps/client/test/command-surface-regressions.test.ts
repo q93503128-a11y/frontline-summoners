@@ -17,6 +17,29 @@ test('growth and catalog route through focused presentations with disabled edge 
   assert.match(growth, /setButtonState\(this\.nextButton, this\.page >= this\.pageCount - 1 \? 'disabled' : 'default'/);
   assert.match(catalog, /'첫 번째 기록 묶음입니다\.'/);
   assert.match(catalog, /'마지막 기록 묶음입니다\.'/);
+  assert.match(catalog, /function catalogCompletion\(/);
+  assert.match(catalog, /getOwnedCharacterIds\(progress\)\.length/);
+  assert.match(catalog, /pageText\.setText\(`\$\{base\} · \$\{noun\} \$\{current\}\/\$\{total\}`\)/);
+  assert.match(catalog, /updateArchiveProgress\(this, carrier, progressGuide\)/);
+});
+
+test('profile and account keep progression identity while separating utility and risk', async () => {
+  const [main, profile, account] = await Promise.all([
+    readSource('../src/main.ts'),
+    readSource('../src/profile-command-scene.ts'),
+    readSource('../src/account-refined-scene.ts'),
+  ]);
+
+  assert.match(main, /import \{ ProfileScene \} from '\.\/profile-command-scene'/);
+  assert.match(main, /import \{ AccountScene \} from '\.\/account-refined-scene'/);
+  assert.match(profile, /import \{ ACHIEVEMENTS \}/);
+  assert.match(profile, /drawAchievementProgress\(\)/);
+  assert.match(profile, /completed \/ total/);
+  assert.match(profile, /'대표 장식과 전과를 정리하고 업적 진행을 확인합니다\.'/);
+  assert.match(account, /'현재 진행의 저장 위치와 계정 연결 상태를 확인합니다\.'/);
+  assert.match(account, /drawAccountGuides\(\)/);
+  assert.match(account, /label === '로그아웃' \|\| label === '로컬 진행 초기화'/);
+  assert.match(account, /label === '테스트 도구'/);
 });
 
 test('guest coop post-story waits for persisted clear state instead of player-facing result copy', async () => {
