@@ -46,6 +46,20 @@ test('record battle uses the real deterministic record runtimes at fixed 1x spee
   assert.match(battle, /tryFireBaseWeapon\(this\.battleState\(\)\)/);
 });
 
+test('record battle presentation routes through the command HUD without leaking prototype vocabulary', async () => {
+  const [accessible, command] = await Promise.all([
+    readSource('../src/accessible-record-battle-scene.ts'),
+    readSource('../src/record-command-hud.ts'),
+  ]);
+  assert.match(accessible, /installRecordCommandHud\(this\)/);
+  assert.match(command, /현재 기록/);
+  assert.match(command, /혼자 도전 · 1× 고정/);
+  assert.match(command, /최대 단계/);
+  assert.match(command, /getCurrentMinimumInternalTouchTarget\(\)/);
+  assert.match(command, /label\.slice\(0, -1\).*초/);
+  assert.doesNotMatch(command, /SOLO_ONLY|RECORD SPECIAL/);
+});
+
 test('record battle applies durable loadout and exposes the selected weapon instead of assuming front cannon', async () => {
   const battle = await readSource('../src/record-battle-scene.ts');
   assert.match(battle, /this\.activeSlots = buildGuestDeckSlots\(progress\)/);
@@ -55,14 +69,18 @@ test('record battle applies durable loadout and exposes the selected weapon inst
   assert.match(battle, /kind === 'SUPPLY_DROP'/);
 });
 
-test('record result always writes reached score and newly crossed milestone rewards before navigation', async () => {
+test('record result writes reached score before navigation and exposes honest settlement states', async () => {
   const result = await readSource('../src/record-result-scene.ts');
   assert.match(result, /recordGuestEndlessResult\(this\.survivalMs\)/);
   assert.match(result, /recordGuestBossRushResult\(this\.defeatedBosses\)/);
   assert.match(result, /result\.resourceReward/);
   assert.match(result, /result\.recordModeProgress/);
   assert.match(result, /if \(this\.resultRecorded\) action\(\)/);
+  assert.match(result, /setActionsLoading/);
+  assert.match(result, /setActionsDisabled/);
+  assert.match(result, /unlockActions/);
   assert.match(result, /this\.scene\.start\('record-battle', \{ modeId: this\.modeId \}\)/);
   assert.match(result, /this\.scene\.start\('record-hub'\)/);
+  assert.doesNotMatch(result, /서버 재생 검증·기록 저장 중/);
   assert.doesNotMatch(result, /recordNormalStageClear|recordSpecialStageClear|sweepGuestStage/);
 });
