@@ -74,7 +74,7 @@ test('runtime and catalog share the coarse-pointer compact-mobile classifier and
   assert.match(ui, /const scaledSize = Math\.round\(size \* getUiScaleFactor\(settings\)\);/);
   assert.match(ui, /const renderedSize = isCompactMobileViewport\(\) \? Math\.max\(scaledSize, 16\) : Math\.max\(scaledSize, 12\);/);
   assert.match(ui, /fontSize: `\$\{renderedSize\}px`/);
-  assert.match(ui, /strokeThickness: highContrast \?/);
+  assert.match(ui, /\.\.\.\(highContrast \? \{[\s\S]*?stroke: '#000000',[\s\S]*?strokeThickness: Math\.max/);
 });
 
 test('catalog keeps desktop descriptions while compact dossiers prioritize readable identity and stats', async () => {
