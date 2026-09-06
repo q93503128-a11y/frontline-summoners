@@ -30,13 +30,17 @@ export class SocialCommandScene extends SocialScene {
   override create(): void {
     const factory = this.add;
     const originalText = factory.text;
-    const wrappedText: typeof originalText = (x, y, text, style) => originalText.call(
-      factory,
-      x,
-      y,
-      this.sanitizePlayerFacingText(text),
-      style,
-    );
+    const wrappedText: typeof originalText = (x, y, text, style) => {
+      const created = originalText.call(
+        factory,
+        x,
+        y,
+        this.sanitizePlayerFacingText(text),
+        style,
+      );
+      this.installDynamicTextSanitizer(created);
+      return created;
+    };
     factory.text = wrappedText;
 
     this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => {
@@ -47,6 +51,11 @@ export class SocialCommandScene extends SocialScene {
 
     super.create();
     this.installCommandChromeSync();
+  }
+
+  private installDynamicTextSanitizer(text: Phaser.GameObjects.Text): void {
+    const originalSetText = text.setText.bind(text);
+    text.setText = ((value: string | string[]) => originalSetText(this.sanitizePlayerFacingText(value))) as typeof text.setText;
   }
 
   private installCommandChromeSync(): void {
@@ -126,8 +135,16 @@ export class SocialCommandScene extends SocialScene {
   }
 
   private sanitizePlayerFacingLine(text: string): string {
-    return text
+    const sanitized = text
       .replace(/^내 상태 (온라인|오프라인) · 프레임 .+$/, '내 상태 $1 · 프로필 장식 적용')
       .replace(/\b(?:main|special)_[a-z0-9_]+\b/gi, '알 수 없는 전장');
+
+    if (/HTTP_\d+|state hash|revision|requestId|matchId|seatId/i.test(sanitized)) {
+      return '요청을 처리하지 못했습니다. 다시 시도해 주세요.';
+    }
+    if (/(?:^|\s)(?:social|friendly|pvp|coop|account)_[a-z0-9_]+/i.test(sanitized)) {
+      return '요청을 처리하지 못했습니다. 다시 시도해 주세요.';
+    }
+    return sanitized;
   }
 }
