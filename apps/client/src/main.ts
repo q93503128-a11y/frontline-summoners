@@ -18,7 +18,7 @@ import { isFirstSliceProductionReviewMode } from './first-slice-production-revie
 import { CatalogScene, GrowthScene } from './meta-command-scenes';
 import { RecruitmentScene } from './recruitment-scene';
 import { BootScene as BaseBootScene, MainMenuScene as BaseMainMenuScene } from './navigation-scenes';
-import { ProfileScene } from './profile-scene';
+import { ProfileScene } from './profile-command-scene';
 import { PublicCoopMatchmakingScene } from './public-coop-scenes';
 import { Pvp2v2BattleScene, Pvp2v2MatchmakingScene } from './pvp-2v2-command-scenes';
 import { PvpMatchScene } from './pvp-command-match-scene';
