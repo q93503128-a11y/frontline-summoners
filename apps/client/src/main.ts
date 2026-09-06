@@ -26,7 +26,7 @@ import { PvpHubScene } from './pvp-expanded-hub-scene';
 import { FriendlyPvp2v2LobbyScene } from './pvp-friendly-2v2-command-scene';
 import { FriendlyPvpLobbyScene, FriendlyPvpMatchScene, PvpMatchScene } from './pvp-mobile-safe-match-scenes';
 import { PvpLeaderboardScene } from './pvp-leaderboard-scene';
-import { PvpMatchmakingScene } from './pvp-scenes';
+import { PvpMatchmakingScene } from './pvp-matchmaking-command-scene';
 import { PvpSeasonScene } from './pvp-season-scene';
 import { QuirkRecordBattleScene as RecordBattleScene } from './quirk-record-battle-scene';
 import { RecordHubScene } from './record-hub-scene';
