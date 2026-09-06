@@ -1,6 +1,6 @@
 import { ProfileScene as BaseProfileScene } from './profile-scene.ts';
 
-interface ProfilePresentationCarrier extends BaseProfileScene {
+interface ProfilePresentationCarrier {
   loadingText?: Phaser.GameObjects.Text;
 }
 
