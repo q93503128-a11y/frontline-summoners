@@ -95,15 +95,18 @@ test('settings cycle authored values without creating arbitrary intermediate sta
   assert.equal(cycleSettingValue(100, AUDIO_VOLUME_VALUES), 0);
 });
 
-test('main menu registers settings and shared UI consumes accessibility preferences', async () => {
-  const [main, ui, scene] = await Promise.all([
+test('main menu registers refined settings while base settings and shared UI retain accessibility authority', async () => {
+  const [main, ui, scene, presentation] = await Promise.all([
     readFile(new URL('../src/main.ts', import.meta.url), 'utf8'),
     readFile(new URL('../src/scene-ui.ts', import.meta.url), 'utf8'),
     readFile(new URL('../src/settings-scene.ts', import.meta.url), 'utf8'),
+    readFile(new URL('../src/settings-command-scene.ts', import.meta.url), 'utf8'),
   ]);
-  assert.match(main, /import \{ SettingsScene \} from '\.\/settings-scene'/);
+  assert.match(main, /import \{ SettingsScene \} from '\.\/settings-command-scene'/);
   assert.match(main, /this\.scene\.start\('settings'\)/);
   assert.match(main, /game\.scene\.add\('settings', SettingsScene, false\)/);
+  assert.match(presentation, /extends BaseSettingsScene/);
+  assert.match(presentation, /Presentation-only settings layer/);
   assert.match(ui, /getUiScaleFactor\(settings\)/);
   assert.match(ui, /settings\.highContrast/);
   assert.match(ui, /shouldReduceDecorativeEffects\(settings\)/);
