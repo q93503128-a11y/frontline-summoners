@@ -23,7 +23,7 @@ import { PublicCoopMatchmakingScene } from './public-coop-scenes';
 import { Pvp2v2BattleScene, Pvp2v2MatchmakingScene } from './pvp-2v2-command-scenes';
 import { PvpMatchScene } from './pvp-command-match-scene';
 import { PvpHubScene } from './pvp-expanded-hub-scene';
-import { FriendlyPvp2v2LobbyScene } from './pvp-friendly-2v2-scene';
+import { FriendlyPvp2v2LobbyScene } from './pvp-friendly-2v2-command-scene';
 import { FriendlyPvpLobbyScene, FriendlyPvpMatchScene } from './pvp-friendly-command-scenes';
 import { PvpLeaderboardScene } from './pvp-leaderboard-scene';
 import { PvpMatchmakingScene } from './pvp-scenes';
