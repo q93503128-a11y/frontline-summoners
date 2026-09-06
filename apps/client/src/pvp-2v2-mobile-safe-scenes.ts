@@ -3,6 +3,7 @@ import {
   Pvp2v2BattleScene as BasePvp2v2BattleScene,
   Pvp2v2MatchmakingScene,
 } from './pvp-2v2-command-scenes.ts';
+import { computePvp2v2CompactRailLayout } from './pvp-2v2-compact-layout.ts';
 import type { Pvp2v2BattleSnapshot, Pvp2v2Session } from './pvp-2v2-network.ts';
 import { getSlotById } from './prototype.ts';
 import { addButton, setButtonState } from './scene-ui.ts';
@@ -38,20 +39,12 @@ function renderCompactTeamControls(scene: TeamBattleCarrier): void {
   if (!seat) return;
   const team = snapshot.teams.find((entry) => entry.teamId === seat.teamId);
   const slotIds = Object.keys(seat.costs).slice(0, 5);
-  const controlCount = slotIds.length + 2;
-  const minimumTouch = getCurrentMinimumInternalTouchTarget();
-  const margin = 16;
-  const gap = 6;
-  const available = 1280 - margin * 2;
-  const buttonWidth = Math.floor((available - gap * (controlCount - 1)) / controlCount);
-  const buttonHeight = Math.max(92, minimumTouch);
-  const panelTop = Math.max(520, 720 - buttonHeight - 16);
-  const y = panelTop + buttonHeight / 2 + 8;
-  const xFor = (index: number): number => margin + buttonWidth / 2 + index * (buttonWidth + gap);
+  const geometry = computePvp2v2CompactRailLayout(getCurrentMinimumInternalTouchTarget(), slotIds.length);
+  const xFor = (index: number): number => geometry.margin + geometry.buttonWidth / 2 + index * (geometry.buttonWidth + geometry.gap);
 
   const panel = scene.add.graphics();
-  panel.fillStyle(0x0b1017, 0.97).fillRect(0, panelTop - 6, 1280, 726 - panelTop);
-  panel.lineStyle(3, 0x536175, 0.66).lineBetween(0, panelTop - 4, 1280, panelTop - 4);
+  panel.fillStyle(0x0b1017, 0.97).fillRect(0, geometry.panelTop - 6, 1280, 726 - geometry.panelTop);
+  panel.lineStyle(3, 0x536175, 0.66).lineBetween(0, geometry.panelTop - 4, 1280, geometry.panelTop - 4);
   layer.add(panel);
 
   slotIds.forEach((slotId, index) => {
@@ -60,7 +53,7 @@ function renderCompactTeamControls(scene: TeamBattleCarrier): void {
     const name = getSlotById(slotId)?.displayName ?? '소환 동료';
     const availableCommand = cooldown <= 0 && seat.supply >= cost;
     const label = cooldown > 0 ? `${name}\n${cooldownSeconds(cooldown)}초` : `${name}\n◆${cost}`;
-    const button = addButton(scene, xFor(index), y, buttonWidth, buttonHeight, label, () => {
+    const button = addButton(scene, xFor(index), geometry.buttonY, geometry.buttonWidth, geometry.buttonHeight, label, () => {
       if (availableCommand) scene.session?.queueCommand({ type: 'SPAWN', slotId });
     }, availableCommand ? 0x5f86aa : 0x48515e, { tone: availableCommand ? 'primary' : 'quiet' });
     layer.add(button);
@@ -73,9 +66,9 @@ function renderCompactTeamControls(scene: TeamBattleCarrier): void {
   const upgrade = addButton(
     scene,
     xFor(supplyIndex),
-    y,
-    buttonWidth,
-    buttonHeight,
+    geometry.buttonY,
+    geometry.buttonWidth,
+    geometry.buttonHeight,
     seat.nextSupplyUpgradeCost === null ? '보급소\n최대 단계' : `보급소 강화\n◆${seat.nextSupplyUpgradeCost}`,
     () => { if (canUpgrade) scene.session?.queueCommand({ type: 'UPGRADE_SUPPLY' }); },
     canUpgrade ? 0x8b773f : 0x4f5050,
@@ -95,9 +88,9 @@ function renderCompactTeamControls(scene: TeamBattleCarrier): void {
   const weapon = addButton(
     scene,
     xFor(weaponIndex),
-    y,
-    buttonWidth,
-    buttonHeight,
+    geometry.buttonY,
+    geometry.buttonWidth,
+    geometry.buttonHeight,
     weaponLabel,
     () => { if (weaponReady) scene.session?.queueCommand({ type: 'FIRE_BASE_WEAPON' }); },
     weaponReady ? 0x587f98 : 0x4d535d,
