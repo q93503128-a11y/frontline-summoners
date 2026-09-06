@@ -231,7 +231,7 @@ test('shared buttons recover from touch or pointer cancellation instead of stayi
   assert.match(buttonBlock, /pressed = false;/);
   assert.match(buttonBlock, /container\.setScale\(1\);/);
   assert.match(buttonBlock, /hit\.on\('pointerupoutside', \(\) => \{[\s\S]*?container\.setScale\(1\);[\s\S]*?\}\);/);
-  assert.match(buttonBlock, /hit\.on\('pointerdown', \(\) => \{[\s\S]*?if \(!shouldUseReducedMotion\(\)\) container\.setScale\(0\.985\);[\s\S]*?\}\);/);
+  assert.match(buttonBlock, /hit\.on\('pointerdown', \(\) => \{[\s\S]*?if \(!shouldUseReducedMotion\(\)\) container\.setScale\(0\.99\);[\s\S]*?\}\);/);
 });
 
 test('Phaser uses smooth filtering for current non-pixel-art character sheets', async () => {
