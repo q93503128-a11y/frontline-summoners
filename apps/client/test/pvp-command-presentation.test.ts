@@ -7,7 +7,7 @@ const readSource = (relative: string): Promise<string> => readFile(new URL(relat
 test('main routes every PvP battle surface through command presentation wrappers', async () => {
   const main = await readSource('../src/main.ts');
   assert.match(main, /import \{ FriendlyPvpLobbyScene, FriendlyPvpMatchScene, PvpMatchScene \} from '\.\/pvp-mobile-safe-match-scenes'/);
-  assert.match(main, /import \{ Pvp2v2BattleScene, Pvp2v2MatchmakingScene \} from '\.\/pvp-2v2-command-scenes'/);
+  assert.match(main, /import \{ Pvp2v2BattleScene, Pvp2v2MatchmakingScene \} from '\.\/pvp-2v2-mobile-safe-scenes'/);
   assert.match(main, /import \{ FriendlyPvp2v2LobbyScene \} from '\.\/pvp-friendly-2v2-command-scene'/);
   assert.match(main, /game\.scene\.add\('pvp-match', PvpMatchScene, false\)/);
   assert.match(main, /game\.scene\.add\('pvp-2v2-match', Pvp2v2BattleScene, false\)/);
@@ -57,6 +57,16 @@ test('2v2 team presentation replaces seat and frame vocabulary with team command
   assert.match(presentation, /extends BasePvp2v2BattleScene/);
   assert.match(presentation, /extends BasePvp2v2MatchmakingScene/);
   assert.doesNotMatch(presentation, /new WebSocket|FRAME_INPUT/);
+});
+
+test('compact 2v2 wrapper keeps five summons and two commands on one equal-width safe rail', async () => {
+  const compact = await readSource('../src/pvp-2v2-mobile-safe-scenes.ts');
+  assert.match(compact, /const controlCount = slotIds\.length \+ 2/);
+  assert.match(compact, /const buttonWidth = Math\.floor\(\(available - gap \* \(controlCount - 1\)\) \/ controlCount\)/);
+  assert.match(compact, /const buttonHeight = Math\.max\(92, minimumTouch\)/);
+  assert.match(compact, /if \(!isCompactMobileViewport\(\)\) \{/);
+  assert.match(compact, /extends BasePvp2v2BattleScene/);
+  assert.doesNotMatch(compact, /new WebSocket|FRAME_INPUT|joinPvp2v2Matchmaking/);
 });
 
 test('friendly duel keeps growth-rule identity while sharing command battle grammar', async () => {
