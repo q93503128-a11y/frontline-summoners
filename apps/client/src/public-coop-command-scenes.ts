@@ -1,8 +1,6 @@
 import Phaser from 'phaser';
-import {
-  PublicCoopLobbyScene as BasePublicCoopLobbyScene,
-  PublicCoopMatchmakingScene as BasePublicCoopMatchmakingScene,
-} from './public-coop-scenes.ts';
+import { StoryPublicCoopLobbyScene as BasePublicCoopLobbyScene } from './coop-command-battle-scenes.ts';
+import { PublicCoopMatchmakingScene as BasePublicCoopMatchmakingScene } from './public-coop-scenes.ts';
 
 function rewritePublicCoopLine(value: string): string {
   const direct: Readonly<Record<string, string>> = {
