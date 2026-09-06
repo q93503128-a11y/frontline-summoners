@@ -14,11 +14,15 @@ function rewriteAccountLine(value: string): string {
     '서버 새로고침': '진행 동기화',
     '게스트 진행 다시 비교': '게스트 진행 비교',
     '게스트 장식 취향 가져오기': '게스트 프로필 가져오기',
+    '서버 진행 유지': '계정 진행 유지',
+    '게스트 저장 초기화': '로컬 진행 초기화',
   };
   if (direct[value]) return direct[value]!;
+  if (/^로그인 후 서버 진행이 비어 있으면/.test(value)) return '계정 진행이 비어 있으면 현재 게스트 진행을 옮길 수 있습니다.';
   if (/^서버에도 진행이 있으면 비교 후 직접 선택합니다/.test(value)) return '계정과 게스트 양쪽에 진행이 있으면 비교 후 직접 선택합니다.';
   if (/^전투·모집·성장·소셜 변경이 서버 진행에 저장됩니다\.$/.test(value)) return '플레이 진행이 계정에 저장됩니다.';
   if (/^오프라인에서는 진행을 확인할 수 있지만/.test(value)) return '오프라인에서는 진행을 볼 수 있지만 변경할 수 없습니다.';
+  if (/^현재 화면은 읽기 전용입니다\./.test(value)) return '현재는 읽기 전용입니다. 온라인 연결을 복구하면 다시 변경할 수 있습니다.';
   return value;
 }
 
@@ -36,7 +40,29 @@ export class AccountScene extends BaseAccountCommandScene {
       text.setText = ((next: string | string[]) => originalSetText(rewriteAccountText(next))) as typeof text.setText;
       return text;
     }) as typeof factory.text;
-    this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => { factory.text = originalText; });
+
     super.create();
+    this.polishAccountGeometry();
+
+    this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => {
+      factory.text = originalText;
+    });
+  }
+
+  private polishAccountGeometry(): void {
+    const visit = (object: Phaser.GameObjects.GameObject): void => {
+      if (object instanceof Phaser.GameObjects.Rectangle) {
+        if (object.width >= 1100 && object.height >= 120) {
+          object.setFillStyle(0x171f28, 0.42).setStrokeStyle(1, 0x647487, 0.18);
+        }
+      }
+      if (object instanceof Phaser.GameObjects.Text) {
+        if (object.text === '저장 상태' || object.text === '계정 관리' || object.text === '이 기기') object.setAlpha(0.9);
+      }
+      if (object instanceof Phaser.GameObjects.Container) {
+        object.list.forEach((child) => visit(child as Phaser.GameObjects.GameObject));
+      }
+    };
+    this.children.list.forEach(visit);
   }
 }
