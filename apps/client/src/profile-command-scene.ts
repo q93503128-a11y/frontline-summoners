@@ -1,6 +1,8 @@
 import Phaser from 'phaser';
 import { ACHIEVEMENTS } from './achievement-profile.ts';
 import { ProfileScene as BaseProfileScene } from './profile-scene.ts';
+import { fitTextToWidth } from './scene-ui.ts';
+import { isCompactMobileViewport } from './viewport.ts';
 
 type ProfilePresentationCarrier = Phaser.Scene & Record<string, unknown> & {
   render?: () => void;
@@ -36,7 +38,7 @@ function safeProfileText(value: string): string {
   }
   if (/^분류 · /.test(text)) text = text.replace(/^분류 · /, '분류 ');
 
-  if (/HTTP_|fetch|network|state hash|revision|requestId|account_|profile_/i.test(text)) {
+  if (/HTTP_|fetch|network|state hash|revision|requestId|seatId|matchId|websocket|account_|profile_/i.test(text)) {
     return '지휘관 기록을 불러오지 못했습니다. 연결 상태를 확인한 뒤 다시 시도해 주세요.';
   }
   return text;
@@ -110,6 +112,7 @@ export class ProfileScene extends BaseProfileScene {
   }
 
   private polishProfileGeometry(): void {
+    const compact = isCompactMobileViewport();
     const visit = (object: Phaser.GameObjects.GameObject): void => {
       if (object instanceof Phaser.GameObjects.Rectangle) {
         if (object.width >= 700 && object.height >= 430) {
@@ -128,6 +131,12 @@ export class ProfileScene extends BaseProfileScene {
         if (object.text === '대표 표창' || object.text === '장식 교체') object.setAlpha(0.84);
         if (object.text.startsWith('표창 · ')) object.setAlpha(0.74);
         if (object.text.startsWith('분류 ')) object.setAlpha(0.86);
+
+        const centered = Math.abs(object.originX - 0.5) < 0.05;
+        const maxWidth = object.x < 470
+          ? centered ? 370 : 390
+          : centered ? 660 : 640;
+        if (object.width > maxWidth) fitTextToWidth(object, maxWidth, compact ? 14 : 11);
       }
       if (object instanceof Phaser.GameObjects.Sprite) {
         const profilePortrait = object.x >= 130 && object.x <= 150 && object.y >= 305 && object.y <= 330;
