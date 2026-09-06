@@ -6,7 +6,7 @@ const readSource = (relative: string): Promise<string> => readFile(new URL(relat
 
 test('main menu routes sortie through active-progress stage flow instead of a stage-agnostic coop lobby', async () => {
   const main = await readSource('../src/main.ts');
-  assert.match(main, /'출 정 · 전선 지도 열기', \(\) => this\.scene\.start\('stage-hub'\)/);
+  assert.match(main, /'전선 지도 열기', \(\) => this\.scene\.start\('stage-hub'\)/);
   assert.doesNotMatch(main, /this\.scene\.start\('coop-lobby'\)/);
   assert.doesNotMatch(main, /this\.scene\.start\('public-coop-matchmaking'\)/);
 });
@@ -14,12 +14,12 @@ test('main menu routes sortie through active-progress stage flow instead of a st
 test('sortie hub no longer exposes a stage-agnostic public coop shortcut', async () => {
   const hub = await readSource('../src/stage-hub-scene.ts');
   assert.doesNotMatch(hub, /this\.scene\.start\('public-coop-matchmaking'\)/);
-  assert.match(hub, /협동 여부는 스테이지에서 결정한다/);
+  assert.match(hub, /진행할 작전군을 고르고 전장으로 이동합니다/);
 });
 
 test('stage context remains the single player-facing authority for coop mode selection', async () => {
   const sortie = await readSource('../src/stage-sortie-mode-scene.ts');
-  assert.match(sortie, /'혼자 시작'/);
+  assert.match(sortie, /'혼자 출정'/);
   assert.match(sortie, /'친구 초대'/);
   assert.match(sortie, /'공개 협동'/);
   assert.match(sortie, /createFriendCoopInvite\(this\.stage\.id, profile\.friendCode\)/);
