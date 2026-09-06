@@ -10,6 +10,8 @@ function normalize(value: string | string[]): string {
 }
 
 function safeProfileText(value: string): string {
+  if (/불러오는 중/.test(value)) return value;
+
   let text = value
     .replace(/제(\d+)장 마지막 전장을 NORMAL_CLEAR/g, '제$1장 마지막 전장 클리어')
     .replace(/메인 NORMAL_CLEAR (\d+)개/g, '메인 전장 클리어 $1개')
@@ -33,7 +35,6 @@ function safeProfileText(value: string): string {
   }
   if (/^분류 · /.test(text)) text = text.replace(/^분류 · /, '분류 ');
 
-  if (/불러오는 중/.test(text)) return text;
   if (/HTTP_|fetch|network|state hash|revision|requestId|account_|profile_/i.test(text)) {
     return '지휘관 기록을 불러오지 못했습니다. 연결 상태를 확인한 뒤 다시 시도해 주세요.';
   }
