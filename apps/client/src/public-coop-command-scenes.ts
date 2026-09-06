@@ -2,7 +2,8 @@ import Phaser from 'phaser';
 import type { CoopSession } from './coop-network.ts';
 import { StoryPublicCoopLobbyScene as BasePublicCoopLobbyScene } from './coop-command-battle-scenes.ts';
 import { PublicCoopMatchmakingScene as BasePublicCoopMatchmakingScene } from './public-coop-scenes.ts';
-import { setButtonState } from './scene-ui.ts';
+import { fitTextToWidth, setButtonState } from './scene-ui.ts';
+import { isCompactMobileViewport } from './viewport.ts';
 
 type PublicCoopPresentationCarrier = Phaser.Scene & {
   render?: () => void;
@@ -38,7 +39,9 @@ function rewritePublicCoopLine(value: string): string {
   if (/^공개 협동 대기열/.test(value)) return value.replace('공개 협동 대기열', '협동 찾기');
   if (/^공유 병기 합의 · /.test(value)) return value.replace('공유 병기 합의 · ', '공유 병기 · ');
   if (/^[AB]\s*지휘관/.test(value)) return value.replace(/^[AB]\s*/, '');
-  if (/HTTP_|state hash|seatId|matchId|accountBound|matchKind|websocketPath|websocket/i.test(value)) return '협동 연결 상태를 확인하지 못했습니다. 다시 시도해 주세요.';
+  if (/HTTP_|state hash|requestId|revision|seatId|matchId|roomId|queueId|accountBound|matchKind|websocketPath|websocket|public_coop_|coop_/i.test(value)) {
+    return '협동 연결 상태를 확인하지 못했습니다. 다시 시도해 주세요.';
+  }
   return value;
 }
 
@@ -46,13 +49,34 @@ function rewritePublicCoopText(value: string | string[]): string | string[] {
   return Array.isArray(value) ? value.map(rewritePublicCoopLine) : rewritePublicCoopLine(value);
 }
 
+function fitPublicCoopText(target: Phaser.GameObjects.Text): void {
+  const compact = isCompactMobileViewport();
+  if (target.text.length < 14) return;
+  const centered = Math.abs(target.originX - 0.5) < 0.05;
+  const maxWidth = centered
+    ? 900
+    : target.x <= 120
+      ? 1040
+      : target.x >= 820
+        ? 340
+        : target.x >= 520
+          ? 520
+          : 430;
+  if (target.width > maxWidth) fitTextToWidth(target, maxWidth, compact ? 14 : 11);
+}
+
 function installTextPresentation(scene: Phaser.Scene): () => void {
   const factory = scene.add;
   const originalText = factory.text;
   factory.text = ((x, y, value, style) => {
     const text = originalText.call(factory, x, y, rewritePublicCoopText(value), style);
+    fitPublicCoopText(text);
     const originalSetText = text.setText.bind(text);
-    text.setText = ((next: string | string[]) => originalSetText(rewritePublicCoopText(next))) as typeof text.setText;
+    text.setText = ((next: string | string[]) => {
+      const result = originalSetText(rewritePublicCoopText(next));
+      fitPublicCoopText(text);
+      return result;
+    }) as typeof text.setText;
     return text;
   }) as typeof factory.text;
   return () => { factory.text = originalText; };
@@ -80,6 +104,7 @@ function polishPublicCoopGeometry(scene: Phaser.Scene): void {
     if (object instanceof Phaser.GameObjects.Text) {
       if (object.text === '출전 인원' || object.text === '전장 선택') object.setAlpha(0.88);
       if (object.text.includes('각자 편성 · 개인 보급')) object.setAlpha(0.72);
+      fitPublicCoopText(object);
     }
     if (object instanceof Phaser.GameObjects.Container) {
       object.list.forEach((child) => visit(child as Phaser.GameObjects.GameObject));
