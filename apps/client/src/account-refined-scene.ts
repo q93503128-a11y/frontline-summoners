@@ -53,7 +53,7 @@ function directButtonLabel(container: Phaser.GameObjects.Container): string {
 }
 
 export class AccountScene extends BaseAccountCommandScene {
-  private accountGuides?: Phaser.GameObjects.Graphics;
+  private accountGuides: Phaser.GameObjects.Graphics | undefined;
 
   override create(): void {
     const factory = this.add;
