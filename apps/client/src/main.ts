@@ -2,7 +2,7 @@ import Phaser from 'phaser';
 import { INTERNAL_HEIGHT, INTERNAL_WIDTH } from '@frontline/shared';
 import { loadActiveProgress } from './active-progress';
 import { restoreAuthenticatedAccountSession } from './account-network';
-import { AccountCommandScene as AccountScene } from './account-command-scene';
+import { AccountScene } from './account-refined-scene';
 import { ReplayBattleScene as BattleScene } from './replay-battle-scene';
 import { BaseWeaponScene } from './base-weapon-scene';
 import {
@@ -10,7 +10,6 @@ import {
   StoryGuestCoopLobbyScene as CoopLobbyScene,
   StoryFriendCoopBattleScene as FriendCoopBattleScene,
   StoryFriendCoopLobbyScene as FriendCoopLobbyScene,
-  StoryPublicCoopLobbyScene as PublicCoopLobbyScene,
 } from './coop-command-battle-scenes';
 import { CatalogScene } from './catalog-command-scene';
 import { DeckScene } from './deck-command-scene';
@@ -20,7 +19,7 @@ import { GrowthScene } from './meta-command-scenes';
 import { RecruitmentScene } from './recruitment-command-scene';
 import { BootScene as BaseBootScene, MainMenuScene as BaseMainMenuScene } from './navigation-scenes';
 import { ProfileScene } from './profile-command-scene';
-import { PublicCoopMatchmakingScene } from './public-coop-scenes';
+import { PublicCoopLobbyScene, PublicCoopMatchmakingScene } from './public-coop-command-scenes';
 import { Pvp2v2BattleScene, Pvp2v2MatchmakingScene } from './pvp-2v2-mobile-safe-scenes';
 import { PvpHubScene } from './pvp-expanded-hub-scene';
 import { FriendlyPvp2v2LobbyScene } from './pvp-friendly-2v2-command-scene';
@@ -31,16 +30,16 @@ import { PvpSeasonScene } from './pvp-season-scene';
 import { QuirkRecordBattleScene as RecordBattleScene } from './quirk-record-battle-scene';
 import { RecordHubScene } from './record-hub-scene';
 import { RecordResultScene } from './record-result-scene';
+import { ResultScene } from './result-command-scene';
 import { getOwnedCharacterIds } from './save';
 import { SocialCommandScene as SocialScene } from './social-command-scene';
 import { StageHubScene } from './stage-hub-scene';
 import { StageSortieModeScene } from './stage-sortie-mode-scene';
 import { StoryStageSelectScene as StageSelectScene } from './story-stage-select-scene';
-import { ResultScene } from './result-scene';
 import { SettingsScene } from './settings-scene';
 import { installStorySilhouetteScenePreviews } from './story-silhouette-preview-scenes.ts';
-import { StoryScene } from './story-scene';
-import { TrustedBattleResultScene } from './trusted-battle-result-scene';
+import { StoryScene } from './story-command-scene';
+import { TrustedBattleResultScene } from './trusted-result-command-scene';
 import {
   addButton,
   addCommandPanel,
