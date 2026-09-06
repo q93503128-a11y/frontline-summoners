@@ -60,7 +60,11 @@ test('friendly duel keeps growth-rule identity while sharing command battle gram
   assert.match(friendly, /내 전선 우세/);
   assert.match(friendly, /getCurrentMinimumInternalTouchTarget\(\)/);
   assert.match(friendly, /시즌 평점·티어·보상 변동 없음/);
-  assert.doesNotMatch(friendly, /30Hz|서버 권위|\bMMR\b|\bREADY\b|보급소 MAX|\d+F/);
+  assert.match(friendly, /if \(\/30Hz\|서버 권위\/i\.test\(value\)\) return '친선전 진행 중'/);
+  assert.match(friendly, /if \(\/MMR 변화 없음\/i\.test\(value\)\) return '친선전 기록 저장 완료 · 시즌 평점 변화 없음'/);
+  assert.match(friendly, /HTTP_\|state hash\|seatId\|matchId/);
+  assert.match(friendly, /return '친선전 연결 상태를 확인하지 못했습니다\. 다시 시도해 주세요\.'/);
+  assert.doesNotMatch(friendly, /\bREADY\b|보급소 MAX|\d+F/);
 });
 
 test('friendly 2v2 lobby presents party positions instead of raw seat identifiers', async () => {
