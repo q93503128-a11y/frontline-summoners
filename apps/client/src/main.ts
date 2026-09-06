@@ -44,7 +44,6 @@ import { TrustedBattleResultScene } from './trusted-battle-result-scene';
 import {
   addButton,
   addCommandPanel,
-  addSectionHeading,
   addStatusPill,
   addText,
   COLORS,
@@ -68,42 +67,44 @@ class MainMenuScene extends BaseMainMenuScene {
     drawBackdrop(this, 'menu');
     const compact = isCompactMobileViewport();
 
-    addText(this, 62, 34, '전선소환전', compact ? 48 : 52, COLORS.cream);
-    addText(this, 64, compact ? 94 : 92, '동료를 모으고, 보급과 타이밍으로 전선을 지휘한다.', compact ? 19 : 16, '#c9d1dc');
+    addText(this, 62, 30, '전선소환전', compact ? 48 : 50, COLORS.cream);
+    addText(this, 64, compact ? 88 : 84, '동료를 모으고 보급과 타이밍으로 전선을 지휘한다.', compact ? 18 : 15, '#c9d1dc');
 
     const statusLayer = this.add.container(0, 0);
-    statusLayer.add(addCommandPanel(this, 1032, 70, compact ? 410 : 390, compact ? 104 : 82, 0x65768a, 0x19212b, 0.9));
-    const authorityText = addText(this, 858, 47, '진행 상태 확인 중…', compact ? 20 : 18, '#ffffff');
-    const progressText = addText(this, 858, compact ? 79 : 76, '전선 정보를 불러오는 중…', compact ? 16 : 13, COLORS.muted);
+    const statusPlate = this.add.graphics();
+    statusPlate.fillStyle(0x151d27, 0.82).fillRoundedRect(840, 24, 390, 82, 10);
+    statusPlate.lineStyle(1, 0x617185, 0.36).strokeRoundedRect(840, 24, 390, 82, 10);
+    statusLayer.add(statusPlate);
+    const authorityText = addText(this, 862, 42, '진행 상태 확인 중…', compact ? 19 : 17, '#ffffff');
+    const progressText = addText(this, 862, compact ? 74 : 72, '전선 정보를 불러오는 중…', compact ? 15 : 12, COLORS.muted);
     statusLayer.add([authorityText, progressText]);
 
-    addSectionHeading(this, 64, 154, '오늘의 작전', 520, 0xb89a55);
-    addSectionHeading(this, 672, 154, '병력 운영', 540, 0x6689a7);
+    addCommandPanel(this, 340, 342, 560, 360, 0xb89a55, 0x19212a, 0.95);
+    addText(this, 92, 182, '작전', compact ? 18 : 15, '#c7b98f');
+    addText(this, 92, 218, '전선 지도', compact ? 34 : 32, '#f5e8c6');
+    addText(this, 94, 266, '메인·특수 전선을 고르고 출정합니다.', compact ? 18 : 15, '#aab6c4');
+    addButton(this, 340, 365, 420, compact ? 100 : 76, '전선 지도 열기', () => this.scene.start('stage-hub'), 0xb89a55, { tone: 'primary' });
+    addButton(this, 220, 470, 190, compact ? 76 : 54, '기록전', () => this.scene.start('record-hub'), 0x667e91, { tone: 'quiet' });
+    addButton(this, 460, 470, 190, compact ? 76 : 54, '거점 병기', () => this.scene.start('base-weapon'), 0x667e91, { tone: 'quiet' });
 
-    addCommandPanel(this, 330, 344, 540, 330, 0xb89a55, 0x1b222c, 0.94);
-    addText(this, 104, 212, '전선 지휘', compact ? 30 : 28, '#f5e8c6');
-    addText(this, 106, 251, '메인 · 특수 전선 · 기록전', compact ? 18 : 15, '#b6c1cd');
-    addText(this, 106, 286, '전장을 고르고 보상과 협동 가능 여부를 확인한 뒤 출정합니다.', compact ? 16 : 13, '#8793a1').setWordWrapWidth(440);
-    addButton(this, 330, 390, 390, compact ? 96 : 74, '전선 지도', () => this.scene.start('stage-hub'), 0xb89a55, { tone: 'primary' });
-    addButton(this, 210, 474, 185, compact ? 74 : 52, '기록전', () => this.scene.start('record-hub'), 0x667e91, { tone: 'quiet' });
-    addButton(this, 450, 474, 185, compact ? 74 : 52, '거점 병기', () => this.scene.start('base-weapon'), 0x667e91, { tone: 'quiet' });
+    addCommandPanel(this, 950, 342, 560, 360, 0x6689a7, 0x19212a, 0.95);
+    addText(this, 700, 182, '출정 준비', compact ? 18 : 15, '#9fb6c9');
+    addText(this, 700, 218, '병력 정비', compact ? 34 : 32, '#eef4fb');
+    addText(this, 702, 266, '편성·성장·모집·도감을 한곳에서 정리합니다.', compact ? 17 : 14, '#aab6c4');
+    const actionHeight = compact ? 82 : 58;
+    addButton(this, 820, 354, 210, actionHeight, '편성', () => this.scene.start('deck'), 0x6593b4, { tone: 'primary' });
+    addButton(this, 1080, 354, 210, actionHeight, '성장', () => this.scene.start('growth'), 0x708c68, { tone: 'secondary' });
+    addButton(this, 820, 445, 210, actionHeight, '모집', () => this.scene.start('recruitment'), 0x8e6fac, { tone: 'secondary' });
+    addButton(this, 1080, 445, 210, actionHeight, '도감', () => this.scene.start('catalog'), 0x8a7754, { tone: 'quiet' });
 
-    addCommandPanel(this, 950, 344, 560, 330, 0x6689a7, 0x1c2530, 0.94);
-    addText(this, 704, 212, '전투 준비', compact ? 30 : 28, '#eef4fb');
-    addText(this, 706, 251, '편성 → 성장 → 모집 → 도감', compact ? 18 : 15, '#b6c5d3');
-    addText(this, 706, 286, '출정 전에 병력을 정비하고 필요한 동료를 확인합니다.', compact ? 16 : 13, '#8795a4');
-    const actionHeight = compact ? 78 : 56;
-    addButton(this, 820, 364, 210, actionHeight, '편성', () => this.scene.start('deck'), 0x6593b4, { tone: 'primary' });
-    addButton(this, 1080, 364, 210, actionHeight, '성장', () => this.scene.start('growth'), 0x708c68, { tone: 'secondary' });
-    addButton(this, 820, 442, 210, actionHeight, '모집', () => this.scene.start('recruitment'), 0x8e6fac, { tone: 'secondary' });
-    addButton(this, 1080, 442, 210, actionHeight, '도감', () => this.scene.start('catalog'), 0x8a7754, { tone: 'quiet' });
-
-    addSectionHeading(this, 64, 548, '지휘관 메뉴', 1148, 0x5f7084);
-    const utilityY = compact ? 633 : 624;
+    const rail = this.add.graphics();
+    rail.lineStyle(1, 0x5f6d7d, 0.4).lineBetween(64, 555, 1216, 555);
+    addText(this, 64, 574, '지휘관', compact ? 16 : 13, '#8794a4');
+    const utilityY = compact ? 640 : 626;
     const utilityHeight = compact ? 80 : 54;
-    addButton(this, 150, utilityY, 190, utilityHeight, '프로필 · 업적', () => this.scene.start('profile'), 0x796a91, { tone: 'quiet' });
-    addButton(this, 385, utilityY, 190, utilityHeight, 'PvP 대전', () => this.scene.start('pvp-hub'), 0x85634f, { tone: 'quiet' });
-    addButton(this, 620, utilityY, 190, utilityHeight, '친구 · 초대', () => this.scene.start('social'), 0x6f668f, { tone: 'quiet' });
+    addButton(this, 150, utilityY, 190, utilityHeight, '프로필', () => this.scene.start('profile'), 0x796a91, { tone: 'quiet' });
+    addButton(this, 385, utilityY, 190, utilityHeight, 'PvP', () => this.scene.start('pvp-hub'), 0x85634f, { tone: 'quiet' });
+    addButton(this, 620, utilityY, 190, utilityHeight, '친구', () => this.scene.start('social'), 0x6f668f, { tone: 'quiet' });
     addButton(this, 855, utilityY, 190, utilityHeight, '계정', () => this.scene.start('account'), 0x6a7b92, { tone: 'quiet' });
     addButton(this, 1090, utilityY, 190, utilityHeight, '설정', () => this.scene.start('settings'), 0x667984, { tone: 'quiet' });
 
