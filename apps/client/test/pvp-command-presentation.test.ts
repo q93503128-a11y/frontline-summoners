@@ -6,9 +6,8 @@ const readSource = (relative: string): Promise<string> => readFile(new URL(relat
 
 test('main routes every PvP battle surface through command presentation wrappers', async () => {
   const main = await readSource('../src/main.ts');
-  assert.match(main, /import \{ PvpMatchScene \} from '\.\/pvp-command-match-scene'/);
+  assert.match(main, /import \{ FriendlyPvpLobbyScene, FriendlyPvpMatchScene, PvpMatchScene \} from '\.\/pvp-mobile-safe-match-scenes'/);
   assert.match(main, /import \{ Pvp2v2BattleScene, Pvp2v2MatchmakingScene \} from '\.\/pvp-2v2-command-scenes'/);
-  assert.match(main, /import \{ FriendlyPvpLobbyScene, FriendlyPvpMatchScene \} from '\.\/pvp-friendly-command-scenes'/);
   assert.match(main, /import \{ FriendlyPvp2v2LobbyScene \} from '\.\/pvp-friendly-2v2-command-scene'/);
   assert.match(main, /game\.scene\.add\('pvp-match', PvpMatchScene, false\)/);
   assert.match(main, /game\.scene\.add\('pvp-2v2-match', Pvp2v2BattleScene, false\)/);
@@ -16,12 +15,11 @@ test('main routes every PvP battle surface through command presentation wrappers
   assert.match(main, /game\.scene\.add\('pvp-friendly-2v2-lobby', FriendlyPvp2v2LobbyScene, false\)/);
 });
 
-test('1v1 command presentation uses authored units, frontline pressure and fit-aware controls', async () => {
+test('1v1 command presentation uses authored units and frontline pressure', async () => {
   const presentation = await readSource('../src/pvp-command-match-scene.ts');
   assert.match(presentation, /familyForUnit\(unit\.definitionId\)/);
   assert.match(presentation, /unit\.hp \/ Math\.max\(1, unit\.maxHp\)/);
   assert.match(presentation, /내 전선 우세/);
-  assert.match(presentation, /getCurrentMinimumInternalTouchTarget\(\)/);
   assert.match(presentation, /setButtonState\(button, 'disabled'/);
   assert.match(presentation, /queueCommand\(\{ type: 'SPAWN', slotId \}\)/);
   assert.match(presentation, /queueCommand\(\{ type: 'UPGRADE_SUPPLY' \}\)/);
@@ -34,6 +32,17 @@ test('1v1 command presentation remains render-only over existing PvP session aut
   assert.match(presentation, /carrier\.renderBattle =/);
   assert.match(presentation, /carrier\.renderControls =/);
   assert.doesNotMatch(presentation, /new WebSocket|joinPvpMatchmaking|leavePvpMatchmaking|FRAME_INPUT/);
+});
+
+test('compact duel wrapper pages touch-safe controls without replacing session authority', async () => {
+  const compact = await readSource('../src/pvp-mobile-safe-match-scenes.ts');
+  assert.match(compact, /computePvpCompactCommandLayout\(getCurrentMinimumInternalTouchTarget\(\), slotIds\.length\)/);
+  assert.match(compact, /병력 전환/);
+  assert.match(compact, /scene\[PAGE\] = \(page \+ 1\) % geometry\.pageCount/);
+  assert.match(compact, /extends BasePvpMatchScene/);
+  assert.match(compact, /extends BaseFriendlyPvpMatchScene/);
+  assert.match(compact, /if \(!isCompactMobileViewport\(\)\) \{/);
+  assert.doesNotMatch(compact, /new WebSocket|FRAME_INPUT|joinPvpMatchmaking|leavePvpMatchmaking/);
 });
 
 test('2v2 team presentation replaces seat and frame vocabulary with team command language', async () => {
@@ -58,7 +67,6 @@ test('friendly duel keeps growth-rule identity while sharing command battle gram
   assert.match(friendly, /시즌 평점·티어·보상에 영향을 주지 않습니다/);
   assert.match(friendly, /familyForUnit\(unit\.definitionId\)/);
   assert.match(friendly, /내 전선 우세/);
-  assert.match(friendly, /getCurrentMinimumInternalTouchTarget\(\)/);
   assert.match(friendly, /시즌 평점·티어·보상 변동 없음/);
   assert.match(friendly, /if \(\/30Hz\|서버 권위\/i\.test\(value\)\) return '친선전 진행 중'/);
   assert.match(friendly, /if \(\/MMR 변화 없음\/i\.test\(value\)\) return '친선전 기록 저장 완료 · 시즌 평점 변화 없음'/);
