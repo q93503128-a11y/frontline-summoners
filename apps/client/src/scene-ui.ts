@@ -99,15 +99,18 @@ export function addText(
   const scaledSize = Math.round(size * getUiScaleFactor(settings));
   const renderedSize = isCompactMobileViewport() ? Math.max(scaledSize, 16) : Math.max(scaledSize, 12);
   const highContrast = settings.highContrast;
-  return scene.add.text(x, y, text, {
+  const style: Phaser.Types.GameObjects.Text.TextStyle = {
     fontFamily: FONT,
     fontSize: `${renderedSize}px`,
     fontStyle: renderedSize >= 30 ? 'bold' : 'normal',
     color,
     align,
-    stroke: highContrast ? '#000000' : undefined,
-    strokeThickness: highContrast ? Math.max(2, renderedSize >= 30 ? 4 : 3) : 0,
-  }).setLineSpacing(renderedSize >= 18 ? 1 : 0);
+    ...(highContrast ? {
+      stroke: '#000000',
+      strokeThickness: Math.max(2, renderedSize >= 30 ? 4 : 3),
+    } : {}),
+  };
+  return scene.add.text(x, y, text, style).setLineSpacing(renderedSize >= 18 ? 1 : 0);
 }
 
 export function addButton(
