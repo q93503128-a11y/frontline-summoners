@@ -47,9 +47,10 @@ test('record battle uses the real deterministic record runtimes at fixed 1x spee
 });
 
 test('record battle presentation routes through the command HUD without leaking prototype vocabulary', async () => {
-  const [accessible, command] = await Promise.all([
+  const [accessible, command, quirk] = await Promise.all([
     readSource('../src/accessible-record-battle-scene.ts'),
     readSource('../src/record-command-hud.ts'),
+    readSource('../src/quirk-record-battle-scene.ts'),
   ]);
   assert.match(accessible, /installRecordCommandHud\(this\)/);
   assert.match(command, /현재 기록/);
@@ -58,6 +59,8 @@ test('record battle presentation routes through the command HUD without leaking 
   assert.match(command, /getCurrentMinimumInternalTouchTarget\(\)/);
   assert.match(command, /label\.slice\(0, -1\).*초/);
   assert.doesNotMatch(command, /SOLO_ONLY|RECORD SPECIAL/);
+  assert.match(quirk, /계정 확인 중/);
+  assert.doesNotMatch(quirk, /서버 검증 대기/);
 });
 
 test('record battle applies durable loadout and exposes the selected weapon instead of assuming front cannon', async () => {
