@@ -15,10 +15,30 @@ import { isSortieStageUnlocked } from './stage-navigation';
 import { addButton } from './scene-ui';
 import { isCompactMobileViewport } from './viewport';
 
+function rewriteBattleLine(value: string): string {
+  const direct: Readonly<Record<string, string>> = {
+    '편성과 전장 불러오는 중…': '출정 준비 중…',
+    '서버 전투 ticket 발급 중…': '계정 전투 준비 중…',
+    '일 시 정 지': '일시정지',
+    '계 속': '계속',
+    '솔로 전투 정지 · 보급·쿨다운·적 스폰도 멈춤': '전투가 완전히 멈춥니다.',
+    'P 또는 ESC로도 계속할 수 있습니다.': 'P / ESC로 계속',
+  };
+  if (direct[value]) return direct[value]!;
+  if (/전투 ticket|revision|state hash|initialStateHash|trusted battle|terminal state/i.test(value)) {
+    return '계정 전투 정보를 확인하지 못했습니다. 다시 출정해 주세요.';
+  }
+  if (/^출정 실패 ·/.test(value)) return value.replace(/^출정 실패 · .+$/, '출정 준비에 실패했습니다. 다시 시도해 주세요.');
+  return value;
+}
+
+function rewriteBattleText(value: string | string[]): string | string[] {
+  return Array.isArray(value) ? value.map(rewriteBattleLine) : rewriteBattleLine(value);
+}
+
 /**
- * Standard direct battles expose 1×/2× immediately and add 3× after that stage's
- * NORMAL_CLEAR, without forking the authoritative combat simulation.
- * QuirkBattleScene wraps the same authoritative combat step with deterministic hidden-achievement observation.
+ * Standard direct battles expose replay speed without changing the authoritative combat simulation.
+ * This adapter also keeps server/debug vocabulary out of the player-facing battle surface.
  */
 export class ReplayBattleScene extends BattleScene {
   private replayStage: PrototypeStage = STAGES[0]!;
@@ -27,6 +47,7 @@ export class ReplayBattleScene extends BattleScene {
   private tripleSpeedUnlocked = false;
   private speedButton: Phaser.GameObjects.Container | undefined;
   private battleCreateStarted = false;
+  private restoreBattleText: (() => void) | undefined;
 
   override init(data: { stageId?: string }): void {
     super.init(data);
@@ -36,9 +57,16 @@ export class ReplayBattleScene extends BattleScene {
     this.tripleSpeedUnlocked = false;
     this.speedButton = undefined;
     this.battleCreateStarted = false;
+    this.restoreBattleText = undefined;
   }
 
   override create(): void {
+    this.installBattleTextPresentation();
+    this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => {
+      this.restoreBattleText?.();
+      this.restoreBattleText = undefined;
+    });
+
     void loadActiveProgress().then((view) => {
       if (!this.scene.isActive()) return;
       if (view.authority === 'ACCOUNT_OFFLINE_CACHE') {
@@ -68,6 +96,18 @@ export class ReplayBattleScene extends BattleScene {
     super.update(time, scaleReplayDeltaMs(delta, this.replaySpeed));
   }
 
+  private installBattleTextPresentation(): void {
+    const factory = this.add;
+    const originalText = factory.text;
+    factory.text = ((x, y, value, style) => {
+      const target = originalText.call(factory, x, y, rewriteBattleText(value), style);
+      const originalSetText = target.setText.bind(target);
+      target.setText = ((next: string | string[]) => originalSetText(rewriteBattleText(next))) as typeof target.setText;
+      return target;
+    }) as typeof factory.text;
+    this.restoreBattleText = () => { factory.text = originalText; };
+  }
+
   private toggleReplaySpeed(): void {
     const convenience = {
       maxBattleSpeed: this.maxReplaySpeed,
@@ -90,7 +130,8 @@ export class ReplayBattleScene extends BattleScene {
       `${this.replaySpeed}×`,
       () => this.toggleReplaySpeed(),
       this.tripleSpeedUnlocked ? 0x7d6aa6 : 0x6b94b7,
-    ).setDepth(90);
+      { tone: 'quiet' },
+    ).setDepth(90).setAlpha(0.92);
     this.speedButton = button;
   }
 }
