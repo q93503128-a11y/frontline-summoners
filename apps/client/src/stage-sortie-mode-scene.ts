@@ -9,7 +9,6 @@ import { type GuestProgress } from './save.ts';
 import {
   addButton,
   addCommandPanel,
-  addSectionHeading,
   addStatusPill,
   addText,
   COLORS,
@@ -52,9 +51,9 @@ function friendlyError(error: unknown): string {
 }
 
 function authorityLabel(authority: ActiveProgressAuthority): string {
-  if (authority === 'ACCOUNT_ONLINE') return '계정 서버 진행';
-  if (authority === 'ACCOUNT_OFFLINE_CACHE') return '계정 오프라인 기록';
-  return '게스트 로컬 진행';
+  if (authority === 'ACCOUNT_ONLINE') return '계정 · 온라인';
+  if (authority === 'ACCOUNT_OFFLINE_CACHE') return '계정 · 오프라인';
+  return '게스트 · 로컬';
 }
 
 export class StageSortieModeScene extends Phaser.Scene {
@@ -89,10 +88,10 @@ export class StageSortieModeScene extends Phaser.Scene {
   create(): void {
     drawBackdrop(this, 'map');
     const compact = isCompactMobileViewport();
-    addText(this, 50, 34, '출정 방식', compact ? 44 : 46, COLORS.cream);
-    addText(this, 52, 88, `${this.stage.name} · 난이도 ${this.stage.difficulty}/12`, compact ? 24 : 20, '#d8e0eb');
-    addButton(this, 1170, 62, 160, compact ? 80 : 50, '스테이지', () => this.returnToStage(), 0x586275, { tone: 'quiet' });
-    this.status = addText(this, INTERNAL_WIDTH / 2, 650, '진행 정보를 확인하는 중…', compact ? 20 : 16, '#a9b5c5', 'center').setOrigin(0.5);
+    addText(this, 50, 28, '출정 확인', compact ? 42 : 44, COLORS.cream);
+    addText(this, 52, 77, `${this.stage.name} · 난이도 ${this.stage.difficulty}/12`, compact ? 21 : 17, '#d8e0eb');
+    addButton(this, 1170, 56, 160, compact ? 80 : 50, '스테이지', () => this.returnToStage(), 0x586275, { tone: 'quiet' });
+    this.status = addText(this, INTERNAL_WIDTH / 2, 674, '진행 정보를 확인하는 중…', compact ? 19 : 15, '#a9b5c5', 'center').setOrigin(0.5).setWordWrapWidth(1040);
     this.renderLoading();
 
     void loadActiveProgress().then((view) => {
@@ -111,9 +110,9 @@ export class StageSortieModeScene extends Phaser.Scene {
         return;
       }
       if (view.authority === 'ACCOUNT_OFFLINE_CACHE') {
-        this.status?.setText('계정 오프라인 기록은 읽기 전용입니다. 서버 연결 후 출정할 수 있습니다.').setColor('#ffd493');
+        this.status?.setText('오프라인 계정 기록은 읽기 전용입니다. 서버 연결 후 출정할 수 있습니다.').setColor('#ffd493');
       } else {
-        this.status?.setText(view.authority === 'ACCOUNT_ONLINE' ? '계정 서버 진행 · 출정 명령 선택' : '게스트 로컬 진행 · 출정 명령 선택').setColor(view.authority === 'ACCOUNT_ONLINE' ? '#8ee3aa' : '#a9b5c5');
+        this.status?.setText('출정 방식을 선택하세요.').setColor(view.authority === 'ACCOUNT_ONLINE' ? '#8ee3aa' : '#a9b5c5');
       }
       this.renderHome();
     }).catch((error: unknown) => {
@@ -133,20 +132,19 @@ export class StageSortieModeScene extends Phaser.Scene {
     this.content?.destroy(true);
     this.resetActionRefs();
     this.content = this.add.container(0, 0);
-    this.content.add(addCommandPanel(this, INTERNAL_WIDTH / 2, 350, 760, 250, 0x657086, 0x1d2531, 0.94));
-    this.content.add(addText(this, INTERNAL_WIDTH / 2, 330, '출정 조건 확인 중…', 28, '#b8c2cf', 'center').setOrigin(0.5));
-    const loading = addButton(this, INTERNAL_WIDTH / 2, 405, 300, 58, '전선 기록 확인', () => undefined, 0x657086, { state: 'loading', reason: '진행 기록과 편성 조건을 확인하고 있습니다.' });
-    this.content.add(loading);
+    this.content.add(addCommandPanel(this, INTERNAL_WIDTH / 2, 360, 760, 250, 0x657086, 0x1a222c, 0.94));
+    this.content.add(addText(this, INTERNAL_WIDTH / 2, 330, '출정 조건 확인 중…', 27, '#b8c2cf', 'center').setOrigin(0.5));
+    this.content.add(addButton(this, INTERNAL_WIDTH / 2, 405, 300, 58, '진행 기록 확인', () => undefined, 0x657086, { state: 'loading', reason: '진행 기록과 편성 조건을 확인하고 있습니다.' }));
   }
 
   private renderBlocked(label: string, deckAction = false): void {
     this.content?.destroy(true);
     this.resetActionRefs();
     this.content = this.add.container(0, 0);
-    this.content.add(addCommandPanel(this, INTERNAL_WIDTH / 2, 350, 760, 280, 0x9c775a, 0x261f20, 0.95));
-    this.content.add(addText(this, INTERNAL_WIDTH / 2, 300, label, 34, '#ffd3a6', 'center').setOrigin(0.5));
-    this.content.add(addText(this, INTERNAL_WIDTH / 2, 350, deckAction ? '현재 편성으로는 이 전장에 출정할 수 없습니다.' : '현재 진행 상태에서 출정 명령을 발행할 수 없습니다.', 17, '#c4b7b4', 'center').setOrigin(0.5));
-    this.content.add(addButton(this, INTERNAL_WIDTH / 2, 425, 300, 64, deckAction ? '편성으로 이동' : '스테이지로 돌아가기', () => {
+    this.content.add(addCommandPanel(this, INTERNAL_WIDTH / 2, 360, 760, 280, 0x9c775a, 0x241e20, 0.95));
+    this.content.add(addText(this, INTERNAL_WIDTH / 2, 302, label, 32, '#ffd3a6', 'center').setOrigin(0.5));
+    this.content.add(addText(this, INTERNAL_WIDTH / 2, 353, deckAction ? '현재 편성을 수정해야 출정할 수 있습니다.' : '현재 진행 상태에서는 출정할 수 없습니다.', 16, '#c4b7b4', 'center').setOrigin(0.5));
+    this.content.add(addButton(this, INTERNAL_WIDTH / 2, 430, 300, 62, deckAction ? '편성으로 이동' : '스테이지로', () => {
       if (deckAction) this.scene.start('deck');
       else this.returnToStage();
     }, deckAction ? 0x6d88a7 : 0x586275, { tone: deckAction ? 'primary' : 'quiet' }));
@@ -161,69 +159,42 @@ export class StageSortieModeScene extends Phaser.Scene {
     const scaling = this.stage.coopStatScaling;
     const offline = this.authority === 'ACCOUNT_OFFLINE_CACHE';
 
-    this.content.add(addCommandPanel(this, INTERNAL_WIDTH / 2, 338, compact ? 1080 : 1000, 400, coop ? 0x6688a7 : 0x777468, 0x1d2530, 0.96));
-    this.content.add(addSectionHeading(this, 182, 158, coop ? '출정 명령선 · 단독 / 협동' : '출정 명령선 · 단독 전용', 916, coop ? 0x6688a7 : 0x777468));
-    this.content.add(addText(this, INTERNAL_WIDTH / 2, 202, this.stage.subtitle, compact ? 28 : 24, '#fff4cf', 'center').setOrigin(0.5).setWordWrapWidth(850));
-    this.content.add(addText(this, INTERNAL_WIDTH / 2, 244, `전장 ${this.stage.mapLength}m · ${coop ? '혼자 또는 협동 출정 가능' : '단독 출정 전용'}`, compact ? 20 : 17, '#aebbd0', 'center').setOrigin(0.5));
-
-    const authorityKind = this.authority === 'ACCOUNT_ONLINE' ? 'online' : this.authority === 'ACCOUNT_OFFLINE_CACHE' ? 'offline' : 'neutral';
-    this.content.add(addStatusPill(this, 864, 286, authorityLabel(this.authority), authorityKind));
-
+    this.content.add(addCommandPanel(this, INTERNAL_WIDTH / 2, 360, 1080, 420, coop ? 0x6688a7 : 0x777468, 0x1a222c, 0.96));
+    this.content.add(addStatusPill(this, 92, 170, authorityLabel(this.authority), this.authority === 'ACCOUNT_ONLINE' ? 'online' : this.authority === 'ACCOUNT_OFFLINE_CACHE' ? 'offline' : 'neutral'));
+    this.content.add(addText(this, 92, 215, this.stage.subtitle, compact ? 28 : 25, '#fff4cf').setWordWrapWidth(880));
+    this.content.add(addText(this, 92, 260, `전장 ${this.stage.mapLength}m · ${coop ? '단독 또는 2인 협동' : '단독 전용'}`, compact ? 18 : 15, '#aebbd0'));
     if (coop) {
-      this.content.add(addText(
-        this,
-        INTERNAL_WIDTH / 2,
-        292,
-        `협동 보정 · 적 체력 ${formatPermille(scaling.enemyHpPermille)} · 공격 ${formatPermille(scaling.enemyAttackPermille)} · 적 기지 ${formatPermille(scaling.enemyBaseHpPermille)}`,
-        compact ? 18 : 15,
-        '#d7bda7',
-        'center',
-      ).setOrigin(0.5));
+      this.content.add(addText(this, 92, 296, `협동 보정  적 체력 ${formatPermille(scaling.enemyHpPermille)} · 공격 ${formatPermille(scaling.enemyAttackPermille)} · 기지 ${formatPermille(scaling.enemyBaseHpPermille)}`, compact ? 17 : 14, '#c9b29e'));
     }
 
-    const route = this.add.graphics();
-    route.lineStyle(4, coop ? 0x6d8397 : 0x7e785f, 0.72);
-    if (coop) {
-      route.lineBetween(330, 366, 950, 366);
-      [330, 640, 950].forEach((x, index) => {
-        route.fillStyle(index === 0 ? 0xb79b61 : index === 1 ? 0x8673a4 : 0x688cac, 0.95);
-        route.fillTriangle(x - 7, 359, x + 7, 366, x - 7, 373);
-      });
-    } else {
-      route.lineBetween(520, 366, 760, 366);
-      route.fillStyle(0xb79b61, 0.95);
-      route.fillTriangle(633, 359, 647, 366, 633, 373);
-    }
-    this.content.add(route);
-
-    const y = 410;
-    const soloLabel = offline ? '계정 연결 후 출정' : '혼자 시작';
-    const soloButton = addButton(this, coop ? 330 : INTERNAL_WIDTH / 2, y, 270, compact ? 88 : 68, soloLabel, () => this.startSolo(), 0xb29a61, { tone: 'primary', state: offline ? 'warning' : 'default' });
+    const soloX = coop ? 280 : INTERNAL_WIDTH / 2;
+    const actionY = 410;
+    const actionW = coop ? 280 : 360;
+    const actionH = compact ? 92 : 72;
+    const soloButton = addButton(this, soloX, actionY, actionW, actionH, offline ? '계정 연결 후 출정' : '혼자 출정', () => this.startSolo(), 0xb29a61, { tone: 'primary', state: offline ? 'warning' : 'default' });
     this.content.add(soloButton);
 
     if (coop) {
-      const friendLabel = this.authority === 'GUEST_LOCAL' ? '친구 코드 협동' : this.authority === 'ACCOUNT_ONLINE' ? '친구 초대' : '친구 협동';
-      this.friendModeButton = addButton(this, 640, y, 270, compact ? 88 : 68, friendLabel, () => { void this.openFriendCoop(); }, 0x8673a4, { tone: 'secondary' });
-      this.content.add(this.friendModeButton);
-
-      const publicLabel = this.authority === 'ACCOUNT_ONLINE' ? '공개 협동' : '공개 협동';
-      this.publicModeButton = addButton(this, 950, y, 270, compact ? 88 : 68, publicLabel, () => { void this.startPublicCoop(); }, 0x688cac, { tone: 'secondary' });
-      this.content.add(this.publicModeButton);
+      const friendLabel = this.authority === 'GUEST_LOCAL' ? '코드 협동' : '친구 초대';
+      this.friendModeButton = addButton(this, 640, actionY, 280, actionH, friendLabel, () => { void this.openFriendCoop(); }, 0x8673a4, { tone: 'secondary' });
+      this.publicModeButton = addButton(this, 1000, actionY, 280, actionH, '공개 협동', () => { void this.startPublicCoop(); }, 0x688cac, { tone: 'secondary' });
+      this.content.add([this.friendModeButton, this.publicModeButton]);
 
       if (this.authority === 'ACCOUNT_OFFLINE_CACHE') {
-        setButtonState(this.friendModeButton, 'locked', '계정 협동은 서버에 다시 연결한 뒤 사용할 수 있습니다.');
-        setButtonState(this.publicModeButton, 'locked', '공개 협동은 서버에 다시 연결한 뒤 사용할 수 있습니다.');
+        setButtonState(this.friendModeButton, 'locked', '서버에 다시 연결한 뒤 사용할 수 있습니다.');
+        setButtonState(this.publicModeButton, 'locked', '서버에 다시 연결한 뒤 사용할 수 있습니다.');
       } else if (this.authority === 'GUEST_LOCAL') {
         setButtonState(this.publicModeButton, 'locked', '공개 협동은 로그인 계정에서만 사용할 수 있습니다.');
       }
 
-      this.content.add(addText(this, INTERNAL_WIDTH / 2, 493, this.authority === 'GUEST_LOCAL'
-        ? '게스트는 참가 코드로 협동한다. 공개 매칭과 계정 친구 초대는 로그인 후 사용할 수 있다.'
+      const help = this.authority === 'GUEST_LOCAL'
+        ? '게스트는 참가 코드 협동만 사용할 수 있습니다.'
         : this.authority === 'ACCOUNT_ONLINE'
-          ? '친구 초대는 이 전장을 고정해 방을 만들고, 공개 협동은 같은 전장을 선택한 지휘관과 자동 매칭한다.'
-          : '오프라인 계정 기록은 읽기 전용이다. 계정 연결을 복구하면 단독·협동 출정을 다시 사용할 수 있다.', compact ? 18 : 15, '#9faaba', 'center').setOrigin(0.5).setWordWrapWidth(900));
+          ? '친구 초대는 지정한 친구와, 공개 협동은 같은 전장을 고른 지휘관과 연결됩니다.'
+          : '계정 연결을 복구하면 단독·협동 출정을 다시 사용할 수 있습니다.';
+      this.content.add(addText(this, INTERNAL_WIDTH / 2, 505, help, compact ? 17 : 14, '#94a1b2', 'center').setOrigin(0.5).setWordWrapWidth(900));
     } else {
-      this.content.add(addText(this, INTERNAL_WIDTH / 2, 493, offline ? '계정 연결을 복구하면 이 전장에 출정할 수 있다.' : '이 전장은 단독 출정으로 진행된다.', compact ? 18 : 15, '#9faaba', 'center').setOrigin(0.5));
+      this.content.add(addText(this, INTERNAL_WIDTH / 2, 505, offline ? '계정 연결을 복구하면 출정할 수 있습니다.' : '이 전장은 혼자 출정합니다.', compact ? 17 : 14, '#94a1b2', 'center').setOrigin(0.5));
     }
   }
 
@@ -283,44 +254,39 @@ export class StageSortieModeScene extends Phaser.Scene {
     this.friendPage = Math.max(0, Math.min(pageCount - 1, this.friendPage));
     const visible = this.friends.slice(this.friendPage * pageSize, this.friendPage * pageSize + pageSize);
 
-    this.content.add(addCommandPanel(this, INTERNAL_WIDTH / 2, 350, 1000, 410, 0x8673a4, 0x1d2430, 0.96));
-    this.content.add(addSectionHeading(this, 182, 160, `${this.stage.name} · 친구 협동 초대`, 916, 0x8673a4));
-    this.content.add(addText(this, INTERNAL_WIDTH / 2, 202, '온라인 계정 친구에게 현재 전장을 고정한 협동 초대를 보낸다.', compact ? 18 : 15, '#aeb8c7', 'center').setOrigin(0.5));
+    this.content.add(addCommandPanel(this, INTERNAL_WIDTH / 2, 360, 1000, 430, 0x8673a4, 0x1a222c, 0.96));
+    this.content.add(addText(this, 160, 166, `${this.stage.name} · 친구 초대`, compact ? 27 : 24, '#fff4cf'));
+    this.content.add(addText(this, 160, 204, '현재 전장으로 초대할 친구를 선택하세요.', compact ? 17 : 14, '#aeb8c7'));
 
-    const prevButton = addButton(this, 250, 585, 180, compact ? 80 : 54, '◀ 이전', () => {
+    if (visible.length === 0) {
+      this.content.add(addText(this, INTERNAL_WIDTH / 2, 350, '초대할 친구가 없습니다.', compact ? 26 : 22, '#abb5c2', 'center').setOrigin(0.5));
+      this.content.add(addButton(this, INTERNAL_WIDTH / 2, 430, 260, compact ? 82 : 58, '친구 메뉴 열기', () => this.scene.start('social'), 0x5f7897, { tone: 'primary' }));
+    } else {
+      visible.forEach((profile, index) => {
+        const y = 275 + index * 66;
+        this.content!.add(this.add.rectangle(INTERNAL_WIDTH / 2, y, 900, 54, 0x1d2631, 0.9).setStrokeStyle(1, profile.online ? 0x5c846a : 0x505966, 0.65));
+        this.content!.add(addText(this, 230, y - 10, `${profile.displayName} · ${profile.friendCode}`, compact ? 19 : 16, '#ffffff'));
+        this.content!.add(addText(this, 230, y + 12, profile.online ? '● 온라인' : '○ 오프라인', compact ? 15 : 12, profile.online ? '#8ee3aa' : '#a6afbb'));
+        let inviteButton: Phaser.GameObjects.Container;
+        inviteButton = addButton(this, 1010, y, 190, compact ? 64 : 44, '초대', () => { void this.inviteFriend(profile, inviteButton); }, profile.online ? 0x5f7897 : 0x536273, { tone: 'secondary', state: profile.online ? 'default' : 'warning' });
+        this.friendInviteButtons.push(inviteButton);
+        this.content!.add(inviteButton);
+      });
+    }
+
+    const prevButton = addButton(this, 245, 590, 170, compact ? 78 : 52, '◀ 이전', () => {
       this.friendPage = Math.max(0, this.friendPage - 1);
       this.renderFriends();
     }, 0x586275, { tone: 'quiet' });
-    const nextButton = addButton(this, 1030, 585, 180, compact ? 80 : 54, '다음 ▶', () => {
+    const nextButton = addButton(this, 1035, 590, 170, compact ? 78 : 52, '다음 ▶', () => {
       this.friendPage = Math.min(pageCount - 1, this.friendPage + 1);
       this.renderFriends();
     }, 0x586275, { tone: 'quiet' });
-    this.content.add(prevButton);
-    this.content.add(nextButton);
+    this.content.add([prevButton, nextButton]);
     if (this.friendPage === 0) setButtonState(prevButton, 'disabled', '첫 페이지입니다.');
     if (this.friendPage >= pageCount - 1) setButtonState(nextButton, 'disabled', '마지막 페이지입니다.');
-
-    this.content.add(addButton(this, INTERNAL_WIDTH / 2, 585, 220, compact ? 80 : 54, '출정 방식으로', () => this.renderHome(), 0x6b628f, { tone: 'secondary' }));
-    this.content.add(addText(this, INTERNAL_WIDTH / 2, 542, `${this.friendPage + 1} / ${pageCount}`, 16, '#9ca8b8', 'center').setOrigin(0.5));
-
-    if (visible.length === 0) {
-      this.content.add(addText(this, INTERNAL_WIDTH / 2, 350, '초대할 친구가 없습니다.', compact ? 27 : 23, '#abb5c2', 'center').setOrigin(0.5));
-      this.content.add(addButton(this, INTERNAL_WIDTH / 2, 430, 260, compact ? 82 : 58, '친구 메뉴 열기', () => this.scene.start('social'), 0x5f7897, { tone: 'primary' }));
-      return;
-    }
-
-    visible.forEach((profile, index) => {
-      const y = 260 + index * 66;
-      const row = this.add.container(0, 0);
-      row.add(this.add.rectangle(INTERNAL_WIDTH / 2, y, 900, 56, 0x202936, 0.96).setStrokeStyle(2, profile.online ? 0x5c846a : 0x505966, 0.9));
-      row.add(addText(this, 230, y - 11, `${profile.displayName} · ${profile.friendCode}`, compact ? 20 : 17, '#ffffff'));
-      row.add(addText(this, 230, y + 13, profile.online ? '● 온라인' : '○ 오프라인', compact ? 16 : 13, profile.online ? '#8ee3aa' : '#a6afbb'));
-      let inviteButton: Phaser.GameObjects.Container;
-      inviteButton = addButton(this, 1010, y, 190, compact ? 66 : 44, '이 전장 초대', () => { void this.inviteFriend(profile, inviteButton); }, profile.online ? 0x5f7897 : 0x536273, { tone: 'secondary', state: profile.online ? 'default' : 'warning' });
-      row.add(inviteButton);
-      this.friendInviteButtons.push(inviteButton);
-      this.content!.add(row);
-    });
+    this.content.add(addButton(this, INTERNAL_WIDTH / 2, 590, 220, compact ? 78 : 52, '출정 방식으로', () => this.renderHome(), 0x6b628f, { tone: 'secondary' }));
+    this.content.add(addText(this, INTERNAL_WIDTH / 2, 548, `${this.friendPage + 1} / ${pageCount}`, 15, '#9ca8b8', 'center').setOrigin(0.5));
   }
 
   private async inviteFriend(profile: SocialPublicProfile, pressedButton: Phaser.GameObjects.Container): Promise<void> {
