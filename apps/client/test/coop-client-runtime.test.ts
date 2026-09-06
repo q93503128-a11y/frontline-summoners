@@ -13,7 +13,7 @@ test('co-op invite codes round-trip without putting the guest token in a progres
 
 test('main menu keeps co-op runtime registered but routes players through the canonical stage flow', async () => {
   const main = await readSource('../src/main.ts');
-  assert.match(main, /'출 정 · 전선 지도 열기', \(\) => this\.scene\.start\('stage-hub'\)/);
+  assert.match(main, /'전선 지도 열기', \(\) => this\.scene\.start\('stage-hub'\)/);
   assert.doesNotMatch(main, /this\.scene\.start\('coop-lobby'\)/);
   assert.doesNotMatch(main, /this\.scene\.start\('public-coop-matchmaking'\)/);
   assert.match(main, /game\.scene\.add\('coop-lobby', CoopLobbyScene, false\)/);
