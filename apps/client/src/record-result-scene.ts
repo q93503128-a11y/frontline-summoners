@@ -16,7 +16,6 @@ import { recordGuestBossRushResult, recordGuestEndlessResult, type GuestRecordRe
 import {
   addButton,
   addCommandPanel,
-  addSectionHeading,
   addStatusPill,
   addText,
   COLORS,
@@ -134,40 +133,41 @@ export class RecordResultScene extends Phaser.Scene {
       : `${this.defeatedBosses} / ${BOSS_RUSH_SEQUENCE.length} 보스 격파`;
     const accent = endless ? 0x5f8ea4 : 0x9a687d;
 
-    addText(this, INTERNAL_WIDTH / 2, compact ? 58 : 66, title, compact ? 48 : 52, this.completed ? COLORS.gold : COLORS.cream, 'center').setOrigin(0.5);
-    addText(this, INTERNAL_WIDTH / 2, compact ? 111 : 118, mode.displayName, compact ? 25 : 22, '#dce4ef', 'center').setOrigin(0.5);
-    addStatusPill(this, INTERNAL_WIDTH / 2, compact ? 150 : 151, this.trustedBattleId ? '계정 기록 정산' : '로컬 기록 정산', this.trustedBattleId ? 'online' : 'neutral').setDepth(3);
+    addText(this, INTERNAL_WIDTH / 2, compact ? 56 : 62, title, compact ? 46 : 50, this.completed ? COLORS.gold : COLORS.cream, 'center').setOrigin(0.5);
+    addText(this, INTERNAL_WIDTH / 2, compact ? 106 : 110, mode.displayName, compact ? 23 : 20, '#dce4ef', 'center').setOrigin(0.5);
+    addStatusPill(this, INTERNAL_WIDTH / 2, compact ? 145 : 142, this.trustedBattleId ? '계정 기록 정산' : '로컬 기록 정산', this.trustedBattleId ? 'online' : 'neutral').setDepth(3);
 
-    addCommandPanel(this, 350, 360, 540, compact ? 370 : 350, accent, endless ? 0x17242c : 0x281d25, 0.94);
-    addCommandPanel(this, 930, 360, 540, compact ? 370 : 350, 0xb09257, 0x24241e, 0.93);
-    addSectionHeading(this, 98, 200, '이번 기록', 465, accent);
-    addSectionHeading(this, 678, 200, '기록 정산표', 465, 0xb09257);
+    addCommandPanel(this, INTERNAL_WIDTH / 2, 360, 1120, compact ? 370 : 350, accent, 0x182129, 0.95);
+    const divider = this.add.graphics();
+    divider.lineStyle(1, 0x667383, 0.42).lineBetween(640, 210, 640, 508);
 
-    const scoreText = addText(this, 350, compact ? 255 : 262, initialScore, compact ? 32 : 29, '#f1d58a', 'center').setOrigin(0.5);
+    addText(this, 110, 205, '이번 기록', compact ? 18 : 15, '#94a7ba');
+    const scoreText = addText(this, 110, compact ? 250 : 258, initialScore, compact ? 34 : 31, '#f1d58a');
     const outcomeDetail = endless
-      ? '아군 거점이 버틴 시간과 도달한 분 단위 경계를 기록합니다.'
+      ? '거점이 버틴 시간과 도달한 분 경계를 기록합니다.'
       : this.completed
         ? '현재 보스 러시 전 구간을 완주했습니다.'
-        : '이번 도전에서 격파한 보스 구간까지 기록합니다.';
-    addText(this, 350, compact ? 320 : 325, outcomeDetail, compact ? 19 : 16, '#bac7d5', 'center').setOrigin(0.5).setWordWrapWidth(430);
-    addText(this, 350, compact ? 400 : 403, endless ? '다음 목표 · 한 분 더 버티기' : '다음 목표 · 한 보스 더 돌파', compact ? 18 : 15, '#9fc5b0', 'center').setOrigin(0.5);
+        : '이번 도전에서 격파한 구간까지 기록합니다.';
+    addText(this, 110, compact ? 316 : 322, outcomeDetail, compact ? 18 : 15, '#bac7d5').setWordWrapWidth(455);
+    addText(this, 110, compact ? 405 : 410, endless ? '다음 목표  한 분 더 버티기' : '다음 목표  한 보스 더 돌파', compact ? 18 : 15, '#9fc5b0');
 
-    const bestText = addText(this, 720, compact ? 248 : 255, '최고기록 계산 중…', compact ? 22 : 19, '#a9caee').setWordWrapWidth(420);
-    const rewardText = addText(this, 720, compact ? 327 : 330, '새 구간 보상 계산 중…', compact ? 19 : 16, '#f2d37c').setWordWrapWidth(420);
+    addText(this, 700, 205, '정산', compact ? 18 : 15, '#b8a77d');
+    const bestText = addText(this, 700, compact ? 250 : 258, '최고기록 계산 중…', compact ? 22 : 19, '#a9caee').setWordWrapWidth(450);
+    const rewardText = addText(this, 700, compact ? 330 : 332, '새 구간 보상 계산 중…', compact ? 19 : 16, '#f2d37c').setWordWrapWidth(450);
     const status = addText(
       this,
-      720,
-      compact ? 438 : 437,
+      700,
+      compact ? 438 : 435,
       this.trustedBattleId ? '계정 기록을 확인하고 저장하는 중…' : '기록과 구간 보상을 저장하는 중…',
       compact ? 17 : 14,
       '#8f9aac',
-    ).setWordWrapWidth(420);
+    ).setWordWrapWidth(450);
 
-    const buttonHeight = compact ? 84 : 66;
+    const buttonHeight = compact ? 82 : 62;
     const guarded = (action: () => void): void => { if (this.resultRecorded) action(); };
-    const retryAction = addButton(this, 350, compact ? 625 : 610, 260, buttonHeight, '다시 도전', () => guarded(() => this.scene.start('record-battle', { modeId: this.modeId })), 0x6d88a7, { tone: 'primary' });
-    const hubAction = addButton(this, 650, compact ? 625 : 610, 250, buttonHeight, '기록전 보관대', () => guarded(() => this.scene.start('record-hub')), 0x80659b, { tone: 'secondary' });
-    const homeAction = addButton(this, 930, compact ? 625 : 610, 220, buttonHeight, '지휘본부', () => guarded(() => this.scene.start('main-menu')), 0x667185, { tone: 'quiet' });
+    const retryAction = addButton(this, 340, compact ? 624 : 610, 270, buttonHeight, '다시 도전', () => guarded(() => this.scene.start('record-battle', { modeId: this.modeId })), 0x6d88a7, { tone: 'primary' });
+    const hubAction = addButton(this, 640, compact ? 624 : 610, 250, buttonHeight, '기록전으로', () => guarded(() => this.scene.start('record-hub')), 0x80659b, { tone: 'secondary' });
+    const homeAction = addButton(this, 930, compact ? 624 : 610, 220, buttonHeight, '지휘소', () => guarded(() => this.scene.start('main-menu')), 0x667185, { tone: 'quiet' });
     const actions = [retryAction, hubAction, homeAction] as const;
 
     const setActionsLoading = (): void => {
@@ -221,7 +221,7 @@ export class RecordResultScene extends Phaser.Scene {
     };
 
     if (this.trustedBattleId) {
-      resendButton = addButton(this, 930, compact ? 520 : 520, 240, compact ? 72 : 52, '결과 재전송', submit, 0x8d654f, { tone: 'secondary' });
+      resendButton = addButton(this, 1030, compact ? 520 : 520, 220, compact ? 70 : 50, '결과 재전송', submit, 0x8d654f, { tone: 'secondary' });
       resendButton.setVisible(false);
     }
     submit();
