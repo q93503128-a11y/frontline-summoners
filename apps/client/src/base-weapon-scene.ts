@@ -37,20 +37,20 @@ function weaponStats(id: BaseWeaponId): readonly string[] {
     return [
       `재사용 ${seconds(weapon.cooldownFrames)} · 발사 준비 ${seconds(weapon.hitDelayFrames)}`,
       `직격 피해 ${weapon.damage}`,
-      `일반 적 밀치기 ${weapon.pushDistance} · 우두머리 ${weapon.bossPushDistance ?? 0}`,
+      `밀치기 ${weapon.pushDistance} · 우두머리 ${weapon.bossPushDistance ?? 0}`,
     ];
   }
   if (weapon.kind === 'AEGIS_EMITTER') {
     return [
-      `재사용 ${seconds(weapon.cooldownFrames)} · 첫 사용 준비 ${seconds(weapon.initialCooldownFrames)}`,
+      `재사용 ${seconds(weapon.cooldownFrames)} · 첫 사용 ${seconds(weapon.initialCooldownFrames)}`,
       `받는 피해 ${Math.round((weapon.damageTakenPermille ?? 1000) / 10)}% · 지속 ${seconds(weapon.durationFrames)}`,
       '발동 순간 살아 있는 아군에게 적용',
     ];
   }
   return [
-    `재사용 ${seconds(weapon.cooldownFrames)} · 첫 사용 준비 ${seconds(weapon.initialCooldownFrames)}`,
+    `재사용 ${seconds(weapon.cooldownFrames)} · 첫 사용 ${seconds(weapon.initialCooldownFrames)}`,
     `투하 지연 ${seconds(weapon.hitDelayFrames)}`,
-    `보급 상한의 ${Math.round((weapon.supplyGainPermille ?? 0) / 10)}% · 최소 ${weapon.supplyGainMin ?? 0} / 최대 ${weapon.supplyGainMax ?? 0}`,
+    `보급 상한 ${Math.round((weapon.supplyGainPermille ?? 0) / 10)}% · ${weapon.supplyGainMin ?? 0}~${weapon.supplyGainMax ?? 0}`,
   ];
 }
 
@@ -102,10 +102,10 @@ export class BaseWeaponScene extends Phaser.Scene {
   create(): void {
     drawBackdrop(this, 'map');
     const compact = isCompactMobileViewport();
-    addText(this, 54, 34, '거점 병기고', compact ? 44 : 48, COLORS.cream);
-    addText(this, 56, 87, '출정 전에 공유 거점 병기 하나를 정비하고 장착한다.', compact ? 19 : 17, COLORS.muted);
-    addButton(this, 1165, compact ? 66 : 60, 160, compact ? 84 : 50, '전선 지도', () => this.scene.start('stage-hub'), 0x586275, { tone: 'quiet' });
-    this.status = addText(this, INTERNAL_WIDTH / 2, compact ? 690 : 674, '병기 장착 정보를 불러오는 중…', compact ? 18 : 14, COLORS.dim, 'center').setOrigin(0.5).setWordWrapWidth(1000);
+    addText(this, 54, 28, '거점 병기고', compact ? 42 : 44, COLORS.cream);
+    addText(this, 56, 77, '출정 전에 공유 거점 병기 하나를 선택합니다.', compact ? 17 : 14, COLORS.muted);
+    addButton(this, 1165, compact ? 60 : 56, 160, compact ? 80 : 50, '전선 지도', () => this.scene.start('stage-hub'), 0x586275, { tone: 'quiet' });
+    this.status = addText(this, INTERNAL_WIDTH / 2, compact ? 690 : 682, '병기 장착 정보를 불러오는 중…', compact ? 18 : 14, COLORS.dim, 'center').setOrigin(0.5).setWordWrapWidth(1040);
     this.renderWeapons();
 
     void loadActiveProgress().then((view) => {
@@ -114,8 +114,8 @@ export class BaseWeaponScene extends Phaser.Scene {
       this.authority = view.authority;
       this.focusedId = getGuestSelectedBaseWeaponId(view.progress);
       this.status?.setText(view.authority === 'ACCOUNT_OFFLINE_CACHE'
-        ? '계정 병기 기록 · 읽기 전용 · 장착 변경은 온라인 연결 후 가능합니다.'
-        : '병기를 선택해 성능을 확인하고 출정 장비를 정하세요.');
+        ? '계정 기록 읽기 전용 · 장착 변경은 온라인 연결 후 가능합니다.'
+        : '병기를 선택해 성능을 확인하고 장착하세요.');
       this.status?.setColor(view.authority === 'ACCOUNT_OFFLINE_CACHE' ? COLORS.warning : COLORS.blue);
       this.renderWeapons();
     }).catch(() => {
@@ -131,18 +131,15 @@ export class BaseWeaponScene extends Phaser.Scene {
     const equipped = getGuestSelectedBaseWeaponId(this.progress);
     const writable = this.authority !== 'ACCOUNT_OFFLINE_CACHE';
 
-    this.layer.add(addSectionHeading(this, 54, 142, '병기 랙', 390, 0x6d8fb5));
-    this.layer.add(addCommandPanel(this, 250, 395, 405, 480, 0x637d98, 0x1c2530, 0.92));
-    this.layer.add(addSectionHeading(this, 490, 142, '병기 설계판', 735, 0xb09257));
-    this.layer.add(addCommandPanel(this, 858, 395, 735, 480, 0xb09257, 0x24261f, 0.9));
+    this.layer.add(addSectionHeading(this, 54, 140, '병기 선택', 1168, 0x6d8fb5));
 
     BASE_WEAPON_UNLOCKS.forEach((unlock, index) => {
-      const y = 245 + index * 116;
+      const x = 240 + index * 400;
       const unlocked = isBaseWeaponUnlocked(unlock.id, this.progress.clearedStageIds);
       const selected = this.focusedId === unlock.id;
       const isEquipped = equipped === unlock.id;
-      const label = `${unlock.displayName}\n${isEquipped ? '현재 장착 중' : unlocked ? '성능 확인' : '아직 해금되지 않음'}`;
-      const rackButton = addButton(this, 250, y, 340, compact ? 92 : 82, label, () => {
+      const label = `${unlock.displayName}\n${isEquipped ? '장착 중' : unlocked ? '성능 보기' : '잠김'}`;
+      const rackButton = addButton(this, x, 205, 330, compact ? 92 : 78, label, () => {
         if (this.busy) return;
         this.focusedId = unlock.id;
         this.renderWeapons();
@@ -150,6 +147,7 @@ export class BaseWeaponScene extends Phaser.Scene {
       this.layer!.add(rackButton);
       if (this.busy) setButtonState(rackButton, 'loading', '병기 장착을 저장하는 중입니다.');
       else if (selected) setButtonState(rackButton, 'selected');
+      else if (!unlocked) setButtonState(rackButton, 'locked', unlockLabel(unlock.id));
     });
 
     const focus = BASE_WEAPON_UNLOCKS.find((entry) => entry.id === this.focusedId) ?? BASE_WEAPON_UNLOCKS[0]!;
@@ -157,21 +155,21 @@ export class BaseWeaponScene extends Phaser.Scene {
     const isEquipped = equipped === focus.id;
     const accent = isEquipped ? 0xc6a75a : unlocked ? 0x79a4c5 : 0x626b76;
 
-    this.layer.add(addStatusPill(this, 535, 187, isEquipped ? '현재 장착' : unlocked ? '장착 가능' : '잠김', isEquipped ? 'online' : unlocked ? 'neutral' : 'warning'));
-    this.layer.add(addText(this, 555, 222, focus.displayName, compact ? 31 : 29, unlocked ? '#ffffff' : '#858d97'));
-    this.layer.add(addText(this, 557, 263, focus.description, compact ? 18 : 15, unlocked ? '#c5cedb' : '#777f89').setWordWrapWidth(380));
-    this.layer.add(drawWeaponSchematic(this, 1040, 320, focus.id, accent));
+    this.layer.add(addCommandPanel(this, INTERNAL_WIDTH / 2, 462, 1160, 390, accent, 0x1b232c, 0.95));
+    this.layer.add(addStatusPill(this, 84, 294, isEquipped ? '현재 장착' : unlocked ? '장착 가능' : '잠김', isEquipped ? 'online' : unlocked ? 'neutral' : 'warning'));
 
-    this.layer.add(addSectionHeading(this, 555, 338, '전투 성능', 430, accent));
+    this.layer.add(drawWeaponSchematic(this, 270, 444, focus.id, accent));
+    this.layer.add(addText(this, 410, 326, focus.displayName, compact ? 31 : 28, unlocked ? '#ffffff' : '#858d97'));
+    this.layer.add(addText(this, 412, 370, focus.description, compact ? 18 : 15, unlocked ? '#c5cedb' : '#777f89').setWordWrapWidth(330));
+    this.layer.add(addText(this, 412, 470, unlocked ? '사용 가능' : unlockLabel(focus.id), compact ? 18 : 15, unlocked ? COLORS.green : '#d6ad82').setWordWrapWidth(330));
+    this.layer.add(addText(this, 412, 505, '일반전과 기록전에 같은 장착 병기가 적용됩니다.', compact ? 15 : 12, COLORS.muted).setWordWrapWidth(330));
+
+    this.layer.add(addSectionHeading(this, 790, 316, '전투 성능', 390, accent));
     weaponStats(focus.id).forEach((line, index) => {
-      this.layer!.add(addText(this, 577, 376 + index * 42, line, compact ? 18 : 15, unlocked ? '#c9d3df' : '#737b85').setWordWrapWidth(430));
+      this.layer!.add(addText(this, 812, 360 + index * 48, line, compact ? 18 : 15, unlocked ? '#c9d3df' : '#737b85').setWordWrapWidth(360));
     });
 
-    this.layer.add(addSectionHeading(this, 555, 510, '해금 · 장착', 430, accent));
-    this.layer.add(addText(this, 577, 548, unlocked ? '사용 가능' : unlockLabel(focus.id), compact ? 18 : 15, unlocked ? COLORS.green : '#d6ad82').setWordWrapWidth(390));
-    this.layer.add(addText(this, 577, 583, '일반전과 기록전에 같은 장착 병기가 적용됩니다.', compact ? 16 : 13, COLORS.muted));
-
-    const action = addButton(this, 1030, 570, 235, compact ? 88 : 64, isEquipped ? '현재 장착 중' : unlocked ? '이 병기 장착' : '잠김', () => {
+    const action = addButton(this, 1000, 562, 260, compact ? 88 : 62, isEquipped ? '현재 장착 중' : unlocked ? '이 병기 장착' : '잠김', () => {
       if (unlocked && !isEquipped && writable && !this.busy) void this.equip(focus.id);
     }, isEquipped ? 0x817044 : unlocked ? 0xb09257 : 0x4b535f, { tone: unlocked && !isEquipped ? 'primary' : 'quiet' });
     this.layer.add(action);
