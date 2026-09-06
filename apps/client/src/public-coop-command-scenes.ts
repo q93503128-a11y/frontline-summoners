@@ -1,6 +1,13 @@
 import Phaser from 'phaser';
+import type { CoopSession } from './coop-network.ts';
 import { StoryPublicCoopLobbyScene as BasePublicCoopLobbyScene } from './coop-command-battle-scenes.ts';
 import { PublicCoopMatchmakingScene as BasePublicCoopMatchmakingScene } from './public-coop-scenes.ts';
+import { setButtonState } from './scene-ui.ts';
+
+type PublicCoopPresentationCarrier = Phaser.Scene & {
+  render?: () => void;
+  readonly session?: CoopSession | null;
+};
 
 function rewritePublicCoopLine(value: string): string {
   const direct: Readonly<Record<string, string>> = {
@@ -20,11 +27,14 @@ function rewritePublicCoopLine(value: string): string {
     'PUBLIC MATCH · 계정 귀속 좌석': '공개 협동 · 출전 인원',
     '공개 매칭용 계정 귀속 방이 아닙니다.': '협동 방 정보를 확인하지 못했습니다. 다시 매칭해 주세요.',
     '매칭 화면': '협동 찾기',
+    '병기 불일치 · 같은 병기를 선택해야 준비할 수 있습니다.': '공유 병기를 맞추면 출전할 수 있습니다.',
+    '출정': '전선으로',
   };
   if (direct[value]) return direct[value]!;
   if (/^협동 가능 전장 \d+ \/ \d+$/.test(value)) return value.replace('협동 가능 전장', '전장');
   if (/^상대 좌석을 확정하는 중/.test(value)) return '상대와 연결하는 중…';
   if (/^공개 협동 대기열/.test(value)) return value.replace('공개 협동 대기열', '협동 찾기');
+  if (/^공유 병기 합의 · /.test(value)) return value.replace('공유 병기 합의 · ', '공유 병기 · ');
   if (/^[AB]\s*지휘관/.test(value)) return value.replace(/^[AB]\s*/, '');
   if (/HTTP_|state hash|seatId|matchId|accountBound|matchKind/i.test(value)) return '협동 연결 상태를 확인하지 못했습니다. 다시 시도해 주세요.';
   return value;
@@ -46,18 +56,82 @@ function installTextPresentation(scene: Phaser.Scene): () => void {
   return () => { factory.text = originalText; };
 }
 
+function collectCommandButtons(object: Phaser.GameObjects.GameObject, output: Phaser.GameObjects.Container[]): void {
+  if (!(object instanceof Phaser.GameObjects.Container)) return;
+  if (object.getData('frontlineCommandButton') !== undefined) output.push(object);
+  object.list.forEach((child) => collectCommandButtons(child as Phaser.GameObjects.GameObject, output));
+}
+
+function commandLabel(button: Phaser.GameObjects.Container): Phaser.GameObjects.Text | undefined {
+  return button.list.find((child): child is Phaser.GameObjects.Text => child instanceof Phaser.GameObjects.Text);
+}
+
+function polishPublicCoopGeometry(scene: Phaser.Scene): void {
+  const visit = (object: Phaser.GameObjects.GameObject): void => {
+    if (object instanceof Phaser.GameObjects.Rectangle) {
+      if (object.width >= 900 && object.height >= 330) {
+        object.setFillStyle(0x17212a, 0.44).setStrokeStyle(1, 0x60758a, 0.2);
+      } else if (object.width >= 340 && object.width <= 410 && object.height >= 220 && object.height <= 280) {
+        object.setFillStyle(0x1a2330, 0.78).setStrokeStyle(1, 0x61758a, 0.34);
+      }
+    }
+    if (object instanceof Phaser.GameObjects.Container) {
+      object.list.forEach((child) => visit(child as Phaser.GameObjects.GameObject));
+    }
+  };
+  scene.children.list.forEach(visit);
+
+  const carrier = scene as unknown as PublicCoopPresentationCarrier;
+  const session = carrier.session ?? null;
+  const mine = session?.room?.seats.find((seat) => seat.seatId === session.seatId);
+  if (!mine) return;
+
+  const buttons: Phaser.GameObjects.Container[] = [];
+  scene.children.list.forEach((object) => collectCommandButtons(object, buttons));
+  for (const button of buttons) {
+    const label = commandLabel(button)?.text ?? '';
+    if ((label.startsWith('병기 변경') || label === '공유 병기 변경') && mine.ready) {
+      setButtonState(button, 'locked', '준비를 취소한 뒤 공유 병기를 변경할 수 있습니다.');
+    }
+    if (label === '준비 취소') setButtonState(button, 'selected');
+  }
+}
+
+function installRenderPolish(scene: Phaser.Scene): () => void {
+  const carrier = scene as unknown as PublicCoopPresentationCarrier;
+  const originalRender = carrier.render;
+  if (!originalRender) {
+    polishPublicCoopGeometry(scene);
+    return () => undefined;
+  }
+  carrier.render = () => {
+    originalRender.call(scene);
+    polishPublicCoopGeometry(scene);
+  };
+  polishPublicCoopGeometry(scene);
+  return () => { carrier.render = originalRender; };
+}
+
 export class PublicCoopMatchmakingScene extends BasePublicCoopMatchmakingScene {
   override create(): void {
-    const restore = installTextPresentation(this);
-    this.events.once(Phaser.Scenes.Events.SHUTDOWN, restore);
+    const restoreText = installTextPresentation(this);
     super.create();
+    const restoreRender = installRenderPolish(this);
+    this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => {
+      restoreText();
+      restoreRender();
+    });
   }
 }
 
 export class PublicCoopLobbyScene extends BasePublicCoopLobbyScene {
   override create(): void {
-    const restore = installTextPresentation(this);
-    this.events.once(Phaser.Scenes.Events.SHUTDOWN, restore);
+    const restoreText = installTextPresentation(this);
     super.create();
+    const restoreRender = installRenderPolish(this);
+    this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => {
+      restoreText();
+      restoreRender();
+    });
   }
 }
