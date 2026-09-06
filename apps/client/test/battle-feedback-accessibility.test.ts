@@ -80,7 +80,7 @@ test('flash reduction dims local bright cores without removing their hit positio
   assert.deepEqual(resolveBattleVfxTreatment({ type: 'Arc', depth: 3, fillAlpha: 0.92, fillColor: 0xffffff }, policy), null);
 });
 
-test('standard and Record battle chains share camera and VFX gates while boss text remains intact', async () => {
+test('standard and Record battle chains share camera and VFX gates while boss and hidden-challenge text stay player-facing', async () => {
   const [cameraGate, vfxGate, accessible, accessibleRecord, quirk, quirkRecord, boss, policy] = await Promise.all([
     readFile(new URL('../src/battle-camera-feedback.ts', import.meta.url), 'utf8'),
     readFile(new URL('../src/battle-vfx-density.ts', import.meta.url), 'utf8'),
@@ -94,6 +94,8 @@ test('standard and Record battle chains share camera and VFX gates while boss te
 
   assert.match(quirk, /AccessibleBattleScene as BattleScene/);
   assert.match(quirkRecord, /AccessibleRecordBattleScene as RecordBattleScene/);
+  assert.match(quirk, /기록 확인 중/);
+  assert.doesNotMatch(quirk, /서버 검증 대기/);
   assert.match(accessible, /installAccessibleBattleCameraFeedback\(this\)/);
   assert.match(accessibleRecord, /installAccessibleBattleCameraFeedback\(this\)/);
   assert.match(accessible, /installBattleVfxDensityPolicy\(this\)/);
