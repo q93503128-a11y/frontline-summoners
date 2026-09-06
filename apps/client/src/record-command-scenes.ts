@@ -11,7 +11,9 @@ function normalize(value: string | string[]): string {
 }
 
 function rewriteRecordCopy(value: string): string {
-  if (/HTTP_|revision|request_|account_/i.test(value)) return '기록 정보를 처리하지 못했습니다. 연결 상태를 확인해 주세요.';
+  if (/HTTP_|revision|requestId|request_|account_|state hash|websocket|record_/i.test(value)) {
+    return '기록 정보를 처리하지 못했습니다. 연결 상태를 확인해 주세요.';
+  }
   const direct: Readonly<Record<string, string>> = {
     '반복 파밍이 아니라 개인 최고 기록을 갱신하는 도전입니다.': '최고 기록과 다음 명예를 노리는 별도 도전 전선입니다.',
     '도전 선택': '기록전 선택',
@@ -42,6 +44,11 @@ function decorateRecordText(target: Phaser.GameObjects.Text, value: string): voi
   if (value.startsWith('다음 명예 ·') || value.startsWith('명예 달성 ·')) {
     target.setColor('#d9c287');
     fitTextToWidth(target, 430, compact ? 14 : 11);
+  }
+  if (value.startsWith('다음 목표 ·')) fitTextToWidth(target, 500, compact ? 14 : 11);
+  if (value.startsWith('기록 정보를 처리하지 못했습니다.')) {
+    target.setColor('#efaaa3');
+    fitTextToWidth(target, 900, compact ? 14 : 11);
   }
   if (value === '도전 종료' || value === '전 구간 격파') target.setColor(value === '전 구간 격파' ? '#f2d785' : '#eee3c8');
 }
