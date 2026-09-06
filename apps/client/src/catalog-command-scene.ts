@@ -151,7 +151,7 @@ function updateArchiveProgress(scene: Phaser.Scene, carrier: RuntimeCarrier, gra
   graphics.clear();
   const x1 = compact ? 260 : 300;
   const x2 = compact ? 1020 : 980;
-  const y = compact ? 626 : 626;
+  const y = 626;
   graphics.lineStyle(compact ? 5 : 4, 0x394552, 0.8).lineBetween(x1, y, x2, y);
   graphics.lineStyle(compact ? 5 : 4, 0x8fa6ba, 0.92).lineBetween(x1, y, x1 + (x2 - x1) * ratio, y);
   graphics.lineStyle(1, 0x596676, 0.24).lineBetween(52, compact ? 184 : 171, 1228, compact ? 184 : 171);
@@ -200,7 +200,7 @@ function polishCatalogScene(scene: Phaser.Scene): void {
     }
 
     if (object instanceof Phaser.GameObjects.Text) {
-      if (object.y >= 430 && object.y <= 560 && object.fontSize <= 15) object.setAlpha(0.76);
+      if (object.y >= 430 && object.y <= 560 && object.text.length > 18) object.setAlpha(0.76);
       if (object.text === '미획득' || object.text === '미발견' || object.text === '미클리어') object.setAlpha(0.72);
     }
   });
