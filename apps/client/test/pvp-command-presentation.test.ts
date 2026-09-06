@@ -59,11 +59,11 @@ test('2v2 team presentation replaces seat and frame vocabulary with team command
   assert.doesNotMatch(presentation, /new WebSocket|FRAME_INPUT/);
 });
 
-test('compact 2v2 wrapper keeps five summons and two commands on one equal-width safe rail', async () => {
+test('compact 2v2 wrapper keeps five summons and two commands on one tested safe rail', async () => {
   const compact = await readSource('../src/pvp-2v2-mobile-safe-scenes.ts');
-  assert.match(compact, /const controlCount = slotIds\.length \+ 2/);
-  assert.match(compact, /const buttonWidth = Math\.floor\(\(available - gap \* \(controlCount - 1\)\) \/ controlCount\)/);
-  assert.match(compact, /const buttonHeight = Math\.max\(92, minimumTouch\)/);
+  assert.match(compact, /computePvp2v2CompactRailLayout\(getCurrentMinimumInternalTouchTarget\(\), slotIds\.length\)/);
+  assert.match(compact, /geometry\.buttonWidth/);
+  assert.match(compact, /geometry\.buttonHeight/);
   assert.match(compact, /if \(!isCompactMobileViewport\(\)\) \{/);
   assert.match(compact, /extends BasePvp2v2BattleScene/);
   assert.doesNotMatch(compact, /new WebSocket|FRAME_INPUT|joinPvp2v2Matchmaking/);
