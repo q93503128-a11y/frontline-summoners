@@ -21,11 +21,12 @@ import { BootScene as BaseBootScene, MainMenuScene as BaseMainMenuScene } from '
 import { ProfileScene } from './profile-scene';
 import { PublicCoopMatchmakingScene } from './public-coop-scenes';
 import { Pvp2v2BattleScene, Pvp2v2MatchmakingScene } from './pvp-2v2-scenes';
+import { PvpMatchScene } from './pvp-command-match-scene';
 import { PvpHubScene } from './pvp-expanded-hub-scene';
 import { FriendlyPvp2v2LobbyScene } from './pvp-friendly-2v2-scene';
 import { FriendlyPvpLobbyScene, FriendlyPvpMatchScene } from './pvp-friendly-scenes';
 import { PvpLeaderboardScene } from './pvp-leaderboard-scene';
-import { PvpMatchmakingScene, PvpMatchScene } from './pvp-scenes';
+import { PvpMatchmakingScene } from './pvp-scenes';
 import { PvpSeasonScene } from './pvp-season-scene';
 import { QuirkRecordBattleScene as RecordBattleScene } from './quirk-record-battle-scene';
 import { RecordHubScene } from './record-hub-scene';
