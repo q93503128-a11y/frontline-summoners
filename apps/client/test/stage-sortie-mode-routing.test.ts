@@ -5,14 +5,17 @@ import test from 'node:test';
 const readSource = (relative: string): Promise<string> => readFile(new URL(relative, import.meta.url), 'utf8');
 
 test('SOLO_OR_COOP stage cards route through a dedicated stage-context sortie picker', async () => {
-  const [storySelect, main] = await Promise.all([
+  const [storySelect, main, presentation] = await Promise.all([
     readSource('../src/story-stage-select-scene.ts'),
     readSource('../src/main.ts'),
+    readSource('../src/stage-sortie-command-scene.ts'),
   ]);
   assert.match(storySelect, /stage\.multiplayerPolicy === 'SOLO_OR_COOP'/);
   assert.match(storySelect, /originalStart\('sortie-mode', \{ stageId \}\)/);
-  assert.match(main, /import \{ StageSortieModeScene \} from '\.\/stage-sortie-mode-scene'/);
+  assert.match(main, /import \{ StageSortieModeScene \} from '\.\/stage-sortie-command-scene'/);
   assert.match(main, /game\.scene\.add\('sortie-mode', StageSortieModeScene, false\)/);
+  assert.match(presentation, /extends BaseStageSortieModeScene/);
+  assert.match(presentation, /Presentation-only pre-battle layer/);
 });
 
 test('sortie picker preserves active progress authority and validates unlock and formation before routing', async () => {
