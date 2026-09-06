@@ -3,6 +3,7 @@ import test from 'node:test';
 import {
   COMPACT_MOBILE_SHORT_SIDE,
   PORTRAIT_MOBILE_MAX_WIDTH,
+  getMinimumInternalTouchTarget,
   shouldBlockPortraitMobile,
   shouldUseCompactMobileUi,
 } from '../src/viewport.ts';
@@ -22,4 +23,16 @@ test('portrait blocking applies only to phone-sized coarse-pointer portrait view
   assert.equal(shouldBlockPortraitMobile(844, 390, true), false);
   assert.equal(shouldBlockPortraitMobile(700, 1000, false), false, 'desktop portrait-like window must not be blocked');
   assert.equal(shouldBlockPortraitMobile(1000, 1400, true), false, 'large touch tablet is outside the phone portrait guard');
+});
+
+test('named phone viewports preserve a real 44 CSS pixel touch target through Scale.FIT', () => {
+  assert.equal(getMinimumInternalTouchTarget(360, 640), 157);
+  assert.equal(getMinimumInternalTouchTarget(390, 844), 145);
+  assert.equal(getMinimumInternalTouchTarget(412, 915), 137);
+  assert.equal(getMinimumInternalTouchTarget(1280, 720), 44);
+
+  for (const [width, height] of [[360, 640], [390, 844], [412, 915]] as const) {
+    assert.equal(shouldUseCompactMobileUi(width, height, true), true);
+    assert.equal(shouldBlockPortraitMobile(width, height, true), true);
+  }
 });
