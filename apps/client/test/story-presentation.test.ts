@@ -92,19 +92,22 @@ test('client wiring keeps solo story optional, immediately skippable, and after 
   assert.match(result, /result\.firstClear && result\.persisted \? getPostStageStory/);
   assert.match(trustedResult, /reward\.firstClear/);
   assert.match(trustedResult, /getPostStageStory\(this\.stage\.id\)/);
-  assert.match(settings, /스토리 연출 자동 건너뛰기/);
+  assert.match(settings, /스토리 자동 건너뛰기/);
 });
 
 test('friend and public account coop keep story local to each client and gate chapter outro on account settlement', async () => {
-  const [main, coopStoryScenes, overlay] = await Promise.all([
+  const [main, coopStoryScenes, publicPresentation, overlay] = await Promise.all([
     readFile(new URL('../src/main.ts', import.meta.url), 'utf8'),
     readFile(new URL('../src/coop-story-scenes.ts', import.meta.url), 'utf8'),
+    readFile(new URL('../src/public-coop-command-scenes.ts', import.meta.url), 'utf8'),
     readFile(new URL('../src/story-overlay.ts', import.meta.url), 'utf8'),
   ]);
 
   assert.match(main, /StoryFriendCoopLobbyScene as FriendCoopLobbyScene/);
-  assert.match(main, /StoryPublicCoopLobbyScene as PublicCoopLobbyScene/);
+  assert.match(main, /import \{ PublicCoopLobbyScene, PublicCoopMatchmakingScene \} from '\.\/public-coop-command-scenes'/);
   assert.match(main, /StoryFriendCoopBattleScene as FriendCoopBattleScene/);
+  assert.match(publicPresentation, /StoryPublicCoopLobbyScene as BasePublicCoopLobbyScene/);
+  assert.match(publicPresentation, /export class PublicCoopLobbyScene extends BasePublicCoopLobbyScene/);
   assert.match(coopStoryScenes, /room\.phase !== 'LOBBY'/);
   assert.match(coopStoryScenes, /getPreStageStory\(room\.stageId\)/);
   assert.match(coopStoryScenes, /message\.type !== 'ACCOUNT_SETTLED'/);
