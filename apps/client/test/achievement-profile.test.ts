@@ -51,8 +51,8 @@ test('profile and achievement scene is reachable from main menu and registered e
     readSource('../src/main.ts'),
     readSource('../src/profile-scene.ts'),
   ]);
-  assert.match(main, /import \{ ProfileScene \} from '\.\/profile-scene';/);
-  assert.match(main, /'프로필 · 업적', \(\) => this\.scene\.start\('profile'\)/);
+  assert.match(main, /import \{ ProfileScene \} from '\.\/profile-command-scene';/);
+  assert.match(main, /'프로필', \(\) => this\.scene\.start\('profile'\)/);
   assert.equal((main.match(/game\.scene\.add\('profile', ProfileScene, false\)/g) ?? []).length, 1);
   assert.match(profile, /loadActiveProgress\(\)/);
   assert.match(profile, /loadGuestAchievementProfile\(view\.progress\)/);
