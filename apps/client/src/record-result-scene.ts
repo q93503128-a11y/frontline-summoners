@@ -13,7 +13,16 @@ import {
 import { accountSnapshotToGuestProgress } from './active-progress.ts';
 import { BOSS_RUSH_SEQUENCE, getRecordModeDefinition, type RecordModeId } from './record-content.ts';
 import { recordGuestBossRushResult, recordGuestEndlessResult, type GuestRecordResult, type RecordModeProgress } from './save.ts';
-import { addButton, addText, COLORS, drawBackdrop } from './scene-ui.ts';
+import {
+  addButton,
+  addCommandPanel,
+  addSectionHeading,
+  addStatusPill,
+  addText,
+  COLORS,
+  drawBackdrop,
+  setButtonState,
+} from './scene-ui.ts';
 import { isCompactMobileViewport } from './viewport.ts';
 
 interface RecordedRecordResult {
@@ -80,6 +89,12 @@ function assertTrustedCompletion(modeId: RecordModeId, completion: AccountTruste
   if (completion.recordMode !== expectedMode) throw new Error('서버 기록전 모드 검증이 일치하지 않습니다.');
 }
 
+function safeRecordFailure(trusted: boolean): string {
+  return trusted
+    ? '계정 기록 확인에 실패했습니다. 연결 상태를 확인한 뒤 결과 재전송을 시도하세요.'
+    : '기록 저장에 실패했습니다. 현재 탭에서는 이번 결과를 유지합니다.';
+}
+
 export class RecordResultScene extends Phaser.Scene {
   private modeId: RecordModeId = 'record_endless_front';
   private survivalMs = 0;
@@ -113,24 +128,66 @@ export class RecordResultScene extends Phaser.Scene {
     const compact = isCompactMobileViewport();
     const mode = getRecordModeDefinition(this.modeId);
     const endless = this.modeId === 'record_endless_front';
-    const title = !endless && this.completed ? '전 부 격 파' : '기 록 종 료';
+    const title = !endless && this.completed ? '전 구간 격파' : '기록 종료';
     const initialScore = endless
       ? `생존 ${formatDuration(this.survivalMs)} · ${Math.floor(this.survivalMs / 60000)}분 경계`
       : `${this.defeatedBosses} / ${BOSS_RUSH_SEQUENCE.length} 보스 격파`;
+    const accent = endless ? 0x5f8ea4 : 0x9a687d;
 
-    addText(this, INTERNAL_WIDTH / 2, compact ? 70 : 82, title, compact ? 52 : 58, this.completed ? COLORS.gold : COLORS.cream, 'center').setOrigin(0.5);
-    addText(this, INTERNAL_WIDTH / 2, compact ? 132 : 145, mode.displayName, compact ? 29 : 25, '#dce4ef', 'center').setOrigin(0.5);
-    this.add.rectangle(INTERNAL_WIDTH / 2, compact ? 350 : 355, compact ? 860 : 780, compact ? 370 : 330, 0x242b38, 0.98).setStrokeStyle(3, this.completed ? 0xb99449 : 0x63758d);
-    const scoreText = addText(this, INTERNAL_WIDTH / 2, compact ? 218 : 230, initialScore, compact ? 34 : 31, '#f1d58a', 'center').setOrigin(0.5);
-    addText(this, INTERNAL_WIDTH / 2, compact ? 275 : 292, endless ? '플레이어 거점 파괴 시점까지의 기록' : this.completed ? '현재 1차 보스 러시 전 구간 완료' : '실패 전까지 새로 격파한 보스 구간도 기록', compact ? 21 : 18, '#b8c5d6', 'center').setOrigin(0.5);
-    const bestText = addText(this, INTERNAL_WIDTH / 2, compact ? 340 : 350, '최고기록 계산 중…', compact ? 24 : 21, '#a9caee', 'center').setOrigin(0.5);
-    const rewardText = addText(this, INTERNAL_WIDTH / 2, compact ? 400 : 405, '새 구간 보상 계산 중…', compact ? 21 : 18, '#f2d37c', 'center').setOrigin(0.5).setWordWrapWidth(compact ? 760 : 700);
-    const status = addText(this, INTERNAL_WIDTH / 2, compact ? 472 : 470, this.trustedBattleId ? '서버 재생 검증·기록 저장 중…' : '기록·구간 보상 저장 중…', compact ? 20 : 16, '#8f9aac', 'center').setOrigin(0.5);
+    addText(this, INTERNAL_WIDTH / 2, compact ? 58 : 66, title, compact ? 48 : 52, this.completed ? COLORS.gold : COLORS.cream, 'center').setOrigin(0.5);
+    addText(this, INTERNAL_WIDTH / 2, compact ? 111 : 118, mode.displayName, compact ? 25 : 22, '#dce4ef', 'center').setOrigin(0.5);
+    addStatusPill(this, INTERNAL_WIDTH / 2, compact ? 150 : 151, this.trustedBattleId ? '계정 기록 정산' : '로컬 기록 정산', this.trustedBattleId ? 'online' : 'neutral').setDepth(3);
 
-    let retryButton: Phaser.GameObjects.Container | null = null;
+    addCommandPanel(this, 350, 360, 540, compact ? 370 : 350, accent, endless ? 0x17242c : 0x281d25, 0.94);
+    addCommandPanel(this, 930, 360, 540, compact ? 370 : 350, 0xb09257, 0x24241e, 0.93);
+    addSectionHeading(this, 98, 200, '이번 기록', 465, accent);
+    addSectionHeading(this, 678, 200, '기록 정산표', 465, 0xb09257);
+
+    const scoreText = addText(this, 350, compact ? 255 : 262, initialScore, compact ? 32 : 29, '#f1d58a', 'center').setOrigin(0.5);
+    const outcomeDetail = endless
+      ? '아군 거점이 버틴 시간과 도달한 분 단위 경계를 기록합니다.'
+      : this.completed
+        ? '현재 보스 러시 전 구간을 완주했습니다.'
+        : '이번 도전에서 격파한 보스 구간까지 기록합니다.';
+    addText(this, 350, compact ? 320 : 325, outcomeDetail, compact ? 19 : 16, '#bac7d5', 'center').setOrigin(0.5).setWordWrapWidth(430);
+    addText(this, 350, compact ? 400 : 403, endless ? '다음 목표 · 한 분 더 버티기' : '다음 목표 · 한 보스 더 돌파', compact ? 18 : 15, '#9fc5b0', 'center').setOrigin(0.5);
+
+    const bestText = addText(this, 720, compact ? 248 : 255, '최고기록 계산 중…', compact ? 22 : 19, '#a9caee').setWordWrapWidth(420);
+    const rewardText = addText(this, 720, compact ? 327 : 330, '새 구간 보상 계산 중…', compact ? 19 : 16, '#f2d37c').setWordWrapWidth(420);
+    const status = addText(
+      this,
+      720,
+      compact ? 438 : 437,
+      this.trustedBattleId ? '계정 기록을 확인하고 저장하는 중…' : '기록과 구간 보상을 저장하는 중…',
+      compact ? 17 : 14,
+      '#8f9aac',
+    ).setWordWrapWidth(420);
+
+    const buttonHeight = compact ? 84 : 66;
+    const guarded = (action: () => void): void => { if (this.resultRecorded) action(); };
+    const retryAction = addButton(this, 350, compact ? 625 : 610, 260, buttonHeight, '다시 도전', () => guarded(() => this.scene.start('record-battle', { modeId: this.modeId })), 0x6d88a7, { tone: 'primary' });
+    const hubAction = addButton(this, 650, compact ? 625 : 610, 250, buttonHeight, '기록전 보관대', () => guarded(() => this.scene.start('record-hub')), 0x80659b, { tone: 'secondary' });
+    const homeAction = addButton(this, 930, compact ? 625 : 610, 220, buttonHeight, '지휘본부', () => guarded(() => this.scene.start('main-menu')), 0x667185, { tone: 'quiet' });
+    const actions = [retryAction, hubAction, homeAction] as const;
+
+    const setActionsLoading = (): void => {
+      for (const action of actions) setButtonState(action, 'loading', '기록 정산이 완료되면 이동할 수 있습니다.');
+    };
+    const setActionsDisabled = (): void => {
+      for (const action of actions) setButtonState(action, 'disabled', '계정 기록 확인이 완료된 뒤 이동할 수 있습니다.');
+    };
+    const unlockActions = (): void => {
+      setButtonState(retryAction, 'default');
+      setButtonState(hubAction, 'default');
+      setButtonState(homeAction, 'default');
+    };
+
+    let resendButton: Phaser.GameObjects.Container | null = null;
     const submit = (): void => {
-      status.setText(this.trustedBattleId ? '서버 재생 검증·기록 저장 중…' : '기록·구간 보상 저장 중…').setColor('#8f9aac');
-      retryButton?.setVisible(false);
+      this.resultRecorded = false;
+      setActionsLoading();
+      status.setText(this.trustedBattleId ? '계정 기록을 확인하고 저장하는 중…' : '기록과 구간 보상을 저장하는 중…').setColor('#8f9aac');
+      resendButton?.setVisible(false);
       const recording: Promise<RecordedRecordResult> = this.trustedBattleId
         ? this.recordAuthenticatedResult(this.trustedBattleId, this.trustedCommands)
         : (endless ? recordGuestEndlessResult(this.survivalMs) : recordGuestBossRushResult(this.defeatedBosses))
@@ -141,34 +198,33 @@ export class RecordResultScene extends Phaser.Scene {
               persisted: result.persisted,
               serverVerified: false,
             }));
-      void recording.then((result) => this.applyRecordedResult(result, scoreText, bestText, rewardText, status)).catch((error: unknown) => {
+      void recording.then((result) => {
+        this.applyRecordedResult(result, scoreText, bestText, rewardText, status);
+        unlockActions();
+      }).catch(() => {
         if (!this.scene.isActive()) return;
         if (this.trustedBattleId) {
           this.resultRecorded = false;
-          bestText.setText('서버 기록 검증 미완료');
-          rewardText.setText('검증 완료 전에는 계정 보상이 지급되지 않음');
-          status.setText(error instanceof Error ? error.message : '서버 기록전 결과 처리에 실패했습니다.').setColor('#ff9a91');
-          retryButton?.setVisible(true);
+          bestText.setText('계정 기록 확인 미완료');
+          rewardText.setText('확인이 끝나기 전에는 계정 보상이 지급되지 않습니다.');
+          status.setText(safeRecordFailure(true)).setColor(COLORS.red);
+          setActionsDisabled();
+          resendButton?.setVisible(true);
           return;
         }
         this.resultRecorded = true;
-        bestText.setText('기록 처리 실패');
-        rewardText.setText('구간 보상 저장 실패');
-        status.setText(error instanceof Error ? error.message : '기록전 결과 처리에 실패했습니다.').setColor('#ff9a91');
+        bestText.setText('이번 기록은 현재 탭에 유지됩니다.');
+        rewardText.setText('영구 저장에 실패해 새 구간 보상을 확정하지 못했습니다.');
+        status.setText(safeRecordFailure(false)).setColor(COLORS.warning);
+        unlockActions();
       });
     };
 
     if (this.trustedBattleId) {
-      retryButton = addButton(this, INTERNAL_WIDTH / 2, compact ? 536 : 525, 230, compact ? 72 : 52, '결과 재전송', submit, 0x8d654f);
-      retryButton.setVisible(false);
+      resendButton = addButton(this, 930, compact ? 520 : 520, 240, compact ? 72 : 52, '결과 재전송', submit, 0x8d654f, { tone: 'secondary' });
+      resendButton.setVisible(false);
     }
     submit();
-
-    const guarded = (action: () => void): void => { if (this.resultRecorded) action(); };
-    const buttonHeight = compact ? 84 : 68;
-    addButton(this, 370, compact ? 620 : 605, 260, buttonHeight, '다시 도전', () => guarded(() => this.scene.start('record-battle', { modeId: this.modeId })), 0x6d88a7);
-    addButton(this, 650, compact ? 620 : 605, 240, buttonHeight, '기록전', () => guarded(() => this.scene.start('record-hub')), 0x80659b);
-    addButton(this, 910, compact ? 620 : 605, 220, buttonHeight, '메인', () => guarded(() => this.scene.start('main-menu')), 0x667185);
   }
 
   private async recordAuthenticatedResult(
@@ -227,11 +283,11 @@ export class RecordResultScene extends Phaser.Scene {
     const honorText = formatRecordProfileHonors(this.modeId, record);
     rewardText.setText(honorText ? `${resourceText}\n${honorText}` : resourceText);
     if (result.serverVerified) {
-      status.setText('서버 재생 검증 · 계정 기록/도감/새 구간 보상 저장 완료').setColor('#8ee3aa');
+      status.setText('계정 기록·도감·새 구간 보상 저장 완료').setColor(COLORS.green);
     } else if (result.persisted) {
-      status.setText('기록·새 구간 보상 저장 완료').setColor('#8ee3aa');
+      status.setText('기록·새 구간 보상 저장 완료').setColor(COLORS.green);
     } else {
-      status.setText('브라우저 영구 저장 실패 · 현재 탭에서는 기록 유지').setColor('#ffb37c');
+      status.setText('브라우저 영구 저장 실패 · 현재 탭에서는 기록 유지').setColor(COLORS.warning);
     }
   }
 }
