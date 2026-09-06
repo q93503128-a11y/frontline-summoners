@@ -15,7 +15,26 @@ test('profile presentation guard keeps loading copy verbatim before sanitizing i
   const loadingGuard = presentation.indexOf("if (/불러오는 중/.test(value)) return value;");
   const normalization = presentation.indexOf(".replace(/NORMAL_CLEAR/g, '클리어')");
   assert.ok(loadingGuard >= 0 && normalization > loadingGuard, 'loading state must be protected before presentation rewrites');
-  assert.match(presentation, /HTTP_\|fetch\|network\|state hash\|revision\|requestId\|account_\|profile_/);
+
+  // Keep the contract semantic rather than pinning the exact alternation order in
+  // safeProfileText. Extending the sanitizer with more internal identifiers must
+  // not invalidate the existing guarantees below.
+  for (const token of [
+    'HTTP_',
+    'fetch',
+    'network',
+    'state hash',
+    'revision',
+    'requestId',
+    'seatId',
+    'matchId',
+    'websocket',
+    'account_',
+    'profile_',
+  ]) {
+    assert.ok(presentation.includes(token), `profile presentation sanitizer must cover ${token}`);
+  }
+
   assert.match(presentation, /지휘관 기록을 불러오지 못했습니다\. 연결 상태를 확인한 뒤 다시 시도해 주세요/);
   assert.match(presentation, /extends BaseProfileScene/);
   assert.doesNotMatch(presentation, /fetch\(|mutateAuthenticatedAccountProfile|loadAuthenticatedAccountProfile/);
