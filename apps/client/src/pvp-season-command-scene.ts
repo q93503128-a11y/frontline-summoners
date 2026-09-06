@@ -59,7 +59,7 @@ function polishSeason(scene: Phaser.Scene): void {
       if (object.text === '시즌 분포') object.setColor('#cbd3de').setAlpha(0.82);
       if (object.text === '지난 시즌') object.setColor('#d9c7a0').setAlpha(0.88);
       if (/^(브론즈|실버|골드|플래티넘|다이아|마스터|그랜드마스터|전선 최상위)$/.test(object.text) && object.x < 200) {
-        object.setFontSize(Math.max(object.fontSize, 29)).setColor('#fff0bd');
+        object.setColor('#fff0bd').setAlpha(1);
       }
       if (object.text.startsWith('평점 ') && object.x < 200) object.setAlpha(0.92);
       if (object.text.startsWith('참가 ') || object.text.startsWith('시즌 ')) object.setAlpha(0.7);
