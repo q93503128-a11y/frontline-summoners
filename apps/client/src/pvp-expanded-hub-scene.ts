@@ -46,10 +46,7 @@ function hubError(error: unknown): string {
   return labels[message] ?? '대전 기록을 불러오지 못했습니다. 다시 시도해 주세요.';
 }
 
-/**
- * Presentation-only PvP command hub.
- * Matchmaking, rating, season and battle authority stay in their existing scenes/network modules.
- */
+/** Matchmaking/rating authority remains in the existing network and battle scenes. */
 export class PvpHubScene extends BasePvpHubScene {
   private commandLayer: Phaser.GameObjects.Container | undefined;
   private statusText: Phaser.GameObjects.Text | undefined;
@@ -61,8 +58,8 @@ export class PvpHubScene extends BasePvpHubScene {
   override create(): void {
     drawBackdrop(this, 'map');
     const compact = isCompactMobileViewport();
-    addText(this, 48, 28, '대전 전선', compact ? 42 : 46, COLORS.cream);
-    addText(this, 50, 80, '표준 전투 규칙으로 맞붙고, 일반전·랭킹전·친선전·팀전을 한 지휘판에서 선택한다.', compact ? 18 : 15, COLORS.muted);
+    addText(this, 48, 28, '대전 전선', compact ? 40 : 43, COLORS.cream);
+    addText(this, 50, 78, '일반전·랭킹전·친선전·팀전을 선택하고 전적을 확인합니다.', compact ? 17 : 14, COLORS.muted);
     addButton(this, 1170, compact ? 61 : 56, 170, compact ? 82 : 50, '지휘소', () => this.scene.start('main-menu'), 0x59677f, { tone: 'quiet' });
     this.statusText = addText(this, INTERNAL_WIDTH / 2, 687, '', compact ? 18 : 14, '#a9b5c5', 'center').setOrigin(0.5).setWordWrapWidth(1120);
 
@@ -90,11 +87,8 @@ export class PvpHubScene extends BasePvpHubScene {
       if (!this.scene.isActive()) return;
       this.accountOverview = overview;
       this.leaderboardEntries = leaderboard;
-      this.statusText?.setText(
-        overview.eligibility.chapter1Complete
-          ? '대전 참가 기록 확인 완료'
-          : '메인 1장을 완료하면 대전 전선이 개방됩니다.',
-      ).setColor(overview.eligibility.chapter1Complete ? '#8ee3aa' : '#ffd493');
+      this.statusText?.setText(overview.eligibility.chapter1Complete ? '대전 참가 기록 확인 완료' : '메인 1장을 완료하면 대전 전선이 개방됩니다.')
+        .setColor(overview.eligibility.chapter1Complete ? '#8ee3aa' : '#ffd493');
     } catch (error) {
       if (!this.scene.isActive()) return;
       this.accountOverview = null;
@@ -116,49 +110,33 @@ export class PvpHubScene extends BasePvpHubScene {
     const overview = this.accountOverview;
 
     this.commandLayer.add(addCommandPanel(this, 318, 360, 542, 486, 0x6a7f96, 0x1c2531, 0.97));
-    this.commandLayer.add(addSectionHeading(this, 70, 132, '내 대전 기록 · 출전 명령', 496, 0x6f879f));
+    this.commandLayer.add(addSectionHeading(this, 70, 132, '대전 참가', 496, 0x6f879f));
 
     if (!online) {
       this.commandLayer.add(addStatusPill(this, 82, 174, '온라인 계정 필요', 'warning'));
-      this.commandLayer.add(addText(this, 318, 250, '로그인하면 대전 기록과 참가 조건을 확인할 수 있습니다.', compact ? 21 : 17, '#c5ceda', 'center').setOrigin(0.5).setWordWrapWidth(430));
-      const accountButton = addButton(this, 318, 352, 330, compact ? 82 : 62, '계정 연결', () => this.scene.start('account'), 0x8d7358, { tone: 'primary' });
-      this.commandLayer.add(accountButton);
+      this.commandLayer.add(addText(this, 318, 220, '로그인하면 참가 조건과 대전 기록을 확인할 수 있습니다.', compact ? 20 : 16, '#c5ceda', 'center').setOrigin(0.5).setWordWrapWidth(430));
+      this.commandLayer.add(addButton(this, 318, 282, 330, compact ? 82 : 58, '계정 연결', () => this.scene.start('account'), 0x8d7358, { tone: 'primary' }));
       this.addModeButtons(false, false, '온라인 로그인 후 사용할 수 있습니다.');
     } else if (this.isLoading) {
       this.commandLayer.add(addStatusPill(this, 82, 174, '전선 기록 확인 중', 'neutral'));
-      const loading = addButton(this, 318, 300, 330, compact ? 82 : 62, '대전 기록 불러오기', () => undefined, 0x68778d, {
-        tone: 'secondary',
-        state: 'loading',
-        reason: '계정 대전 기록을 확인하고 있습니다.',
-      });
-      this.commandLayer.add(loading);
+      this.commandLayer.add(addButton(this, 318, 272, 330, compact ? 82 : 58, '대전 기록 불러오기', () => undefined, 0x68778d, {
+        tone: 'secondary', state: 'loading', reason: '계정 대전 기록을 확인하고 있습니다.',
+      }));
       this.addModeButtons(false, false, '대전 기록 확인이 끝난 뒤 사용할 수 있습니다.');
     } else if (this.loadFailed || !overview) {
       this.commandLayer.add(addStatusPill(this, 82, 174, '기록 확인 실패', 'danger'));
-      this.commandLayer.add(addText(this, 318, 252, '대전 기록을 읽지 못했습니다. 네트워크 상태를 확인한 뒤 다시 불러오세요.', compact ? 20 : 16, '#e2c4c1', 'center').setOrigin(0.5).setWordWrapWidth(430));
-      this.commandLayer.add(addButton(this, 318, 350, 330, compact ? 82 : 62, '다시 불러오기', () => { void this.refreshHub(); }, 0x8b6664, { tone: 'primary' }));
+      this.commandLayer.add(addText(this, 318, 220, '대전 기록을 읽지 못했습니다. 네트워크 상태를 확인해 주세요.', compact ? 19 : 15, '#e2c4c1', 'center').setOrigin(0.5).setWordWrapWidth(430));
+      this.commandLayer.add(addButton(this, 318, 282, 330, compact ? 82 : 58, '다시 불러오기', () => { void this.refreshHub(); }, 0x8b6664, { tone: 'primary' }));
       this.addModeButtons(false, false, '대전 기록을 다시 불러온 뒤 사용할 수 있습니다.');
     } else {
       const unlocked = overview.eligibility.chapter1Complete;
       const ranked = unlocked && overview.eligibility.eligible;
       const rating = overview.rating;
       this.commandLayer.add(addStatusPill(this, 82, 174, unlocked ? '대전 전선 개방' : '메인 1장 필요', unlocked ? 'online' : 'warning'));
-
-      const ratingLabel = rating.placementComplete
-        ? `${tierName(rating.displayedTier)} · 평점 ${rating.mmr}`
-        : `배치전 ${rating.placementMatches}/5`;
-      this.commandLayer.add(addText(this, 318, 220, ratingLabel, compact ? 27 : 23, '#f1d88a', 'center').setOrigin(0.5));
-      this.commandLayer.add(addText(
-        this,
-        318,
-        263,
-        `랭킹 ${rating.rankedWins}승 ${rating.rankedLosses}패 ${rating.rankedDraws}무 · 일반 ${rating.casualWins}승 ${rating.casualLosses}패 ${rating.casualDraws}무`,
-        compact ? 17 : 14,
-        '#c4cfdd',
-        'center',
-      ).setOrigin(0.5).setWordWrapWidth(455));
-      this.commandLayer.add(addText(this, 318, 300, `보유 동료 ${overview.eligibility.ownedCharacterCount}명 · 대전 편성 ${overview.eligibility.deckSize}/10`, compact ? 17 : 14, '#aab8c9', 'center').setOrigin(0.5));
-
+      const ratingLabel = rating.placementComplete ? `${tierName(rating.displayedTier)} · 평점 ${rating.mmr}` : `배치전 ${rating.placementMatches}/5`;
+      this.commandLayer.add(addText(this, 318, 206, ratingLabel, compact ? 26 : 22, '#f1d88a', 'center').setOrigin(0.5));
+      this.commandLayer.add(addText(this, 318, 243, `랭킹 ${rating.rankedWins}승 ${rating.rankedLosses}패 ${rating.rankedDraws}무 · 일반 ${rating.casualWins}승 ${rating.casualLosses}패 ${rating.casualDraws}무`, compact ? 16 : 13, '#c4cfdd', 'center').setOrigin(0.5).setWordWrapWidth(455));
+      this.commandLayer.add(addText(this, 318, 276, `보유 동료 ${overview.eligibility.ownedCharacterCount}명 · 대전 편성 ${overview.eligibility.deckSize}/10`, compact ? 16 : 13, '#aab8c9', 'center').setOrigin(0.5));
       this.addModeButtons(unlocked, ranked, unlocked ? '랭킹전 참가 조건을 충족해야 합니다. 편성과 보유 동료를 확인하세요.' : '메인 1장을 완료하면 사용할 수 있습니다.');
     }
 
@@ -167,26 +145,25 @@ export class PvpHubScene extends BasePvpHubScene {
 
   private addModeButtons(casualEnabled: boolean, rankedEnabled: boolean, lockedReason: string): void {
     const compact = isCompactMobileViewport();
-    const y = 374;
-    const h = compact ? 76 : 56;
-    const casual = addButton(this, 194, y, 210, h, '1v1 일반전', () => this.scene.start('pvp-matchmaking', { modeId: 'pvp_casual_1v1' }), 0x607f9e, { tone: 'primary' });
-    const ranked = addButton(this, 442, y, 210, h, '1v1 랭킹전', () => this.scene.start('pvp-matchmaking', { modeId: 'pvp_ranked_1v1' }), 0x956f55, { tone: 'primary' });
+    this.commandLayer!.add(addSectionHeading(this, 82, 326, '대전 모드', 472, 0x6f879f));
+    const h = compact ? 72 : 52;
+    const casual = addButton(this, 194, 370, 210, h, '1v1 일반전', () => this.scene.start('pvp-matchmaking', { modeId: 'pvp_casual_1v1' }), 0x607f9e, { tone: 'primary' });
+    const ranked = addButton(this, 442, 370, 210, h, '1v1 랭킹전', () => this.scene.start('pvp-matchmaking', { modeId: 'pvp_ranked_1v1' }), 0x956f55, { tone: 'primary' });
     this.commandLayer!.add([casual, ranked]);
     if (!casualEnabled) setButtonState(casual, 'locked', lockedReason);
     if (!rankedEnabled) setButtonState(ranked, 'locked', lockedReason);
 
-    this.commandLayer!.add(addSectionHeading(this, 82, 430, '친선 · 팀전', 472, 0x7b7299));
-    const friendly = addButton(this, 152, 482, 150, compact ? 72 : 50, '1v1 친선', () => this.scene.start('pvp-friendly-lobby'), 0x75628e, { tone: 'quiet' });
-    const team = addButton(this, 318, 482, 150, compact ? 72 : 50, '2v2 일반', () => this.scene.start('pvp-2v2-matchmaking'), 0x607f9e, { tone: 'secondary' });
-    const teamFriendly = addButton(this, 484, 482, 150, compact ? 72 : 50, '2v2 친선', () => this.scene.start('pvp-friendly-2v2-lobby'), 0x70668f, { tone: 'quiet' });
+    this.commandLayer!.add(addSectionHeading(this, 82, 417, '친선 · 팀전', 472, 0x7b7299));
+    const friendly = addButton(this, 152, 458, 150, compact ? 68 : 46, '1v1 친선', () => this.scene.start('pvp-friendly-lobby'), 0x75628e, { tone: 'quiet' });
+    const team = addButton(this, 318, 458, 150, compact ? 68 : 46, '2v2 일반', () => this.scene.start('pvp-2v2-matchmaking'), 0x607f9e, { tone: 'secondary' });
+    const teamFriendly = addButton(this, 484, 458, 150, compact ? 68 : 46, '2v2 친선', () => this.scene.start('pvp-friendly-2v2-lobby'), 0x70668f, { tone: 'quiet' });
     this.commandLayer!.add([friendly, team, teamFriendly]);
     if (!casualEnabled) {
       setButtonState(friendly, 'locked', lockedReason);
       setButtonState(team, 'locked', lockedReason);
       setButtonState(teamFriendly, 'locked', lockedReason);
     }
-
-    this.commandLayer!.add(addText(this, 318, 540, '일반전·친선전은 평점 변동 없음 · 랭킹전만 시즌 평점 반영', compact ? 15 : 12, '#9ca9b8', 'center').setOrigin(0.5).setWordWrapWidth(455));
+    this.commandLayer!.add(addText(this, 318, 500, '일반·친선은 평점 변동 없음 · 랭킹전만 시즌 평점 반영', compact ? 14 : 11, '#8f9cab', 'center').setOrigin(0.5).setWordWrapWidth(455));
   }
 
   private renderLeaderboard(): void {
@@ -202,8 +179,7 @@ export class PvpHubScene extends BasePvpHubScene {
       this.leaderboardEntries.slice(0, 7).forEach((entry, index) => {
         const y = 188 + index * 47;
         const top = index < 3;
-        const rail = this.add.rectangle(930, y + 16, 520, 1, 0x625d6c, 0.32);
-        this.commandLayer!.add(rail);
+        this.commandLayer!.add(this.add.rectangle(930, y + 16, 520, 1, 0x625d6c, 0.32));
         this.commandLayer!.add(addText(this, 682, y, `#${entry.rank}`, compact ? 18 : 15, top ? '#f1d88a' : '#9ba8b9'));
         this.commandLayer!.add(addText(this, 748, y, entry.displayName, compact ? 18 : 15, '#ffffff'));
         this.commandLayer!.add(addText(this, 1178, y, `${tierName(entry.displayedTier)} · 평점 ${entry.mmr}`, compact ? 17 : 14, '#cdbbe5', 'right').setOrigin(1, 0));

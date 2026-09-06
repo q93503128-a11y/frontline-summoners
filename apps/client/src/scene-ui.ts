@@ -12,23 +12,23 @@ import {
 import { resolveUnitArt, type ResolvedUnitArt } from './production-assets.ts';
 import { getCurrentMinimumInternalTouchTarget, isCompactMobileViewport } from './viewport';
 
-export const FONT = '"Malgun Gothic", "Apple SD Gothic Neo", "Noto Sans KR", sans-serif';
+export const FONT = '"Noto Sans KR", "Pretendard", "Apple SD Gothic Neo", "Malgun Gothic", system-ui, sans-serif';
 
 export const COLORS = {
   ink: 0x10141c,
-  panel: 0x202735,
-  panel2: 0x2a3342,
-  line: 0x657086,
+  panel: 0x1d2430,
+  panel2: 0x252e3a,
+  line: 0x59677b,
   mapPaper: 0x202a31,
   mapLine: 0x637568,
-  cream: '#fff0c9',
-  gold: '#f1cf73',
-  blue: '#8bc9f2',
-  green: '#8fdca8',
-  red: '#ff938d',
-  warning: '#f0c77a',
-  muted: '#b6c0cc',
-  dim: '#7f8997',
+  cream: '#f5e7c7',
+  gold: '#e4c46f',
+  blue: '#86bfe3',
+  green: '#8bcf9d',
+  red: '#ef8d86',
+  warning: '#e8bd6c',
+  muted: '#aeb8c5',
+  dim: '#778291',
 } as const;
 
 export const rarityColor: Readonly<Record<string, string>> = {
@@ -72,6 +72,20 @@ function isCommandButtonInactive(state: CommandButtonState): boolean {
   return state === 'disabled' || state === 'locked' || state === 'loading';
 }
 
+export function fitTextToWidth(
+  target: Phaser.GameObjects.Text,
+  maxWidth: number,
+  minFontSize = 11,
+): Phaser.GameObjects.Text {
+  if (!Number.isFinite(maxWidth) || maxWidth <= 0 || target.width <= maxWidth) return target;
+  let fontSize = Math.max(minFontSize, Math.round(target.height));
+  while (target.width > maxWidth && fontSize > minFontSize) {
+    fontSize -= 1;
+    target.setFontSize(fontSize);
+  }
+  return target;
+}
+
 export function addText(
   scene: Phaser.Scene,
   x: number,
@@ -88,11 +102,12 @@ export function addText(
   return scene.add.text(x, y, text, {
     fontFamily: FONT,
     fontSize: `${renderedSize}px`,
+    fontStyle: renderedSize >= 30 ? 'bold' : 'normal',
     color,
     align,
-    stroke: highContrast ? '#000000' : '#11151d',
-    strokeThickness: highContrast ? Math.max(2, renderedSize >= 30 ? 5 : 3) : renderedSize >= 34 ? 3 : 0,
-  });
+    stroke: highContrast ? '#000000' : undefined,
+    strokeThickness: highContrast ? Math.max(2, renderedSize >= 30 ? 4 : 3) : 0,
+  }).setLineSpacing(renderedSize >= 18 ? 1 : 0);
 }
 
 export function addButton(
@@ -111,10 +126,12 @@ export function addButton(
   const compact = isCompactMobileViewport();
   const tone = options.tone ?? 'secondary';
   const visual = scene.add.graphics();
-  const labelText = addText(scene, 0, 0, label, Math.max(17, Math.floor(height * 0.29)), '#ffffff', 'center').setOrigin(0.5);
+  const labelSize = Math.max(16, Math.floor(height * 0.27));
+  const labelText = addText(scene, 0, 0, label, labelSize, '#ffffff', 'center').setOrigin(0.5);
+  fitTextToWidth(labelText, Math.max(72, width - 28), compact ? 14 : 12);
   const minimumTouch = compact ? getCurrentMinimumInternalTouchTarget() : 0;
   const hit = scene.add.rectangle(0, 0, Math.max(width, minimumTouch), Math.max(height, minimumTouch), 0xffffff, 0.001);
-  const marker = scene.add.triangle(-width / 2 + 10, 0, 0, -7, 0, 7, 8, 0, accent, 0.95);
+  const marker = scene.add.rectangle(-width / 2 + 4, 0, 3, Math.max(18, height - 14), accent, 0.72);
   const container = scene.add.container(x, y, [visual, marker, labelText, hit]);
   const controller: CommandButtonController = {
     state: options.state ?? 'default',
@@ -150,8 +167,8 @@ export function addButton(
       : controller.state === 'loading'
         ? hex(COLORS.blue)
         : 0x748196;
-    const bg = scene.add.rectangle(0, 0, bubbleWidth, bubbleHeight, 0x111720, 0.98).setStrokeStyle(2, reasonAccent, 0.78);
-    const rail = scene.add.rectangle(-bubbleWidth / 2 + 4, 0, 6, bubbleHeight - 10, reasonAccent, 0.9);
+    const bg = scene.add.rectangle(0, 0, bubbleWidth, bubbleHeight, 0x111720, 0.98).setStrokeStyle(1, reasonAccent, 0.7);
+    const rail = scene.add.rectangle(-bubbleWidth / 2 + 3, 0, 4, bubbleHeight - 12, reasonAccent, 0.9);
     reasonBubble = scene.add.container(0, 0, [bg, rail, reasonText]).setDepth(5000);
 
     const pointerX = Phaser.Math.Clamp(pointer.x, 12, INTERNAL_WIDTH - 12);
@@ -181,48 +198,34 @@ export function addButton(
     else if (warning) stateAccent = hex(COLORS.warning);
 
     const base = highContrast
-      ? 0x151b24
+      ? 0x141922
       : tone === 'primary'
-        ? mix(0x242c36, stateAccent, 0.18)
+        ? mix(0x232a34, stateAccent, 0.16)
         : tone === 'quiet'
-          ? 0x1b222d
-          : 0x222a36;
-    const hoverBase = mix(base, stateAccent, selected ? 0.27 : hovered ? 0.16 : 0.07);
-    const fill = inactive ? mix(base, 0x11151c, 0.45) : pressed ? mix(hoverBase, 0xffffff, 0.06) : hoverBase;
-    const notch = Math.min(18, Math.max(10, height * 0.2));
+          ? 0x181f29
+          : 0x202833;
+    const hoverBase = mix(base, stateAccent, selected ? 0.2 : hovered ? 0.11 : 0.035);
+    const fill = inactive ? mix(base, 0x10141b, 0.5) : pressed ? mix(hoverBase, 0xffffff, 0.035) : hoverBase;
     const left = -width / 2;
-    const right = width / 2;
     const top = -height / 2;
-    const bottom = height / 2;
+    const radius = Math.min(5, Math.max(2, Math.round(height * 0.07)));
 
-    visual.fillStyle(0x080b10, inactive ? 0.24 : 0.36);
-    visual.fillPoints([
-      new Phaser.Math.Vector2(left + notch + 2, top + 5),
-      new Phaser.Math.Vector2(right + 2, top + 5),
-      new Phaser.Math.Vector2(right - notch + 2, bottom + 5),
-      new Phaser.Math.Vector2(left + 2, bottom + 5),
-      new Phaser.Math.Vector2(left + notch + 2, top + 5),
-    ], true);
+    visual.fillStyle(0x080b10, inactive ? 0.18 : 0.28);
+    visual.fillRoundedRect(left + 2, top + 3, width, height, radius);
+    visual.fillStyle(fill, inactive ? 0.8 : 0.98);
+    visual.fillRoundedRect(left, top, width, height, radius);
 
-    visual.fillStyle(fill, inactive ? 0.82 : 0.99);
-    visual.fillPoints([
-      new Phaser.Math.Vector2(left + notch, top),
-      new Phaser.Math.Vector2(right, top),
-      new Phaser.Math.Vector2(right - notch, bottom),
-      new Phaser.Math.Vector2(left, bottom),
-      new Phaser.Math.Vector2(left + notch, top),
-    ], true);
+    const borderAlpha = inactive ? 0.22 : selected ? 0.92 : hovered ? 0.68 : tone === 'primary' ? 0.58 : 0.32;
+    visual.lineStyle(highContrast ? 3 : selected ? 2 : 1, stateAccent, borderAlpha);
+    visual.strokeRoundedRect(left + 0.5, top + 0.5, width - 1, height - 1, radius);
 
-    const railAlpha = inactive ? 0.32 : selected ? 1 : 0.72;
-    visual.lineStyle(highContrast ? 4 : selected ? 4 : 2, stateAccent, railAlpha);
-    visual.lineBetween(left + notch + 3, top + 2, right - 3, top + 2);
     if (selected || tone === 'primary') {
-      visual.lineStyle(highContrast ? 5 : 3, stateAccent, inactive ? 0.26 : 0.9);
-      visual.lineBetween(left + 4, bottom - 2, right - notch - 3, bottom - 2);
+      visual.lineStyle(highContrast ? 4 : 2, stateAccent, inactive ? 0.22 : 0.82);
+      visual.lineBetween(left + 10, height / 2 - 2, width / 2 - 10, height / 2 - 2);
     }
 
-    marker.setFillStyle(stateAccent, inactive ? 0.35 : 0.95);
-    labelText.setColor(inactive ? '#8f98a6' : '#ffffff');
+    marker.setFillStyle(stateAccent, inactive ? 0.25 : selected || tone === 'primary' ? 0.9 : 0.58);
+    labelText.setColor(inactive ? '#8792a1' : '#f5f7fa');
     container.setAlpha(1);
   };
   controller.render = render;
@@ -248,7 +251,7 @@ export function addButton(
       return;
     }
     pressed = true;
-    if (!shouldUseReducedMotion()) container.setScale(0.985);
+    if (!shouldUseReducedMotion()) container.setScale(0.99);
     render();
   });
   hit.on('pointerupoutside', () => {
@@ -296,11 +299,11 @@ export function addCommandPanel(
   fill = 0x202735,
   alpha = 0.96,
 ): Phaser.GameObjects.Container {
-  const shadow = scene.add.rectangle(4, 5, width, height, 0x080b10, 0.3);
-  const body = scene.add.rectangle(0, 0, width, height, fill, alpha);
-  const rail = scene.add.rectangle(-width / 2 + 3, 0, 5, height - 18, accent, 0.82);
-  const top = scene.add.rectangle(0, -height / 2 + 2, width - 10, 3, accent, 0.36);
-  return scene.add.container(x, y, [shadow, body, rail, top]);
+  const shadow = scene.add.rectangle(3, 4, width, height, 0x080b10, 0.22);
+  const body = scene.add.rectangle(0, 0, width, height, fill, alpha).setStrokeStyle(1, accent, 0.22);
+  const rail = scene.add.rectangle(-width / 2 + 14, -height / 2 + 3, 22, 3, accent, 0.86).setOrigin(0, 0.5);
+  const top = scene.add.rectangle(0, -height / 2 + 1, width - 18, 1, accent, 0.25);
+  return scene.add.container(x, y, [shadow, body, top, rail]);
 }
 
 export function addSectionHeading(
@@ -311,10 +314,11 @@ export function addSectionHeading(
   width: number,
   accent = 0x657086,
 ): Phaser.GameObjects.Container {
-  const line = scene.add.rectangle(0, 14, width, 2, accent, 0.45).setOrigin(0, 0.5);
-  const flag = scene.add.triangle(0, 0, 0, 0, 14, 7, 0, 14, accent, 0.9).setOrigin(0, 0.5);
-  const text = addText(scene, 24, 0, label, 18, '#dfe6ef').setOrigin(0, 0.5);
-  return scene.add.container(x, y, [line, flag, text]);
+  const title = addText(scene, 12, 0, label, 17, '#dfe6ef').setOrigin(0, 0.5);
+  const bar = scene.add.rectangle(0, 0, 4, 18, accent, 0.88).setOrigin(0, 0.5);
+  const lineStart = Math.min(width - 24, 12 + title.width + 18);
+  const line = scene.add.rectangle(lineStart, 0, Math.max(18, width - lineStart), 1, accent, 0.34).setOrigin(0, 0.5);
+  return scene.add.container(x, y, [line, bar, title]);
 }
 
 export function addStatusPill(
@@ -331,10 +335,10 @@ export function addStatusPill(
       : kind === 'danger'
         ? { accent: hex(COLORS.red), text: '#ffd3cf' }
         : { accent: 0x758399, text: '#d7dee8' };
-  const text = addText(scene, 12, 0, label, 15, palette.text).setOrigin(0, 0.5);
-  const width = Math.max(82, text.width + 34);
-  const bg = scene.add.rectangle(width / 2, 0, width, 30, 0x171d27, 0.9);
-  const dot = scene.add.circle(13, 0, 5, palette.accent, 1);
+  const text = addText(scene, 13, 0, label, 14, palette.text).setOrigin(0, 0.5);
+  const width = Math.max(78, text.width + 32);
+  const bg = scene.add.rectangle(width / 2, 0, width, 28, 0x171d27, 0.86).setStrokeStyle(1, palette.accent, 0.24);
+  const dot = scene.add.circle(10, 0, 4, palette.accent, 0.96);
   return scene.add.container(x, y, [bg, dot, text]);
 }
 
@@ -342,7 +346,7 @@ export function drawBackdrop(scene: Phaser.Scene, variant: 'menu' | 'map' = 'men
   const settings = getClientSettings();
   const highContrast = settings.highContrast;
   const reducedEffects = shouldReduceDecorativeEffects(settings);
-  const background = highContrast ? 0x080b10 : variant === 'map' ? 0x141b20 : 0x141923;
+  const background = highContrast ? 0x080b10 : variant === 'map' ? 0x141b20 : 0x121821;
   scene.cameras.main.setBackgroundColor(background);
   const g = scene.add.graphics();
   g.fillStyle(background).fillRect(0, 0, INTERNAL_WIDTH, INTERNAL_HEIGHT);
@@ -371,16 +375,19 @@ export function drawBackdrop(scene: Phaser.Scene, variant: 'menu' | 'map' = 'men
     return;
   }
 
+  g.fillStyle(highContrast ? 0x0d131a : 0x151d27, 0.92).fillRect(0, 112, INTERNAL_WIDTH, 488);
   if (!reducedEffects) {
-    g.fillStyle(highContrast ? 0x15202a : 0x1b2631, 1).fillTriangle(0, 600, 260, 300, 520, 600);
-    g.fillStyle(highContrast ? 0x111b25 : 0x17232d, 1).fillTriangle(310, 600, 700, 220, 1040, 600);
-    g.fillStyle(highContrast ? 0x0f1821 : 0x151f28, 1).fillTriangle(820, 600, 1110, 330, 1280, 600);
-    g.fillStyle(0xd6b560, highContrast ? 0.18 : 0.09).fillCircle(1085, 140, 190);
+    g.lineStyle(1, highContrast ? 0x607389 : 0x2f4053, highContrast ? 0.34 : 0.2);
+    g.lineBetween(110, 600, 470, 112);
+    g.lineBetween(520, 600, 850, 112);
+    g.lineBetween(890, 600, 1180, 112);
+    g.lineStyle(2, 0xb99a52, highContrast ? 0.22 : 0.08);
+    g.lineBetween(1020, 112, 1230, 300);
   }
-  g.fillStyle(highContrast ? 0x06090d : 0x0e141d, 0.98).fillRect(0, 600, INTERNAL_WIDTH, 120);
-  g.lineStyle(highContrast ? 3 : 2, highContrast ? 0x788ba3 : 0x354356, 0.42);
-  g.lineBetween(42, 116, 590, 116);
-  g.lineBetween(690, 116, 1238, 116);
+  g.fillStyle(highContrast ? 0x06090d : 0x0d131b, 0.98).fillRect(0, 600, INTERNAL_WIDTH, 120);
+  g.lineStyle(highContrast ? 2 : 1, highContrast ? 0x788ba3 : 0x344256, 0.38);
+  g.lineBetween(44, 112, 590, 112);
+  g.lineBetween(690, 112, 1236, 112);
 }
 
 export function shakeCamera(

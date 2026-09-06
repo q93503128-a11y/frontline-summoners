@@ -1,7 +1,7 @@
 import Phaser from 'phaser';
 import { CatalogScene as BaseCatalogScene } from './catalog-scene';
 import { GrowthScene as BaseGrowthScene } from './growth-scene';
-import { setButtonState } from './scene-ui';
+import { fitTextToWidth, setButtonState } from './scene-ui';
 
 type RuntimeCarrier = Phaser.Scene & Record<string, unknown>;
 
@@ -65,13 +65,65 @@ function wrapAfter(carrier: RuntimeCarrier, methodName: string, after: () => voi
   return () => { carrier[methodName] = original; };
 }
 
+function normalize(value: string | string[]): string {
+  return Array.isArray(value) ? value.join('\n') : value;
+}
+
+function compactKoreanAmount(value: number): string {
+  const trim = (amount: number): string => {
+    const digits = amount >= 10 ? 1 : 2;
+    return amount.toFixed(digits).replace(/\.0+$/, '').replace(/(\.\d*[1-9])0+$/, '$1');
+  };
+  if (Math.abs(value) >= 100_000_000) return `${trim(value / 100_000_000)}억`;
+  if (Math.abs(value) >= 10_000) return `${trim(value / 10_000)}만`;
+  return value.toLocaleString('ko-KR');
+}
+
+function rewriteGrowthCopy(value: string): string {
+  if (value === '성 장') return '성장';
+  if (/HTTP_|state hash|revision|request_|account_/i.test(value)) return '성장 정보를 불러오지 못했습니다. 다시 시도해 주세요.';
+  const match = /^(G|혼|조각|핵심|왕관)\s+([\d,]+)$/.exec(value);
+  if (!match) return value;
+  const numeric = Number(match[2]!.replaceAll(',', ''));
+  if (!Number.isFinite(numeric)) return value;
+  return `${match[1]} ${compactKoreanAmount(numeric)}`;
+}
+
+function decorateGrowthText(target: Phaser.GameObjects.Text, value: string): void {
+  if (value === '성장') target.setFontSize(40);
+  if (value.startsWith('HP ') && value.includes('재생산')) fitTextToWidth(target, 520, 11);
+  if (value.startsWith('이동 ') && value.includes('공격 범위')) fitTextToWidth(target, 520, 10);
+}
+
+function installGrowthTextFactory(scene: Phaser.Scene): () => void {
+  const original = scene.add.text.bind(scene.add) as typeof scene.add.text;
+  scene.add.text = ((x: number, y: number, value: string | string[], style?: Phaser.Types.GameObjects.Text.TextStyle) => {
+    const rewritten = rewriteGrowthCopy(normalize(value));
+    const target = original(x, y, rewritten, style);
+    decorateGrowthText(target, rewritten);
+    const originalSetText = target.setText.bind(target);
+    target.setText = ((nextValue: string | string[]) => {
+      const next = rewriteGrowthCopy(normalize(nextValue));
+      const result = originalSetText(next);
+      decorateGrowthText(target, next);
+      return result;
+    }) as typeof target.setText;
+    return target;
+  }) as typeof scene.add.text;
+  return () => { scene.add.text = original; };
+}
+
 export class GrowthScene extends BaseGrowthScene {
   override create(): void {
+    const restoreTextFactory = installGrowthTextFactory(this);
     super.create();
     const carrier = this as unknown as RuntimeCarrier;
-    const restore = wrapAfter(carrier, 'renderList', () => syncPagination(this, carrier));
+    const restoreList = wrapAfter(carrier, 'renderList', () => syncPagination(this, carrier));
     syncPagination(this, carrier);
-    this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => restore?.());
+    this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => {
+      restoreList?.();
+      restoreTextFactory();
+    });
   }
 }
 
