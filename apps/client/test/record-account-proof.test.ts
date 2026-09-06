@@ -36,7 +36,8 @@ test('record hub uses active account authority and blocks offline-cache challeng
   assert.match(hub, /loadActiveProgress\(\)/);
   assert.match(hub, /ACCOUNT_OFFLINE_CACHE/);
   assert.match(hub, /const canChallenge = unlocked && this\.authority !== 'ACCOUNT_OFFLINE_CACHE'/);
-  assert.match(hub, /온라인 복구 후 서버 검증 기록 도전 가능/);
+  assert.match(hub, /온라인 연결 후 기록전에 도전할 수 있습니다/);
+  assert.match(hub, /setButtonState\(action, 'disabled'/);
   assert.doesNotMatch(hub, /loadGuestProgress\(\)/);
 });
 
