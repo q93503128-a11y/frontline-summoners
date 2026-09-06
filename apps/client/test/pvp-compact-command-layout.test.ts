@@ -26,6 +26,12 @@ test('360px portrait-equivalent touch target uses four summon commands per page'
   assert.equal(layout.pageCount, 3);
 });
 
+test('412px portrait-equivalent touch target keeps five summon commands per page', () => {
+  assertFits(137, 5);
+  const layout = computePvpCompactCommandLayout(137, 10);
+  assert.equal(layout.pageCount, 2);
+});
+
 test('phone landscape can keep all ten summon commands in one touch-safe row', () => {
   assertFits(81, 10);
   const layout = computePvpCompactCommandLayout(81, 10);
