@@ -87,9 +87,9 @@ test('friendly duel keeps growth-rule identity while sharing command battle gram
 
 test('friendly 2v2 lobby presents party positions instead of raw seat identifiers', async () => {
   const friendly2v2 = await readSource('../src/pvp-friendly-2v2-command-scene.ts');
-  assert.match(friendly2v2, /4인 파티 결투판/);
-  assert.match(friendly2v2, /'나', '팀 동료', '상대 1', '상대 2'/);
-  assert.match(friendly2v2, /참가 표식/);
+  assert.match(friendly2v2, /2v2 친선전/);
+  assert.match(friendly2v2, /'나', '팀원', '상대 1', '상대 2'/);
+  assert.match(friendly2v2, /참가 코드/);
   assert.match(friendly2v2, /팀 배정 완료 · 나머지 지휘관을 기다립니다/);
   assert.doesNotMatch(friendly2v2, /FRIENDLY TEAM BATTLE|A1 방장|B1 참가자|A2 참가자|B2 참가자/);
 });
