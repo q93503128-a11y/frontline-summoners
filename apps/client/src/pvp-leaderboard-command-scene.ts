@@ -1,5 +1,6 @@
 import Phaser from 'phaser';
 import { PvpLeaderboardScene as BasePvpLeaderboardScene } from './pvp-leaderboard-scene.ts';
+import { isCompactMobileViewport } from './viewport.ts';
 
 type LeaderboardCarrier = Phaser.Scene & Record<string, unknown>;
 
@@ -41,7 +42,25 @@ function visit(objects: readonly Phaser.GameObjects.GameObject[], visitor: (obje
   });
 }
 
+function currentFontSize(target: Phaser.GameObjects.Text): number {
+  const parsed = Number.parseFloat(String(target.style.fontSize));
+  if (Number.isFinite(parsed) && parsed > 0) return parsed;
+  const lineCount = Math.max(1, target.text.split('\n').length);
+  return Math.max(1, Math.round(target.height / lineCount));
+}
+
+function fitLineToWidth(target: Phaser.GameObjects.Text, maxWidth: number, minFontSize: number): void {
+  if (!Number.isFinite(maxWidth) || maxWidth <= 0 || target.width <= maxWidth) return;
+  let fontSize = Math.max(minFontSize, Math.floor(currentFontSize(target)));
+  while (target.width > maxWidth && fontSize > minFontSize) {
+    fontSize -= 1;
+    target.setFontSize(fontSize);
+  }
+}
+
 function polishLeaderboard(scene: Phaser.Scene): void {
+  const compact = isCompactMobileViewport();
+  const minBody = compact ? 14 : 12;
   visit(scene.children.list, (object) => {
     if (object instanceof Phaser.GameObjects.Rectangle) {
       if (object.width >= 1100 && object.height >= 450) {
@@ -52,14 +71,22 @@ function polishLeaderboard(scene: Phaser.Scene): void {
       }
       if (object.height <= 2 && object.width >= 900) object.setAlpha(Math.min(object.alpha, 0.16));
     }
-    if (object instanceof Phaser.GameObjects.Text) {
-      if (object.text === '전체 전선' || object.text === '내 주변 전선' || object.text === '친구 전선') {
-        object.setColor('#dbe4ee').setAlpha(0.9);
-      }
-      if (object.text.includes(' · 나')) object.setColor('#fff0b8').setAlpha(1);
-      if (/^#(1|2|3)$/.test(object.text)) object.setAlpha(1).setColor('#f0d67d');
-      if (['순위', '지휘관', '티어', '평점', '승수'].includes(object.text)) object.setAlpha(0.68);
+    if (!(object instanceof Phaser.GameObjects.Text)) return;
+
+    if (object.text === '전체 전선' || object.text === '내 주변 전선' || object.text === '친구 전선') {
+      object.setColor('#dbe4ee').setAlpha(0.9);
     }
+    if (object.text.includes(' · 나')) object.setColor('#fff0b8').setAlpha(1);
+    if (/^#(1|2|3)$/.test(object.text)) object.setAlpha(1).setColor('#f0d67d');
+    if (['순위', '지휘관', '티어', '평점', '승수'].includes(object.text)) object.setAlpha(0.68);
+
+    if (object.x === 50 && object.y <= 90) fitLineToWidth(object, 820, minBody);
+    if (object.x === 1180 && object.y >= 170 && object.y <= 205) fitLineToWidth(object, 260, minBody);
+    if (object.x === 240 && object.y >= 245 && object.y <= 610) fitLineToWidth(object, 410, minBody);
+    if (object.x === 720 && object.y >= 245 && object.y <= 610) fitLineToWidth(object, 170, minBody);
+    if (object.x === 970 && object.y >= 245 && object.y <= 610) fitLineToWidth(object, 100, minBody);
+    if (object.x === 1185 && object.y >= 245 && object.y <= 610) fitLineToWidth(object, 110, minBody);
+    if (object.x === 640 && object.y >= 400 && object.y <= 450) fitLineToWidth(object, 820, minBody);
   });
 }
 
