@@ -52,7 +52,7 @@ function polishSettings(scene: Phaser.Scene): void {
     }
     if (object instanceof Phaser.GameObjects.Text) {
       if (['접근성', '전장 표현', '오디오'].includes(object.text)) object.setAlpha(0.92).setColor('#dce5ee');
-      if (object.y >= 500 && object.fontSize <= 14) object.setAlpha(0.68);
+      if (object.y >= 500) object.setAlpha(Math.min(object.alpha, 0.68));
       if (object.text === '변경 내용은 이 기기에 저장') object.setAlpha(0.62);
     }
     if (object instanceof Phaser.GameObjects.Container) {
