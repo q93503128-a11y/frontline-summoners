@@ -30,6 +30,20 @@ function weaponName(id: string | null): string {
   return '전선포격기';
 }
 
+function fitCompactButtonLabel(button: Phaser.GameObjects.Container, width: number, height: number): void {
+  const label = button.list.find((child): child is Phaser.GameObjects.Text => child instanceof Phaser.GameObjects.Text);
+  if (!label) return;
+  const parsed = Number.parseFloat(String(label.style.fontSize));
+  let fontSize = Number.isFinite(parsed) && parsed > 0 ? Math.floor(parsed) : 16;
+  const minFontSize = 13;
+  const maxWidth = Math.max(48, width - 20);
+  const maxHeight = Math.max(30, height - 16);
+  while ((label.width > maxWidth || label.height > maxHeight) && fontSize > minFontSize) {
+    fontSize -= 1;
+    label.setFontSize(fontSize);
+  }
+}
+
 function renderCompactPager(scene: PagedCarrier): void {
   scene.controls?.destroy(true);
   scene.controls = scene.add.container(0, 0);
@@ -63,6 +77,7 @@ function renderCompactPager(scene: PagedCarrier): void {
     const button = addButton(scene, xFor(index), geometry.buttonY, geometry.buttonWidth, geometry.buttonHeight, label, () => {
       if (available) scene.session?.queueCommand({ type: 'SPAWN', slotId });
     }, available ? 0x5f86aa : 0x48515e, { tone: available ? 'primary' : 'quiet' });
+    fitCompactButtonLabel(button, geometry.buttonWidth, geometry.buttonHeight);
     layer.add(button);
     if (cooldown > 0) setButtonState(button, 'disabled', `재사용까지 ${cooldownSeconds(cooldown)}초 남았습니다.`);
     else if (side.supply < cost) setButtonState(button, 'disabled', `보급이 ${(cost - side.supply).toLocaleString()} 부족합니다.`);
@@ -97,6 +112,7 @@ function renderCompactPager(scene: PagedCarrier): void {
         0x6b668a,
         { tone: 'secondary', state: 'disabled', reason: '모든 소환 명령이 한 줄에 표시되어 있습니다.' },
       );
+  fitCompactButtonLabel(pageButton, geometry.buttonWidth, geometry.buttonHeight);
   layer.add(pageButton);
 
   const canUpgrade = side.nextSupplyUpgradeCost !== null && side.supply >= side.nextSupplyUpgradeCost;
@@ -111,6 +127,7 @@ function renderCompactPager(scene: PagedCarrier): void {
     canUpgrade ? 0x8b773f : 0x4f5050,
     { tone: canUpgrade ? 'primary' : 'quiet' },
   );
+  fitCompactButtonLabel(upgrade, geometry.buttonWidth, geometry.buttonHeight);
   layer.add(upgrade);
   if (side.nextSupplyUpgradeCost === null) setButtonState(upgrade, 'disabled', '보급소가 최대 단계입니다.');
   else if (side.supply < side.nextSupplyUpgradeCost) setButtonState(upgrade, 'disabled', `보급이 ${(side.nextSupplyUpgradeCost - side.supply).toLocaleString()} 부족합니다.`);
@@ -132,6 +149,7 @@ function renderCompactPager(scene: PagedCarrier): void {
     ready ? 0x587f98 : 0x4d535d,
     { tone: ready ? 'primary' : 'quiet' },
   );
+  fitCompactButtonLabel(weapon, geometry.buttonWidth, geometry.buttonHeight);
   layer.add(weapon);
   if (side.baseWeaponId === null) setButtonState(weapon, 'disabled', '장착된 거점 병기가 없습니다.');
   else if (side.baseWeaponCooldownFrames > 0) setButtonState(weapon, 'disabled', `재사용까지 ${cooldownSeconds(side.baseWeaponCooldownFrames)}초 남았습니다.`);
@@ -148,6 +166,7 @@ function installCompactPager(scene: Phaser.Scene): void {
     }
     renderCompactPager(carrier);
   };
+  if (isCompactMobileViewport()) carrier.renderControls();
 }
 
 export class PvpMatchScene extends BasePvpMatchScene {
