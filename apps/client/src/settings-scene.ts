@@ -15,7 +15,6 @@ import {
 import {
   addButton,
   addSectionHeading,
-  addStatusPill,
   addText,
   COLORS,
   drawBackdrop,
@@ -47,7 +46,7 @@ export class SettingsScene extends Phaser.Scene {
     const compact = isCompactMobileViewport();
     addText(this, 48, 28, '설정', compact ? 42 : 44, COLORS.cream);
     addText(this, 50, 77, '접근성, 전장 표현, 소리를 즉시 조정합니다.', compact ? 17 : 14, COLORS.muted);
-    addStatusPill(this, 872, 106, '이 브라우저에 저장', 'neutral');
+    addText(this, 914, 94, '변경 내용은 이 기기에 저장됩니다.', compact ? 15 : 12, '#7f8b9a', 'right').setOrigin(1, 0);
     addButton(this, 1170, compact ? 60 : 56, 170, compact ? 80 : 50, '지휘소', () => this.scene.start('main-menu'), 0x586275, { tone: 'quiet' });
     this.render();
   }
@@ -59,10 +58,11 @@ export class SettingsScene extends Phaser.Scene {
     const rowHeight = compact ? 62 : 48;
 
     const sheet = this.add.graphics();
-    sheet.fillStyle(0x151c25, 0.86).fillRoundedRect(50, 145, 1180, 470, 12);
-    sheet.lineStyle(1, 0x607086, 0.32).strokeRoundedRect(50, 145, 1180, 470, 12);
-    sheet.lineStyle(1, 0x536173, 0.34).lineBetween(430, 176, 430, 586);
-    sheet.lineStyle(1, 0x536173, 0.34).lineBetween(820, 176, 820, 586);
+    sheet.fillStyle(0x151c25, 0.28).fillRect(50, 145, 1180, 470);
+    sheet.lineStyle(1, 0x607086, 0.22).lineBetween(50, 145, 1230, 145);
+    sheet.lineStyle(1, 0x4f5d6d, 0.18).lineBetween(50, 615, 1230, 615);
+    sheet.lineStyle(1, 0x536173, 0.22).lineBetween(430, 176, 430, 586);
+    sheet.lineStyle(1, 0x536173, 0.22).lineBetween(820, 176, 820, 586);
     this.content.add(sheet);
 
     this.content.add(addSectionHeading(this, 72, 170, '접근성', 300, 0x627f9a));
@@ -116,7 +116,7 @@ export class SettingsScene extends Phaser.Scene {
     this.content.add(addText(this, 852, 503, '전체 음량 0%는 모든 게임 소리를 음소거합니다.', compact ? 14 : 12, '#b7a592').setWordWrapWidth(300));
     this.content.add(addText(this, 852, 551, '세부 음량은 전체 음량과 함께 적용됩니다.', compact ? 14 : 12, '#9f9285').setWordWrapWidth(300));
 
-    const reset = addButton(this, INTERNAL_WIDTH / 2, compact ? 666 : 655, 280, compact ? 78 : 52, '기본값으로 되돌리기', () => this.reset(), 0x7a5e61, { tone: 'danger' });
+    const reset = addButton(this, INTERNAL_WIDTH / 2, compact ? 666 : 655, 280, compact ? 78 : 52, '기본값으로 되돌리기', () => this.reset(), 0x66727f, { tone: 'quiet' });
     this.content.add(reset);
   }
 
