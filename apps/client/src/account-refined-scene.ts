@@ -1,9 +1,14 @@
 import Phaser from 'phaser';
 import { AccountCommandScene as BaseAccountCommandScene } from './account-command-scene.ts';
+import { fitTextToWidth } from './scene-ui.ts';
+import { isCompactMobileViewport } from './viewport.ts';
 
 type AccountPresentationCarrier = Phaser.Scene & Record<string, unknown>;
 
 function rewriteAccountLine(value: string): string {
+  const normalized = value
+    .replace(/\bSPECIAL\b/g, '특수')
+    .replace(/\bNORMAL_CLEAR\b/g, '클리어');
   const direct: Readonly<Record<string, string>> = {
     '계 정': '계정',
     '저장 위치와 로그인 상태를 확인하고, 필요한 경우에만 진행을 이전한다.': '현재 진행의 저장 위치와 계정 연결 상태를 확인합니다.',
@@ -20,16 +25,16 @@ function rewriteAccountLine(value: string): string {
     '게스트 저장 초기화': '로컬 진행 초기화',
     'Google 계정으로 로그인': 'Google 계정 연결',
   };
-  if (direct[value]) return direct[value]!;
-  if (/^로그인 후 서버 진행이 비어 있으면/.test(value)) return '계정 진행이 비어 있으면 현재 게스트 진행을 옮길 수 있습니다.';
-  if (/^서버에도 진행이 있으면 비교 후 직접 선택합니다/.test(value)) return '계정과 게스트 양쪽에 진행이 있으면 비교 후 직접 선택합니다.';
-  if (/^전투·모집·성장·소셜 변경이 서버 진행에 저장됩니다\.$/.test(value)) return '플레이 진행이 계정에 저장됩니다.';
-  if (/^오프라인에서는 진행을 확인할 수 있지만/.test(value)) return '오프라인에서는 진행을 볼 수 있지만 변경할 수 없습니다.';
-  if (/^현재 화면은 읽기 전용입니다\./.test(value)) return '현재는 읽기 전용입니다. 온라인 연결을 복구하면 다시 변경할 수 있습니다.';
-  if (/HTTP_|revision|requestId|migrationId|account_|profile_|guest_/i.test(value)) {
+  if (direct[normalized]) return direct[normalized]!;
+  if (/^로그인 후 서버 진행이 비어 있으면/.test(normalized)) return '계정 진행이 비어 있으면 현재 게스트 진행을 옮길 수 있습니다.';
+  if (/^서버에도 진행이 있으면 비교 후 직접 선택합니다/.test(normalized)) return '계정과 게스트 양쪽에 진행이 있으면 비교 후 직접 선택합니다.';
+  if (/^전투·모집·성장·소셜 변경이 서버 진행에 저장됩니다\.$/.test(normalized)) return '플레이 진행이 계정에 저장됩니다.';
+  if (/^오프라인에서는 진행을 확인할 수 있지만/.test(normalized)) return '오프라인에서는 진행을 볼 수 있지만 변경할 수 없습니다.';
+  if (/^현재 화면은 읽기 전용입니다\./.test(normalized)) return '현재는 읽기 전용입니다. 온라인 연결을 복구하면 다시 변경할 수 있습니다.';
+  if (/HTTP_|revision|requestId|migrationId|state hash|account_|profile_|guest_/i.test(normalized)) {
     return '계정 작업을 완료하지 못했습니다. 연결 상태를 확인한 뒤 다시 시도해 주세요.';
   }
-  return value;
+  return normalized;
 }
 
 function rewriteAccountText(value: string | string[]): string | string[] {
@@ -91,6 +96,7 @@ export class AccountScene extends BaseAccountCommandScene {
   }
 
   private polishAccountGeometry(): void {
+    const compact = isCompactMobileViewport();
     const visit = (object: Phaser.GameObjects.GameObject): void => {
       if (object instanceof Phaser.GameObjects.Rectangle) {
         if (object.width >= 1100 && object.height >= 120 && object.height < 180) {
@@ -107,6 +113,16 @@ export class AccountScene extends BaseAccountCommandScene {
         if (object.text === '이 기기') object.setAlpha(0.82).setColor('#b9a3a9');
         if (object.text.includes('계정 진행이 비어 있으면') || object.text.includes('양쪽에 진행이 있으면')) object.setAlpha(0.76);
         if (object.text.includes('로컬 초기화와 테스트 기능')) object.setAlpha(0.68);
+
+        const centered = Math.abs(object.originX - 0.5) < 0.05;
+        const maxWidth = centered
+          ? 1000
+          : object.x <= 130
+            ? 1040
+            : object.x >= 800
+              ? 350
+              : 560;
+        if (object.width > maxWidth) fitTextToWidth(object, maxWidth, compact ? 14 : 11);
       }
       if (object instanceof Phaser.GameObjects.Container) {
         const label = directButtonLabel(object);
