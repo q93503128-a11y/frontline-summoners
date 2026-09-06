@@ -158,7 +158,7 @@ export class SocialCommandScene extends SocialScene {
       .replace(/^내 상태 (온라인|오프라인) · 프레임 .+$/, '내 상태 $1 · 프로필 장식 적용')
       .replace(/\b(?:main|special)_[a-z0-9_]+\b/gi, '알 수 없는 전장');
 
-    if (/HTTP_\d+|state hash|revision|requestId|matchId|seatId/i.test(sanitized)) {
+    if (/HTTP_\d+|fetch|network|websocket|state hash|revision|requestId|matchId|seatId|roomId|queueId/i.test(sanitized)) {
       return '요청을 처리하지 못했습니다. 다시 시도해 주세요.';
     }
     if (/(?:^|\s)(?:social|friendly|pvp|coop|account)_[a-z0-9_]+/i.test(sanitized)) {
