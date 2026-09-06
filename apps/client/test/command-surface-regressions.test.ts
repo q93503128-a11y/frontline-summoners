@@ -4,18 +4,19 @@ import test from 'node:test';
 
 const readSource = (relative: string): Promise<string> => readFile(new URL(relative, import.meta.url), 'utf8');
 
-test('growth and catalog route through their refined command presentations with disabled edge states', async () => {
-  const [main, adapter] = await Promise.all([
+test('growth and catalog route through focused presentations with disabled edge states', async () => {
+  const [main, growth, catalog] = await Promise.all([
     readSource('../src/main.ts'),
-    readSource('../src/meta-command-scenes.ts'),
+    readSource('../src/growth-command-scene.ts'),
+    readSource('../src/catalog-command-scene.ts'),
   ]);
 
   assert.match(main, /import \{ CatalogScene \} from '\.\/catalog-command-scene'/);
-  assert.match(main, /import \{ GrowthScene \} from '\.\/meta-command-scenes'/);
-  assert.match(adapter, /'첫 번째 페이지입니다\.'/);
-  assert.match(adapter, /'마지막 페이지입니다\.'/);
-  assert.match(adapter, /setButtonState\(previous, page <= 0 \? 'disabled' : 'default'/);
-  assert.match(adapter, /setButtonState\(next, page >= count - 1 \? 'disabled' : 'default'/);
+  assert.match(main, /import \{ GrowthScene \} from '\.\/growth-command-scene'/);
+  assert.match(growth, /setButtonState\(this\.previousButton, this\.page <= 0 \? 'disabled' : 'default'/);
+  assert.match(growth, /setButtonState\(this\.nextButton, this\.page >= this\.pageCount - 1 \? 'disabled' : 'default'/);
+  assert.match(catalog, /'첫 번째 기록 묶음입니다\.'/);
+  assert.match(catalog, /'마지막 기록 묶음입니다\.'/);
 });
 
 test('guest coop post-story waits for persisted clear state instead of player-facing result copy', async () => {
