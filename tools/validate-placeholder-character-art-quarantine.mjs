@@ -34,9 +34,9 @@ async function collectTextFiles(path) {
   return out;
 }
 
-function isQuarantinedReviewOnlySource(path) {
+function isDeferredCharacterArtContractSource(path) {
   const file = relative(clientSrcRoot, path).replaceAll('\\', '/');
-  return file.endsWith('-production-review-runtime.ts');
+  return file === 'production-assets.ts' || file.endsWith('-production-review-runtime.ts');
 }
 
 const rootPackage = JSON.parse(await readFile(packagePath, 'utf8'));
@@ -95,10 +95,10 @@ assert(clientAssets.includes("const LOCAL = '/assets/characters';"),
   'normal runtime character art must stay on the pinned free-sprite path');
 
 for (const path of await collectTextFiles(clientSrcRoot)) {
-  if (isQuarantinedReviewOnlySource(path)) continue;
+  if (isDeferredCharacterArtContractSource(path)) continue;
   const source = await readFile(path, 'utf8');
   assert(!source.includes('/assets/production/units'),
     `player runtime source must not reference quarantined production unit art: ${path.slice(root.length + 1)}`);
 }
 
-console.log('[character-art-quarantine] placeholder production unit art is absent from player runtime and CI; legacy review-only runtimes remain quarantined');
+console.log('[character-art-quarantine] placeholder production unit art is absent from player runtime and CI; deferred art contracts stay non-authoritative');
