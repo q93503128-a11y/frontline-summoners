@@ -87,12 +87,13 @@ assert(!ci.includes('apps/client/public/assets/production/review'),
 assert(!await exists(quarantinedRuntimeRoot),
   'public production unit art must stay absent until explicit character design work resumes');
 
-assert(clientPackage.scripts?.predev === 'node ../../tools/vendor-client-assets.mjs',
-  'client predev must continue vendoring pinned free sprites');
-assert(clientPackage.scripts?.prebuild === 'node ../../tools/vendor-client-assets.mjs',
-  'client prebuild must continue vendoring pinned free sprites');
+const expectedClientVendor = 'node ../../tools/vendor-client-assets.mjs && node ../../tools/vendor-lower-rarity-free-assets.mjs';
+assert(clientPackage.scripts?.predev === expectedClientVendor,
+  'client predev must vendor the vetted free sprite families without restoring production-unit generators');
+assert(clientPackage.scripts?.prebuild === expectedClientVendor,
+  'client prebuild must vendor the vetted free sprite families without restoring production-unit generators');
 assert(clientAssets.includes("const LOCAL = '/assets/characters';"),
-  'normal runtime character art must stay on the pinned free-sprite path');
+  'normal runtime character art must stay on the free-sprite path');
 
 for (const path of await collectTextFiles(clientSrcRoot)) {
   if (isDeferredCharacterArtContractSource(path)) continue;
@@ -101,4 +102,4 @@ for (const path of await collectTextFiles(clientSrcRoot)) {
     `player runtime source must not reference quarantined production unit art: ${path.slice(root.length + 1)}`);
 }
 
-console.log('[character-art-quarantine] placeholder production unit art is absent from player runtime and CI; deferred art contracts stay non-authoritative');
+console.log('[character-art-quarantine] placeholder production unit art is absent from player runtime and CI; vetted free source-reference families are allowed');
