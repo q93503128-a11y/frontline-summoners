@@ -5,17 +5,21 @@ import { decodePng, encodePng } from './lib/production-png.mjs';
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const outputRoot = resolve(root, 'apps/client/public/assets/characters/lower-rarity');
+const FOOZLE_REVISION = 'e93aa129978daafda85f3c907eebc8f1807ec43f';
+const FOOZLE_BASE = `https://github.com/series-ai/jam-ready-assets/raw/${FOOZLE_REVISION}`;
 
 // CC0 sources. Raw source files are fetched during dev/build and are not committed as standalone asset packs.
 const SOURCES = {
   bird: 'https://opengameart.org/sites/default/files/bird_v001_blue_and_yellow.png',
   duck: 'https://opengameart.org/sites/default/files/duck_spritesheet.png',
   prehistoricBird: 'https://opengameart.org/sites/default/files/prehistoric-bird-spritesheet.png',
+  foozleMagmaCrab: `${FOOZLE_BASE}/foozle-spire-enemies-ground/2D/fantasy/Ground/Spritesheets/Magma%20Crab.png`,
+  foozleVoidButterfly: `${FOOZLE_BASE}/foozle-spire-enemies-flying/2D/fantasy/Flying/Spritesheets/Voidbutterfly.png`,
 };
 
 const delay = (ms) => new Promise((resolveDelay) => setTimeout(resolveDelay, ms));
 
-async function fetchPng(url, label, attempts = 3) {
+async function fetchBytes(url, label, attempts = 3) {
   let lastError;
   for (let attempt = 1; attempt <= attempts; attempt += 1) {
     const controller = new AbortController();
@@ -27,8 +31,7 @@ async function fetchPng(url, label, attempts = 3) {
         signal: controller.signal,
       });
       if (!response.ok) throw new Error(`HTTP ${response.status}`);
-      const bytes = Buffer.from(await response.arrayBuffer());
-      return decodePng(bytes, label);
+      return Buffer.from(await response.arrayBuffer());
     } catch (error) {
       lastError = error;
       if (attempt < attempts) await delay(500 * attempt);
@@ -37,6 +40,10 @@ async function fetchPng(url, label, attempts = 3) {
     }
   }
   throw new Error(`[lower-rarity-free-art] ${label} download failed: ${String(lastError)}`);
+}
+
+async function fetchPng(url, label, attempts = 3) {
+  return decodePng(await fetchBytes(url, label, attempts), label);
 }
 
 function assert(ok, message) {
@@ -66,6 +73,16 @@ async function writeStrip(folder, name, bytes) {
   const target = resolve(outputRoot, folder, `${name}.png`);
   await mkdir(dirname(target), { recursive: true });
   await writeFile(target, bytes);
+}
+
+async function probeFoozleSource(key, label) {
+  try {
+    const sheet = await fetchPng(SOURCES[key], label, 2);
+    console.log(`[lower-rarity-free-art] probe ${key} ${sheet.width}x${sheet.height}`);
+  } catch (error) {
+    // Probe is intentionally non-authoritative. The source is only promoted after dimensions are known and locked.
+    console.warn(`[lower-rarity-free-art] probe ${key} unavailable: ${String(error)}`);
+  }
 }
 
 await rm(outputRoot, { recursive: true, force: true });
@@ -115,5 +132,9 @@ await writeStrip('cc0-clockduck-f3', 'move', composeStrip(prehistoricBird, 48, 4
 await writeStrip('cc0-clockduck-f3', 'attack', composeStrip(prehistoricBird, 48, 48, peck));
 await writeStrip('cc0-clockduck-f3', 'hit', composeStrip(prehistoricBird, 48, 48, [1, 0]));
 await writeStrip('cc0-clockduck-f3', 'death', composeStrip(prehistoricBird, 48, 48, [2, 1, 0]));
+
+// Probe two additional creator-verified CC0 packs. The exact geometry is locked in the next batch before runtime use.
+await probeFoozleSource('foozleMagmaCrab', 'CC0 Foozle Spire Magma Crab');
+await probeFoozleSource('foozleVoidButterfly', 'CC0 Foozle Spire Voidbutterfly');
 
 console.log('[lower-rarity-free-art] vendored CC0 clockduck and ink-raven source-reference families');
