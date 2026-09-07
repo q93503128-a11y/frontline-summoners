@@ -19,17 +19,22 @@ const EXPECTED_REACTIONS = new Map<string, readonly [number, number]>([
   ['king-2', [4, 6]],
   ['martial-hero-2', [3, 7]],
   ['evil-wizard-2', [3, 7]],
+  ['cc0-clockduck-f1', [2, 3]],
+  ['cc0-clockduck-f3', [2, 3]],
+  ['cc0-ink-raven-f1', [3, 11]],
+  ['cc0-ink-raven-f2', [3, 11]],
+  ['cc0-ink-raven-f3', [3, 11]],
 ]);
 
-test('every pinned source-reference family exposes authored hit and death strips', () => {
+test('every vetted source-reference family exposes authored or source-derived hit and death strips', () => {
   assert.equal(SOURCE_REFERENCE_ART_FAMILIES.length, EXPECTED_REACTIONS.size);
   assert.equal(new Set(SOURCE_REFERENCE_ART_FAMILIES.map((family) => family.id)).size, SOURCE_REFERENCE_ART_FAMILIES.length);
 
   for (const [familyId, [hitFrames, deathFrames]] of EXPECTED_REACTIONS) {
     const family = SOURCE_REFERENCE_ART_BY_ID[familyId];
     assert.ok(family, `missing source-reference family: ${familyId}`);
-    assert.ok(family.knockback, `${familyId} must expose an authored hit strip`);
-    assert.ok(family.death, `${familyId} must expose an authored death strip`);
+    assert.ok(family.knockback, `${familyId} must expose a hit strip`);
+    assert.ok(family.death, `${familyId} must expose a death strip`);
     assert.equal(family.knockback.frames, hitFrames, `${familyId} hit frame count drifted`);
     assert.equal(family.death.frames, deathFrames, `${familyId} death frame count drifted`);
     assert.match(family.knockback.url, /^\/assets\/characters\//);
@@ -53,7 +58,7 @@ test('all ten chapter-one story units resolve to complete five-motion placeholde
   clearActiveVisualForms();
 });
 
-test('verified CC0 references distinguish selected story final forms without claiming production approval', () => {
+test('verified free references distinguish selected story final forms without claiming production approval', () => {
   const hunterF1 = resolveUnitArt('hunter', 'hunter_f1');
   const hunterF3 = resolveUnitArt('hunter', 'hunter_f3');
   const duelistF1 = resolveUnitArt('duelist', 'duelist_f1');
@@ -76,6 +81,17 @@ test('verified CC0 references distinguish selected story final forms without cla
   assert.ok(resolved.every((art) => art.source === 'PLACEHOLDER'));
   assert.ok(resolved.every((art) => art.productionAssetId === undefined));
   assert.ok(resolved.every((art) => art.family.knockback && art.family.death));
+});
+
+test('lower-rarity clockduck and ink-raven forms use free creature silhouettes without production approval', () => {
+  const clockduck = [1, 2, 3].map((order) => resolveUnitArt('char_common_b_clockduck', `char_common_b_clockduck_f${order}`));
+  const raven = [1, 2, 3].map((order) => resolveUnitArt('char_common_b_ink_raven', `char_common_b_ink_raven_f${order}`));
+
+  assert.deepEqual(clockduck.map((art) => art.family.id), ['cc0-clockduck-f1', 'cc0-clockduck-f1', 'cc0-clockduck-f3']);
+  assert.deepEqual(raven.map((art) => art.family.id), ['cc0-ink-raven-f1', 'cc0-ink-raven-f2', 'cc0-ink-raven-f3']);
+  assert.ok([...clockduck, ...raven].every((art) => art.source === 'PLACEHOLDER'));
+  assert.ok([...clockduck, ...raven].every((art) => art.productionAssetId === undefined));
+  assert.ok([...clockduck, ...raven].every((art) => art.family.knockback && art.family.death));
 });
 
 test('golden-mask boss reservation remains placeholder while using complete Evil Wizard source motion', () => {
