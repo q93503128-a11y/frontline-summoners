@@ -36,7 +36,12 @@ async function request(path: string, init: RequestInit = {}): Promise<unknown> {
   const headers = new Headers(init.headers);
   headers.set('authorization', `Bearer ${sessionToken()}`);
   if (init.body !== undefined) headers.set('content-type', 'application/json');
-  const response = await fetch(`${resolveCoopApiOrigin()}${path}`, { ...init, headers });
+  let response: Response;
+  try {
+    response = await fetch(`${resolveCoopApiOrigin()}${path}`, { ...init, headers });
+  } catch {
+    throw new Error('HTTP_NETWORK_ERROR');
+  }
   const payload: unknown = await response.json().catch(() => ({}));
   if (!response.ok) {
     if (response.status === 401) await refreshAuthenticatedAccount();

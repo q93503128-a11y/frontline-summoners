@@ -49,3 +49,43 @@ test('co-op and record presentation sanitize transport details and bound dynamic
   assert.ok(record.includes("value.startsWith('기록 정보를 처리하지 못했습니다.')"));
   assert.ok(record.includes('fitTextToWidth(target, 900'));
 });
+
+test('PvP fetch failures normalize before presentation sanitizers expose status copy', async () => {
+  const [
+    leaderboardNetwork,
+    friendlyNetwork,
+    pvp2v2Network,
+    friendly2v2Network,
+    leaderboardPresentation,
+    friendlyPresentation,
+    pvp2v2Presentation,
+    friendly2v2Presentation,
+  ] = await Promise.all([
+    readSource('../src/pvp-leaderboard-network.ts'),
+    readSource('../src/pvp-friendly-network.ts'),
+    readSource('../src/pvp-2v2-network.ts'),
+    readSource('../src/pvp-friendly-2v2-network.ts'),
+    readSource('../src/pvp-leaderboard-command-scene.ts'),
+    readSource('../src/pvp-friendly-command-scenes.ts'),
+    readSource('../src/pvp-2v2-command-scenes.ts'),
+    readSource('../src/pvp-friendly-2v2-command-scene.ts'),
+  ]);
+
+  for (const [surface, source] of [
+    ['leaderboard network', leaderboardNetwork],
+    ['friendly 1v1 network', friendlyNetwork],
+    ['2v2 network', pvp2v2Network],
+    ['friendly 2v2 network', friendly2v2Network],
+  ] as const) {
+    assertContainsTokens(source, surface, ['HTTP_NETWORK_ERROR']);
+  }
+
+  for (const [surface, source] of [
+    ['leaderboard presentation sanitizer', leaderboardPresentation],
+    ['friendly 1v1 presentation sanitizer', friendlyPresentation],
+    ['2v2 presentation sanitizer', pvp2v2Presentation],
+    ['friendly 2v2 presentation sanitizer', friendly2v2Presentation],
+  ] as const) {
+    assertContainsTokens(source, surface, ['HTTP_']);
+  }
+});

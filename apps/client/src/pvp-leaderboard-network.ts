@@ -68,9 +68,14 @@ export async function getPvpLeaderboardView(
   params.set('scope', scope === 'AROUND_ME' ? 'around' : scope.toLowerCase());
   if (options.limit !== undefined) params.set('limit', String(options.limit));
   if (options.radius !== undefined) params.set('radius', String(options.radius));
-  const response = await fetch(`${resolveCoopApiOrigin()}/api/pvp/leaderboard/view?${params.toString()}`, {
-    headers: { authorization: `Bearer ${token()}` },
-  });
+  let response: Response;
+  try {
+    response = await fetch(`${resolveCoopApiOrigin()}/api/pvp/leaderboard/view?${params.toString()}`, {
+      headers: { authorization: `Bearer ${token()}` },
+    });
+  } catch {
+    throw new Error('HTTP_NETWORK_ERROR');
+  }
   const payload: unknown = await response.json().catch(() => ({}));
   if (!response.ok) {
     if (response.status === 401) await refreshAuthenticatedAccount();

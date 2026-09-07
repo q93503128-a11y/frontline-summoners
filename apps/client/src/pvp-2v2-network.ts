@@ -79,7 +79,24 @@ const SESSION_TOKEN_KEY = 'frontline.account.sessionToken.v1';
 const SESSION_TOKEN_PATTERN = /^[0-9a-f]{64}$/i;
 function isRecord(value: unknown): value is Record<string, unknown> { return typeof value === 'object' && value !== null && !Array.isArray(value); }
 function token(): string { if (getAccountClientState().kind !== 'AUTHENTICATED_ONLINE') throw new Error('2v2 PvP는 온라인 로그인 상태에서만 사용할 수 있습니다.'); const value = typeof window === 'undefined' ? null : window.sessionStorage.getItem(SESSION_TOKEN_KEY); if (!value || !SESSION_TOKEN_PATTERN.test(value)) throw new Error('로그인 세션을 찾을 수 없습니다.'); return value; }
-async function request(path: string, init: RequestInit = {}): Promise<unknown> { const headers = new Headers(init.headers); headers.set('authorization', `Bearer ${token()}`); if (init.body !== undefined) headers.set('content-type', 'application/json'); const response = await fetch(`${resolveCoopApiOrigin()}${path}`, { ...init, headers }); const payload: unknown = await response.json().catch(() => ({})); if (!response.ok) { if (response.status === 401) await refreshAuthenticatedAccount(); const code = isRecord(payload) && typeof payload.error === 'string' ? payload.error : `HTTP_${response.status}`; throw new Error(code); } return payload; }
+async function request(path: string, init: RequestInit = {}): Promise<unknown> {
+  const headers = new Headers(init.headers);
+  headers.set('authorization', `Bearer ${token()}`);
+  if (init.body !== undefined) headers.set('content-type', 'application/json');
+  let response: Response;
+  try {
+    response = await fetch(`${resolveCoopApiOrigin()}${path}`, { ...init, headers });
+  } catch {
+    throw new Error('HTTP_NETWORK_ERROR');
+  }
+  const payload: unknown = await response.json().catch(() => ({}));
+  if (!response.ok) {
+    if (response.status === 401) await refreshAuthenticatedAccount();
+    const code = isRecord(payload) && typeof payload.error === 'string' ? payload.error : `HTTP_${response.status}`;
+    throw new Error(code);
+  }
+  return payload;
+}
 
 function parseState(value: unknown): Pvp2v2MatchmakingState {
   if (!isRecord(value) || typeof value.state !== 'string') throw new Error('2v2 PvP 매칭 응답 형식이 올바르지 않습니다.');
