@@ -86,7 +86,7 @@ jobs:
       - name: Build
         if: success()
         run: npm run build
-      - name: Persist validated production runtime assets
+      - name: Persist validated non-character production assets
         if: success() && github.event_name == 'push' && github.ref == 'refs/heads/main'
         shell: bash
         run: |
@@ -94,17 +94,12 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
 
-          # Re-materialize the human-review surfaces immediately before staging so
-          # the repository receives the exact files that passed their validators,
-          # even if a later test/build step touched the public directory.
-          npm run assets:production:review-hub:check
-
+          # Character/unit production art is intentionally quarantined until the
+          # character-design phase. Only validated non-character runtime assets
+          # may be persisted by CI in the meantime.
           generated_paths=(
-            apps/client/public/assets/production/units
             apps/client/public/assets/production/battlefields
             apps/client/public/assets/production/audio
-            apps/client/public/assets/production/review
-            assets/raw/production/review/vertical-slice-01/preflight
           )
           for path in "${generated_paths[@]}"; do
             if [[ -e "$path" ]]; then
@@ -115,11 +110,11 @@ jobs:
           done
 
           if git diff --cached --quiet; then
-            echo "Generated production runtime/review assets are already current."
+            echo "Generated non-character production assets are already current."
             exit 0
           fi
 
-          git commit -m "chore(art): persist production runtime and review assets [skip ci]"
+          git commit -m "chore(art): persist non-character production assets [skip ci]"
           git fetch origin main
           remote_head="$(git rev-parse origin/main)"
           if [[ "$remote_head" != "$GITHUB_SHA" ]]; then
