@@ -92,6 +92,12 @@ const PLACEHOLDER_PLAYER_FORM_ART: Readonly<Record<string, UnitArtVariant>> = {
   pyromancer_f3: { familyId: 'evil-wizard-2', tint: 0xffffff, displayScale: 1.05, attackFx: 'FIRE' },
   voidsage_f2: { familyId: 'wizard', tint: 0xffffff, displayScale: 1.02, attackFx: 'VOID' },
   voidsage_f3: { familyId: 'evil-wizard-2', tint: 0xffffff, displayScale: 1.04, attackFx: 'VOID' },
+  char_common_b_clockduck_f1: { familyId: 'cc0-clockduck-f1', tint: 0xf2d37a, displayScale: 0.94, attackFx: 'SLASH' },
+  char_common_b_clockduck_f2: { familyId: 'cc0-clockduck-f1', tint: 0xc4b47f, displayScale: 1.08, attackFx: 'SLASH' },
+  char_common_b_clockduck_f3: { familyId: 'cc0-clockduck-f3', tint: 0xf0c766, displayScale: 1.10, attackFx: 'SLASH' },
+  char_common_b_ink_raven_f1: { familyId: 'cc0-ink-raven-f1', tint: 0x59627e, displayScale: 0.96, attackFx: 'VOID' },
+  char_common_b_ink_raven_f2: { familyId: 'cc0-ink-raven-f2', tint: 0x444b66, displayScale: 1.02, attackFx: 'VOID' },
+  char_common_b_ink_raven_f3: { familyId: 'cc0-ink-raven-f3', tint: 0x32384f, displayScale: 1.08, attackFx: 'VOID' },
 };
 
 function productionUnitRoot(unitId: string, formId?: string): string {
