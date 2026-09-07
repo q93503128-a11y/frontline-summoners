@@ -1,4 +1,5 @@
 import { ART_FAMILIES, type ArtFamily, type SpriteStrip } from './assets.ts';
+import { LOWER_RARITY_FREE_ART_FAMILIES } from './lower-rarity-free-art.ts';
 
 export interface SourceReferenceArtFamily extends ArtFamily {
   readonly knockback?: SpriteStrip;
@@ -121,6 +122,7 @@ export const SOURCE_REFERENCE_ART_FAMILIES: readonly SourceReferenceArtFamily[] 
   KING_2,
   MARTIAL_HERO_2,
   EVIL_WIZARD_2,
+  ...LOWER_RARITY_FREE_ART_FAMILIES,
 ];
 
 export const SOURCE_REFERENCE_ART_BY_ID: Readonly<Record<string, SourceReferenceArtFamily>> = Object.fromEntries(
