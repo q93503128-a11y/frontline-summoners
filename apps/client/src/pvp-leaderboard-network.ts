@@ -68,10 +68,11 @@ export async function getPvpLeaderboardView(
   params.set('scope', scope === 'AROUND_ME' ? 'around' : scope.toLowerCase());
   if (options.limit !== undefined) params.set('limit', String(options.limit));
   if (options.radius !== undefined) params.set('radius', String(options.radius));
+  const authorization = `Bearer ${token()}`;
   let response: Response;
   try {
     response = await fetch(`${resolveCoopApiOrigin()}/api/pvp/leaderboard/view?${params.toString()}`, {
-      headers: { authorization: `Bearer ${token()}` },
+      headers: { authorization },
     });
   } catch {
     throw new Error('HTTP_NETWORK_ERROR');
