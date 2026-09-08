@@ -7,10 +7,12 @@ const root = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const outputRoot = resolve(root, 'apps/client/public/assets/characters/lower-rarity');
 const ASSET_REVISION = 'e93aa129978daafda85f3c907eebc8f1807ec43f';
 const API_ROOT = 'https://api.github.com/repos/series-ai/jam-ready-assets/contents';
+const JAM_BASE = `https://github.com/series-ai/jam-ready-assets/raw/${ASSET_REVISION}`;
 const TARGET_CELL = 64;
 
 const encodePath = (path) => path.split('/').map(encodeURIComponent).join('/');
 const apiUrl = (path) => `${API_ROOT}/${encodePath(path)}?ref=${ASSET_REVISION}`;
+const jamUrl = (path) => `${JAM_BASE}/${encodePath(path)}`;
 const delay = (ms) => new Promise((resolveDelay) => setTimeout(resolveDelay, ms));
 
 const A_FORMS = [
@@ -105,8 +107,8 @@ async function listSourceFiles(spec) {
     .filter((entry) => !spec.prefix || entry.name.startsWith(spec.prefix))
     .map((entry) => {
       const dimensions = dimensionsFromName(entry.name);
-      return dimensions && entry.download_url
-        ? { name: entry.name, url: entry.download_url, cellWidth: dimensions[0], cellHeight: dimensions[1] }
+      return dimensions && entry.path
+        ? { name: entry.name, url: jamUrl(entry.path), cellWidth: dimensions[0], cellHeight: dimensions[1] }
         : undefined;
     })
     .filter(Boolean);
