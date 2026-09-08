@@ -44,6 +44,21 @@ const FAMILIES = [
       death: source('GiantBlueSamurai', 'Hit.png', 4, 2, 'GiantBlueSamurai hit-as-death side row'),
     },
   },
+  {
+    output: 'cc0-boss-rootwidow',
+    motions: {
+      // Rootwidow's canonical identity is NATURE + GIANT. Use a purpose-built plant boss
+      // silhouette instead of enlarging the 16px Foozle Spider normal enemy. This does not
+      // claim spider anatomy; it is source-reference art for the root/giant gameplay read.
+      idle: source('GiantBamboo', 'Idle.png', 4, 2, 'GiantBamboo idle side row'),
+      move: source('GiantBamboo', 'Walk.png', 4, 2, 'GiantBamboo walk side row'),
+      attack: source('GiantBamboo', 'Attack.png', 4, 2, 'GiantBamboo authored attack side row'),
+      hit: source('GiantBamboo', 'Hit.png', 4, 2, 'GiantBamboo hit side row'),
+      // The pack has no separate death strip. Keep the authored hit reaction unchanged
+      // rather than drawing or synthesizing a death pose.
+      death: source('GiantBamboo', 'Hit.png', 4, 2, 'GiantBamboo hit-as-death side row'),
+    },
+  },
 ];
 
 const delay = (ms) => new Promise((resolveDelay) => setTimeout(resolveDelay, ms));

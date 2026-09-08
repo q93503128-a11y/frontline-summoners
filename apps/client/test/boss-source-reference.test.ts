@@ -10,13 +10,13 @@ import { resolveUnitArt } from '../src/production-assets.ts';
 const EXPECTED_SOURCE_REFERENCE_BOSSES = {
   'enemy-boss': 'cc0-boss-void-squid',
   'enemy-boss-iron': 'cc0-boss-iron-samurai',
+  boss_ch2_rootwidow: 'cc0-boss-rootwidow',
   boss_ch2_funeral_king: 'cc0-boss-funeral-king',
   boss_ch3_archmagus: 'cc0-boss-archmagus',
   boss_ch3_belzar: 'cc0-boss-belzar-beast',
 } as const;
 
 const STILL_UNMATCHED_BOSSES = [
-  'boss_ch2_rootwidow',
   'boss_ch4_moving_throne',
   'boss_ch4_zero_engine',
 ] as const;
@@ -45,6 +45,13 @@ test('mapped bosses use distinct CC0 boss-grade silhouettes without production a
     assert.ok(art.family.death, `${unitId} must expose a death reaction`);
     assert.match(art.family.idle.url, /^\/assets\/characters\/boss-source-reference\//);
   }
+});
+
+test('Rootwidow uses a deliberate giant nature boss footprint', () => {
+  const art = resolveUnitArt('boss_ch2_rootwidow');
+  assert.equal(art.family.id, 'cc0-boss-rootwidow');
+  assert.ok(art.family.displayHeight >= 280, 'Rootwidow must read larger than ordinary units');
+  assert.equal(art.tint, 0xffffff, 'Rootwidow must keep the authored source palette');
 });
 
 test('unmatched chapter bosses remain outside the source-reference override', () => {

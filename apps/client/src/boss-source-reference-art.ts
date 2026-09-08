@@ -50,6 +50,16 @@ export const BOSS_SOURCE_REFERENCE_ART_FAMILIES: readonly BossSourceReferenceArt
     death: strip('cc0-boss-iron-samurai-death', 'cc0-boss-iron-samurai', 'death'),
   },
   {
+    id: 'cc0-boss-rootwidow',
+    displayHeight: 300,
+    attackContactFrame: 2,
+    idle: strip('cc0-boss-rootwidow-idle', 'cc0-boss-rootwidow', 'idle'),
+    run: strip('cc0-boss-rootwidow-run', 'cc0-boss-rootwidow', 'move'),
+    attack: strip('cc0-boss-rootwidow-attack', 'cc0-boss-rootwidow', 'attack'),
+    knockback: strip('cc0-boss-rootwidow-hit', 'cc0-boss-rootwidow', 'hit'),
+    death: strip('cc0-boss-rootwidow-death', 'cc0-boss-rootwidow', 'death'),
+  },
+  {
     id: 'cc0-boss-funeral-king',
     displayHeight: 276,
     attackContactFrame: 2,
@@ -84,6 +94,7 @@ export const BOSS_SOURCE_REFERENCE_ART_FAMILIES: readonly BossSourceReferenceArt
 export const BOSS_SOURCE_REFERENCE: Readonly<Record<string, UnitArtVariant>> = {
   'enemy-boss': { familyId: 'cc0-boss-void-squid', tint: 0xffffff, attackFx: 'VOID' },
   'enemy-boss-iron': { familyId: 'cc0-boss-iron-samurai', tint: 0xffffff, attackFx: 'BLUNT' },
+  boss_ch2_rootwidow: { familyId: 'cc0-boss-rootwidow', tint: 0xffffff, attackFx: 'MAGIC' },
   boss_ch2_funeral_king: { familyId: 'cc0-boss-funeral-king', tint: 0xffffff, attackFx: 'VOID' },
   boss_ch3_archmagus: { familyId: 'cc0-boss-archmagus', tint: 0xffffff, attackFx: 'MAGIC' },
   boss_ch3_belzar: { familyId: 'cc0-boss-belzar-beast', tint: 0xffffff, attackFx: 'BLUNT' },
