@@ -16,7 +16,7 @@ const clockduckF1: LowerRarityFreeArtFamily = {
   attackContactFrame: 1,
   idle: strip('cc0-clockduck-f1-idle', `${ROOT}/cc0-clockduck-f1/idle.png`, 16, 16, 4),
   run: strip('cc0-clockduck-f1-run', `${ROOT}/cc0-clockduck-f1/move.png`, 16, 16, 4),
-  attack: strip('cc0-clockduck-f1-attack', `${ROOT}/cc0-clockduck-f1/attack.png`, 48, 48, 3),
+  attack: strip('cc0-clockduck-f1-attack', `${ROOT}/cc0-clockduck-f1/attack.png`, 16, 16, 4),
   knockback: strip('cc0-clockduck-f1-hit', `${ROOT}/cc0-clockduck-f1/hit.png`, 16, 16, 2),
   death: strip('cc0-clockduck-f1-death', `${ROOT}/cc0-clockduck-f1/death.png`, 16, 16, 3),
 };
@@ -58,6 +58,19 @@ function foozleFamily(id: string, displayHeight: number): LowerRarityFreeArtFami
   };
 }
 
+function grafxKidRobotFamily(id: string, displayHeight: number): LowerRarityFreeArtFamily {
+  return {
+    id,
+    displayHeight,
+    attackContactFrame: 2,
+    idle: strip(`${id}-idle`, `${ROOT}/${id}/idle.png`, 64, 64, 4),
+    run: strip(`${id}-run`, `${ROOT}/${id}/move.png`, 64, 64, 4),
+    attack: strip(`${id}-attack`, `${ROOT}/${id}/attack.png`, 64, 64, 4),
+    knockback: strip(`${id}-hit`, `${ROOT}/${id}/hit.png`, 64, 64, 4),
+    death: strip(`${id}-death`, `${ROOT}/${id}/death.png`, 64, 64, 4),
+  };
+}
+
 export const LOWER_RARITY_FREE_ART_FAMILIES: readonly LowerRarityFreeArtFamily[] = [
   clockduckF1,
   clockduckF3,
@@ -70,4 +83,7 @@ export const LOWER_RARITY_FREE_ART_FAMILIES: readonly LowerRarityFreeArtFamily[]
   foozleFamily('cc0-lantern-moth-f1', 150),
   foozleFamily('cc0-lantern-moth-f2', 164),
   foozleFamily('cc0-lantern-moth-f3', 178),
+  grafxKidRobotFamily('cc0-tin-squire-f1', 148),
+  grafxKidRobotFamily('cc0-tin-squire-f2', 164),
+  grafxKidRobotFamily('cc0-tin-squire-f3', 180),
 ] as const;
