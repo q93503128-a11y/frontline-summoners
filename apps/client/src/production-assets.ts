@@ -98,6 +98,12 @@ const PLACEHOLDER_PLAYER_FORM_ART: Readonly<Record<string, UnitArtVariant>> = {
   char_common_b_ink_raven_f1: { familyId: 'cc0-ink-raven-f1', tint: 0x59627e, displayScale: 0.96, attackFx: 'VOID' },
   char_common_b_ink_raven_f2: { familyId: 'cc0-ink-raven-f2', tint: 0x444b66, displayScale: 1.02, attackFx: 'VOID' },
   char_common_b_ink_raven_f3: { familyId: 'cc0-ink-raven-f3', tint: 0x32384f, displayScale: 1.08, attackFx: 'VOID' },
+  char_common_c_bell_crab_f1: { familyId: 'cc0-bell-crab-f1', tint: 0xffffff, displayScale: 0.94, attackFx: 'MAGIC' },
+  char_common_c_bell_crab_f2: { familyId: 'cc0-bell-crab-f2', tint: 0xffffff, displayScale: 1.00, attackFx: 'MAGIC' },
+  char_common_c_bell_crab_f3: { familyId: 'cc0-bell-crab-f3', tint: 0xffffff, displayScale: 1.06, attackFx: 'MAGIC' },
+  char_common_c_lantern_moth_f1: { familyId: 'cc0-lantern-moth-f1', tint: 0xffffff, displayScale: 0.94, attackFx: 'MAGIC' },
+  char_common_c_lantern_moth_f2: { familyId: 'cc0-lantern-moth-f2', tint: 0xffffff, displayScale: 1.00, attackFx: 'MAGIC' },
+  char_common_c_lantern_moth_f3: { familyId: 'cc0-lantern-moth-f3', tint: 0xffffff, displayScale: 1.06, attackFx: 'MAGIC' },
 };
 
 function productionUnitRoot(unitId: string, formId?: string): string {
