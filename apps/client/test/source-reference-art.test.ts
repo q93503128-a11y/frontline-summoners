@@ -45,6 +45,21 @@ const EXPECTED_REACTIONS = new Map<string, readonly [number, number]>([
   ['cc0-moss-golem-f1', [4, 4]],
   ['cc0-moss-golem-f2', [4, 4]],
   ['cc0-moss-golem-f3', [4, 4]],
+  ['cc0-glass-keeper-f1', [4, 4]],
+  ['cc0-glass-keeper-f2', [4, 4]],
+  ['cc0-glass-keeper-f3', [4, 4]],
+  ['cc0-bonedrum-f1', [4, 4]],
+  ['cc0-bonedrum-f2', [4, 4]],
+  ['cc0-bonedrum-f3', [4, 4]],
+  ['cc0-paper-dragon-f1', [4, 4]],
+  ['cc0-paper-dragon-f2', [4, 4]],
+  ['cc0-paper-dragon-f3', [4, 4]],
+  ['cc0-meteor-cart-f1', [4, 4]],
+  ['cc0-meteor-cart-f2', [4, 4]],
+  ['cc0-meteor-cart-f3', [4, 4]],
+  ['cc0-mirror-guide-f1', [4, 4]],
+  ['cc0-mirror-guide-f2', [4, 4]],
+  ['cc0-mirror-guide-f3', [4, 4]],
 ]);
 
 test('every vetted source-reference family exposes authored or source-derived hit and death strips', () => {
@@ -161,6 +176,35 @@ test('remaining common batch resolves fifteen deliberate form silhouettes withou
   const newlyVendored = [...turnip, ...slinger, ...coffin, ...moss];
   assert.equal(new Set(newlyVendored.map((art) => art.family.id)).size, 12);
   assert.ok(newlyVendored.every((art) => art.family.idle.url.startsWith('/assets/characters/lower-rarity/')));
+});
+
+test('A-rarity common batch resolves fifteen distinct free form silhouettes without production approval', () => {
+  const ids = [
+    'char_common_a_glass_keeper',
+    'char_common_a_bonedrum',
+    'char_common_a_paper_dragon',
+    'char_common_a_meteor_cart',
+    'char_common_a_mirror_guide',
+  ] as const;
+  const expected = [
+    'cc0-glass-keeper-f1', 'cc0-glass-keeper-f2', 'cc0-glass-keeper-f3',
+    'cc0-bonedrum-f1', 'cc0-bonedrum-f2', 'cc0-bonedrum-f3',
+    'cc0-paper-dragon-f1', 'cc0-paper-dragon-f2', 'cc0-paper-dragon-f3',
+    'cc0-meteor-cart-f1', 'cc0-meteor-cart-f2', 'cc0-meteor-cart-f3',
+    'cc0-mirror-guide-f1', 'cc0-mirror-guide-f2', 'cc0-mirror-guide-f3',
+  ];
+
+  const forms = ids.flatMap((characterId) => [1, 2, 3].map((order) =>
+    resolveUnitArt(characterId, `${characterId}_f${order}`),
+  ));
+
+  assert.deepEqual(forms.map((art) => art.family.id), expected);
+  assert.equal(forms.length, 15);
+  assert.equal(new Set(forms.map((art) => art.family.id)).size, 15);
+  assert.ok(forms.every((art) => art.source === 'PLACEHOLDER'));
+  assert.ok(forms.every((art) => art.productionAssetId === undefined));
+  assert.ok(forms.every((art) => art.family.knockback && art.family.death));
+  assert.ok(forms.every((art) => art.family.idle.url.startsWith('/assets/characters/lower-rarity/')));
 });
 
 test('golden-mask boss reservation remains placeholder while using complete Evil Wizard source motion', () => {
