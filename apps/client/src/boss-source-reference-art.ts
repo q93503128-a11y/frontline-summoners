@@ -15,11 +15,15 @@ const strip = (key: string, folder: string, motion: string): SpriteStrip => ({
 });
 
 /**
- * CC0 source-reference boss silhouettes from Pixel-Boy's Ninja Adventure asset pack.
+ * CC0 source-reference boss silhouettes.
  *
- * Source revision:
+ * Pixel-Boy Ninja Adventure source revision:
  * series-ai/jam-ready-assets@e93aa129978daafda85f3c907eebc8f1807ec43f
  * ninja-adventure/2D/top-down-rpg/LICENSE.txt (CC0-1.0)
+ *
+ * Foozle/Lucifer source mirror revision:
+ * WithinAmnesia/ARPG@9891cd33de14dab668e085599a2fe30463c7edcc
+ * Each selected Lucifer pack includes its own Readme.txt declaring CC0.
  *
  * These remain PLACEHOLDER/source-reference art. They are deliberately separate boss
  * characters rather than scaled versions of the normal humanoid enemy families.
@@ -45,11 +49,44 @@ export const BOSS_SOURCE_REFERENCE_ART_FAMILIES: readonly BossSourceReferenceArt
     knockback: strip('cc0-boss-iron-samurai-hit', 'cc0-boss-iron-samurai', 'hit'),
     death: strip('cc0-boss-iron-samurai-death', 'cc0-boss-iron-samurai', 'death'),
   },
+  {
+    id: 'cc0-boss-funeral-king',
+    displayHeight: 276,
+    attackContactFrame: 2,
+    idle: strip('cc0-boss-funeral-king-idle', 'cc0-boss-funeral-king', 'idle'),
+    run: strip('cc0-boss-funeral-king-run', 'cc0-boss-funeral-king', 'move'),
+    attack: strip('cc0-boss-funeral-king-attack', 'cc0-boss-funeral-king', 'attack'),
+    knockback: strip('cc0-boss-funeral-king-hit', 'cc0-boss-funeral-king', 'hit'),
+    death: strip('cc0-boss-funeral-king-death', 'cc0-boss-funeral-king', 'death'),
+  },
+  {
+    id: 'cc0-boss-archmagus',
+    displayHeight: 252,
+    attackContactFrame: 2,
+    idle: strip('cc0-boss-archmagus-idle', 'cc0-boss-archmagus', 'idle'),
+    run: strip('cc0-boss-archmagus-run', 'cc0-boss-archmagus', 'move'),
+    attack: strip('cc0-boss-archmagus-attack', 'cc0-boss-archmagus', 'attack'),
+    knockback: strip('cc0-boss-archmagus-hit', 'cc0-boss-archmagus', 'hit'),
+    death: strip('cc0-boss-archmagus-death', 'cc0-boss-archmagus', 'death'),
+  },
+  {
+    id: 'cc0-boss-belzar-beast',
+    displayHeight: 288,
+    attackContactFrame: 2,
+    idle: strip('cc0-boss-belzar-beast-idle', 'cc0-boss-belzar-beast', 'idle'),
+    run: strip('cc0-boss-belzar-beast-run', 'cc0-boss-belzar-beast', 'move'),
+    attack: strip('cc0-boss-belzar-beast-attack', 'cc0-boss-belzar-beast', 'attack'),
+    knockback: strip('cc0-boss-belzar-beast-hit', 'cc0-boss-belzar-beast', 'hit'),
+    death: strip('cc0-boss-belzar-beast-death', 'cc0-boss-belzar-beast', 'death'),
+  },
 ] as const;
 
 export const BOSS_SOURCE_REFERENCE: Readonly<Record<string, UnitArtVariant>> = {
   'enemy-boss': { familyId: 'cc0-boss-void-squid', tint: 0xffffff, attackFx: 'VOID' },
   'enemy-boss-iron': { familyId: 'cc0-boss-iron-samurai', tint: 0xffffff, attackFx: 'BLUNT' },
+  boss_ch2_funeral_king: { familyId: 'cc0-boss-funeral-king', tint: 0xffffff, attackFx: 'VOID' },
+  boss_ch3_archmagus: { familyId: 'cc0-boss-archmagus', tint: 0xffffff, attackFx: 'MAGIC' },
+  boss_ch3_belzar: { familyId: 'cc0-boss-belzar-beast', tint: 0xffffff, attackFx: 'BLUNT' },
 } as const;
 
 export function installBossSourceReferenceMappings(): void {
