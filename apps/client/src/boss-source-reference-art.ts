@@ -1,0 +1,60 @@
+import { UNIT_ART, type ArtFamily, type SpriteStrip, type UnitArtVariant } from './assets.ts';
+
+export interface BossSourceReferenceArtFamily extends ArtFamily {
+  readonly knockback: SpriteStrip;
+  readonly death: SpriteStrip;
+}
+
+const ROOT = '/assets/characters/boss-source-reference';
+const strip = (key: string, folder: string, motion: string): SpriteStrip => ({
+  key,
+  url: `${ROOT}/${folder}/${motion}.png`,
+  frameWidth: 128,
+  frameHeight: 128,
+  frames: 4,
+});
+
+/**
+ * CC0 source-reference boss silhouettes from Pixel-Boy's Ninja Adventure asset pack.
+ *
+ * Source revision:
+ * series-ai/jam-ready-assets@e93aa129978daafda85f3c907eebc8f1807ec43f
+ * ninja-adventure/2D/top-down-rpg/LICENSE.txt (CC0-1.0)
+ *
+ * These remain PLACEHOLDER/source-reference art. They are deliberately separate boss
+ * characters rather than scaled versions of the normal humanoid enemy families.
+ */
+export const BOSS_SOURCE_REFERENCE_ART_FAMILIES: readonly BossSourceReferenceArtFamily[] = [
+  {
+    id: 'cc0-boss-void-squid',
+    displayHeight: 246,
+    attackContactFrame: 2,
+    idle: strip('cc0-boss-void-squid-idle', 'cc0-boss-void-squid', 'idle'),
+    run: strip('cc0-boss-void-squid-run', 'cc0-boss-void-squid', 'move'),
+    attack: strip('cc0-boss-void-squid-attack', 'cc0-boss-void-squid', 'attack'),
+    knockback: strip('cc0-boss-void-squid-hit', 'cc0-boss-void-squid', 'hit'),
+    death: strip('cc0-boss-void-squid-death', 'cc0-boss-void-squid', 'death'),
+  },
+  {
+    id: 'cc0-boss-iron-samurai',
+    displayHeight: 260,
+    attackContactFrame: 2,
+    idle: strip('cc0-boss-iron-samurai-idle', 'cc0-boss-iron-samurai', 'idle'),
+    run: strip('cc0-boss-iron-samurai-run', 'cc0-boss-iron-samurai', 'move'),
+    attack: strip('cc0-boss-iron-samurai-attack', 'cc0-boss-iron-samurai', 'attack'),
+    knockback: strip('cc0-boss-iron-samurai-hit', 'cc0-boss-iron-samurai', 'hit'),
+    death: strip('cc0-boss-iron-samurai-death', 'cc0-boss-iron-samurai', 'death'),
+  },
+] as const;
+
+export const BOSS_SOURCE_REFERENCE: Readonly<Record<string, UnitArtVariant>> = {
+  'enemy-boss': { familyId: 'cc0-boss-void-squid', tint: 0xffffff, attackFx: 'VOID' },
+  'enemy-boss-iron': { familyId: 'cc0-boss-iron-samurai', tint: 0xffffff, attackFx: 'BLUNT' },
+} as const;
+
+export function installBossSourceReferenceMappings(): void {
+  const mutableUnitArt = UNIT_ART as Record<string, UnitArtVariant>;
+  for (const [unitId, variant] of Object.entries(BOSS_SOURCE_REFERENCE)) {
+    mutableUnitArt[unitId] = variant;
+  }
+}
