@@ -108,6 +108,7 @@ const PLACEHOLDER_PLAYER_FORM_ART: Readonly<Record<string, UnitArtVariant>> = {
   char_common_c_lantern_moth_f1: { familyId: 'cc0-lantern-moth-f1', tint: 0xffffff, displayScale: 0.94, attackFx: 'MAGIC' },
   char_common_c_lantern_moth_f2: { familyId: 'cc0-lantern-moth-f2', tint: 0xffffff, displayScale: 1.00, attackFx: 'MAGIC' },
   char_common_c_lantern_moth_f3: { familyId: 'cc0-lantern-moth-f3', tint: 0xffffff, displayScale: 1.06, attackFx: 'MAGIC' },
+
   char_common_b_lantern_witch_f1: { familyId: 'wizard', tint: 0xffffff, displayScale: 0.94, attackFx: 'FIRE' },
   char_common_b_lantern_witch_f2: { familyId: 'evil-wizard', tint: 0xffffff, displayScale: 1.00, attackFx: 'FIRE' },
   char_common_b_lantern_witch_f3: { familyId: 'evil-wizard-2', tint: 0xffffff, displayScale: 1.06, attackFx: 'FIRE' },
@@ -123,6 +124,22 @@ const PLACEHOLDER_PLAYER_FORM_ART: Readonly<Record<string, UnitArtVariant>> = {
   char_common_b_ink_raven_f1: { familyId: 'cc0-ink-raven-f1', tint: 0x59627e, displayScale: 0.96, attackFx: 'VOID' },
   char_common_b_ink_raven_f2: { familyId: 'cc0-ink-raven-f2', tint: 0x444b66, displayScale: 1.02, attackFx: 'VOID' },
   char_common_b_ink_raven_f3: { familyId: 'cc0-ink-raven-f3', tint: 0x32384f, displayScale: 1.08, attackFx: 'VOID' },
+
+  char_common_a_glass_keeper_f1: { familyId: 'cc0-glass-keeper-f1', tint: 0xffffff, displayScale: 0.94, attackFx: 'MAGIC' },
+  char_common_a_glass_keeper_f2: { familyId: 'cc0-glass-keeper-f2', tint: 0xffffff, displayScale: 1.00, attackFx: 'MAGIC' },
+  char_common_a_glass_keeper_f3: { familyId: 'cc0-glass-keeper-f3', tint: 0xffffff, displayScale: 1.08, attackFx: 'MAGIC' },
+  char_common_a_bonedrum_f1: { familyId: 'cc0-bonedrum-f1', tint: 0xffffff, displayScale: 0.94, attackFx: 'VOID' },
+  char_common_a_bonedrum_f2: { familyId: 'cc0-bonedrum-f2', tint: 0xffffff, displayScale: 1.00, attackFx: 'VOID' },
+  char_common_a_bonedrum_f3: { familyId: 'cc0-bonedrum-f3', tint: 0xffffff, displayScale: 1.08, attackFx: 'VOID' },
+  char_common_a_paper_dragon_f1: { familyId: 'cc0-paper-dragon-f1', tint: 0xffffff, displayScale: 0.94, attackFx: 'FIRE' },
+  char_common_a_paper_dragon_f2: { familyId: 'cc0-paper-dragon-f2', tint: 0xffffff, displayScale: 1.00, attackFx: 'FIRE' },
+  char_common_a_paper_dragon_f3: { familyId: 'cc0-paper-dragon-f3', tint: 0xffffff, displayScale: 1.08, attackFx: 'FIRE' },
+  char_common_a_meteor_cart_f1: { familyId: 'cc0-meteor-cart-f1', tint: 0xffffff, displayScale: 0.96, attackFx: 'FIRE' },
+  char_common_a_meteor_cart_f2: { familyId: 'cc0-meteor-cart-f2', tint: 0xffffff, displayScale: 1.02, attackFx: 'FIRE' },
+  char_common_a_meteor_cart_f3: { familyId: 'cc0-meteor-cart-f3', tint: 0xffffff, displayScale: 1.10, attackFx: 'FIRE' },
+  char_common_a_mirror_guide_f1: { familyId: 'cc0-mirror-guide-f1', tint: 0xffffff, displayScale: 0.94, attackFx: 'MAGIC' },
+  char_common_a_mirror_guide_f2: { familyId: 'cc0-mirror-guide-f2', tint: 0xffffff, displayScale: 1.00, attackFx: 'MAGIC' },
+  char_common_a_mirror_guide_f3: { familyId: 'cc0-mirror-guide-f3', tint: 0xffffff, displayScale: 1.08, attackFx: 'VOID' },
 };
 
 function productionUnitRoot(unitId: string, formId?: string): string {
