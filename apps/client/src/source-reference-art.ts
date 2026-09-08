@@ -1,4 +1,5 @@
 import { ART_FAMILIES, type ArtFamily, type SpriteStrip } from './assets.ts';
+import { installNormalEnemySourceReferenceMappings } from './enemy-source-reference-map.ts';
 import { LOWER_RARITY_FREE_ART_FAMILIES } from './lower-rarity-free-art.ts';
 
 export interface SourceReferenceArtFamily extends ArtFamily {
@@ -114,6 +115,8 @@ const EVIL_WIZARD_2: SourceReferenceArtFamily = {
 };
 
 const overrides = new Map(WITH_AUTHORED_REACTIONS.map((family) => [family.id, family] as const));
+
+installNormalEnemySourceReferenceMappings();
 
 export const SOURCE_REFERENCE_ART_FAMILIES: readonly SourceReferenceArtFamily[] = [
   ...ART_FAMILIES.map((family) => overrides.get(family.id) ?? family),
