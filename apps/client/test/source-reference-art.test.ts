@@ -33,6 +33,18 @@ const EXPECTED_REACTIONS = new Map<string, readonly [number, number]>([
   ['cc0-tin-squire-f1', [4, 4]],
   ['cc0-tin-squire-f2', [4, 4]],
   ['cc0-tin-squire-f3', [4, 4]],
+  ['cc0-turnip-rider-f1', [4, 4]],
+  ['cc0-turnip-rider-f2', [4, 4]],
+  ['cc0-turnip-rider-f3', [4, 4]],
+  ['cc0-slinger-f1', [4, 4]],
+  ['cc0-slinger-f2', [4, 4]],
+  ['cc0-slinger-f3', [4, 4]],
+  ['cc0-coffin-merchant-f1', [4, 4]],
+  ['cc0-coffin-merchant-f2', [4, 4]],
+  ['cc0-coffin-merchant-f3', [4, 4]],
+  ['cc0-moss-golem-f1', [4, 4]],
+  ['cc0-moss-golem-f2', [4, 4]],
+  ['cc0-moss-golem-f3', [4, 4]],
 ]);
 
 test('every vetted source-reference family exposes authored or source-derived hit and death strips', () => {
@@ -125,6 +137,30 @@ test('tin-squire uses three finished GrafxKid robot forms without production app
   assert.ok(forms.every((art) => art.productionAssetId === undefined));
   assert.ok(forms.every((art) => art.family.knockback && art.family.death));
   assert.ok(forms.every((art) => art.family.idle.url.startsWith('/assets/characters/lower-rarity/')));
+});
+
+test('remaining common batch resolves fifteen deliberate form silhouettes without production approval', () => {
+  const turnip = [1, 2, 3].map((order) => resolveUnitArt('char_common_c_turnip_rider', `char_common_c_turnip_rider_f${order}`));
+  const slinger = [1, 2, 3].map((order) => resolveUnitArt('char_common_c_slinger', `char_common_c_slinger_f${order}`));
+  const witch = [1, 2, 3].map((order) => resolveUnitArt('char_common_b_lantern_witch', `char_common_b_lantern_witch_f${order}`));
+  const coffin = [1, 2, 3].map((order) => resolveUnitArt('char_common_b_coffin_merchant', `char_common_b_coffin_merchant_f${order}`));
+  const moss = [1, 2, 3].map((order) => resolveUnitArt('char_common_b_moss_golem', `char_common_b_moss_golem_f${order}`));
+
+  assert.deepEqual(turnip.map((art) => art.family.id), ['cc0-turnip-rider-f1', 'cc0-turnip-rider-f2', 'cc0-turnip-rider-f3']);
+  assert.deepEqual(slinger.map((art) => art.family.id), ['cc0-slinger-f1', 'cc0-slinger-f2', 'cc0-slinger-f3']);
+  assert.deepEqual(witch.map((art) => art.family.id), ['wizard', 'evil-wizard', 'evil-wizard-2']);
+  assert.deepEqual(coffin.map((art) => art.family.id), ['cc0-coffin-merchant-f1', 'cc0-coffin-merchant-f2', 'cc0-coffin-merchant-f3']);
+  assert.deepEqual(moss.map((art) => art.family.id), ['cc0-moss-golem-f1', 'cc0-moss-golem-f2', 'cc0-moss-golem-f3']);
+
+  const all = [...turnip, ...slinger, ...witch, ...coffin, ...moss];
+  assert.equal(all.length, 15);
+  assert.ok(all.every((art) => art.source === 'PLACEHOLDER'));
+  assert.ok(all.every((art) => art.productionAssetId === undefined));
+  assert.ok(all.every((art) => art.family.knockback && art.family.death));
+
+  const newlyVendored = [...turnip, ...slinger, ...coffin, ...moss];
+  assert.equal(new Set(newlyVendored.map((art) => art.family.id)).size, 12);
+  assert.ok(newlyVendored.every((art) => art.family.idle.url.startsWith('/assets/characters/lower-rarity/')));
 });
 
 test('golden-mask boss reservation remains placeholder while using complete Evil Wizard source motion', () => {

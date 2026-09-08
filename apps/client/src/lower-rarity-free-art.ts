@@ -58,7 +58,7 @@ function foozleFamily(id: string, displayHeight: number): LowerRarityFreeArtFami
   };
 }
 
-function grafxKidRobotFamily(id: string, displayHeight: number): LowerRarityFreeArtFamily {
+function normalizedPixelFamily(id: string, displayHeight: number): LowerRarityFreeArtFamily {
   return {
     id,
     displayHeight,
@@ -83,7 +83,19 @@ export const LOWER_RARITY_FREE_ART_FAMILIES: readonly LowerRarityFreeArtFamily[]
   foozleFamily('cc0-lantern-moth-f1', 150),
   foozleFamily('cc0-lantern-moth-f2', 164),
   foozleFamily('cc0-lantern-moth-f3', 178),
-  grafxKidRobotFamily('cc0-tin-squire-f1', 148),
-  grafxKidRobotFamily('cc0-tin-squire-f2', 164),
-  grafxKidRobotFamily('cc0-tin-squire-f3', 180),
+  normalizedPixelFamily('cc0-tin-squire-f1', 148),
+  normalizedPixelFamily('cc0-tin-squire-f2', 164),
+  normalizedPixelFamily('cc0-tin-squire-f3', 180),
+  normalizedPixelFamily('cc0-turnip-rider-f1', 146),
+  normalizedPixelFamily('cc0-turnip-rider-f2', 162),
+  normalizedPixelFamily('cc0-turnip-rider-f3', 178),
+  normalizedPixelFamily('cc0-slinger-f1', 152),
+  normalizedPixelFamily('cc0-slinger-f2', 168),
+  normalizedPixelFamily('cc0-slinger-f3', 184),
+  normalizedPixelFamily('cc0-coffin-merchant-f1', 150),
+  normalizedPixelFamily('cc0-coffin-merchant-f2', 168),
+  normalizedPixelFamily('cc0-coffin-merchant-f3', 186),
+  normalizedPixelFamily('cc0-moss-golem-f1', 160),
+  normalizedPixelFamily('cc0-moss-golem-f2', 178),
+  normalizedPixelFamily('cc0-moss-golem-f3', 196),
 ] as const;
