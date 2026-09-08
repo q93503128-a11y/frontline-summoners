@@ -30,6 +30,9 @@ const EXPECTED_REACTIONS = new Map<string, readonly [number, number]>([
   ['cc0-lantern-moth-f1', [4, 4]],
   ['cc0-lantern-moth-f2', [4, 4]],
   ['cc0-lantern-moth-f3', [4, 4]],
+  ['cc0-tin-squire-f1', [4, 4]],
+  ['cc0-tin-squire-f2', [4, 4]],
+  ['cc0-tin-squire-f3', [4, 4]],
 ]);
 
 test('every vetted source-reference family exposes authored or source-derived hit and death strips', () => {
@@ -111,6 +114,17 @@ test('bell-crab and lantern-moth use six distinct Foozle creature forms without 
   assert.ok([...crab, ...moth].every((art) => art.productionAssetId === undefined));
   assert.ok([...crab, ...moth].every((art) => art.family.knockback && art.family.death));
   assert.ok([...crab, ...moth].every((art) => art.family.idle.url.startsWith('/assets/characters/lower-rarity/')));
+});
+
+test('tin-squire uses three finished GrafxKid robot forms without production approval', () => {
+  const forms = [1, 2, 3].map((order) => resolveUnitArt('char_common_c_tin_squire', `char_common_c_tin_squire_f${order}`));
+
+  assert.deepEqual(forms.map((art) => art.family.id), ['cc0-tin-squire-f1', 'cc0-tin-squire-f2', 'cc0-tin-squire-f3']);
+  assert.equal(new Set(forms.map((art) => art.family.id)).size, 3);
+  assert.ok(forms.every((art) => art.source === 'PLACEHOLDER'));
+  assert.ok(forms.every((art) => art.productionAssetId === undefined));
+  assert.ok(forms.every((art) => art.family.knockback && art.family.death));
+  assert.ok(forms.every((art) => art.family.idle.url.startsWith('/assets/characters/lower-rarity/')));
 });
 
 test('golden-mask boss reservation remains placeholder while using complete Evil Wizard source motion', () => {
