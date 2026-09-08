@@ -5,21 +5,36 @@ import { decodePng, encodePng } from './lib/production-png.mjs';
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const outputRoot = resolve(root, 'apps/client/public/assets/characters/lower-rarity');
-const FOOZLE_REVISION = 'e93aa129978daafda85f3c907eebc8f1807ec43f';
-const FOOZLE_BASE = `https://github.com/series-ai/jam-ready-assets/raw/${FOOZLE_REVISION}`;
+const ASSET_REVISION = 'e93aa129978daafda85f3c907eebc8f1807ec43f';
+const JAM_BASE = `https://github.com/series-ai/jam-ready-assets/raw/${ASSET_REVISION}`;
+const jamUrl = (path) => `${JAM_BASE}/${path.split('/').map(encodeURIComponent).join('/')}`;
 const FOOZLE_OUTPUT_CELL = 256;
+const GRAFXKID_OUTPUT_CELL = 64;
 
 // CC0 sources. Raw source files are fetched during dev/build and are not committed as standalone asset packs.
 const SOURCES = {
   bird: 'https://opengameart.org/sites/default/files/bird_v001_blue_and_yellow.png',
   duck: 'https://opengameart.org/sites/default/files/duck_spritesheet.png',
   prehistoricBird: 'https://opengameart.org/sites/default/files/prehistoric-bird-spritesheet.png',
-  foozleMagmaCrab: `${FOOZLE_BASE}/foozle-spire-enemies-ground/2D/fantasy/Ground/Spritesheets/Magma%20Crab.png`,
-  foozleScorpion: `${FOOZLE_BASE}/foozle-spire-enemies-ground/2D/fantasy/Ground/Spritesheets/Scorpion.png`,
-  foozleFirebug: `${FOOZLE_BASE}/foozle-spire-enemies-ground/2D/fantasy/Ground/Spritesheets/Firebug.png`,
-  foozleVoidButterfly: `${FOOZLE_BASE}/foozle-spire-enemies-flying/2D/fantasy/Flying/Spritesheets/Voidbutterfly.png`,
-  foozleFirewasp: `${FOOZLE_BASE}/foozle-spire-enemies-flying/2D/fantasy/Flying/Spritesheets/Firewasp.png`,
-  foozleLeafbat: `${FOOZLE_BASE}/foozle-spire-enemies-flying/2D/fantasy/Flying/Spritesheets/Leafbat.png`,
+  foozleMagmaCrab: jamUrl('foozle-spire-enemies-ground/2D/fantasy/Ground/Spritesheets/Magma Crab.png'),
+  foozleScorpion: jamUrl('foozle-spire-enemies-ground/2D/fantasy/Ground/Spritesheets/Scorpion.png'),
+  foozleFirebug: jamUrl('foozle-spire-enemies-ground/2D/fantasy/Ground/Spritesheets/Firebug.png'),
+  foozleVoidButterfly: jamUrl('foozle-spire-enemies-flying/2D/fantasy/Flying/Spritesheets/Voidbutterfly.png'),
+  foozleFirewasp: jamUrl('foozle-spire-enemies-flying/2D/fantasy/Flying/Spritesheets/Firewasp.png'),
+  foozleLeafbat: jamUrl('foozle-spire-enemies-flying/2D/fantasy/Flying/Spritesheets/Leafbat.png'),
+  grafxBumpyIdle: jamUrl('grafxkid-sprite-pack-1/2D/platformer/2 - Bumpy the Robot/Idle (16 x 16).png'),
+  grafxBumpyRun: jamUrl('grafxkid-sprite-pack-1/2D/platformer/2 - Bumpy the Robot/Running (16 x 16).png'),
+  grafxBumpyAttack: jamUrl('grafxkid-sprite-pack-1/2D/platformer/2 - Bumpy the Robot/Pushing_Object (16 x 16).png'),
+  grafxBumpyHit: jamUrl('grafxkid-sprite-pack-1/2D/platformer/2 - Bumpy the Robot/Taking_Damage (16 x 16).png'),
+  grafxBumpyDeath: jamUrl('grafxkid-sprite-pack-1/2D/platformer/2 - Bumpy the Robot/Sitting (16 x 16).png'),
+  grafxTotemIdle: jamUrl('grafxkid-sprite-pack-2/2D/platformer/6 - Robo Totem/Armored_Standing (16 x 32).png'),
+  grafxTotemRun: jamUrl('grafxkid-sprite-pack-2/2D/platformer/6 - Robo Totem/Armored_Walking (16 x 32).png'),
+  grafxTotemHit: jamUrl('grafxkid-sprite-pack-2/2D/platformer/6 - Robo Totem/Hurt (16 x 16).png'),
+  grafxJ5Idle: jamUrl('grafxkid-sprite-pack-3/2D/platformer/3 - Robot J5/Idle (32 x 32).png'),
+  grafxJ5Run: jamUrl('grafxkid-sprite-pack-3/2D/platformer/3 - Robot J5/Walking (32 x 32).png'),
+  grafxJ5Attack: jamUrl('grafxkid-sprite-pack-3/2D/platformer/3 - Robot J5/Throw_Object (32 x 32).png'),
+  grafxJ5Hit: jamUrl('grafxkid-sprite-pack-3/2D/platformer/3 - Robot J5/Hurt (32 x 32).png'),
+  grafxJ5Death: jamUrl('grafxkid-sprite-pack-3/2D/platformer/3 - Robot J5/Burnt (32 x 32).png'),
 };
 
 const delay = (ms) => new Promise((resolveDelay) => setTimeout(resolveDelay, ms));
@@ -94,6 +109,42 @@ function composePaddedStrip(sheet, sourceCell, indexes, targetCell = FOOZLE_OUTP
   return encodePng(targetCell * indexes.length, targetCell, out);
 }
 
+function composeScaledStrip(sheet, sourceWidth, sourceHeight, indexes, targetCell = GRAFXKID_OUTPUT_CELL) {
+  assert(sheet.width % sourceWidth === 0 && sheet.height % sourceHeight === 0,
+    `invalid ${sourceWidth}x${sourceHeight} source grid for ${sheet.width}x${sheet.height}`);
+  const columns = sheet.width / sourceWidth;
+  const rows = sheet.height / sourceHeight;
+  const total = columns * rows;
+  const scale = Math.floor(Math.min(targetCell / sourceWidth, targetCell / sourceHeight));
+  assert(scale >= 1, `source ${sourceWidth}x${sourceHeight} exceeds ${targetCell}px normalized cell`);
+  const drawWidth = sourceWidth * scale;
+  const drawHeight = sourceHeight * scale;
+  const offsetX = Math.floor((targetCell - drawWidth) / 2);
+  const offsetY = Math.floor((targetCell - drawHeight) / 2);
+  const out = Buffer.alloc(targetCell * indexes.length * targetCell * 4);
+
+  indexes.forEach((index, frame) => {
+    assert(index >= 0 && index < total, `frame ${index} outside ${columns}x${rows} grid`);
+    const sourceColumn = index % columns;
+    const sourceRow = Math.floor(index / columns);
+    for (let y = 0; y < sourceHeight; y += 1) {
+      for (let x = 0; x < sourceWidth; x += 1) {
+        const sourceIndex = (((sourceRow * sourceHeight) + y) * sheet.width + sourceColumn * sourceWidth + x) * 4;
+        for (let dy = 0; dy < scale; dy += 1) {
+          for (let dx = 0; dx < scale; dx += 1) {
+            const targetX = frame * targetCell + offsetX + x * scale + dx;
+            const targetY = offsetY + y * scale + dy;
+            const targetIndex = (targetY * targetCell * indexes.length + targetX) * 4;
+            sheet.data.copy(out, targetIndex, sourceIndex, sourceIndex + 4);
+          }
+        }
+      }
+    }
+  });
+
+  return encodePng(targetCell * indexes.length, targetCell, out);
+}
+
 function cellHasAlpha(sheet, cell, index) {
   const columns = sheet.width / cell;
   const sourceColumn = index % columns;
@@ -101,6 +152,19 @@ function cellHasAlpha(sheet, cell, index) {
   for (let y = 0; y < cell; y += 1) {
     const rowStart = ((sourceRow * cell + y) * sheet.width + sourceColumn * cell) * 4;
     for (let x = 0; x < cell; x += 1) {
+      if (sheet.data[rowStart + x * 4 + 3] !== 0) return true;
+    }
+  }
+  return false;
+}
+
+function rectCellHasAlpha(sheet, cellWidth, cellHeight, index) {
+  const columns = sheet.width / cellWidth;
+  const sourceColumn = index % columns;
+  const sourceRow = Math.floor(index / columns);
+  for (let y = 0; y < cellHeight; y += 1) {
+    const rowStart = ((sourceRow * cellHeight + y) * sheet.width + sourceColumn * cellWidth) * 4;
+    for (let x = 0; x < cellWidth; x += 1) {
       if (sheet.data[rowStart + x * 4 + 3] !== 0) return true;
     }
   }
@@ -161,6 +225,49 @@ async function vendorFoozleFamily(folder, sourceKey, label) {
   await writeStrip(folder, 'death', composePaddedStrip(sheet, cell, death));
 }
 
+async function vendorGrafxKidMotion(folder, motion, sourceKey, label, cellWidth, cellHeight) {
+  const sheet = await fetchPng(SOURCES[sourceKey], label);
+  assert(sheet.width % cellWidth === 0 && sheet.height % cellHeight === 0,
+    `${label} changed: expected ${cellWidth}x${cellHeight} grid, got ${sheet.width}x${sheet.height}`);
+  const columns = sheet.width / cellWidth;
+  const rows = sheet.height / cellHeight;
+  const visible = Array.from({ length: columns * rows }, (_, index) => index)
+    .filter((index) => rectCellHasAlpha(sheet, cellWidth, cellHeight, index));
+  await writeStrip(folder, motion, composeScaledStrip(sheet, cellWidth, cellHeight, sampleFour(visible, label)));
+}
+
+async function vendorGrafxKidTinSquire() {
+  const forms = [
+    ['cc0-tin-squire-f1', [
+      ['idle', 'grafxBumpyIdle', 'CC0 GrafxKid Bumpy Robot idle', 16, 16],
+      ['move', 'grafxBumpyRun', 'CC0 GrafxKid Bumpy Robot run', 16, 16],
+      ['attack', 'grafxBumpyAttack', 'CC0 GrafxKid Bumpy Robot push', 16, 16],
+      ['hit', 'grafxBumpyHit', 'CC0 GrafxKid Bumpy Robot damage', 16, 16],
+      ['death', 'grafxBumpyDeath', 'CC0 GrafxKid Bumpy Robot sitting', 16, 16],
+    ]],
+    ['cc0-tin-squire-f2', [
+      ['idle', 'grafxTotemIdle', 'CC0 GrafxKid Robo Totem armored idle', 16, 32],
+      ['move', 'grafxTotemRun', 'CC0 GrafxKid Robo Totem armored walk', 16, 32],
+      ['attack', 'grafxTotemRun', 'CC0 GrafxKid Robo Totem armored strike motion', 16, 32],
+      ['hit', 'grafxTotemHit', 'CC0 GrafxKid Robo Totem hurt', 16, 16],
+      ['death', 'grafxTotemHit', 'CC0 GrafxKid Robo Totem collapse pose', 16, 16],
+    ]],
+    ['cc0-tin-squire-f3', [
+      ['idle', 'grafxJ5Idle', 'CC0 GrafxKid Robot J5 idle', 32, 32],
+      ['move', 'grafxJ5Run', 'CC0 GrafxKid Robot J5 walk', 32, 32],
+      ['attack', 'grafxJ5Attack', 'CC0 GrafxKid Robot J5 throw', 32, 32],
+      ['hit', 'grafxJ5Hit', 'CC0 GrafxKid Robot J5 hurt', 32, 32],
+      ['death', 'grafxJ5Death', 'CC0 GrafxKid Robot J5 burnt', 32, 32],
+    ]],
+  ];
+
+  for (const [folder, motions] of forms) {
+    for (const [motion, sourceKey, label, cellWidth, cellHeight] of motions) {
+      await vendorGrafxKidMotion(folder, motion, sourceKey, label, cellWidth, cellHeight);
+    }
+  }
+}
+
 await rm(outputRoot, { recursive: true, force: true });
 await mkdir(outputRoot, { recursive: true });
 
@@ -189,6 +296,7 @@ assert(duckTotal >= 4, `duck source has only ${duckTotal} frames`);
 const duckFrames = [0, 1, 2, 3];
 await writeStrip('cc0-clockduck-f1', 'idle', composeStrip(duck, 16, 16, [0, 1, 0, 1]));
 await writeStrip('cc0-clockduck-f1', 'move', composeStrip(duck, 16, 16, duckFrames));
+await writeStrip('cc0-clockduck-f1', 'attack', composeStrip(duck, 16, 16, [0, 1, 2, 1]));
 await writeStrip('cc0-clockduck-f1', 'hit', composeStrip(duck, 16, 16, [2, 3]));
 await writeStrip('cc0-clockduck-f1', 'death', composeStrip(duck, 16, 16, [3, 3, 3]));
 
@@ -198,7 +306,6 @@ assert(prehistoricBird.width % 48 === 0 && prehistoricBird.height % 48 === 0,
 const prehistoricTotal = (prehistoricBird.width / 48) * (prehistoricBird.height / 48);
 assert(prehistoricTotal >= 3, `prehistoric bird source has only ${prehistoricTotal} frames`);
 const peck = [0, 1, 2];
-await writeStrip('cc0-clockduck-f1', 'attack', composeStrip(prehistoricBird, 48, 48, peck));
 
 await writeStrip('cc0-clockduck-f3', 'idle', composeStrip(prehistoricBird, 48, 48, [0, 0, 1, 0]));
 await writeStrip('cc0-clockduck-f3', 'move', composeStrip(prehistoricBird, 48, 48, [0, 1, 2, 1]));
@@ -215,4 +322,8 @@ await vendorFoozleFamily('cc0-lantern-moth-f1', 'foozleVoidButterfly', 'CC0 Fooz
 await vendorFoozleFamily('cc0-lantern-moth-f2', 'foozleFirewasp', 'CC0 Foozle Spire Firewasp');
 await vendorFoozleFamily('cc0-lantern-moth-f3', 'foozleLeafbat', 'CC0 Foozle Spire Leafbat');
 
-console.log('[lower-rarity-free-art] vendored CC0 clockduck, ink-raven, bell-crab, and lantern-moth source-reference families');
+// Tin-squire evolution uses three finished GrafxKid robot characters from the same CC0 creator.
+// Only nearest-neighbour normalization is applied; no assistant-authored drawing, recolour, or kitbash.
+await vendorGrafxKidTinSquire();
+
+console.log('[lower-rarity-free-art] vendored CC0 clockduck, ink-raven, bell-crab, lantern-moth, and tin-squire source-reference families');
