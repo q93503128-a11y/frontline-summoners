@@ -45,10 +45,29 @@ function ravenFamily(id: string, displayHeight: number): LowerRarityFreeArtFamil
   };
 }
 
+function foozleFamily(id: string, displayHeight: number): LowerRarityFreeArtFamily {
+  return {
+    id,
+    displayHeight,
+    attackContactFrame: 2,
+    idle: strip(`${id}-idle`, `${ROOT}/${id}/idle.png`, 256, 256, 4),
+    run: strip(`${id}-run`, `${ROOT}/${id}/move.png`, 256, 256, 4),
+    attack: strip(`${id}-attack`, `${ROOT}/${id}/attack.png`, 256, 256, 4),
+    knockback: strip(`${id}-hit`, `${ROOT}/${id}/hit.png`, 256, 256, 4),
+    death: strip(`${id}-death`, `${ROOT}/${id}/death.png`, 256, 256, 4),
+  };
+}
+
 export const LOWER_RARITY_FREE_ART_FAMILIES: readonly LowerRarityFreeArtFamily[] = [
   clockduckF1,
   clockduckF3,
   ravenFamily('cc0-ink-raven-f1', 154),
   ravenFamily('cc0-ink-raven-f2', 166),
   ravenFamily('cc0-ink-raven-f3', 178),
+  foozleFamily('cc0-bell-crab-f1', 150),
+  foozleFamily('cc0-bell-crab-f2', 164),
+  foozleFamily('cc0-bell-crab-f3', 178),
+  foozleFamily('cc0-lantern-moth-f1', 150),
+  foozleFamily('cc0-lantern-moth-f2', 164),
+  foozleFamily('cc0-lantern-moth-f3', 178),
 ] as const;
