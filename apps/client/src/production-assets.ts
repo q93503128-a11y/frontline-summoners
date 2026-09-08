@@ -104,6 +104,9 @@ const PLACEHOLDER_PLAYER_FORM_ART: Readonly<Record<string, UnitArtVariant>> = {
   char_common_c_lantern_moth_f1: { familyId: 'cc0-lantern-moth-f1', tint: 0xffffff, displayScale: 0.94, attackFx: 'MAGIC' },
   char_common_c_lantern_moth_f2: { familyId: 'cc0-lantern-moth-f2', tint: 0xffffff, displayScale: 1.00, attackFx: 'MAGIC' },
   char_common_c_lantern_moth_f3: { familyId: 'cc0-lantern-moth-f3', tint: 0xffffff, displayScale: 1.06, attackFx: 'MAGIC' },
+  char_common_c_tin_squire_f1: { familyId: 'cc0-tin-squire-f1', tint: 0xffffff, displayScale: 0.96, attackFx: 'SLASH' },
+  char_common_c_tin_squire_f2: { familyId: 'cc0-tin-squire-f2', tint: 0xffffff, displayScale: 1.00, attackFx: 'SLASH' },
+  char_common_c_tin_squire_f3: { familyId: 'cc0-tin-squire-f3', tint: 0xffffff, displayScale: 1.06, attackFx: 'SLASH' },
 };
 
 function productionUnitRoot(unitId: string, formId?: string): string {
