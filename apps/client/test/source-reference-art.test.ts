@@ -24,6 +24,12 @@ const EXPECTED_REACTIONS = new Map<string, readonly [number, number]>([
   ['cc0-ink-raven-f1', [3, 11]],
   ['cc0-ink-raven-f2', [3, 11]],
   ['cc0-ink-raven-f3', [3, 11]],
+  ['cc0-bell-crab-f1', [4, 4]],
+  ['cc0-bell-crab-f2', [4, 4]],
+  ['cc0-bell-crab-f3', [4, 4]],
+  ['cc0-lantern-moth-f1', [4, 4]],
+  ['cc0-lantern-moth-f2', [4, 4]],
+  ['cc0-lantern-moth-f3', [4, 4]],
 ]);
 
 test('every vetted source-reference family exposes authored or source-derived hit and death strips', () => {
@@ -92,6 +98,19 @@ test('lower-rarity clockduck and ink-raven forms use free creature silhouettes w
   assert.ok([...clockduck, ...raven].every((art) => art.source === 'PLACEHOLDER'));
   assert.ok([...clockduck, ...raven].every((art) => art.productionAssetId === undefined));
   assert.ok([...clockduck, ...raven].every((art) => art.family.knockback && art.family.death));
+});
+
+test('bell-crab and lantern-moth use six distinct Foozle creature forms without production approval', () => {
+  const crab = [1, 2, 3].map((order) => resolveUnitArt('char_common_c_bell_crab', `char_common_c_bell_crab_f${order}`));
+  const moth = [1, 2, 3].map((order) => resolveUnitArt('char_common_c_lantern_moth', `char_common_c_lantern_moth_f${order}`));
+
+  assert.deepEqual(crab.map((art) => art.family.id), ['cc0-bell-crab-f1', 'cc0-bell-crab-f2', 'cc0-bell-crab-f3']);
+  assert.deepEqual(moth.map((art) => art.family.id), ['cc0-lantern-moth-f1', 'cc0-lantern-moth-f2', 'cc0-lantern-moth-f3']);
+  assert.equal(new Set([...crab, ...moth].map((art) => art.family.id)).size, 6);
+  assert.ok([...crab, ...moth].every((art) => art.source === 'PLACEHOLDER'));
+  assert.ok([...crab, ...moth].every((art) => art.productionAssetId === undefined));
+  assert.ok([...crab, ...moth].every((art) => art.family.knockback && art.family.death));
+  assert.ok([...crab, ...moth].every((art) => art.family.idle.url.startsWith('/assets/characters/lower-rarity/')));
 });
 
 test('golden-mask boss reservation remains placeholder while using complete Evil Wizard source motion', () => {
