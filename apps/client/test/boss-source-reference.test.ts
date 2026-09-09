@@ -14,10 +14,10 @@ const EXPECTED_SOURCE_REFERENCE_BOSSES = {
   boss_ch2_funeral_king: 'cc0-boss-funeral-king',
   boss_ch3_archmagus: 'cc0-boss-archmagus',
   boss_ch3_belzar: 'cc0-boss-belzar-beast',
+  boss_ch4_moving_throne: 'cc0-boss-moving-throne',
 } as const;
 
 const STILL_UNMATCHED_BOSSES = [
-  'boss_ch4_moving_throne',
   'boss_ch4_zero_engine',
 ] as const;
 
@@ -52,6 +52,13 @@ test('Rootwidow uses a deliberate giant nature boss footprint', () => {
   assert.equal(art.family.id, 'cc0-boss-rootwidow');
   assert.ok(art.family.displayHeight >= 280, 'Rootwidow must read larger than ordinary units');
   assert.equal(art.tint, 0xffffff, 'Rootwidow must keep the authored source palette');
+});
+
+test('Moving Throne uses a deliberate heavy mechanical boss footprint', () => {
+  const art = resolveUnitArt('boss_ch4_moving_throne');
+  assert.equal(art.family.id, 'cc0-boss-moving-throne');
+  assert.ok(art.family.displayHeight >= 300, 'Moving Throne must dominate more screen space than ordinary units');
+  assert.equal(art.tint, 0xffffff, 'Moving Throne must keep the authored source palette');
 });
 
 test('unmatched chapter bosses remain outside the source-reference override', () => {

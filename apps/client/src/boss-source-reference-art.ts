@@ -25,6 +25,11 @@ const strip = (key: string, folder: string, motion: string): SpriteStrip => ({
  * WithinAmnesia/ARPG@9891cd33de14dab668e085599a2fe30463c7edcc
  * Each selected Lucifer pack includes its own Readme.txt declaring CC0.
  *
+ * Foozle Sci-Fi Labs Mecha Boss source mirror:
+ * Devs-Noobs/The-Escape@153c7e48287eb37bf0ff3fcbe4457063b723c49c
+ * Foozle_2DC0008_Sci_Fi_Lab_Mecha_Boss_Plus_Drone.zip
+ * The vendoring step verifies the original archive SHA-256 and its CC0 Readme before use.
+ *
  * These remain PLACEHOLDER/source-reference art. They are deliberately separate boss
  * characters rather than scaled versions of the normal humanoid enemy families.
  */
@@ -89,6 +94,16 @@ export const BOSS_SOURCE_REFERENCE_ART_FAMILIES: readonly BossSourceReferenceArt
     knockback: strip('cc0-boss-belzar-beast-hit', 'cc0-boss-belzar-beast', 'hit'),
     death: strip('cc0-boss-belzar-beast-death', 'cc0-boss-belzar-beast', 'death'),
   },
+  {
+    id: 'cc0-boss-moving-throne',
+    displayHeight: 316,
+    attackContactFrame: 2,
+    idle: strip('cc0-boss-moving-throne-idle', 'cc0-boss-moving-throne', 'idle'),
+    run: strip('cc0-boss-moving-throne-run', 'cc0-boss-moving-throne', 'move'),
+    attack: strip('cc0-boss-moving-throne-attack', 'cc0-boss-moving-throne', 'attack'),
+    knockback: strip('cc0-boss-moving-throne-hit', 'cc0-boss-moving-throne', 'hit'),
+    death: strip('cc0-boss-moving-throne-death', 'cc0-boss-moving-throne', 'death'),
+  },
 ] as const;
 
 export const BOSS_SOURCE_REFERENCE: Readonly<Record<string, UnitArtVariant>> = {
@@ -98,6 +113,7 @@ export const BOSS_SOURCE_REFERENCE: Readonly<Record<string, UnitArtVariant>> = {
   boss_ch2_funeral_king: { familyId: 'cc0-boss-funeral-king', tint: 0xffffff, attackFx: 'VOID' },
   boss_ch3_archmagus: { familyId: 'cc0-boss-archmagus', tint: 0xffffff, attackFx: 'MAGIC' },
   boss_ch3_belzar: { familyId: 'cc0-boss-belzar-beast', tint: 0xffffff, attackFx: 'BLUNT' },
+  boss_ch4_moving_throne: { familyId: 'cc0-boss-moving-throne', tint: 0xffffff, attackFx: 'BLUNT' },
 } as const;
 
 export function installBossSourceReferenceMappings(): void {

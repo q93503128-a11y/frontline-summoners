@@ -1,5 +1,7 @@
+import { createHash } from 'node:crypto';
 import { mkdir, rm, writeFile } from 'node:fs/promises';
 import { dirname, resolve } from 'node:path';
+import { inflateRawSync } from 'node:zlib';
 import { fileURLToPath } from 'node:url';
 import { decodePng, encodePng } from './lib/production-png.mjs';
 
@@ -10,6 +12,12 @@ const RAW_BASE = `https://raw.githubusercontent.com/WithinAmnesia/ARPG/${SOURCE_
 const rawUrl = (path) => `${RAW_BASE}/${path.split('/').map(encodeURIComponent).join('/')}`;
 const TARGET_CELL = 128;
 const ARCHIVE = 'C.C.0. Assets Archive/Art/FoozleCC/Lucifer';
+
+const MECHA_MIRROR_REVISION = '153c7e48287eb37bf0ff3fcbe4457063b723c49c';
+const MECHA_ARCHIVE_NAME = 'Foozle_2DC0008_Sci_Fi_Lab_Mecha_Boss_Plus_Drone.zip';
+const MECHA_ARCHIVE_SHA256 = 'ad755ac11d83a99ecf2a14ef8fbcf1168abccb60f1be9a5cb129afa01fe1456d';
+const MECHA_ARCHIVE_URL =
+  `https://raw.githubusercontent.com/Devs-Noobs/The-Escape/${MECHA_MIRROR_REVISION}/${MECHA_ARCHIVE_NAME}`;
 
 // Each selected Foozle/Lucifer pack has a colocated Readme.txt declaring CC0.
 // This step only selects authored frames and nearest-neighbour normalizes their canvas.
@@ -75,19 +83,19 @@ const assert = (ok, message) => {
   if (!ok) throw new Error(`[foozle-boss-source-reference] ${message}`);
 };
 
-async function fetchPng(entry, attempts = 3) {
+async function fetchBytes(url, label, attempts = 3) {
   let lastError;
   for (let attempt = 1; attempt <= attempts; attempt += 1) {
     const controller = new AbortController();
     const timeout = setTimeout(() => controller.abort(), 15000);
     try {
-      const response = await fetch(entry.url, {
+      const response = await fetch(url, {
         headers: { 'user-agent': 'frontline-summoners-build/1.0' },
         redirect: 'follow',
         signal: controller.signal,
       });
       if (!response.ok) throw new Error(`HTTP ${response.status}`);
-      return decodePng(Buffer.from(await response.arrayBuffer()), entry.label);
+      return Buffer.from(await response.arrayBuffer());
     } catch (error) {
       lastError = error;
       if (attempt < attempts) await delay(500 * attempt);
@@ -95,7 +103,11 @@ async function fetchPng(entry, attempts = 3) {
       clearTimeout(timeout);
     }
   }
-  throw new Error(`[foozle-boss-source-reference] ${entry.label} download failed: ${String(lastError)}`);
+  throw new Error(`[foozle-boss-source-reference] ${label} download failed: ${String(lastError)}`);
+}
+
+async function fetchPng(entry) {
+  return decodePng(await fetchBytes(entry.url, entry.label), entry.label);
 }
 
 function cellHasAlpha(sheet, cell, index) {
@@ -160,9 +172,115 @@ async function writeMotion(folder, motion, entry) {
   await writeFile(target, bytes);
 }
 
+function findEndOfCentralDirectory(bytes) {
+  const minimum = Math.max(0, bytes.length - 0xffff - 22);
+  for (let offset = bytes.length - 22; offset >= minimum; offset -= 1) {
+    if (bytes.readUInt32LE(offset) === 0x06054b50) return offset;
+  }
+  throw new Error('[foozle-boss-source-reference] moving-throne archive has no ZIP central directory');
+}
+
+function readZipEntries(bytes) {
+  const end = findEndOfCentralDirectory(bytes);
+  const count = bytes.readUInt16LE(end + 10);
+  let cursor = bytes.readUInt32LE(end + 16);
+  const entries = [];
+
+  for (let i = 0; i < count; i += 1) {
+    assert(bytes.readUInt32LE(cursor) === 0x02014b50, `bad ZIP central entry ${i}`);
+    const method = bytes.readUInt16LE(cursor + 10);
+    const compressedSize = bytes.readUInt32LE(cursor + 20);
+    const uncompressedSize = bytes.readUInt32LE(cursor + 24);
+    const nameLength = bytes.readUInt16LE(cursor + 28);
+    const extraLength = bytes.readUInt16LE(cursor + 30);
+    const commentLength = bytes.readUInt16LE(cursor + 32);
+    const localOffset = bytes.readUInt32LE(cursor + 42);
+    const name = bytes.subarray(cursor + 46, cursor + 46 + nameLength).toString('utf8');
+
+    entries.push({ name, method, compressedSize, uncompressedSize, localOffset });
+    cursor += 46 + nameLength + extraLength + commentLength;
+  }
+
+  return entries;
+}
+
+function extractZipEntry(zip, entry) {
+  const offset = entry.localOffset;
+  assert(zip.readUInt32LE(offset) === 0x04034b50, `bad ZIP local header for ${entry.name}`);
+  const nameLength = zip.readUInt16LE(offset + 26);
+  const extraLength = zip.readUInt16LE(offset + 28);
+  const start = offset + 30 + nameLength + extraLength;
+  const compressed = zip.subarray(start, start + entry.compressedSize);
+
+  let output;
+  if (entry.method === 0) output = Buffer.from(compressed);
+  else if (entry.method === 8) output = inflateRawSync(compressed);
+  else throw new Error(`[foozle-boss-source-reference] unsupported ZIP method ${entry.method} for ${entry.name}`);
+
+  assert(output.length === entry.uncompressedSize,
+    `${entry.name}: ZIP size mismatch ${output.length} != ${entry.uncompressedSize}`);
+  return output;
+}
+
+function pickMechaEntry(entries, motion, patterns) {
+  const pngs = entries.filter((entry) => {
+    const lower = entry.name.toLowerCase();
+    const base = lower.split('/').pop() ?? lower;
+    return lower.endsWith('.png') && lower.includes('mecha') && !base.includes('drone') &&
+      !lower.includes('/exploding_drone/');
+  });
+
+  for (const pattern of patterns) {
+    const matches = pngs.filter((entry) => pattern.test(entry.name));
+    if (matches.length > 0) {
+      matches.sort((a, b) => a.name.localeCompare(b.name));
+      return matches[0];
+    }
+  }
+  throw new Error(`[foozle-boss-source-reference] moving-throne ${motion}: no authored Mecha PNG found`);
+}
+
+async function writeMovingThrone() {
+  const zip = await fetchBytes(MECHA_ARCHIVE_URL, 'Foozle Sci-Fi Labs Mecha Boss archive');
+  const digest = createHash('sha256').update(zip).digest('hex');
+  assert(digest === MECHA_ARCHIVE_SHA256,
+    `moving-throne archive SHA-256 mismatch: ${digest}`);
+
+  const entries = readZipEntries(zip);
+  const readmeEntry = entries.find((entry) => /readme\.txt$/i.test(entry.name));
+  assert(readmeEntry, 'moving-throne archive is missing its Readme.txt');
+  const readme = extractZipEntry(zip, readmeEntry).toString('utf8');
+  assert(/creative commons zero|cc0/i.test(readme),
+    'moving-throne source Readme does not declare CC0');
+
+  const selected = {
+    idle: pickMechaEntry(entries, 'idle', [/idle/i]),
+    move: pickMechaEntry(entries, 'move', [/run/i]),
+    attack: pickMechaEntry(entries, 'attack', [/heavy.*attack|attack.*heavy/i, /attack/i]),
+    hit: pickMechaEntry(entries, 'hit', [/hurt/i, /hit/i]),
+    death: pickMechaEntry(entries, 'death', [/death/i, /dead/i]),
+  };
+
+  const folder = 'cc0-boss-moving-throne';
+  await rm(resolve(outputRoot, folder), { recursive: true, force: true });
+
+  for (const [motion, entry] of Object.entries(selected)) {
+    const sheet = decodePng(extractZipEntry(zip, entry), `Moving Throne ${motion}: ${entry.name}`);
+    const bytes = composeNormalizedHorizontalStrip(sheet, {
+      label: `Moving Throne authored ${motion}: ${entry.name}`,
+      sample: 'spread',
+    });
+    const target = resolve(outputRoot, folder, `${motion}.png`);
+    await mkdir(dirname(target), { recursive: true });
+    await writeFile(target, bytes);
+  }
+}
+
 for (const family of FAMILIES) {
   await rm(resolve(outputRoot, family.output), { recursive: true, force: true });
   for (const [motion, entry] of Object.entries(family.motions)) {
     await writeMotion(family.output, motion, entry);
   }
 }
+
+await writeMovingThrone();
