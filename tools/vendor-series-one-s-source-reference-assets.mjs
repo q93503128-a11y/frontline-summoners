@@ -10,6 +10,7 @@ const FRAME_COUNT = 4;
 const CONTENT = 116;
 
 const LOST_CARD_REV = '8d1ee8fb358ab3ceab5aff31d068d0dcaaec954b';
+const TOTORIA_REV = 'bf84490414e09eb0e1c27c4f4bc8e9bf5189a15c';
 const RIENA_REV = 'f959776d9b2ef57bf6cdef696b72d2ae0ebfb443';
 const MIREILLE_REV = '950515267f4d5b54b9738962c74672193f5e57a3';
 const NERIA_REV = '703e4630abc01f2e3ed752fa93b776f84689c2af';
@@ -28,6 +29,11 @@ const ELSIA_RUN = rawGithub(
   'MasterSacid/Space-war',
   '0751279ed43f0776623b8eb9feb11baf533346ac',
   'animations/charachters/spearwoman/woman_run.png',
+);
+const TOTORIA_SHEET = rawGithub(
+  'Yatchanek/Platformer',
+  TOTORIA_REV,
+  'graphics/spritesheets/Necromancer_creativekind-Sheet.png',
 );
 
 const delay = (ms) => new Promise((resolveDelay) => setTimeout(resolveDelay, ms));
@@ -175,10 +181,36 @@ async function writeElsia() {
   await writeStrip('elsia/death.png', row(2760, [0, 3, 6, 8]));
 }
 
+async function writeTotoria() {
+  const sheet = decodePng(await fetchBytes(TOTORIA_SHEET), TOTORIA_SHEET);
+  const SOURCE_FRAME = 128;
+  const SOURCE_COLUMNS = 17;
+  const SOURCE_ROWS = 7;
+  if (sheet.width !== SOURCE_COLUMNS * SOURCE_FRAME || sheet.height !== SOURCE_ROWS * SOURCE_FRAME) {
+    throw new Error(`Totoria source sheet layout changed: expected 2176x896, got ${sheet.width}x${sheet.height}`);
+  }
+  const row = (rowIndex, indices) => indices.map((index) => crop(
+    sheet,
+    index * SOURCE_FRAME,
+    rowIndex * SOURCE_FRAME,
+    SOURCE_FRAME,
+    SOURCE_FRAME,
+  ));
+
+  await writeStrip('totoria/idle.png', row(0, [0, 2, 4, 6]));
+  await writeStrip('totoria/run.png', row(1, [0, 2, 4, 6]));
+  await writeStrip('totoria/attack-f1.png', row(2, [0, 4, 8, 12]));
+  await writeStrip('totoria/attack-f2.png', row(3, [0, 4, 8, 12]));
+  await writeStrip('totoria/attack-f3.png', row(4, [0, 5, 10, 16]));
+  await writeStrip('totoria/hit.png', row(5, [0, 1, 3, 4]));
+  await writeStrip('totoria/death.png', row(6, [0, 3, 6, 9]));
+}
+
 await rm(outputRoot, { recursive: true, force: true });
 await mkdir(outputRoot, { recursive: true });
 
 await writeElsia();
+await writeTotoria();
 await writeChieritCharacter({
   slug: 'riena',
   repo: 'Mathatou/Gamejam',
@@ -225,6 +257,6 @@ await writeChieritCharacter({
   },
 });
 
-await writeFile(resolve(outputRoot, 'ATTRIBUTION.txt'), `Series 1 S source-reference art\n\nThese assets are source references only and are not production-approved.\nNo recolouring, AI drawing, or kitbashing is performed by the vendoring script; it only crops/scales authored pixels with nearest-neighbour sampling.\n\nElsia source reference\n- Dreamir — Spearwoman\n- https://dreamir.itch.io/spearwoman\n- Free/commercial use permitted by the author; credit appreciated but not required.\n- Pinned mirrors: ThanakornMix/Lost_Card_RPG@${LOST_CARD_REV}, MasterSacid/Space-war@0751279ed43f0776623b8eb9feb11baf533346ac\n\nRiena / Mireille / Neria source references\n- chierit — Elementals: Water Priestess / Leaf Ranger / Metal Bladekeeper\n- https://chierit.itch.io/elementals-water-priestess\n- https://chierit.itch.io/elementals-leaf-ranger\n- https://chierit.itch.io/elementals-metal-bladekeeper\n- License: CC BY 4.0. Credit: chierit.\n- Pinned mirrors: Mathatou/Gamejam@${RIENA_REV}, DawnSouther/godot-demo@${MIREILLE_REV}, Mohammed2372/Elemental-Showdown@${NERIA_REV}\n`);
+await writeFile(resolve(outputRoot, 'ATTRIBUTION.txt'), `Series 1 S source-reference art\n\nThese assets are source references only and are not production-approved.\nNo recolouring, AI drawing, or kitbashing is performed by the vendoring script; it only crops/scales authored pixels with nearest-neighbour sampling.\n\nElsia source reference\n- Dreamir — Spearwoman\n- https://dreamir.itch.io/spearwoman\n- Free/commercial use permitted by the author; credit appreciated but not required.\n- Pinned mirrors: ThanakornMix/Lost_Card_RPG@${LOST_CARD_REV}, MasterSacid/Space-war@0751279ed43f0776623b8eb9feb11baf533346ac\n\nTotoria source reference\n- CreativeKind — Necromancer (Free)\n- https://creativekind.itch.io/necromancer-free\n- Free for commercial and non-commercial use; modification permitted; redistribution/resale prohibited.\n- Pinned mirror: Yatchanek/Platformer@${TOTORIA_REV}\n\nRiena / Mireille / Neria source references\n- chierit — Elementals: Water Priestess / Leaf Ranger / Metal Bladekeeper\n- https://chierit.itch.io/elementals-water-priestess\n- https://chierit.itch.io/elementals-leaf-ranger\n- https://chierit.itch.io/elementals-metal-bladekeeper\n- License: CC BY 4.0. Credit: chierit.\n- Pinned mirrors: Mathatou/Gamejam@${RIENA_REV}, DawnSouther/godot-demo@${MIREILLE_REV}, Mohammed2372/Elemental-Showdown@${NERIA_REV}\n`);
 
-console.log('[s01-source] vendored 4 S-rarity characters / 12 source-reference form families');
+console.log('[s01-source] vendored 5 S-rarity characters / 15 source-reference form families');

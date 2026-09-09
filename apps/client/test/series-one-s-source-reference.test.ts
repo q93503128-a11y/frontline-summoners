@@ -7,11 +7,11 @@ import {
 import { PRODUCTION_UNIT_ART_CANDIDATES, resolveUnitArt } from '../src/production-assets.ts';
 import { SOURCE_REFERENCE_ART_BY_ID } from '../src/source-reference-art.ts';
 
-const CHARACTERS = ['elsia', 'riena', 'mireille', 'neria'] as const;
+const CHARACTERS = ['elsia', 'riena', 'mireille', 'neria', 'totoria'] as const;
 
-test('Series 1 S pass covers four characters and twelve authored source-reference forms', () => {
-  assert.equal(Object.keys(SERIES_ONE_S_PLACEHOLDER_FORM_ART).length, 12);
-  assert.equal(SERIES_ONE_S_SOURCE_REFERENCE_ART_FAMILIES.length, 12);
+test('Series 1 S pass covers five characters and fifteen authored source-reference forms', () => {
+  assert.equal(Object.keys(SERIES_ONE_S_PLACEHOLDER_FORM_ART).length, 15);
+  assert.equal(SERIES_ONE_S_SOURCE_REFERENCE_ART_FAMILIES.length, 15);
   assert.equal(PRODUCTION_UNIT_ART_CANDIDATES.length, 0, 'S source references must not bypass production approval');
 
   for (const character of CHARACTERS) {
@@ -39,9 +39,8 @@ test('Series 1 S pass covers four characters and twelve authored source-referenc
   }
 });
 
-test('Totoria and Arselia remain outside this S source-reference pass', () => {
+test('Arselia remains outside this S source-reference pass', () => {
   for (const formId of [
-    'char_s01_totoria_f1', 'char_s01_totoria_f2', 'char_s01_totoria_f3',
     'char_s01_arselia_f1', 'char_s01_arselia_f2', 'char_s01_arselia_f3',
   ]) {
     assert.equal(SERIES_ONE_S_PLACEHOLDER_FORM_ART[formId], undefined);

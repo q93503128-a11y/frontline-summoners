@@ -48,6 +48,9 @@ export const SERIES_ONE_S_SOURCE_REFERENCE_ART_FAMILIES: readonly SeriesOneSSour
   family('s01-neria-f1', 'neria', 'f1', 198),
   family('s01-neria-f2', 'neria', 'f2', 202),
   family('s01-neria-f3', 'neria', 'f3', 206),
+  family('s01-totoria-f1', 'totoria', 'f1', 196),
+  family('s01-totoria-f2', 'totoria', 'f2', 196),
+  family('s01-totoria-f3', 'totoria', 'f3', 196),
 ];
 
 export const SERIES_ONE_S_PLACEHOLDER_FORM_ART: Readonly<Record<string, UnitArtVariant>> = {
@@ -63,4 +66,7 @@ export const SERIES_ONE_S_PLACEHOLDER_FORM_ART: Readonly<Record<string, UnitArtV
   char_s01_neria_f1: { familyId: 's01-neria-f1', tint: 0xffffff, attackFx: 'SLASH' },
   char_s01_neria_f2: { familyId: 's01-neria-f2', tint: 0xffffff, attackFx: 'SLASH' },
   char_s01_neria_f3: { familyId: 's01-neria-f3', tint: 0xffffff, attackFx: 'SLASH' },
+  char_s01_totoria_f1: { familyId: 's01-totoria-f1', tint: 0xffffff, attackFx: 'MAGIC' },
+  char_s01_totoria_f2: { familyId: 's01-totoria-f2', tint: 0xffffff, attackFx: 'MAGIC' },
+  char_s01_totoria_f3: { familyId: 's01-totoria-f3', tint: 0xffffff, attackFx: 'MAGIC' },
 };
