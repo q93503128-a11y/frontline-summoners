@@ -2,6 +2,7 @@ import { ART_FAMILIES, type ArtFamily, type SpriteStrip } from './assets.ts';
 import { BOSS_SOURCE_REFERENCE_ART_FAMILIES, installBossSourceReferenceMappings } from './boss-source-reference-art.ts';
 import { installNormalEnemySourceReferenceMappings } from './enemy-source-reference-map.ts';
 import { LOWER_RARITY_FREE_ART_FAMILIES } from './lower-rarity-free-art.ts';
+import { SERIES_ONE_S_SOURCE_REFERENCE_ART_FAMILIES } from './series-one-s-source-reference-art.ts';
 
 export interface SourceReferenceArtFamily extends ArtFamily {
   readonly knockback?: SpriteStrip;
@@ -129,6 +130,7 @@ export const SOURCE_REFERENCE_ART_FAMILIES: readonly SourceReferenceArtFamily[] 
   EVIL_WIZARD_2,
   ...BOSS_SOURCE_REFERENCE_ART_FAMILIES,
   ...LOWER_RARITY_FREE_ART_FAMILIES,
+  ...SERIES_ONE_S_SOURCE_REFERENCE_ART_FAMILIES,
 ];
 
 export const SOURCE_REFERENCE_ART_BY_ID: Readonly<Record<string, SourceReferenceArtFamily>> = Object.fromEntries(

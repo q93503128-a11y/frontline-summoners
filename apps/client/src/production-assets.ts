@@ -3,6 +3,7 @@ import { UNIT_ART, type ArtFamily, type AttackFxStyle, type SpriteStrip, type Un
 import { EVOLUTION_FORMS } from './character-growth.ts';
 import { ALL_PLAYER_SLOTS, ALL_STAGES, ENEMIES } from './prototype.ts';
 import { SOURCE_REFERENCE_ART_BY_ID, SOURCE_REFERENCE_ART_FAMILIES } from './source-reference-art.ts';
+import { SERIES_ONE_S_PLACEHOLDER_FORM_ART } from './series-one-s-source-reference-art.ts';
 
 export const PRODUCTION_ASSET_STATUSES = ['AWAITING_ART', 'READY_FOR_REVIEW', 'APPROVED'] as const;
 export type ProductionAssetStatus = (typeof PRODUCTION_ASSET_STATUSES)[number];
@@ -140,6 +141,7 @@ const PLACEHOLDER_PLAYER_FORM_ART: Readonly<Record<string, UnitArtVariant>> = {
   char_common_a_mirror_guide_f1: { familyId: 'cc0-mirror-guide-f1', tint: 0xffffff, displayScale: 0.94, attackFx: 'MAGIC' },
   char_common_a_mirror_guide_f2: { familyId: 'cc0-mirror-guide-f2', tint: 0xffffff, displayScale: 1.00, attackFx: 'MAGIC' },
   char_common_a_mirror_guide_f3: { familyId: 'cc0-mirror-guide-f3', tint: 0xffffff, displayScale: 1.08, attackFx: 'VOID' },
+  ...SERIES_ONE_S_PLACEHOLDER_FORM_ART,
 };
 
 function productionUnitRoot(unitId: string, formId?: string): string {

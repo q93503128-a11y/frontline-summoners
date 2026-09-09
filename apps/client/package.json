@@ -4,9 +4,9 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "predev": "node ../../tools/vendor-client-assets.mjs && node ../../tools/vendor-lower-rarity-free-assets.mjs && node ../../tools/vendor-remaining-common-assets.mjs && node ../../tools/vendor-a-common-assets.mjs && node ../../tools/vendor-boss-source-reference-assets.mjs && node ../../tools/vendor-foozle-boss-source-reference-assets.mjs && node ../../tools/vendor-reactorcore-boss-source-reference-assets.mjs",
+    "predev": "node ../../tools/vendor-client-assets.mjs && node ../../tools/vendor-lower-rarity-free-assets.mjs && node ../../tools/vendor-remaining-common-assets.mjs && node ../../tools/vendor-a-common-assets.mjs && node ../../tools/vendor-boss-source-reference-assets.mjs && node ../../tools/vendor-foozle-boss-source-reference-assets.mjs && node ../../tools/vendor-reactorcore-boss-source-reference-assets.mjs && node ../../tools/vendor-series-one-s-source-reference-assets.mjs",
     "dev": "vite --host 0.0.0.0",
-    "prebuild": "node ../../tools/vendor-client-assets.mjs && node ../../tools/vendor-lower-rarity-free-assets.mjs && node ../../tools/vendor-remaining-common-assets.mjs && node ../../tools/vendor-a-common-assets.mjs && node ../../tools/vendor-boss-source-reference-assets.mjs && node ../../tools/vendor-foozle-boss-source-reference-assets.mjs && node ../../tools/vendor-reactorcore-boss-source-reference-assets.mjs",
+    "prebuild": "node ../../tools/vendor-client-assets.mjs && node ../../tools/vendor-lower-rarity-free-assets.mjs && node ../../tools/vendor-remaining-common-assets.mjs && node ../../tools/vendor-a-common-assets.mjs && node ../../tools/vendor-boss-source-reference-assets.mjs && node ../../tools/vendor-foozle-boss-source-reference-assets.mjs && node ../../tools/vendor-reactorcore-boss-source-reference-assets.mjs && node ../../tools/vendor-series-one-s-source-reference-assets.mjs",
     "build": "vite build",
     "typecheck": "tsc --noEmit",
     "test": "node --experimental-transform-types --test test/*.test.ts"
