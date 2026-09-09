@@ -15,11 +15,8 @@ const EXPECTED_SOURCE_REFERENCE_BOSSES = {
   boss_ch3_archmagus: 'cc0-boss-archmagus',
   boss_ch3_belzar: 'cc0-boss-belzar-beast',
   boss_ch4_moving_throne: 'cc0-boss-moving-throne',
+  boss_ch4_zero_engine: 'cc0-boss-zero-engine',
 } as const;
-
-const STILL_UNMATCHED_BOSSES = [
-  'boss_ch4_zero_engine',
-] as const;
 
 test('mapped bosses use distinct CC0 boss-grade silhouettes without production approval', () => {
   const sourceReferenceBosses = Object.keys(EXPECTED_SOURCE_REFERENCE_BOSSES);
@@ -61,9 +58,12 @@ test('Moving Throne uses a deliberate heavy mechanical boss footprint', () => {
   assert.equal(art.tint, 0xffffff, 'Moving Throne must keep the authored source palette');
 });
 
-test('unmatched chapter bosses remain outside the source-reference override', () => {
-  for (const bossId of STILL_UNMATCHED_BOSSES) {
-    assert.equal(BOSS_SOURCE_REFERENCE[bossId], undefined,
-      `${bossId} must stay untouched until a matching boss-grade source is found`);
-  }
+test('Zero Engine is a separate non-humanoid reactor family, not another Moving Throne body', () => {
+  const engine = resolveUnitArt('boss_ch4_zero_engine');
+  const throne = resolveUnitArt('boss_ch4_moving_throne');
+  assert.equal(engine.family.id, 'cc0-boss-zero-engine');
+  assert.notEqual(engine.family.id, throne.family.id, 'chapter-four bosses must not share one mechanical body');
+  assert.ok(engine.family.displayHeight >= 300, 'Zero Engine needs boss-scale screen occupancy');
+  assert.equal(engine.tint, 0xffffff, 'Zero Engine must keep the authored Reactorcore palette');
+  assert.equal(BOSS_SOURCE_REFERENCE.boss_ch4_zero_engine?.attackFx, 'VOID');
 });

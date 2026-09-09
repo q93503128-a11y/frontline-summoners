@@ -30,6 +30,10 @@ const strip = (key: string, folder: string, motion: string): SpriteStrip => ({
  * Foozle_2DC0008_Sci_Fi_Lab_Mecha_Boss_Plus_Drone.zip
  * The vendoring step verifies the original archive SHA-256 and its CC0 Readme before use.
  *
+ * Reactorcore Core Reactor Machines:
+ * https://opengameart.org/content/core-reactor-machines (published 2025-07-28, CC0)
+ * The vendoring step verifies the CC0 source page and the authored sheet structure before use.
+ *
  * These remain PLACEHOLDER/source-reference art. They are deliberately separate boss
  * characters rather than scaled versions of the normal humanoid enemy families.
  */
@@ -104,6 +108,16 @@ export const BOSS_SOURCE_REFERENCE_ART_FAMILIES: readonly BossSourceReferenceArt
     knockback: strip('cc0-boss-moving-throne-hit', 'cc0-boss-moving-throne', 'hit'),
     death: strip('cc0-boss-moving-throne-death', 'cc0-boss-moving-throne', 'death'),
   },
+  {
+    id: 'cc0-boss-zero-engine',
+    displayHeight: 304,
+    attackContactFrame: 2,
+    idle: strip('cc0-boss-zero-engine-idle', 'cc0-boss-zero-engine', 'idle'),
+    run: strip('cc0-boss-zero-engine-run', 'cc0-boss-zero-engine', 'move'),
+    attack: strip('cc0-boss-zero-engine-attack', 'cc0-boss-zero-engine', 'attack'),
+    knockback: strip('cc0-boss-zero-engine-hit', 'cc0-boss-zero-engine', 'hit'),
+    death: strip('cc0-boss-zero-engine-death', 'cc0-boss-zero-engine', 'death'),
+  },
 ] as const;
 
 export const BOSS_SOURCE_REFERENCE: Readonly<Record<string, UnitArtVariant>> = {
@@ -114,6 +128,7 @@ export const BOSS_SOURCE_REFERENCE: Readonly<Record<string, UnitArtVariant>> = {
   boss_ch3_archmagus: { familyId: 'cc0-boss-archmagus', tint: 0xffffff, attackFx: 'MAGIC' },
   boss_ch3_belzar: { familyId: 'cc0-boss-belzar-beast', tint: 0xffffff, attackFx: 'BLUNT' },
   boss_ch4_moving_throne: { familyId: 'cc0-boss-moving-throne', tint: 0xffffff, attackFx: 'BLUNT' },
+  boss_ch4_zero_engine: { familyId: 'cc0-boss-zero-engine', tint: 0xffffff, attackFx: 'VOID' },
 } as const;
 
 export function installBossSourceReferenceMappings(): void {
