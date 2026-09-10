@@ -1,4 +1,8 @@
 import type { ArtFamily, SpriteStrip, UnitArtVariant } from './assets.ts';
+import {
+  SERIES_TWO_S_PLACEHOLDER_FORM_ART,
+  SERIES_TWO_S_SOURCE_REFERENCE_ART_FAMILIES,
+} from './series-two-s-source-reference-art.ts';
 
 export interface SeriesOneSSourceReferenceArtFamily extends ArtFamily {
   readonly knockback: SpriteStrip;
@@ -31,9 +35,10 @@ function family(
 }
 
 /**
- * S-rarity Series 1 source references only. These are curated, authored external sprites and
- * intentionally remain PLACEHOLDER art until Moon Seung-jun visually approves production use.
- * F1/F2/F3 use different authored attack motions instead of recolours or AI-drawn evolutions.
+ * S-rarity Series 1 source references plus the Series 2 S registry folded into the legacy
+ * export consumed by runtime art plumbing. Series 2 itself remains isolated in its own module;
+ * this compatibility aggregation avoids widening unrelated production-art code during the pass.
+ * All entries are source-reference PLACEHOLDER art until visually approved for production use.
  */
 export const SERIES_ONE_S_SOURCE_REFERENCE_ART_FAMILIES: readonly SeriesOneSSourceReferenceArtFamily[] = [
   family('s01-elsia-f1', 'elsia', 'f1', 194),
@@ -51,6 +56,7 @@ export const SERIES_ONE_S_SOURCE_REFERENCE_ART_FAMILIES: readonly SeriesOneSSour
   family('s01-totoria-f1', 'totoria', 'f1', 196),
   family('s01-totoria-f2', 'totoria', 'f2', 196),
   family('s01-totoria-f3', 'totoria', 'f3', 196),
+  ...SERIES_TWO_S_SOURCE_REFERENCE_ART_FAMILIES,
 ];
 
 export const SERIES_ONE_S_PLACEHOLDER_FORM_ART: Readonly<Record<string, UnitArtVariant>> = {
@@ -69,4 +75,5 @@ export const SERIES_ONE_S_PLACEHOLDER_FORM_ART: Readonly<Record<string, UnitArtV
   char_s01_totoria_f1: { familyId: 's01-totoria-f1', tint: 0xffffff, attackFx: 'MAGIC' },
   char_s01_totoria_f2: { familyId: 's01-totoria-f2', tint: 0xffffff, attackFx: 'MAGIC' },
   char_s01_totoria_f3: { familyId: 's01-totoria-f3', tint: 0xffffff, attackFx: 'MAGIC' },
+  ...SERIES_TWO_S_PLACEHOLDER_FORM_ART,
 };
