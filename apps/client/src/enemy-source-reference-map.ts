@@ -3,19 +3,21 @@ import { UNIT_ART, type UnitArtVariant } from './assets.ts';
 /**
  * Normal-enemy source-reference assignments.
  *
- * These intentionally reuse already-vendored CC0 silhouettes instead of tinting the old
- * human placeholder families. No entry is production-approved; this only gives each
- * chapter enemy a deliberate readable silhouette while final production art is pending.
+ * Chapter-one enemies deliberately stay on the coherent vendored humanoid families from
+ * UNIT_ART. A previous source-reference pass remapped them onto unrelated CC0 composite
+ * silhouettes (for example enemy-shield -> cc0-slinger-f3), which made weapons/shields read
+ * as detached oversized parts in live battle. Later chapters keep their dedicated reference
+ * silhouettes until each visual group is separately reviewed.
  */
 export const NORMAL_ENEMY_SOURCE_REFERENCE: Readonly<Record<string, UnitArtVariant>> = {
-  'enemy-raider': { familyId: 'cc0-mirror-guide-f1', tint: 0xffffff, attackFx: 'SLASH' },
-  'enemy-sprinter': { familyId: 'cc0-slinger-f2', tint: 0xffffff, attackFx: 'SLASH' },
-  'enemy-spearman': { familyId: 'cc0-slinger-f1', tint: 0xffffff, attackFx: 'PIERCE' },
-  'enemy-shield': { familyId: 'cc0-slinger-f3', tint: 0xffffff, attackFx: 'BLUNT' },
-  'enemy-cultist': { familyId: 'cc0-bonedrum-f3', tint: 0xffffff, attackFx: 'FIRE' },
-  'enemy-sniper': { familyId: 'cc0-mirror-guide-f2', tint: 0xffffff, attackFx: 'MAGIC' },
-  'enemy-knight': { familyId: 'cc0-moss-golem-f3', tint: 0xffffff, displayScale: 1.08, attackFx: 'SLASH' },
-  'enemy-berserker': { familyId: 'cc0-tin-squire-f3', tint: 0xffffff, displayScale: 1.08, attackFx: 'BLUNT' },
+  'enemy-raider': { familyId: 'warrior', tint: 0xff9a93, attackFx: 'SLASH' },
+  'enemy-sprinter': { familyId: 'fantasy-warrior', tint: 0xffb27d, attackFx: 'SLASH' },
+  'enemy-spearman': { familyId: 'huntress', tint: 0xffad96, attackFx: 'PIERCE' },
+  'enemy-shield': { familyId: 'hero-knight-2', tint: 0xd38c83, attackFx: 'BLUNT' },
+  'enemy-cultist': { familyId: 'evil-wizard', tint: 0xff7373, attackFx: 'FIRE' },
+  'enemy-sniper': { familyId: 'wizard', tint: 0xeeb7ff, attackFx: 'MAGIC' },
+  'enemy-knight': { familyId: 'hero-knight', tint: 0xd78383, attackFx: 'SLASH' },
+  'enemy-berserker': { familyId: 'fantasy-warrior', tint: 0xff6767, displayScale: 1.08, attackFx: 'BLUNT' },
 
   enemy_ch2_mossboar: { familyId: 'cc0-moss-golem-f1', tint: 0xffffff, displayScale: 1.22, attackFx: 'BLUNT' },
   enemy_ch2_umbrella: { familyId: 'cc0-coffin-merchant-f1', tint: 0xffffff, displayScale: 0.92, attackFx: 'MAGIC' },
