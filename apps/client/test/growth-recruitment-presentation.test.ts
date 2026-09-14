@@ -31,6 +31,7 @@ test('recruitment keeps ten-pull as the dominant summon command and reduces seco
   assert.match(presentation, /label\.startsWith\('1회 · 결정 '\)\) container\.setScale\(0\.97\)/);
   assert.match(presentation, /label\.startsWith\('10회 · 결정 '\)\) container\.setScale\(1\.035, 1\.05\)/);
   assert.match(presentation, /body\?\.setFillStyle\(0x171d1b, 0\.78\)\.setStrokeStyle\(1, 0x9a7b4a, 0\.24\)/);
-  assert.match(presentation, /sprite\.setScale\(sprite\.scaleX \* 1\.12, sprite\.scaleY \* 1\.12\)/);
+  assert.doesNotMatch(presentation, /Phaser\.GameObjects\.Sprite/);
+  assert.doesNotMatch(presentation, /sprite\.setScale\(/);
   assert.match(presentation, /if \(value === '보장 횟수 없음'\) return '보장 없음';/);
 });
