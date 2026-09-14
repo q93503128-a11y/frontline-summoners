@@ -1,4 +1,5 @@
 import Phaser from 'phaser';
+import { addCoopBattleUnitPresentation } from './coop-battle-unit-presentation.ts';
 import type { CoopBattleSnapshot, CoopServerMessage, CoopSession } from './coop-network';
 import { getSlotById } from './prototype';
 import { loadGuestProgress } from './save';
@@ -21,8 +22,10 @@ type CoopBattlePresentationCarrier = Phaser.Scene & {
   readonly snapshot?: CoopBattleSnapshot | null;
   readonly session?: CoopSession;
   readonly controlsLayer?: Phaser.GameObjects.Container;
+  readonly battlefieldLayer?: Phaser.GameObjects.Container;
   readonly deckIds?: readonly string[];
   readonly progress?: { readonly deckSlotIds?: readonly string[] };
+  readonly stage?: { readonly mapLength: number };
 };
 
 type RuntimeCarrier = CoopBattlePresentationCarrier & Record<string, unknown>;
@@ -34,6 +37,8 @@ type GuestStoryRuntimeCarrier = RuntimeCarrier & {
   postStoryHandled?: boolean;
   onStoryServerMessage?: (message: CoopServerMessage) => void;
 };
+
+const coopCharacterLayerByScene = new WeakMap<Phaser.Scene, Phaser.GameObjects.Container>();
 
 function visitTexts(object: Phaser.GameObjects.GameObject, action: (text: Phaser.GameObjects.Text) => void): void {
   if (object instanceof Phaser.GameObjects.Text) action(object);
@@ -153,6 +158,41 @@ function refreshControlStates(carrier: CoopBattlePresentationCarrier): void {
   }
 }
 
+function replaceAnonymousBattleDots(carrier: CoopBattlePresentationCarrier): void {
+  const previous = coopCharacterLayerByScene.get(carrier);
+  previous?.destroy(true);
+  coopCharacterLayerByScene.delete(carrier);
+
+  const snapshot = carrier.snapshot;
+  const battlefield = carrier.battlefieldLayer;
+  const mapLength = carrier.stage?.mapLength;
+  if (!snapshot || !battlefield || !mapLength) return;
+
+  const alive = snapshot.units.filter((unit) => unit.state !== 'DYING');
+  let hiddenDots = 0;
+  battlefield.list.forEach((child) => {
+    if (child instanceof Phaser.GameObjects.Arc && hiddenDots < alive.length) {
+      child.setVisible(false);
+      hiddenDots += 1;
+      return;
+    }
+    if (child instanceof Phaser.GameObjects.Text && child.y >= 315 && child.y <= 395) child.setVisible(false);
+  });
+
+  const layer = carrier.add.container(0, 0).setDepth(12);
+  coopCharacterLayerByScene.set(carrier, layer);
+  const compact = isCompactMobileViewport();
+  const fieldLeft = 70;
+  const fieldRight = 1210;
+  const fieldY = carrier.scene.key === 'friend-coop-battle' ? 380 : 385;
+
+  alive.forEach((unit, index) => {
+    const x = fieldLeft + 42 + (Math.max(0, Math.min(mapLength, unit.anchorX)) / mapLength) * (fieldRight - fieldLeft - 84);
+    const y = fieldY + ((index % 5) - 2) * 10;
+    addCoopBattleUnitPresentation(carrier, layer, unit, x, y, compact);
+  });
+}
+
 function wrapAfter(carrier: RuntimeCarrier, methodName: string, after: () => void): (() => void) | undefined {
   const original = carrier[methodName];
   if (typeof original !== 'function') return undefined;
@@ -212,6 +252,7 @@ function installCoopBattleCommandSurface(scene: Phaser.Scene): void {
   const carrier = scene as unknown as RuntimeCarrier;
   const refresh = (): void => {
     refreshControlStates(carrier);
+    replaceAnonymousBattleDots(carrier);
     sanitizePlayerText(scene, carrier.session);
   };
   const restores = [
@@ -225,6 +266,8 @@ function installCoopBattleCommandSurface(scene: Phaser.Scene): void {
   const unsubscribeConnection = carrier.session?.subscribeConnection(() => refresh());
   scene.events.once(Phaser.Scenes.Events.SHUTDOWN, () => {
     unsubscribeConnection?.();
+    coopCharacterLayerByScene.get(scene)?.destroy(true);
+    coopCharacterLayerByScene.delete(scene);
     restores.forEach((restore) => restore());
   });
   refresh();
