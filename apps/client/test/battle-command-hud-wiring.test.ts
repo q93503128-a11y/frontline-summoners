@@ -29,7 +29,8 @@ test('battle production rail favors one-row 1-0 scanning and reflows only when r
   assert.match(source, /const useTwoRows = compact && singleRowSlotWidth \* 10 \+ 36 > 870;/);
   assert.match(source, /const columns = useTwoRows \? 5 : 10;/);
   assert.match(source, /Math\.max\(456, 720 - \(slotHeight \* 2 \+ rowGap \+ 12\)\)/);
-  assert.match(source, /if \(!compact\) \{[\s\S]*?getUnitHotkeyLabel\(index\)/);
+  assert.match(source, /const hotkeyPrefix = !compact \? `\$\{getUnitHotkeyLabel\(index\)\} · ` : '';/);
+  assert.match(source, /const nameLabel = `\$\{hotkeyPrefix\}\$\{badge\.label\} · \$\{displayName\}`;/);
 });
 
 test('supply and base weapon remain separate commands with desktop Q-E vocabulary and compact touch vocabulary', async () => {
