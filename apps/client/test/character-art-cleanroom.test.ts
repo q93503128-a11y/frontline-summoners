@@ -81,3 +81,29 @@ test('2v2 battle chrome and ownership marker stay outside resolved character dis
   assert.doesNotMatch(source, /scene\.add\.rectangle\(x, y \+ 39,/);
   assert.doesNotMatch(source, /createUnitSilhouettePresentation|addAt\(/);
 });
+
+test('deck roster text starts beyond the resolved character width and keeps card chrome in header/footer zones', async () => {
+  const source = await readSource('../src/deck-command-scene.ts');
+
+  assert.match(source, /const portraitScale = \(targetHeight \/ art\.family\.idle\.frameHeight\) \* art\.displayScale;/);
+  assert.match(source, /const displayedWidth = art\.family\.idle\.frameWidth \* portraitScale;/);
+  assert.match(source, /const portraitRight = portraitX \+ displayedWidth \/ 2;/);
+  assert.match(source, /const infoX = Math\.max\(baseInfoX, portraitRight \+ 10\);/);
+  assert.match(source, /const headerY = y - cardHeight \/ 2 \+ \(compact \? 13 : 12\);/);
+  assert.match(source, /const favoriteStar = text\(scene, x \+ cardWidth \/ 2 - 13, headerY,/);
+  assert.match(source, /const portrait = scene\.add\.sprite\(x, y, art\.family\.idle\.key, 0\)\.setTint\(art\.tint\);/);
+  assert.match(source, /const name = text\(scene, x, y \+ height \/ 2 - 8,/);
+  assert.doesNotMatch(source, /createUnitSilhouettePresentation|addAt\(/);
+});
+
+test('growth detail copy starts beyond the resolved character width', async () => {
+  const source = await readSource('../src/growth-command-scene.ts');
+
+  assert.match(source, /const portraitScale = \(targetHeight \/ art\.family\.idle\.frameHeight\) \* art\.displayScale;/);
+  assert.match(source, /const displayedWidth = art\.family\.idle\.frameWidth \* portraitScale;/);
+  assert.match(source, /const portraitRight = portraitX \+ displayedWidth \/ 2;/);
+  assert.match(source, /const infoX = Math\.max\(594, portraitRight \+ 18\);/);
+  assert.match(source, /portrait\.setScale\(portraitScale\);/);
+  assert.match(source, /\.setTint\(art\.tint\)/);
+  assert.doesNotMatch(source, /createUnitSilhouettePresentation|addAt\(/);
+});
