@@ -203,18 +203,22 @@ function renderBattle(scene: BattleCarrier): void {
     const ownUnit = unit.ownerSeatId === mineSeat;
     const ownTeam = unit.teamId === mineTeam;
     const art = familyForUnit(unit.definitionId);
-    const shadow = scene.add.ellipse(x, y + 31, 52 * Math.min(1.4, art.displayScale), 10, 0x070a0e, 0.34).setDepth(2);
+    const targetHeight = compact ? 60 : 54;
+    const displayedHeight = targetHeight * art.displayScale;
+    const hpY = y - displayedHeight / 2 - 10;
+    const markerY = y + displayedHeight / 2 + 8;
+    const shadowY = markerY + 9;
+    const shadow = scene.add.ellipse(x, shadowY, 52 * Math.min(1.4, art.displayScale), 10, 0x070a0e, 0.34).setDepth(2);
     const sprite = scene.add.sprite(x, y, art.family.idle.key, 0).setTint(art.tint).setDepth(3);
     sprite.setFlipX(unit.teamId === 'B');
-    const targetHeight = compact ? 60 : 54;
     sprite.setScale((targetHeight / art.family.idle.frameHeight) * art.displayScale);
     const hpRatio = Phaser.Math.Clamp(unit.hp / Math.max(1, unit.maxHp), 0, 1);
-    const hpBg = scene.add.rectangle(x, y - 39, 48, 6, 0x11161d, 0.95).setDepth(4);
+    const hpBg = scene.add.rectangle(x, hpY, 48, 6, 0x11161d, 0.95).setDepth(4);
     const hpColor = ownUnit ? 0x8ce1b0 : ownTeam ? 0x78b7dc : 0xf1837c;
-    const hp = scene.add.rectangle(x - 23, y - 39, Math.max(1, 46 * hpRatio), 4, hpColor, 0.98).setOrigin(0, 0.5).setDepth(5);
+    const hp = scene.add.rectangle(x - 23, hpY, Math.max(1, 46 * hpRatio), 4, hpColor, 0.98).setOrigin(0, 0.5).setDepth(5);
     layer.add([shadow, sprite, hpBg, hp]);
     if (ownUnit) {
-      layer.add(scene.add.rectangle(x, y + 39, 24, 3, 0xf0d67d, 0.92).setDepth(5));
+      layer.add(scene.add.rectangle(x, markerY, 24, 3, 0xf0d67d, 0.92).setDepth(5));
     }
   });
 
