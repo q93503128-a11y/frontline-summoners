@@ -123,14 +123,17 @@ function drawBattlePresentation(scene: PvpMatchPresentationCarrier): void {
     const y = 424 + laneOffset;
     const own = unit.sideId === mine;
     const art = familyForUnit(unit.definitionId);
-    const shadow = scene.add.ellipse(x, y + 31, 52 * Math.min(1.4, art.displayScale), 10, 0x070a0e, 0.34).setDepth(2);
+    const targetHeight = compact ? 62 : 56;
+    const displayedHeight = targetHeight * art.displayScale;
+    const hpY = y - displayedHeight / 2 - 10;
+    const shadowY = y + displayedHeight / 2 + 10;
+    const shadow = scene.add.ellipse(x, shadowY, 52 * Math.min(1.4, art.displayScale), 10, 0x070a0e, 0.34).setDepth(2);
     const sprite = scene.add.sprite(x, y, art.family.idle.key, 0).setTint(art.tint).setDepth(3);
     sprite.setFlipX(unit.sideId === 'B');
-    const targetHeight = compact ? 62 : 56;
     sprite.setScale((targetHeight / art.family.idle.frameHeight) * art.displayScale);
     const hpRatio = Phaser.Math.Clamp(unit.hp / Math.max(1, unit.maxHp), 0, 1);
-    const hpBg = scene.add.rectangle(x, y - 40, 50, 6, 0x11161d, 0.95).setDepth(4);
-    const hp = scene.add.rectangle(x - 24, y - 40, Math.max(1, 48 * hpRatio), 4, own ? 0x78dca0 : 0xf1837c, 0.98).setOrigin(0, 0.5).setDepth(5);
+    const hpBg = scene.add.rectangle(x, hpY, 50, 6, 0x11161d, 0.95).setDepth(4);
+    const hp = scene.add.rectangle(x - 24, hpY, Math.max(1, 48 * hpRatio), 4, own ? 0x78dca0 : 0xf1837c, 0.98).setOrigin(0, 0.5).setDepth(5);
     layer.add([shadow, sprite, hpBg, hp]);
   });
 
