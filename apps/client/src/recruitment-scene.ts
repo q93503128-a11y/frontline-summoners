@@ -326,7 +326,7 @@ export class RecruitmentScene extends Phaser.Scene {
 
     const columns = results.length === 1 ? 1 : 5;
     const ticketWidth = results.length === 1 ? 390 : 200;
-    const ticketHeight = results.length === 1 ? 202 : 188;
+    const ticketHeight = results.length === 1 ? 242 : 188;
     const xGap = results.length === 1 ? 0 : 216;
     const yGap = 204;
     const startX = results.length === 1 ? 640 : 208;
@@ -348,19 +348,26 @@ export class RecruitmentScene extends Phaser.Scene {
       this.resultsLayer!.add([shadow, ticket, ribbon, rarityRule, stamp]);
 
       const art = familyForUnit(slot.definition.id);
-      const portrait = this.add.sprite(x, y - 34, art.family.idle.key, 0).setTint(art.tint);
-      portrait.setScale(((results.length === 1 ? 94 : 66) / art.family.idle.frameHeight) * art.displayScale);
+      const portraitY = y - 34;
+      const portraitScale = ((results.length === 1 ? 94 : 66) / art.family.idle.frameHeight) * art.displayScale;
+      const displayedHeight = art.family.idle.frameHeight * portraitScale;
+      const portraitBottom = portraitY + displayedHeight / 2;
+      const nameY = Math.max(y + 39, portraitBottom + (results.length === 1 ? 16 : 12));
+      const duplicateY = Math.max(y + 70, nameY + (results.length === 1 ? 31 : 24));
+      const plusY = Math.max(y + 91, duplicateY + (results.length === 1 ? 21 : 18));
+      const portrait = this.add.sprite(x, portraitY, art.family.idle.key, 0).setTint(art.tint);
+      portrait.setScale(portraitScale);
       this.resultsLayer!.add(portrait);
       this.resultsLayer!.add(addText(this, x - ticketWidth / 2 + 20, y - ticketHeight / 2 + 12, pull.rarity, compact ? 20 : 16, rarityColor[pull.rarity] ?? '#ffffff'));
-      this.resultsLayer!.add(addText(this, x, y + 39, slot.displayName, results.length === 1 ? 26 : 18, '#ffffff', 'center').setOrigin(0.5));
+      this.resultsLayer!.add(addText(this, x, nameY, slot.displayName, results.length === 1 ? 26 : 18, '#ffffff', 'center').setOrigin(0.5));
       const duplicateLabel = !pull.duplicate
         ? '신규 합류'
         : pull.duplicateResolution === 'DISMANTLE'
           ? `분해 · 혼 +${pull.dismantledSoulEssence ?? 0}`
           : '중복 · +1 적용';
-      this.resultsLayer!.add(addText(this, x, y + 70, duplicateLabel, results.length === 1 ? 20 : 14, pull.duplicate ? COLORS.gold : COLORS.green, 'center').setOrigin(0.5));
+      this.resultsLayer!.add(addText(this, x, duplicateY, duplicateLabel, results.length === 1 ? 20 : 14, pull.duplicate ? COLORS.gold : COLORS.green, 'center').setOrigin(0.5));
       if (pull.duplicateResolution === 'PLUS' && pull.plusLevelAfter !== undefined) {
-        this.resultsLayer!.add(addText(this, x, y + 91, `현재 +${pull.plusLevelAfter}`, results.length === 1 ? 17 : 12, COLORS.gold, 'center').setOrigin(0.5));
+        this.resultsLayer!.add(addText(this, x, plusY, `현재 +${pull.plusLevelAfter}`, results.length === 1 ? 17 : 12, COLORS.gold, 'center').setOrigin(0.5));
       }
     });
 
