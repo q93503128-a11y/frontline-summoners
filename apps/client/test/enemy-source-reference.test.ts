@@ -3,15 +3,18 @@ import test from 'node:test';
 import { NORMAL_ENEMY_SOURCE_REFERENCE, NORMAL_ENEMY_SOURCE_REFERENCE_IDS } from '../src/enemy-source-reference-map.ts';
 import { resolveUnitArt } from '../src/production-assets.ts';
 
-const CHAPTER_NORMAL_ENEMIES = [
-  'enemy-raider',
-  'enemy-sprinter',
-  'enemy-spearman',
-  'enemy-shield',
-  'enemy-cultist',
-  'enemy-sniper',
-  'enemy-knight',
-  'enemy-berserker',
+const CHAPTER_ONE_ENEMIES = {
+  'enemy-raider': 'warrior',
+  'enemy-sprinter': 'fantasy-warrior',
+  'enemy-spearman': 'huntress',
+  'enemy-shield': 'hero-knight-2',
+  'enemy-cultist': 'evil-wizard',
+  'enemy-sniper': 'wizard',
+  'enemy-knight': 'hero-knight',
+  'enemy-berserker': 'fantasy-warrior',
+} as const;
+
+const LATER_CHAPTER_NORMAL_ENEMIES = [
   'enemy_ch2_mossboar',
   'enemy_ch2_umbrella',
   'enemy_ch2_vinerider',
@@ -49,24 +52,40 @@ const BOSSES_LEFT_UNTOUCHED = [
   'boss_ch4_zero_engine',
 ] as const;
 
-test('all 32 normal chapter enemies use deliberate distinct CC0 source-reference silhouettes', () => {
+test('all 32 normal chapter enemies remain explicitly mapped without claiming production approval', () => {
+  const allIds = [...Object.keys(CHAPTER_ONE_ENEMIES), ...LATER_CHAPTER_NORMAL_ENEMIES];
   assert.equal(NORMAL_ENEMY_SOURCE_REFERENCE_IDS.length, 32);
-  assert.deepEqual(new Set(NORMAL_ENEMY_SOURCE_REFERENCE_IDS), new Set(CHAPTER_NORMAL_ENEMIES));
+  assert.deepEqual(new Set(NORMAL_ENEMY_SOURCE_REFERENCE_IDS), new Set(allIds));
 
-  const configuredFamilies = CHAPTER_NORMAL_ENEMIES.map((unitId) => NORMAL_ENEMY_SOURCE_REFERENCE[unitId]!.familyId);
-  assert.equal(new Set(configuredFamilies).size, 32, 'normal enemies must not collapse back into recolors of one body');
-
-  for (const unitId of CHAPTER_NORMAL_ENEMIES) {
+  for (const unitId of allIds) {
     const expected = NORMAL_ENEMY_SOURCE_REFERENCE[unitId]!;
     const art = resolveUnitArt(unitId);
-    assert.equal(art.source, 'PLACEHOLDER', `${unitId} must remain source-reference art`);
+    assert.equal(art.source, 'PLACEHOLDER', `${unitId} must remain review-only placeholder art`);
     assert.equal(art.productionAssetId, undefined, `${unitId} must not claim production approval`);
     assert.equal(art.family.id, expected.familyId, `${unitId} source-reference mapping drifted`);
-    assert.equal(art.tint, 0xffffff, `${unitId} must use the authored source palette rather than recolor identity`);
     assert.ok(art.family.knockback, `${unitId} must expose a hit reaction`);
     assert.ok(art.family.death, `${unitId} must expose a death reaction`);
-    assert.match(art.family.idle.url, /^\/assets\/characters\/lower-rarity\//);
   }
+});
+
+test('chapter-one enemies use coherent full-character families instead of unrelated composite parts', () => {
+  for (const [unitId, familyId] of Object.entries(CHAPTER_ONE_ENEMIES)) {
+    const art = resolveUnitArt(unitId);
+    assert.equal(art.family.id, familyId, `${unitId} readability fallback drifted`);
+    assert.ok(!art.family.id.startsWith('cc0-'), `${unitId} must not use the rejected composite creature pass`);
+  }
+
+  assert.equal(resolveUnitArt('enemy-shield').family.id, 'hero-knight-2', 'shield enemy must stay a readable knight, not an oversized detached shield part');
+});
+
+test('later chapter source-reference mappings keep their authored palettes and distinct reviewed silhouettes', () => {
+  const families = LATER_CHAPTER_NORMAL_ENEMIES.map((unitId) => {
+    const art = resolveUnitArt(unitId);
+    assert.equal(art.tint, 0xffffff, `${unitId} must preserve its source palette`);
+    assert.match(art.family.idle.url, /^\/assets\/characters\/lower-rarity\//);
+    return art.family.id;
+  });
+  assert.equal(new Set(families).size, LATER_CHAPTER_NORMAL_ENEMIES.length);
 });
 
 test('boss reservations are excluded from the normal-enemy visual batch', () => {
