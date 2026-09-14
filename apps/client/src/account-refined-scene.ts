@@ -1,9 +1,16 @@
 import Phaser from 'phaser';
+import { getAccountClientState } from './account-network.ts';
 import { AccountCommandScene as BaseAccountCommandScene } from './account-command-scene.ts';
-import { fitTextToWidth } from './scene-ui.ts';
+import { closeLocalCredentialDialog, requestLocalCredentials, type LocalCredentialMode } from './local-credential-dialog.ts';
+import { loginWithLocalCredentials, registerLocalCredentials } from './local-login.ts';
+import { addButton, COLORS, fitTextToWidth } from './scene-ui.ts';
 import { isCompactMobileViewport } from './viewport.ts';
 
 type AccountPresentationCarrier = Phaser.Scene & Record<string, unknown>;
+
+type MessageCarrier = {
+  setMessage(message: string, color: string): void;
+};
 
 function rewriteAccountLine(value: string): string {
   const normalized = value
@@ -23,12 +30,13 @@ function rewriteAccountLine(value: string): string {
     '게스트 장식 취향 가져오기': '게스트 프로필 가져오기',
     '서버 진행 유지': '계정 진행 유지',
     '게스트 저장 초기화': '로컬 진행 초기화',
-    'Google 계정으로 로그인': 'Google 계정 연결',
-    'Google 로그인이 아직 서버에 설정되지 않았습니다.': '현재 Google 계정 연결을 사용할 수 없습니다. 잠시 후 다시 시도해 주세요.',
-    'Google 로그인 API를 찾지 못했습니다.': 'Google 계정 연결을 시작하지 못했습니다. 잠시 후 다시 시도해 주세요.',
+    'Google 계정으로 로그인': '계정 연결',
+    'Google 로그인이 아직 서버에 설정되지 않았습니다.': 'Google 연결은 현재 사용할 수 없습니다. 아이디 로그인도 사용할 수 있습니다.',
+    'Google 로그인 API를 찾지 못했습니다.': 'Google 연결을 시작하지 못했습니다. 아이디 로그인도 사용할 수 있습니다.',
+    'Google 로그인 설정 응답 형식이 올바르지 않습니다.': '계정 API 연결 설정을 확인해 주세요. 아이디 로그인도 같은 API 서버를 사용합니다.',
   };
   if (direct[normalized]) return direct[normalized]!;
-  if (/^로그인 후 서버 진행이 비어 있으면/.test(normalized)) return '계정 진행이 비어 있으면 현재 게스트 진행을 옮길 수 있습니다.';
+  if (/^로그인 후 서버 진행이 비어 있으면/.test(normalized)) return 'Google 또는 자체 아이디로 로그인할 수 있습니다. 계정 진행이 비어 있으면 현재 게스트 진행을 옮길 수 있습니다.';
   if (/^서버에도 진행이 있으면 비교 후 직접 선택합니다/.test(normalized)) return '계정과 게스트 양쪽에 진행이 있으면 비교 후 직접 선택합니다.';
   if (/^전투·모집·성장·소셜 변경이 서버 진행에 저장됩니다\.$/.test(normalized)) return '플레이 진행이 계정에 저장됩니다.';
   if (/^오프라인에서는 진행을 확인할 수 있지만/.test(normalized)) return '오프라인에서는 진행을 볼 수 있지만 변경할 수 없습니다.';
@@ -61,6 +69,8 @@ function directButtonLabel(container: Phaser.GameObjects.Container): string {
 
 export class AccountScene extends BaseAccountCommandScene {
   private accountGuides: Phaser.GameObjects.Graphics | undefined;
+  private localActionLayer: Phaser.GameObjects.Container | undefined;
+  private localAuthPending = false;
 
   override create(): void {
     const factory = this.add;
@@ -74,18 +84,88 @@ export class AccountScene extends BaseAccountCommandScene {
 
     super.create();
     const carrier = this as unknown as AccountPresentationCarrier;
-    const restoreState = wrapAfter(carrier, 'renderState', () => this.polishAccountGeometry());
-    const restoreActions = wrapAfter(carrier, 'renderActions', () => this.polishAccountGeometry());
+    const restoreState = wrapAfter(carrier, 'renderState', () => {
+      this.polishAccountGeometry();
+      this.renderLocalAccountActions();
+    });
+    const restoreActions = wrapAfter(carrier, 'renderActions', () => {
+      this.polishAccountGeometry();
+      this.renderLocalAccountActions();
+    });
     this.drawAccountGuides();
     this.polishAccountGeometry();
+    this.renderLocalAccountActions();
 
     this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => {
       factory.text = originalText;
       restoreState?.();
       restoreActions?.();
+      this.localActionLayer?.destroy(true);
+      this.localActionLayer = undefined;
+      closeLocalCredentialDialog();
       this.accountGuides?.destroy();
       this.accountGuides = undefined;
     });
+  }
+
+  private renderLocalAccountActions(): void {
+    this.localActionLayer?.destroy(true);
+    this.localActionLayer = undefined;
+    if (getAccountClientState().kind !== 'GUEST_LOCAL') return;
+
+    const compact = isCompactMobileViewport();
+    const height = compact ? 70 : 48;
+    const layer = this.add.container(0, 0).setDepth(12);
+    layer.add(addButton(
+      this,
+      420,
+      530,
+      250,
+      height,
+      this.localAuthPending ? '처리 중…' : '아이디 로그인',
+      () => { void this.handleLocalAccount('login'); },
+      0x5e7fa1,
+      { tone: 'secondary', state: this.localAuthPending ? 'loading' : 'default' },
+    ));
+    layer.add(addButton(
+      this,
+      860,
+      530,
+      250,
+      height,
+      this.localAuthPending ? '처리 중…' : '아이디 만들기',
+      () => { void this.handleLocalAccount('register'); },
+      0x6d8569,
+      { tone: 'primary', state: this.localAuthPending ? 'loading' : 'default' },
+    ));
+    this.localActionLayer = layer;
+  }
+
+  private setBaseMessage(message: string, color: string): void {
+    const carrier = this as unknown as Partial<MessageCarrier>;
+    if (typeof carrier.setMessage === 'function') carrier.setMessage(message, color);
+  }
+
+  private async handleLocalAccount(mode: LocalCredentialMode): Promise<void> {
+    if (this.localAuthPending || getAccountClientState().kind !== 'GUEST_LOCAL') return;
+    const credential = await requestLocalCredentials(mode);
+    if (!credential || !this.scene.isActive()) return;
+
+    this.localAuthPending = true;
+    this.renderLocalAccountActions();
+    this.setBaseMessage(mode === 'register' ? '아이디 계정을 만드는 중…' : '아이디 계정으로 로그인하는 중…', COLORS.muted);
+    try {
+      if (mode === 'register') await registerLocalCredentials(credential.username, credential.password);
+      else await loginWithLocalCredentials(credential.username, credential.password);
+      if (!this.scene.isActive()) return;
+      this.setBaseMessage(mode === 'register' ? '아이디 계정을 만들고 로그인했습니다.' : '아이디 계정으로 로그인했습니다.', COLORS.green);
+      this.scene.restart();
+    } catch (error) {
+      if (!this.scene.isActive()) return;
+      this.setBaseMessage(error instanceof Error ? error.message : '아이디 계정 작업에 실패했습니다.', COLORS.red);
+      this.localAuthPending = false;
+      this.renderLocalAccountActions();
+    }
   }
 
   private drawAccountGuides(): void {
