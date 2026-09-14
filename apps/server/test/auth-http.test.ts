@@ -4,7 +4,7 @@ import { isAuthRequestOriginAllowed, resolveAuthHttp } from '../src/auth-http.ts
 
 const fakeDb = {} as D1Database;
 
-test('google auth origin gate allows same-origin or configured exact origins and rejects unrelated sites', () => {
+test('auth origin gate allows same-origin or configured exact origins and rejects unrelated sites', () => {
   assert.equal(isAuthRequestOriginAllowed(
     new Request('https://api.example/api/auth/config', { headers: { origin: 'https://api.example' } }),
     undefined,
@@ -19,7 +19,7 @@ test('google auth origin gate allows same-origin or configured exact origins and
   ), false);
 });
 
-test('auth config exposes public Google client id only to an allowed browser origin', async () => {
+test('auth config exposes Google and local credential capabilities only to an allowed browser origin', async () => {
   const allowed = await resolveAuthHttp(
     new Request('https://api.example/api/auth/config', { headers: { origin: 'https://game.example' } }),
     { DB: fakeDb, GOOGLE_CLIENT_ID: '123456789012-example.apps.googleusercontent.com', AUTH_ALLOWED_ORIGINS: 'https://game.example' },
@@ -27,6 +27,12 @@ test('auth config exposes public Google client id only to an allowed browser ori
   assert.equal(allowed?.status, 200);
   assert.deepEqual(allowed?.body, {
     google: { enabled: true, clientId: '123456789012-example.apps.googleusercontent.com' },
+    local: {
+      enabled: true,
+      usernameMinLength: 4,
+      usernameMaxLength: 24,
+      passwordMinLength: 10,
+    },
   });
   assert.equal(allowed?.headers?.['access-control-allow-origin'], 'https://game.example');
   assert.equal(allowed?.headers?.['cache-control'], 'no-store');
@@ -54,7 +60,7 @@ test('google login route stays closed until a server client id is configured', a
 
 test('auth preflight returns only exact origin instead of wildcard CORS', async () => {
   const result = await resolveAuthHttp(
-    new Request('https://api.example/api/auth/google', { method: 'OPTIONS', headers: { origin: 'https://game.example' } }),
+    new Request('https://api.example/api/auth/local/login', { method: 'OPTIONS', headers: { origin: 'https://game.example' } }),
     { DB: fakeDb, AUTH_ALLOWED_ORIGINS: 'https://game.example' },
   );
   assert.equal(result?.status, 204);
