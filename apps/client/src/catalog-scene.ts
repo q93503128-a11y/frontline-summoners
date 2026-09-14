@@ -217,35 +217,47 @@ export class CatalogScene extends Phaser.Scene {
       this.contentLayer!.add(addDossierCard(this, x, 398, 220, 430, owned ? 0x252c3a : 0x1d222b, border, owned));
 
       const art = getArt(slot.definition.id);
-      const portrait = this.add.sprite(x, compact ? 285 : 270, art.family.idle.key, 0);
+      const portraitY = compact ? 285 : 270;
+      const targetHeight = compact ? 132 : 145;
+      const portraitScale = (targetHeight / art.family.idle.frameHeight) * art.displayScale;
+      const displayedHeight = art.family.idle.frameHeight * portraitScale;
+      const portraitBottom = portraitY + displayedHeight / 2;
+      const nameY = Math.max(compact ? 360 : 342, portraitBottom + (compact ? 22 : 18));
+      const portrait = this.add.sprite(x, portraitY, art.family.idle.key, 0);
       if (owned) {
         portrait.setTint(art.tint);
         portrait.setAlpha(1);
       } else {
+        // Discovery concealment is canonical catalog behavior, not UI polish applied to owned art.
         portrait.setTint(0x07080b);
         portrait.setTintFill();
         portrait.setAlpha(0.86);
       }
-      portrait.setScale(((compact ? 132 : 145) / art.family.idle.frameHeight) * art.displayScale);
+      portrait.setScale(portraitScale);
       this.contentLayer!.add(portrait);
 
-      this.contentLayer!.add(addText(this, x - 96, 200, owned ? badge.label : '???', compact ? 20 : 15, owned ? badge.color : '#69727e'));
-      this.contentLayer!.add(addText(this, x, compact ? 360 : 342, owned ? slot.displayName : '???', compact ? 27 : 22, owned ? '#ffffff' : '#747d89', 'center').setOrigin(0.5));
+      const nameLabel = owned ? `${badge.label} · ${slot.displayName}` : '???';
+      this.contentLayer!.add(addText(this, x, nameY, nameLabel, compact ? 25 : 21, owned ? '#ffffff' : '#747d89', 'center').setOrigin(0.5));
 
       if (owned) {
-        this.contentLayer!.add(addText(this, x, compact ? 400 : 376, `${slot.role} · ${slot.cost} 보급`, compact ? 21 : 14, COLORS.gold, 'center').setOrigin(0.5));
-        this.contentLayer!.add(addText(this, x, compact ? 438 : 402, formatCombatTraits(slot.definition), compact ? 19 : 13, COLORS.blue, 'center').setOrigin(0.5));
+        const roleY = nameY + (compact ? 40 : 34);
+        const traitY = roleY + (compact ? 38 : 26);
+        const specialtyY = traitY + (compact ? 36 : 28);
+        this.contentLayer!.add(addText(this, x, roleY, `${slot.role} · ${slot.cost} 보급`, compact ? 20 : 14, COLORS.gold, 'center').setOrigin(0.5));
+        this.contentLayer!.add(addText(this, x, traitY, formatCombatTraits(slot.definition), compact ? 18 : 13, COLORS.blue, 'center').setOrigin(0.5));
         const specialty = formatDamageSpecialty(slot.definition);
-        if (specialty) this.contentLayer!.add(addText(this, x, compact ? 474 : 430, specialty, compact ? 19 : 13, '#ffd493', 'center').setOrigin(0.5));
+        if (specialty) this.contentLayer!.add(addText(this, x, specialtyY, specialty, compact ? 18 : 13, '#ffd493', 'center').setOrigin(0.5));
         if (compact) {
-          this.contentLayer!.add(addText(this, x, 532, `HP ${slot.definition.maxHp} · 공격 ${slot.definition.attackDamage}\n사거리 ${slot.definition.attackMaxRange}`, 18, '#aeb8c8', 'center').setOrigin(0.5).setWordWrapWidth(190));
+          const statsY = Math.max(532, specialty ? specialtyY + 52 : traitY + 62);
+          this.contentLayer!.add(addText(this, x, statsY, `HP ${slot.definition.maxHp} · 공격 ${slot.definition.attackDamage}\n사거리 ${slot.definition.attackMaxRange}`, 18, '#aeb8c8', 'center').setOrigin(0.5).setWordWrapWidth(190));
         } else {
-          this.contentLayer!.add(addText(this, x, specialty ? 466 : 440, slot.description, 13, '#bec7d5', 'center').setOrigin(0.5).setWordWrapWidth(188));
+          const descriptionY = specialty ? specialtyY + 36 : traitY + 38;
+          this.contentLayer!.add(addText(this, x, descriptionY, slot.description, 13, '#bec7d5', 'center').setOrigin(0.5).setWordWrapWidth(188));
           this.contentLayer!.add(addText(this, x, 555, `HP ${slot.definition.maxHp}  ·  공격 ${slot.definition.attackDamage}\n사거리 ${slot.definition.attackMaxRange}  ·  재생산 ${(slot.rechargeFrames / 30).toFixed(1)}초`, 12, '#91a0b3', 'center').setOrigin(0.5).setWordWrapWidth(190));
         }
       } else {
-        this.contentLayer!.add(addText(this, x, compact ? 425 : 415, '미획득', compact ? 22 : 15, '#707985', 'center').setOrigin(0.5));
-        this.contentLayer!.add(addText(this, x, compact ? 486 : 470, '획득 후 정보 공개', compact ? 19 : 14, '#616b78', 'center').setOrigin(0.5));
+        this.contentLayer!.add(addText(this, x, nameY + (compact ? 65 : 55), '미획득', compact ? 22 : 15, '#707985', 'center').setOrigin(0.5));
+        this.contentLayer!.add(addText(this, x, nameY + (compact ? 126 : 110), '획득 후 정보 공개', compact ? 19 : 14, '#616b78', 'center').setOrigin(0.5));
       }
     });
   }
@@ -265,31 +277,44 @@ export class CatalogScene extends Phaser.Scene {
       this.contentLayer!.add(addDossierCard(this, x, 398, 220, 430, discovered ? 0x30262a : 0x1d222b, border, discovered || focused));
 
       const art = getArt(enemy.definition.id);
-      const portrait = this.add.sprite(x, compact ? 285 : 270, art.family.idle.key, 0);
+      const portraitY = compact ? 285 : 270;
+      const targetHeight = compact ? 132 : 145;
+      const portraitScale = (targetHeight / art.family.idle.frameHeight) * art.displayScale;
+      const displayedHeight = art.family.idle.frameHeight * portraitScale;
+      const portraitBottom = portraitY + displayedHeight / 2;
+      const nameY = Math.max(compact ? 360 : 342, portraitBottom + (compact ? 22 : 18));
+      const portrait = this.add.sprite(x, portraitY, art.family.idle.key, 0);
       if (discovered) {
         portrait.setTint(art.tint);
         portrait.setAlpha(1);
       } else {
+        // Discovery concealment is canonical catalog behavior, not UI polish applied to discovered art.
         portrait.setTint(0x07080b);
         portrait.setTintFill();
         portrait.setAlpha(0.86);
       }
-      portrait.setScale(((compact ? 132 : 145) / art.family.idle.frameHeight) * art.displayScale);
+      portrait.setScale(portraitScale);
       this.contentLayer!.add(portrait);
 
       const categoryLabel = discovered ? (isBoss ? '우두머리' : '적') : '???';
-      this.contentLayer!.add(addText(this, x - 96, 200, focused ? `▶ ${categoryLabel}` : categoryLabel, compact ? 20 : 15, focused ? '#ffe39a' : discovered ? (isBoss ? '#ff9b92' : '#d5a0a4') : '#69727e'));
-      this.contentLayer!.add(addText(this, x, compact ? 360 : 342, discovered ? enemy.displayName : '???', compact ? 27 : 22, discovered ? '#ffffff' : '#747d89', 'center').setOrigin(0.5));
+      const nameLabel = discovered
+        ? `${focused ? '▶ ' : ''}${categoryLabel} · ${enemy.displayName}`
+        : '???';
+      this.contentLayer!.add(addText(this, x, nameY, nameLabel, compact ? 25 : 21, focused ? '#ffe39a' : discovered ? '#ffffff' : '#747d89', 'center').setOrigin(0.5));
 
       if (discovered) {
-        this.contentLayer!.add(addText(this, x, compact ? 400 : 376, `처치 보급 +${enemy.rewardSupply}`, compact ? 21 : 14, COLORS.gold, 'center').setOrigin(0.5));
-        this.contentLayer!.add(addText(this, x, compact ? 438 : 402, formatCombatTraits(enemy.definition), compact ? 19 : 13, '#ffb4ae', 'center').setOrigin(0.5));
+        const rewardY = nameY + (compact ? 40 : 34);
+        const traitY = rewardY + (compact ? 38 : 26);
+        const specialtyY = traitY + (compact ? 36 : 28);
+        this.contentLayer!.add(addText(this, x, rewardY, `처치 보급 +${enemy.rewardSupply}`, compact ? 20 : 14, COLORS.gold, 'center').setOrigin(0.5));
+        this.contentLayer!.add(addText(this, x, traitY, formatCombatTraits(enemy.definition), compact ? 18 : 13, '#ffb4ae', 'center').setOrigin(0.5));
         const specialty = formatDamageSpecialty(enemy.definition);
-        if (specialty) this.contentLayer!.add(addText(this, x, compact ? 474 : 430, specialty, compact ? 19 : 13, '#ffd493', 'center').setOrigin(0.5));
-        this.contentLayer!.add(addText(this, x, compact ? 532 : 520, `HP ${enemy.definition.maxHp} · 공격 ${enemy.definition.attackDamage}\n사거리 ${enemy.definition.attackMaxRange}`, compact ? 18 : 12, '#aeb8c8', 'center').setOrigin(0.5).setWordWrapWidth(190));
+        if (specialty) this.contentLayer!.add(addText(this, x, specialtyY, specialty, compact ? 18 : 13, '#ffd493', 'center').setOrigin(0.5));
+        const statsY = compact ? Math.max(532, specialty ? specialtyY + 52 : traitY + 62) : 520;
+        this.contentLayer!.add(addText(this, x, statsY, `HP ${enemy.definition.maxHp} · 공격 ${enemy.definition.attackDamage}\n사거리 ${enemy.definition.attackMaxRange}`, compact ? 18 : 12, '#aeb8c8', 'center').setOrigin(0.5).setWordWrapWidth(190));
       } else {
-        this.contentLayer!.add(addText(this, x, compact ? 425 : 415, '미발견', compact ? 22 : 15, '#707985', 'center').setOrigin(0.5));
-        this.contentLayer!.add(addText(this, x, compact ? 486 : 470, '전투에서 조우하면 정보 공개', compact ? 19 : 14, '#616b78', 'center').setOrigin(0.5).setWordWrapWidth(188));
+        this.contentLayer!.add(addText(this, x, nameY + (compact ? 65 : 55), '미발견', compact ? 22 : 15, '#707985', 'center').setOrigin(0.5));
+        this.contentLayer!.add(addText(this, x, nameY + (compact ? 126 : 110), '전투에서 조우하면 정보 공개', compact ? 19 : 14, '#616b78', 'center').setOrigin(0.5).setWordWrapWidth(188));
       }
     });
   }
