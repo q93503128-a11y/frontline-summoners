@@ -193,12 +193,6 @@ function polishCatalogScene(scene: Phaser.Scene): void {
       object.setDepth(active ? 3 : 1);
     }
 
-    if (object instanceof Phaser.GameObjects.Sprite && (Math.abs(object.y - 270) <= 2 || Math.abs(object.y - 285) <= 2)) {
-      object.setY(object.y - 5);
-      object.setScale(object.scaleX * 1.08, object.scaleY * 1.08);
-      object.setDepth(5);
-    }
-
     if (object instanceof Phaser.GameObjects.Text) {
       if (object.y >= 430 && object.y <= 560 && object.text.length > 18) object.setAlpha(0.76);
       if (object.text === '미획득' || object.text === '미발견' || object.text === '미클리어') object.setAlpha(0.72);

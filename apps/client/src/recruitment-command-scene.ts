@@ -92,12 +92,6 @@ function polishRectangle(rectangle: Phaser.GameObjects.Rectangle): void {
   if ((oneTicket || tenTicket) && rectangle.fillColor === 0x292820) rectangle.setFillStyle(0x1c2027, 0.99).setStrokeStyle(1, 0xa48958, 0.5);
 }
 
-function polishSprite(sprite: Phaser.GameObjects.Sprite): void {
-  const singleResult = Math.abs(sprite.x - 640) <= 2 && Math.abs(sprite.y - 322) <= 3;
-  const tenResultRow = (Math.abs(sprite.y - 216) <= 3 || Math.abs(sprite.y - 420) <= 3) && sprite.x >= 100 && sprite.x <= 1180;
-  if (singleResult || tenResultRow) sprite.setScale(sprite.scaleX * 1.12, sprite.scaleY * 1.12);
-}
-
 function visitGameObjects(objects: readonly Phaser.GameObjects.GameObject[], visitor: (object: Phaser.GameObjects.GameObject) => void): void {
   objects.forEach((object) => {
     visitor(object);
@@ -113,7 +107,6 @@ function installDynamicPolish(scene: Phaser.Scene): () => void {
       polished.add(object);
       if (object instanceof Phaser.GameObjects.Container) polishContainer(object);
       else if (object instanceof Phaser.GameObjects.Rectangle) polishRectangle(object);
-      else if (object instanceof Phaser.GameObjects.Sprite) polishSprite(object);
     });
   };
   scene.events.on(Phaser.Scenes.Events.POST_UPDATE, apply);

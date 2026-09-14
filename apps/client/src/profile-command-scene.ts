@@ -138,10 +138,6 @@ export class ProfileScene extends BaseProfileScene {
           : centered ? 660 : 640;
         if (object.width > maxWidth) fitTextToWidth(object, maxWidth, compact ? 14 : 11);
       }
-      if (object instanceof Phaser.GameObjects.Sprite) {
-        const profilePortrait = object.x >= 130 && object.x <= 150 && object.y >= 305 && object.y <= 330;
-        if (profilePortrait) object.setScale(object.scaleX * 1.08, object.scaleY * 1.08).setDepth(7);
-      }
       if (object instanceof Phaser.GameObjects.Container) {
         const label = object.list.find((child): child is Phaser.GameObjects.Text => child instanceof Phaser.GameObjects.Text)?.text ?? '';
         if (['대표 인물', '칭호', '프레임', '배너', '문장', '배지'].includes(label)) object.setDepth(5);

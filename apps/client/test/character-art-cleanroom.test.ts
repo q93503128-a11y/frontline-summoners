@@ -17,3 +17,17 @@ test('character portrait clean room keeps legacy silhouette installer inert', as
   assert.doesNotMatch(installer, /Phaser\.GameObjects\.Graphics/);
   assert.doesNotMatch(installer, /addAt\(/);
 });
+
+test('command presentation wrappers never mutate character sprite presentation', async () => {
+  const sources = await Promise.all([
+    readSource('../src/recruitment-command-scene.ts'),
+    readSource('../src/catalog-command-scene.ts'),
+    readSource('../src/profile-command-scene.ts'),
+  ]);
+
+  for (const source of sources) {
+    assert.doesNotMatch(source, /Phaser\.GameObjects\.Sprite/);
+    assert.doesNotMatch(source, /\.setTint\(/);
+    assert.doesNotMatch(source, /\.setScale\([^\n]*scale[XY]\s*\*/);
+  }
+});
