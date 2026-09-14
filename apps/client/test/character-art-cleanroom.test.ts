@@ -32,6 +32,36 @@ test('battle character clean room keeps legacy silhouette runtime inert', async 
   assert.doesNotMatch(runtime, /\.set(?:Scale|Tint|Depth|Angle|Alpha)\(/);
 });
 
+test('pve battle clean-room runtime moves chrome without mutating character presentation', async () => {
+  const [battle, runtime] = await Promise.all([
+    readSource('../src/accessible-battle-scene.ts'),
+    readSource('../src/battle-character-cleanroom-runtime.ts'),
+  ]);
+
+  assert.match(battle, /installBattleCharacterCleanroomRuntime\(this\)/);
+  assert.match(runtime, /const displayedHeight = art\.family\.displayHeight \* art\.displayScale;/);
+  assert.match(runtime, /const hpY = view\.sprite\.y - displayedHeight \/ 2 - 10;/);
+  assert.match(runtime, /const traitY = hpY - 18;/);
+  assert.match(runtime, /const shadowY = view\.sprite\.y \+ displayedHeight \/ 2 \+ 8;/);
+  assert.match(runtime, /view\.hpBg\.setPosition\(view\.sprite\.x, hpY\);/);
+  assert.match(runtime, /view\.trait\.setPosition\(view\.sprite\.x, traitY\);/);
+  assert.match(runtime, /view\.shadow\.setPosition\(view\.sprite\.x, shadowY\);/);
+  assert.doesNotMatch(runtime, /view\.sprite\.set(?:Scale|Tint|Texture|Frame|Alpha|Angle|FlipX)/);
+  assert.doesNotMatch(runtime, /createUnitSilhouettePresentation|addAt\(/);
+});
+
+test('battle summon cards reserve an unoccluded character zone', async () => {
+  const source = await readSource('../src/battle-command-hud.ts');
+
+  assert.match(source, /const portraitScale = \(portraitHeight \/ art\.family\.idle\.frameHeight\) \* art\.displayScale;/);
+  assert.match(source, /const displayedHeight = art\.family\.idle\.frameHeight \* portraitScale;/);
+  assert.match(source, /const portraitBottom = portraitY \+ displayedHeight \/ 2;/);
+  assert.match(source, /const footerTop = Math\.max\(y \+ slotHeight \* 0\.03, portraitBottom \+ 6\);/);
+  assert.match(source, /const shade = scene\.add\.rectangle\(x, footerTop \+ shadeHeight \/ 2, slotWidth - 8, shadeHeight,/);
+  assert.doesNotMatch(source, /const shade = scene\.add\.rectangle\(x, y, slotWidth, slotHeight,/);
+  assert.doesNotMatch(source, /topRail/);
+});
+
 test('command presentation wrappers never mutate character sprite presentation', async () => {
   const sources = await Promise.all([
     readSource('../src/recruitment-command-scene.ts'),
@@ -106,4 +136,18 @@ test('growth detail copy starts beyond the resolved character width', async () =
   assert.match(source, /portrait\.setScale\(portraitScale\);/);
   assert.match(source, /\.setTint\(art\.tint\)/);
   assert.doesNotMatch(source, /createUnitSilhouettePresentation|addAt\(/);
+});
+
+test('catalog ally and enemy dossiers start footer copy below resolved portrait bounds', async () => {
+  const source = await readSource('../src/catalog-scene.ts');
+  const portraitBottomMatches = source.match(/const portraitBottom = portraitY \+ displayedHeight \/ 2;/g) ?? [];
+  const nameYMatches = source.match(/const nameY = Math\.max\(compact \? 360 : 342, portraitBottom \+ \(compact \? 22 : 18\)\);/g) ?? [];
+
+  assert.equal(portraitBottomMatches.length, 2);
+  assert.equal(nameYMatches.length, 2);
+  assert.match(source, /const portraitScale = \(targetHeight \/ art\.family\.idle\.frameHeight\) \* art\.displayScale;/);
+  assert.match(source, /portrait\.setScale\(portraitScale\);/);
+  assert.match(source, /Discovery concealment is canonical catalog behavior/);
+  assert.doesNotMatch(source, /x - 96, 200, owned \? badge\.label/);
+  assert.doesNotMatch(source, /x - 96, 200, focused \?/);
 });
