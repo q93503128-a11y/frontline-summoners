@@ -27,7 +27,8 @@ test('enemy catalog hides undiscovered identity and combat information behind a 
   const source = await readFile(new URL('../src/catalog-scene.ts', import.meta.url), 'utf8');
   assert.match(source, /type CatalogMode = 'ALLIES' \| 'ENEMIES' \| 'REWARDS' \| 'SPECIAL'/);
   assert.match(source, /new Set\(this\.progress\.discoveredEnemyIds \?\? \[\]\)/);
-  assert.match(source, /discovered \? enemy\.displayName : '\?\?\?'/);
+  assert.match(source, /const categoryLabel = discovered \? \(isBoss \? '우두머리' : '적'\) : '\?\?\?';/);
+  assert.match(source, /const nameLabel = discovered[\s\S]*?enemy\.displayName[\s\S]*?: '\?\?\?';/);
   assert.match(source, /portrait\.setTint\(0x07080b\)/);
   assert.match(source, /portrait\.setTintFill\(\)/);
   assert.match(source, /전투에서 조우하면 정보 공개/);
