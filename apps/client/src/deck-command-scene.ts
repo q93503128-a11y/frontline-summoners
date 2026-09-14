@@ -151,27 +151,29 @@ function renderFormationOrder(scene: DeckPresentationCarrier): void {
     scene.deckLayer.add(bg);
     scene.deckLayer.add(scene.add.rectangle(x, y - height / 2 + 2, DECK_SLOT_WIDTH - 14, 3, border, rosterSlot ? 0.88 : 0.22));
 
-    const keyCircle = scene.add.circle(x - 39, y - height / 2 + 14, compact ? 13 : 11, rosterSlot ? 0x342d1d : 0x1b222b, 0.98)
+    const keyCircle = scene.add.circle(x - 39, y - height / 2 + 7, 9, rosterSlot ? 0x342d1d : 0x1b222b, 0.98)
       .setStrokeStyle(1, rosterSlot ? 0xc8a85a : 0x566272, 0.82);
     scene.deckLayer.add(keyCircle);
-    scene.deckLayer.add(text(scene, keyCircle.x, keyCircle.y - 1, hotkeyLabel(index), compact ? 14 : 12, rosterSlot ? COLORS.gold : '#8792a0', 'center').setOrigin(0.5));
+    scene.deckLayer.add(text(scene, keyCircle.x, keyCircle.y - 1, hotkeyLabel(index), compact ? 12 : 11, rosterSlot ? COLORS.gold : '#8792a0', 'center').setOrigin(0.5));
 
     if (!rosterSlot) {
       scene.deckLayer.add(text(scene, x, y - 2, '+', compact ? 28 : 24, '#566272', 'center').setOrigin(0.5));
-      scene.deckLayer.add(text(scene, x, y + 25, '빈 슬롯', compact ? 12 : 10, '#697584', 'center').setOrigin(0.5));
+      scene.deckLayer.add(text(scene, x, y + 28, '빈 슬롯', compact ? 12 : 10, '#697584', 'center').setOrigin(0.5));
       continue;
     }
 
     const meta = scene.progress.characterProgressById?.[rosterSlot.slotId];
     const art = resolveUnitArt(rosterSlot.definition.id, meta?.selectedFormId);
-    const portrait = scene.add.sprite(x, y - 5, art.family.idle.key, 0).setTint(art.tint);
-    portrait.setScale(((compact ? 44 : 42) / art.family.idle.frameHeight) * art.displayScale);
+    const targetHeight = compact ? 44 : 42;
+    const portraitScale = (targetHeight / art.family.idle.frameHeight) * art.displayScale;
+    const portrait = scene.add.sprite(x, y, art.family.idle.key, 0).setTint(art.tint);
+    portrait.setScale(portraitScale);
     scene.deckLayer.add(portrait);
 
-    const cost = text(scene, x + 43, y - height / 2 + 7, `◆${rosterSlot.cost}`, compact ? 12 : 10, COLORS.gold, 'right').setOrigin(1, 0);
+    const cost = text(scene, x + 43, y - height / 2 + 4, `◆${rosterSlot.cost}`, compact ? 11 : 10, COLORS.gold, 'right').setOrigin(1, 0);
     scene.deckLayer.add(cost);
     const displayName = rosterSlot.displayName.length > 6 ? `${rosterSlot.displayName.slice(0, 5)}…` : rosterSlot.displayName;
-    const name = text(scene, x, y + 25, displayName, compact ? 14 : 12, '#f4f7fb', 'center').setOrigin(0.5);
+    const name = text(scene, x, y + height / 2 - 8, displayName, compact ? 13 : 12, '#f4f7fb', 'center').setOrigin(0.5);
     fitTextToWidth(name, DECK_SLOT_WIDTH - 18, compact ? 11 : 10);
     scene.deckLayer.add(name);
     scene.wireDragSurface(bg, rosterSlot.slotId, x, y);
@@ -219,16 +221,23 @@ function renderRosterCards(scene: DeckPresentationCarrier): void {
 
     const meta = scene.progress.characterProgressById?.[slot.slotId];
     const art = resolveUnitArt(slot.definition.id, meta?.selectedFormId);
-    const portrait = scene.add.sprite(x - cardWidth / 2 + (compact ? 54 : 47), y + 5, art.family.idle.key, 0).setTint(art.tint);
-    portrait.setScale(((compact ? 66 : 60) / art.family.idle.frameHeight) * art.displayScale);
+    const portraitX = x - cardWidth / 2 + (compact ? 54 : 47);
+    const portraitY = y + 5;
+    const targetHeight = compact ? 66 : 60;
+    const portraitScale = (targetHeight / art.family.idle.frameHeight) * art.displayScale;
+    const displayedWidth = art.family.idle.frameWidth * portraitScale;
+    const portraitRight = portraitX + displayedWidth / 2;
+    const portrait = scene.add.sprite(portraitX, portraitY, art.family.idle.key, 0).setTint(art.tint);
+    portrait.setScale(portraitScale);
     scene.cardsLayer!.add(portrait);
 
-    scene.cardsLayer!.add(text(scene, x - cardWidth / 2 + 11, y - cardHeight / 2 + 7, badge.label, compact ? 14 : 12, badge.color));
+    const headerY = y - cardHeight / 2 + (compact ? 13 : 12);
+    scene.cardsLayer!.add(text(scene, x - cardWidth / 2 + 11, headerY, badge.label, compact ? 14 : 12, badge.color).setOrigin(0, 0.5));
     if (selected) {
-      scene.cardsLayer!.add(text(scene, x + cardWidth / 2 - 11, y - cardHeight / 2 + 7, `출격 ${hotkeyLabel(selectedIndex)}`, compact ? 14 : 12, COLORS.gold, 'right').setOrigin(1, 0));
+      scene.cardsLayer!.add(text(scene, x + cardWidth / 2 - 42, headerY, `출격 ${hotkeyLabel(selectedIndex)}`, compact ? 14 : 12, COLORS.gold, 'right').setOrigin(1, 0.5));
     }
 
-    const favoriteStar = text(scene, x + cardWidth / 2 - 13, y + 30, favorite ? '★' : '☆', compact ? 22 : 19, favorite ? COLORS.gold : '#738092', 'right').setOrigin(1, 0.5);
+    const favoriteStar = text(scene, x + cardWidth / 2 - 13, headerY, favorite ? '★' : '☆', compact ? 20 : 18, favorite ? COLORS.gold : '#738092', 'right').setOrigin(1, 0.5);
     favoriteStar.setInteractive({ useHandCursor: true });
     favoriteStar.on('pointerdown', (_pointer: Phaser.Input.Pointer, _localX: number, _localY: number, event: Phaser.Types.Input.EventData) => event.stopPropagation());
     favoriteStar.on('pointerup', (_pointer: Phaser.Input.Pointer, _localX: number, _localY: number, event: Phaser.Types.Input.EventData) => {
@@ -237,8 +246,10 @@ function renderRosterCards(scene: DeckPresentationCarrier): void {
     });
     scene.cardsLayer!.add(favoriteStar);
 
-    const infoX = x - cardWidth / 2 + (compact ? 96 : 84);
-    const infoWidth = compact ? 150 : 124;
+    const baseInfoX = x - cardWidth / 2 + (compact ? 96 : 84);
+    const infoX = Math.max(baseInfoX, portraitRight + 10);
+    const infoRight = x + cardWidth / 2 - 12;
+    const infoWidth = Math.max(1, infoRight - infoX);
     const name = text(scene, infoX, y - 43, slot.displayName, compact ? 19 : 16, '#ffffff');
     fitTextToWidth(name, infoWidth, compact ? 14 : 12);
     scene.cardsLayer!.add(name);
@@ -256,7 +267,7 @@ function renderRosterCards(scene: DeckPresentationCarrier): void {
     const specialty = formatDamageSpecialty(currentSlot.definition);
     const identity = specialty ? `${traits} · ${specialty}` : traits;
     const combatLine = text(scene, infoX, y + 17, `◆${currentSlot.cost} · ${identity}`, compact ? 14 : 12, COLORS.gold);
-    fitTextToWidth(combatLine, infoWidth + (compact ? 6 : 4), compact ? 10 : 9);
+    fitTextToWidth(combatLine, infoWidth, compact ? 10 : 9);
     scene.cardsLayer!.add(combatLine);
 
     scene.wireDragSurface(bg, slot.slotId, x, y);
