@@ -4,6 +4,13 @@ import {
   GoogleIdTokenValidationError,
   verifyGoogleIdToken,
 } from './google-id-token-authority.ts';
+import {
+  LocalAuthInputError,
+  LocalAuthInvalidCredentialsError,
+  LocalAuthUsernameTakenError,
+  loginLocalPasswordAccount,
+  registerLocalPasswordAccount,
+} from './local-password-authority.ts';
 
 export interface AuthHttpEnvironment {
   readonly DB: D1Database;
@@ -17,7 +24,12 @@ export interface AuthHttpResult {
   readonly headers?: Readonly<Record<string, string>>;
 }
 
-const AUTH_PATHS = new Set(['/api/auth/config', '/api/auth/google']);
+const AUTH_PATHS = new Set([
+  '/api/auth/config',
+  '/api/auth/google',
+  '/api/auth/local/login',
+  '/api/auth/local/register',
+]);
 const AUTH_SESSION_TTL_MS = 7 * 24 * 60 * 60 * 1000;
 const MAX_GOOGLE_CREDENTIAL_LENGTH = 16_384;
 
@@ -92,6 +104,14 @@ function googleClientId(env: AuthHttpEnvironment): string | null {
   return value && value.length > 0 ? value : null;
 }
 
+function sessionBody(provider: 'google' | 'local', session: { readonly token: string; readonly expiresAtMs: number }): unknown {
+  return {
+    provider,
+    sessionToken: session.token,
+    expiresAtMs: session.expiresAtMs,
+  };
+}
+
 export async function resolveAuthHttp(
   request: Request,
   env: AuthHttpEnvironment,
@@ -116,6 +136,12 @@ export async function resolveAuthHttp(
           enabled: clientId !== null,
           clientId,
         },
+        local: {
+          enabled: true,
+          usernameMinLength: 4,
+          usernameMaxLength: 24,
+          passwordMinLength: 10,
+        },
       },
       headers,
     };
@@ -128,15 +154,7 @@ export async function resolveAuthHttp(
       const body = await readJsonObject(request);
       const identity = await verifyGoogleIdToken(googleCredential(body.credential), clientId, nowMs);
       const session = await issueAuthSessionForVerifiedIdentity(env.DB, identity, nowMs + AUTH_SESSION_TTL_MS, nowMs);
-      return {
-        status: 200,
-        body: {
-          provider: 'google',
-          sessionToken: session.token,
-          expiresAtMs: session.expiresAtMs,
-        },
-        headers,
-      };
+      return { status: 200, body: sessionBody('google', session), headers };
     } catch (error) {
       if (error instanceof AuthRequestError) {
         return { status: 400, body: { error: 'invalid_request', message: error.message }, headers };
@@ -146,6 +164,28 @@ export async function resolveAuthHttp(
       }
       if (error instanceof GoogleIdTokenProviderError) {
         return { status: 503, body: { error: 'google_verification_unavailable' }, headers };
+      }
+      throw error;
+    }
+  }
+
+  if (request.method === 'POST' && (url.pathname === '/api/auth/local/login' || url.pathname === '/api/auth/local/register')) {
+    try {
+      const body = await readJsonObject(request);
+      const expiresAtMs = nowMs + AUTH_SESSION_TTL_MS;
+      const session = url.pathname.endsWith('/register')
+        ? await registerLocalPasswordAccount(env.DB, body.username, body.password, expiresAtMs, nowMs)
+        : await loginLocalPasswordAccount(env.DB, body.username, body.password, expiresAtMs, nowMs);
+      return { status: url.pathname.endsWith('/register') ? 201 : 200, body: sessionBody('local', session), headers };
+    } catch (error) {
+      if (error instanceof AuthRequestError || error instanceof LocalAuthInputError) {
+        return { status: 400, body: { error: 'invalid_request', message: error.message }, headers };
+      }
+      if (error instanceof LocalAuthUsernameTakenError) {
+        return { status: 409, body: { error: 'username_taken' }, headers };
+      }
+      if (error instanceof LocalAuthInvalidCredentialsError) {
+        return { status: 401, body: { error: 'invalid_credentials' }, headers };
       }
       throw error;
     }
