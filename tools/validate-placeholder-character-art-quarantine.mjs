@@ -87,11 +87,21 @@ assert(!ci.includes('apps/client/public/assets/production/review'),
 assert(!await exists(quarantinedRuntimeRoot),
   'public production unit art must stay absent until explicit character design work resumes');
 
-const expectedClientVendor = 'node ../../tools/vendor-client-assets.mjs && node ../../tools/vendor-lower-rarity-free-assets.mjs';
+const expectedClientVendor = [
+  'node ../../tools/vendor-client-assets.mjs',
+  'node ../../tools/vendor-lower-rarity-free-assets.mjs',
+  'node ../../tools/vendor-remaining-common-assets.mjs',
+  'node ../../tools/vendor-a-common-assets.mjs',
+  'node ../../tools/vendor-boss-source-reference-assets.mjs',
+  'node ../../tools/vendor-foozle-boss-source-reference-assets.mjs',
+  'node ../../tools/vendor-reactorcore-boss-source-reference-assets.mjs',
+  'node ../../tools/vendor-series-one-s-source-reference-assets.mjs',
+  'node ../../tools/vendor-series-two-s-source-reference-assets.mjs',
+].join(' && ');
 assert(clientPackage.scripts?.predev === expectedClientVendor,
-  'client predev must vendor the vetted free sprite families without restoring production-unit generators');
+  'client predev must vendor only the vetted free/source-reference sprite families without restoring production-unit generators');
 assert(clientPackage.scripts?.prebuild === expectedClientVendor,
-  'client prebuild must vendor the vetted free sprite families without restoring production-unit generators');
+  'client prebuild must vendor only the vetted free/source-reference sprite families without restoring production-unit generators');
 assert(clientAssets.includes("const LOCAL = '/assets/characters';"),
   'normal runtime character art must stay on the free-sprite path');
 
