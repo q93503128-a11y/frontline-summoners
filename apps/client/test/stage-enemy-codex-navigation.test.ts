@@ -38,7 +38,8 @@ test('catalog accepts focused enemy navigation while preserving undiscovered sil
   assert.match(source, /this\.page = Math\.floor\(index \/ ENEMY_PAGE_SIZE\)/);
   assert.match(source, /const focused = enemy\.enemyId === this\.focusEnemyId/);
   assert.match(source, /const border = focused \? 0xf0c967/);
-  assert.match(source, /discovered \? enemy\.displayName : '\?\?\?'/);
+  assert.match(source, /const categoryLabel = discovered \? \(isBoss \? '우두머리' : '적'\) : '\?\?\?';/);
+  assert.match(source, /const nameLabel = discovered[\s\S]*?enemy\.displayName[\s\S]*?: '\?\?\?';/);
   assert.match(source, /portrait\.setTint\(0x07080b\)/);
   assert.match(source, /portrait\.setTintFill\(\)/);
   assert.match(source, /this\.returnTo \? '스테이지' : '지휘소'/);
