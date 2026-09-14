@@ -64,3 +64,20 @@ test('pvp battle chrome stays outside resolved character display bounds', async 
     assert.doesNotMatch(source, /createUnitSilhouettePresentation|addAt\(/);
   }
 });
+
+test('2v2 battle chrome and ownership marker stay outside resolved character display bounds', async () => {
+  const source = await readSource('../src/pvp-2v2-command-scenes.ts');
+
+  assert.match(source, /const art = familyForUnit\(unit\.definitionId\);/);
+  assert.match(source, /const displayedHeight = targetHeight \* art\.displayScale;/);
+  assert.match(source, /const hpY = y - displayedHeight \/ 2 - 10;/);
+  assert.match(source, /const markerY = y \+ displayedHeight \/ 2 \+ 8;/);
+  assert.match(source, /const shadowY = markerY \+ 9;/);
+  assert.match(source, /scene\.add\.rectangle\(x, markerY, 24, 3,/);
+  assert.match(source, /\.setTint\(art\.tint\)/);
+  assert.match(source, /\.setScale\(\(targetHeight \/ art\.family\.idle\.frameHeight\) \* art\.displayScale\)/);
+  assert.doesNotMatch(source, /scene\.add\.ellipse\(x, y \+ 31,/);
+  assert.doesNotMatch(source, /scene\.add\.rectangle\(x, y - 39,/);
+  assert.doesNotMatch(source, /scene\.add\.rectangle\(x, y \+ 39,/);
+  assert.doesNotMatch(source, /createUnitSilhouettePresentation|addAt\(/);
+});
