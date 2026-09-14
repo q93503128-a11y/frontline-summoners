@@ -18,6 +18,20 @@ test('character portrait clean room keeps legacy silhouette installer inert', as
   assert.doesNotMatch(installer, /addAt\(/);
 });
 
+test('battle character clean room keeps legacy silhouette runtime inert', async () => {
+  const [battle, runtime] = await Promise.all([
+    readSource('../src/accessible-battle-scene.ts'),
+    readSource('../src/battle-story-silhouette-runtime.ts'),
+  ]);
+
+  assert.match(battle, /installStorySilhouetteOverlayRuntime\(this\)/);
+  assert.match(runtime, /Character art is a strict clean room during UI\/UX work/);
+  assert.doesNotMatch(runtime, /createUnitSilhouettePresentation/);
+  assert.doesNotMatch(runtime, /createUnitView/);
+  assert.doesNotMatch(runtime, /Phaser\.GameObjects\.(?:Sprite|Graphics)/);
+  assert.doesNotMatch(runtime, /\.set(?:Scale|Tint|Depth|Angle|Alpha)\(/);
+});
+
 test('command presentation wrappers never mutate character sprite presentation', async () => {
   const sources = await Promise.all([
     readSource('../src/recruitment-command-scene.ts'),
