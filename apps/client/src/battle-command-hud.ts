@@ -10,6 +10,7 @@ import {
   addText,
   battleUiFontSize,
   familyForUnit,
+  fitTextToWidth,
   getUnitHotkeyLabel,
   rarityColor,
 } from './scene-ui';
@@ -161,40 +162,39 @@ function installProductionRail(scene: BattleHudCarrier): void {
     const border = Phaser.Display.Color.HexStringToColor(badge.color).color;
     const bg = scene.add.rectangle(x, y, slotWidth, slotHeight, 0x1b2531, 0.98).setStrokeStyle(2, border, 0.8);
     bg.setInteractive({ useHandCursor: true });
-    const topRail = scene.add.rectangle(x, y - slotHeight / 2 + 3, slotWidth - 10, 4, border, 0.82).setDepth(4);
-    const shade = scene.add.rectangle(x, y, slotWidth, slotHeight, 0x05070b, 0).setDepth(7);
 
     const art = familyForUnit(slot.definition.id);
     const portraitHeight = useTwoRows ? 48 : compact ? 38 : 40;
-    const portrait = scene.add.sprite(x, y - slotHeight * 0.2, art.family.idle.key, 0).setTint(art.tint).setDepth(4);
-    portrait.setScale((portraitHeight / art.family.idle.frameHeight) * art.displayScale);
+    const portraitY = y - slotHeight * 0.2;
+    const portraitScale = (portraitHeight / art.family.idle.frameHeight) * art.displayScale;
+    const displayedHeight = art.family.idle.frameHeight * portraitScale;
+    const portraitBottom = portraitY + displayedHeight / 2;
+    const portrait = scene.add.sprite(x, portraitY, art.family.idle.key, 0).setTint(art.tint).setDepth(4);
+    portrait.setScale(portraitScale);
 
-    if (!compact || useTwoRows) {
-      addText(scene, x - slotWidth / 2 + 7, y - slotHeight / 2 + 7, badge.label, battleUiFontSize(10, 14), badge.color)
-        .setDepth(8);
-    }
+    const footerTop = Math.max(y + slotHeight * 0.03, portraitBottom + 6);
+    const footerBottom = y + slotHeight / 2 - 4;
+    const shadeHeight = Math.max(12, footerBottom - footerTop);
+    const shade = scene.add.rectangle(x, footerTop + shadeHeight / 2, slotWidth - 8, shadeHeight, 0x05070b, 0).setDepth(3);
+
     const displayName = compact && !useTwoRows && slot.displayName.length > 5
       ? `${slot.displayName.slice(0, 4)}…`
       : slot.displayName;
-    const nameSize = useTwoRows ? battleUiFontSize(13, 18) : battleUiFontSize(12, 16);
-    addText(scene, x, y + slotHeight * 0.04, displayName, nameSize, '#ffffff', 'center')
+    const hotkeyPrefix = !compact ? `${getUnitHotkeyLabel(index)} · ` : '';
+    const nameLabel = `${hotkeyPrefix}${badge.label} · ${displayName}`;
+    const nameSize = useTwoRows ? battleUiFontSize(12, 17) : battleUiFontSize(11, 15);
+    const name = addText(scene, x, footerTop, nameLabel, nameSize, '#ffffff', 'center')
       .setOrigin(0.5, 0)
       .setDepth(5);
-    const statusY = y + slotHeight * 0.37;
-    const cost = addText(scene, x - slotWidth / 2 + 8, statusY, `◆${slot.cost}`, battleUiFontSize(11, 15), '#f0cf78')
+    fitTextToWidth(name, slotWidth - 12, compact ? 10 : 9);
+
+    const statusY = Math.min(footerBottom - 6, footerTop + (compact ? 25 : 22));
+    const cost = addText(scene, x - slotWidth / 2 + 8, statusY, `◆${slot.cost}`, battleUiFontSize(10, 14), '#f0cf78')
       .setOrigin(0, 0.5)
       .setDepth(5);
-    const cooldown = addText(scene, x + slotWidth / 2 - 8, statusY, '', battleUiFontSize(11, 15), '#d8e1ef', 'right')
+    const cooldown = addText(scene, x + slotWidth / 2 - 8, statusY, '', battleUiFontSize(10, 14), '#d8e1ef', 'right')
       .setOrigin(1, 0.5)
       .setDepth(8);
-
-    if (!compact) {
-      const hotkey = getUnitHotkeyLabel(index);
-      const keyBg = scene.add.rectangle(x + slotWidth / 2 - 13, y - slotHeight / 2 + 13, 20, 20, 0x0d131b, 0.92).setStrokeStyle(1, 0x71849b, 0.75).setDepth(8);
-      const keyText = addText(scene, keyBg.x, keyBg.y - 1, hotkey, 12, '#c9d5e3', 'center').setOrigin(0.5).setDepth(9);
-      keyBg.setAlpha(0.96);
-      keyText.setAlpha(0.96);
-    }
 
     bg.on('pointerover', () => bg.setFillStyle(0x263442, 1));
     bg.on('pointerout', () => bg.setFillStyle(0x1b2531, 0.98));
@@ -205,7 +205,6 @@ function installProductionRail(scene: BattleHudCarrier): void {
     });
     bg.on('pointerupoutside', () => bg.setFillStyle(0x1b2531, 0.98));
 
-    topRail.setAlpha(0.86);
     scene.buttons.set(slot.slotId, { bg, shade, cooldown, cost });
   });
 
