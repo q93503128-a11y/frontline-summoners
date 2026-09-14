@@ -219,12 +219,18 @@ export class ProfileScene extends Phaser.Scene {
     const portraitId = state.profileLoadout.portraitCharacterId;
     if (portraitId) {
       const art = familyForUnit(portraitId);
+      const portraitX = x - 108;
+      const portraitY = y - 76;
+      const maxNativeDimension = Math.max(art.family.idle.frameWidth, art.family.idle.frameHeight);
+      const plateFitScale = Math.min(1, 132 / Math.max(1, maxNativeDimension));
+      const portraitScale = plateFitScale * art.displayScale;
+      const displayedHeight = art.family.idle.frameHeight * portraitScale;
+      const nameY = Math.max(y + 18, portraitY + displayedHeight / 2 + 16);
       const portraitPlate = this.add.rectangle(x - 108, y - 65, 146, 146, 0x151b24, 0.86).setStrokeStyle(2, frameColor, 0.5);
-      const portrait = this.add.sprite(x - 108, y - 76, art.family.idle.key, 0).setTint(art.tint);
-      portrait.setScale(1.05 * art.displayScale);
-      portrait.setDisplaySize(Math.min(132, portrait.displayWidth), Math.min(132, portrait.displayHeight));
+      const portrait = this.add.sprite(portraitX, portraitY, art.family.idle.key, 0).setTint(art.tint);
+      portrait.setScale(portraitScale);
       this.layer!.add([portraitPlate, portrait]);
-      this.layer!.add(addText(this, x - 108, y + 18, getSlotById(portraitId)?.displayName ?? '등록된 동료', compact ? 17 : 15, '#ffffff', 'center').setOrigin(0.5));
+      this.layer!.add(addText(this, portraitX, nameY, getSlotById(portraitId)?.displayName ?? '등록된 동료', compact ? 17 : 15, '#ffffff', 'center').setOrigin(0.5));
     }
 
     const emblemName = getProfileCosmetic(state.profileLoadout.emblemId).name;
