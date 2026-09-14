@@ -22,6 +22,7 @@ import {
   COLORS,
   drawBackdrop,
   familyForUnit,
+  fitTextToWidth,
   rarityColor,
   setButtonState,
 } from './scene-ui';
@@ -181,16 +182,35 @@ export class GrowthScene extends Phaser.Scene {
     const levelCap = getGuestBaseLevelCap(this.progress);
     const headerBg = this.add.rectangle(835, 226, 760, 180, 0x161e28, 0.78).setStrokeStyle(1, 0x8a7450, 0.34);
     this.detailLayer.add(headerBg);
-    const portrait = this.add.sprite(510, 224, art.family.idle.key, 0).setTint(art.tint);
-    portrait.setScale((118 / art.family.idle.frameHeight) * art.displayScale);
+
+    const portraitX = 510;
+    const portraitY = 224;
+    const targetHeight = 118;
+    const portraitScale = (targetHeight / art.family.idle.frameHeight) * art.displayScale;
+    const displayedWidth = art.family.idle.frameWidth * portraitScale;
+    const portraitRight = portraitX + displayedWidth / 2;
+    const infoX = Math.max(594, portraitRight + 18);
+    const infoRight = 1198;
+    const infoWidth = Math.max(1, infoRight - infoX);
+    const portrait = this.add.sprite(portraitX, portraitY, art.family.idle.key, 0).setTint(art.tint);
+    portrait.setScale(portraitScale);
     this.detailLayer.add(portrait);
-    this.detailLayer.add(addText(this, 592, 160, slot.displayName, compact ? 30 : 28, '#ffffff'));
-    this.detailLayer.add(addText(this, 594, 197, `${badge.label} · Lv${meta.level}/${levelCap}${meta.plusLevel > 0 ? ` · +${meta.plusLevel}` : ''}`, compact ? 18 : 15, badge.color));
-    this.detailLayer.add(addText(this, 594, 228, slot.description, compact ? 15 : 12, '#909baa').setWordWrapWidth(585));
+
+    const name = addText(this, infoX, 160, slot.displayName, compact ? 30 : 28, '#ffffff');
+    fitTextToWidth(name, infoWidth, compact ? 18 : 16);
+    this.detailLayer.add(name);
+    const identity = addText(this, infoX, 197, `${badge.label} · Lv${meta.level}/${levelCap}${meta.plusLevel > 0 ? ` · +${meta.plusLevel}` : ''}`, compact ? 18 : 15, badge.color);
+    fitTextToWidth(identity, infoWidth, compact ? 13 : 11);
+    this.detailLayer.add(identity);
+    this.detailLayer.add(addText(this, infoX, 228, slot.description, compact ? 15 : 12, '#909baa').setWordWrapWidth(infoWidth));
 
     const rechargeSeconds = (combat.rechargeFrames / 30).toFixed(1);
-    this.detailLayer.add(addText(this, 594, 272, `HP ${combat.definition.maxHp}  ·  공격 ${combat.definition.attackDamage}  ·  비용 ${combat.cost}  ·  재출격 ${rechargeSeconds}초`, compact ? 16 : 13, '#e3e8ef'));
-    this.detailLayer.add(addText(this, 594, 300, `이동 ${combat.definition.moveSpeed}  ·  대기 ${combat.definition.standingRange}  ·  공격 범위 ${combat.definition.attackMinRange}~${combat.definition.attackMaxRange}`, compact ? 15 : 12, '#9fb0c3'));
+    const primaryStats = addText(this, infoX, 272, `HP ${combat.definition.maxHp}  ·  공격 ${combat.definition.attackDamage}  ·  비용 ${combat.cost}  ·  재출격 ${rechargeSeconds}초`, compact ? 16 : 13, '#e3e8ef');
+    fitTextToWidth(primaryStats, infoWidth, compact ? 12 : 10);
+    this.detailLayer.add(primaryStats);
+    const rangeStats = addText(this, infoX, 300, `이동 ${combat.definition.moveSpeed}  ·  대기 ${combat.definition.standingRange}  ·  공격 범위 ${combat.definition.attackMinRange}~${combat.definition.attackMaxRange}`, compact ? 15 : 12, '#9fb0c3');
+    fitTextToWidth(rangeStats, infoWidth, compact ? 11 : 9);
+    this.detailLayer.add(rangeStats);
 
     const gold = getGuestResourceBalance(this.progress, 'gold');
     const soul = getGuestResourceBalance(this.progress, 'soul_essence');
