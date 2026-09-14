@@ -45,3 +45,22 @@ test('command presentation wrappers never mutate character sprite presentation',
     assert.doesNotMatch(source, /\.setScale\([^\n]*scale[XY]\s*\*/);
   }
 });
+
+test('pvp battle chrome stays outside resolved character display bounds', async () => {
+  const sources = await Promise.all([
+    readSource('../src/pvp-command-match-scene.ts'),
+    readSource('../src/pvp-friendly-command-scenes.ts'),
+  ]);
+
+  for (const source of sources) {
+    assert.match(source, /const art = familyForUnit\(unit\.definitionId\);/);
+    assert.match(source, /const displayedHeight = targetHeight \* art\.displayScale;/);
+    assert.match(source, /const hpY = y - displayedHeight \/ 2 - 10;/);
+    assert.match(source, /const shadowY = y \+ displayedHeight \/ 2 \+ 10;/);
+    assert.match(source, /\.setTint\(art\.tint\)/);
+    assert.match(source, /\.setScale\(\(targetHeight \/ art\.family\.idle\.frameHeight\) \* art\.displayScale\)/);
+    assert.doesNotMatch(source, /scene\.add\.ellipse\(x, y \+ 31,/);
+    assert.doesNotMatch(source, /scene\.add\.rectangle\(x, y - 40,/);
+    assert.doesNotMatch(source, /createUnitSilhouettePresentation|addAt\(/);
+  }
+});
