@@ -6,6 +6,7 @@ import { __googleLoginTestOnly } from '../src/google-login.ts';
 test('google auth config/session parser accepts only configured client ids and fixed session tokens', () => {
   assert.deepEqual(__googleLoginTestOnly.parseGoogleAuthConfig({
     google: { enabled: true, clientId: '123456789012-example.apps.googleusercontent.com' },
+    local: { enabled: true },
   }), {
     enabled: true,
     clientId: '123456789012-example.apps.googleusercontent.com',
@@ -21,6 +22,16 @@ test('google auth config/session parser accepts only configured client ids and f
   assert.equal(__googleLoginTestOnly.parseGoogleSessionResponse({ sessionToken: 'short', expiresAtMs: 1 }), null);
 });
 
+test('google auth reports a disconnected account api when Pages returns HTML instead of JSON', async () => {
+  await assert.rejects(
+    () => __googleLoginTestOnly.readJsonApiResponse(new Response('<!doctype html><html></html>', {
+      status: 200,
+      headers: { 'content-type': 'text/html; charset=utf-8' },
+    }), 'Google 로그인'),
+    /계정 API가 게임 페이지와 연결되지 않았습니다/,
+  );
+});
+
 test('account scene uses official Google Identity Services credential flow and server exchange', async () => {
   const scene = await readFile(new URL('../src/account-scene.ts', import.meta.url), 'utf8');
   const login = await readFile(new URL('../src/google-login.ts', import.meta.url), 'utf8');
@@ -32,6 +43,7 @@ test('account scene uses official Google Identity Services credential flow and s
   assert.match(login, /\/api\/auth\/config/);
   assert.match(login, /\/api\/auth\/google/);
   assert.match(login, /setAuthenticatedAccountSession\(session\.sessionToken\)/);
+  assert.match(login, /content-type/);
   assert.doesNotMatch(login, /accountId/);
   assert.match(main, /scene\.start\('account'\)/);
   assert.match(main, /game\.scene\.add\('account', AccountScene, false\)/);
