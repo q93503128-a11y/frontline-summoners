@@ -49,9 +49,11 @@ export function installBattleFrontlineOverlay(scene: Phaser.Scene): void {
   carrier[INSTALLED] = true;
 
   const compact = isCompactMobileViewport();
-  const railY = compact ? 414 : 558;
+  // Keep the strategic pressure rail in the empty command band above bases/units.
+  // Character and enemy sprites occupy the lower battlefield, so UI never crosses their art bounds.
+  const railY = 150;
   const supplyY = railY + 11;
-  const labelY = railY - (compact ? 30 : 28);
+  const labelY = compact ? 112 : 116;
   const originalDrawBases = carrier.drawBases.bind(carrier);
   const originalSyncHud = carrier.syncHud.bind(carrier);
   let layer: Phaser.GameObjects.Container | undefined;
