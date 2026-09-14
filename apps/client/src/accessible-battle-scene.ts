@@ -1,6 +1,7 @@
 import Phaser from 'phaser';
 import { BattleScene } from './battle-scene';
 import { installAccessibleBattleCameraFeedback } from './battle-camera-feedback';
+import { installBattleCharacterCleanroomRuntime } from './battle-character-cleanroom-runtime.ts';
 import { installBattleCommandFeedback } from './battle-command-feedback.ts';
 import { installBattleCommandHud } from './battle-command-hud.ts';
 import { installStorySilhouetteOverlayRuntime } from './battle-story-silhouette-runtime.ts';
@@ -141,6 +142,7 @@ export class AccessibleBattleScene extends BattleScene {
   override create(): void {
     installAccessibleBattleCameraFeedback(this);
     installBattleVfxDensityPolicy(this);
+    installBattleCharacterCleanroomRuntime(this);
     installBattleCommandFeedback(this);
     installBattleCommandHud(this);
     if (isFirstSliceProductionReviewMode()) {
