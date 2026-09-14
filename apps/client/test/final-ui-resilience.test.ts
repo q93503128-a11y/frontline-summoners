@@ -19,8 +19,8 @@ test('account and profile presentation contain long text and hide internal vocab
   assertContainsTokens(account, 'account presentation sanitizer', [
     'HTTP_', 'fetch', 'network', 'websocket', 'state hash', 'revision', 'requestId', 'migrationId', 'account_', 'profile_', 'guest_',
   ]);
-  assert.ok(account.includes('현재 Google 계정 연결을 사용할 수 없습니다. 잠시 후 다시 시도해 주세요.'));
-  assert.ok(account.includes('Google 계정 연결을 시작하지 못했습니다. 잠시 후 다시 시도해 주세요.'));
+  assert.ok(account.includes('Google 연결은 현재 사용할 수 없습니다. 아이디 로그인도 사용할 수 있습니다.'));
+  assert.ok(account.includes('Google 연결을 시작하지 못했습니다. 아이디 로그인도 사용할 수 있습니다.'));
 
   assert.ok(profile.includes("replace(/\\bSPECIAL\\b/g, '특수')"));
   assert.ok(profile.includes('fitTextToWidth(object, maxWidth'));
