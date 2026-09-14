@@ -30,8 +30,27 @@ function rewriteRecruitmentCopy(value: string): string {
   return value;
 }
 
+function keepBannerCopyClearOfSeal(target: Phaser.GameObjects.Text): void {
+  if (Math.abs(target.x - 500) > 1 || target.y < 170 || target.y > 390) return;
+  const originalY = target.y;
+  target.setX(355);
+  if (Math.abs(originalY - 176) <= 2) {
+    target.setWordWrapWidth(250);
+    fitTextToWidth(target, 250, 18);
+    return;
+  }
+  if (Math.abs(originalY - 213) <= 2) {
+    target.setWordWrapWidth(245);
+    fitTextToWidth(target, 245, 12);
+    return;
+  }
+  target.setWordWrapWidth(250);
+  fitTextToWidth(target, 250, 11);
+}
+
 function decorateRecruitmentText(target: Phaser.GameObjects.Text, value: string): void {
   const compact = isCompactMobileViewport();
+  keepBannerCopyClearOfSeal(target);
   if (value === '전선 모집') target.setPosition(52, compact ? 20 : 18).setFontSize(compact ? 40 : 42).setColor('#f5e7c7');
   if (value.startsWith('시리즈와 공개 확률을')) target.setY(compact ? 74 : 72).setFontSize(compact ? 16 : 13).setColor('#909baa');
   if (value === '시리즈 선택' || value === '현재 기록' || value === '모집') target.setColor('#e2e7ed');
@@ -39,7 +58,7 @@ function decorateRecruitmentText(target: Phaser.GameObjects.Text, value: string)
   if (value === '대표 SS') target.setColor('#bda7ca');
   if (value.startsWith('공통 풀 ·') || value.startsWith('시리즈 전용 ·')) {
     target.setColor(value.startsWith('시리즈') ? '#cdb2dc' : '#9ea9b7');
-    fitTextToWidth(target, 400, compact ? 13 : 11);
+    fitTextToWidth(target, 250, compact ? 13 : 11);
   }
   if (value === '10회 할인 없음' || value === '최소 희귀도 보장 없음') target.setFontSize(compact ? 14 : 11).setColor('#8f9aaa');
   if (value.startsWith('+1 우선 ·') || value.startsWith('분해 우선 ·')) fitTextToWidth(target, 214, compact ? 13 : 10);
@@ -117,6 +136,7 @@ function installDynamicPolish(scene: Phaser.Scene): () => void {
 function drawHierarchyGuides(scene: Phaser.Scene): Phaser.GameObjects.Graphics {
   const guides = scene.add.graphics().setDepth(3);
   guides.lineStyle(1, 0x786347, 0.24).lineBetween(52, 500, 1228, 500);
+  guides.lineStyle(1, 0x786347, 0.2).lineBetween(620, 176, 620, 468);
   guides.lineStyle(1, 0x586779, 0.2).lineBetween(936, 160, 936, 486);
   guides.lineStyle(1, 0x9c8251, 0.34).lineBetween(500, 642, 1218, 642);
   guides.fillStyle(0x9c8251, 0.58).fillTriangle(1208, 638, 1218, 642, 1208, 646);
