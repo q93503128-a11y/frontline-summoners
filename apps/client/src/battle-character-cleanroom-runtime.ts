@@ -1,6 +1,5 @@
 import Phaser from 'phaser';
 import type { BattleUnit } from '@frontline/sim';
-import { familyForUnit } from './scene-ui.ts';
 
 interface UnitViewLike {
   readonly sprite: Phaser.GameObjects.Sprite;
@@ -18,23 +17,6 @@ interface BattleCharacterCleanroomCarrier extends Phaser.Scene {
 }
 
 const INSTALLED = Symbol('frontline-battle-character-cleanroom-runtime-installed');
-const PLACEHOLDER_BATTLE_SCALE = 1.34;
-const MIN_PLACEHOLDER_FRAME_HEIGHT = 220;
-const MAX_PLACEHOLDER_FRAME_HEIGHT = 300;
-
-function improvePlaceholderLegibility(unit: BattleUnit, view: UnitViewLike): void {
-  const art = familyForUnit(unit.definition.id);
-  if (art.source !== 'PLACEHOLDER') return;
-  const currentHeight = view.sprite.displayHeight;
-  if (!Number.isFinite(currentHeight) || currentHeight <= 0) return;
-  const targetHeight = Phaser.Math.Clamp(
-    currentHeight * PLACEHOLDER_BATTLE_SCALE,
-    MIN_PLACEHOLDER_FRAME_HEIGHT,
-    MAX_PLACEHOLDER_FRAME_HEIGHT,
-  );
-  const factor = targetHeight / currentHeight;
-  view.sprite.setScale(view.sprite.scaleX * factor, view.sprite.scaleY * factor);
-}
 
 function layoutChromeOutsideCharacter(view: UnitViewLike): void {
   const displayedHeight = Math.max(1, view.sprite.displayHeight);
@@ -48,19 +30,12 @@ function layoutChromeOutsideCharacter(view: UnitViewLike): void {
   view.shadow.setPosition(view.sprite.x, shadowY);
 }
 
-function polishUnitPresentation(unit: BattleUnit, view: UnitViewLike): void {
-  improvePlaceholderLegibility(unit, view);
-  layoutChromeOutsideCharacter(view);
-}
-
 /**
- * Presentation-only guard for the PvE battle renderer.
+ * Layout-only guard for the PvE battle renderer.
  *
- * BattleScene remains authoritative for character texture, frame, tint, motion state, alpha,
- * angle, flip, and world position. Production art keeps its authored scale. While final art is
- * still unavailable, PLACEHOLDER sprite sheets receive a bounded uniform battle-only scale-up
- * because their transparent frame canvas is much larger than their visible character pixels.
- * HP bars, trait labels, and shadows are then laid out from the actual post-scale sprite bounds.
+ * BattleScene remains the sole owner of character texture, frame, tint, scale, motion state,
+ * alpha, angle, flip, and world position. This runtime reads the final displayed character bounds
+ * and moves only UI chrome outside those bounds. It never mutates character presentation.
  */
 export function installBattleCharacterCleanroomRuntime(scene: Phaser.Scene): void {
   const carrier = scene as unknown as BattleCharacterCleanroomCarrier & { [INSTALLED]?: boolean };
@@ -73,7 +48,7 @@ export function installBattleCharacterCleanroomRuntime(scene: Phaser.Scene): voi
   const createUnitView = carrier.createUnitView.bind(carrier);
   carrier.createUnitView = (unit: BattleUnit): UnitViewLike => {
     const view = createUnitView(unit);
-    polishUnitPresentation(unit, view);
+    layoutChromeOutsideCharacter(view);
     return view;
   };
 
@@ -82,7 +57,7 @@ export function installBattleCharacterCleanroomRuntime(scene: Phaser.Scene): voi
     syncUnits();
     for (const unit of carrier.state.battle.units) {
       const view = carrier.views.get(unit.simulationId);
-      if (view) polishUnitPresentation(unit, view);
+      if (view) layoutChromeOutsideCharacter(view);
     }
   };
 }
