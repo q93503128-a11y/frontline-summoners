@@ -26,7 +26,6 @@ import { loadGuestAchievementProfile } from './achievement-profile.ts';
 import { fetchGoogleAuthConfig, loginWithGoogleCredential } from './google-login.ts';
 import { loadGuestProgress, type GuestProgress } from './save.ts';
 import {
-  applyGuestDeveloperResourceCode,
   isGuestDeveloperResourceSandboxActive,
   resetGuestLocalAccountData,
 } from './guest-maintenance.ts';
@@ -95,28 +94,15 @@ function summaryText(label: string, summary: AccountProgressSummaryClient): stri
   return `${label} · 메인 ${summary.mainClearCount} · SPECIAL ${summary.specialClearCount} · 동료 ${summary.ownedCharacterCount}${resource ? ` · ${resource}` : ''}`;
 }
 
-function ensureGoogleIdentityScript(): Promise<void> {
-  if (window.google?.accounts?.id) return Promise.resolve();
-  if (googleScriptPromise) return googleScriptPromise;
-  googleScriptPromise = new Promise<void>((resolve, reject) => {
-    const existing = document.getElementById(GOOGLE_GSI_SCRIPT_ID) as HTMLScriptElement | null;
-    const script = existing ?? document.createElement('script');
-    const onLoad = () => window.google?.accounts?.id ? resolve() : reject(new Error('Google 로그인을 초기화하지 못했습니다.'));
-    const onError = () => reject(new Error('Google 로그인 화면을 불러오지 못했습니다.'));
-    script.addEventListener('load', onLoad, { once: true });
-    script.addEventListener('error', onError, { once: true });
-    if (!existing) {
-      script.id = GOOGLE_GSI_SCRIPT_ID;
-      script.src = GOOGLE_GSI_SCRIPT_SRC;
-      script.async = true;
-      script.defer = true;
-      document.head.appendChild(script);
-    }
-  }).catch((error) => {
-    googleScriptPromise = null;
-    throw error;
-  });
-  return googleScriptPromise;
+function accountConnectionMessage(error: unknown): string {
+  const detail = error instanceof Error ? error.message : '';
+  const googleSetupFailure = detail.includes('Google')
+    || detail.includes('google')
+    || detail.includes('응답 형식')
+    || detail.includes('/auth/google');
+  return googleSetupFailure
+    ? '계정 연결 기능을 준비 중입니다. 지금은 이 기기의 로컬 저장으로 계속 플레이할 수 있습니다.'
+    : '계정 연결 상태를 확인하지 못했습니다. 로컬 저장으로 계속 플레이할 수 있습니다.';
 }
 
 function stateSummary(state: AccountClientState): { readonly title: string; readonly detail: string; readonly kind: 'neutral' | 'online' | 'offline' } {
@@ -168,9 +154,10 @@ export class AccountCommandScene extends Phaser.Scene {
       .setWordWrapWidth(compact ? 1060 : 1010);
 
     addSectionHeading(this, 56, 628, '로컬 저장 관리', 1168, 0x765f66);
-    addButton(this, 380, 674, 260, compact ? 82 : 54, '게스트 저장 초기화', () => { void this.resetGuestLocalAccount(); }, 0x8a6262, { tone: 'danger' });
-    addButton(this, 690, 674, 260, compact ? 82 : 54, '개발자 테스트 도구', () => { void this.applyDeveloperCode(); }, 0x765f8d, { tone: 'quiet' });
-    addText(this, 850, 674, '위 두 기능은 일반 계정 작업과 별개입니다.', compact ? 16 : 13, '#8d96a3').setOrigin(0, 0.5);
+    addButton(this, 300, 674, 300, compact ? 82 : 54, '게스트 저장 초기화', () => { void this.resetGuestLocalAccount(); }, 0x8a6262, { tone: 'danger' });
+    addText(this, 500, 674, '이 기기의 로컬 게스트 저장만 삭제합니다. 로그인 계정의 서버 진행은 바뀌지 않습니다.', compact ? 16 : 13, '#8d96a3')
+      .setOrigin(0, 0.5)
+      .setWordWrapWidth(680);
 
     this.unsubscribeState = subscribeAccountClientState((state) => {
       this.renderState(state);
@@ -192,7 +179,7 @@ export class AccountCommandScene extends Phaser.Scene {
       await this.setupGoogleLogin();
       if (state.kind === 'AUTHENTICATED_ONLINE') await this.prepareMigrationPreview(true);
     } catch (error) {
-      if (!this.destroyed) this.setMessage(error instanceof Error ? error.message : '계정 초기화에 실패했습니다.', COLORS.red);
+      if (!this.destroyed) this.setMessage(accountConnectionMessage(error), COLORS.muted);
     }
   }
 
@@ -261,7 +248,7 @@ export class AccountCommandScene extends Phaser.Scene {
     const config = await fetchGoogleAuthConfig();
     if (this.destroyed) return;
     if (!config.enabled || !config.clientId) {
-      this.setMessage('Google 로그인이 아직 서버에 설정되지 않았습니다.', COLORS.muted);
+      this.setMessage('Google 계정 연결은 현재 사용할 수 없습니다. 로컬 저장으로 계속 플레이할 수 있습니다.', COLORS.muted);
       return;
     }
     await ensureGoogleIdentityScript();
@@ -308,7 +295,7 @@ export class AccountCommandScene extends Phaser.Scene {
 
   private async handleGoogleCredential(response: GoogleCredentialResponse): Promise<void> {
     if (!response.credential) {
-      this.setMessage('Google에서 로그인 정보를 받지 못했습니다.', COLORS.red);
+      this.setMessage('Google에서 로그인 정보를 받지 못했습니다. 다시 시도해 주세요.', COLORS.warning);
       return;
     }
     this.setMessage('Google 계정을 확인하는 중…', COLORS.muted);
@@ -320,8 +307,8 @@ export class AccountCommandScene extends Phaser.Scene {
       this.renderState(state);
       this.renderActions(state);
       await this.prepareMigrationPreview(true);
-    } catch (error) {
-      if (!this.destroyed) this.setMessage(error instanceof Error ? error.message : 'Google 로그인에 실패했습니다.', COLORS.red);
+    } catch {
+      if (!this.destroyed) this.setMessage('Google 로그인에 실패했습니다. 잠시 후 다시 시도하거나 로컬 저장으로 계속 플레이하세요.', COLORS.warning);
     }
   }
 
@@ -334,7 +321,7 @@ export class AccountCommandScene extends Phaser.Scene {
       this.migrationEnvelope = null;
       this.migrationPreview = null;
       this.replacementArmed = false;
-      this.setMessage('개발자 테스트 재화가 적용된 게스트 진행은 서버 계정으로 이전할 수 없습니다.', COLORS.red);
+      this.setMessage('이 게스트 저장은 계정 이전을 사용할 수 없습니다.', COLORS.warning);
       this.renderActions(getAccountClientState());
       return;
     }
@@ -458,28 +445,6 @@ export class AccountCommandScene extends Phaser.Scene {
     window.setTimeout(() => window.location.reload(), 250);
   }
 
-  private async applyDeveloperCode(): Promise<void> {
-    if (getAccountClientState().kind !== 'GUEST_LOCAL') {
-      this.setMessage('개발자 테스트 도구는 게스트 로컬 테스트에서만 사용할 수 있습니다.', COLORS.warning);
-      return;
-    }
-    if (typeof window === 'undefined') return;
-    const code = window.prompt('개발자 테스트 코드를 입력하세요.');
-    if (code === null) return;
-    this.setMessage('개발자 테스트 재화를 적용하는 중…', COLORS.muted);
-    try {
-      const result = await applyGuestDeveloperResourceCode(code);
-      if (!result.activated) {
-        this.setMessage('개발자 코드가 일치하지 않습니다.', COLORS.red);
-        return;
-      }
-      this.setMessage('개발자 테스트 재화를 적용했습니다. 이 게스트 저장은 서버 이전이 차단됩니다.', COLORS.green);
-      window.setTimeout(() => window.location.reload(), 250);
-    } catch (error) {
-      this.setMessage(error instanceof Error ? error.message : '개발자 테스트 재화 적용에 실패했습니다.', COLORS.red);
-    }
-  }
-
   private async refresh(): Promise<void> {
     const state = getAccountClientState();
     if (state.kind === 'GUEST_LOCAL') {
@@ -510,7 +475,7 @@ export class AccountCommandScene extends Phaser.Scene {
     this.renderState(state);
     this.renderActions(state);
     this.setMessage(result.serverRevoked ? '로그아웃했습니다.' : '로컬 로그아웃은 완료했지만 서버 연결 확인에 실패했습니다.', result.serverRevoked ? COLORS.green : COLORS.warning);
-    await this.setupGoogleLogin().catch((error) => this.setMessage(error instanceof Error ? error.message : 'Google 로그인 준비에 실패했습니다.', COLORS.red));
+    await this.setupGoogleLogin().catch((error) => this.setMessage(accountConnectionMessage(error), COLORS.muted));
   }
 
   private setMessage(message: string, color: string): void {
@@ -537,5 +502,6 @@ export const __accountCommandSceneTestOnly = {
   stateSummary,
   hasMeaningfulGuestProgress,
   summaryText,
+  accountConnectionMessage,
   googleScriptSrc: GOOGLE_GSI_SCRIPT_SRC,
 };
