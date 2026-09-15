@@ -41,6 +41,19 @@ test('browser transport creates a stage-bound room and reconnects by the same to
   assert.match(network, /setTimeout\(\(\) =>/);
 });
 
+test('live-service API routing supports build and runtime production origins without losing explicit overrides', async () => {
+  const network = await readSource('../src/coop-network.ts');
+
+  assert.match(network, /VITE_FRONTLINE_API_ORIGIN/);
+  assert.match(network, /__FRONTLINE_API_ORIGIN__/);
+  assert.match(network, /const API_ORIGIN_STORAGE_KEY = 'frontline\.apiOrigin';/);
+  assert.match(network, /const LEGACY_API_ORIGIN_STORAGE_KEY = 'frontline\.coop\.apiOrigin';/);
+  assert.match(network, /url\.protocol !== 'http:' && url\.protocol !== 'https:'/);
+  assert.match(network, /const configured = configuredApiOrigin\(browser\);/);
+  assert.match(network, /if \(configured\) return configured;/);
+  assert.match(network, /return browser\.location\.origin;/);
+});
+
 test('co-op READY carries saved level plus form rewards and main clears but never raw combat stats', async () => {
   const [network, scenes] = await Promise.all([
     readSource('../src/coop-network.ts'),
