@@ -44,6 +44,15 @@ function fitCompactButtonLabel(button: Phaser.GameObjects.Container, width: numb
   }
 }
 
+function lockDesktopControlsWhileDisconnected(scene: DuelCommandCarrier): void {
+  if (scene.session?.connectionState === 'OPEN' || !scene.controls) return;
+  scene.controls.list.forEach((child) => {
+    if (child instanceof Phaser.GameObjects.Container && child.getData('frontlineCommandButton')) {
+      setButtonState(child, 'locked', '대전 연결을 복구하는 중입니다.');
+    }
+  });
+}
+
 function renderCompactPager(scene: PagedCarrier): void {
   scene.controls?.destroy(true);
   scene.controls = scene.add.container(0, 0);
@@ -166,6 +175,7 @@ function installCompactPager(scene: Phaser.Scene): void {
   carrier.renderControls = (): void => {
     if (!isCompactMobileViewport()) {
       desktopRenderer();
+      lockDesktopControlsWhileDisconnected(carrier);
       return;
     }
     renderCompactPager(carrier);
@@ -184,6 +194,11 @@ export class FriendlyPvpMatchScene extends BaseFriendlyPvpMatchScene {
   override create(): void {
     super.create();
     installCompactPager(this);
+    const carrier = this as unknown as DuelCommandCarrier;
+    const unsubscribeConnection = carrier.session?.subscribeConnection(() => {
+      if (this.scene.isActive()) carrier.renderControls();
+    });
+    this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => unsubscribeConnection?.());
   }
 }
 
