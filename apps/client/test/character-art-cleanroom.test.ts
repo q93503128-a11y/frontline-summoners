@@ -32,20 +32,13 @@ test('battle character clean room keeps legacy silhouette runtime inert', async 
   assert.doesNotMatch(runtime, /\.set(?:Scale|Tint|Depth|Angle|Alpha)\(/);
 });
 
-test('pve battle clean-room runtime scales only placeholder frames and keeps chrome outside post-scale bounds', async () => {
+test('pve battle clean-room runtime is layout-only and keeps chrome outside final sprite bounds', async () => {
   const [battle, runtime] = await Promise.all([
     readSource('../src/accessible-battle-scene.ts'),
     readSource('../src/battle-character-cleanroom-runtime.ts'),
   ]);
 
   assert.match(battle, /installBattleCharacterCleanroomRuntime\(this\)/);
-  assert.match(runtime, /const PLACEHOLDER_BATTLE_SCALE = 1\.34;/);
-  assert.match(runtime, /const MIN_PLACEHOLDER_FRAME_HEIGHT = 220;/);
-  assert.match(runtime, /const MAX_PLACEHOLDER_FRAME_HEIGHT = 300;/);
-  assert.match(runtime, /if \(art\.source !== 'PLACEHOLDER'\) return;/);
-  assert.match(runtime, /const targetHeight = Phaser\.Math\.Clamp\(/);
-  assert.match(runtime, /currentHeight \* PLACEHOLDER_BATTLE_SCALE,/);
-  assert.match(runtime, /view\.sprite\.setScale\(view\.sprite\.scaleX \* factor, view\.sprite\.scaleY \* factor\);/);
   assert.match(runtime, /const displayedHeight = Math\.max\(1, view\.sprite\.displayHeight\);/);
   assert.match(runtime, /const hpY = view\.sprite\.y - displayedHeight \/ 2 - 10;/);
   assert.match(runtime, /const traitY = hpY - 18;/);
@@ -53,7 +46,9 @@ test('pve battle clean-room runtime scales only placeholder frames and keeps chr
   assert.match(runtime, /view\.hpBg\.setPosition\(view\.sprite\.x, hpY\);/);
   assert.match(runtime, /view\.trait\.setPosition\(view\.sprite\.x, traitY\);/);
   assert.match(runtime, /view\.shadow\.setPosition\(view\.sprite\.x, shadowY\);/);
-  assert.doesNotMatch(runtime, /view\.sprite\.set(?:Tint|Texture|Frame|Alpha|Angle|FlipX)/);
+  assert.match(runtime, /It never mutates character presentation/);
+  assert.doesNotMatch(runtime, /PLACEHOLDER_BATTLE_SCALE|MIN_PLACEHOLDER_FRAME_HEIGHT|MAX_PLACEHOLDER_FRAME_HEIGHT|familyForUnit/);
+  assert.doesNotMatch(runtime, /view\.sprite\.set(?:Scale|Tint|Texture|Frame|Alpha|Angle|FlipX|FlipY|Position|X|Y)\(/);
   assert.doesNotMatch(runtime, /createUnitSilhouettePresentation|addAt\(/);
 });
 
@@ -157,4 +152,27 @@ test('catalog ally and enemy dossiers start footer copy below resolved portrait 
   assert.match(source, /Discovery concealment is canonical catalog behavior/);
   assert.doesNotMatch(source, /x - 96, 200, owned \? badge\.label/);
   assert.doesNotMatch(source, /x - 96, 200, focused \?/);
+});
+
+test('profile portrait keeps uniform canonical scaling and pushes the name below final portrait bounds', async () => {
+  const source = await readSource('../src/profile-scene.ts');
+
+  assert.match(source, /const maxNativeDimension = Math\.max\(art\.family\.idle\.frameWidth, art\.family\.idle\.frameHeight\);/);
+  assert.match(source, /const plateFitScale = Math\.min\(1, 132 \/ Math\.max\(1, maxNativeDimension\)\);/);
+  assert.match(source, /const portraitScale = plateFitScale \* art\.displayScale;/);
+  assert.match(source, /const displayedHeight = art\.family\.idle\.frameHeight \* portraitScale;/);
+  assert.match(source, /const nameY = Math\.max\(y \+ 18, portraitY \+ displayedHeight \/ 2 \+ 16\);/);
+  assert.match(source, /portrait\.setScale\(portraitScale\);/);
+  assert.doesNotMatch(source, /setDisplaySize\(/);
+  assert.doesNotMatch(source, /1\.05 \* art\.displayScale/);
+});
+
+test('recruitment result tickets keep all character metadata below or outside the portrait body', async () => {
+  const source = await readSource('../src/recruitment-scene.ts');
+
+  assert.match(source, /const portrait = this\.add\.sprite\(x, y - 34, art\.family\.idle\.key, 0\)\.setTint\(art\.tint\);/);
+  assert.match(source, /portrait\.setScale\(\(\(results\.length === 1 \? 94 : 66\) \/ art\.family\.idle\.frameHeight\) \* art\.displayScale\);/);
+  assert.match(source, /addText\(this, x, y \+ 39, slot\.displayName/);
+  assert.match(source, /addText\(this, x, y \+ 70, duplicateLabel/);
+  assert.doesNotMatch(source, /createUnitSilhouettePresentation|addAt\(/);
 });
