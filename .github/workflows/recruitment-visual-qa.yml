@@ -5,6 +5,11 @@ on:
     branches: [main]
     paths:
       - '.github/workflows/recruitment-visual-qa.yml'
+      - 'apps/client/src/recruitment-scene.ts'
+      - 'apps/client/src/recruitment-command-scene.ts'
+      - 'apps/client/src/scene-ui.ts'
+      - 'apps/client/src/viewport.ts'
+      - 'apps/client/src/client-settings.ts'
 
 jobs:
   capture:
