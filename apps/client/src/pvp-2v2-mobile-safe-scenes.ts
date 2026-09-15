@@ -41,6 +41,15 @@ function fitCompactButtonLabel(button: Phaser.GameObjects.Container, width: numb
   }
 }
 
+function lockDesktopControlsWhileDisconnected(scene: TeamBattleCarrier): void {
+  if (scene.session?.connectionState === 'OPEN' || !scene.controls) return;
+  scene.controls.list.forEach((child) => {
+    if (child instanceof Phaser.GameObjects.Container && child.getData('frontlineCommandButton')) {
+      setButtonState(child, 'locked', '2v2 연결을 복구하는 중입니다.');
+    }
+  });
+}
+
 function renderCompactTeamControls(scene: TeamBattleCarrier): void {
   scene.controls?.destroy(true);
   scene.controls = scene.add.container(0, 0);
@@ -51,6 +60,7 @@ function renderCompactTeamControls(scene: TeamBattleCarrier): void {
 
   const seat = snapshot.seats.find((entry) => entry.seatId === seatId);
   if (!seat) return;
+  const connectionOpen = scene.session?.connectionState === 'OPEN';
   const team = snapshot.teams.find((entry) => entry.teamId === seat.teamId);
   const slotIds = Object.keys(seat.costs).slice(0, 5);
   const geometry = computePvp2v2CompactRailLayout(getCurrentMinimumInternalTouchTarget(), slotIds.length);
@@ -65,19 +75,20 @@ function renderCompactTeamControls(scene: TeamBattleCarrier): void {
     const cooldown = seat.cooldowns[slotId] ?? 0;
     const cost = seat.costs[slotId] ?? 0;
     const name = getSlotById(slotId)?.displayName ?? '소환 동료';
-    const availableCommand = cooldown <= 0 && seat.supply >= cost;
+    const availableCommand = connectionOpen && cooldown <= 0 && seat.supply >= cost;
     const label = cooldown > 0 ? `${name}\n${cooldownSeconds(cooldown)}초` : `${name}\n◆${cost}`;
     const button = addButton(scene, xFor(index), geometry.buttonY, geometry.buttonWidth, geometry.buttonHeight, label, () => {
       if (availableCommand) scene.session?.queueCommand({ type: 'SPAWN', slotId });
     }, availableCommand ? 0x5f86aa : 0x48515e, { tone: availableCommand ? 'primary' : 'quiet' });
     fitCompactButtonLabel(button, geometry.buttonWidth, geometry.buttonHeight);
     layer.add(button);
-    if (cooldown > 0) setButtonState(button, 'disabled', `재사용까지 ${cooldownSeconds(cooldown)}초 남았습니다.`);
+    if (!connectionOpen) setButtonState(button, 'locked', '2v2 연결을 복구하는 중입니다.');
+    else if (cooldown > 0) setButtonState(button, 'disabled', `재사용까지 ${cooldownSeconds(cooldown)}초 남았습니다.`);
     else if (seat.supply < cost) setButtonState(button, 'disabled', `보급이 ${(cost - seat.supply).toLocaleString()} 부족합니다.`);
   });
 
   const supplyIndex = slotIds.length;
-  const canUpgrade = seat.nextSupplyUpgradeCost !== null && seat.supply >= seat.nextSupplyUpgradeCost;
+  const canUpgrade = connectionOpen && seat.nextSupplyUpgradeCost !== null && seat.supply >= seat.nextSupplyUpgradeCost;
   const upgrade = addButton(
     scene,
     xFor(supplyIndex),
@@ -91,11 +102,12 @@ function renderCompactTeamControls(scene: TeamBattleCarrier): void {
   );
   fitCompactButtonLabel(upgrade, geometry.buttonWidth, geometry.buttonHeight);
   layer.add(upgrade);
-  if (seat.nextSupplyUpgradeCost === null) setButtonState(upgrade, 'disabled', '보급소가 최대 단계입니다.');
+  if (!connectionOpen) setButtonState(upgrade, 'locked', '2v2 연결을 복구하는 중입니다.');
+  else if (seat.nextSupplyUpgradeCost === null) setButtonState(upgrade, 'disabled', '보급소가 최대 단계입니다.');
   else if (seat.supply < seat.nextSupplyUpgradeCost) setButtonState(upgrade, 'disabled', `보급이 ${(seat.nextSupplyUpgradeCost - seat.supply).toLocaleString()} 부족합니다.`);
 
   const weaponIndex = supplyIndex + 1;
-  const weaponReady = Boolean(team?.baseWeaponId) && (team?.baseWeaponCooldownFrames ?? 1) === 0;
+  const weaponReady = connectionOpen && Boolean(team?.baseWeaponId) && (team?.baseWeaponCooldownFrames ?? 1) === 0;
   const weaponLabel = !team?.baseWeaponId
     ? '팀 거점 병기\n장착 없음'
     : team.baseWeaponCooldownFrames > 0
@@ -114,7 +126,8 @@ function renderCompactTeamControls(scene: TeamBattleCarrier): void {
   );
   fitCompactButtonLabel(weapon, geometry.buttonWidth, geometry.buttonHeight);
   layer.add(weapon);
-  if (!team?.baseWeaponId) setButtonState(weapon, 'disabled', '팀에 장착된 거점 병기가 없습니다.');
+  if (!connectionOpen) setButtonState(weapon, 'locked', '2v2 연결을 복구하는 중입니다.');
+  else if (!team?.baseWeaponId) setButtonState(weapon, 'disabled', '팀에 장착된 거점 병기가 없습니다.');
   else if (team.baseWeaponCooldownFrames > 0) setButtonState(weapon, 'disabled', `재사용까지 ${cooldownSeconds(team.baseWeaponCooldownFrames)}초 남았습니다.`);
 }
 
@@ -125,6 +138,7 @@ function installCompactTeamRail(scene: Phaser.Scene): void {
   carrier.renderControls = (): void => {
     if (!isCompactMobileViewport()) {
       desktopRenderer();
+      lockDesktopControlsWhileDisconnected(carrier);
       return;
     }
     renderCompactTeamControls(carrier);
@@ -136,6 +150,11 @@ export class Pvp2v2BattleScene extends BasePvp2v2BattleScene {
   override create(): void {
     super.create();
     installCompactTeamRail(this);
+    const carrier = this as unknown as TeamBattleCarrier;
+    const unsubscribeConnection = carrier.session?.subscribeConnection(() => {
+      if (this.scene.isActive()) carrier.renderControls();
+    });
+    this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => unsubscribeConnection?.());
   }
 }
 

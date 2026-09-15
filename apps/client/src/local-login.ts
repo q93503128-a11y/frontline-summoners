@@ -30,6 +30,7 @@ function errorMessage(payload: unknown, status: number, mode: 'login' | 'registe
   if (code === 'username_taken') return '이미 사용 중인 아이디입니다.';
   if (code === 'invalid_credentials') return '아이디 또는 비밀번호가 올바르지 않습니다.';
   if (code === 'auth_origin_denied') return '현재 사이트 주소가 계정 서버의 허용 목록에 없습니다.';
+  if (code === 'api_proxy_not_configured') return '웹 페이지와 계정 서버 연결이 아직 설정되지 않았습니다.';
   if (code === 'invalid_request' && isRecord(payload) && typeof payload.message === 'string') {
     return payload.message.includes('username')
       ? '아이디는 영문 소문자·숫자·_ 조합 4~24자로 입력하세요.'
@@ -38,17 +39,23 @@ function errorMessage(payload: unknown, status: number, mode: 'login' | 'registe
         : '계정 입력값을 확인해 주세요.';
   }
   if (status === 404 || status === 405) return '계정 API 서버에 로그인 기능이 아직 배포되지 않았습니다.';
+  if (status === 502 || status === 503 || status === 504) return '계정 서버 연결을 준비하는 중입니다. 잠시 후 다시 시도해 주세요.';
   return mode === 'login' ? `아이디 로그인에 실패했습니다. (HTTP ${status})` : `아이디 생성에 실패했습니다. (HTTP ${status})`;
 }
 
 async function requestLocalSession(mode: 'login' | 'register', username: string, password: string): Promise<AccountClientState> {
   const normalizedUsername = normalizeUsername(username);
   const checkedPassword = validatePassword(password);
-  const response = await fetch(`${resolveCoopApiOrigin()}/api/auth/local/${mode}`, {
-    method: 'POST',
-    headers: { 'content-type': 'application/json' },
-    body: JSON.stringify({ username: normalizedUsername, password: checkedPassword }),
-  });
+  let response: Response;
+  try {
+    response = await fetch(`${resolveCoopApiOrigin()}/api/auth/local/${mode}`, {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ username: normalizedUsername, password: checkedPassword }),
+    });
+  } catch {
+    throw new Error('계정 서버에 연결하지 못했습니다. 네트워크 상태를 확인한 뒤 다시 시도해 주세요.');
+  }
   const contentType = response.headers.get('content-type') ?? '';
   const payload: unknown = contentType.includes('application/json')
     ? await response.json().catch(() => ({}))

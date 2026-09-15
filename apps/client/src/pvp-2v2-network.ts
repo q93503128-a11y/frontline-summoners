@@ -153,11 +153,14 @@ export class Pvp2v2Session {
     for (const subscriber of this.subscribers) subscriber(message);
   }
   sendReady(): void { this.send({ type: 'READY' }); }
-  queueCommand(command: Pvp2v2Command): void { if (this.queuedCommands.length < 8) this.queuedCommands.push(command); }
+  queueCommand(command: Pvp2v2Command): void {
+    if (this.connectionState !== 'OPEN' || !this.battle || this.battle.winner !== null) return;
+    if (this.queuedCommands.length < 8) this.queuedCommands.push(command);
+  }
   startInputPump(tickRate = 30): void { if (this.inputTimer !== null || typeof window === 'undefined') return; const interval = Math.max(16, Math.round(1000 / Math.max(1, tickRate))); const pump = () => { const battle = this.battle; if (!battle || battle.winner !== null || this.connectionState !== 'OPEN') return; const tick = battle.tick; if (tick <= this.lastSubmittedTick) return; const commands = this.queuedCommands.splice(0, this.queuedCommands.length); this.send({ type: 'FRAME_INPUT', input: { tick, sequence: this.sequence, commands } }); this.sequence += 1; this.lastSubmittedTick = tick; }; this.inputTimer = window.setInterval(pump, interval); pump(); }
   stopInputPump(): void { if (this.inputTimer !== null && typeof window !== 'undefined') window.clearInterval(this.inputTimer); this.inputTimer = null; }
-  close(): void { this.deliberatelyClosed = true; this.stopInputPump(); if (this.reconnectTimer !== null && typeof window !== 'undefined') window.clearTimeout(this.reconnectTimer); this.reconnectTimer = null; this.socket?.close(1000, 'client_close'); this.socket = null; this.setConnectionState('CLOSED'); }
-  private handleClose(socket: WebSocket): void { if (this.socket !== socket) return; this.socket = null; this.stopInputPump(); if (this.deliberatelyClosed || typeof window === 'undefined') { this.setConnectionState('CLOSED'); return; } this.setConnectionState('RECONNECTING'); this.reconnectTimer = window.setTimeout(() => { this.reconnectTimer = null; this.open('RECONNECTING'); }, 900); }
+  close(): void { this.deliberatelyClosed = true; this.stopInputPump(); this.queuedCommands.splice(0, this.queuedCommands.length); if (this.reconnectTimer !== null && typeof window !== 'undefined') window.clearTimeout(this.reconnectTimer); this.reconnectTimer = null; this.socket?.close(1000, 'client_close'); this.socket = null; this.setConnectionState('CLOSED'); }
+  private handleClose(socket: WebSocket): void { if (this.socket !== socket) return; this.socket = null; this.stopInputPump(); this.queuedCommands.splice(0, this.queuedCommands.length); if (this.deliberatelyClosed || typeof window === 'undefined') { this.setConnectionState('CLOSED'); return; } this.setConnectionState('RECONNECTING'); this.reconnectTimer = window.setTimeout(() => { this.reconnectTimer = null; this.open('RECONNECTING'); }, 900); }
   private send(payload: unknown): void { if (!this.socket || this.socket.readyState !== WebSocket.OPEN) throw new Error('2v2 PvP 서버에 연결되어 있지 않습니다.'); this.socket.send(JSON.stringify(payload)); }
   private setConnectionState(state: Pvp2v2ConnectionState): void { if (this.connectionState === state) return; this.connectionState = state; for (const subscriber of this.connectionSubscribers) subscriber(state); }
 }

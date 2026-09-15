@@ -5,6 +5,8 @@ import { resolveUnitArt } from '../src/production-assets.ts';
 import { PLAYER_SLOTS } from '../src/prototype.ts';
 import { SOURCE_REFERENCE_ART_BY_ID, SOURCE_REFERENCE_ART_FAMILIES } from '../src/source-reference-art.ts';
 
+const EXPECTED_SOURCE_REFERENCE_FAMILY_COUNT = 92;
+
 const EXPECTED_REACTIONS = new Map<string, readonly [number, number]>([
   ['hero-knight', [4, 11]],
   ['hero-knight-2', [4, 9]],
@@ -62,23 +64,88 @@ const EXPECTED_REACTIONS = new Map<string, readonly [number, number]>([
   ['cc0-mirror-guide-f3', [4, 4]],
 ]);
 
-test('every vetted source-reference family exposes authored or source-derived hit and death strips', () => {
-  assert.equal(SOURCE_REFERENCE_ART_FAMILIES.length, EXPECTED_REACTIONS.size);
+const FORM_CASES: readonly (readonly [string, string, string])[] = [
+  ['hunter', 'hunter_f1', 'huntress'],
+  ['hunter', 'hunter_f3', 'huntress-2'],
+  ['duelist', 'duelist_f1', 'fantasy-warrior'],
+  ['duelist', 'duelist_f3', 'martial-hero-2'],
+  ['royal', 'royal_f1', 'hero-knight'],
+  ['royal', 'royal_f3', 'king-2'],
+  ['heretic', 'heretic_f1', 'evil-wizard'],
+  ['heretic', 'heretic_f3', 'evil-wizard-2'],
+
+  ['char_common_b_clockduck', 'char_common_b_clockduck_f1', 'cc0-clockduck-f1'],
+  ['char_common_b_clockduck', 'char_common_b_clockduck_f2', 'cc0-clockduck-f1'],
+  ['char_common_b_clockduck', 'char_common_b_clockduck_f3', 'cc0-clockduck-f3'],
+  ['char_common_b_ink_raven', 'char_common_b_ink_raven_f1', 'cc0-ink-raven-f1'],
+  ['char_common_b_ink_raven', 'char_common_b_ink_raven_f2', 'cc0-ink-raven-f2'],
+  ['char_common_b_ink_raven', 'char_common_b_ink_raven_f3', 'cc0-ink-raven-f3'],
+
+  ['char_common_c_bell_crab', 'char_common_c_bell_crab_f1', 'cc0-bell-crab-f1'],
+  ['char_common_c_bell_crab', 'char_common_c_bell_crab_f2', 'cc0-bell-crab-f2'],
+  ['char_common_c_bell_crab', 'char_common_c_bell_crab_f3', 'cc0-bell-crab-f3'],
+  ['char_common_c_lantern_moth', 'char_common_c_lantern_moth_f1', 'cc0-lantern-moth-f1'],
+  ['char_common_c_lantern_moth', 'char_common_c_lantern_moth_f2', 'cc0-lantern-moth-f2'],
+  ['char_common_c_lantern_moth', 'char_common_c_lantern_moth_f3', 'cc0-lantern-moth-f3'],
+  ['char_common_c_tin_squire', 'char_common_c_tin_squire_f1', 'cc0-tin-squire-f1'],
+  ['char_common_c_tin_squire', 'char_common_c_tin_squire_f2', 'cc0-tin-squire-f2'],
+  ['char_common_c_tin_squire', 'char_common_c_tin_squire_f3', 'cc0-tin-squire-f3'],
+  ['char_common_c_turnip_rider', 'char_common_c_turnip_rider_f1', 'cc0-turnip-rider-f1'],
+  ['char_common_c_turnip_rider', 'char_common_c_turnip_rider_f2', 'cc0-turnip-rider-f2'],
+  ['char_common_c_turnip_rider', 'char_common_c_turnip_rider_f3', 'cc0-turnip-rider-f3'],
+  ['char_common_c_slinger', 'char_common_c_slinger_f1', 'cc0-slinger-f1'],
+  ['char_common_c_slinger', 'char_common_c_slinger_f2', 'cc0-slinger-f2'],
+  ['char_common_c_slinger', 'char_common_c_slinger_f3', 'cc0-slinger-f3'],
+
+  ['char_common_b_lantern_witch', 'char_common_b_lantern_witch_f1', 'wizard'],
+  ['char_common_b_lantern_witch', 'char_common_b_lantern_witch_f2', 'evil-wizard'],
+  ['char_common_b_lantern_witch', 'char_common_b_lantern_witch_f3', 'evil-wizard-2'],
+  ['char_common_b_coffin_merchant', 'char_common_b_coffin_merchant_f1', 'cc0-coffin-merchant-f1'],
+  ['char_common_b_coffin_merchant', 'char_common_b_coffin_merchant_f2', 'cc0-coffin-merchant-f2'],
+  ['char_common_b_coffin_merchant', 'char_common_b_coffin_merchant_f3', 'cc0-coffin-merchant-f3'],
+  ['char_common_b_moss_golem', 'char_common_b_moss_golem_f1', 'cc0-moss-golem-f1'],
+  ['char_common_b_moss_golem', 'char_common_b_moss_golem_f2', 'cc0-moss-golem-f2'],
+  ['char_common_b_moss_golem', 'char_common_b_moss_golem_f3', 'cc0-moss-golem-f3'],
+
+  ['char_common_a_glass_keeper', 'char_common_a_glass_keeper_f1', 'cc0-glass-keeper-f1'],
+  ['char_common_a_glass_keeper', 'char_common_a_glass_keeper_f2', 'cc0-glass-keeper-f2'],
+  ['char_common_a_glass_keeper', 'char_common_a_glass_keeper_f3', 'cc0-glass-keeper-f3'],
+  ['char_common_a_bonedrum', 'char_common_a_bonedrum_f1', 'cc0-bonedrum-f1'],
+  ['char_common_a_bonedrum', 'char_common_a_bonedrum_f2', 'cc0-bonedrum-f2'],
+  ['char_common_a_bonedrum', 'char_common_a_bonedrum_f3', 'cc0-bonedrum-f3'],
+  ['char_common_a_paper_dragon', 'char_common_a_paper_dragon_f1', 'cc0-paper-dragon-f1'],
+  ['char_common_a_paper_dragon', 'char_common_a_paper_dragon_f2', 'cc0-paper-dragon-f2'],
+  ['char_common_a_paper_dragon', 'char_common_a_paper_dragon_f3', 'cc0-paper-dragon-f3'],
+  ['char_common_a_meteor_cart', 'char_common_a_meteor_cart_f1', 'cc0-meteor-cart-f1'],
+  ['char_common_a_meteor_cart', 'char_common_a_meteor_cart_f2', 'cc0-meteor-cart-f2'],
+  ['char_common_a_meteor_cart', 'char_common_a_meteor_cart_f3', 'cc0-meteor-cart-f3'],
+  ['char_common_a_mirror_guide', 'char_common_a_mirror_guide_f1', 'cc0-mirror-guide-f1'],
+  ['char_common_a_mirror_guide', 'char_common_a_mirror_guide_f2', 'cc0-mirror-guide-f2'],
+  ['char_common_a_mirror_guide', 'char_common_a_mirror_guide_f3', 'cc0-mirror-guide-f3'],
+];
+
+test('every vetted source-reference family is unique and exposes complete hit/death reactions', () => {
+  assert.equal(SOURCE_REFERENCE_ART_FAMILIES.length, EXPECTED_SOURCE_REFERENCE_FAMILY_COUNT);
   assert.equal(new Set(SOURCE_REFERENCE_ART_FAMILIES.map((family) => family.id)).size, SOURCE_REFERENCE_ART_FAMILIES.length);
 
-  for (const [familyId, [hitFrames, deathFrames]] of EXPECTED_REACTIONS) {
-    const family = SOURCE_REFERENCE_ART_BY_ID[familyId];
-    assert.ok(family, `missing source-reference family: ${familyId}`);
-    assert.ok(family.knockback, `${familyId} must expose a hit strip`);
-    assert.ok(family.death, `${familyId} must expose a death strip`);
-    assert.equal(family.knockback.frames, hitFrames, `${familyId} hit frame count drifted`);
-    assert.equal(family.death.frames, deathFrames, `${familyId} death frame count drifted`);
+  for (const family of SOURCE_REFERENCE_ART_FAMILIES) {
+    assert.ok(family.knockback, `${family.id} must expose a hit strip`);
+    assert.ok(family.death, `${family.id} must expose a death strip`);
+    assert.ok(family.knockback.frames > 0, `${family.id} hit strip must contain frames`);
+    assert.ok(family.death.frames > 0, `${family.id} death strip must contain frames`);
     assert.match(family.knockback.url, /^\/assets\/characters\//);
     assert.match(family.death.url, /^\/assets\/characters\//);
   }
+
+  for (const [familyId, [hitFrames, deathFrames]] of EXPECTED_REACTIONS) {
+    const family = SOURCE_REFERENCE_ART_BY_ID[familyId];
+    assert.ok(family, `missing established source-reference family: ${familyId}`);
+    assert.equal(family.knockback?.frames, hitFrames, `${familyId} hit frame count drifted`);
+    assert.equal(family.death?.frames, deathFrames, `${familyId} death frame count drifted`);
+  }
 });
 
-test('all ten chapter-one story units resolve to complete five-motion placeholder families', () => {
+test('all ten chapter-one story units remain unapproved placeholders with complete reactions', () => {
   assert.equal(PLAYER_SLOTS.length, 10);
   clearActiveVisualForms();
 
@@ -86,132 +153,60 @@ test('all ten chapter-one story units resolve to complete five-motion placeholde
     const art = resolveUnitArt(slot.slotId);
     assert.equal(art.source, 'PLACEHOLDER', `${slot.slotId} must remain unapproved source-reference art`);
     assert.equal(art.productionAssetId, undefined);
-    assert.ok(art.family.knockback, `${slot.slotId} must have an authored placeholder hit reaction`);
-    assert.ok(art.family.death, `${slot.slotId} must have an authored placeholder death motion`);
-    assert.ok(EXPECTED_REACTIONS.has(art.family.id), `${slot.slotId} resolved to an unverified reaction family: ${art.family.id}`);
+    assert.ok(art.family.knockback, `${slot.slotId} must have a placeholder hit reaction`);
+    assert.ok(art.family.death, `${slot.slotId} must have a placeholder death motion`);
+    assert.ok(EXPECTED_REACTIONS.has(art.family.id), `${slot.slotId} resolved to an unverified story reaction family: ${art.family.id}`);
   }
 
   clearActiveVisualForms();
 });
 
-test('verified free references distinguish selected story final forms without claiming production approval', () => {
-  const hunterF1 = resolveUnitArt('hunter', 'hunter_f1');
-  const hunterF3 = resolveUnitArt('hunter', 'hunter_f3');
-  const duelistF1 = resolveUnitArt('duelist', 'duelist_f1');
-  const duelistF3 = resolveUnitArt('duelist', 'duelist_f3');
-  const royalF1 = resolveUnitArt('royal', 'royal_f1');
-  const royalF3 = resolveUnitArt('royal', 'royal_f3');
-  const hereticF1 = resolveUnitArt('heretic', 'heretic_f1');
-  const hereticF3 = resolveUnitArt('heretic', 'heretic_f3');
-
-  assert.equal(hunterF1.family.id, 'huntress');
-  assert.equal(hunterF3.family.id, 'huntress-2');
-  assert.equal(duelistF1.family.id, 'fantasy-warrior');
-  assert.equal(duelistF3.family.id, 'martial-hero-2');
-  assert.equal(royalF1.family.id, 'hero-knight');
-  assert.equal(royalF3.family.id, 'king-2');
-  assert.equal(hereticF1.family.id, 'evil-wizard');
-  assert.equal(hereticF3.family.id, 'evil-wizard-2');
-
-  const resolved = [hunterF1, hunterF3, duelistF1, duelistF3, royalF1, royalF3, hereticF1, hereticF3];
-  assert.ok(resolved.every((art) => art.source === 'PLACEHOLDER'));
-  assert.ok(resolved.every((art) => art.productionAssetId === undefined));
-  assert.ok(resolved.every((art) => art.family.knockback && art.family.death));
+test('vetted story and common forms resolve to their exact source-reference silhouettes without production approval', () => {
+  for (const [unitId, formId, expectedFamilyId] of FORM_CASES) {
+    const art = resolveUnitArt(unitId, formId);
+    assert.equal(art.family.id, expectedFamilyId, `${formId} source-reference family drifted`);
+    assert.equal(art.source, 'PLACEHOLDER', `${formId} must remain source-reference art`);
+    assert.equal(art.productionAssetId, undefined, `${formId} must not claim production approval`);
+    assert.ok(art.family.knockback, `${formId} must have a hit reaction`);
+    assert.ok(art.family.death, `${formId} must have a death reaction`);
+    if (expectedFamilyId.startsWith('cc0-')) {
+      assert.ok(art.family.idle.url.startsWith('/assets/characters/'), `${formId} must stay on vendored source-reference assets`);
+    }
+  }
 });
 
-test('lower-rarity clockduck and ink-raven forms use free creature silhouettes without production approval', () => {
-  const clockduck = [1, 2, 3].map((order) => resolveUnitArt('char_common_b_clockduck', `char_common_b_clockduck_f${order}`));
-  const raven = [1, 2, 3].map((order) => resolveUnitArt('char_common_b_ink_raven', `char_common_b_ink_raven_f${order}`));
-
-  assert.deepEqual(clockduck.map((art) => art.family.id), ['cc0-clockduck-f1', 'cc0-clockduck-f1', 'cc0-clockduck-f3']);
-  assert.deepEqual(raven.map((art) => art.family.id), ['cc0-ink-raven-f1', 'cc0-ink-raven-f2', 'cc0-ink-raven-f3']);
-  assert.ok([...clockduck, ...raven].every((art) => art.source === 'PLACEHOLDER'));
-  assert.ok([...clockduck, ...raven].every((art) => art.productionAssetId === undefined));
-  assert.ok([...clockduck, ...raven].every((art) => art.family.knockback && art.family.death));
+test('clockduck intentionally reuses its first source silhouette for form two while later forms stay distinct', () => {
+  const families = [1, 2, 3].map((order) => resolveUnitArt('char_common_b_clockduck', `char_common_b_clockduck_f${order}`).family.id);
+  assert.deepEqual(families, ['cc0-clockduck-f1', 'cc0-clockduck-f1', 'cc0-clockduck-f3']);
 });
 
-test('bell-crab and lantern-moth use six distinct Foozle creature forms without production approval', () => {
-  const crab = [1, 2, 3].map((order) => resolveUnitArt('char_common_c_bell_crab', `char_common_c_bell_crab_f${order}`));
-  const moth = [1, 2, 3].map((order) => resolveUnitArt('char_common_c_lantern_moth', `char_common_c_lantern_moth_f${order}`));
-
-  assert.deepEqual(crab.map((art) => art.family.id), ['cc0-bell-crab-f1', 'cc0-bell-crab-f2', 'cc0-bell-crab-f3']);
-  assert.deepEqual(moth.map((art) => art.family.id), ['cc0-lantern-moth-f1', 'cc0-lantern-moth-f2', 'cc0-lantern-moth-f3']);
-  assert.equal(new Set([...crab, ...moth].map((art) => art.family.id)).size, 6);
-  assert.ok([...crab, ...moth].every((art) => art.source === 'PLACEHOLDER'));
-  assert.ok([...crab, ...moth].every((art) => art.productionAssetId === undefined));
-  assert.ok([...crab, ...moth].every((art) => art.family.knockback && art.family.death));
-  assert.ok([...crab, ...moth].every((art) => art.family.idle.url.startsWith('/assets/characters/lower-rarity/')));
+test('bell-crab and lantern-moth preserve six distinct creature silhouettes', () => {
+  const ids = ['char_common_c_bell_crab', 'char_common_c_lantern_moth'] as const;
+  const forms = ids.flatMap((unitId) => [1, 2, 3].map((order) => resolveUnitArt(unitId, `${unitId}_f${order}`).family.id));
+  assert.equal(new Set(forms).size, 6);
 });
 
-test('tin-squire uses three finished GrafxKid robot forms without production approval', () => {
-  const forms = [1, 2, 3].map((order) => resolveUnitArt('char_common_c_tin_squire', `char_common_c_tin_squire_f${order}`));
-
-  assert.deepEqual(forms.map((art) => art.family.id), ['cc0-tin-squire-f1', 'cc0-tin-squire-f2', 'cc0-tin-squire-f3']);
-  assert.equal(new Set(forms.map((art) => art.family.id)).size, 3);
-  assert.ok(forms.every((art) => art.source === 'PLACEHOLDER'));
-  assert.ok(forms.every((art) => art.productionAssetId === undefined));
-  assert.ok(forms.every((art) => art.family.knockback && art.family.death));
-  assert.ok(forms.every((art) => art.family.idle.url.startsWith('/assets/characters/lower-rarity/')));
+test('remaining newly vendored C/B common forms keep twelve distinct CC0 silhouettes', () => {
+  const ids = ['char_common_c_turnip_rider', 'char_common_c_slinger', 'char_common_b_coffin_merchant', 'char_common_b_moss_golem'] as const;
+  const forms = ids.flatMap((unitId) => [1, 2, 3].map((order) => resolveUnitArt(unitId, `${unitId}_f${order}`).family.id));
+  assert.equal(forms.length, 12);
+  assert.equal(new Set(forms).size, 12);
 });
 
-test('remaining common batch resolves fifteen deliberate form silhouettes without production approval', () => {
-  const turnip = [1, 2, 3].map((order) => resolveUnitArt('char_common_c_turnip_rider', `char_common_c_turnip_rider_f${order}`));
-  const slinger = [1, 2, 3].map((order) => resolveUnitArt('char_common_c_slinger', `char_common_c_slinger_f${order}`));
-  const witch = [1, 2, 3].map((order) => resolveUnitArt('char_common_b_lantern_witch', `char_common_b_lantern_witch_f${order}`));
-  const coffin = [1, 2, 3].map((order) => resolveUnitArt('char_common_b_coffin_merchant', `char_common_b_coffin_merchant_f${order}`));
-  const moss = [1, 2, 3].map((order) => resolveUnitArt('char_common_b_moss_golem', `char_common_b_moss_golem_f${order}`));
-
-  assert.deepEqual(turnip.map((art) => art.family.id), ['cc0-turnip-rider-f1', 'cc0-turnip-rider-f2', 'cc0-turnip-rider-f3']);
-  assert.deepEqual(slinger.map((art) => art.family.id), ['cc0-slinger-f1', 'cc0-slinger-f2', 'cc0-slinger-f3']);
-  assert.deepEqual(witch.map((art) => art.family.id), ['wizard', 'evil-wizard', 'evil-wizard-2']);
-  assert.deepEqual(coffin.map((art) => art.family.id), ['cc0-coffin-merchant-f1', 'cc0-coffin-merchant-f2', 'cc0-coffin-merchant-f3']);
-  assert.deepEqual(moss.map((art) => art.family.id), ['cc0-moss-golem-f1', 'cc0-moss-golem-f2', 'cc0-moss-golem-f3']);
-
-  const all = [...turnip, ...slinger, ...witch, ...coffin, ...moss];
-  assert.equal(all.length, 15);
-  assert.ok(all.every((art) => art.source === 'PLACEHOLDER'));
-  assert.ok(all.every((art) => art.productionAssetId === undefined));
-  assert.ok(all.every((art) => art.family.knockback && art.family.death));
-
-  const newlyVendored = [...turnip, ...slinger, ...coffin, ...moss];
-  assert.equal(new Set(newlyVendored.map((art) => art.family.id)).size, 12);
-  assert.ok(newlyVendored.every((art) => art.family.idle.url.startsWith('/assets/characters/lower-rarity/')));
-});
-
-test('A-rarity common batch resolves fifteen distinct free form silhouettes without production approval', () => {
-  const ids = [
-    'char_common_a_glass_keeper',
-    'char_common_a_bonedrum',
-    'char_common_a_paper_dragon',
-    'char_common_a_meteor_cart',
-    'char_common_a_mirror_guide',
-  ] as const;
-  const expected = [
-    'cc0-glass-keeper-f1', 'cc0-glass-keeper-f2', 'cc0-glass-keeper-f3',
-    'cc0-bonedrum-f1', 'cc0-bonedrum-f2', 'cc0-bonedrum-f3',
-    'cc0-paper-dragon-f1', 'cc0-paper-dragon-f2', 'cc0-paper-dragon-f3',
-    'cc0-meteor-cart-f1', 'cc0-meteor-cart-f2', 'cc0-meteor-cart-f3',
-    'cc0-mirror-guide-f1', 'cc0-mirror-guide-f2', 'cc0-mirror-guide-f3',
-  ];
-
-  const forms = ids.flatMap((characterId) => [1, 2, 3].map((order) =>
-    resolveUnitArt(characterId, `${characterId}_f${order}`),
-  ));
-
-  assert.deepEqual(forms.map((art) => art.family.id), expected);
+test('A-rarity common forms keep fifteen distinct CC0 silhouettes', () => {
+  const ids = ['char_common_a_glass_keeper', 'char_common_a_bonedrum', 'char_common_a_paper_dragon', 'char_common_a_meteor_cart', 'char_common_a_mirror_guide'] as const;
+  const forms = ids.flatMap((unitId) => [1, 2, 3].map((order) => resolveUnitArt(unitId, `${unitId}_f${order}`).family.id));
   assert.equal(forms.length, 15);
-  assert.equal(new Set(forms.map((art) => art.family.id)).size, 15);
-  assert.ok(forms.every((art) => art.source === 'PLACEHOLDER'));
-  assert.ok(forms.every((art) => art.productionAssetId === undefined));
-  assert.ok(forms.every((art) => art.family.knockback && art.family.death));
-  assert.ok(forms.every((art) => art.family.idle.url.startsWith('/assets/characters/lower-rarity/')));
+  assert.equal(new Set(forms).size, 15);
+  assert.ok(forms.every((familyId) => familyId.startsWith('cc0-')));
 });
 
-test('golden-mask boss reservation remains placeholder while using complete Evil Wizard source motion', () => {
+test('chapter-one boss reservation remains placeholder while using its dedicated CC0 boss silhouette', () => {
   const boss = resolveUnitArt('enemy-boss');
   assert.equal(boss.source, 'PLACEHOLDER');
   assert.equal(boss.productionAssetId, undefined);
-  assert.equal(boss.family.id, 'evil-wizard');
+  assert.equal(boss.family.id, 'cc0-boss-void-squid');
   assert.ok(boss.family.knockback);
   assert.ok(boss.family.death);
+  assert.ok(boss.family.idle.url.startsWith('/assets/characters/boss-source-reference/'));
 });

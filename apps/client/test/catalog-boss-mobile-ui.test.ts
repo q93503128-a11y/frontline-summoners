@@ -31,13 +31,14 @@ test('catalog pages active-authority allies, discovered enemies, permanent rewar
   assert.match(source, /계정 · 오프라인 기록/);
   assert.match(source, /new Set\(getOwnedCharacterIds\(this\.progress\)\)/);
   assert.match(source, /ALL_PLAYER_SLOTS\.slice\(start, start \+ ALLY_PAGE_SIZE\)/);
-  assert.match(source, /owned \? slot\.displayName : '\?\?\?'/);
+  assert.match(source, /const nameLabel = owned \? `\$\{badge\.label\} · \$\{slot\.displayName\}` : '\?\?\?';/);
   assert.match(source, /portrait\.setTint\(0x07080b\)/);
   assert.match(source, /portrait\.setTintFill\(\)/);
   assert.match(source, /portrait\.setAlpha\(0\.86\)/);
   assert.match(source, /'획득 후 정보 공개'/);
   assert.match(source, /new Set\(this\.progress\.discoveredEnemyIds \?\? \[\]\)/);
-  assert.match(source, /discovered \? enemy\.displayName : '\?\?\?'/);
+  assert.match(source, /const categoryLabel = discovered \? \(isBoss \? '우두머리' : '적'\) : '\?\?\?';/);
+  assert.match(source, /const nameLabel = discovered[\s\S]*?enemy\.displayName[\s\S]*?: '\?\?\?';/);
   assert.match(source, /'전투에서 조우하면 정보 공개'/);
   assert.match(source, /new Set\(this\.progress\.permanentRewardIds\)/);
   assert.match(source, /new Set\(this\.progress\.specialClearedStageIds\)/);
@@ -82,8 +83,8 @@ test('catalog keeps desktop descriptions while compact dossiers prioritize reada
   assert.match(source, /function addDossierCard\(/);
   assert.match(source, /const spine = scene\.add\.rectangle/);
   assert.match(source, /const compact = isCompactMobileViewport\(\);/);
-  assert.match(source, /compact \? 27 : 22/);
-  assert.match(source, /compact \? 21 : 14/);
+  assert.match(source, /compact \? 25 : 21/);
+  assert.match(source, /compact \? 20 : 14/);
   assert.match(source, /if \(compact\) \{[\s\S]*?HP \$\{slot\.definition\.maxHp\} · 공격 \$\{slot\.definition\.attackDamage\}/);
   assert.match(source, /else \{[\s\S]*?slot\.description/);
   assert.match(source, /재생산 \$\{\(slot\.rechargeFrames \/ 30\)\.toFixed\(1\)\}초/);
