@@ -85,13 +85,15 @@ export class RecruitmentScene extends Phaser.Scene {
     this.drawNoticeBoard(compact);
 
     const ssName = getSlotById(this.banner.poolByRarity.SS[0]!)?.displayName ?? '미확인';
-    addText(this, 500, 176, this.banner.name, compact ? 29 : 27, '#f3e9da');
-    addText(this, 500, 213, this.banner.description, compact ? 16 : 14, '#c6bdac').setWordWrapWidth(438);
-    addText(this, 500, 278, '대표 인장', compact ? 17 : 14, '#bca8c8');
-    addText(this, 500, 307, `SS · ${ssName}`, compact ? 24 : 21, COLORS.gold);
-    addText(this, 500, 344, `공통 C ${this.banner.poolByRarity.C.length} · B ${this.banner.poolByRarity.B.length} · A ${this.banner.poolByRarity.A.length}`, compact ? 16 : 13, COLORS.muted);
-    addText(this, 500, 374, `전용 S ${this.banner.poolByRarity.S.length} · SS ${this.banner.poolByRarity.SS.length}`, compact ? 17 : 14, '#d8bcea');
-    this.drawSummoningSeal(735, 302, compact);
+    const copyX = 350;
+    const copyWidth = 300;
+    addText(this, copyX, 176, this.banner.name, compact ? 29 : 27, '#f3e9da');
+    addText(this, copyX, 213, this.banner.description, compact ? 16 : 14, '#c6bdac').setWordWrapWidth(copyWidth);
+    addText(this, copyX, 278, '대표 인장', compact ? 17 : 14, '#bca8c8');
+    addText(this, copyX, 307, `SS · ${ssName}`, compact ? 24 : 21, COLORS.gold).setWordWrapWidth(copyWidth);
+    addText(this, copyX, 344, `공통 C ${this.banner.poolByRarity.C.length} · B ${this.banner.poolByRarity.B.length} · A ${this.banner.poolByRarity.A.length}`, compact ? 16 : 13, COLORS.muted).setWordWrapWidth(copyWidth);
+    addText(this, copyX, 374, `전용 S ${this.banner.poolByRarity.S.length} · SS ${this.banner.poolByRarity.SS.length}`, compact ? 17 : 14, '#d8bcea').setWordWrapWidth(copyWidth);
+    this.drawSummoningSeal(790, 316, compact);
 
     addText(this, 92, 182, '공개 확률', compact ? 21 : 18, COLORS.cream);
     let probabilityY = 225;
@@ -173,24 +175,24 @@ export class RecruitmentScene extends Phaser.Scene {
 
   private drawSummoningSeal(x: number, y: number, compact: boolean): void {
     const g = this.add.graphics();
-    const outer = compact ? 112 : 104;
-    g.fillStyle(0x171720, 0.7).fillCircle(x, y, outer + 14);
-    g.lineStyle(5, 0x8f6ea4, 0.72).strokeCircle(x, y, outer);
-    g.lineStyle(2, 0xc9a768, 0.6).strokeCircle(x, y, outer - 24);
-    g.lineStyle(2, 0x8f6ea4, 0.46).strokeCircle(x, y, outer - 54);
-    const radius = outer - 8;
+    const outer = compact ? 78 : 72;
+    g.fillStyle(0x171720, 0.7).fillCircle(x, y, outer + 10);
+    g.lineStyle(4, 0x8f6ea4, 0.68).strokeCircle(x, y, outer);
+    g.lineStyle(2, 0xc9a768, 0.56).strokeCircle(x, y, outer - 18);
+    g.lineStyle(2, 0x8f6ea4, 0.42).strokeCircle(x, y, outer - 38);
+    const radius = outer - 7;
     for (let index = 0; index < 8; index += 1) {
       const angle = Phaser.Math.DegToRad(index * 45 - 90);
       const inner = Phaser.Math.DegToRad(index * 45 + 22.5 - 90);
       const x1 = x + Math.cos(angle) * radius;
       const y1 = y + Math.sin(angle) * radius;
-      const x2 = x + Math.cos(inner) * (radius - 34);
-      const y2 = y + Math.sin(inner) * (radius - 34);
-      g.lineStyle(2, index % 2 === 0 ? 0xd0ad68 : 0x8f6ea4, 0.5).lineBetween(x, y, x1, y1);
-      g.fillStyle(index % 2 === 0 ? 0xd0ad68 : 0x8f6ea4, 0.8).fillCircle(x2, y2, 4);
+      const x2 = x + Math.cos(inner) * (radius - 24);
+      const y2 = y + Math.sin(inner) * (radius - 24);
+      g.lineStyle(2, index % 2 === 0 ? 0xd0ad68 : 0x8f6ea4, 0.45).lineBetween(x, y, x1, y1);
+      g.fillStyle(index % 2 === 0 ? 0xd0ad68 : 0x8f6ea4, 0.75).fillCircle(x2, y2, 3);
     }
-    g.fillStyle(0xd0ad68, 0.18).fillCircle(x, y, compact ? 42 : 38);
-    g.fillStyle(0xd0ad68, 0.85).fillTriangle(x, y - 24, x - 17, y + 15, x + 17, y + 15);
+    g.fillStyle(0xd0ad68, 0.16).fillCircle(x, y, compact ? 31 : 28);
+    g.fillStyle(0xd0ad68, 0.82).fillTriangle(x, y - 18, x - 13, y + 11, x + 13, y + 11);
   }
 
   private renderSeriesTabs(compact: boolean): void {
