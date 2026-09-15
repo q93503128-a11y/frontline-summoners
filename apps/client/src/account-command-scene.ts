@@ -94,6 +94,30 @@ function summaryText(label: string, summary: AccountProgressSummaryClient): stri
   return `${label} · 메인 ${summary.mainClearCount} · SPECIAL ${summary.specialClearCount} · 동료 ${summary.ownedCharacterCount}${resource ? ` · ${resource}` : ''}`;
 }
 
+function ensureGoogleIdentityScript(): Promise<void> {
+  if (window.google?.accounts?.id) return Promise.resolve();
+  if (googleScriptPromise) return googleScriptPromise;
+  googleScriptPromise = new Promise<void>((resolve, reject) => {
+    const existing = document.getElementById(GOOGLE_GSI_SCRIPT_ID) as HTMLScriptElement | null;
+    const script = existing ?? document.createElement('script');
+    const onLoad = () => window.google?.accounts?.id ? resolve() : reject(new Error('Google 로그인을 초기화하지 못했습니다.'));
+    const onError = () => reject(new Error('Google 로그인 화면을 불러오지 못했습니다.'));
+    script.addEventListener('load', onLoad, { once: true });
+    script.addEventListener('error', onError, { once: true });
+    if (!existing) {
+      script.id = GOOGLE_GSI_SCRIPT_ID;
+      script.src = GOOGLE_GSI_SCRIPT_SRC;
+      script.async = true;
+      script.defer = true;
+      document.head.appendChild(script);
+    }
+  }).catch((error) => {
+    googleScriptPromise = null;
+    throw error;
+  });
+  return googleScriptPromise;
+}
+
 function accountConnectionMessage(error: unknown): string {
   const detail = error instanceof Error ? error.message : '';
   const googleSetupFailure = detail.includes('Google')
