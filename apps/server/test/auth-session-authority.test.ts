@@ -2,6 +2,7 @@ import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
 import test from 'node:test';
 import {
+  AUTH_IDENTITY_PROVIDERS,
   hashAuthSessionToken,
   parseAuthorizationBearerHeader,
 } from '../src/auth-session-authority.ts';
@@ -38,9 +39,10 @@ test('D1 auth session migration stores only token hashes with expiry, revocation
   assert.match(sql, /auth_sessions_expiry_idx/);
 });
 
-test('verified identity binding is restricted to google/email and session issue stays behind that verified boundary', async () => {
+test('verified identity binding is local-only while multiplayer/session consumers stay provider-agnostic', async () => {
+  assert.deepEqual(AUTH_IDENTITY_PROVIDERS, ['local']);
   const source = await readFile(new URL('../src/auth-session-authority.ts', import.meta.url), 'utf8');
-  assert.match(source, /AUTH_IDENTITY_PROVIDERS = \['google', 'email'\]/);
+  assert.match(source, /AUTH_IDENTITY_PROVIDERS = \['local'\]/);
   assert.match(source, /resolveOrCreateUserForVerifiedIdentity/);
   assert.match(source, /issueAuthSessionForVerifiedIdentity/);
   assert.match(source, /INSERT INTO auth_identities/);
@@ -49,4 +51,5 @@ test('verified identity binding is restricted to google/email and session issue 
   assert.match(source, /resolveAuthSession/);
   assert.match(source, /revoked_at !== null/);
   assert.match(source, /expiresAtMs <= nowMs/);
+  assert.doesNotMatch(source, /AUTH_IDENTITY_PROVIDERS = \[[^\]]*google/);
 });
