@@ -50,6 +50,9 @@ const RESOURCE_LABELS: Readonly<Record<string, string>> = {
   sweep_ticket: '소탕권',
 };
 
+const ACCOUNT_ACTION_FAILED_MESSAGE = '계정 작업을 완료하지 못했습니다. 잠시 후 다시 시도해 주세요.';
+const INTERNAL_ACCOUNT_ERROR_MARKER = /(?:https?:\/\/|\b(?:http|api|fetch|network|json|token|session|auth|origin|d1|sqlite|migration|request|response)\b|failed\s+to\s+fetch|[A-Za-z_][A-Za-z0-9_.:/-]{2,})/i;
+
 function newRequestId(): string {
   if (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function') return crypto.randomUUID();
   return `guest-profile-${Date.now()}-${Math.random().toString(36).slice(2)}`;
@@ -74,13 +77,15 @@ function summaryText(label: string, summary: AccountProgressSummaryClient): stri
     .slice(0, 3)
     .map(([id, value]) => `${RESOURCE_LABELS[id] ?? '재화'} ${value.toLocaleString('ko-KR')}`)
     .join(' · ');
-  return `${label} · 메인 ${summary.mainClearCount} · SPECIAL ${summary.specialClearCount} · 동료 ${summary.ownedCharacterCount}${resource ? ` · ${resource}` : ''}`;
+  return `${label} · 메인 ${summary.mainClearCount} · 특수 ${summary.specialClearCount} · 동료 ${summary.ownedCharacterCount}${resource ? ` · ${resource}` : ''}`;
 }
 
 function accountConnectionMessage(error: unknown): string {
-  return error instanceof Error && error.message.trim().length > 0
-    ? error.message
-    : '계정 연결 상태를 확인하지 못했습니다. 로컬 저장으로 계속 플레이할 수 있습니다.';
+  const message = error instanceof Error ? error.message.trim() : '';
+  if (!message || !/[가-힣]/.test(message) || INTERNAL_ACCOUNT_ERROR_MARKER.test(message)) {
+    return ACCOUNT_ACTION_FAILED_MESSAGE;
+  }
+  return message;
 }
 
 function stateSummary(state: AccountClientState): { readonly title: string; readonly detail: string; readonly kind: 'neutral' | 'online' | 'offline' } {
@@ -234,6 +239,10 @@ export class AccountCommandScene extends Phaser.Scene {
       zIndex: '1000',
       display: 'flex',
       alignItems: 'center',
+      justifyContent: 'center',
+      flexWrap: 'wrap',
+      boxSizing: 'border-box',
+      width: '760px',
       gap: '10px',
       padding: '10px 12px',
       border: '1px solid rgba(184, 198, 214, 0.45)',
@@ -259,9 +268,12 @@ export class AccountCommandScene extends Phaser.Scene {
 
     for (const input of [username, password]) {
       Object.assign(input.style, {
-        width: '190px',
+        flex: '1 1 170px',
+        minWidth: '0',
+        width: 'auto',
         height: '38px',
         padding: '0 12px',
+        boxSizing: 'border-box',
         borderRadius: '8px',
         border: '1px solid #58697d',
         background: '#111923',
@@ -290,8 +302,12 @@ export class AccountCommandScene extends Phaser.Scene {
     button.type = 'button';
     button.textContent = label;
     Object.assign(button.style, {
+      flex: label === '로그인' ? '1 1 120px' : '1 1 160px',
+      minWidth: '112px',
+      maxWidth: '220px',
       height: '40px',
       padding: '0 16px',
+      boxSizing: 'border-box',
       borderRadius: '8px',
       border: '1px solid #71869d',
       background: '#34495f',
@@ -317,10 +333,22 @@ export class AccountCommandScene extends Phaser.Scene {
   private positionCredentialHost = (): void => {
     if (!this.credentialHost || !this.game?.canvas) return;
     const rect = this.game.canvas.getBoundingClientRect();
-    const scale = Math.min(rect.width / INTERNAL_WIDTH, rect.height / INTERNAL_HEIGHT);
-    this.credentialHost.style.left = `${rect.left + rect.width * 0.5}px`;
-    this.credentialHost.style.top = `${rect.top + rect.height * (500 / INTERNAL_HEIGHT)}px`;
-    this.credentialHost.style.transform = `translate(-50%, -50%) scale(${Math.max(0.62, Math.min(1, scale))})`;
+    const canvasScale = Math.min(rect.width / INTERNAL_WIDTH, rect.height / INTERNAL_HEIGHT);
+    const appliedScale = Math.max(0.62, Math.min(1, canvasScale));
+    const contentWidth = INTERNAL_WIDTH * canvasScale;
+    const contentHeight = INTERNAL_HEIGHT * canvasScale;
+    const contentLeft = rect.left + (rect.width - contentWidth) * 0.5;
+    const contentTop = rect.top + (rect.height - contentHeight) * 0.5;
+    const visibleLeft = Math.max(0, contentLeft);
+    const visibleRight = Math.min(window.innerWidth, contentLeft + contentWidth);
+    const visibleWidth = Math.max(0, visibleRight - visibleLeft);
+    const renderedWidthLimit = Math.max(0, visibleWidth - 24);
+    const logicalWidth = renderedWidthLimit > 0 ? Math.min(760, renderedWidthLimit / appliedScale) : 760;
+    this.credentialHost.style.width = `${Math.max(1, logicalWidth)}px`;
+    this.credentialHost.style.maxWidth = `${Math.max(1, logicalWidth)}px`;
+    this.credentialHost.style.left = `${contentLeft + contentWidth * 0.5}px`;
+    this.credentialHost.style.top = `${contentTop + 500 * canvasScale}px`;
+    this.credentialHost.style.transform = `translate(-50%, -50%) scale(${appliedScale})`;
   };
 
   private async submitCredentials(mode: 'login' | 'register'): Promise<void> {
@@ -409,7 +437,7 @@ export class AccountCommandScene extends Phaser.Scene {
       this.setMessage('게스트 진행 이전 완료 · 계정 진행으로 전환되었습니다. 직후 상태라면 되돌릴 수 있습니다.', COLORS.green);
       this.renderActions(getAccountClientState());
     } catch (error) {
-      if (!this.destroyed) this.setMessage(error instanceof Error ? error.message : '게스트 진행 이전에 실패했습니다.', COLORS.red);
+      if (!this.destroyed) this.setMessage(accountConnectionMessage(error), COLORS.red);
     }
   }
 
@@ -434,7 +462,7 @@ export class AccountCommandScene extends Phaser.Scene {
       this.setMessage('직전 이전을 되돌렸습니다. 서버 진행이 이전 상태로 복구되었습니다.', COLORS.green);
       this.renderActions(getAccountClientState());
     } catch (error) {
-      if (!this.destroyed) this.setMessage(error instanceof Error ? error.message : '이전을 되돌릴 수 없습니다.', COLORS.red);
+      if (!this.destroyed) this.setMessage(accountConnectionMessage(error), COLORS.red);
     }
   }
 
@@ -456,7 +484,7 @@ export class AccountCommandScene extends Phaser.Scene {
       if (this.destroyed) return;
       this.setMessage('게스트 프로필 장착 취향을 가져왔습니다. 서버에서 해금되지 않은 장식은 추가하지 않았습니다.', COLORS.green);
     } catch (error) {
-      if (!this.destroyed) this.setMessage(error instanceof Error ? error.message : '게스트 프로필 가져오기에 실패했습니다.', COLORS.red);
+      if (!this.destroyed) this.setMessage(accountConnectionMessage(error), COLORS.red);
     }
   }
 
@@ -536,5 +564,4 @@ export const __accountCommandSceneTestOnly = {
   hasMeaningfulGuestProgress,
   summaryText,
   accountConnectionMessage,
-  googleScriptSrc: null,
 };
