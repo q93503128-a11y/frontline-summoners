@@ -165,6 +165,7 @@ function drawControlsPresentation(scene: PvpMatchPresentationCarrier): void {
   const side = snapshot.sides.find((entry) => entry.sideId === seatId);
   if (!side) return;
 
+  const connectionOpen = scene.session?.connectionState === 'OPEN';
   const compact = isCompactMobileViewport();
   const minimumTouch = compact ? getCurrentMinimumInternalTouchTarget() : 0;
   const singleWidth = Math.max(82, minimumTouch);
@@ -193,7 +194,7 @@ function drawControlsPresentation(scene: PvpMatchPresentationCarrier): void {
     const cost = side.costs[slotId] ?? 0;
     const info = getSlotById(slotId);
     const name = info?.displayName ?? '소환 동료';
-    const available = cooldown <= 0 && side.supply >= cost;
+    const available = connectionOpen && cooldown <= 0 && side.supply >= cost;
     const label = cooldown > 0 ? `${name}\n${cooldownSeconds(cooldown)}초` : `${name}\n◆${cost}`;
     const button = addButton(scene, x, y, slotWidth - 2, slotHeight, label, () => {
       if (available) scene.session?.queueCommand({ type: 'SPAWN', slotId });
@@ -203,7 +204,8 @@ function drawControlsPresentation(scene: PvpMatchPresentationCarrier): void {
       const key = index === 9 ? '0' : String(index + 1);
       layer.add(addText(scene, x + slotWidth / 2 - 14, y - slotHeight / 2 + 7, key, 11, '#c9d5e3', 'right').setOrigin(1, 0).setDepth(20));
     }
-    if (cooldown > 0) setButtonState(button, 'disabled', `재사용까지 ${cooldownSeconds(cooldown)}초 남았습니다.`);
+    if (!connectionOpen) setButtonState(button, 'locked', '대전 연결을 복구하는 중입니다.');
+    else if (cooldown > 0) setButtonState(button, 'disabled', `재사용까지 ${cooldownSeconds(cooldown)}초 남았습니다.`);
     else if (side.supply < cost) setButtonState(button, 'disabled', `보급이 ${(cost - side.supply).toLocaleString()} 부족합니다.`);
   });
 
@@ -214,17 +216,18 @@ function drawControlsPresentation(scene: PvpMatchPresentationCarrier): void {
   const weaponX = useTwoRows ? 1142 : 1155;
   const weaponWidth = useTwoRows ? 260 : 204;
 
-  const canUpgrade = side.nextSupplyUpgradeCost !== null && side.supply >= side.nextSupplyUpgradeCost;
+  const canUpgrade = connectionOpen && side.nextSupplyUpgradeCost !== null && side.supply >= side.nextSupplyUpgradeCost;
   const upgradeLabel = side.nextSupplyUpgradeCost === null ? '보급소\n최대 단계' : `보급소 강화\n◆${side.nextSupplyUpgradeCost}`;
   const upgrade = addButton(scene, supplyX, commandY, supplyWidth, commandHeight, upgradeLabel, () => {
     if (canUpgrade) scene.session?.queueCommand({ type: 'UPGRADE_SUPPLY' });
   }, canUpgrade ? 0x8b773f : 0x4f5050, { tone: canUpgrade ? 'primary' : 'quiet' });
   layer.add(upgrade);
-  if (side.nextSupplyUpgradeCost === null) setButtonState(upgrade, 'disabled', '보급소가 최대 단계입니다.');
+  if (!connectionOpen) setButtonState(upgrade, 'locked', '대전 연결을 복구하는 중입니다.');
+  else if (side.nextSupplyUpgradeCost === null) setButtonState(upgrade, 'disabled', '보급소가 최대 단계입니다.');
   else if (side.supply < side.nextSupplyUpgradeCost) setButtonState(upgrade, 'disabled', `보급이 ${(side.nextSupplyUpgradeCost - side.supply).toLocaleString()} 부족합니다.`);
 
   const weapon = weaponName(side.baseWeaponId);
-  const weaponReady = side.baseWeaponId !== null && side.baseWeaponCooldownFrames === 0;
+  const weaponReady = connectionOpen && side.baseWeaponId !== null && side.baseWeaponCooldownFrames === 0;
   const weaponLabel = side.baseWeaponId === null
     ? '거점 병기\n장착 없음'
     : side.baseWeaponCooldownFrames > 0
@@ -234,7 +237,8 @@ function drawControlsPresentation(scene: PvpMatchPresentationCarrier): void {
     if (weaponReady) scene.session?.queueCommand({ type: 'FIRE_BASE_WEAPON' });
   }, weaponReady ? 0x587f98 : 0x4d535d, { tone: weaponReady ? 'primary' : 'quiet' });
   layer.add(weaponButton);
-  if (side.baseWeaponId === null) setButtonState(weaponButton, 'disabled', '장착된 거점 병기가 없습니다.');
+  if (!connectionOpen) setButtonState(weaponButton, 'locked', '대전 연결을 복구하는 중입니다.');
+  else if (side.baseWeaponId === null) setButtonState(weaponButton, 'disabled', '장착된 거점 병기가 없습니다.');
   else if (side.baseWeaponCooldownFrames > 0) setButtonState(weaponButton, 'disabled', `재사용까지 ${cooldownSeconds(side.baseWeaponCooldownFrames)}초 남았습니다.`);
 }
 
@@ -252,5 +256,10 @@ export class PvpMatchScene extends BasePvpMatchScene {
   override create(): void {
     installPvpCommandMatchPresentation(this);
     super.create();
+    const carrier = this as unknown as PvpMatchPresentationCarrier;
+    const unsubscribeConnection = carrier.session?.subscribeConnection(() => {
+      if (this.scene.isActive()) carrier.renderControls();
+    });
+    this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => unsubscribeConnection?.());
   }
 }
