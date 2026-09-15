@@ -54,6 +54,7 @@ function renderCompactPager(scene: PagedCarrier): void {
   const side = snapshot.sides.find((entry) => entry.sideId === seatId);
   if (!side) return;
 
+  const connectionOpen = scene.session?.connectionState === 'OPEN';
   const slotIds = Object.keys(side.costs).slice(0, 10);
   const geometry = computePvpCompactCommandLayout(getCurrentMinimumInternalTouchTarget(), slotIds.length);
   const page = Phaser.Math.Clamp(scene[PAGE] ?? 0, 0, geometry.pageCount - 1);
@@ -72,14 +73,15 @@ function renderCompactPager(scene: PagedCarrier): void {
     const cooldown = side.cooldowns[slotId] ?? 0;
     const cost = side.costs[slotId] ?? 0;
     const name = getSlotById(slotId)?.displayName ?? '소환 동료';
-    const available = cooldown <= 0 && side.supply >= cost;
+    const available = connectionOpen && cooldown <= 0 && side.supply >= cost;
     const label = cooldown > 0 ? `${name}\n${cooldownSeconds(cooldown)}초` : `${name}\n◆${cost}`;
     const button = addButton(scene, xFor(index), geometry.buttonY, geometry.buttonWidth, geometry.buttonHeight, label, () => {
       if (available) scene.session?.queueCommand({ type: 'SPAWN', slotId });
     }, available ? 0x5f86aa : 0x48515e, { tone: available ? 'primary' : 'quiet' });
     fitCompactButtonLabel(button, geometry.buttonWidth, geometry.buttonHeight);
     layer.add(button);
-    if (cooldown > 0) setButtonState(button, 'disabled', `재사용까지 ${cooldownSeconds(cooldown)}초 남았습니다.`);
+    if (!connectionOpen) setButtonState(button, 'locked', '대전 연결을 복구하는 중입니다.');
+    else if (cooldown > 0) setButtonState(button, 'disabled', `재사용까지 ${cooldownSeconds(cooldown)}초 남았습니다.`);
     else if (side.supply < cost) setButtonState(button, 'disabled', `보급이 ${(cost - side.supply).toLocaleString()} 부족합니다.`);
   });
 
@@ -115,7 +117,7 @@ function renderCompactPager(scene: PagedCarrier): void {
   fitCompactButtonLabel(pageButton, geometry.buttonWidth, geometry.buttonHeight);
   layer.add(pageButton);
 
-  const canUpgrade = side.nextSupplyUpgradeCost !== null && side.supply >= side.nextSupplyUpgradeCost;
+  const canUpgrade = connectionOpen && side.nextSupplyUpgradeCost !== null && side.supply >= side.nextSupplyUpgradeCost;
   const upgrade = addButton(
     scene,
     xFor(pageIndex + 1),
@@ -129,10 +131,11 @@ function renderCompactPager(scene: PagedCarrier): void {
   );
   fitCompactButtonLabel(upgrade, geometry.buttonWidth, geometry.buttonHeight);
   layer.add(upgrade);
-  if (side.nextSupplyUpgradeCost === null) setButtonState(upgrade, 'disabled', '보급소가 최대 단계입니다.');
+  if (!connectionOpen) setButtonState(upgrade, 'locked', '대전 연결을 복구하는 중입니다.');
+  else if (side.nextSupplyUpgradeCost === null) setButtonState(upgrade, 'disabled', '보급소가 최대 단계입니다.');
   else if (side.supply < side.nextSupplyUpgradeCost) setButtonState(upgrade, 'disabled', `보급이 ${(side.nextSupplyUpgradeCost - side.supply).toLocaleString()} 부족합니다.`);
 
-  const ready = side.baseWeaponId !== null && side.baseWeaponCooldownFrames === 0;
+  const ready = connectionOpen && side.baseWeaponId !== null && side.baseWeaponCooldownFrames === 0;
   const weaponLabel = side.baseWeaponId === null
     ? '거점 병기\n장착 없음'
     : side.baseWeaponCooldownFrames > 0
@@ -151,7 +154,8 @@ function renderCompactPager(scene: PagedCarrier): void {
   );
   fitCompactButtonLabel(weapon, geometry.buttonWidth, geometry.buttonHeight);
   layer.add(weapon);
-  if (side.baseWeaponId === null) setButtonState(weapon, 'disabled', '장착된 거점 병기가 없습니다.');
+  if (!connectionOpen) setButtonState(weapon, 'locked', '대전 연결을 복구하는 중입니다.');
+  else if (side.baseWeaponId === null) setButtonState(weapon, 'disabled', '장착된 거점 병기가 없습니다.');
   else if (side.baseWeaponCooldownFrames > 0) setButtonState(weapon, 'disabled', `재사용까지 ${cooldownSeconds(side.baseWeaponCooldownFrames)}초 남았습니다.`);
 }
 
