@@ -43,7 +43,6 @@ import { isEitherSocialBlocked, recordRecentCoopPlayers } from './social-authori
 export interface Env {
   DB: D1Database;
   BATTLE_ROOM: DurableObjectNamespace<BattleRoom>;
-  GOOGLE_CLIENT_ID?: string;
   AUTH_ALLOWED_ORIGINS?: string;
 }
 
@@ -140,7 +139,6 @@ export default {
 
     const authHttpResult = await resolveAuthHttp(request, {
       DB: env.DB,
-      ...(env.GOOGLE_CLIENT_ID === undefined ? {} : { GOOGLE_CLIENT_ID: env.GOOGLE_CLIENT_ID }),
       ...(env.AUTH_ALLOWED_ORIGINS === undefined ? {} : { AUTH_ALLOWED_ORIGINS: env.AUTH_ALLOWED_ORIGINS }),
     });
     if (authHttpResult) return authResponse(authHttpResult);
@@ -546,7 +544,6 @@ export class BattleRoom extends DurableObject<Env> {
     }
     return finished;
   }
-
   private async finishBattle(record: StoredCoopRoom): Promise<void> {
     if (!record.battle || record.room.phase === 'FINISHED') return;
     record.room.phase = 'FINISHED';
