@@ -44,7 +44,7 @@ function errorMessage(payload: unknown, status: number, mode: 'login' | 'registe
 async function requestLocalSession(mode: 'login' | 'register', username: string, password: string): Promise<AccountClientState> {
   const normalizedUsername = normalizeUsername(username);
   const checkedPassword = validatePassword(password);
-  const response = await fetch(`${resolveCoopApiOrigin()}/api/auth/local/${mode}`, {
+  const response = await fetch(`${resolveCoopApiOrigin()}/api/auth/${mode}`, {
     method: 'POST',
     headers: { 'content-type': 'application/json' },
     body: JSON.stringify({ username: normalizedUsername, password: checkedPassword }),

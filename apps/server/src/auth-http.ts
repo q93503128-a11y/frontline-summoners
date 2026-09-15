@@ -1,9 +1,3 @@
-import { issueAuthSessionForVerifiedIdentity } from './auth-session-authority.ts';
-import {
-  GoogleIdTokenProviderError,
-  GoogleIdTokenValidationError,
-  verifyGoogleIdToken,
-} from './google-id-token-authority.ts';
 import {
   LocalAuthInputError,
   LocalAuthInvalidCredentialsError,
@@ -14,8 +8,9 @@ import {
 
 export interface AuthHttpEnvironment {
   readonly DB: D1Database;
-  readonly GOOGLE_CLIENT_ID?: string;
   readonly AUTH_ALLOWED_ORIGINS?: string;
+  // Kept only so older deployment bindings can be removed independently.
+  readonly GOOGLE_CLIENT_ID?: string;
 }
 
 export interface AuthHttpResult {
@@ -26,12 +21,10 @@ export interface AuthHttpResult {
 
 const AUTH_PATHS = new Set([
   '/api/auth/config',
-  '/api/auth/google',
-  '/api/auth/local/login',
-  '/api/auth/local/register',
+  '/api/auth/login',
+  '/api/auth/register',
 ]);
 const AUTH_SESSION_TTL_MS = 7 * 24 * 60 * 60 * 1000;
-const MAX_GOOGLE_CREDENTIAL_LENGTH = 16_384;
 
 class AuthRequestError extends Error {}
 
@@ -90,23 +83,9 @@ async function readJsonObject(request: Request): Promise<Record<string, unknown>
   return value;
 }
 
-function googleCredential(value: unknown): string {
-  if (typeof value !== 'string') throw new AuthRequestError('credential must be a string');
-  const trimmed = value.trim();
-  if (trimmed.length < 32 || trimmed.length > MAX_GOOGLE_CREDENTIAL_LENGTH) {
-    throw new AuthRequestError(`credential must be 32..${MAX_GOOGLE_CREDENTIAL_LENGTH} characters`);
-  }
-  return trimmed;
-}
-
-function googleClientId(env: AuthHttpEnvironment): string | null {
-  const value = env.GOOGLE_CLIENT_ID?.trim();
-  return value && value.length > 0 ? value : null;
-}
-
-function sessionBody(provider: 'google' | 'local', session: { readonly token: string; readonly expiresAtMs: number }): unknown {
+function sessionBody(session: { readonly token: string; readonly expiresAtMs: number }): unknown {
   return {
-    provider,
+    provider: 'local',
     sessionToken: session.token,
     expiresAtMs: session.expiresAtMs,
   };
@@ -128,55 +107,30 @@ export async function resolveAuthHttp(
   if (request.method === 'OPTIONS') return { status: 204, body: null, headers };
 
   if (request.method === 'GET' && url.pathname === '/api/auth/config') {
-    const clientId = googleClientId(env);
     return {
       status: 200,
       body: {
-        google: {
-          enabled: clientId !== null,
-          clientId,
-        },
         local: {
           enabled: true,
           usernameMinLength: 4,
           usernameMaxLength: 24,
           passwordMinLength: 10,
+          passwordMaxLength: 128,
         },
       },
       headers,
     };
   }
 
-  if (request.method === 'POST' && url.pathname === '/api/auth/google') {
-    const clientId = googleClientId(env);
-    if (!clientId) return { status: 503, body: { error: 'google_auth_not_configured' }, headers };
-    try {
-      const body = await readJsonObject(request);
-      const identity = await verifyGoogleIdToken(googleCredential(body.credential), clientId, nowMs);
-      const session = await issueAuthSessionForVerifiedIdentity(env.DB, identity, nowMs + AUTH_SESSION_TTL_MS, nowMs);
-      return { status: 200, body: sessionBody('google', session), headers };
-    } catch (error) {
-      if (error instanceof AuthRequestError) {
-        return { status: 400, body: { error: 'invalid_request', message: error.message }, headers };
-      }
-      if (error instanceof GoogleIdTokenValidationError) {
-        return { status: 401, body: { error: 'invalid_google_credential' }, headers };
-      }
-      if (error instanceof GoogleIdTokenProviderError) {
-        return { status: 503, body: { error: 'google_verification_unavailable' }, headers };
-      }
-      throw error;
-    }
-  }
-
-  if (request.method === 'POST' && (url.pathname === '/api/auth/local/login' || url.pathname === '/api/auth/local/register')) {
+  if (request.method === 'POST' && (url.pathname === '/api/auth/login' || url.pathname === '/api/auth/register')) {
     try {
       const body = await readJsonObject(request);
       const expiresAtMs = nowMs + AUTH_SESSION_TTL_MS;
-      const session = url.pathname.endsWith('/register')
+      const isRegister = url.pathname === '/api/auth/register';
+      const session = isRegister
         ? await registerLocalPasswordAccount(env.DB, body.username, body.password, expiresAtMs, nowMs)
         : await loginLocalPasswordAccount(env.DB, body.username, body.password, expiresAtMs, nowMs);
-      return { status: url.pathname.endsWith('/register') ? 201 : 200, body: sessionBody('local', session), headers };
+      return { status: isRegister ? 201 : 200, body: sessionBody(session), headers };
     } catch (error) {
       if (error instanceof AuthRequestError || error instanceof LocalAuthInputError) {
         return { status: 400, body: { error: 'invalid_request', message: error.message }, headers };
@@ -200,5 +154,4 @@ export async function resolveAuthHttp(
 
 export const __authHttpTestOnly = {
   configuredOrigins,
-  googleCredential,
 };

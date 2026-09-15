@@ -23,7 +23,7 @@ import {
   type GuestMigrationEnvelopeClient,
 } from './account-guest-migration-network.ts';
 import { loadGuestAchievementProfile } from './achievement-profile.ts';
-import { fetchGoogleAuthConfig, loginWithGoogleCredential } from './google-login.ts';
+import { loginWithLocalCredentials, registerLocalCredentials } from './local-login.ts';
 import { loadGuestProgress, type GuestProgress } from './save.ts';
 import {
   isGuestDeveloperResourceSandboxActive,
@@ -39,23 +39,6 @@ import {
   drawBackdrop,
 } from './scene-ui';
 import { isCompactMobileViewport } from './viewport';
-
-type GoogleCredentialResponse = { readonly credential?: string };
-type GoogleIdentityApi = {
-  initialize(options: { readonly client_id: string; readonly callback: (response: GoogleCredentialResponse) => void }): void;
-  renderButton(parent: HTMLElement, options: Readonly<Record<string, unknown>>): void;
-  cancel(): void;
-};
-
-declare global {
-  interface Window {
-    google?: { readonly accounts?: { readonly id?: GoogleIdentityApi } };
-  }
-}
-
-const GOOGLE_GSI_SCRIPT_ID = 'frontline-google-gsi';
-const GOOGLE_GSI_SCRIPT_SRC = 'https://accounts.google.com/gsi/client';
-let googleScriptPromise: Promise<void> | null = null;
 
 const RESOURCE_LABELS: Readonly<Record<string, string>> = {
   gold: '골드',
@@ -94,38 +77,9 @@ function summaryText(label: string, summary: AccountProgressSummaryClient): stri
   return `${label} · 메인 ${summary.mainClearCount} · SPECIAL ${summary.specialClearCount} · 동료 ${summary.ownedCharacterCount}${resource ? ` · ${resource}` : ''}`;
 }
 
-function ensureGoogleIdentityScript(): Promise<void> {
-  if (window.google?.accounts?.id) return Promise.resolve();
-  if (googleScriptPromise) return googleScriptPromise;
-  googleScriptPromise = new Promise<void>((resolve, reject) => {
-    const existing = document.getElementById(GOOGLE_GSI_SCRIPT_ID) as HTMLScriptElement | null;
-    const script = existing ?? document.createElement('script');
-    const onLoad = () => window.google?.accounts?.id ? resolve() : reject(new Error('Google 로그인을 초기화하지 못했습니다.'));
-    const onError = () => reject(new Error('Google 로그인 화면을 불러오지 못했습니다.'));
-    script.addEventListener('load', onLoad, { once: true });
-    script.addEventListener('error', onError, { once: true });
-    if (!existing) {
-      script.id = GOOGLE_GSI_SCRIPT_ID;
-      script.src = GOOGLE_GSI_SCRIPT_SRC;
-      script.async = true;
-      script.defer = true;
-      document.head.appendChild(script);
-    }
-  }).catch((error) => {
-    googleScriptPromise = null;
-    throw error;
-  });
-  return googleScriptPromise;
-}
-
 function accountConnectionMessage(error: unknown): string {
-  const detail = error instanceof Error ? error.message : '';
-  const googleSetupFailure = detail.includes('Google')
-    || detail.includes('google')
-    || detail.includes('응답 형식')
-    || detail.includes('/auth/google');
-  return googleSetupFailure
-    ? '계정 연결 기능을 준비 중입니다. 지금은 이 기기의 로컬 저장으로 계속 플레이할 수 있습니다.'
+  return error instanceof Error && error.message.trim().length > 0
+    ? error.message
     : '계정 연결 상태를 확인하지 못했습니다. 로컬 저장으로 계속 플레이할 수 있습니다.';
 }
 
@@ -134,10 +88,10 @@ function stateSummary(state: AccountClientState): { readonly title: string; read
     return { title: '게스트 지휘관', detail: '이 기기의 로컬 저장으로 플레이 중입니다.', kind: 'neutral' };
   }
   if (state.kind === 'AUTHENTICATED_ONLINE') {
-    return { title: '계정 지휘관 · 온라인', detail: '서버 진행과 동기화되어 있습니다.', kind: 'online' };
+    return { title: '전용 계정 · 온라인', detail: '서버 진행과 동기화되어 있습니다.', kind: 'online' };
   }
   return {
-    title: '계정 지휘관 · 오프라인',
+    title: '전용 계정 · 오프라인',
     detail: state.remote ? '마지막으로 동기화된 진행을 읽기 전용으로 보고 있습니다.' : '저장된 서버 진행을 읽을 수 없습니다. 인터넷 연결이 필요합니다.',
     kind: 'offline',
   };
@@ -147,9 +101,12 @@ export class AccountCommandScene extends Phaser.Scene {
   private stateLayer?: Phaser.GameObjects.Container;
   private actionLayer?: Phaser.GameObjects.Container;
   private messageText?: Phaser.GameObjects.Text;
-  private googleHost: HTMLDivElement | null = null;
+  private credentialHost: HTMLDivElement | null = null;
+  private usernameInput: HTMLInputElement | null = null;
+  private passwordInput: HTMLInputElement | null = null;
   private unsubscribeState: (() => void) | null = null;
   private destroyed = false;
+  private authBusy = false;
   private migrationEnvelope: GuestMigrationEnvelopeClient | null = null;
   private migrationPreview: AccountGuestMigrationPreviewClient | null = null;
   private replacementArmed = false;
@@ -162,7 +119,7 @@ export class AccountCommandScene extends Phaser.Scene {
     drawBackdrop(this, 'menu');
     const compact = isCompactMobileViewport();
     addText(this, 52, 30, '계 정', compact ? 46 : 48, COLORS.cream);
-    addText(this, 54, 84, '저장 위치와 로그인 상태를 확인하고, 필요한 경우에만 진행을 이전한다.', compact ? 20 : 17, COLORS.muted);
+    addText(this, 54, 84, '전용 계정으로 서버 진행을 저장하거나 게스트 진행을 이전한다.', compact ? 20 : 17, COLORS.muted);
     addButton(this, 1170, 58, 160, compact ? 82 : 50, '지휘소', () => this.scene.start('main-menu'), 0x5b6879, { tone: 'quiet' });
 
     addSectionHeading(this, 56, 137, '현재 저장 상태', 1168, 0x6d8195);
@@ -189,7 +146,7 @@ export class AccountCommandScene extends Phaser.Scene {
     });
     this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => this.cleanup());
     this.events.once(Phaser.Scenes.Events.DESTROY, () => this.cleanup());
-    window.addEventListener('resize', this.positionGoogleHost);
+    window.addEventListener('resize', this.positionCredentialHost);
     void this.initialize();
   }
 
@@ -200,10 +157,10 @@ export class AccountCommandScene extends Phaser.Scene {
       const state = getAccountClientState();
       this.renderState(state);
       this.renderActions(state);
-      await this.setupGoogleLogin();
       if (state.kind === 'AUTHENTICATED_ONLINE') await this.prepareMigrationPreview(true);
+      else this.setMessage('아이디와 비밀번호로 전용 계정을 만들거나 로그인할 수 있습니다.', COLORS.blue);
     } catch (error) {
-      if (!this.destroyed) this.setMessage(accountConnectionMessage(error), COLORS.muted);
+      if (!this.destroyed) this.setMessage(accountConnectionMessage(error), COLORS.warning);
     }
   }
 
@@ -216,12 +173,12 @@ export class AccountCommandScene extends Phaser.Scene {
     this.stateLayer.add(addStatusPill(this, 88, 200, summary.title, summary.kind));
     this.stateLayer.add(addText(this, 88, 243, summary.detail, compact ? 21 : 18, state.kind === 'AUTHENTICATED_OFFLINE_CACHE' ? COLORS.warning : '#d9e2ec'));
     const support = state.kind === 'GUEST_LOCAL'
-      ? '로그인하지 않아도 플레이할 수 있습니다. 나중에 계정으로 이전할 수 있습니다.'
+      ? '로그인하지 않아도 플레이할 수 있습니다. 나중에 전용 계정으로 진행을 이전할 수 있습니다.'
       : state.kind === 'AUTHENTICATED_ONLINE'
-        ? '전투·모집·성장·소셜 변경이 서버 진행에 저장됩니다.'
+        ? '전투·모집·성장·소셜·멀티플레이 진행이 이 계정에 연결됩니다.'
         : '오프라인에서는 진행을 확인할 수 있지만 서버 진행을 바꾸는 행동은 사용할 수 없습니다.';
     this.stateLayer.add(addText(this, 88, 275, support, compact ? 17 : 14, '#97a3b2'));
-    if (this.googleHost) this.googleHost.style.display = state.kind === 'GUEST_LOCAL' ? 'block' : 'none';
+    this.setCredentialHostVisible(state.kind === 'GUEST_LOCAL');
   }
 
   private renderActions(state: AccountClientState): void {
@@ -231,12 +188,14 @@ export class AccountCommandScene extends Phaser.Scene {
     const h = compact ? 82 : 58;
 
     if (state.kind === 'GUEST_LOCAL') {
-      this.actionLayer.add(addText(this, 110, 382, 'Google 계정으로 로그인', compact ? 27 : 24, '#ffffff'));
-      this.actionLayer.add(addText(this, 110, 422, '로그인 후 서버 진행이 비어 있으면 게스트 진행을 그대로 옮길 수 있습니다.', compact ? 18 : 15, '#aeb8c5'));
-      this.actionLayer.add(addText(this, 110, 455, '서버에도 진행이 있으면 비교 후 직접 선택합니다. 자동으로 합치지 않습니다.', compact ? 17 : 14, '#8f9aa8'));
+      this.actionLayer.add(addText(this, 110, 372, '전용 계정 로그인', compact ? 27 : 24, '#ffffff'));
+      this.actionLayer.add(addText(this, 110, 410, '아이디 4~24자 · 비밀번호 10~128자. 새 계정 생성과 기존 계정 로그인을 지원합니다.', compact ? 18 : 15, '#aeb8c5'));
+      this.actionLayer.add(addText(this, 110, 445, '로그인 뒤 게스트 진행과 서버 진행을 비교한 후 직접 이전 여부를 선택합니다.', compact ? 17 : 14, '#8f9aa8'));
+      this.ensureCredentialHost();
       return;
     }
 
+    this.setCredentialHostVisible(false);
     if (state.kind === 'AUTHENTICATED_OFFLINE_CACHE') {
       this.actionLayer.add(addText(this, 110, 385, '온라인 연결이 필요합니다.', compact ? 28 : 24, COLORS.warning));
       this.actionLayer.add(addText(this, 110, 425, '현재 화면은 읽기 전용입니다. 서버 연결을 복구한 뒤 진행을 변경할 수 있습니다.', compact ? 19 : 16, '#b8c1cd'));
@@ -245,7 +204,7 @@ export class AccountCommandScene extends Phaser.Scene {
       return;
     }
 
-    this.actionLayer.add(addText(this, 110, 370, '온라인 계정 관리', compact ? 27 : 24, '#ffffff'));
+    this.actionLayer.add(addText(this, 110, 370, '전용 계정 관리', compact ? 27 : 24, '#ffffff'));
     this.actionLayer.add(addButton(this, 230, 430, 220, h, '서버 새로고침', () => { void this.refresh(); }, 0x5f86a7, { tone: 'primary' }));
     this.actionLayer.add(addButton(this, 640, 430, 270, h, '게스트 장식 취향 가져오기', () => { void this.importGuestProfilePreferences(); }, 0x6f7194, { tone: 'quiet' }));
     this.actionLayer.add(addButton(this, 1050, 430, 220, h, '로그아웃', () => { void this.logout(); }, 0x815d61, { tone: 'danger' }));
@@ -263,76 +222,126 @@ export class AccountCommandScene extends Phaser.Scene {
     }
   }
 
-  private async setupGoogleLogin(): Promise<void> {
-    const state = getAccountClientState();
-    if (state.kind !== 'GUEST_LOCAL') {
-      this.removeGoogleHost();
+  private ensureCredentialHost(): void {
+    if (this.credentialHost) {
+      this.setCredentialHostVisible(true);
       return;
     }
-    const config = await fetchGoogleAuthConfig();
-    if (this.destroyed) return;
-    if (!config.enabled || !config.clientId) {
-      this.setMessage('Google 계정 연결은 현재 사용할 수 없습니다. 로컬 저장으로 계속 플레이할 수 있습니다.', COLORS.muted);
-      return;
-    }
-    await ensureGoogleIdentityScript();
-    if (this.destroyed) return;
-    const api = window.google?.accounts?.id;
-    if (!api) throw new Error('Google 로그인 API를 찾지 못했습니다.');
-
-    this.removeGoogleHost();
     const host = document.createElement('div');
-    host.dataset.frontlineGoogleLogin = 'true';
-    host.style.position = 'fixed';
-    host.style.zIndex = '1000';
-    host.style.pointerEvents = 'auto';
-    host.style.touchAction = 'auto';
-    host.style.transformOrigin = 'center center';
-    document.body.appendChild(host);
-    this.googleHost = host;
-    this.positionGoogleHost();
+    host.dataset.frontlineLocalAccount = 'true';
+    Object.assign(host.style, {
+      position: 'fixed',
+      zIndex: '1000',
+      display: 'flex',
+      alignItems: 'center',
+      gap: '10px',
+      padding: '10px 12px',
+      border: '1px solid rgba(184, 198, 214, 0.45)',
+      borderRadius: '12px',
+      background: 'rgba(18, 25, 34, 0.96)',
+      boxShadow: '0 10px 28px rgba(0,0,0,0.35)',
+      transformOrigin: 'center center',
+      pointerEvents: 'auto',
+    });
 
-    api.initialize({
-      client_id: config.clientId,
-      callback: (response) => { void this.handleGoogleCredential(response); },
+    const username = document.createElement('input');
+    username.type = 'text';
+    username.autocomplete = 'username';
+    username.placeholder = '아이디';
+    username.maxLength = 24;
+    username.spellcheck = false;
+
+    const password = document.createElement('input');
+    password.type = 'password';
+    password.autocomplete = 'current-password';
+    password.placeholder = '비밀번호';
+    password.maxLength = 128;
+
+    for (const input of [username, password]) {
+      Object.assign(input.style, {
+        width: '190px',
+        height: '38px',
+        padding: '0 12px',
+        borderRadius: '8px',
+        border: '1px solid #58697d',
+        background: '#111923',
+        color: '#f7f0df',
+        fontSize: '15px',
+        outline: 'none',
+      });
+    }
+
+    const login = this.makeCredentialButton('로그인', () => { void this.submitCredentials('login'); });
+    const register = this.makeCredentialButton('새 계정 만들기', () => { void this.submitCredentials('register'); });
+    password.addEventListener('keydown', (event) => {
+      if (event.key === 'Enter') void this.submitCredentials('login');
     });
-    api.renderButton(host, {
-      type: 'standard',
-      theme: 'filled_black',
-      size: 'large',
-      shape: 'pill',
-      text: 'signin_with',
-      width: 280,
-      locale: 'ko',
-    });
-    this.setMessage('Google 계정으로 로그인할 수 있습니다.', COLORS.blue);
+
+    host.append(username, password, login, register);
+    document.body.appendChild(host);
+    this.credentialHost = host;
+    this.usernameInput = username;
+    this.passwordInput = password;
+    this.positionCredentialHost();
   }
 
-  private positionGoogleHost = (): void => {
-    if (!this.googleHost || !this.game?.canvas) return;
-    const rect = this.game.canvas.getBoundingClientRect();
-    const scale = Math.min(rect.width / INTERNAL_WIDTH, rect.height / INTERNAL_HEIGHT);
-    this.googleHost.style.left = `${rect.left + rect.width * 0.5}px`;
-    this.googleHost.style.top = `${rect.top + rect.height * (485 / INTERNAL_HEIGHT)}px`;
-    this.googleHost.style.transform = `translate(-50%, -50%) scale(${Math.max(0.7, Math.min(1, scale))})`;
-  };
+  private makeCredentialButton(label: string, action: () => void): HTMLButtonElement {
+    const button = document.createElement('button');
+    button.type = 'button';
+    button.textContent = label;
+    Object.assign(button.style, {
+      height: '40px',
+      padding: '0 16px',
+      borderRadius: '8px',
+      border: '1px solid #71869d',
+      background: '#34495f',
+      color: '#ffffff',
+      fontWeight: '700',
+      cursor: 'pointer',
+      whiteSpace: 'nowrap',
+    });
+    button.addEventListener('click', action);
+    return button;
+  }
 
-  private async handleGoogleCredential(response: GoogleCredentialResponse): Promise<void> {
-    if (!response.credential) {
-      this.setMessage('Google에서 로그인 정보를 받지 못했습니다. 다시 시도해 주세요.', COLORS.warning);
+  private setCredentialHostVisible(visible: boolean): void {
+    if (!visible) {
+      if (this.credentialHost) this.credentialHost.style.display = 'none';
       return;
     }
-    this.setMessage('Google 계정을 확인하는 중…', COLORS.muted);
+    this.ensureCredentialHost();
+    if (this.credentialHost) this.credentialHost.style.display = 'flex';
+    this.positionCredentialHost();
+  }
+
+  private positionCredentialHost = (): void => {
+    if (!this.credentialHost || !this.game?.canvas) return;
+    const rect = this.game.canvas.getBoundingClientRect();
+    const scale = Math.min(rect.width / INTERNAL_WIDTH, rect.height / INTERNAL_HEIGHT);
+    this.credentialHost.style.left = `${rect.left + rect.width * 0.5}px`;
+    this.credentialHost.style.top = `${rect.top + rect.height * (500 / INTERNAL_HEIGHT)}px`;
+    this.credentialHost.style.transform = `translate(-50%, -50%) scale(${Math.max(0.62, Math.min(1, scale))})`;
+  };
+
+  private async submitCredentials(mode: 'login' | 'register'): Promise<void> {
+    if (this.authBusy) return;
+    const username = this.usernameInput?.value ?? '';
+    const password = this.passwordInput?.value ?? '';
+    this.authBusy = true;
+    this.setMessage(mode === 'register' ? '전용 계정을 만드는 중…' : '로그인하는 중…', COLORS.muted);
     try {
-      await loginWithGoogleCredential(response.credential);
+      if (mode === 'register') await registerLocalCredentials(username, password);
+      else await loginWithLocalCredentials(username, password);
       if (this.destroyed) return;
-      this.removeGoogleHost();
+      if (this.passwordInput) this.passwordInput.value = '';
       const state = getAccountClientState();
       this.renderState(state);
       this.renderActions(state);
       await this.prepareMigrationPreview(true);
-    } catch {
-      if (!this.destroyed) this.setMessage('Google 로그인에 실패했습니다. 잠시 후 다시 시도하거나 로컬 저장으로 계속 플레이하세요.', COLORS.warning);
+    } catch (error) {
+      if (!this.destroyed) this.setMessage(accountConnectionMessage(error), COLORS.warning);
+    } finally {
+      this.authBusy = false;
     }
   }
 
@@ -499,16 +508,17 @@ export class AccountCommandScene extends Phaser.Scene {
     this.renderState(state);
     this.renderActions(state);
     this.setMessage(result.serverRevoked ? '로그아웃했습니다.' : '로컬 로그아웃은 완료했지만 서버 연결 확인에 실패했습니다.', result.serverRevoked ? COLORS.green : COLORS.warning);
-    await this.setupGoogleLogin().catch((error) => this.setMessage(accountConnectionMessage(error), COLORS.muted));
   }
 
   private setMessage(message: string, color: string): void {
     this.messageText?.setText(message).setColor(color);
   }
 
-  private removeGoogleHost(): void {
-    this.googleHost?.remove();
-    this.googleHost = null;
+  private removeCredentialHost(): void {
+    this.credentialHost?.remove();
+    this.credentialHost = null;
+    this.usernameInput = null;
+    this.passwordInput = null;
   }
 
   private cleanup(): void {
@@ -516,9 +526,8 @@ export class AccountCommandScene extends Phaser.Scene {
     this.destroyed = true;
     this.unsubscribeState?.();
     this.unsubscribeState = null;
-    window.removeEventListener('resize', this.positionGoogleHost);
-    this.removeGoogleHost();
-    window.google?.accounts?.id?.cancel();
+    window.removeEventListener('resize', this.positionCredentialHost);
+    this.removeCredentialHost();
   }
 }
 
@@ -527,5 +536,5 @@ export const __accountCommandSceneTestOnly = {
   hasMeaningfulGuestProgress,
   summaryText,
   accountConnectionMessage,
-  googleScriptSrc: GOOGLE_GSI_SCRIPT_SRC,
+  googleScriptSrc: null,
 };

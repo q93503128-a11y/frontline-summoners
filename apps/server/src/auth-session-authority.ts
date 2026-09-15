@@ -1,6 +1,6 @@
 import { initializeAccountSave } from './account-save-authority.ts';
 
-export const AUTH_IDENTITY_PROVIDERS = ['google', 'email'] as const;
+export const AUTH_IDENTITY_PROVIDERS = ['local'] as const;
 export type AuthIdentityProvider = (typeof AUTH_IDENTITY_PROVIDERS)[number];
 
 export interface VerifiedAuthIdentity {
@@ -39,12 +39,12 @@ function normalizeProvider(value: string): AuthIdentityProvider {
   return provider as AuthIdentityProvider;
 }
 
-function normalizeProviderSubject(provider: AuthIdentityProvider, value: string): string {
-  const trimmed = value.trim();
+function normalizeProviderSubject(_provider: AuthIdentityProvider, value: string): string {
+  const trimmed = value.trim().toLowerCase();
   if (trimmed.length < 1 || trimmed.length > MAX_PROVIDER_SUBJECT_LENGTH) {
     throw new Error(`auth provider subject must be 1..${MAX_PROVIDER_SUBJECT_LENGTH} characters`);
   }
-  return provider === 'email' ? trimmed.toLowerCase() : trimmed;
+  return trimmed;
 }
 
 function normalizeVerifiedIdentity(identity: VerifiedAuthIdentity): VerifiedAuthIdentity {
