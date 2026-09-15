@@ -56,7 +56,7 @@ test('account command scene keeps credential errors and mobile controls on the p
 
   assert.doesNotMatch(account, /googleScriptSrc/);
   assert.doesNotMatch(account, /SPECIAL/);
-  assert.doesNotMatch(account, /error instanceof Error \? error\.message/);
+  assert.doesNotMatch(account, /return error\.message/);
   assert.match(account, /ACCOUNT_ACTION_FAILED_MESSAGE/);
   assert.match(account, /INTERNAL_ACCOUNT_ERROR_MARKER/);
   assert.ok((account.match(/accountConnectionMessage\(error\)/g) ?? []).length >= 5);
