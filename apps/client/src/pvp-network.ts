@@ -154,7 +154,12 @@ async function accountRequest(path: string, init: RequestInit = {}): Promise<unk
   const headers = new Headers(init.headers);
   headers.set('authorization', `Bearer ${sessionToken()}`);
   if (init.body !== undefined) headers.set('content-type', 'application/json');
-  const response = await fetch(`${resolveCoopApiOrigin()}${path}`, { ...init, headers });
+  let response: Response;
+  try {
+    response = await fetch(`${resolveCoopApiOrigin()}${path}`, { ...init, headers });
+  } catch {
+    throw new Error('PvP 서버에 연결하지 못했습니다. 잠시 후 다시 시도해 주세요.');
+  }
   const payload: unknown = await response.json().catch(() => ({}));
   if (!response.ok) {
     if (response.status === 401) await refreshAuthenticatedAccount();
@@ -299,6 +304,7 @@ export class PvpSession {
   }
 
   queueCommand(command: Pvp1v1Command): void {
+    if (this.connectionState !== 'OPEN' || !this.battle || this.battle.winner !== null) return;
     if (this.queuedCommands.length >= 8) return;
     this.queuedCommands.push(command);
   }
@@ -328,6 +334,7 @@ export class PvpSession {
   close(): void {
     this.deliberatelyClosed = true;
     this.stopInputPump();
+    this.queuedCommands.splice(0, this.queuedCommands.length);
     if (this.reconnectTimer !== null && typeof window !== 'undefined') window.clearTimeout(this.reconnectTimer);
     this.reconnectTimer = null;
     this.socket?.close(1000, 'client_close');
@@ -339,6 +346,7 @@ export class PvpSession {
     if (this.socket !== socket) return;
     this.socket = null;
     this.stopInputPump();
+    this.queuedCommands.splice(0, this.queuedCommands.length);
     if (this.deliberatelyClosed || typeof window === 'undefined') {
       this.setConnectionState('CLOSED');
       return;
