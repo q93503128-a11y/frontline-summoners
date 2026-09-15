@@ -103,6 +103,11 @@ export interface CreatedCoopMatch {
 
 type CoopSubscriber = (message: CoopServerMessage) => void;
 type ConnectionSubscriber = (state: 'CONNECTING' | 'OPEN' | 'RECONNECTING' | 'CLOSED') => void;
+type FrontlineRuntimeWindow = Window & { readonly __FRONTLINE_API_ORIGIN__?: string };
+type FrontlineImportMeta = ImportMeta & { readonly env?: Readonly<Record<string, string | undefined>> };
+
+const API_ORIGIN_STORAGE_KEY = 'frontline.apiOrigin';
+const LEGACY_API_ORIGIN_STORAGE_KEY = 'frontline.coop.apiOrigin';
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === 'object' && value !== null && !Array.isArray(value);
@@ -112,19 +117,71 @@ function runtimeWindow(): Window | undefined {
   return typeof window === 'undefined' ? undefined : window;
 }
 
+function normalizeApiOrigin(candidate: string | null | undefined, base: string): string | null {
+  const trimmed = candidate?.trim();
+  if (!trimmed) return null;
+  try {
+    const url = new URL(trimmed, base);
+    if (url.protocol !== 'http:' && url.protocol !== 'https:') return null;
+    return url.origin;
+  } catch {
+    return null;
+  }
+}
+
+function rememberApiOrigin(browser: Window, origin: string): void {
+  try {
+    browser.localStorage.setItem(API_ORIGIN_STORAGE_KEY, origin);
+    browser.localStorage.removeItem(LEGACY_API_ORIGIN_STORAGE_KEY);
+  } catch { /* storage is optional */ }
+}
+
+function configuredApiOrigin(browser: Window): string | null {
+  const runtimeConfigured = normalizeApiOrigin(
+    (browser as FrontlineRuntimeWindow).__FRONTLINE_API_ORIGIN__,
+    browser.location.href,
+  );
+  if (runtimeConfigured) return runtimeConfigured;
+
+  const env = (import.meta as FrontlineImportMeta).env;
+  return normalizeApiOrigin(env?.VITE_FRONTLINE_API_ORIGIN, browser.location.href);
+}
+
+/**
+ * Shared API origin for account, co-op, PvP, and other live-service calls.
+ *
+ * Precedence keeps an explicit operator override first, then a previously remembered override,
+ * then production hosting configuration. A separately hosted production client therefore no longer
+ * silently sends account requests to its own static origin.
+ */
 export function resolveCoopApiOrigin(): string {
   const browser = runtimeWindow();
   if (!browser) return 'http://127.0.0.1:8787';
-  const query = new URLSearchParams(browser.location.search).get('api');
+
+  const query = normalizeApiOrigin(
+    new URLSearchParams(browser.location.search).get('api'),
+    browser.location.href,
+  );
   if (query) {
-    const normalized = new URL(query, browser.location.href).origin;
-    try { browser.localStorage.setItem('frontline.coop.apiOrigin', normalized); } catch { /* storage is optional */ }
-    return normalized;
+    rememberApiOrigin(browser, query);
+    return query;
   }
+
   try {
-    const stored = browser.localStorage.getItem('frontline.coop.apiOrigin');
-    if (stored) return new URL(stored).origin;
+    const stored = normalizeApiOrigin(
+      browser.localStorage.getItem(API_ORIGIN_STORAGE_KEY)
+        ?? browser.localStorage.getItem(LEGACY_API_ORIGIN_STORAGE_KEY),
+      browser.location.href,
+    );
+    if (stored) {
+      rememberApiOrigin(browser, stored);
+      return stored;
+    }
   } catch { /* storage is optional */ }
+
+  const configured = configuredApiOrigin(browser);
+  if (configured) return configured;
+
   if (browser.location.hostname === 'localhost' || browser.location.hostname === '127.0.0.1') {
     return `${browser.location.protocol}//${browser.location.hostname}:8787`;
   }
