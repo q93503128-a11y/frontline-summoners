@@ -53,7 +53,6 @@ jobs:
             await page.screenshot({ path: `visual-qa/recruitment-${name}.png`, fullPage: true });
             const finalBox = await canvas.boundingBox();
             if (finalBox) await canvas.screenshot({ path: `visual-qa/recruitment-${name}-canvas.png` });
-            await Bun?.write?.('noop','').catch?.(()=>{});
             if (browserErrors.length) console.log(`${name} page errors:\n${browserErrors.join('\n')}`);
             await page.close();
           }
