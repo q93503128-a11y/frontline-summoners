@@ -35,7 +35,7 @@ jobs:
       - name: Capture recruitment desktop and mobile
         run: |
           mkdir -p visual-qa
-          cat > /tmp/recruitment-capture.mjs <<'EOF'
+          cat > visual-qa/recruitment-capture.mjs <<'EOF'
           import { chromium } from 'playwright';
           const browser = await chromium.launch({ headless: true });
           async function capture(name, viewport) {
@@ -51,8 +51,7 @@ jobs:
             await page.mouse.click(box.x + box.width * (820 / 1280), box.y + box.height * (445 / 720));
             await page.waitForTimeout(1800);
             await page.screenshot({ path: `visual-qa/recruitment-${name}.png`, fullPage: true });
-            const finalBox = await canvas.boundingBox();
-            if (finalBox) await canvas.screenshot({ path: `visual-qa/recruitment-${name}-canvas.png` });
+            await canvas.screenshot({ path: `visual-qa/recruitment-${name}-canvas.png` });
             if (browserErrors.length) console.log(`${name} page errors:\n${browserErrors.join('\n')}`);
             await page.close();
           }
@@ -60,10 +59,14 @@ jobs:
           await capture('mobile-390x844', { width: 390, height: 844 });
           await browser.close();
           EOF
-          node /tmp/recruitment-capture.mjs
+          node visual-qa/recruitment-capture.mjs
+      - name: Preserve capture diagnostics
+        if: always()
+        run: cp /tmp/frontline-vite.log visual-qa/vite.log || true
       - name: Upload visual QA
+        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: recruitment-visual-qa
-          path: visual-qa/*.png
+          path: visual-qa/
           if-no-files-found: error
