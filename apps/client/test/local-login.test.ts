@@ -35,8 +35,13 @@ test('local login uses the canonical register/login API and persists only server
   assert.match(main, /AccountScene.*account-refined-scene/);
 });
 
-test('local auth failures stay player-facing', () => {
+test('local auth failures stay player-facing and do not expose protocol details', () => {
   assert.equal(__localLoginTestOnly.errorMessage({ error: 'username_taken' }, 409, 'register'), '이미 사용 중인 아이디입니다.');
   assert.equal(__localLoginTestOnly.errorMessage({ error: 'invalid_credentials' }, 401, 'login'), '아이디 또는 비밀번호가 올바르지 않습니다.');
-  assert.match(__localLoginTestOnly.errorMessage({}, 503, 'login'), /HTTP 503/);
+  const serverFailure = __localLoginTestOnly.errorMessage({}, 503, 'login');
+  assert.equal(serverFailure, '계정 서버에 일시적인 문제가 있습니다. 잠시 후 다시 시도해 주세요.');
+  assert.doesNotMatch(serverFailure, /HTTP|API|fetch|JSON|token|session/i);
+  const missingRoute = __localLoginTestOnly.errorMessage({}, 404, 'register');
+  assert.equal(missingRoute, '계정 기능을 현재 사용할 수 없습니다. 잠시 후 다시 시도해 주세요.');
+  assert.doesNotMatch(missingRoute, /HTTP|API|404/i);
 });
