@@ -1,4 +1,5 @@
 import assert from 'node:assert/strict';
+import { readFile } from 'node:fs/promises';
 import test from 'node:test';
 import { isAuthRequestOriginAllowed, resolveAuthHttp } from '../src/auth-http.ts';
 
@@ -35,6 +36,13 @@ test('retired Google auth route is outside the active auth surface', async () =>
     body: JSON.stringify({ credential: 'retired' }),
   });
   assert.equal(await resolveAuthHttp(request, { DB: fakeDb }), null);
+});
+
+test('active server auth source contains no retired Google binding or implementation', async () => {
+  const authHttp = await readFile(new URL('../src/auth-http.ts', import.meta.url), 'utf8');
+  const worker = await readFile(new URL('../src/index.ts', import.meta.url), 'utf8');
+  assert.doesNotMatch(authHttp, /google/i);
+  assert.doesNotMatch(worker, /google/i);
 });
 
 test('local login and registration preflight allows only the credential JSON surface', async () => {
