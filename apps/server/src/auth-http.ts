@@ -9,8 +9,6 @@ import {
 export interface AuthHttpEnvironment {
   readonly DB: D1Database;
   readonly AUTH_ALLOWED_ORIGINS?: string;
-  // Kept only so older deployment bindings can be removed independently.
-  readonly GOOGLE_CLIENT_ID?: string;
 }
 
 export interface AuthHttpResult {
