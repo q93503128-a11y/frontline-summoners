@@ -9,9 +9,7 @@ export const PRODUCTION_ASSET_STATUSES = ['AWAITING_ART', 'READY_FOR_REVIEW', 'A
 export type ProductionAssetStatus = (typeof PRODUCTION_ASSET_STATUSES)[number];
 
 export interface RuntimeArtFamily extends ArtFamily {
-  /** Production or source-reference natural knockback motion when an authored strip exists. */
   readonly knockback?: SpriteStrip;
-  /** Production or source-reference death motion when an authored strip exists. */
   readonly death?: SpriteStrip;
 }
 
@@ -75,45 +73,25 @@ const F1_FORM_BY_CHARACTER = new Map(
 );
 
 /**
- * Source-reference-only form silhouettes used while production art remains unapproved.
- * These entries must never be promoted to production evidence; they only let the runtime
- * preserve evolution-form readability during the art pass.
- *
- * Story units deliberately keep one complete vendored sprite identity per character across
- * temporary F1/F2/F3 presentation. Until reviewed production forms exist, this is preferable
- * to borrowing another character's body/weapon silhouette or assembling detached parts.
+ * Complete, vendored free sprite families used while reviewed production art remains unavailable.
+ * Never assemble body/weapon parts in runtime placeholder art. Selected evolution forms may use
+ * another complete external family to preserve form readability, but every resolved family must
+ * remain a coherent single-character sprite sheet.
  */
 const PLACEHOLDER_PLAYER_FORM_ART: Readonly<Record<string, UnitArtVariant>> = {
   militia_f1: { familyId: 'warrior-3', tint: 0xffffff, displayScale: 1.08, attackFx: 'SLASH' },
-  militia_f2: { familyId: 'warrior-3', tint: 0xffffff, displayScale: 1.14, attackFx: 'SLASH' },
-  militia_f3: { familyId: 'warrior-3', tint: 0xffffff, displayScale: 1.20, attackFx: 'SLASH' },
-  guard_f1: { familyId: 'hero-knight-2', tint: 0xffffff, displayScale: 1.08, attackFx: 'BLUNT' },
-  guard_f2: { familyId: 'hero-knight-2', tint: 0xffffff, displayScale: 1.14, attackFx: 'BLUNT' },
-  guard_f3: { familyId: 'hero-knight-2', tint: 0xffffff, displayScale: 1.20, attackFx: 'BLUNT' },
-  hunter_f1: { familyId: 'huntress', tint: 0xffffff, displayScale: 1.08, attackFx: 'PIERCE' },
-  hunter_f2: { familyId: 'huntress', tint: 0xffffff, displayScale: 1.14, attackFx: 'PIERCE' },
-  hunter_f3: { familyId: 'huntress', tint: 0xffffff, displayScale: 1.20, attackFx: 'PIERCE' },
-  duelist_f1: { familyId: 'fantasy-warrior', tint: 0xffffff, displayScale: 1.08, attackFx: 'SLASH' },
-  duelist_f2: { familyId: 'fantasy-warrior', tint: 0xffffff, displayScale: 1.14, attackFx: 'SLASH' },
-  duelist_f3: { familyId: 'fantasy-warrior', tint: 0xffffff, displayScale: 1.20, attackFx: 'SLASH' },
-  lancer_f1: { familyId: 'warrior-1', tint: 0xffffff, displayScale: 1.30, attackFx: 'PIERCE' },
-  lancer_f2: { familyId: 'warrior-1', tint: 0xffffff, displayScale: 1.38, attackFx: 'PIERCE' },
-  lancer_f3: { familyId: 'warrior-1', tint: 0xffffff, displayScale: 1.46, attackFx: 'PIERCE' },
-  battlemage_f1: { familyId: 'wizard', tint: 0xffffff, displayScale: 1.06, attackFx: 'MAGIC' },
-  battlemage_f2: { familyId: 'wizard', tint: 0xffffff, displayScale: 1.12, attackFx: 'MAGIC' },
-  battlemage_f3: { familyId: 'wizard', tint: 0xffffff, displayScale: 1.18, attackFx: 'MAGIC' },
-  pyromancer_f1: { familyId: 'evil-wizard', tint: 0xffffff, displayScale: 1.10, attackFx: 'FIRE' },
+  militia_f2: { familyId: 'hero-knight-2', tint: 0xffffff, displayScale: 1.14, attackFx: 'SLASH' },
+  militia_f3: { familyId: 'warrior-1', tint: 0xffffff, displayScale: 1.36, attackFx: 'SLASH' },
+  hunter_f3: { familyId: 'huntress-2', tint: 0xffffff, displayScale: 1.20, attackFx: 'PIERCE' },
+  duelist_f3: { familyId: 'martial-hero-2', tint: 0xffffff, displayScale: 1.35, attackFx: 'SLASH' },
+  royal_f3: { familyId: 'king-2', tint: 0xffffff, displayScale: 1.35, attackFx: 'SLASH' },
+  heretic_f3: { familyId: 'evil-wizard-2', tint: 0xffffff, displayScale: 1.35, attackFx: 'VOID' },
+  battlemage_f2: { familyId: 'fantasy-warrior', tint: 0xffffff, displayScale: 1.15, attackFx: 'MAGIC' },
+  battlemage_f3: { familyId: 'evil-wizard-2', tint: 0xffffff, displayScale: 1.28, attackFx: 'MAGIC' },
   pyromancer_f2: { familyId: 'evil-wizard', tint: 0xffffff, displayScale: 1.16, attackFx: 'FIRE' },
-  pyromancer_f3: { familyId: 'evil-wizard', tint: 0xffffff, displayScale: 1.22, attackFx: 'FIRE' },
-  royal_f1: { familyId: 'hero-knight', tint: 0xffffff, displayScale: 1.12, attackFx: 'SLASH' },
-  royal_f2: { familyId: 'hero-knight', tint: 0xffffff, displayScale: 1.18, attackFx: 'SLASH' },
-  royal_f3: { familyId: 'hero-knight', tint: 0xffffff, displayScale: 1.24, attackFx: 'SLASH' },
-  heretic_f1: { familyId: 'evil-wizard-2', tint: 0xffffff, displayScale: 1.30, attackFx: 'VOID' },
-  heretic_f2: { familyId: 'evil-wizard-2', tint: 0xffffff, displayScale: 1.38, attackFx: 'VOID' },
-  heretic_f3: { familyId: 'evil-wizard-2', tint: 0xffffff, displayScale: 1.46, attackFx: 'VOID' },
-  voidsage_f1: { familyId: 'martial-hero-2', tint: 0xffffff, displayScale: 1.32, attackFx: 'VOID' },
-  voidsage_f2: { familyId: 'martial-hero-2', tint: 0xffffff, displayScale: 1.40, attackFx: 'VOID' },
-  voidsage_f3: { familyId: 'martial-hero-2', tint: 0xffffff, displayScale: 1.48, attackFx: 'VOID' },
+  pyromancer_f3: { familyId: 'evil-wizard-2', tint: 0xffffff, displayScale: 1.30, attackFx: 'FIRE' },
+  voidsage_f2: { familyId: 'wizard', tint: 0xffffff, displayScale: 1.15, attackFx: 'VOID' },
+  voidsage_f3: { familyId: 'evil-wizard-2', tint: 0xffffff, displayScale: 1.30, attackFx: 'VOID' },
 
   char_common_c_turnip_rider_f1: { familyId: 'cc0-turnip-rider-f1', tint: 0xffffff, displayScale: 0.94, attackFx: 'SLASH' },
   char_common_c_turnip_rider_f2: { familyId: 'cc0-turnip-rider-f2', tint: 0xffffff, displayScale: 1.00, attackFx: 'SLASH' },
@@ -135,7 +113,7 @@ const PLACEHOLDER_PLAYER_FORM_ART: Readonly<Record<string, UnitArtVariant>> = {
   char_common_b_lantern_witch_f2: { familyId: 'evil-wizard', tint: 0xffffff, displayScale: 1.00, attackFx: 'FIRE' },
   char_common_b_lantern_witch_f3: { familyId: 'evil-wizard-2', tint: 0xffffff, displayScale: 1.06, attackFx: 'FIRE' },
   char_common_b_clockduck_f1: { familyId: 'cc0-clockduck-f1', tint: 0xffffff, displayScale: 0.94, attackFx: 'SLASH' },
-  char_common_b_clockduck_f2: { familyId: 'cc0-clockduck-f2', tint: 0xffffff, displayScale: 1.02, attackFx: 'SLASH' },
+  char_common_b_clockduck_f2: { familyId: 'cc0-clockduck-f1', tint: 0xffffff, displayScale: 1.08, attackFx: 'SLASH' },
   char_common_b_clockduck_f3: { familyId: 'cc0-clockduck-f3', tint: 0xffffff, displayScale: 1.10, attackFx: 'SLASH' },
   char_common_b_coffin_merchant_f1: { familyId: 'cc0-coffin-merchant-f1', tint: 0xffffff, displayScale: 0.94, attackFx: 'VOID' },
   char_common_b_coffin_merchant_f2: { familyId: 'cc0-coffin-merchant-f2', tint: 0xffffff, displayScale: 1.00, attackFx: 'VOID' },
@@ -225,11 +203,6 @@ function requirementIdForPlayerForm(characterId: string, formOrder: 1 | 2 | 3): 
 const firstBattlefieldTheme = ALL_STAGES[0]?.theme;
 if (!firstBattlefieldTheme) throw new Error('production asset contract requires at least one battlefield theme');
 
-/**
- * First production vertical slice. These are reservations only: they do not preload files and do not change runtime art.
- * Moving an item to APPROVED requires a real reviewed asset entry in PRODUCTION_UNIT_ART_CANDIDATES or its future
- * battlefield/audio manifest counterpart.
- */
 export const PRODUCTION_VERTICAL_SLICE: readonly ProductionReviewReservation[] = [
   { assetId: requirementIdForPlayerForm('militia', 1), status: 'AWAITING_ART', note: '스토리 대표 F1 · 작은 전투 실루엣 기준' },
   { assetId: requirementIdForPlayerForm('militia', 2), status: 'AWAITING_ART', note: '스토리 대표 F2 · 진화 구조 차이 검증' },
@@ -241,10 +214,6 @@ export const PRODUCTION_VERTICAL_SLICE: readonly ProductionReviewReservation[] =
   { assetId: 'sfx:battle-core', status: 'AWAITING_ART', note: 'contact 동기화 공격·거점·생산 SFX 기준' },
 ] as const;
 
-/**
- * Reviewed production unit art enters here. Intentionally empty until actual files exist and have been reviewed.
- * READY_FOR_REVIEW candidates may exist in the future but are never runtime-authoritative.
- */
 export const PRODUCTION_UNIT_ART_CANDIDATES: readonly ProductionUnitArtCandidate[] = [];
 
 function allFamilyStrips(family: RuntimeArtFamily): readonly SpriteStrip[] {
