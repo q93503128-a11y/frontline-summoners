@@ -36,10 +36,9 @@ function family(
 
 /**
  * S-rarity Series 1 source references plus the Series 2 S registry folded into the legacy
- * export consumed by runtime art plumbing. The generated Series 1 reference sheets remain
- * available for review, but their assembled body/weapon parts are not live-authoritative:
- * the deployed battle exposed detached/oversized parts at gameplay scale. Until production
- * art passes visual review, Series 1 forms use coherent single-character vendored families.
+ * export consumed by runtime art plumbing. Every live Series 1 placeholder below resolves to
+ * one complete authored external character rather than recolouring a generic knight, wizard,
+ * or archer family. These remain source-reference placeholders until production approval.
  */
 export const SERIES_ONE_S_SOURCE_REFERENCE_ART_FAMILIES: readonly SeriesOneSSourceReferenceArtFamily[] = [
   family('s01-elsia-f1', 'elsia', 'f1', 194),
@@ -61,20 +60,20 @@ export const SERIES_ONE_S_SOURCE_REFERENCE_ART_FAMILIES: readonly SeriesOneSSour
 ];
 
 export const SERIES_ONE_S_PLACEHOLDER_FORM_ART: Readonly<Record<string, UnitArtVariant>> = {
-  char_s01_elsia_f1: { familyId: 'hero-knight-2', tint: 0xe8f1ff, attackFx: 'PIERCE' },
-  char_s01_elsia_f2: { familyId: 'hero-knight', tint: 0xe8f1ff, displayScale: 1.02, attackFx: 'PIERCE' },
-  char_s01_elsia_f3: { familyId: 'king-2', tint: 0xe8f1ff, displayScale: 1.04, attackFx: 'PIERCE' },
-  char_s01_riena_f1: { familyId: 'fantasy-warrior', tint: 0xffd8b5, attackFx: 'BLUNT' },
-  char_s01_riena_f2: { familyId: 'warrior-1', tint: 0xffd8b5, displayScale: 1.02, attackFx: 'BLUNT' },
-  char_s01_riena_f3: { familyId: 'martial-hero-2', tint: 0xffd8b5, displayScale: 1.04, attackFx: 'BLUNT' },
-  char_s01_mireille_f1: { familyId: 'huntress', tint: 0xcbe7ff, attackFx: 'PIERCE' },
-  char_s01_mireille_f2: { familyId: 'huntress-2', tint: 0xcbe7ff, displayScale: 1.02, attackFx: 'PIERCE' },
-  char_s01_mireille_f3: { familyId: 'huntress', tint: 0xaed9ff, displayScale: 1.08, attackFx: 'PIERCE' },
-  char_s01_neria_f1: { familyId: 'warrior', tint: 0x8b788e, attackFx: 'SLASH' },
-  char_s01_neria_f2: { familyId: 'hero-knight-2', tint: 0x8b788e, displayScale: 1.03, attackFx: 'SLASH' },
-  char_s01_neria_f3: { familyId: 'hero-knight', tint: 0x8b788e, displayScale: 1.05, attackFx: 'SLASH' },
-  char_s01_totoria_f1: { familyId: 'wizard', tint: 0xf2c8ff, attackFx: 'MAGIC' },
-  char_s01_totoria_f2: { familyId: 'evil-wizard', tint: 0xf2c8ff, displayScale: 1.02, attackFx: 'MAGIC' },
-  char_s01_totoria_f3: { familyId: 'evil-wizard-2', tint: 0xf2c8ff, displayScale: 1.04, attackFx: 'MAGIC' },
+  char_s01_elsia_f1: { familyId: 's01-elsia-f1', tint: 0xffffff, attackFx: 'PIERCE' },
+  char_s01_elsia_f2: { familyId: 's01-elsia-f2', tint: 0xffffff, displayScale: 1.02, attackFx: 'PIERCE' },
+  char_s01_elsia_f3: { familyId: 's01-elsia-f3', tint: 0xffffff, displayScale: 1.04, attackFx: 'PIERCE' },
+  char_s01_riena_f1: { familyId: 's01-riena-f1', tint: 0xffffff, attackFx: 'BLUNT' },
+  char_s01_riena_f2: { familyId: 's01-riena-f2', tint: 0xffffff, displayScale: 1.02, attackFx: 'BLUNT' },
+  char_s01_riena_f3: { familyId: 's01-riena-f3', tint: 0xffffff, displayScale: 1.04, attackFx: 'BLUNT' },
+  char_s01_mireille_f1: { familyId: 's01-mireille-f1', tint: 0xffffff, attackFx: 'PIERCE' },
+  char_s01_mireille_f2: { familyId: 's01-mireille-f2', tint: 0xffffff, displayScale: 1.02, attackFx: 'PIERCE' },
+  char_s01_mireille_f3: { familyId: 's01-mireille-f3', tint: 0xffffff, displayScale: 1.04, attackFx: 'PIERCE' },
+  char_s01_neria_f1: { familyId: 's01-neria-f1', tint: 0xffffff, attackFx: 'SLASH' },
+  char_s01_neria_f2: { familyId: 's01-neria-f2', tint: 0xffffff, displayScale: 1.02, attackFx: 'SLASH' },
+  char_s01_neria_f3: { familyId: 's01-neria-f3', tint: 0xffffff, displayScale: 1.04, attackFx: 'SLASH' },
+  char_s01_totoria_f1: { familyId: 's01-totoria-f1', tint: 0xffffff, attackFx: 'MAGIC' },
+  char_s01_totoria_f2: { familyId: 's01-totoria-f2', tint: 0xffffff, displayScale: 1.02, attackFx: 'MAGIC' },
+  char_s01_totoria_f3: { familyId: 's01-totoria-f3', tint: 0xffffff, displayScale: 1.04, attackFx: 'MAGIC' },
   ...SERIES_TWO_S_PLACEHOLDER_FORM_ART,
 };
