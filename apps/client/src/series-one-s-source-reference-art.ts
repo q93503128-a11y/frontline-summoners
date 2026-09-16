@@ -1,5 +1,9 @@
 import type { ArtFamily, SpriteStrip, UnitArtVariant } from './assets.ts';
 import {
+  SERIES_THREE_S_PLACEHOLDER_FORM_ART,
+  SERIES_THREE_S_SOURCE_REFERENCE_ART_FAMILIES,
+} from './series-three-s-source-reference-art.ts';
+import {
   SERIES_TWO_S_PLACEHOLDER_FORM_ART,
   SERIES_TWO_S_SOURCE_REFERENCE_ART_FAMILIES,
 } from './series-two-s-source-reference-art.ts';
@@ -35,10 +39,10 @@ function family(
 }
 
 /**
- * S-rarity Series 1 source references plus the Series 2 S registry folded into the legacy
- * export consumed by runtime art plumbing. Every live Series 1 placeholder below resolves to
- * one complete authored external character rather than recolouring a generic knight, wizard,
- * or archer family. These remain source-reference placeholders until production approval.
+ * S-rarity Series 1 source references plus the later S registries folded into the legacy export
+ * consumed by runtime art plumbing. Every live Series 1 placeholder below resolves to one
+ * complete authored external character rather than recolouring a generic knight, wizard, or
+ * archer family. These remain source-reference placeholders until production approval.
  */
 export const SERIES_ONE_S_SOURCE_REFERENCE_ART_FAMILIES: readonly SeriesOneSSourceReferenceArtFamily[] = [
   family('s01-elsia-f1', 'elsia', 'f1', 194),
@@ -57,6 +61,7 @@ export const SERIES_ONE_S_SOURCE_REFERENCE_ART_FAMILIES: readonly SeriesOneSSour
   family('s01-totoria-f2', 'totoria', 'f2', 196),
   family('s01-totoria-f3', 'totoria', 'f3', 196),
   ...SERIES_TWO_S_SOURCE_REFERENCE_ART_FAMILIES,
+  ...SERIES_THREE_S_SOURCE_REFERENCE_ART_FAMILIES,
 ];
 
 export const SERIES_ONE_S_PLACEHOLDER_FORM_ART: Readonly<Record<string, UnitArtVariant>> = {
@@ -76,4 +81,5 @@ export const SERIES_ONE_S_PLACEHOLDER_FORM_ART: Readonly<Record<string, UnitArtV
   char_s01_totoria_f2: { familyId: 's01-totoria-f2', tint: 0xffffff, displayScale: 1.02, attackFx: 'MAGIC' },
   char_s01_totoria_f3: { familyId: 's01-totoria-f3', tint: 0xffffff, displayScale: 1.04, attackFx: 'MAGIC' },
   ...SERIES_TWO_S_PLACEHOLDER_FORM_ART,
+  ...SERIES_THREE_S_PLACEHOLDER_FORM_ART,
 };
