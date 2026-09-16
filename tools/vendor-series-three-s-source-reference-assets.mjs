@@ -5,17 +5,26 @@ import { decodePng, encodePng } from './lib/production-png.mjs';
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const outputRoot = resolve(root, 'apps/client/public/assets/characters/series-three-s');
-const MIRROR_REVISION = 'ffe7111bf94a0aa2fc5f0505a618c8a3a335a4d3';
-const RAW_ROOT = `https://raw.githubusercontent.com/Clique33/Gamelab-Cipher-Labs/${MIRROR_REVISION}/GameCore/Sprites`;
-const CELL = 128;
+const DROID_MIRROR_REVISION = 'ffe7111bf94a0aa2fc5f0505a618c8a3a335a4d3';
+const DROID_RAW_ROOT = `https://raw.githubusercontent.com/Clique33/Gamelab-Cipher-Labs/${DROID_MIRROR_REVISION}/GameCore/Sprites`;
+const CYBORG_MIRROR_REVISION = '96e2572cc356c16628a1bf49cc4cf129ce99cb7c';
+const CYBORG_RAW_ROOT = `https://raw.githubusercontent.com/Tyger8540/substance-zero/${CYBORG_MIRROR_REVISION}/substance-zero/sprites/bosses/World2_cyborg`;
+const TARGET_CELL = 128;
 
-// Foozle Sci-fi Lab Droids Pack 1 is CC0 and contains three separately authored droids.
-// Canonical source/license: https://foozlecc.itch.io/sci-fi-lab-droids
-// Pinned public mirror above is used only as a deterministic byte source for builds.
+const encodedUrl = (rootUrl, path) => `${rootUrl}/${path.split('/').map(encodeURIComponent).join('/')}`;
+
+// Foozle Sci-fi Lab Droids Pack 1 and Sci-fi Lab Cyborg are CC0 authored character packs.
+// Canonical source/licenses:
+//   https://foozlecc.itch.io/sci-fi-lab-droids
+//   https://foozlecc.itch.io/sci-fi-lab-cyborg
+// Pinned public mirrors are deterministic byte sources only. We select/crop existing frames and
+// nearest-neighbour normalize their canvas; no recolour, drawing, or runtime kitbashing occurs.
 const CHARACTERS = [
   {
     slug: 'k17',
+    root: DROID_RAW_ROOT,
     folder: 'Droid02',
+    sourceCell: 128,
     files: {
       idle: 'Droid02Idle.png',
       move: 'Droid02Move.png',
@@ -26,7 +35,9 @@ const CHARACTERS = [
   },
   {
     slug: 'arc-railer',
+    root: DROID_RAW_ROOT,
     folder: 'Droid01',
+    sourceCell: 128,
     files: {
       idle: 'Droid01Idle.png',
       move: 'Droid01Move.png',
@@ -37,13 +48,28 @@ const CHARACTERS = [
   },
   {
     slug: 'rxomega',
+    root: DROID_RAW_ROOT,
     folder: 'Droid03',
+    sourceCell: 128,
     files: {
       idle: 'Droid03Idle.png',
       move: 'Droid3Move.png',
       attack: 'Droid03Attack.png',
       hit: 'Droid03Hurt.png',
       death: 'Droid03Death.png',
+    },
+  },
+  {
+    slug: 'blade-hound',
+    root: CYBORG_RAW_ROOT,
+    folder: '',
+    sourceCell: 32,
+    files: {
+      idle: 'cyber prisoner idle-Sheet.png',
+      move: 'cyber prisoner run cycle-Sheet.png',
+      attack: 'cyber prisoner Light attack slash-Sheet.png',
+      hit: 'cyber prisoner hurt-Sheet.png',
+      death: 'cyber prisoner death-Sheet.png',
     },
   },
 ];
@@ -82,30 +108,45 @@ function sampleFour(frameCount) {
   return Array.from({ length: 4 }, (_, index) => Math.round((frameCount - 1) * index / 3));
 }
 
-function normalizeStrip(sheet, label) {
-  assert(sheet.height === CELL, `${label} height changed: expected ${CELL}, got ${sheet.height}`);
-  assert(sheet.width % CELL === 0, `${label} width is not a ${CELL}px strip: ${sheet.width}`);
-  const frameCount = sheet.width / CELL;
+function normalizeStrip(sheet, label, sourceCell) {
+  assert(sheet.height === sourceCell, `${label} height changed: expected ${sourceCell}, got ${sheet.height}`);
+  assert(sheet.width % sourceCell === 0, `${label} width is not a ${sourceCell}px strip: ${sheet.width}`);
+  const frameCount = sheet.width / sourceCell;
   const indexes = sampleFour(frameCount);
-  const out = Buffer.alloc(CELL * indexes.length * CELL * 4);
+  const scale = Math.floor(TARGET_CELL / sourceCell);
+  assert(scale >= 1 && sourceCell * scale <= TARGET_CELL,
+    `${label} cannot normalize ${sourceCell}px cells into ${TARGET_CELL}px`);
+  const drawSize = sourceCell * scale;
+  const offset = Math.floor((TARGET_CELL - drawSize) / 2);
+  const out = Buffer.alloc(TARGET_CELL * indexes.length * TARGET_CELL * 4);
+
   indexes.forEach((sourceFrame, targetFrame) => {
-    for (let y = 0; y < CELL; y += 1) {
-      const sourceStart = (y * sheet.width + sourceFrame * CELL) * 4;
-      const targetStart = (y * CELL * indexes.length + targetFrame * CELL) * 4;
-      sheet.data.copy(out, targetStart, sourceStart, sourceStart + CELL * 4);
+    for (let y = 0; y < sourceCell; y += 1) {
+      for (let x = 0; x < sourceCell; x += 1) {
+        const sourceIndex = (y * sheet.width + sourceFrame * sourceCell + x) * 4;
+        for (let dy = 0; dy < scale; dy += 1) {
+          for (let dx = 0; dx < scale; dx += 1) {
+            const targetX = targetFrame * TARGET_CELL + offset + x * scale + dx;
+            const targetY = offset + y * scale + dy;
+            const targetIndex = (targetY * TARGET_CELL * indexes.length + targetX) * 4;
+            sheet.data.copy(out, targetIndex, sourceIndex, sourceIndex + 4);
+          }
+        }
+      }
     }
   });
-  return encodePng(CELL * indexes.length, CELL, out);
+  return encodePng(TARGET_CELL * indexes.length, TARGET_CELL, out);
 }
 
 async function writeCharacter(character) {
   for (const [motion, filename] of Object.entries(character.files)) {
-    const url = `${RAW_ROOT}/${character.folder}/${filename}`;
+    const relative = character.folder ? `${character.folder}/${filename}` : filename;
+    const url = encodedUrl(character.root, relative);
     const label = `${character.slug} ${motion}`;
     const sheet = decodePng(await fetchBytes(url, label), label);
     const target = resolve(outputRoot, character.slug, `${motion}.png`);
     await mkdir(dirname(target), { recursive: true });
-    await writeFile(target, normalizeStrip(sheet, label));
+    await writeFile(target, normalizeStrip(sheet, label, character.sourceCell));
   }
 }
 
@@ -113,4 +154,4 @@ await rm(outputRoot, { recursive: true, force: true });
 await mkdir(outputRoot, { recursive: true });
 for (const character of CHARACTERS) await writeCharacter(character);
 
-console.log('[series-three-s-art] vendored dedicated CC0 droids for K-17, Arc Railer, and RX-Omega');
+console.log('[series-three-s-art] vendored distinct CC0 source-reference art for K-17, Arc Railer, RX-Omega, and Blade Hound');
