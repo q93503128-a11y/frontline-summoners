@@ -35,8 +35,8 @@ function family(
 }
 
 /**
- * Series 3 S-rarity mechanical recruits use complete authored CC0 droid characters.
- * They intentionally do not share a humanoid fantasy family and are never recoloured or
+ * Series 3 S-rarity mechanical recruits use complete authored CC0 sci-fi characters.
+ * They intentionally do not share fantasy humanoid families and are never recoloured or
  * assembled from runtime parts. Form progression changes presentation scale while keeping the
  * recruit's authored silhouette stable until reviewed production evolution art replaces it.
  */
@@ -44,6 +44,7 @@ export const SERIES_THREE_S_SOURCE_REFERENCE_ART_FAMILIES: readonly SeriesThreeS
   family('s03-k17', 'k17', 218),
   family('s03-arc-railer', 'arc-railer', 230),
   family('s03-rxomega', 'rxomega', 244),
+  family('s03-blade-hound', 'blade-hound', 232),
 ];
 
 export const SERIES_THREE_S_PLACEHOLDER_FORM_ART: Readonly<Record<string, UnitArtVariant>> = {
@@ -56,4 +57,7 @@ export const SERIES_THREE_S_PLACEHOLDER_FORM_ART: Readonly<Record<string, UnitAr
   char_s03_rxomega_f1: { familyId: 's03-rxomega', tint: 0xffffff, displayScale: 1.04, attackFx: 'BLUNT' },
   char_s03_rxomega_f2: { familyId: 's03-rxomega', tint: 0xffffff, displayScale: 1.12, attackFx: 'BLUNT' },
   char_s03_rxomega_f3: { familyId: 's03-rxomega', tint: 0xffffff, displayScale: 1.20, attackFx: 'BLUNT' },
+  char_s03_blade_hound_f1: { familyId: 's03-blade-hound', tint: 0xffffff, displayScale: 1.00, attackFx: 'SLASH' },
+  char_s03_blade_hound_f2: { familyId: 's03-blade-hound', tint: 0xffffff, displayScale: 1.08, attackFx: 'SLASH' },
+  char_s03_blade_hound_f3: { familyId: 's03-blade-hound', tint: 0xffffff, displayScale: 1.16, attackFx: 'SLASH' },
 };
